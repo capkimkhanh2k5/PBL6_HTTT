@@ -7,7 +7,7 @@ import com.danasport.backend.authentication.application.port.TokenProvider;
 import com.danasport.backend.authentication.application.port.UserAccountPort;
 import com.danasport.backend.authentication.application.result.LoginResult;
 import com.danasport.backend.authentication.domain.exception.InvalidCredentialsException;
-import com.danasport.backend.authentication.domain.model.AuthUser;
+import com.danasport.backend.authentication.domain.model.Authentication;
 
 import lombok.RequiredArgsConstructor;
 
@@ -22,7 +22,7 @@ public class LoginUseCase {
         String normalizedEmail = email.trim()
                                     .toLowerCase(Locale.ROOT);
 
-        AuthUser user = userAccountPort.findByEmail(normalizedEmail)
+        Authentication user = userAccountPort.findByEmail(normalizedEmail)
                     .orElseThrow(InvalidCredentialsException :: new);
 
         if (!user.enabled() 

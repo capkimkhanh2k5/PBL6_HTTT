@@ -2,7 +2,7 @@ package com.danasport.backend.authentication.domain.model;
 
 import java.util.UUID;
 
-public record AuthUser(
+public record Authentication(
 	UUID id,
 	String email,
 	String passwordHash,
