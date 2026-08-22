@@ -7,7 +7,7 @@ import org.springframework.stereotype.Component;
 
 import com.danasport.backend.authentication.application.port.UserAccountPort;
 import com.danasport.backend.authentication.domain.exception.EmailAlreadyUsedException;
-import com.danasport.backend.authentication.domain.model.AuthUser;
+import com.danasport.backend.authentication.domain.model.Authentication;
 import com.danasport.backend.user.infrastructure.persistence.JpaUserRepository;
 import com.danasport.backend.user.infrastructure.persistence.UserEntity;
 
@@ -21,7 +21,7 @@ public class UserAccountAdapter implements UserAccountPort {
 
 
     @Override
-    public Optional<AuthUser> findByEmail(String email) {
+    public Optional<Authentication> findByEmail(String email) {
         return repository.findByEmail(email)
             .map(this::toDomain);
     }
@@ -32,7 +32,7 @@ public class UserAccountAdapter implements UserAccountPort {
     }
 
     @Override
-    public AuthUser save(AuthUser user) {
+    public Authentication save(Authentication user) {
         try {
             UserEntity entity = repository.saveAndFlush(toEntity(user));
             return toDomain(entity);
@@ -41,8 +41,8 @@ public class UserAccountAdapter implements UserAccountPort {
         }
     }
 
-    private AuthUser toDomain(UserEntity entity) {
-        return new AuthUser(
+    private Authentication toDomain(UserEntity entity) {
+        return new Authentication(
             entity.getId(),
             entity.getEmail(),
             entity.getPasswordHash(),
@@ -51,7 +51,7 @@ public class UserAccountAdapter implements UserAccountPort {
         );
     }
 
-    private UserEntity toEntity(AuthUser user) {
+    private UserEntity toEntity(Authentication user) {
         UserEntity entity = new UserEntity();
         
         entity.setId(user.id());

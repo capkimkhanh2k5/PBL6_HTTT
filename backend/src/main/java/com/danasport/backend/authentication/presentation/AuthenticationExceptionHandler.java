@@ -8,9 +8,10 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import com.danasport.backend.authentication.domain.exception.EmailAlreadyUsedException;
 import com.danasport.backend.authentication.domain.exception.InvalidCredentialsException;
+import com.danasport.backend.shared.presentation.ErrorResponse;
 
 @RestControllerAdvice
-public class AuthExceptionHandler {
+public class AuthenticationExceptionHandler {
     
     @ExceptionHandler(InvalidCredentialsException.class)
     public ResponseEntity<ErrorResponse> handleInvalidCredentials(
@@ -52,9 +53,4 @@ public class AuthExceptionHandler {
                                 message
                 ));
     }
-
-    public record ErrorResponse(
-        String code, 
-        String message
-    ) {}
 }

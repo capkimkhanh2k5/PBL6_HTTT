@@ -7,7 +7,7 @@ import com.danasport.backend.authentication.application.port.TokenProvider;
 import com.danasport.backend.authentication.application.port.UserAccountPort;
 import com.danasport.backend.authentication.application.result.LoginResult;
 import com.danasport.backend.authentication.domain.exception.EmailAlreadyUsedException;
-import com.danasport.backend.authentication.domain.model.AuthUser;
+import com.danasport.backend.authentication.domain.model.Authentication;
 
 import lombok.RequiredArgsConstructor;
 
@@ -28,7 +28,7 @@ public class RegisterUseCase {
 
         String hashedPassword = passwordHasher.hash(password);
         
-        AuthUser user = new AuthUser(
+        Authentication user = new Authentication(
             null, 
             normalizedEmail, 
             hashedPassword,
@@ -36,7 +36,7 @@ public class RegisterUseCase {
             true
         );
 
-        AuthUser savedUser = userAccountPort.save(user);
+        Authentication savedUser = userAccountPort.save(user);
 
         String accessToken = tokenProvider.generateAccessToken(savedUser);
 

@@ -8,7 +8,7 @@ import java.util.Optional;
 import org.springframework.stereotype.Component;
 
 import com.danasport.backend.authentication.application.port.TokenProvider;
-import com.danasport.backend.authentication.domain.model.AuthUser;
+import com.danasport.backend.authentication.domain.model.Authentication;
 
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
@@ -21,7 +21,7 @@ public class JwtTokenProvider implements TokenProvider {
     private final JwtProperties properties;
 
     @Override 
-    public String generateAccessToken(AuthUser user) {
+    public String generateAccessToken(Authentication user) {
         Instant now = Instant.now();
 
         return Jwts.builder()

@@ -2,13 +2,13 @@ package com.danasport.backend.authentication.application.port;
 
 import java.util.Optional;
 
-import com.danasport.backend.authentication.domain.model.AuthUser;
+import com.danasport.backend.authentication.domain.model.Authentication;
 
 public interface UserAccountPort {
     
-    Optional<AuthUser> findByEmail(String email);
+    Optional<Authentication> findByEmail(String email);
 
     boolean existsByEmail(String email);
 
-    AuthUser save(AuthUser user);
+    Authentication save(Authentication user);
 }

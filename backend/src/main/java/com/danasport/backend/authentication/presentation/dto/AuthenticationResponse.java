@@ -2,7 +2,7 @@ package com.danasport.backend.authentication.presentation.dto;
 
 import java.util.UUID;
 
-public record AuthResponse (
+public record AuthenticationResponse (
     String accessToken,
     UUID userId,
     String email,

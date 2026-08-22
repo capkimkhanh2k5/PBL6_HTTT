@@ -2,11 +2,11 @@ package com.danasport.backend.authentication.application.port;
 
 import java.util.Optional;
 
-import com.danasport.backend.authentication.domain.model.AuthUser;
+import com.danasport.backend.authentication.domain.model.Authentication;
 
 public interface TokenProvider {
     
-    String generateAccessToken(AuthUser user);
+    String generateAccessToken(Authentication user);
 
     Optional<String> getEmail (String token);
 }

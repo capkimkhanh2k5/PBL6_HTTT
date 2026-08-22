@@ -11,6 +11,8 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import com.danasport.backend.authentication.application.port.TokenProvider;
 import com.danasport.backend.authentication.application.port.UserAccountPort;
+import com.danasport.backend.authorization.application.port.AuthorizationPort;
+import com.danasport.backend.authorization.domain.model.AuthorizationSubject;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -25,6 +27,7 @@ public class JwtAuthenticationFilter
     
     private final TokenProvider tokenProvider;
     private final UserAccountPort userAccountPort;
+    private final AuthorizationPort authorizationPort;
 
     @Override
     protected void doFilterInternal(
@@ -47,17 +50,34 @@ public class JwtAuthenticationFilter
             tokenProvider.getEmail(token)
                 .flatMap(userAccountPort::findByEmail)
                 .filter(user -> user.enabled())
-                .ifPresent(user -> {
-                    var authentication = new UsernamePasswordAuthenticationToken(
-                                                                user.email(), 
-                                                                null, 
-                                                                List.of(new SimpleGrantedAuthority("ROLE_" + user.role()))
-                                                            );
-                    SecurityContextHolder.getContext()
-                                            .setAuthentication(authentication);
-                });
+                .map(user -> authorizationPort.findSubjectByEmail(user.email()))
+                .filter(subject -> !subject.roles().isEmpty())
+                .ifPresent(this::authenticate);
         }
 
         filterChain.doFilter(request, response);
     }
+
+        private void authenticate(AuthorizationSubject subject) {
+        List<SimpleGrantedAuthority> authorities = subject.roles()
+            .stream()
+            .map(role -> new SimpleGrantedAuthority("ROLE_" + role))
+            .toList();
+
+        authorities = java.util.stream.Stream.concat(
+            authorities.stream(),
+            subject.permissions()
+                .stream()
+                .map(SimpleGrantedAuthority::new)
+        ).toList();
+
+        var authentication = new UsernamePasswordAuthenticationToken(
+            subject.email(),
+            null,
+            authorities
+        );
+
+        SecurityContextHolder.getContext()
+            .setAuthentication(authentication);
+        }
 }
