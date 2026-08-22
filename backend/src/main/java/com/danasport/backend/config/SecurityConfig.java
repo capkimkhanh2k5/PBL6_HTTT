@@ -1,34 +1,43 @@
 package com.danasport.backend.config;
 
-import org.springframework.boot.security.autoconfigure.actuate.web.servlet.EndpointRequest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.annotation.Order;
-import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+
+import com.danasport.backend.authentication.infrastructure.security.JwtAuthenticationFilter;
 
 @Configuration
 public class SecurityConfig {
 
 	@Bean
-	@Order(0)
-	SecurityFilterChain actuatorHealthSecurityFilterChain(HttpSecurity http) throws Exception {
+	SecurityFilterChain applicationSecurityFilterChain(
+			HttpSecurity http,
+			JwtAuthenticationFilter jwtAuthenticationFilter
+	) throws Exception {
 		return http
-				.securityMatcher(EndpointRequest.to("health"))
-				.authorizeHttpRequests(authorize -> authorize
-						.anyRequest().permitAll())
-				.build();
-	}
-
-	@Bean
-	@Order(1)
-	SecurityFilterChain applicationSecurityFilterChain(HttpSecurity http) throws Exception {
-		return http
-				.authorizeHttpRequests(authorize -> authorize
-						.anyRequest().authenticated())
-				.httpBasic(Customizer.withDefaults())
-				.formLogin(Customizer.withDefaults())
+				.csrf(csrf -> csrf.disable())
+				.sessionManagement(session ->
+						session.sessionCreationPolicy(
+								SessionCreationPolicy.STATELESS
+						))
+				.authorizeHttpRequests(auth -> auth
+						.requestMatchers(
+								"/api/auth/login",
+								"/api/auth/register",
+								"/actuator/health",
+								"/swagger-ui/**",
+								"/swagger-ui.html",
+								"/v3/api-docs/**"
+						).permitAll()
+						.anyRequest()
+						.authenticated())
+				.addFilterBefore(
+						jwtAuthenticationFilter,
+						UsernamePasswordAuthenticationFilter.class
+				)
 				.build();
 	}
 

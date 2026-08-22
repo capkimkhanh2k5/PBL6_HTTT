@@ -11,9 +11,14 @@ spring:
 
   jpa:
     hibernate:
-      ddl-auto: validate
+      ddl-auto: update
 
     open-in-view: false
 
 server:
   port: 8080
+
+app:
+  jwt:
+    secret: ${APP_JWT_SECRET}
+    access-token-minutes: ${APP_JWT_ACCESS_TOKEN_MINUTES}
