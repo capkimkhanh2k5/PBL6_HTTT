@@ -1,4 +1,4 @@
-package com.danasea.backend.config;
+package com.danasea.backend.modules.systemconfig;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -11,7 +11,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 
 import jakarta.servlet.http.HttpServletResponse;
 
-import com.danasea.backend.authentication.infrastructure.security.JwtAuthenticationFilter;
+import com.danasea.backend.security.authentication.infrastructure.security.JwtAuthenticationFilter;
 
 @Configuration
 @EnableMethodSecurity
