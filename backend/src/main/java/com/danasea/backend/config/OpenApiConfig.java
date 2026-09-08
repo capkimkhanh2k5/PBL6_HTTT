@@ -1,4 +1,4 @@
-package com.danasea.backend.config;
+package com.danasea.backend.modules.systemconfig;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
