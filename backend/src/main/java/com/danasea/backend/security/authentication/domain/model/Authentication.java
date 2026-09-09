@@ -7,6 +7,7 @@ public record Authentication(
 	String email,
 	String passwordHash,
 	String role,
-	boolean enabled
+	boolean enabled,
+	boolean emailVerified
 ) {
 }

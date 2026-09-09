@@ -8,13 +8,21 @@ import com.danasea.backend.security.authentication.application.usecase.LoginUseC
 import com.danasea.backend.security.authentication.application.usecase.RegisterUseCase;
 import com.danasea.backend.security.authentication.presentation.dto.AuthenticationResponse;
 import com.danasea.backend.security.authentication.presentation.dto.LoginRequest;
+import com.danasea.backend.security.authentication.presentation.dto.RefreshResponse;
 import com.danasea.backend.security.authentication.presentation.dto.RegisterRequest;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.Cookie;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.CookieValue;
+import org.springframework.http.ResponseEntity;
 
+import com.danasea.backend.security.authentication.application.usecase.RefreshTokenUseCase;
+import com.danasea.backend.security.authentication.application.usecase.LogoutUseCase;
+import com.danasea.backend.security.authentication.infrastructure.security.CookieUtils;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -23,36 +31,65 @@ public class AuthenticationController {
 
     private final LoginUseCase loginUseCase;
     private final RegisterUseCase registerUseCase;
+    private final RefreshTokenUseCase refreshTokenUseCase;
+    private final LogoutUseCase logoutUseCase;
+
+
 
     @PostMapping("/login")
-    public AuthenticationResponse login(@Valid @RequestBody LoginRequest request) {
+    public AuthenticationResponse login(@Valid @RequestBody LoginRequest request, HttpServletResponse response) {
         LoginResult result = loginUseCase.execute(
-            request.email(),
-            request.password() 
-        );
+                request.email(),
+                request.password());
+
+        CookieUtils.addRefreshTokenCookie(response, result.refreshToken());
 
         return new AuthenticationResponse(
-            result.accessToken(),
-            result.userId(),
-            result.email(),
-            result.role()
-        );
+                result.accessToken(),
+                result.userId(),
+                result.email(),
+                result.role());
     }
 
     @PostMapping("/register")
-    public AuthenticationResponse register(@Valid @RequestBody RegisterRequest request) {
-        
+    public AuthenticationResponse register(@Valid @RequestBody RegisterRequest request, HttpServletResponse response) {
+
         LoginResult result = registerUseCase.execute(
-            request.email(),
-            request.password()
-        );
+                request.email(),
+                request.password());
+
+        CookieUtils.addRefreshTokenCookie(response, result.refreshToken());
 
         return new AuthenticationResponse(
-            result.accessToken(),
-            result.userId(),
-            result.email(),
-            result.role()
-        );
+                result.accessToken(),
+                result.userId(),
+                result.email(),
+                result.role());
     }
-    
+
+    @PostMapping("/refresh")
+    public ResponseEntity<RefreshResponse> refresh(
+            @CookieValue(name = "refresh_token", required = false) String refreshToken,
+            HttpServletResponse response) {
+
+        if (refreshToken == null || refreshToken.isBlank()) {
+            return ResponseEntity.status(401).build();
+        }
+
+        LoginResult authResponse = refreshTokenUseCase.execute(refreshToken);
+
+        CookieUtils.addRefreshTokenCookie(response, authResponse.refreshToken());
+
+        return ResponseEntity.ok(new RefreshResponse(authResponse.accessToken()));
+    }
+
+    @PostMapping("/logout")
+    public ResponseEntity<Void> logout(
+            @CookieValue(name = "refresh_token", required = false) String refreshToken,
+            HttpServletResponse response) {
+
+        logoutUseCase.execute(refreshToken);
+        CookieUtils.clearRefreshTokenCookie(response);
+        return ResponseEntity.ok().build();
+    }
 }
