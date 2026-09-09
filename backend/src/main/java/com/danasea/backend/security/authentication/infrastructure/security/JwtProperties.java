@@ -11,7 +11,8 @@ import io.jsonwebtoken.security.Keys;
 @ConfigurationProperties(prefix = "app.jwt")
 public record JwtProperties (
     String secret,
-    long accessTokenMinutes
+    long accessTokenMinutes,
+    long refreshTokenDays
 ) {
     public SecretKey secretKey() {
         return Keys.hmacShaKeyFor(

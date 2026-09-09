@@ -7,6 +7,8 @@ import com.danasea.backend.security.authentication.domain.model.Authentication;
 public interface TokenProvider {
     
     String generateAccessToken(Authentication user);
+    String generateRefreshToken(Authentication user);
 
-    Optional<String> getEmail (String token);
+    Optional<String> getEmail(String token);
+    boolean validateToken(String token);
 }
