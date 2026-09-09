@@ -1,6 +1,7 @@
 package com.danasea.backend.security.authentication.presentation.filter;
 
 import java.io.IOException;
+import java.security.Principal;
 import java.time.Duration;
 
 import jakarta.servlet.FilterChain;
@@ -46,6 +47,26 @@ public class RateLimitFilter extends OncePerRequestFilter {
                 response.addHeader("X-Rate-Limit-Retry-After-Seconds", String.valueOf(waitForRefill));
                 response.sendError(HttpStatus.TOO_MANY_REQUESTS.value(), "You have exhausted your API Request Quota");
             }
+        } else if (path.equals("/api/auth/otp/send")) {
+            Principal principal = request.getUserPrincipal();
+            if (principal != null && principal.getName() != null) {
+                String email = principal.getName();
+                String key = "otp-send:" + email;
+                Bucket bucket = proxyManager.builder().build(key.getBytes(), this::getOtpConfig);
+
+                ConsumptionProbe probe = bucket.tryConsumeAndReturnRemaining(1);
+                if (probe.isConsumed()) {
+                    response.addHeader("X-Rate-Limit-Remaining", String.valueOf(probe.getRemainingTokens()));
+                    filterChain.doFilter(request, response);
+                } else {
+                    long waitForRefill = probe.getNanosToWaitForRefill() / 1_000_000_000;
+                    response.addHeader("X-Rate-Limit-Retry-After-Seconds", String.valueOf(waitForRefill));
+                    response.sendError(HttpStatus.TOO_MANY_REQUESTS.value(),
+                            "OTP request is too frequent. Please wait.");
+                }
+            } else {
+                filterChain.doFilter(request, response);
+            }
         } else {
             filterChain.doFilter(request, response);
         }
@@ -55,6 +76,13 @@ public class RateLimitFilter extends OncePerRequestFilter {
         // limit 50 requests per 1 minute per IP
         return BucketConfiguration.builder()
                 .addLimit(Bandwidth.classic(50, Refill.intervally(50, Duration.ofMinutes(1))))
+                .build();
+    }
+
+    private BucketConfiguration getOtpConfig() {
+        // limit 1 request per 1 minute per email
+        return BucketConfiguration.builder()
+                .addLimit(Bandwidth.classic(1, Refill.intervally(1, Duration.ofMinutes(1))))
                 .build();
     }
 

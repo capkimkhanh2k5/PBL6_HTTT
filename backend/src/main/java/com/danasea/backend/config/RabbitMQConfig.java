@@ -22,6 +22,11 @@ public class RabbitMQConfig {
     public static final String NOTIFICATION_EMAIL_QUEUE = "notification.email.queue";
     public static final String NOTIFICATION_EMAIL_DLQ = "notification.email.dlq";
     public static final String USER_REGISTERED_ROUTING_KEY = "auth.user.registered";
+    
+    // OTP events queue
+    public static final String NOTIFICATION_OTP_EMAIL_QUEUE = "notification.otp-email.queue";
+    public static final String NOTIFICATION_OTP_EMAIL_DLQ = "notification.otp-email.dlq";
+    public static final String USER_OTP_REQUESTED_ROUTING_KEY = "auth.user.otp_requested";
 
     @Bean
     public TopicExchange exchange() {
@@ -54,6 +59,29 @@ public class RabbitMQConfig {
     @Bean
     public Binding bindingNotificationEmailDlq(Queue notificationEmailDlq, TopicExchange dlxExchange) {
         return BindingBuilder.bind(notificationEmailDlq).to(dlxExchange).with(NOTIFICATION_EMAIL_QUEUE + ".dlq");
+    }
+
+    @Bean
+    public Queue notificationOtpEmailQueue() {
+        return QueueBuilder.durable(NOTIFICATION_OTP_EMAIL_QUEUE)
+                .withArgument("x-dead-letter-exchange", DLX_EXCHANGE_NAME)
+                .withArgument("x-dead-letter-routing-key", NOTIFICATION_OTP_EMAIL_QUEUE + ".dlq")
+                .build();
+    }
+
+    @Bean
+    public Queue notificationOtpEmailDlq() {
+        return QueueBuilder.durable(NOTIFICATION_OTP_EMAIL_DLQ).build();
+    }
+
+    @Bean
+    public Binding bindingNotificationOtpEmailQueue(Queue notificationOtpEmailQueue, TopicExchange exchange) {
+        return BindingBuilder.bind(notificationOtpEmailQueue).to(exchange).with(USER_OTP_REQUESTED_ROUTING_KEY);
+    }
+
+    @Bean
+    public Binding bindingNotificationOtpEmailDlq(Queue notificationOtpEmailDlq, TopicExchange dlxExchange) {
+        return BindingBuilder.bind(notificationOtpEmailDlq).to(dlxExchange).with(NOTIFICATION_OTP_EMAIL_QUEUE + ".dlq");
     }
 
     @Bean
