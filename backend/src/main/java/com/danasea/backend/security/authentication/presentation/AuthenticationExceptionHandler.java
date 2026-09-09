@@ -11,58 +11,51 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import com.danasea.backend.security.authentication.domain.exception.EmailAlreadyUsedException;
 import com.danasea.backend.security.authentication.domain.exception.InvalidCredentialsException;
+import com.danasea.backend.security.authentication.infrastructure.security.CookieUtils;
 import com.danasea.backend.shared.presentation.ErrorResponse;
 
 @RestControllerAdvice
 public class AuthenticationExceptionHandler {
-    
-    @ExceptionHandler(InvalidCredentialsException.class)
-    public ResponseEntity<ErrorResponse> handleInvalidCredentials(
-                InvalidCredentialsException exception,
-                HttpServletResponse response) {
-        
-        Cookie cookie = new Cookie("refresh_token", "");
-        cookie.setHttpOnly(true);
-        cookie.setSecure(true);
-        cookie.setPath("/api/auth");
-        cookie.setMaxAge(0);
-        response.addCookie(cookie);
 
-        return ResponseEntity
-                .status(HttpStatus.UNAUTHORIZED)
-                .body(new ErrorResponse(
-                                "INVALID_CREDENTIALS",
-                                exception.getMessage()
-                ));
-    }
+        @ExceptionHandler(InvalidCredentialsException.class)
+        public ResponseEntity<ErrorResponse> handleInvalidCredentials(
+                        InvalidCredentialsException exception,
+                        HttpServletResponse response) {
 
-    @ExceptionHandler(EmailAlreadyUsedException.class)
-    public ResponseEntity<ErrorResponse> handleEmailAlreadyUsed(
-                EmailAlreadyUsedException exception) {
-        return ResponseEntity
-                .status(HttpStatus.CONFLICT)
-                .body(new ErrorResponse(
-                                "EMAIL_ALREADY_USED",
-                                exception.getMessage()
-                ));
-    }
+                CookieUtils.clearRefreshTokenCookie(response);
 
-    @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<ErrorResponse> handleMethodArgumentNotValid(
-            MethodArgumentNotValidException exception) {
+                return ResponseEntity
+                                .status(HttpStatus.UNAUTHORIZED)
+                                .body(new ErrorResponse(
+                                                "INVALID_CREDENTIALS",
+                                                exception.getMessage()));
+        }
 
-        String message = exception.getBindingResult()
-                .getFieldErrors()
-                .stream()
-                .map(error -> error.getField() + ": " + error.getDefaultMessage())
-                .findFirst()
-                .orElse("Invalid request"); 
+        @ExceptionHandler(EmailAlreadyUsedException.class)
+        public ResponseEntity<ErrorResponse> handleEmailAlreadyUsed(
+                        EmailAlreadyUsedException exception) {
+                return ResponseEntity
+                                .status(HttpStatus.CONFLICT)
+                                .body(new ErrorResponse(
+                                                "EMAIL_ALREADY_USED",
+                                                exception.getMessage()));
+        }
 
-        return ResponseEntity
-                .status(HttpStatus.BAD_REQUEST)
-                .body(new ErrorResponse(
-                                "INVALID_INPUT",
-                                message
-                ));
-    }
+        @ExceptionHandler(MethodArgumentNotValidException.class)
+        public ResponseEntity<ErrorResponse> handleMethodArgumentNotValid(
+                        MethodArgumentNotValidException exception) {
+
+                String message = exception.getBindingResult()
+                                .getFieldErrors()
+                                .stream()
+                                .map(error -> error.getField() + ": " + error.getDefaultMessage())
+                                .findFirst()
+                                .orElse("Invalid request");
+
+                return ResponseEntity
+                                .status(HttpStatus.BAD_REQUEST)
+                                .body(new ErrorResponse(
+                                                "INVALID_INPUT",
+                                                message));
+        }
 }

@@ -22,6 +22,7 @@ import org.springframework.http.ResponseEntity;
 
 import com.danasea.backend.security.authentication.application.usecase.RefreshTokenUseCase;
 import com.danasea.backend.security.authentication.application.usecase.LogoutUseCase;
+import com.danasea.backend.security.authentication.infrastructure.security.CookieUtils;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -33,23 +34,7 @@ public class AuthenticationController {
     private final RefreshTokenUseCase refreshTokenUseCase;
     private final LogoutUseCase logoutUseCase;
 
-    private void addRefreshTokenCookie(HttpServletResponse response, String refreshToken) {
-        Cookie cookie = new Cookie("refresh_token", refreshToken);
-        cookie.setHttpOnly(true);
-        cookie.setSecure(true);
-        cookie.setPath("/api/auth");
-        cookie.setMaxAge(7 * 24 * 60 * 60); // 7 days
-        response.addCookie(cookie);
-    }
 
-    private void clearRefreshTokenCookie(HttpServletResponse response) {
-        Cookie cookie = new Cookie("refresh_token", null);
-        cookie.setHttpOnly(true);
-        cookie.setSecure(true);
-        cookie.setPath("/api/auth");
-        cookie.setMaxAge(0);
-        response.addCookie(cookie);
-    }
 
     @PostMapping("/login")
     public AuthenticationResponse login(@Valid @RequestBody LoginRequest request, HttpServletResponse response) {
@@ -57,7 +42,7 @@ public class AuthenticationController {
                 request.email(),
                 request.password());
 
-        addRefreshTokenCookie(response, result.refreshToken());
+        CookieUtils.addRefreshTokenCookie(response, result.refreshToken());
 
         return new AuthenticationResponse(
                 result.accessToken(),
@@ -73,7 +58,7 @@ public class AuthenticationController {
                 request.email(),
                 request.password());
 
-        addRefreshTokenCookie(response, result.refreshToken());
+        CookieUtils.addRefreshTokenCookie(response, result.refreshToken());
 
         return new AuthenticationResponse(
                 result.accessToken(),
@@ -93,7 +78,7 @@ public class AuthenticationController {
 
         LoginResult authResponse = refreshTokenUseCase.execute(refreshToken);
 
-        addRefreshTokenCookie(response, authResponse.refreshToken());
+        CookieUtils.addRefreshTokenCookie(response, authResponse.refreshToken());
 
         return ResponseEntity.ok(new RefreshResponse(authResponse.accessToken()));
     }
@@ -104,7 +89,7 @@ public class AuthenticationController {
             HttpServletResponse response) {
 
         logoutUseCase.execute(refreshToken);
-        clearRefreshTokenCookie(response);
+        CookieUtils.clearRefreshTokenCookie(response);
         return ResponseEntity.ok().build();
     }
 }

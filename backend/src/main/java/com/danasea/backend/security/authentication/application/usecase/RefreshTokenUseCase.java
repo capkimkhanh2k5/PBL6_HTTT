@@ -20,7 +20,6 @@ import lombok.RequiredArgsConstructor;
 
 import com.danasea.backend.security.authentication.infrastructure.security.HashUtils;
 
-@Service
 @RequiredArgsConstructor
 public class RefreshTokenUseCase {
 
@@ -28,7 +27,7 @@ public class RefreshTokenUseCase {
     private final TokenProvider tokenProvider;
     private final JwtProperties jwtProperties;
 
-    @Transactional
+    @Transactional(noRollbackFor = InvalidCredentialsException.class)
     public LoginResult execute(String rawRefreshToken) {
         String tokenHash = HashUtils.sha256(rawRefreshToken);
 
@@ -54,9 +53,10 @@ public class RefreshTokenUseCase {
             throw new InvalidCredentialsException("User is locked or inactive");
         }
 
-        if (!Boolean.TRUE.equals(user.getIsEmailVerified())) {
-            throw new InvalidCredentialsException("Email not verified");
-        }
+        // TODO: Turn on when completed module send email OTP
+        // if (!Boolean.TRUE.equals(user.getIsEmailVerified())) {
+        // throw new InvalidCredentialsException("Email not verified");
+        // }
 
         Authentication auth = new Authentication(user.getId(), user.getEmail(), null, user.getRole().name(), true,
                 true);

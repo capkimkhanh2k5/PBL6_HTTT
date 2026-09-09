@@ -54,16 +54,16 @@ public class RateLimitFilterIntegrationTest {
     }
 
     @Test
-    void shouldBlockAfter5Requests() throws Exception {
+    void shouldBlockAfter50Requests() throws Exception {
         String ip = "192.168.1.100";
 
-        for (int i = 0; i < 5; i++) {
+        for (int i = 0; i < 50; i++) {
             HttpServletRequest request = mock(HttpServletRequest.class);
             HttpServletResponse response = mock(HttpServletResponse.class);
             FilterChain filterChain = mock(FilterChain.class);
 
             when(request.getRequestURI()).thenReturn("/api/auth/login");
-            when(request.getHeader("X-Forwarded-For")).thenReturn(ip);
+            when(request.getRemoteAddr()).thenReturn(ip);
 
             rateLimitFilter.doFilterInternal(request, response, filterChain);
 
@@ -78,7 +78,7 @@ public class RateLimitFilterIntegrationTest {
         FilterChain filterChain = mock(FilterChain.class);
 
         when(request.getRequestURI()).thenReturn("/api/auth/login");
-        when(request.getHeader("X-Forwarded-For")).thenReturn(ip);
+        when(request.getRemoteAddr()).thenReturn(ip);
 
         rateLimitFilter.doFilterInternal(request, response, filterChain);
 
@@ -100,7 +100,7 @@ public class RateLimitFilterIntegrationTest {
             FilterChain filterChain = mock(FilterChain.class);
 
             when(request.getRequestURI()).thenReturn("/api/auth/login");
-            when(request.getHeader("X-Forwarded-For")).thenReturn(ip1);
+            when(request.getRemoteAddr()).thenReturn(ip1);
 
             rateLimitFilter.doFilterInternal(request, response, filterChain);
         }
@@ -111,7 +111,7 @@ public class RateLimitFilterIntegrationTest {
         FilterChain filterChain1 = mock(FilterChain.class);
 
         when(request1.getRequestURI()).thenReturn("/api/auth/login");
-        when(request1.getHeader("X-Forwarded-For")).thenReturn(ip1);
+        when(request1.getRemoteAddr()).thenReturn(ip1);
 
         rateLimitFilter.doFilterInternal(request1, response1, filterChain1);
         verify(response1, times(1)).sendError(HttpStatus.TOO_MANY_REQUESTS.value(),
@@ -123,7 +123,7 @@ public class RateLimitFilterIntegrationTest {
         FilterChain filterChain2 = mock(FilterChain.class);
 
         when(request2.getRequestURI()).thenReturn("/api/auth/login");
-        when(request2.getHeader("X-Forwarded-For")).thenReturn(ip2);
+        when(request2.getRemoteAddr()).thenReturn(ip2);
 
         rateLimitFilter.doFilterInternal(request2, response2, filterChain2);
         verify(filterChain2, times(1)).doFilter(request2, response2);

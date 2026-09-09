@@ -65,6 +65,18 @@ public class RabbitMQConfig {
     public RabbitTemplate rabbitTemplate(ConnectionFactory connectionFactory, MessageConverter jsonMessageConverter) {
         RabbitTemplate template = new RabbitTemplate(connectionFactory);
         template.setMessageConverter(jsonMessageConverter);
+        template.setMandatory(true);
+
+        template.setConfirmCallback((correlationData, ack, cause) -> {
+            if (!ack) {
+                System.err.println("Message failed to publish: " + cause);
+            }
+        });
+
+        template.setReturnsCallback(returned -> {
+            System.err.println("Message returned: " + returned.getMessage() + " with reply code: " + returned.getReplyCode());
+        });
+
         return template;
     }
 }

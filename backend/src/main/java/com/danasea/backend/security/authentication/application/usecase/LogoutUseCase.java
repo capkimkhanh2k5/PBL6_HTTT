@@ -11,7 +11,6 @@ import lombok.RequiredArgsConstructor;
 
 import java.time.OffsetDateTime;
 
-@Service
 @RequiredArgsConstructor
 public class LogoutUseCase {
 

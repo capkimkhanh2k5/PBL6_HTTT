@@ -12,6 +12,8 @@ import com.danasea.backend.modules.account.application.api.AccountInternalApi;
 import org.springframework.context.ApplicationEventPublisher;
 
 import com.danasea.backend.security.authentication.infrastructure.security.JwtProperties;
+import com.danasea.backend.security.authentication.application.usecase.RefreshTokenUseCase;
+import com.danasea.backend.security.authentication.application.usecase.LogoutUseCase;
 
 @Configuration
 public class ApplicationBeans {
@@ -50,5 +52,19 @@ public class ApplicationBeans {
                 tokenProvider,
                 jwtProperties
         );
+    }
+
+    @Bean
+    RefreshTokenUseCase refreshTokenUseCase(
+            AccountInternalApi accountInternalApi,
+            TokenProvider tokenProvider,
+            JwtProperties jwtProperties
+    ) {
+        return new RefreshTokenUseCase(accountInternalApi, tokenProvider, jwtProperties);
+    }
+
+    @Bean
+    LogoutUseCase logoutUseCase(AccountInternalApi accountInternalApi) {
+        return new LogoutUseCase(accountInternalApi);
     }
 }
