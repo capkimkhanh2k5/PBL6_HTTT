@@ -11,6 +11,10 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import com.danasea.backend.security.authentication.domain.exception.EmailAlreadyUsedException;
 import com.danasea.backend.security.authentication.domain.exception.InvalidCredentialsException;
+import com.danasea.backend.security.authentication.domain.exception.OtpExpiredException;
+import com.danasea.backend.security.authentication.domain.exception.OtpInvalidException;
+import com.danasea.backend.security.authentication.domain.exception.OtpMaxAttemptsExceededException;
+import com.danasea.backend.security.authentication.domain.exception.OtpRequestTooFrequentException;
 import com.danasea.backend.security.authentication.infrastructure.security.CookieUtils;
 import com.danasea.backend.shared.presentation.ErrorResponse;
 
@@ -57,5 +61,23 @@ public class AuthenticationExceptionHandler {
                                 .body(new ErrorResponse(
                                                 "INVALID_INPUT",
                                                 message));
+        }
+
+        @ExceptionHandler({OtpInvalidException.class, OtpExpiredException.class, OtpMaxAttemptsExceededException.class})
+        public ResponseEntity<ErrorResponse> handleOtpVerificationExceptions(Exception exception) {
+                return ResponseEntity
+                                .status(HttpStatus.BAD_REQUEST)
+                                .body(new ErrorResponse(
+                                                "INVALID_OTP",
+                                                "The OTP provided is invalid, expired, or has exceeded maximum attempts."));
+        }
+
+        @ExceptionHandler(OtpRequestTooFrequentException.class)
+        public ResponseEntity<ErrorResponse> handleOtpTooFrequent(OtpRequestTooFrequentException exception) {
+                return ResponseEntity
+                                .status(HttpStatus.TOO_MANY_REQUESTS)
+                                .body(new ErrorResponse(
+                                                "OTP_REQUEST_TOO_FREQUENT",
+                                                exception.getMessage()));
         }
 }

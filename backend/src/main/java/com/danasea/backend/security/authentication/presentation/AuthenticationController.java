@@ -6,10 +6,13 @@ import org.springframework.web.bind.annotation.RestController;
 import com.danasea.backend.security.authentication.application.result.LoginResult;
 import com.danasea.backend.security.authentication.application.usecase.LoginUseCase;
 import com.danasea.backend.security.authentication.application.usecase.RegisterUseCase;
+import com.danasea.backend.security.authentication.application.usecase.SendVerificationOtpUseCase;
+import com.danasea.backend.security.authentication.application.usecase.VerifyOtpUseCase;
 import com.danasea.backend.security.authentication.presentation.dto.AuthenticationResponse;
 import com.danasea.backend.security.authentication.presentation.dto.LoginRequest;
 import com.danasea.backend.security.authentication.presentation.dto.RefreshResponse;
 import com.danasea.backend.security.authentication.presentation.dto.RegisterRequest;
+import com.danasea.backend.security.authentication.presentation.dto.VerifyOtpRequest;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -18,6 +21,9 @@ import jakarta.servlet.http.Cookie;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.CookieValue;
+
+import java.security.Principal;
+
 import org.springframework.http.ResponseEntity;
 
 import com.danasea.backend.security.authentication.application.usecase.RefreshTokenUseCase;
@@ -33,8 +39,8 @@ public class AuthenticationController {
     private final RegisterUseCase registerUseCase;
     private final RefreshTokenUseCase refreshTokenUseCase;
     private final LogoutUseCase logoutUseCase;
-
-
+    private final SendVerificationOtpUseCase sendVerificationOtpUseCase;
+    private final VerifyOtpUseCase verifyOtpUseCase;
 
     @PostMapping("/login")
     public AuthenticationResponse login(@Valid @RequestBody LoginRequest request, HttpServletResponse response) {
@@ -90,6 +96,26 @@ public class AuthenticationController {
 
         logoutUseCase.execute(refreshToken);
         CookieUtils.clearRefreshTokenCookie(response);
+        return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/otp/send")
+    public ResponseEntity<Void> sendOtp(Principal principal) {
+        if (principal == null || principal.getName() == null) {
+            return ResponseEntity.status(401).build();
+        }
+        sendVerificationOtpUseCase.execute(principal.getName());
+        return ResponseEntity.accepted().build(); // 202 Accepted
+    }
+
+    @PostMapping("/otp/verify")
+    public ResponseEntity<Void> verifyOtp(
+            @Valid @RequestBody VerifyOtpRequest request,
+            Principal principal) {
+        if (principal == null || principal.getName() == null) {
+            return ResponseEntity.status(401).build();
+        }
+        verifyOtpUseCase.execute(principal.getName(), request.code());
         return ResponseEntity.ok().build();
     }
 }

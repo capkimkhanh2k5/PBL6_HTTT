@@ -36,7 +36,7 @@ public class LoginUseCase {
                 .orElseThrow(InvalidCredentialsException::new);
 
         if (!user.enabled()
-                // || !user.emailVerified() // TODO: Bật lại khi có luồng verify email bằng OTP
+                || !user.emailVerified()
                 || !passwordHasher.matches(
                         password,
                         user.passwordHash())) {
