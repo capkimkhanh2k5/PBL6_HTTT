@@ -1,12 +1,14 @@
 package com.danasea.backend.modules.account.application.api;
 
-import java.util.UUID;
-
-import com.danasea.backend.modules.account.domain.models.User;
-import com.danasea.backend.modules.account.domain.models.RefreshToken;
-
 import java.util.Optional;
 import java.util.UUID;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+
+import com.danasea.backend.modules.account.domain.models.RefreshToken;
+import com.danasea.backend.modules.account.domain.models.Role;
+import com.danasea.backend.modules.account.domain.models.User;
 
 public interface AccountInternalApi {
     Optional<User> findUserByEmail(String email);
@@ -22,4 +24,10 @@ public interface AccountInternalApi {
     Optional<RefreshToken> findRefreshTokenByHash(String tokenHash);
 
     void revokeRefreshTokenFamily(UUID familyId);
+
+    void revokeAllTokensByUserId(UUID userId);
+
+
+    Page<User> findUsers(Pageable pageable, Role role, Boolean isLocked, String search);
 }
+

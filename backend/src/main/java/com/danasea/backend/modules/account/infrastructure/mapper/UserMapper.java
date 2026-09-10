@@ -20,6 +20,8 @@ public class UserMapper {
         domain.setIsEmailVerified(entity.getIsEmailVerified());
         domain.setIsLocked(entity.getIsLocked());
         domain.setLocale(entity.getLocale());
+        domain.setCreatedAt(entity.getCreatedAt());
+        domain.setUpdatedAt(entity.getUpdatedAt());
         return domain;
     }
 

@@ -1,4 +1,4 @@
-package com.danasea.backend.modules.account.domain.models;
+package com.danasea.backend.modules.audit.domain.models;
 
 import java.util.UUID;
 

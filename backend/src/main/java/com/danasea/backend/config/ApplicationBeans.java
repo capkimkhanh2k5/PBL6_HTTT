@@ -18,6 +18,11 @@ import org.springframework.context.ApplicationEventPublisher;
 import com.danasea.backend.security.authentication.infrastructure.security.JwtProperties;
 import com.danasea.backend.security.authentication.application.usecase.RefreshTokenUseCase;
 import com.danasea.backend.security.authentication.application.usecase.LogoutUseCase;
+import com.danasea.backend.modules.admin.application.usecase.GetUserDetailUseCase;
+import com.danasea.backend.modules.admin.application.usecase.GetUsersUseCase;
+import com.danasea.backend.modules.admin.application.usecase.LockUserUseCase;
+import com.danasea.backend.modules.admin.application.usecase.UnlockUserUseCase;
+import com.danasea.backend.modules.audit.application.port.AuditLogPort;
 
 @Configuration
 public class ApplicationBeans {
@@ -82,5 +87,25 @@ public class ApplicationBeans {
             OtpStorePort otpStorePort) {
         return new VerifyOtpUseCase(accountInternalApi,
                 otpStorePort);
+    }
+
+    @Bean
+    LockUserUseCase lockUserUseCase(AccountInternalApi accountInternalApi, AuditLogPort auditLogPort) {
+        return new LockUserUseCase(accountInternalApi, auditLogPort);
+    }
+
+    @Bean
+    UnlockUserUseCase unlockUserUseCase(AccountInternalApi accountInternalApi, AuditLogPort auditLogPort) {
+        return new UnlockUserUseCase(accountInternalApi, auditLogPort);
+    }
+
+    @Bean
+    GetUsersUseCase getUsersUseCase(AccountInternalApi accountInternalApi) {
+        return new GetUsersUseCase(accountInternalApi);
+    }
+
+    @Bean
+    GetUserDetailUseCase getUserDetailUseCase(AccountInternalApi accountInternalApi) {
+        return new GetUserDetailUseCase(accountInternalApi);
     }
 }
