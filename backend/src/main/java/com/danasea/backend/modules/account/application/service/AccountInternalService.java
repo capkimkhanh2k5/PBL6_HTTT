@@ -137,4 +137,16 @@ public class AccountInternalService implements AccountInternalApi {
         });
         refreshTokenRepository.saveAll(tokens);
     }
+
+    @Override
+    public void revokeAllRefreshTokensByUserId(UUID userId) {
+        List<RefreshTokenJpaEntity> tokens = refreshTokenRepository.findAllByUserId(userId);
+        OffsetDateTime now = OffsetDateTime.now();
+        tokens.forEach(token -> {
+            if (token.getRevokedAt() == null) {
+                token.setRevokedAt(now);
+            }
+        });
+        refreshTokenRepository.saveAll(tokens);
+    }
 }

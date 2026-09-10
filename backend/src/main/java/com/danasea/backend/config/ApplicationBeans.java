@@ -13,6 +13,11 @@ import com.danasea.backend.security.authentication.application.usecase.RegisterU
 import com.danasea.backend.security.authentication.application.usecase.SendVerificationOtpUseCase;
 import com.danasea.backend.security.authentication.application.usecase.VerifyOtpUseCase;
 import com.danasea.backend.modules.account.application.api.AccountInternalApi;
+import com.danasea.backend.modules.account.application.usecase.ChangePasswordUseCase;
+import com.danasea.backend.modules.account.application.usecase.GetMyProfileUseCase;
+import com.danasea.backend.modules.account.application.usecase.UpdateProfileUseCase;
+import com.danasea.backend.modules.account.infrastructure.persistence.repositories.JpaAuditLogRepository;
+
 import org.springframework.context.ApplicationEventPublisher;
 
 import com.danasea.backend.security.authentication.infrastructure.security.JwtProperties;
@@ -88,5 +93,23 @@ public class ApplicationBeans {
             OtpStorePort otpStorePort) {
         return new VerifyOtpUseCase(accountInternalApi,
                 otpStorePort);
+    }
+
+    @Bean
+    GetMyProfileUseCase getMyProfileUseCase(AccountInternalApi accountInternalApi) {
+        return new GetMyProfileUseCase(accountInternalApi);
+    }
+
+    @Bean
+    UpdateProfileUseCase updateProfileUseCase(AccountInternalApi accountInternalApi) {
+        return new UpdateProfileUseCase(accountInternalApi);
+    }
+
+    @Bean
+    ChangePasswordUseCase changePasswordUseCase(
+            AccountInternalApi accountInternalApi,
+            PasswordHasher passwordHasher,
+            JpaAuditLogRepository auditLogRepository) {
+        return new ChangePasswordUseCase(accountInternalApi, passwordHasher, auditLogRepository);
     }
 }
