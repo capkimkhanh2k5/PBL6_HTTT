@@ -1,34 +1,36 @@
 package com.danasea.backend.modules.account.application.service;
 
+import java.time.OffsetDateTime;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Locale;
+import java.util.Optional;
 import java.util.UUID;
-
-import com.danasea.backend.modules.account.application.api.AccountInternalApi;
-import com.danasea.backend.modules.account.domain.models.User;
-import com.danasea.backend.modules.account.domain.models.Role;
-import com.danasea.backend.modules.account.domain.models.RefreshToken;
-import com.danasea.backend.modules.account.infrastructure.persistence.repositories.JpaUserRepository;
-import com.danasea.backend.modules.account.infrastructure.persistence.repositories.JpaRefreshTokenRepository;
-import com.danasea.backend.modules.account.infrastructure.persistence.entities.UserJpaEntity;
-import com.danasea.backend.modules.account.infrastructure.persistence.entities.RefreshTokenJpaEntity;
-import com.danasea.backend.modules.account.infrastructure.mapper.UserMapper;
-import com.danasea.backend.modules.account.infrastructure.mapper.RefreshTokenMapper;
 
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.Caching;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.transaction.support.TransactionSynchronization;
-import org.springframework.transaction.support.TransactionSynchronizationManager;
-import lombok.RequiredArgsConstructor;
 
-import java.util.Optional;
-import java.util.UUID;
-import java.util.List;
-import java.time.OffsetDateTime;
-import java.util.Locale;
+import com.danasea.backend.modules.account.application.api.AccountInternalApi;
+import com.danasea.backend.modules.account.domain.models.RefreshToken;
+import com.danasea.backend.modules.account.domain.models.Role;
+import com.danasea.backend.modules.account.domain.models.User;
+import com.danasea.backend.modules.account.infrastructure.mapper.RefreshTokenMapper;
+import com.danasea.backend.modules.account.infrastructure.mapper.UserMapper;
+import com.danasea.backend.modules.account.infrastructure.persistence.entities.RefreshTokenJpaEntity;
+import com.danasea.backend.modules.account.infrastructure.persistence.entities.UserJpaEntity;
+import com.danasea.backend.modules.account.infrastructure.persistence.repositories.JpaRefreshTokenRepository;
+import com.danasea.backend.modules.account.infrastructure.persistence.repositories.JpaUserRepository;
+
+import jakarta.persistence.criteria.Predicate;
+import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
@@ -98,7 +100,6 @@ public class AccountInternalService implements AccountInternalApi {
         UserJpaEntity entity = userMapper.toEntity(user);
         UserJpaEntity saved = userRepository.saveAndFlush(entity);
 
-        // If email was changed or previously cached under an old email, evict it immediately
         if (previousEmail != null && !previousEmail.equals(user.getEmail())) {
             if (cacheManager != null) {
                 Cache cache = cacheManager.getCache("usersByEmail");
@@ -139,14 +140,48 @@ public class AccountInternalService implements AccountInternalApi {
     }
 
     @Override
+    @Transactional
     public void revokeAllRefreshTokensByUserId(UUID userId) {
         List<RefreshTokenJpaEntity> tokens = refreshTokenRepository.findAllByUserId(userId);
         OffsetDateTime now = OffsetDateTime.now();
-        tokens.forEach(token -> {
+        boolean hasUnrevoked = false;
+        for (RefreshTokenJpaEntity token : tokens) {
             if (token.getRevokedAt() == null) {
                 token.setRevokedAt(now);
+                hasUnrevoked = true;
             }
-        });
-        refreshTokenRepository.saveAll(tokens);
+        }
+        if (hasUnrevoked) {
+            refreshTokenRepository.saveAll(tokens);
+        }
+    }
+
+    @Override
+    @Transactional
+    public void revokeAllTokensByUserId(UUID userId) {
+        revokeAllRefreshTokensByUserId(userId);
+    }
+
+    @Override
+    public Page<User> findUsers(Pageable pageable, Role role, Boolean isLocked, String search) {
+        Specification<UserJpaEntity> spec = (root, query, cb) -> {
+            List<Predicate> predicates = new ArrayList<>();
+            if (role != null) {
+                predicates.add(cb.equal(root.get("role"), role));
+            }
+            if (isLocked != null) {
+                predicates.add(cb.equal(root.get("isLocked"), isLocked));
+            }
+            if (search != null && !search.isBlank()) {
+                String pattern = "%" + search.trim().toLowerCase() + "%";
+                Predicate emailMatch = cb.like(cb.lower(root.get("email")), pattern);
+                Predicate nameMatch = cb.like(cb.lower(root.get("fullName")), pattern);
+                predicates.add(cb.or(emailMatch, nameMatch));
+            }
+            return predicates.isEmpty() ? null : cb.and(predicates.toArray(new Predicate[0]));
+        };
+
+        Page<UserJpaEntity> entities = userRepository.findAll(spec, pageable);
+        return entities.map(userMapper::toDomain);
     }
 }

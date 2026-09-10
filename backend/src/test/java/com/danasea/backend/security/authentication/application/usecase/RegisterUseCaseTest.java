@@ -1,6 +1,7 @@
 package com.danasea.backend.security.authentication.application.usecase;
 
 import com.danasea.backend.modules.account.application.api.AccountInternalApi;
+import com.danasea.backend.modules.audit.application.port.AuditLogPort;
 import com.danasea.backend.modules.account.domain.models.RefreshToken;
 import org.springframework.context.ApplicationEventPublisher;
 

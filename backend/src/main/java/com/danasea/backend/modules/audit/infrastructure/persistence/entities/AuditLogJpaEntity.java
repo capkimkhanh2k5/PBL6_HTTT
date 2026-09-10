@@ -1,4 +1,4 @@
-package com.danasea.backend.modules.account.infrastructure.persistence.entities;
+package com.danasea.backend.modules.audit.infrastructure.persistence.entities;
 
 import java.util.UUID;
 
