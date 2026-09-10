@@ -22,7 +22,7 @@ public class AuthorizationController {
 	}
 
 	@GetMapping("/user")
-	@PreAuthorize("hasRole('USER')")
+	@PreAuthorize("hasRole('CUSTOMER')")
 	public String userAccess() {
 		return "USER access granted";
 	}

@@ -18,9 +18,15 @@ import org.springframework.context.ApplicationEventPublisher;
 import com.danasea.backend.security.authentication.infrastructure.security.JwtProperties;
 import com.danasea.backend.security.authentication.application.usecase.RefreshTokenUseCase;
 import com.danasea.backend.security.authentication.application.usecase.LogoutUseCase;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 @Configuration
 public class ApplicationBeans {
+
+    @Bean
+    public ObjectMapper objectMapper() {
+        return new ObjectMapper();
+    }
 
     @Bean
     LoginUseCase loginUseCase(
