@@ -13,6 +13,11 @@ import com.danasea.backend.security.authentication.application.usecase.RegisterU
 import com.danasea.backend.security.authentication.application.usecase.SendVerificationOtpUseCase;
 import com.danasea.backend.security.authentication.application.usecase.VerifyOtpUseCase;
 import com.danasea.backend.modules.account.application.api.AccountInternalApi;
+import com.danasea.backend.modules.account.application.usecase.ChangePasswordUseCase;
+import com.danasea.backend.modules.account.application.usecase.GetMyProfileUseCase;
+import com.danasea.backend.modules.account.application.usecase.UpdateProfileUseCase;
+import com.danasea.backend.modules.account.infrastructure.persistence.repositories.JpaAuditLogRepository;
+
 import org.springframework.context.ApplicationEventPublisher;
 
 import com.danasea.backend.security.authentication.infrastructure.security.JwtProperties;
@@ -23,9 +28,15 @@ import com.danasea.backend.modules.admin.application.usecase.GetUsersUseCase;
 import com.danasea.backend.modules.admin.application.usecase.LockUserUseCase;
 import com.danasea.backend.modules.admin.application.usecase.UnlockUserUseCase;
 import com.danasea.backend.modules.audit.application.port.AuditLogPort;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 @Configuration
 public class ApplicationBeans {
+
+    @Bean
+    public ObjectMapper objectMapper() {
+        return new ObjectMapper();
+    }
 
     @Bean
     LoginUseCase loginUseCase(
@@ -107,5 +118,23 @@ public class ApplicationBeans {
     @Bean
     GetUserDetailUseCase getUserDetailUseCase(AccountInternalApi accountInternalApi) {
         return new GetUserDetailUseCase(accountInternalApi);
+    }
+
+    @Bean
+    GetMyProfileUseCase getMyProfileUseCase(AccountInternalApi accountInternalApi) {
+        return new GetMyProfileUseCase(accountInternalApi);
+    }
+
+    @Bean
+    UpdateProfileUseCase updateProfileUseCase(AccountInternalApi accountInternalApi) {
+        return new UpdateProfileUseCase(accountInternalApi);
+    }
+
+    @Bean
+    ChangePasswordUseCase changePasswordUseCase(
+            AccountInternalApi accountInternalApi,
+            PasswordHasher passwordHasher,
+            JpaAuditLogRepository auditLogRepository) {
+        return new ChangePasswordUseCase(accountInternalApi, passwordHasher, auditLogRepository);
     }
 }

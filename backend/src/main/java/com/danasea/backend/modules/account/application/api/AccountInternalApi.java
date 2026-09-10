@@ -27,7 +27,7 @@ public interface AccountInternalApi {
 
     void revokeAllTokensByUserId(UUID userId);
 
+    void revokeAllRefreshTokensByUserId(UUID userId);
 
     Page<User> findUsers(Pageable pageable, Role role, Boolean isLocked, String search);
 }
-

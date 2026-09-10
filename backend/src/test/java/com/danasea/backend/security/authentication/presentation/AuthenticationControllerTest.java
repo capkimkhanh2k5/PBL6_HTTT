@@ -59,7 +59,7 @@ class AuthenticationControllerTest {
     @BeforeEach
     void setUp() {
         mockMvc = MockMvcBuilders.standaloneSetup(authenticationController)
-                .setControllerAdvice(new AuthenticationExceptionHandler())
+                .setControllerAdvice(new AuthenticationExceptionHandler(), new com.danasea.backend.shared.presentation.GlobalExceptionHandler())
                 .build();
     }
 
