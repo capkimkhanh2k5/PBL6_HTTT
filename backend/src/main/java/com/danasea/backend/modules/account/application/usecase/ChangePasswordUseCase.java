@@ -1,12 +1,12 @@
 package com.danasea.backend.modules.account.application.usecase;
 
 import com.danasea.backend.modules.account.application.api.AccountInternalApi;
-import com.danasea.backend.modules.account.domain.models.AuditLog;
+import com.danasea.backend.modules.audit.domain.models.AuditLog;
 import com.danasea.backend.modules.account.domain.models.User;
-import com.danasea.backend.modules.account.infrastructure.persistence.repositories.JpaAuditLogRepository;
-import com.danasea.backend.modules.account.infrastructure.persistence.entities.AuditLogJpaEntity;
+import com.danasea.backend.modules.audit.infrastructure.persistence.repositories.JpaAuditLogRepository;
+import com.danasea.backend.modules.audit.infrastructure.persistence.entities.AuditLogJpaEntity;
 import com.danasea.backend.security.authentication.application.port.PasswordHasher;
-import com.danasea.backend.security.authentication.domain.exception.AccessDeniedException;
+import com.danasea.backend.security.authorization.domain.exception.AccessDeniedException;
 import com.danasea.backend.security.authentication.domain.exception.InvalidCredentialsException;
 
 import lombok.RequiredArgsConstructor;

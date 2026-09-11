@@ -1,4 +1,5 @@
 package com.danasea.backend.security.authentication.infrastructure.security;
+import java.util.stream.Stream;
 
 import java.util.List;
 import java.io.IOException;
@@ -64,7 +65,7 @@ public class JwtAuthenticationFilter
             .map(role -> new SimpleGrantedAuthority("ROLE_" + role))
             .toList();
 
-        authorities = java.util.stream.Stream.concat(
+        authorities = Stream.concat(
             authorities.stream(),
             subject.permissions()
                 .stream()
@@ -76,8 +77,9 @@ public class JwtAuthenticationFilter
             null,
             authorities
         );
+        authentication.setDetails(subject);
 
         SecurityContextHolder.getContext()
             .setAuthentication(authentication);
-        }
+    }
 }

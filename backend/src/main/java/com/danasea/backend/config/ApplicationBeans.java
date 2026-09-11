@@ -1,4 +1,4 @@
-package com.danasea.backend.modules.systemconfig;
+package com.danasea.backend.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -16,7 +16,7 @@ import com.danasea.backend.modules.account.application.api.AccountInternalApi;
 import com.danasea.backend.modules.account.application.usecase.ChangePasswordUseCase;
 import com.danasea.backend.modules.account.application.usecase.GetMyProfileUseCase;
 import com.danasea.backend.modules.account.application.usecase.UpdateProfileUseCase;
-import com.danasea.backend.modules.account.infrastructure.persistence.repositories.JpaAuditLogRepository;
+import com.danasea.backend.modules.audit.infrastructure.persistence.repositories.JpaAuditLogRepository;
 
 import org.springframework.context.ApplicationEventPublisher;
 
@@ -88,7 +88,7 @@ public class ApplicationBeans {
             UserAccountPort userAccountPort,
             OtpStorePort otpStorePort,
             AuthEventPublisher authEventPublisher) {
-        return new com.danasea.backend.security.authentication.application.usecase.SendVerificationOtpUseCase(
+        return new SendVerificationOtpUseCase(
                 userAccountPort, otpStorePort, authEventPublisher);
     }
 

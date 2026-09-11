@@ -2,7 +2,7 @@ package com.danasea.backend.modules.account.application.usecase;
 
 import com.danasea.backend.modules.account.application.api.AccountInternalApi;
 import com.danasea.backend.modules.account.domain.models.User;
-import com.danasea.backend.security.authentication.domain.exception.AccessDeniedException;
+import com.danasea.backend.security.authorization.domain.exception.AccessDeniedException;
 
 import lombok.RequiredArgsConstructor;
 

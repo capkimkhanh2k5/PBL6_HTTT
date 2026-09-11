@@ -1,4 +1,7 @@
 package com.danasea.backend.security.authorization;
+import com.danasea.backend.modules.account.infrastructure.mapper.UserMapper;
+import org.assertj.core.api.Assertions;
+import org.springframework.transaction.PlatformTransactionManager;
 
 import com.danasea.backend.modules.account.application.api.AccountInternalApi;
 import com.danasea.backend.modules.account.domain.models.Role;
@@ -61,10 +64,10 @@ public class RbacCacheInvalidationIntegrationTest extends BaseSecurityIntegratio
     private JpaUserRepository jpaUserRepository;
 
     @Autowired
-    private org.springframework.transaction.PlatformTransactionManager transactionManager;
+    private PlatformTransactionManager transactionManager;
 
     @Autowired
-    private com.danasea.backend.modules.account.infrastructure.mapper.UserMapper userMapper;
+    private UserMapper userMapper;
 
     @AfterEach
     void tearDown() {
@@ -434,7 +437,7 @@ public class RbacCacheInvalidationIntegrationTest extends BaseSecurityIntegratio
         assertThat(accountInternalApi.existsByEmail("   ")).isFalse();
 
         // saveUser với null phải ném IllegalArgumentException
-        org.assertj.core.api.Assertions.assertThatThrownBy(() -> accountInternalApi.saveUser(null))
+        Assertions.assertThatThrownBy(() -> accountInternalApi.saveUser(null))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage("User cannot be null");
     }

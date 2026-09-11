@@ -10,3 +10,4 @@
 .postman 
 .DS_Store
 .agents/
+.worktrees/

@@ -7,7 +7,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -29,6 +28,7 @@ import com.danasea.backend.modules.admin.application.usecase.UnlockUserUseCase;
 import com.danasea.backend.modules.admin.presentation.dto.LockUserRequest;
 import com.danasea.backend.modules.admin.presentation.dto.UserDetailResponse;
 import com.danasea.backend.modules.admin.presentation.dto.UserSummaryResponse;
+import com.danasea.backend.security.authorization.domain.exception.AccessDeniedException;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -103,7 +103,7 @@ public class AdminUserController {
 
         if (auth == null || auth.getAuthorities() == null || auth.getAuthorities().stream()
                 .noneMatch(a -> "ROLE_ADMIN".equals(a.getAuthority()))) {
-            throw new AccessDeniedException("Access denied");
+            throw new AccessDeniedException();
         }
     }
 

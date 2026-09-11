@@ -1,4 +1,5 @@
 package com.danasea.backend.modules.admin.integration;
+import org.springframework.cache.CacheManager;
 
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
@@ -73,8 +74,10 @@ class UserLockTokenRevocationIntegrationTest {
         accountInternalService = new AccountInternalService(
                 userRepository,
                 refreshTokenRepository,
+                mock(JpaAuditLogRepository.class),
                 userMapper,
-                refreshTokenMapper
+                refreshTokenMapper,
+                mock(CacheManager.class)
         );
         
         auditLogAdapter = new AuditLogAdapter(auditLogRepository, auditLogMapper);
