@@ -2,11 +2,12 @@ package com.danasea.backend.modules.service.infrastructure.persistence.repositor
 
 import java.util.UUID;
 
+import com.danasea.backend.modules.service.domain.models.ServiceStatus;
 import com.danasea.backend.modules.service.infrastructure.persistence.entities.ServiceJpaEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
-import java.util.UUID;
 
 @Repository
 public interface JpaServiceRepository extends JpaRepository<ServiceJpaEntity, UUID> {
+    boolean existsByCategoryIdAndStatus(UUID categoryId, ServiceStatus status);
 }
