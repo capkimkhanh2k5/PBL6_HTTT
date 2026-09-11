@@ -1,16 +1,16 @@
 package com.danasea.backend.modules.account.application.service;
 
-<<<<<<< HEAD
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
-=======
 import java.util.UUID;
 
-import com.danasea.backend.modules.account.application.api.AccountInternalApi;
 import java.util.Optional;
 import java.util.UUID;
+
+import com.danasea.backend.modules.audit.infrastructure.persistence.entities.AuditLogJpaEntity;
+import com.danasea.backend.modules.audit.infrastructure.persistence.repositories.JpaAuditLogRepository;
 
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;

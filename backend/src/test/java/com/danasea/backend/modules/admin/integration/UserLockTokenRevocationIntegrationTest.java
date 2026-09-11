@@ -73,6 +73,7 @@ class UserLockTokenRevocationIntegrationTest {
         accountInternalService = new AccountInternalService(
                 userRepository,
                 refreshTokenRepository,
+                mock(com.danasea.backend.modules.audit.infrastructure.persistence.repositories.JpaAuditLogRepository.class),
                 userMapper,
                 refreshTokenMapper,
                 mock(org.springframework.cache.CacheManager.class)
