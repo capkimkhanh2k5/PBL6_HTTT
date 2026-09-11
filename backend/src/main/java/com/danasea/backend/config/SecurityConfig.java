@@ -60,6 +60,8 @@ public class SecurityConfig {
 								"/v3/api-docs/**"
 						).permitAll()
 						.requestMatchers(HttpMethod.GET, "/api/categories", "/api/categories/**").permitAll()
+						.requestMatchers(HttpMethod.GET, "/api/services", "/api/services/**").permitAll()
+						.requestMatchers(HttpMethod.GET, "/api/recently-viewed").permitAll()
 						.requestMatchers("/api/admin/**").hasRole("ADMIN")
 						.anyRequest()
 						.authenticated())
@@ -75,8 +77,8 @@ public class SecurityConfig {
 		CorsConfiguration configuration = new CorsConfiguration();
 		configuration.setAllowedOrigins(allowedOrigins);
 		configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
-		configuration.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type", "X-Requested-With"));
-		configuration.setExposedHeaders(List.of("Authorization"));
+		configuration.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type", "X-Requested-With", "X-Session-Id"));
+		configuration.setExposedHeaders(Arrays.asList("Authorization", "X-Session-Id"));
 		configuration.setAllowCredentials(true);
 
 		UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();

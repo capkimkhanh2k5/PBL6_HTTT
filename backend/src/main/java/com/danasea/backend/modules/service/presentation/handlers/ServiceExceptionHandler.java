@@ -66,26 +66,26 @@ public class ServiceExceptionHandler {
                 .body(new ErrorResponse("WEATHER_REQUIREMENTS_MISSING", ex.getMessage()));
     }
 
-    @ExceptionHandler(com.danasea.backend.modules.service.domain.exceptions.ImageNotFoundException.class)
-    public ResponseEntity<ErrorResponse> handleImageNotFound(com.danasea.backend.modules.service.domain.exceptions.ImageNotFoundException ex) {
+    @ExceptionHandler(ImageNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleImageNotFound(ImageNotFoundException ex) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND)
                 .body(new ErrorResponse("IMAGE_NOT_FOUND", ex.getMessage()));
     }
 
-    @ExceptionHandler(com.danasea.backend.modules.service.domain.exceptions.MaxImagesExceededException.class)
-    public ResponseEntity<ErrorResponse> handleMaxImagesExceeded(com.danasea.backend.modules.service.domain.exceptions.MaxImagesExceededException ex) {
+    @ExceptionHandler(MaxImagesExceededException.class)
+    public ResponseEntity<ErrorResponse> handleMaxImagesExceeded(MaxImagesExceededException ex) {
         return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY)
                 .body(new ErrorResponse("MAX_IMAGES_EXCEEDED", ex.getMessage()));
     }
 
-    @ExceptionHandler(com.danasea.backend.modules.service.domain.exceptions.InvalidFileTypeException.class)
-    public ResponseEntity<ErrorResponse> handleInvalidFileType(com.danasea.backend.modules.service.domain.exceptions.InvalidFileTypeException ex) {
+    @ExceptionHandler(InvalidFileTypeException.class)
+    public ResponseEntity<ErrorResponse> handleInvalidFileType(InvalidFileTypeException ex) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                 .body(new ErrorResponse("INVALID_FILE_TYPE", ex.getMessage()));
     }
 
-    @ExceptionHandler(com.danasea.backend.modules.service.domain.exceptions.SafetyDocumentRequiredException.class)
-    public ResponseEntity<ErrorResponse> handleSafetyDocumentRequired(com.danasea.backend.modules.service.domain.exceptions.SafetyDocumentRequiredException ex) {
+    @ExceptionHandler(SafetyDocumentRequiredException.class)
+    public ResponseEntity<ErrorResponse> handleSafetyDocumentRequired(SafetyDocumentRequiredException ex) {
         return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY)
                 .body(new ErrorResponse("SAFETY_DOCUMENT_REQUIRED", ex.getMessage()));
     }

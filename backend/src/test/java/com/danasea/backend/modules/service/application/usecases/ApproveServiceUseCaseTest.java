@@ -31,10 +31,14 @@ import com.danasea.backend.modules.service.domain.ports.ServiceRepositoryPort;
 @DisplayName("ApproveServiceUseCase Tests")
 class ApproveServiceUseCaseTest {
 
-    @Mock private ServiceRepositoryPort serviceRepository;
-    @Mock private ServiceImageRepositoryPort serviceImageRepository;
-    @Mock private AuditLogPort auditLogPort;
-    @Mock private com.danasea.backend.modules.service.application.usecase.ApproveSafetyDocumentUseCase approveSafetyDocumentUseCase;
+    @Mock
+    private ServiceRepositoryPort serviceRepository;
+    @Mock
+    private ServiceImageRepositoryPort serviceImageRepository;
+    @Mock
+    private AuditLogPort auditLogPort;
+    @Mock
+    private ApproveSafetyDocumentUseCase approveSafetyDocumentUseCase;
 
     private ApproveServiceUseCase useCase;
 
@@ -43,7 +47,8 @@ class ApproveServiceUseCaseTest {
 
     @BeforeEach
     void setUp() {
-        useCase = new ApproveServiceUseCase(serviceRepository, serviceImageRepository, auditLogPort, approveSafetyDocumentUseCase);
+        useCase = new ApproveServiceUseCase(serviceRepository, serviceImageRepository, auditLogPort,
+                approveSafetyDocumentUseCase);
     }
 
     private Service serviceWithStatus(ServiceStatus status) {
@@ -64,8 +69,7 @@ class ApproveServiceUseCaseTest {
 
         assertThat(result.status()).isEqualTo(ServiceStatus.PUBLISHED);
         verify(auditLogPort).recordAuditLog(
-                eq(adminUserId), eq("SERVICE_APPROVED"), eq("SERVICE"), eq(serviceId), any()
-        );
+                eq(adminUserId), eq("SERVICE_APPROVED"), eq("SERVICE"), eq(serviceId), any());
     }
 
     @Test

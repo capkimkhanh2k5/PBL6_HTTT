@@ -101,8 +101,9 @@ public class ServiceBeans {
             ServiceRepositoryPort serviceRepository,
             ServiceImageRepositoryPort serviceImageRepository,
             AuditLogPort auditLogPort,
-            com.danasea.backend.modules.service.application.usecase.ApproveSafetyDocumentUseCase approveSafetyDocumentUseCase) {
-        return new ApproveServiceUseCase(serviceRepository, serviceImageRepository, auditLogPort, approveSafetyDocumentUseCase);
+            ApproveSafetyDocumentUseCase approveSafetyDocumentUseCase) {
+        return new ApproveServiceUseCase(serviceRepository, serviceImageRepository, auditLogPort,
+                approveSafetyDocumentUseCase);
     }
 
     @Bean
