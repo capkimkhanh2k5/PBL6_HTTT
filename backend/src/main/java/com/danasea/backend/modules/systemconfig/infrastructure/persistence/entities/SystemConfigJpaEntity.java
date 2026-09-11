@@ -13,8 +13,10 @@ import lombok.Setter;
 @Table(name = "system_configs")
 public class SystemConfigJpaEntity extends BaseJpaEntity {
 
+    @Column(name = "\"key\"")
     private String key;
 
+    @Column(name = "\"value\"")
     private String value;
 
     private String description;

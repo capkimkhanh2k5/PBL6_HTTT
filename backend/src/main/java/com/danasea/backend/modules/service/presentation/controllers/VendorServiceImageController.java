@@ -35,7 +35,7 @@ public class VendorServiceImageController {
             @RequestParam("file") MultipartFile file,
             Principal principal) {
 
-        UUID vendorId = UUID.fromString(principal.getName());
+        UUID vendorId = com.danasea.backend.security.infrastructure.SecurityUtils.getCurrentUserId().orElseThrow(() -> new org.springframework.security.access.AccessDeniedException("User ID not found"));
         var saved = uploadServiceImageUseCase.execute(serviceId, vendorId, file);
         return ResponseEntity.status(HttpStatus.CREATED).body(ServiceImageResponse.from(saved));
     }
@@ -49,7 +49,7 @@ public class VendorServiceImageController {
             @PathVariable UUID imageId,
             Principal principal) {
 
-        UUID vendorId = UUID.fromString(principal.getName());
+        UUID vendorId = com.danasea.backend.security.infrastructure.SecurityUtils.getCurrentUserId().orElseThrow(() -> new org.springframework.security.access.AccessDeniedException("User ID not found"));
         deleteServiceImageUseCase.execute(serviceId, imageId, vendorId);
         return ResponseEntity.noContent().build();
     }
@@ -64,7 +64,7 @@ public class VendorServiceImageController {
             @Valid @RequestBody ReorderImagesRequest request,
             Principal principal) {
 
-        UUID vendorId = UUID.fromString(principal.getName());
+        UUID vendorId = com.danasea.backend.security.infrastructure.SecurityUtils.getCurrentUserId().orElseThrow(() -> new org.springframework.security.access.AccessDeniedException("User ID not found"));
         var reordered = reorderServiceImagesUseCase.execute(serviceId, vendorId, request.imageIds());
         return ResponseEntity.ok(reordered.stream().map(ServiceImageResponse::from).toList());
     }

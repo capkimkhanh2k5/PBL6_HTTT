@@ -52,7 +52,7 @@ public class VendorServiceController {
     public ResponseEntity<ServiceResult> createService(
             @Valid @RequestBody CreateServiceRequest request,
             Principal principal) {
-        UUID userId = UUID.fromString(principal.getName());
+        UUID userId = com.danasea.backend.security.infrastructure.SecurityUtils.getCurrentUserId().orElseThrow(() -> new org.springframework.security.access.AccessDeniedException("User ID not found"));
         CreateServiceCommand cmd = new CreateServiceCommand(
                 userId,
                 request.categoryId(),
@@ -77,7 +77,7 @@ public class VendorServiceController {
 
     @GetMapping
     public ResponseEntity<List<ServiceResult>> getMyServices(Principal principal) {
-        UUID userId = UUID.fromString(principal.getName());
+        UUID userId = com.danasea.backend.security.infrastructure.SecurityUtils.getCurrentUserId().orElseThrow(() -> new org.springframework.security.access.AccessDeniedException("User ID not found"));
         return ResponseEntity.ok(getVendorServicesUseCase.execute(userId));
     }
 
@@ -85,7 +85,7 @@ public class VendorServiceController {
     public ResponseEntity<ServiceResult> getServiceDetail(
             @PathVariable UUID id,
             Principal principal) {
-        UUID userId = UUID.fromString(principal.getName());
+        UUID userId = com.danasea.backend.security.infrastructure.SecurityUtils.getCurrentUserId().orElseThrow(() -> new org.springframework.security.access.AccessDeniedException("User ID not found"));
         return ResponseEntity.ok(getServiceDetailUseCase.execute(userId, id));
     }
 
@@ -94,7 +94,7 @@ public class VendorServiceController {
             @PathVariable UUID id,
             @RequestBody UpdateServiceRequest request,
             Principal principal) {
-        UUID userId = UUID.fromString(principal.getName());
+        UUID userId = com.danasea.backend.security.infrastructure.SecurityUtils.getCurrentUserId().orElseThrow(() -> new org.springframework.security.access.AccessDeniedException("User ID not found"));
         UpdateServiceCommand cmd = new UpdateServiceCommand(
                 userId, id,
                 request.categoryId(), request.name(), request.nameEn(),
@@ -110,7 +110,7 @@ public class VendorServiceController {
     public ResponseEntity<ServiceResult> submitForReview(
             @PathVariable UUID id,
             Principal principal) {
-        UUID userId = UUID.fromString(principal.getName());
+        UUID userId = com.danasea.backend.security.infrastructure.SecurityUtils.getCurrentUserId().orElseThrow(() -> new org.springframework.security.access.AccessDeniedException("User ID not found"));
         return ResponseEntity.ok(submitServiceForReviewUseCase.execute(userId, id));
     }
 
@@ -118,7 +118,7 @@ public class VendorServiceController {
     public ResponseEntity<ServiceResult> pause(
             @PathVariable UUID id,
             Principal principal) {
-        UUID userId = UUID.fromString(principal.getName());
+        UUID userId = com.danasea.backend.security.infrastructure.SecurityUtils.getCurrentUserId().orElseThrow(() -> new org.springframework.security.access.AccessDeniedException("User ID not found"));
         return ResponseEntity.ok(pauseServiceUseCase.execute(userId, id));
     }
 
@@ -126,7 +126,7 @@ public class VendorServiceController {
     public ResponseEntity<ServiceResult> resume(
             @PathVariable UUID id,
             Principal principal) {
-        UUID userId = UUID.fromString(principal.getName());
+        UUID userId = com.danasea.backend.security.infrastructure.SecurityUtils.getCurrentUserId().orElseThrow(() -> new org.springframework.security.access.AccessDeniedException("User ID not found"));
         return ResponseEntity.ok(resumeServiceUseCase.execute(userId, id));
     }
 
@@ -134,7 +134,7 @@ public class VendorServiceController {
     public ResponseEntity<Void> deleteService(
             @PathVariable UUID id,
             Principal principal) {
-        UUID userId = UUID.fromString(principal.getName());
+        UUID userId = com.danasea.backend.security.infrastructure.SecurityUtils.getCurrentUserId().orElseThrow(() -> new org.springframework.security.access.AccessDeniedException("User ID not found"));
         deleteServiceUseCase.execute(userId, id);
         return ResponseEntity.noContent().build();
     }

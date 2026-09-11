@@ -28,7 +28,7 @@ public class VendorSafetyDocumentController {
             @RequestParam("file") MultipartFile file,
             Principal principal) {
 
-        UUID vendorId = UUID.fromString(principal.getName());
+        UUID vendorId = com.danasea.backend.security.infrastructure.SecurityUtils.getCurrentUserId().orElseThrow(() -> new org.springframework.security.access.AccessDeniedException("User ID not found"));
         var saved = uploadSafetyDocumentUseCase.execute(serviceId, vendorId, file);
         return ResponseEntity.status(HttpStatus.CREATED).body(SafetyDocumentResponse.from(saved));
     }

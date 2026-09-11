@@ -43,7 +43,7 @@ public class AdminSafetyDocumentController {
             @PathVariable UUID docId,
             Principal principal) {
 
-        UUID adminId = UUID.fromString(principal.getName());
+        UUID adminId = com.danasea.backend.security.infrastructure.SecurityUtils.getCurrentUserId().orElseThrow(() -> new org.springframework.security.access.AccessDeniedException("User ID not found"));
         var updated = approveSafetyDocumentUseCase.approve(docId, adminId);
         return ResponseEntity.ok(SafetyDocumentResponse.from(updated));
     }
@@ -59,7 +59,7 @@ public class AdminSafetyDocumentController {
             @Valid @RequestBody RejectDocumentRequest request,
             Principal principal) {
 
-        UUID adminId = UUID.fromString(principal.getName());
+        UUID adminId = com.danasea.backend.security.infrastructure.SecurityUtils.getCurrentUserId().orElseThrow(() -> new org.springframework.security.access.AccessDeniedException("User ID not found"));
         var updated = approveSafetyDocumentUseCase.reject(docId, adminId, request.rejectionReason());
         return ResponseEntity.ok(SafetyDocumentResponse.from(updated));
     }

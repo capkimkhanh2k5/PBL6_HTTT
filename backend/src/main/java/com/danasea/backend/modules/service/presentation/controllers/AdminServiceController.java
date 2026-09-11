@@ -45,7 +45,7 @@ public class AdminServiceController {
     public ResponseEntity<ServiceResult> approve(
             @PathVariable UUID id,
             Principal principal) {
-        UUID adminUserId = UUID.fromString(principal.getName());
+        UUID adminUserId = com.danasea.backend.security.infrastructure.SecurityUtils.getCurrentUserId().orElseThrow(() -> new org.springframework.security.access.AccessDeniedException("User ID not found"));
         return ResponseEntity.ok(approveServiceUseCase.execute(adminUserId, id));
     }
 
@@ -54,7 +54,7 @@ public class AdminServiceController {
             @PathVariable UUID id,
             @Valid @RequestBody RejectServiceRequest request,
             Principal principal) {
-        UUID adminUserId = UUID.fromString(principal.getName());
+        UUID adminUserId = com.danasea.backend.security.infrastructure.SecurityUtils.getCurrentUserId().orElseThrow(() -> new org.springframework.security.access.AccessDeniedException("User ID not found"));
         RejectServiceCommand cmd = new RejectServiceCommand(adminUserId, id, request.reason());
         return ResponseEntity.ok(rejectServiceUseCase.execute(cmd));
     }
