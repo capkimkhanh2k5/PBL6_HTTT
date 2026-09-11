@@ -1,9 +1,14 @@
 package com.danasea.backend.modules.account.application.service;
 
+<<<<<<< HEAD
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+=======
+import java.util.UUID;
+
+import com.danasea.backend.modules.account.application.api.AccountInternalApi;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -39,6 +44,7 @@ public class AccountInternalService implements AccountInternalApi {
 
     private final JpaUserRepository userRepository;
     private final JpaRefreshTokenRepository refreshTokenRepository;
+    private final JpaAuditLogRepository auditLogRepository;
     private final UserMapper userMapper;
     private final RefreshTokenMapper refreshTokenMapper;
     private final CacheManager cacheManager;
@@ -183,5 +189,16 @@ public class AccountInternalService implements AccountInternalApi {
 
         Page<UserJpaEntity> entities = userRepository.findAll(spec, pageable);
         return entities.map(userMapper::toDomain);
+    }
+
+    @Override
+    public void recordAuditLog(UUID actorUserId, String action, String entityType, UUID entityId, String metadata) {
+        AuditLogJpaEntity entity = new AuditLogJpaEntity();
+        entity.setActorUserId(actorUserId);
+        entity.setAction(action);
+        entity.setEntityType(entityType);
+        entity.setEntityId(entityId);
+        entity.setMetadata(metadata);
+        auditLogRepository.save(entity);
     }
 }

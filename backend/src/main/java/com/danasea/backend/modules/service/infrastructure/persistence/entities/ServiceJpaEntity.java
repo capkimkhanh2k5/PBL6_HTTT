@@ -46,6 +46,9 @@ public class ServiceJpaEntity extends BaseJpaEntity {
     @Enumerated(EnumType.STRING)
     private ServiceStatus status;
 
+    @Column(name = "rejection_reason")
+    private String rejectionReason;
+
     private String waiverContent;
 
     private Boolean weatherSensitive;

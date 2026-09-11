@@ -21,4 +21,8 @@ public class Category extends BaseDomainModel {
     private UUID parentId;
     private String iconUrl;
     private Boolean isActive;
+
+    public boolean isActive() {
+        return Boolean.TRUE.equals(this.isActive);
+    }
 }
