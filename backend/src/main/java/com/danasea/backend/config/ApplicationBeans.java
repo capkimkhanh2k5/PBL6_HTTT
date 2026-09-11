@@ -16,7 +16,7 @@ import com.danasea.backend.modules.account.application.api.AccountInternalApi;
 import com.danasea.backend.modules.account.application.usecase.ChangePasswordUseCase;
 import com.danasea.backend.modules.account.application.usecase.GetMyProfileUseCase;
 import com.danasea.backend.modules.account.application.usecase.UpdateProfileUseCase;
-import com.danasea.backend.modules.account.infrastructure.persistence.repositories.JpaAuditLogRepository;
+import com.danasea.backend.modules.audit.infrastructure.persistence.repositories.JpaAuditLogRepository;
 
 import org.springframework.context.ApplicationEventPublisher;
 

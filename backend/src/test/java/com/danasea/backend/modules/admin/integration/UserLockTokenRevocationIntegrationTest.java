@@ -74,7 +74,8 @@ class UserLockTokenRevocationIntegrationTest {
                 userRepository,
                 refreshTokenRepository,
                 userMapper,
-                refreshTokenMapper
+                refreshTokenMapper,
+                mock(org.springframework.cache.CacheManager.class)
         );
         
         auditLogAdapter = new AuditLogAdapter(auditLogRepository, auditLogMapper);

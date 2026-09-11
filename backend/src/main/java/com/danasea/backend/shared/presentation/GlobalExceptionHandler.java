@@ -1,6 +1,6 @@
 package com.danasea.backend.shared.presentation;
 
-import com.danasea.backend.security.authentication.domain.exception.AccessDeniedException;
+import com.danasea.backend.security.authorization.domain.exception.AccessDeniedException;
 import com.danasea.backend.security.authentication.domain.exception.InvalidCredentialsException;
 import com.danasea.backend.security.authentication.infrastructure.security.CookieUtils;
 

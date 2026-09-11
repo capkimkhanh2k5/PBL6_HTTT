@@ -129,7 +129,7 @@ class UserControllerTest {
                 .principal(mockPrincipal)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(jsonPayload))
-                .andExpect(status().isBadRequest())
+                .andExpect(status().isUnauthorized())
                 .andExpect(jsonPath("$.code").value("INVALID_CREDENTIALS"));
     }
 
