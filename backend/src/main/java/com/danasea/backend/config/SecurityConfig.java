@@ -4,6 +4,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
@@ -43,6 +44,13 @@ public class SecurityConfig {
 								SessionCreationPolicy.STATELESS
 						))
 				.exceptionHandling(exception -> exception
+						.authenticationEntryPoint((request, response, authException) -> {
+							response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+							response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+							response.getWriter().write(
+									"{\"code\":\"UNAUTHORIZED\",\"message\":\"Authentication required\"}"
+							);
+						})
 						.accessDeniedHandler((request, response, accessDenied) -> {
 							response.setStatus(HttpServletResponse.SC_FORBIDDEN);
 							response.setContentType(MediaType.APPLICATION_JSON_VALUE);
@@ -61,6 +69,8 @@ public class SecurityConfig {
 								"/swagger-ui.html",
 								"/v3/api-docs/**"
 						).permitAll()
+						.requestMatchers(HttpMethod.GET, "/api/services", "/api/services/**").permitAll()
+						.requestMatchers(HttpMethod.GET, "/api/recently-viewed").permitAll()
 						.anyRequest()
 						.authenticated())
 				.addFilterBefore(
@@ -75,8 +85,8 @@ public class SecurityConfig {
 		CorsConfiguration configuration = new CorsConfiguration();
 		configuration.setAllowedOrigins(allowedOrigins);
 		configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
-		configuration.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type", "X-Requested-With"));
-		configuration.setExposedHeaders(List.of("Authorization"));
+		configuration.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type", "X-Requested-With", "X-Session-Id"));
+		configuration.setExposedHeaders(Arrays.asList("Authorization", "X-Session-Id"));
 		configuration.setAllowCredentials(true);
 
 		UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();

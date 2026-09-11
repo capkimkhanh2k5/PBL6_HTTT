@@ -76,8 +76,9 @@ public class JwtAuthenticationFilter
             null,
             authorities
         );
+        authentication.setDetails(subject);
 
         SecurityContextHolder.getContext()
             .setAuthentication(authentication);
-        }
+    }
 }
