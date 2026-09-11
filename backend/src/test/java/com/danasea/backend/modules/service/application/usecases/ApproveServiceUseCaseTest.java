@@ -34,6 +34,7 @@ class ApproveServiceUseCaseTest {
     @Mock private ServiceRepositoryPort serviceRepository;
     @Mock private ServiceImageRepositoryPort serviceImageRepository;
     @Mock private AuditLogPort auditLogPort;
+    @Mock private com.danasea.backend.modules.service.application.usecase.ApproveSafetyDocumentUseCase approveSafetyDocumentUseCase;
 
     private ApproveServiceUseCase useCase;
 
@@ -42,7 +43,7 @@ class ApproveServiceUseCaseTest {
 
     @BeforeEach
     void setUp() {
-        useCase = new ApproveServiceUseCase(serviceRepository, serviceImageRepository, auditLogPort);
+        useCase = new ApproveServiceUseCase(serviceRepository, serviceImageRepository, auditLogPort, approveSafetyDocumentUseCase);
     }
 
     private Service serviceWithStatus(ServiceStatus status) {

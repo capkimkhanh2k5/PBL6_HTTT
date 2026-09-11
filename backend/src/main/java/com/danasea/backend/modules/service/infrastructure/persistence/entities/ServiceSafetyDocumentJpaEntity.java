@@ -26,4 +26,6 @@ public class ServiceSafetyDocumentJpaEntity extends BaseJpaEntity {
 
     private OffsetDateTime reviewedAt;
 
+    private String rejectionReason;
+
 }

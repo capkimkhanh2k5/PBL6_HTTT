@@ -4,6 +4,10 @@ import java.util.UUID;
 
 public class UnauthorizedServiceAccessException extends ServiceDomainException {
 
+    public UnauthorizedServiceAccessException() {
+        super("You do not have permission to access or modify this service.");
+    }
+
     public UnauthorizedServiceAccessException(String message) {
         super(message);
     }

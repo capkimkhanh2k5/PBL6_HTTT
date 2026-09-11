@@ -4,6 +4,10 @@ import java.util.UUID;
 
 public class ServiceNotFoundException extends ServiceDomainException {
 
+    public ServiceNotFoundException() {
+        super("Service not found.");
+    }
+
     public ServiceNotFoundException(UUID serviceId) {
         super("Service not found with ID: " + serviceId);
     }

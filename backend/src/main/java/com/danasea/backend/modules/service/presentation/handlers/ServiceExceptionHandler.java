@@ -65,4 +65,34 @@ public class ServiceExceptionHandler {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                 .body(new ErrorResponse("WEATHER_REQUIREMENTS_MISSING", ex.getMessage()));
     }
+
+    @ExceptionHandler(com.danasea.backend.modules.service.domain.exceptions.ImageNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleImageNotFound(com.danasea.backend.modules.service.domain.exceptions.ImageNotFoundException ex) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(new ErrorResponse("IMAGE_NOT_FOUND", ex.getMessage()));
+    }
+
+    @ExceptionHandler(com.danasea.backend.modules.service.domain.exceptions.MaxImagesExceededException.class)
+    public ResponseEntity<ErrorResponse> handleMaxImagesExceeded(com.danasea.backend.modules.service.domain.exceptions.MaxImagesExceededException ex) {
+        return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY)
+                .body(new ErrorResponse("MAX_IMAGES_EXCEEDED", ex.getMessage()));
+    }
+
+    @ExceptionHandler(com.danasea.backend.modules.service.domain.exceptions.InvalidFileTypeException.class)
+    public ResponseEntity<ErrorResponse> handleInvalidFileType(com.danasea.backend.modules.service.domain.exceptions.InvalidFileTypeException ex) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(new ErrorResponse("INVALID_FILE_TYPE", ex.getMessage()));
+    }
+
+    @ExceptionHandler(com.danasea.backend.modules.service.domain.exceptions.SafetyDocumentRequiredException.class)
+    public ResponseEntity<ErrorResponse> handleSafetyDocumentRequired(com.danasea.backend.modules.service.domain.exceptions.SafetyDocumentRequiredException ex) {
+        return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY)
+                .body(new ErrorResponse("SAFETY_DOCUMENT_REQUIRED", ex.getMessage()));
+    }
+
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<ErrorResponse> handleIllegalArgument(IllegalArgumentException ex) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(new ErrorResponse("BAD_REQUEST", ex.getMessage()));
+    }
 }

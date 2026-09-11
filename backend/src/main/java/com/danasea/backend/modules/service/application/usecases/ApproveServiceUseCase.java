@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.UUID;
 
 import com.danasea.backend.modules.service.application.dto.ServiceResult;
+import com.danasea.backend.modules.service.application.usecase.ApproveSafetyDocumentUseCase;
 import com.danasea.backend.modules.service.application.usecases.helpers.ServiceResultMapper;
 import com.danasea.backend.modules.service.domain.exceptions.ServiceNotFoundException;
 import com.danasea.backend.modules.service.domain.models.Service;
@@ -19,10 +20,14 @@ public class ApproveServiceUseCase {
     private final ServiceRepositoryPort serviceRepository;
     private final ServiceImageRepositoryPort serviceImageRepository;
     private final AuditLogPort auditLogPort;
+    private final ApproveSafetyDocumentUseCase approveSafetyDocumentUseCase;
 
     public ServiceResult execute(UUID adminUserId, UUID serviceId) {
         Service service = serviceRepository.findById(serviceId)
                 .orElseThrow(() -> new ServiceNotFoundException(serviceId));
+
+        // Business logic guard: ensure safety documents are approved if required
+        approveSafetyDocumentUseCase.canPublish(serviceId);
 
         service.approve();
 
