@@ -19,7 +19,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-class GetServiceDetailUseCaseTest {
+class GetPublicServiceDetailUseCaseTest {
 
     @Mock
     private ServiceRepositoryPort serviceRepositoryPort;
@@ -28,7 +28,7 @@ class GetServiceDetailUseCaseTest {
     private RecordRecentlyViewedUseCase recordRecentlyViewedUseCase;
 
     @InjectMocks
-    private GetServiceDetailUseCase getServiceDetailUseCase;
+    private GetPublicServiceDetailUseCase getServiceDetailUseCase;
 
     @Test
     void execute_ShouldReturnDetailAndIncrementViewCount() {

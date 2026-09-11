@@ -3,7 +3,7 @@ package com.danasea.backend.modules.service.presentation;
 import com.danasea.backend.modules.service.application.dto.SearchServicesCriteria;
 import com.danasea.backend.modules.service.application.dto.ServiceDetailResult;
 import com.danasea.backend.modules.service.application.dto.ServiceSummaryResult;
-import com.danasea.backend.modules.service.application.usecase.GetServiceDetailUseCase;
+import com.danasea.backend.modules.service.application.usecase.GetPublicServiceDetailUseCase;
 import com.danasea.backend.modules.service.application.usecase.SearchServicesUseCase;
 import com.danasea.backend.modules.service.presentation.dto.PageResponse;
 import com.danasea.backend.modules.service.presentation.dto.ServiceDetailResponse;
@@ -19,12 +19,12 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping("/api/services")
+@RequestMapping("/api/v1/catalog")
 @RequiredArgsConstructor
 public class CatalogController {
 
     private final SearchServicesUseCase searchServicesUseCase;
-    private final GetServiceDetailUseCase getServiceDetailUseCase;
+    private final GetPublicServiceDetailUseCase getServiceDetailUseCase;
 
     @GetMapping
     public ResponseEntity<PageResponse<ServiceSummaryResponse>> searchServices(

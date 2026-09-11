@@ -7,7 +7,11 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import com.danasea.backend.modules.service.domain.exceptions.CategoryInactiveException;
 import com.danasea.backend.modules.service.domain.exceptions.CategoryNotFoundException;
+import com.danasea.backend.modules.service.domain.exceptions.ImageNotFoundException;
+import com.danasea.backend.modules.service.domain.exceptions.InvalidFileTypeException;
 import com.danasea.backend.modules.service.domain.exceptions.InvalidServiceStateException;
+import com.danasea.backend.modules.service.domain.exceptions.MaxImagesExceededException;
+import com.danasea.backend.modules.service.domain.exceptions.SafetyDocumentRequiredException;
 import com.danasea.backend.modules.service.domain.exceptions.ServiceImagesRequiredException;
 import com.danasea.backend.modules.service.domain.exceptions.ServiceNotFoundException;
 import com.danasea.backend.modules.service.domain.exceptions.UnauthorizedServiceAccessException;

@@ -3,6 +3,7 @@ package com.danasea.backend.modules.service.infrastructure.config;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import com.danasea.backend.modules.service.application.usecase.ApproveSafetyDocumentUseCase;
 import com.danasea.backend.modules.service.application.usecases.ApproveServiceUseCase;
 import com.danasea.backend.modules.service.application.usecases.CreateServiceUseCase;
 import com.danasea.backend.modules.service.application.usecases.DeleteServiceUseCase;

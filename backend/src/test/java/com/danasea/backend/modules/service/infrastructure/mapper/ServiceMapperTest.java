@@ -3,6 +3,7 @@ package com.danasea.backend.modules.service.infrastructure.mapper;
 import com.danasea.backend.modules.service.domain.models.Service;
 import com.danasea.backend.modules.service.domain.models.ServiceStatus;
 import com.danasea.backend.modules.service.infrastructure.persistence.entities.ServiceJpaEntity;
+import com.danasea.backend.modules.service.infrastructure.persistence.mappers.ServiceMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 

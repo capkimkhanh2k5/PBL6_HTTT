@@ -2,7 +2,7 @@ package com.danasea.backend.modules.service.presentation;
 
 import com.danasea.backend.modules.service.application.dto.ServiceDetailResult;
 import com.danasea.backend.modules.service.application.dto.ServiceSummaryResult;
-import com.danasea.backend.modules.service.application.usecase.GetServiceDetailUseCase;
+import com.danasea.backend.modules.service.application.usecase.GetPublicServiceDetailUseCase;
 import com.danasea.backend.modules.service.application.usecase.SearchServicesUseCase;
 import com.danasea.backend.modules.service.domain.exceptions.ServiceNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
@@ -33,7 +33,7 @@ class CatalogControllerTest {
     private SearchServicesUseCase searchServicesUseCase;
 
     @Mock
-    private GetServiceDetailUseCase getServiceDetailUseCase;
+    private GetPublicServiceDetailUseCase getServiceDetailUseCase;
 
     @InjectMocks
     private CatalogController catalogController;
@@ -55,7 +55,7 @@ class CatalogControllerTest {
         when(searchServicesUseCase.execute(any())).thenReturn(List.of(result));
         when(searchServicesUseCase.count(any())).thenReturn(1L);
 
-        mockMvc.perform(get("/api/services")
+        mockMvc.perform(get("/api/v1/catalog")
                 .param("page", "0")
                 .param("size", "20")
                 .contentType(MediaType.APPLICATION_JSON))
@@ -74,7 +74,7 @@ class CatalogControllerTest {
 
         when(getServiceDetailUseCase.execute(eq(id), any(), any())).thenReturn(result);
 
-        mockMvc.perform(get("/api/services/" + id)
+        mockMvc.perform(get("/api/v1/catalog/" + id)
                 .header("X-Session-Id", "sess-123")
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
@@ -88,7 +88,7 @@ class CatalogControllerTest {
         when(getServiceDetailUseCase.execute(eq(id), any(), any()))
                 .thenThrow(new ServiceNotFoundException("Service not found"));
 
-        mockMvc.perform(get("/api/services/" + id))
+        mockMvc.perform(get("/api/v1/catalog/" + id))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.code").value("SERVICE_NOT_FOUND"));
     }

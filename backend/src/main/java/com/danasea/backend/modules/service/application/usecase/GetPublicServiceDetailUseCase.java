@@ -12,7 +12,7 @@ import java.util.UUID;
 
 @Component
 @RequiredArgsConstructor
-public class GetServiceDetailUseCase {
+public class GetPublicServiceDetailUseCase {
     private final ServiceRepositoryPort serviceRepositoryPort;
     private final RecordRecentlyViewedUseCase recordRecentlyViewedUseCase;
 

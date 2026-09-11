@@ -20,7 +20,11 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.danasea.backend.modules.service.application.dto.ServiceResult;
+import com.danasea.backend.modules.service.application.usecase.ApproveSafetyDocumentUseCase;
 import com.danasea.backend.modules.service.domain.exceptions.InvalidServiceStateException;
+import com.danasea.backend.modules.service.domain.exceptions.SafetyDocumentRequiredException;
+import com.danasea.backend.modules.service.domain.exceptions.ServiceImagesRequiredException;
+import com.danasea.backend.modules.service.domain.exceptions.ServiceNotFoundException;
 import com.danasea.backend.modules.service.domain.models.Service;
 import com.danasea.backend.modules.service.domain.models.ServiceStatus;
 import com.danasea.backend.modules.service.domain.ports.AuditLogPort;
