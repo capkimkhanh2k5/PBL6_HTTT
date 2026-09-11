@@ -8,8 +8,10 @@ import com.danasea.backend.modules.account.domain.models.Role;
 import com.danasea.backend.modules.account.domain.models.RefreshToken;
 import com.danasea.backend.modules.account.infrastructure.persistence.repositories.JpaUserRepository;
 import com.danasea.backend.modules.account.infrastructure.persistence.repositories.JpaRefreshTokenRepository;
+import com.danasea.backend.modules.account.infrastructure.persistence.repositories.JpaAuditLogRepository;
 import com.danasea.backend.modules.account.infrastructure.persistence.entities.UserJpaEntity;
 import com.danasea.backend.modules.account.infrastructure.persistence.entities.RefreshTokenJpaEntity;
+import com.danasea.backend.modules.account.infrastructure.persistence.entities.AuditLogJpaEntity;
 import com.danasea.backend.modules.account.infrastructure.mapper.UserMapper;
 import com.danasea.backend.modules.account.infrastructure.mapper.RefreshTokenMapper;
 
@@ -27,6 +29,7 @@ public class AccountInternalService implements AccountInternalApi {
 
     private final JpaUserRepository userRepository;
     private final JpaRefreshTokenRepository refreshTokenRepository;
+    private final JpaAuditLogRepository auditLogRepository;
     private final UserMapper userMapper;
     private final RefreshTokenMapper refreshTokenMapper;
 
@@ -75,5 +78,16 @@ public class AccountInternalService implements AccountInternalApi {
             }
         });
         refreshTokenRepository.saveAll(tokens);
+    }
+
+    @Override
+    public void recordAuditLog(UUID actorUserId, String action, String entityType, UUID entityId, String metadata) {
+        AuditLogJpaEntity entity = new AuditLogJpaEntity();
+        entity.setActorUserId(actorUserId);
+        entity.setAction(action);
+        entity.setEntityType(entityType);
+        entity.setEntityId(entityId);
+        entity.setMetadata(metadata);
+        auditLogRepository.save(entity);
     }
 }

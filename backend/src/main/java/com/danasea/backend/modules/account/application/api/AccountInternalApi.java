@@ -22,4 +22,6 @@ public interface AccountInternalApi {
     Optional<RefreshToken> findRefreshTokenByHash(String tokenHash);
 
     void revokeRefreshTokenFamily(UUID familyId);
+
+    void recordAuditLog(UUID actorUserId, String action, String entityType, UUID entityId, String metadata);
 }
