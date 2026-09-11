@@ -1,4 +1,5 @@
 package com.danasea.backend.modules.service.e2e;
+import org.hamcrest.Matchers;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -32,7 +33,7 @@ public class ServiceTier2BoundaryCornerCaseE2ETest extends BaseServiceE2ETest {
         mockMvc.perform(authenticateAsPendingVendor(post(VENDOR_API_BASE))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(payload))
-                .andExpect(status().is(org.hamcrest.Matchers.isOneOf(400, 403)));
+                .andExpect(status().is(Matchers.isOneOf(400, 403)));
     }
 
     @Test
@@ -43,7 +44,7 @@ public class ServiceTier2BoundaryCornerCaseE2ETest extends BaseServiceE2ETest {
         mockMvc.perform(authenticateAsRejectedVendor(post(VENDOR_API_BASE))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(payload))
-                .andExpect(status().is(org.hamcrest.Matchers.isOneOf(400, 403)));
+                .andExpect(status().is(Matchers.isOneOf(400, 403)));
     }
 
     @Test
@@ -58,7 +59,7 @@ public class ServiceTier2BoundaryCornerCaseE2ETest extends BaseServiceE2ETest {
         mockMvc.perform(authenticateAsVendorA(post(VENDOR_API_BASE))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(payload))
-                .andExpect(status().is(org.hamcrest.Matchers.isOneOf(400, 404)));
+                .andExpect(status().is(Matchers.isOneOf(400, 404)));
     }
 
     @Test
@@ -73,7 +74,7 @@ public class ServiceTier2BoundaryCornerCaseE2ETest extends BaseServiceE2ETest {
         mockMvc.perform(authenticateAsVendorA(post(VENDOR_API_BASE))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(payload))
-                .andExpect(status().is(org.hamcrest.Matchers.isOneOf(400, 404)));
+                .andExpect(status().is(Matchers.isOneOf(400, 404)));
     }
 
     @Test
@@ -144,7 +145,7 @@ public class ServiceTier2BoundaryCornerCaseE2ETest extends BaseServiceE2ETest {
     @DisplayName("F2.B1: Fail when unauthenticated user accesses vendor services")
     void f2_testGetVendorServices_Fail_AnonymousUnauthenticated() throws Exception {
         mockMvc.perform(get(VENDOR_API_BASE))
-                .andExpect(status().is(org.hamcrest.Matchers.isOneOf(401, 403)));
+                .andExpect(status().is(Matchers.isOneOf(401, 403)));
     }
 
     @Test
@@ -195,7 +196,7 @@ public class ServiceTier2BoundaryCornerCaseE2ETest extends BaseServiceE2ETest {
     void f3_testGetServiceDetail_Fail_OtherVendorForbidden() throws Exception {
         UUID serviceIdOfVendorA = UUID.randomUUID();
         mockMvc.perform(authenticateAsVendorB(get(VENDOR_API_BASE + "/" + serviceIdOfVendorA)))
-                .andExpect(status().is(org.hamcrest.Matchers.isOneOf(403, 404)));
+                .andExpect(status().is(Matchers.isOneOf(403, 404)));
     }
 
     @Test
@@ -218,7 +219,7 @@ public class ServiceTier2BoundaryCornerCaseE2ETest extends BaseServiceE2ETest {
     @DisplayName("F3.B5: Malformed non-UUID serviceId returns 400 Bad Request")
     void f3_testGetServiceDetail_Fail_MalformedUuid() throws Exception {
         mockMvc.perform(authenticateAsVendorA(get(VENDOR_API_BASE + "/not-a-valid-uuid-1234")))
-                .andExpect(status().is(org.hamcrest.Matchers.isOneOf(400, 404)));
+                .andExpect(status().is(Matchers.isOneOf(400, 404)));
     }
 
     // =========================================================================
@@ -234,7 +235,7 @@ public class ServiceTier2BoundaryCornerCaseE2ETest extends BaseServiceE2ETest {
         mockMvc.perform(authenticateAsVendorB(patch(VENDOR_API_BASE + "/" + serviceId))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(buildUpdateServicePayload(updates)))
-                .andExpect(status().is(org.hamcrest.Matchers.isOneOf(403, 404)));
+                .andExpect(status().is(Matchers.isOneOf(403, 404)));
     }
 
     @Test
@@ -258,7 +259,7 @@ public class ServiceTier2BoundaryCornerCaseE2ETest extends BaseServiceE2ETest {
         mockMvc.perform(authenticateAsVendorA(patch(VENDOR_API_BASE + "/" + serviceId))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(buildUpdateServicePayload(updates)))
-                .andExpect(status().is(org.hamcrest.Matchers.isOneOf(400, 404)));
+                .andExpect(status().is(Matchers.isOneOf(400, 404)));
     }
 
     @Test
@@ -273,7 +274,7 @@ public class ServiceTier2BoundaryCornerCaseE2ETest extends BaseServiceE2ETest {
         mockMvc.perform(authenticateAsVendorA(patch(VENDOR_API_BASE + "/" + serviceId))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(buildUpdateServicePayload(updates)))
-                .andExpect(status().is(org.hamcrest.Matchers.isOneOf(400, 404)));
+                .andExpect(status().is(Matchers.isOneOf(400, 404)));
     }
 
     @Test
@@ -297,7 +298,7 @@ public class ServiceTier2BoundaryCornerCaseE2ETest extends BaseServiceE2ETest {
         mockMvc.perform(authenticateAsVendorA(patch(VENDOR_API_BASE + "/" + serviceId))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(buildUpdateServicePayload(updates)))
-                .andExpect(status().is(org.hamcrest.Matchers.isOneOf(400, 404)));
+                .andExpect(status().is(Matchers.isOneOf(400, 404)));
     }
 
     // =========================================================================
@@ -310,7 +311,7 @@ public class ServiceTier2BoundaryCornerCaseE2ETest extends BaseServiceE2ETest {
         UUID serviceWithoutImagesId = UUID.randomUUID();
 
         mockMvc.perform(authenticateAsVendorA(post(VENDOR_API_BASE + "/" + serviceWithoutImagesId + "/submit")))
-                .andExpect(status().is(org.hamcrest.Matchers.isOneOf(400, 404)));
+                .andExpect(status().is(Matchers.isOneOf(400, 404)));
     }
 
     @Test
@@ -319,7 +320,7 @@ public class ServiceTier2BoundaryCornerCaseE2ETest extends BaseServiceE2ETest {
         UUID pendingServiceId = UUID.randomUUID();
 
         mockMvc.perform(authenticateAsVendorA(post(VENDOR_API_BASE + "/" + pendingServiceId + "/submit")))
-                .andExpect(status().is(org.hamcrest.Matchers.isOneOf(400, 404)));
+                .andExpect(status().is(Matchers.isOneOf(400, 404)));
     }
 
     @Test
@@ -328,7 +329,7 @@ public class ServiceTier2BoundaryCornerCaseE2ETest extends BaseServiceE2ETest {
         UUID publishedServiceId = UUID.randomUUID();
 
         mockMvc.perform(authenticateAsVendorA(post(VENDOR_API_BASE + "/" + publishedServiceId + "/submit")))
-                .andExpect(status().is(org.hamcrest.Matchers.isOneOf(400, 404)));
+                .andExpect(status().is(Matchers.isOneOf(400, 404)));
     }
 
     @Test
@@ -337,7 +338,7 @@ public class ServiceTier2BoundaryCornerCaseE2ETest extends BaseServiceE2ETest {
         UUID pausedServiceId = UUID.randomUUID();
 
         mockMvc.perform(authenticateAsVendorA(post(VENDOR_API_BASE + "/" + pausedServiceId + "/submit")))
-                .andExpect(status().is(org.hamcrest.Matchers.isOneOf(400, 404)));
+                .andExpect(status().is(Matchers.isOneOf(400, 404)));
     }
 
     @Test
@@ -346,7 +347,7 @@ public class ServiceTier2BoundaryCornerCaseE2ETest extends BaseServiceE2ETest {
         UUID serviceIdOfVendorA = UUID.randomUUID();
 
         mockMvc.perform(authenticateAsVendorB(post(VENDOR_API_BASE + "/" + serviceIdOfVendorA + "/submit")))
-                .andExpect(status().is(org.hamcrest.Matchers.isOneOf(403, 404)));
+                .andExpect(status().is(Matchers.isOneOf(403, 404)));
     }
 
     @Test
@@ -368,7 +369,7 @@ public class ServiceTier2BoundaryCornerCaseE2ETest extends BaseServiceE2ETest {
         UUID draftServiceId = UUID.randomUUID();
 
         mockMvc.perform(authenticateAsVendorA(patch(VENDOR_API_BASE + "/" + draftServiceId + "/pause")))
-                .andExpect(status().is(org.hamcrest.Matchers.isOneOf(400, 404)));
+                .andExpect(status().is(Matchers.isOneOf(400, 404)));
     }
 
     @Test
@@ -377,7 +378,7 @@ public class ServiceTier2BoundaryCornerCaseE2ETest extends BaseServiceE2ETest {
         UUID pendingServiceId = UUID.randomUUID();
 
         mockMvc.perform(authenticateAsVendorA(patch(VENDOR_API_BASE + "/" + pendingServiceId + "/pause")))
-                .andExpect(status().is(org.hamcrest.Matchers.isOneOf(400, 404)));
+                .andExpect(status().is(Matchers.isOneOf(400, 404)));
     }
 
     @Test
@@ -386,7 +387,7 @@ public class ServiceTier2BoundaryCornerCaseE2ETest extends BaseServiceE2ETest {
         UUID rejectedServiceId = UUID.randomUUID();
 
         mockMvc.perform(authenticateAsVendorA(patch(VENDOR_API_BASE + "/" + rejectedServiceId + "/pause")))
-                .andExpect(status().is(org.hamcrest.Matchers.isOneOf(400, 404)));
+                .andExpect(status().is(Matchers.isOneOf(400, 404)));
     }
 
     @Test
@@ -395,7 +396,7 @@ public class ServiceTier2BoundaryCornerCaseE2ETest extends BaseServiceE2ETest {
         UUID pausedServiceId = UUID.randomUUID();
 
         mockMvc.perform(authenticateAsVendorA(patch(VENDOR_API_BASE + "/" + pausedServiceId + "/pause")))
-                .andExpect(status().is(org.hamcrest.Matchers.isOneOf(400, 404)));
+                .andExpect(status().is(Matchers.isOneOf(400, 404)));
     }
 
     @Test
@@ -404,7 +405,7 @@ public class ServiceTier2BoundaryCornerCaseE2ETest extends BaseServiceE2ETest {
         UUID serviceIdOfVendorA = UUID.randomUUID();
 
         mockMvc.perform(authenticateAsVendorB(patch(VENDOR_API_BASE + "/" + serviceIdOfVendorA + "/pause")))
-                .andExpect(status().is(org.hamcrest.Matchers.isOneOf(403, 404)));
+                .andExpect(status().is(Matchers.isOneOf(403, 404)));
     }
 
     @Test
@@ -426,7 +427,7 @@ public class ServiceTier2BoundaryCornerCaseE2ETest extends BaseServiceE2ETest {
         UUID draftServiceId = UUID.randomUUID();
 
         mockMvc.perform(authenticateAsVendorA(patch(VENDOR_API_BASE + "/" + draftServiceId + "/resume")))
-                .andExpect(status().is(org.hamcrest.Matchers.isOneOf(400, 404)));
+                .andExpect(status().is(Matchers.isOneOf(400, 404)));
     }
 
     @Test
@@ -435,7 +436,7 @@ public class ServiceTier2BoundaryCornerCaseE2ETest extends BaseServiceE2ETest {
         UUID pendingServiceId = UUID.randomUUID();
 
         mockMvc.perform(authenticateAsVendorA(patch(VENDOR_API_BASE + "/" + pendingServiceId + "/resume")))
-                .andExpect(status().is(org.hamcrest.Matchers.isOneOf(400, 404)));
+                .andExpect(status().is(Matchers.isOneOf(400, 404)));
     }
 
     @Test
@@ -444,7 +445,7 @@ public class ServiceTier2BoundaryCornerCaseE2ETest extends BaseServiceE2ETest {
         UUID rejectedServiceId = UUID.randomUUID();
 
         mockMvc.perform(authenticateAsVendorA(patch(VENDOR_API_BASE + "/" + rejectedServiceId + "/resume")))
-                .andExpect(status().is(org.hamcrest.Matchers.isOneOf(400, 404)));
+                .andExpect(status().is(Matchers.isOneOf(400, 404)));
     }
 
     @Test
@@ -453,7 +454,7 @@ public class ServiceTier2BoundaryCornerCaseE2ETest extends BaseServiceE2ETest {
         UUID publishedServiceId = UUID.randomUUID();
 
         mockMvc.perform(authenticateAsVendorA(patch(VENDOR_API_BASE + "/" + publishedServiceId + "/resume")))
-                .andExpect(status().is(org.hamcrest.Matchers.isOneOf(400, 404)));
+                .andExpect(status().is(Matchers.isOneOf(400, 404)));
     }
 
     @Test
@@ -462,7 +463,7 @@ public class ServiceTier2BoundaryCornerCaseE2ETest extends BaseServiceE2ETest {
         UUID serviceIdOfVendorA = UUID.randomUUID();
 
         mockMvc.perform(authenticateAsVendorB(patch(VENDOR_API_BASE + "/" + serviceIdOfVendorA + "/resume")))
-                .andExpect(status().is(org.hamcrest.Matchers.isOneOf(403, 404)));
+                .andExpect(status().is(Matchers.isOneOf(403, 404)));
     }
 
     @Test
@@ -484,7 +485,7 @@ public class ServiceTier2BoundaryCornerCaseE2ETest extends BaseServiceE2ETest {
         UUID publishedServiceId = UUID.randomUUID();
 
         mockMvc.perform(authenticateAsVendorA(delete(VENDOR_API_BASE + "/" + publishedServiceId)))
-                .andExpect(status().is(org.hamcrest.Matchers.isOneOf(400, 404)));
+                .andExpect(status().is(Matchers.isOneOf(400, 404)));
     }
 
     @Test
@@ -493,7 +494,7 @@ public class ServiceTier2BoundaryCornerCaseE2ETest extends BaseServiceE2ETest {
         UUID pausedServiceId = UUID.randomUUID();
 
         mockMvc.perform(authenticateAsVendorA(delete(VENDOR_API_BASE + "/" + pausedServiceId)))
-                .andExpect(status().is(org.hamcrest.Matchers.isOneOf(400, 404)));
+                .andExpect(status().is(Matchers.isOneOf(400, 404)));
     }
 
     @Test
@@ -502,7 +503,7 @@ public class ServiceTier2BoundaryCornerCaseE2ETest extends BaseServiceE2ETest {
         UUID pendingServiceId = UUID.randomUUID();
 
         mockMvc.perform(authenticateAsVendorA(delete(VENDOR_API_BASE + "/" + pendingServiceId)))
-                .andExpect(status().is(org.hamcrest.Matchers.isOneOf(400, 404)));
+                .andExpect(status().is(Matchers.isOneOf(400, 404)));
     }
 
     @Test
@@ -511,7 +512,7 @@ public class ServiceTier2BoundaryCornerCaseE2ETest extends BaseServiceE2ETest {
         UUID rejectedServiceId = UUID.randomUUID();
 
         mockMvc.perform(authenticateAsVendorA(delete(VENDOR_API_BASE + "/" + rejectedServiceId)))
-                .andExpect(status().is(org.hamcrest.Matchers.isOneOf(400, 404)));
+                .andExpect(status().is(Matchers.isOneOf(400, 404)));
     }
 
     @Test
@@ -520,7 +521,7 @@ public class ServiceTier2BoundaryCornerCaseE2ETest extends BaseServiceE2ETest {
         UUID serviceIdOfVendorA = UUID.randomUUID();
 
         mockMvc.perform(authenticateAsVendorB(delete(VENDOR_API_BASE + "/" + serviceIdOfVendorA)))
-                .andExpect(status().is(org.hamcrest.Matchers.isOneOf(403, 404)));
+                .andExpect(status().is(Matchers.isOneOf(403, 404)));
     }
 
     @Test
@@ -554,7 +555,7 @@ public class ServiceTier2BoundaryCornerCaseE2ETest extends BaseServiceE2ETest {
     @DisplayName("F9.B3: Block unauthenticated access to admin services endpoint (401/403)")
     void f9_testAdminListServices_Fail_AnonymousForbidden() throws Exception {
         mockMvc.perform(get(ADMIN_API_BASE))
-                .andExpect(status().is(org.hamcrest.Matchers.isOneOf(401, 403)));
+                .andExpect(status().is(Matchers.isOneOf(401, 403)));
     }
 
     @Test
@@ -582,7 +583,7 @@ public class ServiceTier2BoundaryCornerCaseE2ETest extends BaseServiceE2ETest {
         UUID draftServiceId = UUID.randomUUID();
 
         mockMvc.perform(authenticateAsAdmin(patch(ADMIN_API_BASE + "/" + draftServiceId + "/approve")))
-                .andExpect(status().is(org.hamcrest.Matchers.isOneOf(400, 404)));
+                .andExpect(status().is(Matchers.isOneOf(400, 404)));
     }
 
     @Test
@@ -591,7 +592,7 @@ public class ServiceTier2BoundaryCornerCaseE2ETest extends BaseServiceE2ETest {
         UUID publishedServiceId = UUID.randomUUID();
 
         mockMvc.perform(authenticateAsAdmin(patch(ADMIN_API_BASE + "/" + publishedServiceId + "/approve")))
-                .andExpect(status().is(org.hamcrest.Matchers.isOneOf(400, 404)));
+                .andExpect(status().is(Matchers.isOneOf(400, 404)));
     }
 
     @Test
@@ -600,7 +601,7 @@ public class ServiceTier2BoundaryCornerCaseE2ETest extends BaseServiceE2ETest {
         UUID pausedServiceId = UUID.randomUUID();
 
         mockMvc.perform(authenticateAsAdmin(patch(ADMIN_API_BASE + "/" + pausedServiceId + "/approve")))
-                .andExpect(status().is(org.hamcrest.Matchers.isOneOf(400, 404)));
+                .andExpect(status().is(Matchers.isOneOf(400, 404)));
     }
 
     @Test
@@ -609,7 +610,7 @@ public class ServiceTier2BoundaryCornerCaseE2ETest extends BaseServiceE2ETest {
         UUID rejectedServiceId = UUID.randomUUID();
 
         mockMvc.perform(authenticateAsAdmin(patch(ADMIN_API_BASE + "/" + rejectedServiceId + "/approve")))
-                .andExpect(status().is(org.hamcrest.Matchers.isOneOf(400, 404)));
+                .andExpect(status().is(Matchers.isOneOf(400, 404)));
     }
 
     @Test
@@ -678,7 +679,7 @@ public class ServiceTier2BoundaryCornerCaseE2ETest extends BaseServiceE2ETest {
         mockMvc.perform(authenticateAsAdmin(patch(ADMIN_API_BASE + "/" + draftServiceId + "/reject"))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(payload))
-                .andExpect(status().is(org.hamcrest.Matchers.isOneOf(400, 404)));
+                .andExpect(status().is(Matchers.isOneOf(400, 404)));
     }
 
     @Test
@@ -690,7 +691,7 @@ public class ServiceTier2BoundaryCornerCaseE2ETest extends BaseServiceE2ETest {
         mockMvc.perform(authenticateAsAdmin(patch(ADMIN_API_BASE + "/" + publishedServiceId + "/reject"))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(payload))
-                .andExpect(status().is(org.hamcrest.Matchers.isOneOf(400, 404)));
+                .andExpect(status().is(Matchers.isOneOf(400, 404)));
     }
 
     @Test
@@ -702,7 +703,7 @@ public class ServiceTier2BoundaryCornerCaseE2ETest extends BaseServiceE2ETest {
         mockMvc.perform(authenticateAsAdmin(patch(ADMIN_API_BASE + "/" + pausedServiceId + "/reject"))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(payload))
-                .andExpect(status().is(org.hamcrest.Matchers.isOneOf(400, 404)));
+                .andExpect(status().is(Matchers.isOneOf(400, 404)));
     }
 
     @Test

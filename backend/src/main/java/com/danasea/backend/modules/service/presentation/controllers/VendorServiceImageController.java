@@ -1,5 +1,6 @@
 package com.danasea.backend.modules.service.presentation.controllers;
 
+import com.danasea.backend.security.infrastructure.SecurityUtils;
 import com.danasea.backend.modules.service.application.usecase.DeleteServiceImageUseCase;
 import com.danasea.backend.modules.service.application.usecase.ReorderServiceImagesUseCase;
 import com.danasea.backend.modules.service.application.usecase.UploadServiceImageUseCase;
@@ -11,6 +12,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.security.access.AccessDeniedException;
 
 import java.security.Principal;
 import java.util.List;
@@ -35,7 +37,8 @@ public class VendorServiceImageController {
             @RequestParam("file") MultipartFile file,
             Principal principal) {
 
-        UUID vendorId = com.danasea.backend.security.infrastructure.SecurityUtils.getCurrentUserId().orElseThrow(() -> new org.springframework.security.access.AccessDeniedException("User ID not found"));
+        UUID vendorId = SecurityUtils.getCurrentUserId()
+                .orElseThrow(() -> new AccessDeniedException("User ID not found"));
         var saved = uploadServiceImageUseCase.execute(serviceId, vendorId, file);
         return ResponseEntity.status(HttpStatus.CREATED).body(ServiceImageResponse.from(saved));
     }
@@ -49,7 +52,8 @@ public class VendorServiceImageController {
             @PathVariable UUID imageId,
             Principal principal) {
 
-        UUID vendorId = com.danasea.backend.security.infrastructure.SecurityUtils.getCurrentUserId().orElseThrow(() -> new org.springframework.security.access.AccessDeniedException("User ID not found"));
+        UUID vendorId = SecurityUtils.getCurrentUserId()
+                .orElseThrow(() -> new AccessDeniedException("User ID not found"));
         deleteServiceImageUseCase.execute(serviceId, imageId, vendorId);
         return ResponseEntity.noContent().build();
     }
@@ -64,7 +68,8 @@ public class VendorServiceImageController {
             @Valid @RequestBody ReorderImagesRequest request,
             Principal principal) {
 
-        UUID vendorId = com.danasea.backend.security.infrastructure.SecurityUtils.getCurrentUserId().orElseThrow(() -> new org.springframework.security.access.AccessDeniedException("User ID not found"));
+        UUID vendorId = SecurityUtils.getCurrentUserId()
+                .orElseThrow(() -> new AccessDeniedException("User ID not found"));
         var reordered = reorderServiceImagesUseCase.execute(serviceId, vendorId, request.imageIds());
         return ResponseEntity.ok(reordered.stream().map(ServiceImageResponse::from).toList());
     }

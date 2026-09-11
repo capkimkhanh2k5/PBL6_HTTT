@@ -1,4 +1,5 @@
 package com.danasea.backend.modules.service.e2e;
+import org.hamcrest.Matchers;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -37,19 +38,19 @@ public class ServiceTier3PairwiseCombinationE2ETest extends BaseServiceE2ETest {
 
         // Step 2: Vendor submits service for review (DRAFT -> PENDING_REVIEW)
         mockMvc.perform(authenticateAsVendorA(post(VENDOR_API_BASE + "/" + serviceId + "/submit")))
-                .andExpect(status().is(org.hamcrest.Matchers.isOneOf(200, 400, 404)));
+                .andExpect(status().is(Matchers.isOneOf(200, 400, 404)));
 
         // Step 3: Admin approves service (PENDING_REVIEW -> PUBLISHED)
         mockMvc.perform(authenticateAsAdmin(patch(ADMIN_API_BASE + "/" + serviceId + "/approve")))
-                .andExpect(status().is(org.hamcrest.Matchers.isOneOf(200, 400, 404)));
+                .andExpect(status().is(Matchers.isOneOf(200, 400, 404)));
 
         // Step 4: Vendor pauses service (PUBLISHED -> PAUSED)
         mockMvc.perform(authenticateAsVendorA(patch(VENDOR_API_BASE + "/" + serviceId + "/pause")))
-                .andExpect(status().is(org.hamcrest.Matchers.isOneOf(200, 400, 404)));
+                .andExpect(status().is(Matchers.isOneOf(200, 400, 404)));
 
         // Step 5: Vendor resumes service (PAUSED -> PUBLISHED)
         mockMvc.perform(authenticateAsVendorA(patch(VENDOR_API_BASE + "/" + serviceId + "/resume")))
-                .andExpect(status().is(org.hamcrest.Matchers.isOneOf(200, 400, 404)));
+                .andExpect(status().is(Matchers.isOneOf(200, 400, 404)));
     }
 
     @Test
@@ -59,29 +60,29 @@ public class ServiceTier3PairwiseCombinationE2ETest extends BaseServiceE2ETest {
 
         // Step 1: Submit draft
         mockMvc.perform(authenticateAsVendorA(post(VENDOR_API_BASE + "/" + serviceId + "/submit")))
-                .andExpect(status().is(org.hamcrest.Matchers.isOneOf(200, 400, 404)));
+                .andExpect(status().is(Matchers.isOneOf(200, 400, 404)));
 
         // Step 2: Admin rejects with reason (PENDING_REVIEW -> REJECTED)
         String rejectPayload = buildRejectPayload("Thiếu mô tả điều kiện hoàn hủy vé");
         mockMvc.perform(authenticateAsAdmin(patch(ADMIN_API_BASE + "/" + serviceId + "/reject"))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(rejectPayload))
-                .andExpect(status().is(org.hamcrest.Matchers.isOneOf(200, 400, 404)));
+                .andExpect(status().is(Matchers.isOneOf(200, 400, 404)));
 
         // Step 3: Vendor updates description on REJECTED service (allowed per R3)
         Map<String, Object> updates = Collections.singletonMap("description", "Bổ sung chính sách hoàn tiền 100% trước 24h");
         mockMvc.perform(authenticateAsVendorA(patch(VENDOR_API_BASE + "/" + serviceId))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(buildUpdateServicePayload(updates)))
-                .andExpect(status().is(org.hamcrest.Matchers.isOneOf(200, 404)));
+                .andExpect(status().is(Matchers.isOneOf(200, 404)));
 
         // Step 4: Vendor resubmits (REJECTED -> PENDING_REVIEW allowed per R3)
         mockMvc.perform(authenticateAsVendorA(post(VENDOR_API_BASE + "/" + serviceId + "/submit")))
-                .andExpect(status().is(org.hamcrest.Matchers.isOneOf(200, 400, 404)));
+                .andExpect(status().is(Matchers.isOneOf(200, 400, 404)));
 
         // Step 5: Admin approves resubmitted service (PENDING_REVIEW -> PUBLISHED)
         mockMvc.perform(authenticateAsAdmin(patch(ADMIN_API_BASE + "/" + serviceId + "/approve")))
-                .andExpect(status().is(org.hamcrest.Matchers.isOneOf(200, 400, 404)));
+                .andExpect(status().is(Matchers.isOneOf(200, 400, 404)));
     }
 
     @Test
@@ -94,15 +95,15 @@ public class ServiceTier3PairwiseCombinationE2ETest extends BaseServiceE2ETest {
         mockMvc.perform(authenticateAsVendorA(patch(VENDOR_API_BASE + "/" + serviceId))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(buildUpdateServicePayload(updates)))
-                .andExpect(status().is(org.hamcrest.Matchers.isOneOf(200, 404)));
+                .andExpect(status().is(Matchers.isOneOf(200, 404)));
 
         // Step 2: Verify service transitioned to PENDING_REVIEW
         mockMvc.perform(authenticateAsVendorA(get(VENDOR_API_BASE + "/" + serviceId)))
-                .andExpect(status().is(org.hamcrest.Matchers.isOneOf(200, 404)));
+                .andExpect(status().is(Matchers.isOneOf(200, 404)));
 
         // Step 3: Admin re-approves updated service
         mockMvc.perform(authenticateAsAdmin(patch(ADMIN_API_BASE + "/" + serviceId + "/approve")))
-                .andExpect(status().is(org.hamcrest.Matchers.isOneOf(200, 400, 404)));
+                .andExpect(status().is(Matchers.isOneOf(200, 400, 404)));
     }
 
     @Test
@@ -115,19 +116,19 @@ public class ServiceTier3PairwiseCombinationE2ETest extends BaseServiceE2ETest {
 
         // Deleting DRAFT succeeds (204)
         mockMvc.perform(authenticateAsVendorA(delete(VENDOR_API_BASE + "/" + draftServiceId)))
-                .andExpect(status().is(org.hamcrest.Matchers.isOneOf(200, 204, 400, 404)));
+                .andExpect(status().is(Matchers.isOneOf(200, 204, 400, 404)));
 
         // Deleting PENDING_REVIEW fails (400)
         mockMvc.perform(authenticateAsVendorA(delete(VENDOR_API_BASE + "/" + pendingServiceId)))
-                .andExpect(status().is(org.hamcrest.Matchers.isOneOf(400, 404)));
+                .andExpect(status().is(Matchers.isOneOf(400, 404)));
 
         // Deleting PUBLISHED fails (400 per R3)
         mockMvc.perform(authenticateAsVendorA(delete(VENDOR_API_BASE + "/" + publishedServiceId)))
-                .andExpect(status().is(org.hamcrest.Matchers.isOneOf(400, 404)));
+                .andExpect(status().is(Matchers.isOneOf(400, 404)));
 
         // Deleting PAUSED fails (400 per R3)
         mockMvc.perform(authenticateAsVendorA(delete(VENDOR_API_BASE + "/" + pausedServiceId)))
-                .andExpect(status().is(org.hamcrest.Matchers.isOneOf(400, 404)));
+                .andExpect(status().is(Matchers.isOneOf(400, 404)));
     }
 
     @Test
@@ -137,11 +138,11 @@ public class ServiceTier3PairwiseCombinationE2ETest extends BaseServiceE2ETest {
 
         // Submit without images fails (400)
         mockMvc.perform(authenticateAsVendorA(post(VENDOR_API_BASE + "/" + serviceId + "/submit")))
-                .andExpect(status().is(org.hamcrest.Matchers.isOneOf(400, 404)));
+                .andExpect(status().is(Matchers.isOneOf(400, 404)));
 
         // Subsequent submit after images added succeeds (200)
         mockMvc.perform(authenticateAsVendorA(post(VENDOR_API_BASE + "/" + serviceId + "/submit")))
-                .andExpect(status().is(org.hamcrest.Matchers.isOneOf(200, 400, 404)));
+                .andExpect(status().is(Matchers.isOneOf(200, 400, 404)));
     }
 
     @Test
@@ -154,11 +155,11 @@ public class ServiceTier3PairwiseCombinationE2ETest extends BaseServiceE2ETest {
         mockMvc.perform(authenticateAsAdmin(patch(ADMIN_API_BASE + "/" + serviceId + "/reject"))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(rejectPayload))
-                .andExpect(status().is(org.hamcrest.Matchers.isOneOf(200, 400, 404)));
+                .andExpect(status().is(Matchers.isOneOf(200, 400, 404)));
 
         // Action 2: Approve (records SERVICE_APPROVED)
         mockMvc.perform(authenticateAsAdmin(patch(ADMIN_API_BASE + "/" + serviceId + "/approve")))
-                .andExpect(status().is(org.hamcrest.Matchers.isOneOf(200, 400, 404)));
+                .andExpect(status().is(Matchers.isOneOf(200, 400, 404)));
     }
 
     @Test
@@ -168,29 +169,29 @@ public class ServiceTier3PairwiseCombinationE2ETest extends BaseServiceE2ETest {
 
         // Vendor B cannot view Vendor A's service
         mockMvc.perform(authenticateAsVendorB(get(VENDOR_API_BASE + "/" + serviceIdOfVendorA)))
-                .andExpect(status().is(org.hamcrest.Matchers.isOneOf(403, 404)));
+                .andExpect(status().is(Matchers.isOneOf(403, 404)));
 
         // Vendor B cannot edit Vendor A's service
         mockMvc.perform(authenticateAsVendorB(patch(VENDOR_API_BASE + "/" + serviceIdOfVendorA))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(buildUpdateServicePayload(Collections.singletonMap("price", 1000.0))))
-                .andExpect(status().is(org.hamcrest.Matchers.isOneOf(403, 404)));
+                .andExpect(status().is(Matchers.isOneOf(403, 404)));
 
         // Vendor B cannot submit Vendor A's service
         mockMvc.perform(authenticateAsVendorB(post(VENDOR_API_BASE + "/" + serviceIdOfVendorA + "/submit")))
-                .andExpect(status().is(org.hamcrest.Matchers.isOneOf(403, 404)));
+                .andExpect(status().is(Matchers.isOneOf(403, 404)));
 
         // Vendor B cannot pause Vendor A's service
         mockMvc.perform(authenticateAsVendorB(patch(VENDOR_API_BASE + "/" + serviceIdOfVendorA + "/pause")))
-                .andExpect(status().is(org.hamcrest.Matchers.isOneOf(403, 404)));
+                .andExpect(status().is(Matchers.isOneOf(403, 404)));
 
         // Vendor B cannot resume Vendor A's service
         mockMvc.perform(authenticateAsVendorB(patch(VENDOR_API_BASE + "/" + serviceIdOfVendorA + "/resume")))
-                .andExpect(status().is(org.hamcrest.Matchers.isOneOf(403, 404)));
+                .andExpect(status().is(Matchers.isOneOf(403, 404)));
 
         // Vendor B cannot delete Vendor A's service
         mockMvc.perform(authenticateAsVendorB(delete(VENDOR_API_BASE + "/" + serviceIdOfVendorA)))
-                .andExpect(status().is(org.hamcrest.Matchers.isOneOf(403, 404)));
+                .andExpect(status().is(Matchers.isOneOf(403, 404)));
     }
 
     @Test

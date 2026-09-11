@@ -1,4 +1,7 @@
 package com.danasea.backend.modules.service.presentation.controllers;
+import com.danasea.backend.security.authentication.application.port.TokenProvider;
+import com.danasea.backend.security.authentication.application.port.UserAccountPort;
+import com.danasea.backend.security.authorization.application.port.AuthorizationPort;
 
 import org.springframework.boot.test.context.TestConfiguration;
 
@@ -121,11 +124,11 @@ class ServiceControllerTest {
 
     // Mock infrastructure beans picked up by @WebMvcTest component scan
     @MockitoBean
-    private com.danasea.backend.security.authentication.application.port.TokenProvider tokenProvider;
+    private TokenProvider tokenProvider;
     @MockitoBean
-    private com.danasea.backend.security.authentication.application.port.UserAccountPort userAccountPort;
+    private UserAccountPort userAccountPort;
     @MockitoBean
-    private com.danasea.backend.security.authorization.application.port.AuthorizationPort authorizationPort;
+    private AuthorizationPort authorizationPort;
     @MockitoBean
     private io.github.bucket4j.redis.lettuce.cas.LettuceBasedProxyManager<byte[]> lettuceBasedProxyManager;
 

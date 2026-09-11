@@ -1,4 +1,5 @@
 package com.danasea.backend.modules.service;
+import com.danasea.backend.security.authorization.BaseSecurityIntegrationTest;
 
 import com.danasea.backend.modules.account.domain.models.Role;
 import com.danasea.backend.modules.account.infrastructure.persistence.entities.UserJpaEntity;
@@ -31,7 +32,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
-public class ServiceIntegrationE2ETest extends com.danasea.backend.security.authorization.BaseSecurityIntegrationTest {
+public class ServiceIntegrationE2ETest extends BaseSecurityIntegrationTest {
 
     @Autowired
     private MockMvc mockMvc;

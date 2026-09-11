@@ -1,6 +1,7 @@
 package com.danasea.backend.modules.service.presentation.controllers;
 
 import java.security.Principal;
+
 import java.util.List;
 import java.util.UUID;
 
@@ -15,7 +16,9 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.access.AccessDeniedException;
 
+import com.danasea.backend.security.infrastructure.SecurityUtils;
 import com.danasea.backend.modules.service.application.dto.CreateServiceCommand;
 import com.danasea.backend.modules.service.application.dto.ServiceResult;
 import com.danasea.backend.modules.service.application.dto.UpdateServiceCommand;
@@ -50,9 +53,9 @@ public class VendorServiceController {
 
     @PostMapping
     public ResponseEntity<ServiceResult> createService(
-            @Valid @RequestBody CreateServiceRequest request,
-            Principal principal) {
-        UUID userId = com.danasea.backend.security.infrastructure.SecurityUtils.getCurrentUserId().orElseThrow(() -> new org.springframework.security.access.AccessDeniedException("User ID not found"));
+            @Valid @RequestBody CreateServiceRequest request) {
+        UUID userId = SecurityUtils.getCurrentUserId()
+                .orElseThrow(() -> new AccessDeniedException("User ID not found"));
         CreateServiceCommand cmd = new CreateServiceCommand(
                 userId,
                 request.categoryId(),
@@ -70,71 +73,70 @@ public class VendorServiceController {
                 request.waiverContent(),
                 request.weatherSensitive(),
                 request.minWindKmh(),
-                request.maxWaveM()
-        );
+                request.maxWaveM());
         return ResponseEntity.status(HttpStatus.CREATED).body(createServiceUseCase.execute(cmd));
     }
 
     @GetMapping
-    public ResponseEntity<List<ServiceResult>> getMyServices(Principal principal) {
-        UUID userId = com.danasea.backend.security.infrastructure.SecurityUtils.getCurrentUserId().orElseThrow(() -> new org.springframework.security.access.AccessDeniedException("User ID not found"));
+    public ResponseEntity<List<ServiceResult>> getMyServices() {
+        UUID userId = SecurityUtils.getCurrentUserId()
+                .orElseThrow(() -> new AccessDeniedException("User ID not found"));
         return ResponseEntity.ok(getVendorServicesUseCase.execute(userId));
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<ServiceResult> getServiceDetail(
-            @PathVariable UUID id,
-            Principal principal) {
-        UUID userId = com.danasea.backend.security.infrastructure.SecurityUtils.getCurrentUserId().orElseThrow(() -> new org.springframework.security.access.AccessDeniedException("User ID not found"));
+            @PathVariable UUID id) {
+        UUID userId = SecurityUtils.getCurrentUserId()
+                .orElseThrow(() -> new AccessDeniedException("User ID not found"));
         return ResponseEntity.ok(getServiceDetailUseCase.execute(userId, id));
     }
 
     @PatchMapping("/{id}")
     public ResponseEntity<ServiceResult> updateService(
             @PathVariable UUID id,
-            @RequestBody UpdateServiceRequest request,
-            Principal principal) {
-        UUID userId = com.danasea.backend.security.infrastructure.SecurityUtils.getCurrentUserId().orElseThrow(() -> new org.springframework.security.access.AccessDeniedException("User ID not found"));
+            @RequestBody UpdateServiceRequest request) {
+        UUID userId = SecurityUtils.getCurrentUserId()
+                .orElseThrow(() -> new AccessDeniedException("User ID not found"));
         UpdateServiceCommand cmd = new UpdateServiceCommand(
                 userId, id,
                 request.categoryId(), request.name(), request.nameEn(),
                 request.description(), request.descriptionEn(),
                 request.price(), request.durationMinutes(), request.capacityPerSlot(),
                 request.locationName(), request.address(), request.latitude(), request.longitude(),
-                request.waiverContent(), request.weatherSensitive(), request.minWindKmh(), request.maxWaveM()
-        );
+                request.waiverContent(), request.weatherSensitive(), request.minWindKmh(), request.maxWaveM());
         return ResponseEntity.ok(updateServiceUseCase.execute(cmd));
     }
 
     @PostMapping("/{id}/submit")
     public ResponseEntity<ServiceResult> submitForReview(
-            @PathVariable UUID id,
-            Principal principal) {
-        UUID userId = com.danasea.backend.security.infrastructure.SecurityUtils.getCurrentUserId().orElseThrow(() -> new org.springframework.security.access.AccessDeniedException("User ID not found"));
+            @PathVariable UUID id) {
+        UUID userId = SecurityUtils.getCurrentUserId()
+                .orElseThrow(() -> new AccessDeniedException("User ID not found"));
         return ResponseEntity.ok(submitServiceForReviewUseCase.execute(userId, id));
     }
 
     @PatchMapping("/{id}/pause")
     public ResponseEntity<ServiceResult> pause(
-            @PathVariable UUID id,
-            Principal principal) {
-        UUID userId = com.danasea.backend.security.infrastructure.SecurityUtils.getCurrentUserId().orElseThrow(() -> new org.springframework.security.access.AccessDeniedException("User ID not found"));
+            @PathVariable UUID id) {
+        UUID userId = SecurityUtils.getCurrentUserId()
+                .orElseThrow(() -> new AccessDeniedException("User ID not found"));
         return ResponseEntity.ok(pauseServiceUseCase.execute(userId, id));
     }
 
     @PatchMapping("/{id}/resume")
     public ResponseEntity<ServiceResult> resume(
-            @PathVariable UUID id,
-            Principal principal) {
-        UUID userId = com.danasea.backend.security.infrastructure.SecurityUtils.getCurrentUserId().orElseThrow(() -> new org.springframework.security.access.AccessDeniedException("User ID not found"));
+            @PathVariable UUID id) {
+        UUID userId = SecurityUtils.getCurrentUserId()
+                .orElseThrow(() -> new AccessDeniedException("User ID not found"));
         return ResponseEntity.ok(resumeServiceUseCase.execute(userId, id));
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteService(
-            @PathVariable UUID id,
-            Principal principal) {
-        UUID userId = com.danasea.backend.security.infrastructure.SecurityUtils.getCurrentUserId().orElseThrow(() -> new org.springframework.security.access.AccessDeniedException("User ID not found"));
+            @PathVariable UUID id) {
+        UUID userId = SecurityUtils.getCurrentUserId()
+                .orElseThrow(() -> new AccessDeniedException("User ID not found"));
         deleteServiceUseCase.execute(userId, id);
         return ResponseEntity.noContent().build();
     }

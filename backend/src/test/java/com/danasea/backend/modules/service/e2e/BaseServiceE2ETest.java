@@ -1,4 +1,8 @@
 package com.danasea.backend.modules.service.e2e;
+import com.danasea.backend.modules.service.presentation.controllers.AdminServiceController;
+import com.danasea.backend.modules.service.presentation.controllers.VendorServiceController;
+import com.danasea.backend.modules.service.presentation.handlers.ServiceExceptionHandler;
+import org.junit.jupiter.api.Assertions;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Assumptions;
@@ -67,7 +71,7 @@ public abstract class BaseServiceE2ETest {
         if (!controllersAvailable) {
             boolean strict = Boolean.getBoolean("e2e.strict");
             if (strict) {
-                org.junit.jupiter.api.Assertions.fail(
+                Assertions.fail(
                         "E2E Strict Mode: Service controllers (VendorServiceController / AdminServiceController) " +
                                 "not yet available in classpath. Implementation is pending Milestone M4."
                 );
@@ -83,8 +87,8 @@ public abstract class BaseServiceE2ETest {
 
     protected boolean checkControllersAvailable() {
         try {
-            Class.forName("com.danasea.backend.modules.service.presentation.controllers.VendorServiceController");
-            Class.forName("com.danasea.backend.modules.service.presentation.controllers.AdminServiceController");
+            Class.forName("VendorServiceController");
+            Class.forName("AdminServiceController");
             return true;
         } catch (ClassNotFoundException e) {
             return false;
@@ -94,13 +98,13 @@ public abstract class BaseServiceE2ETest {
     protected void initializeMockMvc() {
         try {
             Class<?> vendorControllerClass = Class.forName(
-                    "com.danasea.backend.modules.service.presentation.controllers.VendorServiceController"
+                    "VendorServiceController"
             );
             Class<?> adminControllerClass = Class.forName(
-                    "com.danasea.backend.modules.service.presentation.controllers.AdminServiceController"
+                    "AdminServiceController"
             );
             Class<?> exceptionHandlerClass = Class.forName(
-                    "com.danasea.backend.modules.service.presentation.handlers.ServiceExceptionHandler"
+                    "ServiceExceptionHandler"
             );
 
             // Create standalone MockMvc with controllers and advice if available

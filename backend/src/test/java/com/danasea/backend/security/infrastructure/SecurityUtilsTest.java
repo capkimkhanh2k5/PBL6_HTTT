@@ -1,4 +1,5 @@
 package com.danasea.backend.security.infrastructure;
+import java.util.Collections;
 
 import com.danasea.backend.security.authorization.domain.model.AuthorizationSubject;
 import org.junit.jupiter.api.AfterEach;
@@ -39,7 +40,7 @@ class SecurityUtilsTest {
         );
 
         UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(
-                subject.email(), null, java.util.Collections.emptyList()
+                subject.email(), null, Collections.emptyList()
         );
         auth.setDetails(subject);
         SecurityContextHolder.getContext().setAuthentication(auth);
@@ -61,7 +62,7 @@ class SecurityUtilsTest {
         );
 
         UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(
-                subject, null, java.util.Collections.emptyList()
+                subject, null, Collections.emptyList()
         );
         SecurityContextHolder.getContext().setAuthentication(auth);
 
@@ -80,7 +81,7 @@ class SecurityUtilsTest {
                 Set.of("READ")
         );
         UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(
-                subject.email(), null, java.util.Collections.emptyList()
+                subject.email(), null, Collections.emptyList()
         );
         auth.setDetails(subject);
         SecurityContextHolder.getContext().setAuthentication(auth);

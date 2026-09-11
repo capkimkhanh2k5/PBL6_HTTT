@@ -1,4 +1,5 @@
 package com.danasea.backend.modules.account.presentation;
+import com.danasea.backend.shared.presentation.GlobalExceptionHandler;
 
 import com.danasea.backend.modules.account.application.usecase.ChangePasswordUseCase;
 import com.danasea.backend.modules.account.application.usecase.GetMyProfileUseCase;
@@ -47,7 +48,7 @@ class UserControllerTest {
     @BeforeEach
     void setUp() {
         mockMvc = MockMvcBuilders.standaloneSetup(userController)
-                .setControllerAdvice(new com.danasea.backend.shared.presentation.GlobalExceptionHandler())
+                .setControllerAdvice(new GlobalExceptionHandler())
                 .build();
     }
 

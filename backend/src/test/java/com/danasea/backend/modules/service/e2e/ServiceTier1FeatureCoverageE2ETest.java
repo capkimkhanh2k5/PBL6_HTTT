@@ -1,4 +1,5 @@
 package com.danasea.backend.modules.service.e2e;
+import org.hamcrest.Matchers;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -182,7 +183,7 @@ public class ServiceTier1FeatureCoverageE2ETest extends BaseServiceE2ETest {
     void f3_testGetServiceDetail_Success_DraftService() throws Exception {
         UUID serviceId = UUID.randomUUID();
         mockMvc.perform(authenticateAsVendorA(get(VENDOR_API_BASE + "/" + serviceId)))
-                .andExpect(status().is(org.hamcrest.Matchers.isOneOf(200, 404)));
+                .andExpect(status().is(Matchers.isOneOf(200, 404)));
     }
 
     @Test
@@ -190,7 +191,7 @@ public class ServiceTier1FeatureCoverageE2ETest extends BaseServiceE2ETest {
     void f3_testGetServiceDetail_Success_PublishedService() throws Exception {
         UUID serviceId = UUID.randomUUID();
         mockMvc.perform(authenticateAsVendorA(get(VENDOR_API_BASE + "/" + serviceId)))
-                .andExpect(status().is(org.hamcrest.Matchers.isOneOf(200, 404)));
+                .andExpect(status().is(Matchers.isOneOf(200, 404)));
     }
 
     @Test
@@ -198,7 +199,7 @@ public class ServiceTier1FeatureCoverageE2ETest extends BaseServiceE2ETest {
     void f3_testGetServiceDetail_Success_IncludesImageGallery() throws Exception {
         UUID serviceId = UUID.randomUUID();
         mockMvc.perform(authenticateAsVendorA(get(VENDOR_API_BASE + "/" + serviceId)))
-                .andExpect(status().is(org.hamcrest.Matchers.isOneOf(200, 404)));
+                .andExpect(status().is(Matchers.isOneOf(200, 404)));
     }
 
     @Test
@@ -206,7 +207,7 @@ public class ServiceTier1FeatureCoverageE2ETest extends BaseServiceE2ETest {
     void f3_testGetServiceDetail_Success_IncludesWeatherConfig() throws Exception {
         UUID serviceId = UUID.randomUUID();
         mockMvc.perform(authenticateAsVendorA(get(VENDOR_API_BASE + "/" + serviceId)))
-                .andExpect(status().is(org.hamcrest.Matchers.isOneOf(200, 404)));
+                .andExpect(status().is(Matchers.isOneOf(200, 404)));
     }
 
     @Test
@@ -214,7 +215,7 @@ public class ServiceTier1FeatureCoverageE2ETest extends BaseServiceE2ETest {
     void f3_testGetServiceDetail_Success_CompleteDetailPayload() throws Exception {
         UUID serviceId = UUID.randomUUID();
         mockMvc.perform(authenticateAsVendorA(get(VENDOR_API_BASE + "/" + serviceId)))
-                .andExpect(status().is(org.hamcrest.Matchers.isOneOf(200, 404)));
+                .andExpect(status().is(Matchers.isOneOf(200, 404)));
     }
 
     // =========================================================================
@@ -232,7 +233,7 @@ public class ServiceTier1FeatureCoverageE2ETest extends BaseServiceE2ETest {
         mockMvc.perform(authenticateAsVendorA(patch(VENDOR_API_BASE + "/" + serviceId))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(buildUpdateServicePayload(updates)))
-                .andExpect(status().is(org.hamcrest.Matchers.isOneOf(200, 404)));
+                .andExpect(status().is(Matchers.isOneOf(200, 404)));
     }
 
     @Test
@@ -245,7 +246,7 @@ public class ServiceTier1FeatureCoverageE2ETest extends BaseServiceE2ETest {
         mockMvc.perform(authenticateAsVendorA(patch(VENDOR_API_BASE + "/" + serviceId))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(buildUpdateServicePayload(updates)))
-                .andExpect(status().is(org.hamcrest.Matchers.isOneOf(200, 404)));
+                .andExpect(status().is(Matchers.isOneOf(200, 404)));
     }
 
     @Test
@@ -258,7 +259,7 @@ public class ServiceTier1FeatureCoverageE2ETest extends BaseServiceE2ETest {
         mockMvc.perform(authenticateAsVendorA(patch(VENDOR_API_BASE + "/" + serviceId))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(buildUpdateServicePayload(updates)))
-                .andExpect(status().is(org.hamcrest.Matchers.isOneOf(200, 404)));
+                .andExpect(status().is(Matchers.isOneOf(200, 404)));
     }
 
     @Test
@@ -271,7 +272,7 @@ public class ServiceTier1FeatureCoverageE2ETest extends BaseServiceE2ETest {
         mockMvc.perform(authenticateAsVendorA(patch(VENDOR_API_BASE + "/" + serviceId))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(buildUpdateServicePayload(updates)))
-                .andExpect(status().is(org.hamcrest.Matchers.isOneOf(200, 404)));
+                .andExpect(status().is(Matchers.isOneOf(200, 404)));
     }
 
     @Test
@@ -286,7 +287,7 @@ public class ServiceTier1FeatureCoverageE2ETest extends BaseServiceE2ETest {
         mockMvc.perform(authenticateAsVendorA(patch(VENDOR_API_BASE + "/" + serviceId))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(buildUpdateServicePayload(updates)))
-                .andExpect(status().is(org.hamcrest.Matchers.isOneOf(200, 404)));
+                .andExpect(status().is(Matchers.isOneOf(200, 404)));
     }
 
     // =========================================================================
@@ -298,7 +299,7 @@ public class ServiceTier1FeatureCoverageE2ETest extends BaseServiceE2ETest {
     void f5_testSubmitService_Success_FromDraftWithImages() throws Exception {
         UUID serviceId = UUID.randomUUID();
         mockMvc.perform(authenticateAsVendorA(post(VENDOR_API_BASE + "/" + serviceId + "/submit")))
-                .andExpect(status().is(org.hamcrest.Matchers.isOneOf(200, 400, 404)));
+                .andExpect(status().is(Matchers.isOneOf(200, 400, 404)));
     }
 
     @Test
@@ -306,7 +307,7 @@ public class ServiceTier1FeatureCoverageE2ETest extends BaseServiceE2ETest {
     void f5_testSubmitService_Success_FromRejectedWithImages() throws Exception {
         UUID serviceId = UUID.randomUUID();
         mockMvc.perform(authenticateAsVendorA(post(VENDOR_API_BASE + "/" + serviceId + "/submit")))
-                .andExpect(status().is(org.hamcrest.Matchers.isOneOf(200, 400, 404)));
+                .andExpect(status().is(Matchers.isOneOf(200, 400, 404)));
     }
 
     @Test
@@ -314,7 +315,7 @@ public class ServiceTier1FeatureCoverageE2ETest extends BaseServiceE2ETest {
     void f5_testSubmitService_Success_ResponseReflectsPendingReview() throws Exception {
         UUID serviceId = UUID.randomUUID();
         mockMvc.perform(authenticateAsVendorA(post(VENDOR_API_BASE + "/" + serviceId + "/submit")))
-                .andExpect(status().is(org.hamcrest.Matchers.isOneOf(200, 400, 404)));
+                .andExpect(status().is(Matchers.isOneOf(200, 400, 404)));
     }
 
     @Test
@@ -322,7 +323,7 @@ public class ServiceTier1FeatureCoverageE2ETest extends BaseServiceE2ETest {
     void f5_testSubmitService_Success_MultipleImagesSupported() throws Exception {
         UUID serviceId = UUID.randomUUID();
         mockMvc.perform(authenticateAsVendorA(post(VENDOR_API_BASE + "/" + serviceId + "/submit")))
-                .andExpect(status().is(org.hamcrest.Matchers.isOneOf(200, 400, 404)));
+                .andExpect(status().is(Matchers.isOneOf(200, 400, 404)));
     }
 
     @Test
@@ -330,7 +331,7 @@ public class ServiceTier1FeatureCoverageE2ETest extends BaseServiceE2ETest {
     void f5_testSubmitService_Success_OwnerAuthorization() throws Exception {
         UUID serviceId = UUID.randomUUID();
         mockMvc.perform(authenticateAsVendorA(post(VENDOR_API_BASE + "/" + serviceId + "/submit")))
-                .andExpect(status().is(org.hamcrest.Matchers.isOneOf(200, 400, 404)));
+                .andExpect(status().is(Matchers.isOneOf(200, 400, 404)));
     }
 
     // =========================================================================
@@ -342,7 +343,7 @@ public class ServiceTier1FeatureCoverageE2ETest extends BaseServiceE2ETest {
     void f6_testPauseService_Success_FromPublishedToPaused() throws Exception {
         UUID serviceId = UUID.randomUUID();
         mockMvc.perform(authenticateAsVendorA(patch(VENDOR_API_BASE + "/" + serviceId + "/pause")))
-                .andExpect(status().is(org.hamcrest.Matchers.isOneOf(200, 400, 404)));
+                .andExpect(status().is(Matchers.isOneOf(200, 400, 404)));
     }
 
     @Test
@@ -350,7 +351,7 @@ public class ServiceTier1FeatureCoverageE2ETest extends BaseServiceE2ETest {
     void f6_testPauseService_Success_ResponseStatusIsPaused() throws Exception {
         UUID serviceId = UUID.randomUUID();
         mockMvc.perform(authenticateAsVendorA(patch(VENDOR_API_BASE + "/" + serviceId + "/pause")))
-                .andExpect(status().is(org.hamcrest.Matchers.isOneOf(200, 400, 404)));
+                .andExpect(status().is(Matchers.isOneOf(200, 400, 404)));
     }
 
     @Test
@@ -358,7 +359,7 @@ public class ServiceTier1FeatureCoverageE2ETest extends BaseServiceE2ETest {
     void f6_testPauseService_Success_OwnerCanPause() throws Exception {
         UUID serviceId = UUID.randomUUID();
         mockMvc.perform(authenticateAsVendorA(patch(VENDOR_API_BASE + "/" + serviceId + "/pause")))
-                .andExpect(status().is(org.hamcrest.Matchers.isOneOf(200, 400, 404)));
+                .andExpect(status().is(Matchers.isOneOf(200, 400, 404)));
     }
 
     @Test
@@ -366,7 +367,7 @@ public class ServiceTier1FeatureCoverageE2ETest extends BaseServiceE2ETest {
     void f6_testPauseService_Success_DetailReflectsPausedState() throws Exception {
         UUID serviceId = UUID.randomUUID();
         mockMvc.perform(authenticateAsVendorA(patch(VENDOR_API_BASE + "/" + serviceId + "/pause")))
-                .andExpect(status().is(org.hamcrest.Matchers.isOneOf(200, 400, 404)));
+                .andExpect(status().is(Matchers.isOneOf(200, 400, 404)));
     }
 
     @Test
@@ -374,7 +375,7 @@ public class ServiceTier1FeatureCoverageE2ETest extends BaseServiceE2ETest {
     void f6_testPauseService_Success_IndependentServicePause() throws Exception {
         UUID serviceId = UUID.randomUUID();
         mockMvc.perform(authenticateAsVendorA(patch(VENDOR_API_BASE + "/" + serviceId + "/pause")))
-                .andExpect(status().is(org.hamcrest.Matchers.isOneOf(200, 400, 404)));
+                .andExpect(status().is(Matchers.isOneOf(200, 400, 404)));
     }
 
     // =========================================================================
@@ -386,7 +387,7 @@ public class ServiceTier1FeatureCoverageE2ETest extends BaseServiceE2ETest {
     void f7_testResumeService_Success_FromPausedToPublished() throws Exception {
         UUID serviceId = UUID.randomUUID();
         mockMvc.perform(authenticateAsVendorA(patch(VENDOR_API_BASE + "/" + serviceId + "/resume")))
-                .andExpect(status().is(org.hamcrest.Matchers.isOneOf(200, 400, 404)));
+                .andExpect(status().is(Matchers.isOneOf(200, 400, 404)));
     }
 
     @Test
@@ -394,7 +395,7 @@ public class ServiceTier1FeatureCoverageE2ETest extends BaseServiceE2ETest {
     void f7_testResumeService_Success_ResponseStatusIsPublished() throws Exception {
         UUID serviceId = UUID.randomUUID();
         mockMvc.perform(authenticateAsVendorA(patch(VENDOR_API_BASE + "/" + serviceId + "/resume")))
-                .andExpect(status().is(org.hamcrest.Matchers.isOneOf(200, 400, 404)));
+                .andExpect(status().is(Matchers.isOneOf(200, 400, 404)));
     }
 
     @Test
@@ -402,7 +403,7 @@ public class ServiceTier1FeatureCoverageE2ETest extends BaseServiceE2ETest {
     void f7_testResumeService_Success_OwnerCanResume() throws Exception {
         UUID serviceId = UUID.randomUUID();
         mockMvc.perform(authenticateAsVendorA(patch(VENDOR_API_BASE + "/" + serviceId + "/resume")))
-                .andExpect(status().is(org.hamcrest.Matchers.isOneOf(200, 400, 404)));
+                .andExpect(status().is(Matchers.isOneOf(200, 400, 404)));
     }
 
     @Test
@@ -410,7 +411,7 @@ public class ServiceTier1FeatureCoverageE2ETest extends BaseServiceE2ETest {
     void f7_testResumeService_Success_DetailReflectsPublishedState() throws Exception {
         UUID serviceId = UUID.randomUUID();
         mockMvc.perform(authenticateAsVendorA(patch(VENDOR_API_BASE + "/" + serviceId + "/resume")))
-                .andExpect(status().is(org.hamcrest.Matchers.isOneOf(200, 400, 404)));
+                .andExpect(status().is(Matchers.isOneOf(200, 400, 404)));
     }
 
     @Test
@@ -418,7 +419,7 @@ public class ServiceTier1FeatureCoverageE2ETest extends BaseServiceE2ETest {
     void f7_testResumeService_Success_MultiplePauseResumeCycles() throws Exception {
         UUID serviceId = UUID.randomUUID();
         mockMvc.perform(authenticateAsVendorA(patch(VENDOR_API_BASE + "/" + serviceId + "/resume")))
-                .andExpect(status().is(org.hamcrest.Matchers.isOneOf(200, 400, 404)));
+                .andExpect(status().is(Matchers.isOneOf(200, 400, 404)));
     }
 
     // =========================================================================
@@ -430,7 +431,7 @@ public class ServiceTier1FeatureCoverageE2ETest extends BaseServiceE2ETest {
     void f8_testDeleteService_Success_DraftServiceDeleted() throws Exception {
         UUID serviceId = UUID.randomUUID();
         mockMvc.perform(authenticateAsVendorA(delete(VENDOR_API_BASE + "/" + serviceId)))
-                .andExpect(status().is(org.hamcrest.Matchers.isOneOf(200, 204, 400, 404)));
+                .andExpect(status().is(Matchers.isOneOf(200, 204, 400, 404)));
     }
 
     @Test
@@ -438,7 +439,7 @@ public class ServiceTier1FeatureCoverageE2ETest extends BaseServiceE2ETest {
     void f8_testDeleteService_Success_NoLongerInVendorList() throws Exception {
         UUID serviceId = UUID.randomUUID();
         mockMvc.perform(authenticateAsVendorA(delete(VENDOR_API_BASE + "/" + serviceId)))
-                .andExpect(status().is(org.hamcrest.Matchers.isOneOf(200, 204, 400, 404)));
+                .andExpect(status().is(Matchers.isOneOf(200, 204, 400, 404)));
     }
 
     @Test
@@ -446,7 +447,7 @@ public class ServiceTier1FeatureCoverageE2ETest extends BaseServiceE2ETest {
     void f8_testDeleteService_Success_Returns404OnSubsequentGet() throws Exception {
         UUID serviceId = UUID.randomUUID();
         mockMvc.perform(authenticateAsVendorA(delete(VENDOR_API_BASE + "/" + serviceId)))
-                .andExpect(status().is(org.hamcrest.Matchers.isOneOf(200, 204, 400, 404)));
+                .andExpect(status().is(Matchers.isOneOf(200, 204, 400, 404)));
     }
 
     @Test
@@ -454,7 +455,7 @@ public class ServiceTier1FeatureCoverageE2ETest extends BaseServiceE2ETest {
     void f8_testDeleteService_Success_OwnerCanDelete() throws Exception {
         UUID serviceId = UUID.randomUUID();
         mockMvc.perform(authenticateAsVendorA(delete(VENDOR_API_BASE + "/" + serviceId)))
-                .andExpect(status().is(org.hamcrest.Matchers.isOneOf(200, 204, 400, 404)));
+                .andExpect(status().is(Matchers.isOneOf(200, 204, 400, 404)));
     }
 
     @Test
@@ -462,7 +463,7 @@ public class ServiceTier1FeatureCoverageE2ETest extends BaseServiceE2ETest {
     void f8_testDeleteService_Success_CascadeImageCleanup() throws Exception {
         UUID serviceId = UUID.randomUUID();
         mockMvc.perform(authenticateAsVendorA(delete(VENDOR_API_BASE + "/" + serviceId)))
-                .andExpect(status().is(org.hamcrest.Matchers.isOneOf(200, 204, 400, 404)));
+                .andExpect(status().is(Matchers.isOneOf(200, 204, 400, 404)));
     }
 
     // =========================================================================
@@ -519,7 +520,7 @@ public class ServiceTier1FeatureCoverageE2ETest extends BaseServiceE2ETest {
     void f10_testApproveService_Success_PendingReviewToPublished() throws Exception {
         UUID serviceId = UUID.randomUUID();
         mockMvc.perform(authenticateAsAdmin(patch(ADMIN_API_BASE + "/" + serviceId + "/approve")))
-                .andExpect(status().is(org.hamcrest.Matchers.isOneOf(200, 400, 404)));
+                .andExpect(status().is(Matchers.isOneOf(200, 400, 404)));
     }
 
     @Test
@@ -527,7 +528,7 @@ public class ServiceTier1FeatureCoverageE2ETest extends BaseServiceE2ETest {
     void f10_testApproveService_Success_ResponseStatusPublished() throws Exception {
         UUID serviceId = UUID.randomUUID();
         mockMvc.perform(authenticateAsAdmin(patch(ADMIN_API_BASE + "/" + serviceId + "/approve")))
-                .andExpect(status().is(org.hamcrest.Matchers.isOneOf(200, 400, 404)));
+                .andExpect(status().is(Matchers.isOneOf(200, 400, 404)));
     }
 
     @Test
@@ -535,7 +536,7 @@ public class ServiceTier1FeatureCoverageE2ETest extends BaseServiceE2ETest {
     void f10_testApproveService_Success_AuditLogRecorded() throws Exception {
         UUID serviceId = UUID.randomUUID();
         mockMvc.perform(authenticateAsAdmin(patch(ADMIN_API_BASE + "/" + serviceId + "/approve")))
-                .andExpect(status().is(org.hamcrest.Matchers.isOneOf(200, 400, 404)));
+                .andExpect(status().is(Matchers.isOneOf(200, 400, 404)));
     }
 
     @Test
@@ -543,7 +544,7 @@ public class ServiceTier1FeatureCoverageE2ETest extends BaseServiceE2ETest {
     void f10_testApproveService_Success_VendorSeesPublished() throws Exception {
         UUID serviceId = UUID.randomUUID();
         mockMvc.perform(authenticateAsAdmin(patch(ADMIN_API_BASE + "/" + serviceId + "/approve")))
-                .andExpect(status().is(org.hamcrest.Matchers.isOneOf(200, 400, 404)));
+                .andExpect(status().is(Matchers.isOneOf(200, 400, 404)));
     }
 
     @Test
@@ -551,7 +552,7 @@ public class ServiceTier1FeatureCoverageE2ETest extends BaseServiceE2ETest {
     void f10_testApproveService_Success_CanNowBePaused() throws Exception {
         UUID serviceId = UUID.randomUUID();
         mockMvc.perform(authenticateAsAdmin(patch(ADMIN_API_BASE + "/" + serviceId + "/approve")))
-                .andExpect(status().is(org.hamcrest.Matchers.isOneOf(200, 400, 404)));
+                .andExpect(status().is(Matchers.isOneOf(200, 400, 404)));
     }
 
     // =========================================================================
@@ -567,7 +568,7 @@ public class ServiceTier1FeatureCoverageE2ETest extends BaseServiceE2ETest {
         mockMvc.perform(authenticateAsAdmin(patch(ADMIN_API_BASE + "/" + serviceId + "/reject"))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(payload))
-                .andExpect(status().is(org.hamcrest.Matchers.isOneOf(200, 400, 404)));
+                .andExpect(status().is(Matchers.isOneOf(200, 400, 404)));
     }
 
     @Test
@@ -579,7 +580,7 @@ public class ServiceTier1FeatureCoverageE2ETest extends BaseServiceE2ETest {
         mockMvc.perform(authenticateAsAdmin(patch(ADMIN_API_BASE + "/" + serviceId + "/reject"))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(payload))
-                .andExpect(status().is(org.hamcrest.Matchers.isOneOf(200, 400, 404)));
+                .andExpect(status().is(Matchers.isOneOf(200, 400, 404)));
     }
 
     @Test
@@ -591,7 +592,7 @@ public class ServiceTier1FeatureCoverageE2ETest extends BaseServiceE2ETest {
         mockMvc.perform(authenticateAsAdmin(patch(ADMIN_API_BASE + "/" + serviceId + "/reject"))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(payload))
-                .andExpect(status().is(org.hamcrest.Matchers.isOneOf(200, 400, 404)));
+                .andExpect(status().is(Matchers.isOneOf(200, 400, 404)));
     }
 
     @Test
@@ -603,7 +604,7 @@ public class ServiceTier1FeatureCoverageE2ETest extends BaseServiceE2ETest {
         mockMvc.perform(authenticateAsAdmin(patch(ADMIN_API_BASE + "/" + serviceId + "/reject"))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(payload))
-                .andExpect(status().is(org.hamcrest.Matchers.isOneOf(200, 400, 404)));
+                .andExpect(status().is(Matchers.isOneOf(200, 400, 404)));
     }
 
     @Test
@@ -615,6 +616,6 @@ public class ServiceTier1FeatureCoverageE2ETest extends BaseServiceE2ETest {
         mockMvc.perform(authenticateAsAdmin(patch(ADMIN_API_BASE + "/" + serviceId + "/reject"))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(payload))
-                .andExpect(status().is(org.hamcrest.Matchers.isOneOf(200, 400, 404)));
+                .andExpect(status().is(Matchers.isOneOf(200, 400, 404)));
     }
 }

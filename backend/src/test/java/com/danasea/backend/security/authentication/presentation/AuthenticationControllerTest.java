@@ -1,4 +1,5 @@
 package com.danasea.backend.security.authentication.presentation;
+import com.danasea.backend.shared.presentation.GlobalExceptionHandler;
 
 import com.danasea.backend.security.authentication.domain.exception.InvalidCredentialsException;
 import com.danasea.backend.security.authentication.domain.exception.OtpInvalidException;
@@ -59,7 +60,7 @@ class AuthenticationControllerTest {
     @BeforeEach
     void setUp() {
         mockMvc = MockMvcBuilders.standaloneSetup(authenticationController)
-                .setControllerAdvice(new AuthenticationExceptionHandler(), new com.danasea.backend.shared.presentation.GlobalExceptionHandler())
+                .setControllerAdvice(new AuthenticationExceptionHandler(), new GlobalExceptionHandler())
                 .build();
     }
 

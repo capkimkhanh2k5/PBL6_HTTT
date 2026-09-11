@@ -1,5 +1,6 @@
 package com.danasea.backend.modules.service.presentation.controllers;
 
+import com.danasea.backend.security.infrastructure.SecurityUtils;
 import com.danasea.backend.modules.service.application.usecase.ApproveSafetyDocumentUseCase;
 import com.danasea.backend.modules.service.application.usecase.GetSafetyDocumentsUseCase;
 import com.danasea.backend.modules.service.presentation.dto.RejectDocumentRequest;
@@ -8,6 +9,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.security.access.AccessDeniedException;
 
 import java.security.Principal;
 import java.util.List;
@@ -43,7 +45,8 @@ public class AdminSafetyDocumentController {
             @PathVariable UUID docId,
             Principal principal) {
 
-        UUID adminId = com.danasea.backend.security.infrastructure.SecurityUtils.getCurrentUserId().orElseThrow(() -> new org.springframework.security.access.AccessDeniedException("User ID not found"));
+        UUID adminId = SecurityUtils.getCurrentUserId()
+                .orElseThrow(() -> new AccessDeniedException("User ID not found"));
         var updated = approveSafetyDocumentUseCase.approve(docId, adminId);
         return ResponseEntity.ok(SafetyDocumentResponse.from(updated));
     }
@@ -59,7 +62,8 @@ public class AdminSafetyDocumentController {
             @Valid @RequestBody RejectDocumentRequest request,
             Principal principal) {
 
-        UUID adminId = com.danasea.backend.security.infrastructure.SecurityUtils.getCurrentUserId().orElseThrow(() -> new org.springframework.security.access.AccessDeniedException("User ID not found"));
+        UUID adminId = SecurityUtils.getCurrentUserId()
+                .orElseThrow(() -> new AccessDeniedException("User ID not found"));
         var updated = approveSafetyDocumentUseCase.reject(docId, adminId, request.rejectionReason());
         return ResponseEntity.ok(SafetyDocumentResponse.from(updated));
     }

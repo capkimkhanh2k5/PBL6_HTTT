@@ -26,6 +26,14 @@ public final class SecurityUtils {
             return Optional.ofNullable(subject.userId());
         }
 
+        if (authentication.getName() != null) {
+            try {
+                return Optional.of(UUID.fromString(authentication.getName()));
+            } catch (IllegalArgumentException e) {
+                // Ignore
+            }
+        }
+
         return Optional.empty();
     }
 
@@ -43,7 +51,8 @@ public final class SecurityUtils {
             return Optional.ofNullable(subject.email());
         }
 
-        if (authentication.getName() != null && !authentication.getName().isBlank() && !"anonymousUser".equalsIgnoreCase(authentication.getName())) {
+        if (authentication.getName() != null && !authentication.getName().isBlank()
+                && !"anonymousUser".equalsIgnoreCase(authentication.getName())) {
             return Optional.of(authentication.getName());
         }
 

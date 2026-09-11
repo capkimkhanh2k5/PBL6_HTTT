@@ -1,4 +1,5 @@
 package com.danasea.backend.modules.service.application.usecases;
+import com.danasea.backend.modules.service.domain.models.ServiceImage;
 
 import java.util.List;
 import java.util.UUID;
@@ -76,7 +77,7 @@ public class CreateServiceUseCase {
         // 5. Persist
         Service saved = serviceRepository.save(service);
 
-        List<com.danasea.backend.modules.service.domain.models.ServiceImage> images =
+        List<ServiceImage> images =
                 serviceImageRepository.findByServiceId(saved.getId());
 
         return ServiceResultMapper.toResult(saved, images);

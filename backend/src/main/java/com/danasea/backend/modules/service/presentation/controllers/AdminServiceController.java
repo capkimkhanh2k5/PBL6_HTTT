@@ -4,6 +4,7 @@ import java.security.Principal;
 import java.util.List;
 import java.util.UUID;
 
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.danasea.backend.security.infrastructure.SecurityUtils;
 import com.danasea.backend.modules.service.application.dto.RejectServiceCommand;
 import com.danasea.backend.modules.service.application.dto.ServiceResult;
 import com.danasea.backend.modules.service.application.usecases.ApproveServiceUseCase;
@@ -45,7 +47,8 @@ public class AdminServiceController {
     public ResponseEntity<ServiceResult> approve(
             @PathVariable UUID id,
             Principal principal) {
-        UUID adminUserId = com.danasea.backend.security.infrastructure.SecurityUtils.getCurrentUserId().orElseThrow(() -> new org.springframework.security.access.AccessDeniedException("User ID not found"));
+        UUID adminUserId = SecurityUtils.getCurrentUserId()
+                .orElseThrow(() -> new AccessDeniedException("User ID not found"));
         return ResponseEntity.ok(approveServiceUseCase.execute(adminUserId, id));
     }
 
@@ -54,7 +57,8 @@ public class AdminServiceController {
             @PathVariable UUID id,
             @Valid @RequestBody RejectServiceRequest request,
             Principal principal) {
-        UUID adminUserId = com.danasea.backend.security.infrastructure.SecurityUtils.getCurrentUserId().orElseThrow(() -> new org.springframework.security.access.AccessDeniedException("User ID not found"));
+        UUID adminUserId = SecurityUtils.getCurrentUserId()
+                .orElseThrow(() -> new AccessDeniedException("User ID not found"));
         RejectServiceCommand cmd = new RejectServiceCommand(adminUserId, id, request.reason());
         return ResponseEntity.ok(rejectServiceUseCase.execute(cmd));
     }

@@ -88,7 +88,7 @@ public class ApplicationBeans {
             UserAccountPort userAccountPort,
             OtpStorePort otpStorePort,
             AuthEventPublisher authEventPublisher) {
-        return new com.danasea.backend.security.authentication.application.usecase.SendVerificationOtpUseCase(
+        return new SendVerificationOtpUseCase(
                 userAccountPort, otpStorePort, authEventPublisher);
     }
 

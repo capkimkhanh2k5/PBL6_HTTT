@@ -1,5 +1,6 @@
 package com.danasea.backend.modules.service.presentation.controllers;
 
+import com.danasea.backend.security.infrastructure.SecurityUtils;
 import com.danasea.backend.modules.service.application.usecase.UploadSafetyDocumentUseCase;
 import com.danasea.backend.modules.service.presentation.dto.SafetyDocumentResponse;
 import lombok.RequiredArgsConstructor;
@@ -7,6 +8,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.security.access.AccessDeniedException;
 
 import java.security.Principal;
 import java.util.UUID;
@@ -28,7 +30,8 @@ public class VendorSafetyDocumentController {
             @RequestParam("file") MultipartFile file,
             Principal principal) {
 
-        UUID vendorId = com.danasea.backend.security.infrastructure.SecurityUtils.getCurrentUserId().orElseThrow(() -> new org.springframework.security.access.AccessDeniedException("User ID not found"));
+        UUID vendorId = SecurityUtils.getCurrentUserId()
+                .orElseThrow(() -> new AccessDeniedException("User ID not found"));
         var saved = uploadSafetyDocumentUseCase.execute(serviceId, vendorId, file);
         return ResponseEntity.status(HttpStatus.CREATED).body(SafetyDocumentResponse.from(saved));
     }
