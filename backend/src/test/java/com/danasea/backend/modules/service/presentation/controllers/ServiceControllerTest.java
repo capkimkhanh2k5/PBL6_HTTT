@@ -1,5 +1,7 @@
 package com.danasea.backend.modules.service.presentation.controllers;
 
+import org.springframework.boot.test.context.TestConfiguration;
+
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
@@ -46,17 +48,20 @@ import com.danasea.backend.modules.service.application.usecases.UpdateServiceUse
 import com.danasea.backend.modules.service.presentation.handlers.ServiceExceptionHandler;
 
 /**
- * MockMvc security tests for VendorServiceController and AdminServiceController.
+ * MockMvc security tests for VendorServiceController and
+ * AdminServiceController.
  * Tests focus on RBAC: correct role gets 2xx, wrong role gets 403.
  *
  * Strategy:
  * - Use @WebMvcTest (lightweight slice) without loading infrastructure beans.
  * - Override security config with a minimal test-only config that enables
- *   @PreAuthorize RBAC checks without the JwtAuthenticationFilter/Redis/RabbitMQ.
- * - Use SecurityMockMvcRequestPostProcessors.user() to inject test principals.
+ * 
+ * @PreAuthorize RBAC checks without the JwtAuthenticationFilter/Redis/RabbitMQ.
+ *               - Use SecurityMockMvcRequestPostProcessors.user() to inject
+ *               test principals.
  */
-@WebMvcTest(controllers = {VendorServiceController.class, AdminServiceController.class})
-@Import({ServiceControllerTest.TestSecurityConfig.class, ServiceExceptionHandler.class})
+@WebMvcTest(controllers = { VendorServiceController.class, AdminServiceController.class })
+@Import({ ServiceControllerTest.TestSecurityConfig.class, ServiceExceptionHandler.class })
 @DisplayName("ServiceControllerTest — RBAC & Security")
 class ServiceControllerTest {
 
@@ -65,7 +70,7 @@ class ServiceControllerTest {
      * Replaces the full application SecurityConfig so we don't need JJWT/Redis.
      * Preserves method-level @PreAuthorize with @EnableMethodSecurity.
      */
-    @org.springframework.boot.test.context.TestConfiguration
+    @TestConfiguration
     @EnableWebSecurity
     @EnableMethodSecurity
     static class TestSecurityConfig {
@@ -75,8 +80,8 @@ class ServiceControllerTest {
             return http
                     .csrf(AbstractHttpConfigurer::disable)
                     .exceptionHandling(ex -> ex
-                            .authenticationEntryPoint((request, response, authException) ->
-                                    response.sendError(401, "Unauthorized")))
+                            .authenticationEntryPoint(
+                                    (request, response, authException) -> response.sendError(401, "Unauthorized")))
                     .authorizeHttpRequests(auth -> auth.anyRequest().authenticated())
                     .build();
         }
@@ -91,23 +96,38 @@ class ServiceControllerTest {
     @Autowired
     private MockMvc mockMvc;
 
-    @MockitoBean private CreateServiceUseCase createServiceUseCase;
-    @MockitoBean private GetVendorServicesUseCase getVendorServicesUseCase;
-    @MockitoBean private GetServiceDetailUseCase getServiceDetailUseCase;
-    @MockitoBean private UpdateServiceUseCase updateServiceUseCase;
-    @MockitoBean private SubmitServiceForReviewUseCase submitServiceForReviewUseCase;
-    @MockitoBean private PauseServiceUseCase pauseServiceUseCase;
-    @MockitoBean private ResumeServiceUseCase resumeServiceUseCase;
-    @MockitoBean private DeleteServiceUseCase deleteServiceUseCase;
-    @MockitoBean private GetAdminServicesUseCase getAdminServicesUseCase;
-    @MockitoBean private ApproveServiceUseCase approveServiceUseCase;
-    @MockitoBean private RejectServiceUseCase rejectServiceUseCase;
+    @MockitoBean
+    private CreateServiceUseCase createServiceUseCase;
+    @MockitoBean
+    private GetVendorServicesUseCase getVendorServicesUseCase;
+    @MockitoBean
+    private GetServiceDetailUseCase getServiceDetailUseCase;
+    @MockitoBean
+    private UpdateServiceUseCase updateServiceUseCase;
+    @MockitoBean
+    private SubmitServiceForReviewUseCase submitServiceForReviewUseCase;
+    @MockitoBean
+    private PauseServiceUseCase pauseServiceUseCase;
+    @MockitoBean
+    private ResumeServiceUseCase resumeServiceUseCase;
+    @MockitoBean
+    private DeleteServiceUseCase deleteServiceUseCase;
+    @MockitoBean
+    private GetAdminServicesUseCase getAdminServicesUseCase;
+    @MockitoBean
+    private ApproveServiceUseCase approveServiceUseCase;
+    @MockitoBean
+    private RejectServiceUseCase rejectServiceUseCase;
 
     // Mock infrastructure beans picked up by @WebMvcTest component scan
-    @MockitoBean private com.danasea.backend.security.authentication.application.port.TokenProvider tokenProvider;
-    @MockitoBean private com.danasea.backend.security.authentication.application.port.UserAccountPort userAccountPort;
-    @MockitoBean private com.danasea.backend.security.authorization.application.port.AuthorizationPort authorizationPort;
-    @MockitoBean private io.github.bucket4j.redis.lettuce.cas.LettuceBasedProxyManager<byte[]> lettuceBasedProxyManager;
+    @MockitoBean
+    private com.danasea.backend.security.authentication.application.port.TokenProvider tokenProvider;
+    @MockitoBean
+    private com.danasea.backend.security.authentication.application.port.UserAccountPort userAccountPort;
+    @MockitoBean
+    private com.danasea.backend.security.authorization.application.port.AuthorizationPort authorizationPort;
+    @MockitoBean
+    private io.github.bucket4j.redis.lettuce.cas.LettuceBasedProxyManager<byte[]> lettuceBasedProxyManager;
 
     private final UUID serviceId = UUID.randomUUID();
     private final UUID userId = UUID.randomUUID();
@@ -124,7 +144,7 @@ class ServiceControllerTest {
             when(getVendorServicesUseCase.execute(any())).thenReturn(List.of());
 
             mockMvc.perform(get("/api/vendor/services")
-                            .with(user(userId.toString()).roles("VENDOR")))
+                    .with(user(userId.toString()).roles("VENDOR")))
                     .andExpect(status().isOk());
         }
 
@@ -132,7 +152,7 @@ class ServiceControllerTest {
         @DisplayName("❌ CUSTOMER → GET /api/vendor/services → 403 Forbidden")
         void customerCannotAccessVendorEndpoints() throws Exception {
             mockMvc.perform(get("/api/vendor/services")
-                            .with(user("customer").roles("CUSTOMER")))
+                    .with(user("customer").roles("CUSTOMER")))
                     .andExpect(status().isForbidden());
         }
 
@@ -140,7 +160,7 @@ class ServiceControllerTest {
         @DisplayName("❌ ADMIN → GET /api/vendor/services → 403 Forbidden")
         void adminCannotAccessVendorEndpoints() throws Exception {
             mockMvc.perform(get("/api/vendor/services")
-                            .with(user("admin").roles("ADMIN")))
+                    .with(user("admin").roles("ADMIN")))
                     .andExpect(status().isForbidden());
         }
 
@@ -154,14 +174,15 @@ class ServiceControllerTest {
         @Test
         @DisplayName("❌ CUSTOMER → POST /api/vendor/services → 403")
         void customerCannotCreateService() throws Exception {
-            // Send a structurally valid body — security RBAC check runs before bean validation
+            // Send a structurally valid body — security RBAC check runs before bean
+            // validation
             String validBody = """
                     {"categoryId":"00000000-0000-0000-0000-000000000001",
                      "name":"Test","price":100000,"durationMinutes":60}""";
             mockMvc.perform(post("/api/vendor/services")
-                            .with(user("customer").roles("CUSTOMER"))
-                            .contentType(MediaType.APPLICATION_JSON)
-                            .content(validBody))
+                    .with(user("customer").roles("CUSTOMER"))
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(validBody))
                     .andExpect(status().isForbidden());
         }
 
@@ -169,7 +190,7 @@ class ServiceControllerTest {
         @DisplayName("❌ ADMIN → DELETE /api/vendor/services/{id} → 403")
         void adminCannotDeleteVendorService() throws Exception {
             mockMvc.perform(delete("/api/vendor/services/" + serviceId)
-                            .with(user("admin").roles("ADMIN")))
+                    .with(user("admin").roles("ADMIN")))
                     .andExpect(status().isForbidden());
         }
 
@@ -177,7 +198,7 @@ class ServiceControllerTest {
         @DisplayName("❌ CUSTOMER → POST /api/vendor/services/{id}/submit → 403")
         void customerCannotSubmitService() throws Exception {
             mockMvc.perform(post("/api/vendor/services/" + serviceId + "/submit")
-                            .with(user("customer").roles("CUSTOMER")))
+                    .with(user("customer").roles("CUSTOMER")))
                     .andExpect(status().isForbidden());
         }
 
@@ -185,7 +206,7 @@ class ServiceControllerTest {
         @DisplayName("❌ ADMIN → PATCH /api/vendor/services/{id}/pause → 403")
         void adminCannotPauseVendorService() throws Exception {
             mockMvc.perform(patch("/api/vendor/services/" + serviceId + "/pause")
-                            .with(user("admin").roles("ADMIN")))
+                    .with(user("admin").roles("ADMIN")))
                     .andExpect(status().isForbidden());
         }
     }
@@ -202,7 +223,7 @@ class ServiceControllerTest {
             when(getAdminServicesUseCase.execute(any())).thenReturn(List.of());
 
             mockMvc.perform(get("/api/admin/services")
-                            .with(user(userId.toString()).roles("ADMIN")))
+                    .with(user(userId.toString()).roles("ADMIN")))
                     .andExpect(status().isOk());
         }
 
@@ -210,7 +231,7 @@ class ServiceControllerTest {
         @DisplayName("❌ VENDOR → GET /api/admin/services → 403 Forbidden")
         void vendorCannotAccessAdminEndpoints() throws Exception {
             mockMvc.perform(get("/api/admin/services")
-                            .with(user("vendor").roles("VENDOR")))
+                    .with(user("vendor").roles("VENDOR")))
                     .andExpect(status().isForbidden());
         }
 
@@ -218,7 +239,7 @@ class ServiceControllerTest {
         @DisplayName("❌ CUSTOMER → GET /api/admin/services → 403 Forbidden")
         void customerCannotAccessAdminEndpoints() throws Exception {
             mockMvc.perform(get("/api/admin/services")
-                            .with(user("customer").roles("CUSTOMER")))
+                    .with(user("customer").roles("CUSTOMER")))
                     .andExpect(status().isForbidden());
         }
 
@@ -226,7 +247,7 @@ class ServiceControllerTest {
         @DisplayName("❌ VENDOR → PATCH /api/admin/services/{id}/approve → 403")
         void vendorCannotApproveService() throws Exception {
             mockMvc.perform(patch("/api/admin/services/" + serviceId + "/approve")
-                            .with(user("vendor").roles("VENDOR")))
+                    .with(user("vendor").roles("VENDOR")))
                     .andExpect(status().isForbidden());
         }
 
@@ -234,9 +255,9 @@ class ServiceControllerTest {
         @DisplayName("❌ CUSTOMER → PATCH /api/admin/services/{id}/reject → 403")
         void customerCannotRejectService() throws Exception {
             mockMvc.perform(patch("/api/admin/services/" + serviceId + "/reject")
-                            .with(user("customer").roles("CUSTOMER"))
-                            .contentType(MediaType.APPLICATION_JSON)
-                            .content("{\"reason\":\"bad\"}"))
+                    .with(user("customer").roles("CUSTOMER"))
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content("{\"reason\":\"bad\"}"))
                     .andExpect(status().isForbidden());
         }
     }
