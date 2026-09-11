@@ -29,6 +29,15 @@ public class CategoryMapper {
         return domain;
     }
 
+    public List<Category> toDomainList(List<CategoryJpaEntity> entities) {
+        if (entities == null) {
+            return new ArrayList<>();
+        }
+        return entities.stream()
+                .map(this::toDomain)
+                .toList();
+    }
+
     public CategoryJpaEntity toEntity(Category domain) {
         if (domain == null) {
             return null;

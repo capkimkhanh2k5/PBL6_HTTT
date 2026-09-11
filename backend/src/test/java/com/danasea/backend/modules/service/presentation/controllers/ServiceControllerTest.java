@@ -65,7 +65,7 @@ class ServiceControllerTest {
      * Replaces the full application SecurityConfig so we don't need JJWT/Redis.
      * Preserves method-level @PreAuthorize with @EnableMethodSecurity.
      */
-    @Configuration
+    @org.springframework.boot.test.context.TestConfiguration
     @EnableWebSecurity
     @EnableMethodSecurity
     static class TestSecurityConfig {

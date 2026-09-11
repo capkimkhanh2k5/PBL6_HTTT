@@ -8,9 +8,9 @@ import com.danasea.backend.modules.account.application.api.AccountInternalApi;
 import com.danasea.backend.modules.service.domain.ports.AuditLogPort;
 import lombok.RequiredArgsConstructor;
 
-@Component
+@Component("serviceAuditLogAdapter")
 @RequiredArgsConstructor
-public class AuditLogAdapter implements AuditLogPort {
+public class ServiceAuditLogAdapter implements AuditLogPort {
 
     private final AccountInternalApi accountInternalApi;
 
