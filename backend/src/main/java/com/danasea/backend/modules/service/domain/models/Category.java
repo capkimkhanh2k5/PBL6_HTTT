@@ -15,4 +15,5 @@ public class Category extends BaseDomainModel {
     private UUID parentId;
     private String iconUrl;
     private Boolean isActive;
+    private Boolean requiresSafetyCert;
 }

@@ -15,4 +15,5 @@ public class ServiceSafetyDocument extends BaseDomainModel {
     private DocStatus status;
     private UUID reviewedBy;
     private OffsetDateTime reviewedAt;
+    private String rejectionReason;
 }

@@ -25,4 +25,7 @@ public class CategoryJpaEntity extends BaseJpaEntity {
 
     private Boolean isActive;
 
+    @Column(name = "requires_safety_cert", nullable = false)
+    private Boolean requiresSafetyCert = false;
+
 }
