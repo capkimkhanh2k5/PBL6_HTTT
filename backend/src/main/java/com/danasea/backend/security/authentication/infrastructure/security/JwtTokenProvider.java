@@ -8,8 +8,8 @@ import java.util.UUID;
 
 import org.springframework.stereotype.Component;
 
-import com.danasea.backend.security.authentication.application.port.TokenProvider;
-import com.danasea.backend.security.authentication.domain.model.Authentication;
+import com.danasea.backend.security.authentication.application.ports.TokenProvider;
+import com.danasea.backend.security.authentication.domain.models.Authentication;
 
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;

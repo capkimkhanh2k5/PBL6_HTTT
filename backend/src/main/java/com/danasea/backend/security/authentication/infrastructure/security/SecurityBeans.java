@@ -6,7 +6,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
-import com.danasea.backend.security.authentication.application.port.PasswordHasher;
+import com.danasea.backend.security.authentication.application.ports.PasswordHasher;
 
 @Configuration
 @EnableConfigurationProperties(JwtProperties.class)

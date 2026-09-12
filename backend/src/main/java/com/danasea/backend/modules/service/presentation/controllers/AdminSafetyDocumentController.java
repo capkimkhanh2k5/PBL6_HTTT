@@ -1,10 +1,10 @@
 package com.danasea.backend.modules.service.presentation.controllers;
 
 import com.danasea.backend.security.infrastructure.SecurityUtils;
-import com.danasea.backend.modules.service.application.usecase.ApproveSafetyDocumentUseCase;
-import com.danasea.backend.modules.service.application.usecase.GetSafetyDocumentsUseCase;
-import com.danasea.backend.modules.service.presentation.dto.RejectDocumentRequest;
-import com.danasea.backend.modules.service.presentation.dto.SafetyDocumentResponse;
+import com.danasea.backend.modules.service.application.usecases.ApproveSafetyDocumentUseCase;
+import com.danasea.backend.modules.service.application.usecases.GetSafetyDocumentsUseCase;
+import com.danasea.backend.modules.service.presentation.dtos.RejectDocumentRequest;
+import com.danasea.backend.modules.service.presentation.dtos.SafetyDocumentResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;

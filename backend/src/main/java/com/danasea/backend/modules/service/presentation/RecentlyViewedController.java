@@ -1,8 +1,8 @@
 package com.danasea.backend.modules.service.presentation;
 
-import com.danasea.backend.modules.service.application.dto.RecentlyViewedResult;
-import com.danasea.backend.modules.service.application.usecase.GetRecentlyViewedUseCase;
-import com.danasea.backend.modules.service.presentation.dto.RecentlyViewedResponse;
+import com.danasea.backend.modules.service.application.dtos.RecentlyViewedResult;
+import com.danasea.backend.modules.service.application.usecases.GetRecentlyViewedUseCase;
+import com.danasea.backend.modules.service.presentation.dtos.RecentlyViewedResponse;
 import com.danasea.backend.security.infrastructure.SecurityUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;

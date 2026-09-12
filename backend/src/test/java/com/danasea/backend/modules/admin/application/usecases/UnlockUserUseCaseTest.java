@@ -1,0 +1,100 @@
+package com.danasea.backend.modules.admin.application.usecases;
+
+import java.util.Optional;
+import java.util.UUID;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+
+import com.danasea.backend.modules.account.application.api.AccountInternalApi;
+import com.danasea.backend.modules.audit.application.api.AuditLogInternalApi;
+import com.danasea.backend.modules.account.domain.models.Role;
+import com.danasea.backend.modules.account.domain.models.User;
+import com.danasea.backend.modules.admin.domain.exceptions.UserAlreadyUnlockedException;
+import com.danasea.backend.modules.admin.domain.exceptions.UserNotFoundException;
+
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.*;
+
+@ExtendWith(MockitoExtension.class)
+class UnlockUserUseCaseTest {
+
+    @Mock
+    private AccountInternalApi accountInternalApi;
+
+    @Mock
+    private AuditLogInternalApi auditLogInternalApi;
+
+    private UnlockUserUseCase unlockUserUseCase;
+
+    private UUID actorId;
+    private UUID targetUserId;
+    private User targetUser;
+
+    @BeforeEach
+    void setUp() {
+        unlockUserUseCase = new UnlockUserUseCase(accountInternalApi, auditLogInternalApi);
+        actorId = UUID.randomUUID();
+        targetUserId = UUID.randomUUID();
+
+        targetUser = new User();
+        targetUser.setId(targetUserId);
+        targetUser.setEmail("target@example.com");
+        targetUser.setFullName("Target User");
+        targetUser.setRole(Role.CUSTOMER);
+        targetUser.setIsLocked(true);
+    }
+
+    @Test
+    void shouldUnlockUserSuccessfully() {
+        when(accountInternalApi.findUserById(targetUserId)).thenReturn(Optional.of(targetUser));
+
+        unlockUserUseCase.execute(actorId, targetUserId);
+
+        verify(accountInternalApi).saveUser(targetUser);
+        assertFalse(targetUser.getIsLocked());
+
+        verify(auditLogInternalApi).recordAuditLog(
+                eq(actorId),
+                eq("USER_UNLOCKED"),
+                eq("USER"),
+                eq(targetUserId),
+                eq("")
+        );
+
+        verify(accountInternalApi, never()).revokeAllTokensByUserId(any());
+    }
+
+    @Test
+    void shouldThrowWhenUserNotFound() {
+        when(accountInternalApi.findUserById(targetUserId)).thenReturn(Optional.empty());
+
+        UserNotFoundException exception = assertThrows(
+                UserNotFoundException.class,
+                () -> unlockUserUseCase.execute(actorId, targetUserId)
+        );
+
+        assertTrue(exception.getMessage().contains(targetUserId.toString()));
+        verify(accountInternalApi, never()).saveUser(any());
+        verify(auditLogInternalApi, never()).recordAuditLog(any(), any(), any(), any(), any());
+    }
+
+    @Test
+    void shouldThrowWhenUserAlreadyUnlocked() {
+        targetUser.setIsLocked(false);
+        when(accountInternalApi.findUserById(targetUserId)).thenReturn(Optional.of(targetUser));
+
+        assertThrows(
+                UserAlreadyUnlockedException.class,
+                () -> unlockUserUseCase.execute(actorId, targetUserId)
+        );
+
+        verify(accountInternalApi, never()).saveUser(any());
+        verify(auditLogInternalApi, never()).recordAuditLog(any(), any(), any(), any(), any());
+    }
+}

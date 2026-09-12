@@ -7,11 +7,11 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
-import com.danasea.backend.modules.admin.domain.exception.SelfLockNotAllowedException;
-import com.danasea.backend.modules.admin.domain.exception.UserAlreadyLockedException;
-import com.danasea.backend.modules.admin.domain.exception.UserAlreadyUnlockedException;
-import com.danasea.backend.modules.admin.domain.exception.UserNotFoundException;
-import com.danasea.backend.security.authorization.domain.exception.AccessDeniedException;
+import com.danasea.backend.modules.admin.domain.exceptions.SelfLockNotAllowedException;
+import com.danasea.backend.modules.admin.domain.exceptions.UserAlreadyLockedException;
+import com.danasea.backend.modules.admin.domain.exceptions.UserAlreadyUnlockedException;
+import com.danasea.backend.modules.admin.domain.exceptions.UserNotFoundException;
+import com.danasea.backend.security.authorization.domain.exceptions.AccessDeniedException;
 import com.danasea.backend.shared.presentation.ErrorResponse;
 
 @RestControllerAdvice

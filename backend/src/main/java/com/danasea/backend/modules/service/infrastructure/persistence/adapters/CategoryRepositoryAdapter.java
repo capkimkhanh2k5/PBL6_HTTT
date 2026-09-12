@@ -8,7 +8,7 @@ import org.springframework.stereotype.Component;
 
 import com.danasea.backend.modules.service.domain.models.Category;
 import com.danasea.backend.modules.service.domain.ports.CategoryRepositoryPort;
-import com.danasea.backend.modules.service.infrastructure.mapper.CategoryMapper;
+import com.danasea.backend.modules.service.infrastructure.mappers.CategoryMapper;
 import com.danasea.backend.modules.service.infrastructure.persistence.repositories.JpaCategoryRepository;
 import lombok.RequiredArgsConstructor;
 

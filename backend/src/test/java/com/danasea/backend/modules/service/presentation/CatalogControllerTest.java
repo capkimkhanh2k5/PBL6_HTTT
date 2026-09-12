@@ -1,9 +1,9 @@
 package com.danasea.backend.modules.service.presentation;
 
-import com.danasea.backend.modules.service.application.dto.ServiceDetailResult;
-import com.danasea.backend.modules.service.application.dto.ServiceSummaryResult;
-import com.danasea.backend.modules.service.application.usecase.GetPublicServiceDetailUseCase;
-import com.danasea.backend.modules.service.application.usecase.SearchServicesUseCase;
+import com.danasea.backend.modules.service.application.dtos.ServiceDetailResult;
+import com.danasea.backend.modules.service.application.dtos.ServiceSummaryResult;
+import com.danasea.backend.modules.service.application.usecases.GetPublicServiceDetailUseCase;
+import com.danasea.backend.modules.service.application.usecases.SearchServicesUseCase;
 import com.danasea.backend.modules.service.domain.exceptions.ServiceNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

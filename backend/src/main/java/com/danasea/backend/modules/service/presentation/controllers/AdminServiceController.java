@@ -16,13 +16,13 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.danasea.backend.security.infrastructure.SecurityUtils;
-import com.danasea.backend.modules.service.application.dto.RejectServiceCommand;
-import com.danasea.backend.modules.service.application.dto.ServiceResult;
+import com.danasea.backend.modules.service.application.dtos.RejectServiceCommand;
+import com.danasea.backend.modules.service.application.dtos.ServiceResult;
 import com.danasea.backend.modules.service.application.usecases.ApproveServiceUseCase;
 import com.danasea.backend.modules.service.application.usecases.GetAdminServicesUseCase;
 import com.danasea.backend.modules.service.application.usecases.RejectServiceUseCase;
 import com.danasea.backend.modules.service.domain.models.ServiceStatus;
-import com.danasea.backend.modules.service.presentation.dto.RejectServiceRequest;
+import com.danasea.backend.modules.service.presentation.dtos.RejectServiceRequest;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;

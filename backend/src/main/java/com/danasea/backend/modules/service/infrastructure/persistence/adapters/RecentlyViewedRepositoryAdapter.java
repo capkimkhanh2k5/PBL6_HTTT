@@ -6,7 +6,7 @@ import java.util.UUID;
 
 import com.danasea.backend.modules.service.domain.models.RecentlyViewed;
 import com.danasea.backend.modules.service.domain.ports.RecentlyViewedRepositoryPort;
-import com.danasea.backend.modules.service.infrastructure.mapper.RecentlyViewedMapper;
+import com.danasea.backend.modules.service.infrastructure.mappers.RecentlyViewedMapper;
 import com.danasea.backend.modules.service.infrastructure.persistence.entities.RecentlyViewedJpaEntity;
 import com.danasea.backend.modules.service.infrastructure.persistence.repositories.JpaRecentlyViewedRepository;
 import lombok.RequiredArgsConstructor;

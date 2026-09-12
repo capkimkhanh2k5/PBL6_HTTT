@@ -1,12 +1,12 @@
 package com.danasea.backend.modules.account.presentation;
 
-import com.danasea.backend.modules.account.application.usecase.ChangePasswordUseCase;
-import com.danasea.backend.modules.account.application.usecase.GetMyProfileUseCase;
-import com.danasea.backend.modules.account.application.usecase.UpdateProfileUseCase;
+import com.danasea.backend.modules.account.application.usecases.ChangePasswordUseCase;
+import com.danasea.backend.modules.account.application.usecases.GetMyProfileUseCase;
+import com.danasea.backend.modules.account.application.usecases.UpdateProfileUseCase;
 import com.danasea.backend.modules.account.domain.models.User;
-import com.danasea.backend.modules.account.presentation.dto.ChangePasswordRequest;
-import com.danasea.backend.modules.account.presentation.dto.UpdateProfileRequest;
-import com.danasea.backend.modules.account.presentation.dto.UserProfileResponse;
+import com.danasea.backend.modules.account.presentation.dtos.ChangePasswordRequest;
+import com.danasea.backend.modules.account.presentation.dtos.UpdateProfileRequest;
+import com.danasea.backend.modules.account.presentation.dtos.UserProfileResponse;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;

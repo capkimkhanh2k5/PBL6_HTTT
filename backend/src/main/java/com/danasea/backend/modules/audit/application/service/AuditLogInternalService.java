@@ -9,7 +9,7 @@ import org.springframework.stereotype.Service;
 import lombok.RequiredArgsConstructor;
 
 import com.danasea.backend.modules.audit.application.api.AuditLogInternalApi;
-import com.danasea.backend.modules.audit.application.port.AuditLogPort;
+import com.danasea.backend.modules.audit.application.ports.AuditLogPort;
 import com.danasea.backend.modules.audit.domain.models.AuditLog;
 
 import org.springframework.scheduling.annotation.Async;

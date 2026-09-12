@@ -1,11 +1,11 @@
 package com.danasea.backend.security.authentication.infrastructure.persistence;
 
 import com.danasea.backend.modules.account.application.api.AccountInternalApi;
-import com.danasea.backend.modules.audit.application.port.AuditLogPort;
+import com.danasea.backend.modules.audit.application.ports.AuditLogPort;
 import com.danasea.backend.modules.account.domain.models.Role;
 import com.danasea.backend.modules.account.domain.models.User;
-import com.danasea.backend.security.authentication.domain.exception.EmailAlreadyUsedException;
-import com.danasea.backend.security.authentication.domain.model.Authentication;
+import com.danasea.backend.security.authentication.domain.exceptions.EmailAlreadyUsedException;
+import com.danasea.backend.security.authentication.domain.models.Authentication;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.dao.DataIntegrityViolationException;

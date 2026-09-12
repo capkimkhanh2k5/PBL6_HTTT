@@ -5,9 +5,9 @@ import java.util.Optional;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Component;
 
-import com.danasea.backend.security.authentication.application.port.UserAccountPort;
-import com.danasea.backend.security.authentication.domain.exception.EmailAlreadyUsedException;
-import com.danasea.backend.security.authentication.domain.model.Authentication;
+import com.danasea.backend.security.authentication.application.ports.UserAccountPort;
+import com.danasea.backend.security.authentication.domain.exceptions.EmailAlreadyUsedException;
+import com.danasea.backend.security.authentication.domain.models.Authentication;
 import com.danasea.backend.modules.account.application.api.AccountInternalApi;
 import com.danasea.backend.modules.account.domain.models.User;
 import com.danasea.backend.modules.account.domain.models.Role;

@@ -3,8 +3,8 @@ package com.danasea.backend.modules.service.application.usecases.helpers;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import com.danasea.backend.modules.service.application.dto.ServiceImageResult;
-import com.danasea.backend.modules.service.application.dto.ServiceResult;
+import com.danasea.backend.modules.service.application.dtos.ServiceImageResult;
+import com.danasea.backend.modules.service.application.dtos.ServiceResult;
 import com.danasea.backend.modules.service.domain.models.Service;
 import com.danasea.backend.modules.service.domain.models.ServiceImage;
 

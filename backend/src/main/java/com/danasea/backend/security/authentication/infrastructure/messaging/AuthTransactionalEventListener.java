@@ -1,7 +1,7 @@
 package com.danasea.backend.security.authentication.infrastructure.messaging;
 
-import com.danasea.backend.security.authentication.application.port.AuthEventPublisher;
-import com.danasea.backend.security.authentication.domain.event.UserRegisteredEvent;
+import com.danasea.backend.security.authentication.application.ports.AuthEventPublisher;
+import com.danasea.backend.security.authentication.domain.events.UserRegisteredEvent;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;

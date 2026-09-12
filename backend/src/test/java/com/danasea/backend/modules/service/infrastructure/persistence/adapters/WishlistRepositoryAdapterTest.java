@@ -1,7 +1,7 @@
 package com.danasea.backend.modules.service.infrastructure.persistence.adapters;
 
 import com.danasea.backend.modules.service.domain.models.Wishlist;
-import com.danasea.backend.modules.service.infrastructure.mapper.WishlistMapper;
+import com.danasea.backend.modules.service.infrastructure.mappers.WishlistMapper;
 import com.danasea.backend.modules.service.infrastructure.persistence.entities.WishlistJpaEntity;
 import com.danasea.backend.modules.service.infrastructure.persistence.repositories.JpaWishlistRepository;
 import org.junit.jupiter.api.BeforeEach;

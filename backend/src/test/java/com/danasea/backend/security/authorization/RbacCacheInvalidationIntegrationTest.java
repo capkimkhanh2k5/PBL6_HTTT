@@ -1,5 +1,5 @@
 package com.danasea.backend.security.authorization;
-import com.danasea.backend.modules.account.infrastructure.mapper.UserMapper;
+import com.danasea.backend.modules.account.infrastructure.mappers.UserMapper;
 import org.assertj.core.api.Assertions;
 import org.springframework.transaction.PlatformTransactionManager;
 
@@ -7,7 +7,7 @@ import com.danasea.backend.modules.account.application.api.AccountInternalApi;
 import com.danasea.backend.modules.account.domain.models.Role;
 import com.danasea.backend.modules.account.domain.models.User;
 import com.danasea.backend.modules.account.infrastructure.persistence.repositories.JpaUserRepository;
-import com.danasea.backend.security.authentication.domain.model.Authentication;
+import com.danasea.backend.security.authentication.domain.models.Authentication;
 import com.danasea.backend.security.authentication.infrastructure.security.JwtTokenProvider;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;

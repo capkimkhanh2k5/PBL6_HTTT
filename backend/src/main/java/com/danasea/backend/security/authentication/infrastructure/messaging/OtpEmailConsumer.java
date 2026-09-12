@@ -1,7 +1,7 @@
 package com.danasea.backend.security.authentication.infrastructure.messaging;
 
-import com.danasea.backend.config.RabbitMQConfig;
-import com.danasea.backend.security.authentication.domain.event.OtpEmailRequestedEvent;
+import com.danasea.backend.configs.RabbitMQConfig;
+import com.danasea.backend.security.authentication.domain.events.OtpEmailRequestedEvent;
 import lombok.extern.slf4j.Slf4j;
 
 import org.slf4j.Logger;

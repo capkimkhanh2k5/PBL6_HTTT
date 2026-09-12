@@ -2,7 +2,7 @@ package com.danasea.backend.security.authentication.infrastructure.security;
 
 import org.springframework.security.crypto.password.PasswordEncoder;
 
-import com.danasea.backend.security.authentication.application.port.PasswordHasher;
+import com.danasea.backend.security.authentication.application.ports.PasswordHasher;
 
 import lombok.RequiredArgsConstructor;
 

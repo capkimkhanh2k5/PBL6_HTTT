@@ -5,8 +5,8 @@ import java.util.UUID;
 
 import org.springframework.stereotype.Component;
 
-import com.danasea.backend.security.authorization.application.port.AuthorizationPort;
-import com.danasea.backend.security.authorization.domain.model.AuthorizationSubject;
+import com.danasea.backend.security.authorization.application.ports.AuthorizationPort;
+import com.danasea.backend.security.authorization.domain.models.AuthorizationSubject;
 import com.danasea.backend.modules.account.application.api.AccountInternalApi;
 import com.danasea.backend.modules.account.domain.models.User;
 

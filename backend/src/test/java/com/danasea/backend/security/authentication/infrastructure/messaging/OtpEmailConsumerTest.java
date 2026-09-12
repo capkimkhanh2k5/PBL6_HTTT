@@ -1,6 +1,6 @@
 package com.danasea.backend.security.authentication.infrastructure.messaging;
 
-import com.danasea.backend.security.authentication.domain.event.OtpEmailRequestedEvent;
+import com.danasea.backend.security.authentication.domain.events.OtpEmailRequestedEvent;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;

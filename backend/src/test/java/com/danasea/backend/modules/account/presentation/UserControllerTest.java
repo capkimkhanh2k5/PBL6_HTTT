@@ -1,12 +1,12 @@
 package com.danasea.backend.modules.account.presentation;
 import com.danasea.backend.shared.presentation.GlobalExceptionHandler;
 
-import com.danasea.backend.modules.account.application.usecase.ChangePasswordUseCase;
-import com.danasea.backend.modules.account.application.usecase.GetMyProfileUseCase;
-import com.danasea.backend.modules.account.application.usecase.UpdateProfileUseCase;
+import com.danasea.backend.modules.account.application.usecases.ChangePasswordUseCase;
+import com.danasea.backend.modules.account.application.usecases.GetMyProfileUseCase;
+import com.danasea.backend.modules.account.application.usecases.UpdateProfileUseCase;
 import com.danasea.backend.modules.account.domain.models.Role;
 import com.danasea.backend.modules.account.domain.models.User;
-import com.danasea.backend.security.authentication.domain.exception.InvalidCredentialsException;
+import com.danasea.backend.security.authentication.domain.exceptions.InvalidCredentialsException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

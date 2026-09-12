@@ -8,8 +8,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Component;
 
-import com.danasea.backend.security.authentication.application.port.OtpStorePort;
-import com.danasea.backend.security.authentication.domain.model.OtpDetails;
+import com.danasea.backend.security.authentication.application.ports.OtpStorePort;
+import com.danasea.backend.security.authentication.domain.models.OtpDetails;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 

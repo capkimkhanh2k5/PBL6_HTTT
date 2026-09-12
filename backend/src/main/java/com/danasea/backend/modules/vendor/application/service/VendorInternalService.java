@@ -10,7 +10,7 @@ import org.springframework.stereotype.Service;
 import com.danasea.backend.modules.vendor.application.api.VendorInternalApi;
 import com.danasea.backend.modules.vendor.domain.models.Vendor;
 import com.danasea.backend.modules.vendor.domain.models.VerificationStatus;
-import com.danasea.backend.modules.vendor.infrastructure.mapper.VendorMapper;
+import com.danasea.backend.modules.vendor.infrastructure.mappers.VendorMapper;
 import com.danasea.backend.modules.vendor.infrastructure.persistence.entities.VendorJpaEntity;
 import com.danasea.backend.modules.vendor.infrastructure.persistence.repositories.JpaVendorRepository;
 import lombok.RequiredArgsConstructor;

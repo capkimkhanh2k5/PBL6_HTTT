@@ -1,7 +1,7 @@
 package com.danasea.backend.security.infrastructure;
 import java.util.Collections;
 
-import com.danasea.backend.security.authorization.domain.model.AuthorizationSubject;
+import com.danasea.backend.security.authorization.domain.models.AuthorizationSubject;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
