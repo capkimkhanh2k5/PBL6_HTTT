@@ -1,5 +1,10 @@
 package com.danasea.backend.modules.audit.infrastructure.adapter;
 
+import java.util.Optional;
+import java.util.UUID;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 import lombok.RequiredArgsConstructor;
 
@@ -19,5 +24,17 @@ public class AuditLogAdapter implements AuditLogPort {
     public void saveAuditLog(AuditLog log) {
         AuditLogJpaEntity entity = auditLogMapper.toEntity(log);
         jpaAuditLogRepository.save(entity);
+    }
+
+    @Override
+    public Page<AuditLog> getAuditLogs(Pageable pageable) {
+        return jpaAuditLogRepository.findAll(pageable)
+                .map(auditLogMapper::toDomain);
+    }
+
+    @Override
+    public Optional<AuditLog> getAuditLogById(UUID id) {
+        return jpaAuditLogRepository.findById(id)
+                .map(auditLogMapper::toDomain);
     }
 }

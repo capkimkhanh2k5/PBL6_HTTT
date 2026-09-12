@@ -3,12 +3,15 @@ package com.danasea.backend.modules.vendor.application.service;
 import java.util.Optional;
 import java.util.UUID;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import com.danasea.backend.modules.vendor.application.api.VendorInternalApi;
 import com.danasea.backend.modules.vendor.domain.models.Vendor;
 import com.danasea.backend.modules.vendor.domain.models.VerificationStatus;
 import com.danasea.backend.modules.vendor.infrastructure.mapper.VendorMapper;
+import com.danasea.backend.modules.vendor.infrastructure.persistence.entities.VendorJpaEntity;
 import com.danasea.backend.modules.vendor.infrastructure.persistence.repositories.JpaVendorRepository;
 import lombok.RequiredArgsConstructor;
 
@@ -45,5 +48,20 @@ public class VendorInternalService implements VendorInternalApi {
         return vendorRepository.findById(vendorId)
                 .map(v -> VerificationStatus.APPROVED.equals(v.getVerificationStatus()))
                 .orElse(false);
+    }
+
+    @Override
+    public Vendor saveVendor(Vendor vendor) {
+        VendorJpaEntity entity = vendorMapper.toEntity(vendor);
+        entity = vendorRepository.save(entity);
+        return vendorMapper.toDomain(entity);
+    }
+
+    @Override
+    public Page<Vendor> getVendors(VerificationStatus status, Pageable pageable) {
+        if (status == null) {
+            return vendorRepository.findAll(pageable).map(vendorMapper::toDomain);
+        }
+        return vendorRepository.findByVerificationStatus(status, pageable).map(vendorMapper::toDomain);
     }
 }

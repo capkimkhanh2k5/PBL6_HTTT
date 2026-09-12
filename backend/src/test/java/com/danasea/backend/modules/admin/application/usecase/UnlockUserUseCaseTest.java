@@ -6,13 +6,11 @@ import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.danasea.backend.modules.account.application.api.AccountInternalApi;
-import com.danasea.backend.modules.audit.application.port.AuditLogPort;
-import com.danasea.backend.modules.audit.domain.models.AuditLog;
+import com.danasea.backend.modules.audit.application.api.AuditLogInternalApi;
 import com.danasea.backend.modules.account.domain.models.Role;
 import com.danasea.backend.modules.account.domain.models.User;
 import com.danasea.backend.modules.admin.domain.exception.UserAlreadyUnlockedException;
@@ -20,6 +18,7 @@ import com.danasea.backend.modules.admin.domain.exception.UserNotFoundException;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -29,7 +28,7 @@ class UnlockUserUseCaseTest {
     private AccountInternalApi accountInternalApi;
 
     @Mock
-    private AuditLogPort auditLogPort;
+    private AuditLogInternalApi auditLogInternalApi;
 
     private UnlockUserUseCase unlockUserUseCase;
 
@@ -39,7 +38,7 @@ class UnlockUserUseCaseTest {
 
     @BeforeEach
     void setUp() {
-        unlockUserUseCase = new UnlockUserUseCase(accountInternalApi, auditLogPort);
+        unlockUserUseCase = new UnlockUserUseCase(accountInternalApi, auditLogInternalApi);
         actorId = UUID.randomUUID();
         targetUserId = UUID.randomUUID();
 
@@ -57,17 +56,16 @@ class UnlockUserUseCaseTest {
 
         unlockUserUseCase.execute(actorId, targetUserId);
 
-        ArgumentCaptor<User> userCaptor = ArgumentCaptor.forClass(User.class);
-        verify(accountInternalApi).saveUser(userCaptor.capture());
-        assertFalse(userCaptor.getValue().getIsLocked());
+        verify(accountInternalApi).saveUser(targetUser);
+        assertFalse(targetUser.getIsLocked());
 
-        ArgumentCaptor<AuditLog> auditCaptor = ArgumentCaptor.forClass(AuditLog.class);
-        verify(auditLogPort).saveAuditLog(auditCaptor.capture());
-        AuditLog savedLog = auditCaptor.getValue();
-        assertEquals("USER_UNLOCKED", savedLog.getAction());
-        assertEquals("USER", savedLog.getEntityType());
-        assertEquals(targetUserId, savedLog.getEntityId());
-        assertEquals(actorId, savedLog.getActorUserId());
+        verify(auditLogInternalApi).recordAuditLog(
+                eq(actorId),
+                eq("USER_UNLOCKED"),
+                eq("USER"),
+                eq(targetUserId),
+                eq("")
+        );
 
         verify(accountInternalApi, never()).revokeAllTokensByUserId(any());
     }
@@ -83,7 +81,7 @@ class UnlockUserUseCaseTest {
 
         assertTrue(exception.getMessage().contains(targetUserId.toString()));
         verify(accountInternalApi, never()).saveUser(any());
-        verify(auditLogPort, never()).saveAuditLog(any());
+        verify(auditLogInternalApi, never()).recordAuditLog(any(), any(), any(), any(), any());
     }
 
     @Test
@@ -97,6 +95,6 @@ class UnlockUserUseCaseTest {
         );
 
         verify(accountInternalApi, never()).saveUser(any());
-        verify(auditLogPort, never()).saveAuditLog(any());
+        verify(auditLogInternalApi, never()).recordAuditLog(any(), any(), any(), any(), any());
     }
 }

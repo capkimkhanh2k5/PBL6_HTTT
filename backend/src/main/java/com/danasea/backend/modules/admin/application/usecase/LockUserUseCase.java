@@ -3,8 +3,7 @@ package com.danasea.backend.modules.admin.application.usecase;
 import java.util.UUID;
 
 import com.danasea.backend.modules.account.application.api.AccountInternalApi;
-import com.danasea.backend.modules.audit.domain.models.AuditLog;
-import com.danasea.backend.modules.audit.application.port.AuditLogPort;
+import com.danasea.backend.modules.audit.application.api.AuditLogInternalApi;
 import com.danasea.backend.modules.account.domain.models.User;
 import com.danasea.backend.modules.admin.domain.exception.SelfLockNotAllowedException;
 import com.danasea.backend.modules.admin.domain.exception.UserAlreadyLockedException;
@@ -18,7 +17,7 @@ import lombok.RequiredArgsConstructor;
 public class LockUserUseCase {
 
     private final AccountInternalApi accountInternalApi;
-    private final AuditLogPort auditLogPort;
+    private final AuditLogInternalApi auditLogInternalApi;
 
     @Transactional
     public void execute(UUID actorId, UUID targetUserId, String reason) {
@@ -44,14 +43,13 @@ public class LockUserUseCase {
 
         accountInternalApi.revokeAllTokensByUserId(targetUserId);
 
-        AuditLog auditLog = new AuditLog();
-        auditLog.setAction("USER_LOCKED");
-        auditLog.setEntityType("USER");
-        auditLog.setEntityId(targetUserId);
-        auditLog.setActorUserId(actorId);
-        auditLog.setMetadata(buildMetadataJson(reason));
-
-        auditLogPort.saveAuditLog(auditLog);
+        auditLogInternalApi.recordAuditLog(
+                actorId,
+                "USER_LOCKED",
+                "USER",
+                targetUserId,
+                buildMetadataJson(reason)
+        );
     }
 
     private String buildMetadataJson(String reason) {

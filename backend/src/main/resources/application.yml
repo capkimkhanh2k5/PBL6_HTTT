@@ -2,7 +2,6 @@ spring:
   application:
     name: backend
   config:
-    import: optional:file:../.env[.properties]
 
   servlet:
     multipart:
@@ -19,7 +18,7 @@ spring:
 
   jpa:
     hibernate:
-      ddl-auto: update
+      ddl-auto: validate
 
     open-in-view: false
   mail:
@@ -51,9 +50,16 @@ spring:
       publisher-confirm-type: correlated
       publisher-returns: true
 
+  flyway:
+    enabled: true
+    baseline-on-migrate: true
+
 server:
   port: 8080
   forward-headers-strategy: native
+  tomcat:
+    remoteip:
+      internal-proxies: 10\.\d{1,3}\.\d{1,3}\.\d{1,3}|192\.168\.\d{1,3}\.\d{1,3}|169\.254\.\d{1,3}\.\d{1,3}|127\.\d{1,3}\.\d{1,3}\.\d{1,3}|172\.1[6-9]{1}\.\d{1,3}\.\d{1,3}|172\.2[0-9]{1}\.\d{1,3}\.\d{1,3}|172\.3[0-1]{1}\.\d{1,3}\.\d{1,3}|0:0:0:0:0:0:0:1|::1
 
 app:
   jwt:
