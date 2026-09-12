@@ -3,12 +3,19 @@ package com.danasea.backend.modules.vendor.infrastructure.persistence.repositori
 import java.util.Optional;
 import java.util.UUID;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
+
+import com.danasea.backend.modules.vendor.domain.models.VerificationStatus;
 import com.danasea.backend.modules.vendor.infrastructure.persistence.entities.VendorJpaEntity;
 
 @Repository
 public interface JpaVendorRepository extends JpaRepository<VendorJpaEntity, UUID> {
     Optional<VendorJpaEntity> findByUserId(UUID userId);
+
     boolean existsByUserId(UUID userId);
+
+    Page<VendorJpaEntity> findByVerificationStatus(VerificationStatus verificationStatus, Pageable pageable);
 }

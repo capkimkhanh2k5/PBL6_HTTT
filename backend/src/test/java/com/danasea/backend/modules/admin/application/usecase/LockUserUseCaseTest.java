@@ -6,13 +6,11 @@ import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.danasea.backend.modules.account.application.api.AccountInternalApi;
-import com.danasea.backend.modules.audit.application.port.AuditLogPort;
-import com.danasea.backend.modules.audit.domain.models.AuditLog;
+import com.danasea.backend.modules.audit.application.api.AuditLogInternalApi;
 import com.danasea.backend.modules.account.domain.models.Role;
 import com.danasea.backend.modules.account.domain.models.User;
 import com.danasea.backend.modules.admin.domain.exception.SelfLockNotAllowedException;
@@ -21,6 +19,7 @@ import com.danasea.backend.modules.admin.domain.exception.UserNotFoundException;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -30,7 +29,7 @@ class LockUserUseCaseTest {
     private AccountInternalApi accountInternalApi;
 
     @Mock
-    private AuditLogPort auditLogPort;
+    private AuditLogInternalApi auditLogInternalApi;
 
     private LockUserUseCase lockUserUseCase;
 
@@ -40,7 +39,7 @@ class LockUserUseCaseTest {
 
     @BeforeEach
     void setUp() {
-        lockUserUseCase = new LockUserUseCase(accountInternalApi, auditLogPort);
+        lockUserUseCase = new LockUserUseCase(accountInternalApi, auditLogInternalApi);
         actorId = UUID.randomUUID();
         targetUserId = UUID.randomUUID();
 
@@ -59,20 +58,18 @@ class LockUserUseCaseTest {
 
         lockUserUseCase.execute(actorId, targetUserId, reason);
 
-        ArgumentCaptor<User> userCaptor = ArgumentCaptor.forClass(User.class);
-        verify(accountInternalApi).saveUser(userCaptor.capture());
-        assertTrue(userCaptor.getValue().getIsLocked());
+        verify(accountInternalApi).saveUser(targetUser);
+        assertTrue(targetUser.getIsLocked());
 
         verify(accountInternalApi).revokeAllTokensByUserId(targetUserId);
 
-        ArgumentCaptor<AuditLog> auditCaptor = ArgumentCaptor.forClass(AuditLog.class);
-        verify(auditLogPort).saveAuditLog(auditCaptor.capture());
-        AuditLog savedLog = auditCaptor.getValue();
-        assertEquals("USER_LOCKED", savedLog.getAction());
-        assertEquals("USER", savedLog.getEntityType());
-        assertEquals(targetUserId, savedLog.getEntityId());
-        assertEquals(actorId, savedLog.getActorUserId());
-        assertEquals("{\"reason\":\"Violation of service terms\"}", savedLog.getMetadata());
+        verify(auditLogInternalApi).recordAuditLog(
+                eq(actorId),
+                eq("USER_LOCKED"),
+                eq("USER"),
+                eq(targetUserId),
+                eq("{\"reason\":\"Violation of service terms\"}")
+        );
     }
 
     @Test
@@ -87,7 +84,7 @@ class LockUserUseCaseTest {
         assertTrue(exception.getMessage().contains(targetUserId.toString()));
         verify(accountInternalApi, never()).saveUser(any());
         verify(accountInternalApi, never()).revokeAllTokensByUserId(any());
-        verify(auditLogPort, never()).saveAuditLog(any());
+        verify(auditLogInternalApi, never()).recordAuditLog(any(), any(), any(), any(), any());
     }
 
     @Test
@@ -102,7 +99,7 @@ class LockUserUseCaseTest {
 
         verify(accountInternalApi, never()).saveUser(any());
         verify(accountInternalApi, never()).revokeAllTokensByUserId(any());
-        verify(auditLogPort, never()).saveAuditLog(any());
+        verify(auditLogInternalApi, never()).recordAuditLog(any(), any(), any(), any(), any());
     }
 
     @Test
@@ -117,7 +114,7 @@ class LockUserUseCaseTest {
         verify(accountInternalApi, never()).findUserById(any());
         verify(accountInternalApi, never()).saveUser(any());
         verify(accountInternalApi, never()).revokeAllTokensByUserId(any());
-        verify(auditLogPort, never()).saveAuditLog(any());
+        verify(auditLogInternalApi, never()).recordAuditLog(any(), any(), any(), any(), any());
     }
 
     @Test
@@ -126,8 +123,12 @@ class LockUserUseCaseTest {
 
         lockUserUseCase.execute(actorId, targetUserId, null);
 
-        ArgumentCaptor<AuditLog> auditCaptor = ArgumentCaptor.forClass(AuditLog.class);
-        verify(auditLogPort).saveAuditLog(auditCaptor.capture());
-        assertEquals("{\"reason\":\"\"}", auditCaptor.getValue().getMetadata());
+        verify(auditLogInternalApi).recordAuditLog(
+                eq(actorId),
+                eq("USER_LOCKED"),
+                eq("USER"),
+                eq(targetUserId),
+                eq("{\"reason\":\"\"}")
+        );
     }
 }

@@ -16,7 +16,6 @@ import com.danasea.backend.modules.account.application.api.AccountInternalApi;
 import com.danasea.backend.modules.account.application.usecase.ChangePasswordUseCase;
 import com.danasea.backend.modules.account.application.usecase.GetMyProfileUseCase;
 import com.danasea.backend.modules.account.application.usecase.UpdateProfileUseCase;
-import com.danasea.backend.modules.audit.infrastructure.persistence.repositories.JpaAuditLogRepository;
 
 import org.springframework.context.ApplicationEventPublisher;
 
@@ -27,7 +26,7 @@ import com.danasea.backend.modules.admin.application.usecase.GetUserDetailUseCas
 import com.danasea.backend.modules.admin.application.usecase.GetUsersUseCase;
 import com.danasea.backend.modules.admin.application.usecase.LockUserUseCase;
 import com.danasea.backend.modules.admin.application.usecase.UnlockUserUseCase;
-import com.danasea.backend.modules.audit.application.port.AuditLogPort;
+import com.danasea.backend.modules.audit.application.api.AuditLogInternalApi;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 @Configuration
@@ -101,13 +100,13 @@ public class ApplicationBeans {
     }
 
     @Bean
-    LockUserUseCase lockUserUseCase(AccountInternalApi accountInternalApi, AuditLogPort auditLogPort) {
-        return new LockUserUseCase(accountInternalApi, auditLogPort);
+    LockUserUseCase lockUserUseCase(AccountInternalApi accountInternalApi, AuditLogInternalApi auditLogInternalApi) {
+        return new LockUserUseCase(accountInternalApi, auditLogInternalApi);
     }
 
     @Bean
-    UnlockUserUseCase unlockUserUseCase(AccountInternalApi accountInternalApi, AuditLogPort auditLogPort) {
-        return new UnlockUserUseCase(accountInternalApi, auditLogPort);
+    UnlockUserUseCase unlockUserUseCase(AccountInternalApi accountInternalApi, AuditLogInternalApi auditLogInternalApi) {
+        return new UnlockUserUseCase(accountInternalApi, auditLogInternalApi);
     }
 
     @Bean
@@ -134,7 +133,7 @@ public class ApplicationBeans {
     ChangePasswordUseCase changePasswordUseCase(
             AccountInternalApi accountInternalApi,
             PasswordHasher passwordHasher,
-            JpaAuditLogRepository auditLogRepository) {
-        return new ChangePasswordUseCase(accountInternalApi, passwordHasher, auditLogRepository);
+            AuditLogInternalApi auditLogInternalApi) {
+        return new ChangePasswordUseCase(accountInternalApi, passwordHasher, auditLogInternalApi);
     }
 }

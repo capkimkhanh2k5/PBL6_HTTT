@@ -38,14 +38,19 @@ public class RateLimitFilter extends OncePerRequestFilter {
             String ip = getClientIP(request);
             Bucket bucket = proxyManager.builder().build(ip.getBytes(), this::getConfig);
 
-            ConsumptionProbe probe = bucket.tryConsumeAndReturnRemaining(1);
-            if (probe.isConsumed()) {
-                response.addHeader("X-Rate-Limit-Remaining", String.valueOf(probe.getRemainingTokens()));
+            try {
+                ConsumptionProbe probe = bucket.tryConsumeAndReturnRemaining(1);
+                if (probe.isConsumed()) {
+                    response.addHeader("X-Rate-Limit-Remaining", String.valueOf(probe.getRemainingTokens()));
+                    filterChain.doFilter(request, response);
+                } else {
+                    long waitForRefill = probe.getNanosToWaitForRefill() / 1_000_000_000;
+                    response.addHeader("X-Rate-Limit-Retry-After-Seconds", String.valueOf(waitForRefill));
+                    response.sendError(HttpStatus.TOO_MANY_REQUESTS.value(), "You have exhausted your API Request Quota");
+                }
+            } catch (Exception e) {
+                // Fail-open if Redis is down
                 filterChain.doFilter(request, response);
-            } else {
-                long waitForRefill = probe.getNanosToWaitForRefill() / 1_000_000_000;
-                response.addHeader("X-Rate-Limit-Retry-After-Seconds", String.valueOf(waitForRefill));
-                response.sendError(HttpStatus.TOO_MANY_REQUESTS.value(), "You have exhausted your API Request Quota");
             }
         } else if (path.equals("/api/auth/otp/send")) {
             Principal principal = request.getUserPrincipal();
@@ -54,15 +59,20 @@ public class RateLimitFilter extends OncePerRequestFilter {
                 String key = "otp-send:" + email;
                 Bucket bucket = proxyManager.builder().build(key.getBytes(), this::getOtpConfig);
 
-                ConsumptionProbe probe = bucket.tryConsumeAndReturnRemaining(1);
-                if (probe.isConsumed()) {
-                    response.addHeader("X-Rate-Limit-Remaining", String.valueOf(probe.getRemainingTokens()));
+                try {
+                    ConsumptionProbe probe = bucket.tryConsumeAndReturnRemaining(1);
+                    if (probe.isConsumed()) {
+                        response.addHeader("X-Rate-Limit-Remaining", String.valueOf(probe.getRemainingTokens()));
+                        filterChain.doFilter(request, response);
+                    } else {
+                        long waitForRefill = probe.getNanosToWaitForRefill() / 1_000_000_000;
+                        response.addHeader("X-Rate-Limit-Retry-After-Seconds", String.valueOf(waitForRefill));
+                        response.sendError(HttpStatus.TOO_MANY_REQUESTS.value(),
+                                "OTP request is too frequent. Please wait.");
+                    }
+                } catch (Exception e) {
+                    // Fail-open if Redis is down
                     filterChain.doFilter(request, response);
-                } else {
-                    long waitForRefill = probe.getNanosToWaitForRefill() / 1_000_000_000;
-                    response.addHeader("X-Rate-Limit-Retry-After-Seconds", String.valueOf(waitForRefill));
-                    response.sendError(HttpStatus.TOO_MANY_REQUESTS.value(),
-                            "OTP request is too frequent. Please wait.");
                 }
             } else {
                 filterChain.doFilter(request, response);

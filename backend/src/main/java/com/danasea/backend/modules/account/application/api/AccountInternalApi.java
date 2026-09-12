@@ -30,6 +30,4 @@ public interface AccountInternalApi {
     void revokeAllRefreshTokensByUserId(UUID userId);
 
     Page<User> findUsers(Pageable pageable, Role role, Boolean isLocked, String search);
-
-    void recordAuditLog(UUID actorUserId, String action, String entityType, UUID entityId, String metadata);
 }

@@ -33,9 +33,6 @@ public abstract class BaseSecurityIntegrationTest {
         registry.add("spring.datasource.url", () -> dbUrl);
         registry.add("spring.datasource.username", () -> "test");
         registry.add("spring.datasource.password", () -> "test");
-        registry.add("spring.datasource.driver-class-name", () -> "org.postgresql.Driver");
-        registry.add("spring.jpa.database-platform", () -> "org.hibernate.dialect.PostgreSQLDialect");
-
         
         registry.add("spring.flyway.url", () -> dbUrl);
         registry.add("spring.flyway.user", () -> "test");

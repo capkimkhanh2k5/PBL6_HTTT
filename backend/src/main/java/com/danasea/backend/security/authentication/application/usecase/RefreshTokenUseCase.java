@@ -53,10 +53,9 @@ public class RefreshTokenUseCase {
             throw new InvalidCredentialsException("User is locked or inactive");
         }
 
-        // TODO: Turn on when completed module send email OTP
-        // if (!Boolean.TRUE.equals(user.getIsEmailVerified())) {
-        // throw new InvalidCredentialsException("Email not verified");
-        // }
+        if (!Boolean.TRUE.equals(user.getIsEmailVerified())) {
+            throw new InvalidCredentialsException("Email not verified");
+        }
 
         Authentication auth = new Authentication(user.getId(), user.getEmail(), null, user.getRole().name(), true,
                 true);

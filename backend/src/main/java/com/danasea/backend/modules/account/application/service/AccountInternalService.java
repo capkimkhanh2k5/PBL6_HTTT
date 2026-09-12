@@ -9,8 +9,6 @@ import java.util.UUID;
 import java.util.Optional;
 import java.util.UUID;
 
-import com.danasea.backend.modules.audit.infrastructure.persistence.entities.AuditLogJpaEntity;
-import com.danasea.backend.modules.audit.infrastructure.persistence.repositories.JpaAuditLogRepository;
 
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
@@ -44,7 +42,6 @@ public class AccountInternalService implements AccountInternalApi {
 
     private final JpaUserRepository userRepository;
     private final JpaRefreshTokenRepository refreshTokenRepository;
-    private final JpaAuditLogRepository auditLogRepository;
     private final UserMapper userMapper;
     private final RefreshTokenMapper refreshTokenMapper;
     private final CacheManager cacheManager;
@@ -191,14 +188,4 @@ public class AccountInternalService implements AccountInternalApi {
         return entities.map(userMapper::toDomain);
     }
 
-    @Override
-    public void recordAuditLog(UUID actorUserId, String action, String entityType, UUID entityId, String metadata) {
-        AuditLogJpaEntity entity = new AuditLogJpaEntity();
-        entity.setActorUserId(actorUserId);
-        entity.setAction(action);
-        entity.setEntityType(entityType);
-        entity.setEntityId(entityId);
-        entity.setMetadata(metadata);
-        auditLogRepository.save(entity);
-    }
 }

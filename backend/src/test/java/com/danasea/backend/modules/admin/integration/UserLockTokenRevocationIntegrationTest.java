@@ -1,4 +1,5 @@
 package com.danasea.backend.modules.admin.integration;
+
 import org.springframework.cache.CacheManager;
 
 import java.time.OffsetDateTime;
@@ -74,22 +75,22 @@ class UserLockTokenRevocationIntegrationTest {
         accountInternalService = new AccountInternalService(
                 userRepository,
                 refreshTokenRepository,
-                mock(JpaAuditLogRepository.class),
                 userMapper,
                 refreshTokenMapper,
-                mock(CacheManager.class)
-        );
-        
-        auditLogAdapter = new AuditLogAdapter(auditLogRepository, auditLogMapper);
+                mock(CacheManager.class));
 
-        lockUserUseCase = new LockUserUseCase(accountInternalService, auditLogAdapter);
+        auditLogAdapter = new AuditLogAdapter(auditLogRepository, auditLogMapper);
+        com.danasea.backend.modules.audit.application.service.AuditLogInternalService auditLogInternalService = new com.danasea.backend.modules.audit.application.service.AuditLogInternalService(
+                auditLogAdapter);
+
+        lockUserUseCase = new LockUserUseCase(accountInternalService, auditLogInternalService);
 
         JwtProperties jwtProperties = new JwtProperties("super-secret-key-that-is-long-enough-32bytes", 15, 7);
         refreshTokenUseCase = new RefreshTokenUseCase(accountInternalService, tokenProvider, jwtProperties);
 
         adminId = UUID.randomUUID();
         targetUserId = UUID.randomUUID();
-        
+
         rawRefreshToken1 = "test-raw-refresh-token-family1-" + UUID.randomUUID();
         rawRefreshToken2 = "test-raw-refresh-token-family2-" + UUID.randomUUID();
         String tokenHash1 = HashUtils.sha256(rawRefreshToken1);
@@ -114,7 +115,7 @@ class UserLockTokenRevocationIntegrationTest {
                 .revokedAt(null)
                 .build();
         tokenStore.add(tokenEntity1);
-        
+
         // Token 2 - Family 2 (Different session)
         RefreshTokenJpaEntity tokenEntity2 = RefreshTokenJpaEntity.builder()
                 .id(UUID.randomUUID())
@@ -126,9 +127,8 @@ class UserLockTokenRevocationIntegrationTest {
                 .build();
         tokenStore.add(tokenEntity2);
 
-        when(userRepository.findById(targetUserId)).thenAnswer(inv ->
-                userStore.stream().filter(u -> u.getId().equals(targetUserId)).findFirst()
-        );
+        when(userRepository.findById(targetUserId))
+                .thenAnswer(inv -> userStore.stream().filter(u -> u.getId().equals(targetUserId)).findFirst());
         when(userRepository.saveAndFlush(any(UserJpaEntity.class))).thenAnswer(inv -> {
             UserJpaEntity u = inv.getArgument(0);
             userStore.removeIf(existing -> existing.getId().equals(u.getId()));
@@ -136,16 +136,15 @@ class UserLockTokenRevocationIntegrationTest {
             return u;
         });
 
-        when(refreshTokenRepository.findAllByUserId(targetUserId)).thenAnswer(inv ->
-                tokenStore.stream().filter(t -> t.getUserId().equals(targetUserId)).toList()
-        );
-        
+        when(refreshTokenRepository.findAllByUserId(targetUserId))
+                .thenAnswer(inv -> tokenStore.stream().filter(t -> t.getUserId().equals(targetUserId)).toList());
+
         // Mock findByTokenHash for both tokens
         when(refreshTokenRepository.findByTokenHash(anyString())).thenAnswer(inv -> {
             String hash = inv.getArgument(0);
             return tokenStore.stream().filter(t -> t.getTokenHash().equals(hash)).findFirst();
         });
-        
+
         when(refreshTokenRepository.saveAll(any())).thenAnswer(inv -> {
             Iterable<RefreshTokenJpaEntity> tokens = inv.getArgument(0);
             tokens.forEach(t -> {
@@ -154,7 +153,7 @@ class UserLockTokenRevocationIntegrationTest {
             });
             return tokenStore;
         });
-        
+
         lenient().when(refreshTokenRepository.findAllByFamilyId(any(UUID.class))).thenAnswer(inv -> {
             UUID familyId = inv.getArgument(0);
             return tokenStore.stream().filter(t -> familyId.equals(t.getFamilyId())).toList();
@@ -192,14 +191,12 @@ class UserLockTokenRevocationIntegrationTest {
         assertThrows(
                 InvalidCredentialsException.class,
                 () -> refreshTokenUseCase.execute(rawRefreshToken1),
-                "Should reject refresh with token from Family 1"
-        );
-        
+                "Should reject refresh with token from Family 1");
+
         // Try to refresh with Token 2
         assertThrows(
                 InvalidCredentialsException.class,
                 () -> refreshTokenUseCase.execute(rawRefreshToken2),
-                "Should reject refresh with token from Family 2"
-        );
+                "Should reject refresh with token from Family 2");
     }
 }
