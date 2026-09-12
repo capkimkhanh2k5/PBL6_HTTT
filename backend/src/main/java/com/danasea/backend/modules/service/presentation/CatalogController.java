@@ -1,13 +1,13 @@
 package com.danasea.backend.modules.service.presentation;
 
-import com.danasea.backend.modules.service.application.dto.SearchServicesCriteria;
-import com.danasea.backend.modules.service.application.dto.ServiceDetailResult;
-import com.danasea.backend.modules.service.application.dto.ServiceSummaryResult;
-import com.danasea.backend.modules.service.application.usecase.GetPublicServiceDetailUseCase;
-import com.danasea.backend.modules.service.application.usecase.SearchServicesUseCase;
-import com.danasea.backend.modules.service.presentation.dto.PageResponse;
-import com.danasea.backend.modules.service.presentation.dto.ServiceDetailResponse;
-import com.danasea.backend.modules.service.presentation.dto.ServiceSummaryResponse;
+import com.danasea.backend.modules.service.application.dtos.SearchServicesCriteria;
+import com.danasea.backend.modules.service.application.dtos.ServiceDetailResult;
+import com.danasea.backend.modules.service.application.dtos.ServiceSummaryResult;
+import com.danasea.backend.modules.service.application.usecases.GetPublicServiceDetailUseCase;
+import com.danasea.backend.modules.service.application.usecases.SearchServicesUseCase;
+import com.danasea.backend.modules.service.presentation.dtos.PageResponse;
+import com.danasea.backend.modules.service.presentation.dtos.ServiceDetailResponse;
+import com.danasea.backend.modules.service.presentation.dtos.ServiceSummaryResponse;
 import com.danasea.backend.security.infrastructure.SecurityUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;

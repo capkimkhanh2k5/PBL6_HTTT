@@ -1,7 +1,7 @@
 package com.danasea.backend.modules.service.presentation.controllers;
-import com.danasea.backend.security.authentication.application.port.TokenProvider;
-import com.danasea.backend.security.authentication.application.port.UserAccountPort;
-import com.danasea.backend.security.authorization.application.port.AuthorizationPort;
+import com.danasea.backend.security.authentication.application.ports.TokenProvider;
+import com.danasea.backend.security.authentication.application.ports.UserAccountPort;
+import com.danasea.backend.security.authorization.application.ports.AuthorizationPort;
 
 import org.springframework.boot.test.context.TestConfiguration;
 

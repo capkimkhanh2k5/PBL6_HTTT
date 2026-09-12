@@ -3,7 +3,7 @@ package com.danasea.backend.security.infrastructure;
 import java.util.Optional;
 import java.util.UUID;
 
-import com.danasea.backend.security.authorization.domain.model.AuthorizationSubject;
+import com.danasea.backend.security.authorization.domain.models.AuthorizationSubject;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 

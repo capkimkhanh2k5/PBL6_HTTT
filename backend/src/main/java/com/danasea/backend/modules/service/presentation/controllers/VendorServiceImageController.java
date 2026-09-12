@@ -1,11 +1,11 @@
 package com.danasea.backend.modules.service.presentation.controllers;
 
 import com.danasea.backend.security.infrastructure.SecurityUtils;
-import com.danasea.backend.modules.service.application.usecase.DeleteServiceImageUseCase;
-import com.danasea.backend.modules.service.application.usecase.ReorderServiceImagesUseCase;
-import com.danasea.backend.modules.service.application.usecase.UploadServiceImageUseCase;
-import com.danasea.backend.modules.service.presentation.dto.ReorderImagesRequest;
-import com.danasea.backend.modules.service.presentation.dto.ServiceImageResponse;
+import com.danasea.backend.modules.service.application.usecases.DeleteServiceImageUseCase;
+import com.danasea.backend.modules.service.application.usecases.ReorderServiceImagesUseCase;
+import com.danasea.backend.modules.service.application.usecases.UploadServiceImageUseCase;
+import com.danasea.backend.modules.service.presentation.dtos.ReorderImagesRequest;
+import com.danasea.backend.modules.service.presentation.dtos.ServiceImageResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;

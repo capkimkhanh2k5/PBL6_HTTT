@@ -14,7 +14,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.danasea.backend.modules.service.domain.models.Category;
 import com.danasea.backend.modules.service.infrastructure.persistence.entities.CategoryJpaEntity;
-import com.danasea.backend.modules.service.infrastructure.mapper.CategoryMapper;
+import com.danasea.backend.modules.service.infrastructure.mappers.CategoryMapper;
 import com.danasea.backend.modules.service.infrastructure.persistence.repositories.JpaCategoryRepository;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;

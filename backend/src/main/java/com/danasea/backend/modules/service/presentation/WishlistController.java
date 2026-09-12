@@ -1,8 +1,8 @@
 package com.danasea.backend.modules.service.presentation;
 
-import com.danasea.backend.modules.service.application.dto.WishlistItemResult;
-import com.danasea.backend.modules.service.application.usecase.WishlistUseCase;
-import com.danasea.backend.modules.service.presentation.dto.WishlistItemResponse;
+import com.danasea.backend.modules.service.application.dtos.WishlistItemResult;
+import com.danasea.backend.modules.service.application.usecases.WishlistUseCase;
+import com.danasea.backend.modules.service.presentation.dtos.WishlistItemResponse;
 import com.danasea.backend.security.infrastructure.SecurityUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;

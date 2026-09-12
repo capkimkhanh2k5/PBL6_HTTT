@@ -3,16 +3,16 @@ package com.danasea.backend.security.authentication.presentation;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.danasea.backend.security.authentication.application.result.LoginResult;
-import com.danasea.backend.security.authentication.application.usecase.LoginUseCase;
-import com.danasea.backend.security.authentication.application.usecase.RegisterUseCase;
-import com.danasea.backend.security.authentication.application.usecase.SendVerificationOtpUseCase;
-import com.danasea.backend.security.authentication.application.usecase.VerifyOtpUseCase;
-import com.danasea.backend.security.authentication.presentation.dto.AuthenticationResponse;
-import com.danasea.backend.security.authentication.presentation.dto.LoginRequest;
-import com.danasea.backend.security.authentication.presentation.dto.RefreshResponse;
-import com.danasea.backend.security.authentication.presentation.dto.RegisterRequest;
-import com.danasea.backend.security.authentication.presentation.dto.VerifyOtpRequest;
+import com.danasea.backend.security.authentication.application.results.LoginResult;
+import com.danasea.backend.security.authentication.application.usecases.LoginUseCase;
+import com.danasea.backend.security.authentication.application.usecases.RegisterUseCase;
+import com.danasea.backend.security.authentication.application.usecases.SendVerificationOtpUseCase;
+import com.danasea.backend.security.authentication.application.usecases.VerifyOtpUseCase;
+import com.danasea.backend.security.authentication.presentation.dtos.AuthenticationResponse;
+import com.danasea.backend.security.authentication.presentation.dtos.LoginRequest;
+import com.danasea.backend.security.authentication.presentation.dtos.RefreshResponse;
+import com.danasea.backend.security.authentication.presentation.dtos.RegisterRequest;
+import com.danasea.backend.security.authentication.presentation.dtos.VerifyOtpRequest;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -26,8 +26,8 @@ import java.security.Principal;
 
 import org.springframework.http.ResponseEntity;
 
-import com.danasea.backend.security.authentication.application.usecase.RefreshTokenUseCase;
-import com.danasea.backend.security.authentication.application.usecase.LogoutUseCase;
+import com.danasea.backend.security.authentication.application.usecases.RefreshTokenUseCase;
+import com.danasea.backend.security.authentication.application.usecases.LogoutUseCase;
 import com.danasea.backend.security.authentication.infrastructure.security.CookieUtils;
 
 @RestController

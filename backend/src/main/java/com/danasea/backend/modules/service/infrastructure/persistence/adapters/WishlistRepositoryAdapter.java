@@ -6,7 +6,7 @@ import java.util.UUID;
 
 import com.danasea.backend.modules.service.domain.models.Wishlist;
 import com.danasea.backend.modules.service.domain.ports.WishlistRepositoryPort;
-import com.danasea.backend.modules.service.infrastructure.mapper.WishlistMapper;
+import com.danasea.backend.modules.service.infrastructure.mappers.WishlistMapper;
 import com.danasea.backend.modules.service.infrastructure.persistence.entities.WishlistJpaEntity;
 import com.danasea.backend.modules.service.infrastructure.persistence.repositories.JpaWishlistRepository;
 import lombok.RequiredArgsConstructor;

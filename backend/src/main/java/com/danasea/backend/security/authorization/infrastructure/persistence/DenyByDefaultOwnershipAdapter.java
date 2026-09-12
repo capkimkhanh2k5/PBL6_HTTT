@@ -4,7 +4,7 @@ import java.util.UUID;
 
 import org.springframework.stereotype.Component;
 
-import com.danasea.backend.security.authorization.application.port.ResourceOwnershipPort;
+import com.danasea.backend.security.authorization.application.ports.ResourceOwnershipPort;
 
 @Component
 public class DenyByDefaultOwnershipAdapter implements ResourceOwnershipPort {

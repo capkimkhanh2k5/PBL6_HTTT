@@ -1,13 +1,13 @@
 package com.danasea.backend.modules.admin.presentation;
 
 import com.danasea.backend.modules.account.application.api.AccountInternalApi;
-import com.danasea.backend.modules.admin.application.usecase.ApproveVendorUseCase;
-import com.danasea.backend.modules.admin.application.usecase.GetVendorDetailUseCase;
-import com.danasea.backend.modules.admin.application.usecase.GetVendorsUseCase;
-import com.danasea.backend.modules.admin.application.usecase.RejectVendorUseCase;
-import com.danasea.backend.modules.admin.presentation.dto.AdminVendorResponse;
+import com.danasea.backend.modules.admin.application.usecases.ApproveVendorUseCase;
+import com.danasea.backend.modules.admin.application.usecases.GetVendorDetailUseCase;
+import com.danasea.backend.modules.admin.application.usecases.GetVendorsUseCase;
+import com.danasea.backend.modules.admin.application.usecases.RejectVendorUseCase;
+import com.danasea.backend.modules.admin.presentation.dtos.AdminVendorResponse;
 import com.danasea.backend.modules.vendor.domain.models.DocType;
-import com.danasea.backend.modules.vendor.presentation.dto.VendorDocumentResponse;
+import com.danasea.backend.modules.vendor.presentation.dtos.VendorDocumentResponse;
 import com.danasea.backend.shared.presentation.GlobalExceptionHandler;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;

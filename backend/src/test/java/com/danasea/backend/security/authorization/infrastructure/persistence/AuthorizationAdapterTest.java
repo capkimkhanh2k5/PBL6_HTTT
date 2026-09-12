@@ -3,7 +3,7 @@ package com.danasea.backend.security.authorization.infrastructure.persistence;
 import com.danasea.backend.modules.account.application.api.AccountInternalApi;
 import com.danasea.backend.modules.account.domain.models.Role;
 import com.danasea.backend.modules.account.domain.models.User;
-import com.danasea.backend.security.authorization.domain.model.AuthorizationSubject;
+import com.danasea.backend.security.authorization.domain.models.AuthorizationSubject;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

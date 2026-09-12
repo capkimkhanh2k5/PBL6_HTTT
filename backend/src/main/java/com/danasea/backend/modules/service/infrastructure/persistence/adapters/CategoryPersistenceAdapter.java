@@ -4,11 +4,11 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-import com.danasea.backend.modules.service.application.port.output.ActiveServiceCheckPort;
-import com.danasea.backend.modules.service.application.port.output.CategoryRepositoryPort;
+import com.danasea.backend.modules.service.application.ports.output.ActiveServiceCheckPort;
+import com.danasea.backend.modules.service.application.ports.output.CategoryRepositoryPort;
 import com.danasea.backend.modules.service.domain.models.Category;
 import com.danasea.backend.modules.service.domain.models.ServiceStatus;
-import com.danasea.backend.modules.service.infrastructure.mapper.CategoryMapper;
+import com.danasea.backend.modules.service.infrastructure.mappers.CategoryMapper;
 import com.danasea.backend.modules.service.infrastructure.persistence.entities.CategoryJpaEntity;
 import com.danasea.backend.modules.service.infrastructure.persistence.repositories.JpaCategoryRepository;
 import com.danasea.backend.modules.service.infrastructure.persistence.repositories.JpaServiceRepository;

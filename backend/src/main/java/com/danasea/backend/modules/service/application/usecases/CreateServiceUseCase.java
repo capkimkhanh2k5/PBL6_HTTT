@@ -4,8 +4,8 @@ import com.danasea.backend.modules.service.domain.models.ServiceImage;
 import java.util.List;
 import java.util.UUID;
 
-import com.danasea.backend.modules.service.application.dto.CreateServiceCommand;
-import com.danasea.backend.modules.service.application.dto.ServiceResult;
+import com.danasea.backend.modules.service.application.dtos.CreateServiceCommand;
+import com.danasea.backend.modules.service.application.dtos.ServiceResult;
 import com.danasea.backend.modules.service.application.usecases.helpers.ServiceResultMapper;
 import com.danasea.backend.modules.service.domain.exceptions.CategoryInactiveException;
 import com.danasea.backend.modules.service.domain.exceptions.CategoryNotFoundException;

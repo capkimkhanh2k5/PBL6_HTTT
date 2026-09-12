@@ -18,7 +18,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.danasea.backend.modules.service.application.dto.ServiceResult;
+import com.danasea.backend.modules.service.application.dtos.ServiceResult;
 import com.danasea.backend.modules.service.domain.exceptions.InvalidServiceStateException;
 import com.danasea.backend.modules.service.domain.exceptions.ServiceImagesRequiredException;
 import com.danasea.backend.modules.service.domain.models.Service;

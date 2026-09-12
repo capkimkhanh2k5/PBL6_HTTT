@@ -14,9 +14,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.danasea.backend.modules.admin.application.usecase.GetAuditLogDetailUseCase;
-import com.danasea.backend.modules.admin.application.usecase.GetAuditLogsUseCase;
-import com.danasea.backend.modules.admin.presentation.dto.AuditLogResponse;
+import com.danasea.backend.modules.admin.application.usecases.GetAuditLogDetailUseCase;
+import com.danasea.backend.modules.admin.application.usecases.GetAuditLogsUseCase;
+import com.danasea.backend.modules.admin.presentation.dtos.AuditLogResponse;
 
 import lombok.RequiredArgsConstructor;
 

@@ -10,7 +10,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.cloudinary.Cloudinary;
-import com.danasea.backend.modules.vendor.application.port.DocumentStoragePort;
+import com.danasea.backend.modules.vendor.application.ports.DocumentStoragePort;
 
 @Component
 public class CloudinaryDocumentStorageAdapter implements DocumentStoragePort {

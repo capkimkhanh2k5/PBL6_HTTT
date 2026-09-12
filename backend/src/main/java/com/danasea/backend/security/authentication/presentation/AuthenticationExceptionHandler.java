@@ -5,11 +5,11 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
-import com.danasea.backend.security.authentication.domain.exception.EmailAlreadyUsedException;
-import com.danasea.backend.security.authentication.domain.exception.OtpExpiredException;
-import com.danasea.backend.security.authentication.domain.exception.OtpInvalidException;
-import com.danasea.backend.security.authentication.domain.exception.OtpMaxAttemptsExceededException;
-import com.danasea.backend.security.authentication.domain.exception.OtpRequestTooFrequentException;
+import com.danasea.backend.security.authentication.domain.exceptions.EmailAlreadyUsedException;
+import com.danasea.backend.security.authentication.domain.exceptions.OtpExpiredException;
+import com.danasea.backend.security.authentication.domain.exceptions.OtpInvalidException;
+import com.danasea.backend.security.authentication.domain.exceptions.OtpMaxAttemptsExceededException;
+import com.danasea.backend.security.authentication.domain.exceptions.OtpRequestTooFrequentException;
 import com.danasea.backend.shared.presentation.ErrorResponse;
 
 @RestControllerAdvice(basePackageClasses = AuthenticationController.class)

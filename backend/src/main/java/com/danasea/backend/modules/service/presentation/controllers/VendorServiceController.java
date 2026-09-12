@@ -19,9 +19,9 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.security.access.AccessDeniedException;
 
 import com.danasea.backend.security.infrastructure.SecurityUtils;
-import com.danasea.backend.modules.service.application.dto.CreateServiceCommand;
-import com.danasea.backend.modules.service.application.dto.ServiceResult;
-import com.danasea.backend.modules.service.application.dto.UpdateServiceCommand;
+import com.danasea.backend.modules.service.application.dtos.CreateServiceCommand;
+import com.danasea.backend.modules.service.application.dtos.ServiceResult;
+import com.danasea.backend.modules.service.application.dtos.UpdateServiceCommand;
 import com.danasea.backend.modules.service.application.usecases.CreateServiceUseCase;
 import com.danasea.backend.modules.service.application.usecases.DeleteServiceUseCase;
 import com.danasea.backend.modules.service.application.usecases.GetServiceDetailUseCase;
@@ -30,8 +30,8 @@ import com.danasea.backend.modules.service.application.usecases.PauseServiceUseC
 import com.danasea.backend.modules.service.application.usecases.ResumeServiceUseCase;
 import com.danasea.backend.modules.service.application.usecases.SubmitServiceForReviewUseCase;
 import com.danasea.backend.modules.service.application.usecases.UpdateServiceUseCase;
-import com.danasea.backend.modules.service.presentation.dto.CreateServiceRequest;
-import com.danasea.backend.modules.service.presentation.dto.UpdateServiceRequest;
+import com.danasea.backend.modules.service.presentation.dtos.CreateServiceRequest;
+import com.danasea.backend.modules.service.presentation.dtos.UpdateServiceRequest;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;

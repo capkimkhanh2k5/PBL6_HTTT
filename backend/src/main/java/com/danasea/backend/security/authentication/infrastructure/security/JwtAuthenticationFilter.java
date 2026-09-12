@@ -10,10 +10,10 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
-import com.danasea.backend.security.authentication.application.port.TokenProvider;
-import com.danasea.backend.security.authentication.application.port.UserAccountPort;
-import com.danasea.backend.security.authorization.application.port.AuthorizationPort;
-import com.danasea.backend.security.authorization.domain.model.AuthorizationSubject;
+import com.danasea.backend.security.authentication.application.ports.TokenProvider;
+import com.danasea.backend.security.authentication.application.ports.UserAccountPort;
+import com.danasea.backend.security.authorization.application.ports.AuthorizationPort;
+import com.danasea.backend.security.authorization.domain.models.AuthorizationSubject;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;

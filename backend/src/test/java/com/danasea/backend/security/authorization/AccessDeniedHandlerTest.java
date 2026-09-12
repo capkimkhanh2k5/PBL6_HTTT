@@ -1,11 +1,11 @@
 package com.danasea.backend.security.authorization;
 
-import com.danasea.backend.security.authentication.application.port.UserAccountPort;
-import com.danasea.backend.security.authentication.domain.model.Authentication;
+import com.danasea.backend.security.authentication.application.ports.UserAccountPort;
+import com.danasea.backend.security.authentication.domain.models.Authentication;
 import com.danasea.backend.security.authentication.infrastructure.security.CustomAuthenticationEntryPoint;
 import com.danasea.backend.security.authentication.infrastructure.security.JwtTokenProvider;
-import com.danasea.backend.security.authorization.application.port.AuthorizationPort;
-import com.danasea.backend.security.authorization.domain.model.AuthorizationSubject;
+import com.danasea.backend.security.authorization.application.ports.AuthorizationPort;
+import com.danasea.backend.security.authorization.domain.models.AuthorizationSubject;
 import com.danasea.backend.security.authorization.infrastructure.security.CustomAccessDeniedHandler;
 import com.danasea.backend.shared.presentation.ErrorResponse;
 import com.fasterxml.jackson.databind.ObjectMapper;

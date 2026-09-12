@@ -2,7 +2,7 @@ package com.danasea.backend.modules.service.application.usecases;
 
 import java.util.List;
 
-import com.danasea.backend.modules.service.application.dto.ServiceResult;
+import com.danasea.backend.modules.service.application.dtos.ServiceResult;
 import com.danasea.backend.modules.service.application.usecases.helpers.ServiceResultMapper;
 import com.danasea.backend.modules.service.domain.models.ServiceImage;
 import com.danasea.backend.modules.service.domain.models.ServiceStatus;

@@ -1,6 +1,6 @@
 package com.danasea.backend.modules.audit.application.service;
 
-import com.danasea.backend.modules.audit.application.port.AuditLogPort;
+import com.danasea.backend.modules.audit.application.ports.AuditLogPort;
 import com.danasea.backend.modules.audit.domain.models.AuditLog;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

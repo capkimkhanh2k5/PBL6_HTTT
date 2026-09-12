@@ -1,20 +1,20 @@
 package com.danasea.backend.modules.account.integration;
 
 import com.danasea.backend.modules.account.application.service.AccountInternalService;
-import com.danasea.backend.modules.account.application.usecase.ChangePasswordUseCase;
+import com.danasea.backend.modules.account.application.usecases.ChangePasswordUseCase;
 import com.danasea.backend.modules.account.domain.models.Role;
 import com.danasea.backend.modules.account.domain.models.User;
-import com.danasea.backend.modules.account.infrastructure.mapper.RefreshTokenMapper;
-import com.danasea.backend.modules.account.infrastructure.mapper.UserMapper;
+import com.danasea.backend.modules.account.infrastructure.mappers.RefreshTokenMapper;
+import com.danasea.backend.modules.account.infrastructure.mappers.UserMapper;
 import com.danasea.backend.modules.account.infrastructure.persistence.entities.RefreshTokenJpaEntity;
 import com.danasea.backend.modules.account.infrastructure.persistence.entities.UserJpaEntity;
 import com.danasea.backend.modules.account.infrastructure.persistence.repositories.JpaRefreshTokenRepository;
 import com.danasea.backend.modules.account.infrastructure.persistence.repositories.JpaUserRepository;
 import com.danasea.backend.modules.audit.application.api.AuditLogInternalApi;
-import com.danasea.backend.security.authentication.application.port.PasswordHasher;
-import com.danasea.backend.security.authentication.application.port.TokenProvider;
-import com.danasea.backend.security.authentication.application.usecase.RefreshTokenUseCase;
-import com.danasea.backend.security.authentication.domain.exception.InvalidCredentialsException;
+import com.danasea.backend.security.authentication.application.ports.PasswordHasher;
+import com.danasea.backend.security.authentication.application.ports.TokenProvider;
+import com.danasea.backend.security.authentication.application.usecases.RefreshTokenUseCase;
+import com.danasea.backend.security.authentication.domain.exceptions.InvalidCredentialsException;
 import com.danasea.backend.security.authentication.infrastructure.security.HashUtils;
 import com.danasea.backend.security.authentication.infrastructure.security.JwtProperties;
 

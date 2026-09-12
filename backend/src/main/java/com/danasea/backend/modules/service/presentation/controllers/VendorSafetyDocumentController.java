@@ -1,8 +1,8 @@
 package com.danasea.backend.modules.service.presentation.controllers;
 
 import com.danasea.backend.security.infrastructure.SecurityUtils;
-import com.danasea.backend.modules.service.application.usecase.UploadSafetyDocumentUseCase;
-import com.danasea.backend.modules.service.presentation.dto.SafetyDocumentResponse;
+import com.danasea.backend.modules.service.application.usecases.UploadSafetyDocumentUseCase;
+import com.danasea.backend.modules.service.presentation.dtos.SafetyDocumentResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

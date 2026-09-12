@@ -2,8 +2,8 @@ package com.danasea.backend.modules.service.application.usecases;
 
 import java.util.List;
 
-import com.danasea.backend.modules.service.application.dto.RejectServiceCommand;
-import com.danasea.backend.modules.service.application.dto.ServiceResult;
+import com.danasea.backend.modules.service.application.dtos.RejectServiceCommand;
+import com.danasea.backend.modules.service.application.dtos.ServiceResult;
 import com.danasea.backend.modules.service.application.usecases.helpers.ServiceResultMapper;
 import com.danasea.backend.modules.service.domain.exceptions.ServiceNotFoundException;
 import com.danasea.backend.modules.service.domain.models.Service;
