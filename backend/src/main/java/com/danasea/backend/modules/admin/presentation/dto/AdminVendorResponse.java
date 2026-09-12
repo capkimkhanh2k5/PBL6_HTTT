@@ -2,10 +2,12 @@ package com.danasea.backend.modules.admin.presentation.dto;
 
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
+import java.util.List;
 import java.util.UUID;
 
 import com.danasea.backend.modules.vendor.domain.models.BadgeTier;
 import com.danasea.backend.modules.vendor.domain.models.VerificationStatus;
+import com.danasea.backend.modules.vendor.presentation.dto.VendorDocumentResponse;
 
 import lombok.Builder;
 import lombok.Data;
@@ -29,4 +31,5 @@ public class AdminVendorResponse {
     private BadgeTier badgeTier;
     private OffsetDateTime createdAt;
     private OffsetDateTime updatedAt;
+    private List<VendorDocumentResponse> documents;
 }

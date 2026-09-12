@@ -19,14 +19,14 @@
 - [x] LoginUseCaseTest (thành công, sai mật khẩu, user locked, email chưa verify)
 - [x] RefreshTokenUseCaseTest (rotation, family revocation, hết hạn, user locked)
 - [x] LogoutUseCaseTest
-- [ ] SendVerificationOtpUseCaseTest
-- [ ] VerifyOtpUseCaseTest (đúng, sai, hết hạn, vượt max attempts, one-time-use)
+- [x] SendVerificationOtpUseCaseTest
+- [x] VerifyOtpUseCaseTest (đúng, sai, hết hạn, vượt max attempts, one-time-use)
 - [x] OtpEmailConsumerTest (mail lỗi → DLQ)
 - [x] AuthenticationControllerTest (login/register/refresh/logout/OTP, cookie httpOnly)
 - [x] RateLimitFilterIntegrationTest
-- [ ] Test Family Revocation persist thật qua DB sau khi fix noRollbackFor
-- [ ] Test X-Forwarded-For không bypass được rate limit (sau khi cấu hình forward-headers-strategy)
-- [ ] Test emailVerified đồng nhất giữa Login và Refresh
+- [x] Test Family Revocation persist thật qua DB sau khi fix noRollbackFor
+- [x] Test X-Forwarded-For không bypass được rate limit (sau khi cấu hình forward-headers-strategy)
+- [x] Test emailVerified đồng nhất giữa Login và Refresh
 
 ### RBAC — Hạ tầng
 - [x] Role trong JWT claims + map GrantedAuthority (ROLE_*)
@@ -36,7 +36,7 @@
 ### RBAC — Test
 - [x] SecurityConfigIntegrationTest (403 role sai, 401 không token/hết hạn)
 - [x] ServiceIntegrationE2ETest (login thật → gọi endpoint role-protected + cần userId)
-- [ ] AccessDeniedHandlerTest (response JSON đúng format)
+- [x] AccessDeniedHandlerTest (response JSON đúng format)
 
 ### Admin quản lý tài khoản — API
 - [x] GET /api/admin/users
@@ -48,9 +48,9 @@
 ### Admin quản lý tài khoản — Test
 - [x] LockUserUseCaseTest (thành công, không tồn tại, đã lock rồi, self-lock chặn)
 - [x] UnlockUserUseCaseTest
-- [ ] Test liên module: refresh token của user vừa bị lock thất bại NGAY (không đợi hết hạn)
+- [x] Test liên module: refresh token của user vừa bị lock thất bại NGAY (không đợi hết hạn)
 - [x] AdminUserControllerTest (list/filter, 404, role sai → 403)
-- [ ] AuditLogServiceTest (ghi đúng field, không rollback hành động chính nếu audit lỗi)
+- [x] AuditLogServiceTest (ghi đúng field, không rollback hành động chính nếu audit lỗi)
 
 ### User Module — API
 - [x] GET /api/users/me
@@ -60,7 +60,7 @@
 ### User Module — Test
 - [x] UpdateProfileUseCaseTest (thành công, chống mass assignment)
 - [x] ChangePasswordUseCaseTest (thành công, sai mật khẩu cũ, trùng mật khẩu mới, revoke toàn bộ token)
-- [ ] UserControllerTest: xác nhận token cũ vô hiệu ngay sau đổi mật khẩu (test ở tầng controller/integration)
+- [x] UserControllerTest: xác nhận token cũ vô hiệu ngay sau đổi mật khẩu (test ở tầng controller/integration)
 
 ---
 
@@ -83,8 +83,8 @@
 - [x] UploadVendorDocumentUseCaseTest (9 case)
 - [x] VendorProfileControllerTest (12 case)
 - [x] ApproveVendorUseCaseTest / RejectVendorUseCaseTest
-- [ ] Test approve khi vendor không ở trạng thái PENDING → chặn
-- [ ] Test GET /api/admin/vendors/{id} trả đủ danh sách document cho Admin đọc trước khi approve
+- [x] Test approve khi vendor không ở trạng thái PENDING → chặn
+- [x] Test GET /api/admin/vendors/{id} trả đủ danh sách document cho Admin đọc trước khi approve
 
 ### Categories — API
 - [x] GET /api/categories
