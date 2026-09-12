@@ -30,8 +30,8 @@ public class ApproveVendorUseCase {
         Vendor vendor = vendorInternalApi.findById(vendorId)
                 .orElseThrow(() -> new VendorNotFoundException("Vendor not found with id: " + vendorId));
 
-        if (vendor.getVerificationStatus() == VerificationStatus.APPROVED) {
-            throw new IllegalArgumentException("Vendor is already approved");
+        if (vendor.getVerificationStatus() != VerificationStatus.PENDING) {
+            throw new IllegalArgumentException("Vendor is not in PENDING status");
         }
 
         vendor.setVerificationStatus(VerificationStatus.APPROVED);

@@ -128,4 +128,51 @@ public class RateLimitFilterIntegrationTest {
         rateLimitFilter.doFilterInternal(request2, response2, filterChain2);
         verify(filterChain2, times(1)).doFilter(request2, response2);
     }
+
+    @Test
+    void shouldExtractRealIpFromXForwardedFor() throws Exception {
+        String spoofedRemoteAddr = "10.0.0.99";
+        String realIp = "192.168.1.200";
+        String xForwardedFor = realIp + ", 10.0.0.1, 10.0.0.2";
+
+        for (int i = 0; i < 50; i++) {
+            HttpServletRequest request = mock(HttpServletRequest.class);
+            HttpServletResponse response = mock(HttpServletResponse.class);
+            FilterChain filterChain = mock(FilterChain.class);
+
+            when(request.getRequestURI()).thenReturn("/api/auth/login");
+            when(request.getRemoteAddr()).thenReturn(spoofedRemoteAddr);
+            when(request.getHeader("X-Forwarded-For")).thenReturn(xForwardedFor);
+
+            rateLimitFilter.doFilterInternal(request, response, filterChain);
+        }
+
+        // The 51st request should be blocked based on the realIp extracted
+        HttpServletRequest request = mock(HttpServletRequest.class);
+        HttpServletResponse response = mock(HttpServletResponse.class);
+        FilterChain filterChain = mock(FilterChain.class);
+
+        when(request.getRequestURI()).thenReturn("/api/auth/login");
+        when(request.getRemoteAddr()).thenReturn(spoofedRemoteAddr);
+        when(request.getHeader("X-Forwarded-For")).thenReturn(xForwardedFor);
+
+        rateLimitFilter.doFilterInternal(request, response, filterChain);
+
+        verify(filterChain, never()).doFilter(request, response);
+        verify(response, times(1)).sendError(HttpStatus.TOO_MANY_REQUESTS.value(),
+                "You have exhausted your API Request Quota");
+
+        // Verify that a request from a DIFFERENT X-Forwarded-For but SAME remote address is allowed
+        HttpServletRequest diffRequest = mock(HttpServletRequest.class);
+        HttpServletResponse diffResponse = mock(HttpServletResponse.class);
+        FilterChain diffFilterChain = mock(FilterChain.class);
+
+        when(diffRequest.getRequestURI()).thenReturn("/api/auth/login");
+        when(diffRequest.getRemoteAddr()).thenReturn(spoofedRemoteAddr);
+        when(diffRequest.getHeader("X-Forwarded-For")).thenReturn("192.168.1.201"); // different real IP
+
+        rateLimitFilter.doFilterInternal(diffRequest, diffResponse, diffFilterChain);
+
+        verify(diffFilterChain, times(1)).doFilter(diffRequest, diffResponse);
+    }
 }
