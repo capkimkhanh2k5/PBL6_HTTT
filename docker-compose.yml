@@ -107,6 +107,20 @@ services:
     tmpfs:
       - /tmp
 
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    restart: unless-stopped
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL:-admin@admin.com}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD:-admin}
+    ports:
+      - "5050:80"
+    networks:
+      - data
+    depends_on:
+      postgres:
+        condition: service_healthy
+
 volumes:
   postgres_data:
 
