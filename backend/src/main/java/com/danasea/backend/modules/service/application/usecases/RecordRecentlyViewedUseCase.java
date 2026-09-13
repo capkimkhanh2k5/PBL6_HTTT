@@ -38,7 +38,7 @@ public class RecordRecentlyViewedUseCase {
             recentlyViewedRepositoryPort.save(rv);
         } else {
             RecentlyViewed rv = new RecentlyViewed();
-            rv.setId(UUID.randomUUID());
+            
             rv.setServiceId(serviceId);
             rv.setUserId(userId);
             rv.setSessionId(sessionId);
