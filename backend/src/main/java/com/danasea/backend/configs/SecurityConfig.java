@@ -54,10 +54,12 @@ public class SecurityConfig {
 								"/api/auth/register",
 								"/api/auth/refresh",
 								"/api/auth/logout",
+								"/api/v1/weather/**",
 								"/actuator/health",
 								"/swagger-ui/**",
 								"/swagger-ui.html",
-								"/v3/api-docs/**"
+								"/v3/api-docs/**",
+								"/error"
 						).permitAll()
 						.requestMatchers(HttpMethod.GET, "/api/categories", "/api/categories/**").permitAll()
 						.requestMatchers(HttpMethod.GET, "/api/services", "/api/services/**").permitAll()
