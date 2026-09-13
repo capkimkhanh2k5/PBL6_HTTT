@@ -3,8 +3,13 @@ package com.danasea.backend.modules.weather.application.dtos;
 import lombok.Builder;
 import lombok.Data;
 
+import lombok.NoArgsConstructor;
+import lombok.AllArgsConstructor;
+
 @Data
 @Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class WeatherInfoDto {
     private double latitude;
     private double longitude;
@@ -14,6 +19,8 @@ public class WeatherInfoDto {
 
     @Data
     @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
     public static class WeatherData {
         private String time;
         private Double temperature;
@@ -30,6 +37,8 @@ public class WeatherInfoDto {
 
     @Data
     @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
     public static class MarineData {
         private String time;
         private Double waveHeight;
