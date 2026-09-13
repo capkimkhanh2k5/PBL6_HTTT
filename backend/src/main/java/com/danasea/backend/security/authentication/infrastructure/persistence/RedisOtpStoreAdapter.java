@@ -17,7 +17,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 @Component
-@RequiredArgsConstructor
+@Slf4j
 public class RedisOtpStoreAdapter implements OtpStorePort {
 
     private static final Logger log = LoggerFactory.getLogger(RedisOtpStoreAdapter.class);
@@ -26,6 +26,11 @@ public class RedisOtpStoreAdapter implements OtpStorePort {
     private final ObjectMapper objectMapper;
 
     private static final String KEY_PREFIX = "otp:verify-email:";
+
+    public RedisOtpStoreAdapter(StringRedisTemplate redisTemplate, ObjectMapper objectMapper) {
+        this.redisTemplate = redisTemplate;
+        this.objectMapper = objectMapper.copy().findAndRegisterModules();
+    }
 
     @Override
     public void save(String email, OtpDetails details, Duration ttl) {

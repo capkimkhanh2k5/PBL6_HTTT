@@ -29,6 +29,7 @@ import org.springframework.http.ResponseEntity;
 import com.danasea.backend.security.authentication.application.usecases.RefreshTokenUseCase;
 import com.danasea.backend.security.authentication.application.usecases.LogoutUseCase;
 import com.danasea.backend.security.authentication.infrastructure.security.CookieUtils;
+import io.swagger.v3.oas.annotations.security.SecurityRequirements;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -43,6 +44,7 @@ public class AuthenticationController {
     private final VerifyOtpUseCase verifyOtpUseCase;
 
     @PostMapping("/login")
+    @SecurityRequirements()
     public AuthenticationResponse login(@Valid @RequestBody LoginRequest request, HttpServletResponse response) {
         LoginResult result = loginUseCase.execute(
                 request.email(),
@@ -58,6 +60,7 @@ public class AuthenticationController {
     }
 
     @PostMapping("/register")
+    @SecurityRequirements()
     public AuthenticationResponse register(@Valid @RequestBody RegisterRequest request, HttpServletResponse response) {
 
         LoginResult result = registerUseCase.execute(
@@ -74,6 +77,7 @@ public class AuthenticationController {
     }
 
     @PostMapping("/refresh")
+    @SecurityRequirements()
     public ResponseEntity<RefreshResponse> refresh(
             @CookieValue(name = "refresh_token", required = false) String refreshToken,
             HttpServletResponse response) {
@@ -90,6 +94,7 @@ public class AuthenticationController {
     }
 
     @PostMapping("/logout")
+    @SecurityRequirements()
     public ResponseEntity<Void> logout(
             @CookieValue(name = "refresh_token", required = false) String refreshToken,
             HttpServletResponse response) {

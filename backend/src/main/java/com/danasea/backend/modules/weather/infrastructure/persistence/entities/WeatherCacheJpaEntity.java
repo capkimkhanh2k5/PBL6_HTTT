@@ -22,6 +22,7 @@ public class WeatherCacheJpaEntity extends BaseJpaEntity {
 
     private BigDecimal precipitationMm;
 
+    @Column(columnDefinition = "TEXT")
     private String rawPayload;
 
     private OffsetDateTime fetchedAt;

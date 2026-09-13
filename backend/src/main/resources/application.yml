@@ -71,3 +71,7 @@ cloudinary:
   cloud-name: ${CLOUDINARY_CLOUD_NAME:}
   api-key: ${CLOUDINARY_API_KEY:}
   api-secret: ${CLOUDINARY_API_SECRET:}
+
+open-meteo:
+  base-url: ${OPEN_METEO_BASE_URL}
+  marine-url: ${OPEN_METEO_MARINE_BASE_URL}

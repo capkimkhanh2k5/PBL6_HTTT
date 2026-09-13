@@ -36,7 +36,7 @@ public class CreateCategoryUseCase {
         }
 
         Category category = Category.builder()
-                .id(command.id() != null ? command.id() : UUID.randomUUID())
+                .id(command.id())
                 .name(command.name())
                 .nameEn(command.nameEn())
                 .slug(command.slug())

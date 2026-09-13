@@ -31,7 +31,7 @@ public class WishlistUseCase {
         }
 
         Wishlist wishlist = new Wishlist();
-        wishlist.setId(UUID.randomUUID());
+        
         wishlist.setUserId(userId);
         wishlist.setServiceId(serviceId);
         wishlist.setCreatedAt(OffsetDateTime.now());
