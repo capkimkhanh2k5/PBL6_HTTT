@@ -25,16 +25,23 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import com.danasea.backend.modules.booking.application.dtos.BookingHoldItemResult;
 import com.danasea.backend.modules.booking.application.dtos.BookingHoldResult;
+import com.danasea.backend.modules.booking.application.usecases.CancelBookingHoldUseCase;
+import com.danasea.backend.modules.booking.application.usecases.ConfirmBookingUseCase;
 import com.danasea.backend.modules.booking.application.usecases.CreateBookingHoldUseCase;
+import com.danasea.backend.modules.booking.domain.exceptions.BookingHoldExpiredException;
 import com.danasea.backend.modules.booking.domain.exceptions.InsufficientInventoryException;
 import com.danasea.backend.modules.booking.domain.exceptions.SlotNotAvailableException;
+import com.danasea.backend.modules.booking.domain.exceptions.UnauthorizedBookingAccessException;
 import com.danasea.backend.modules.booking.domain.models.BookingStatus;
 import com.danasea.backend.modules.booking.presentation.handlers.BookingExceptionHandler;
 import com.danasea.backend.shared.presentation.GlobalExceptionHandler;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -46,6 +53,12 @@ class BookingHoldControllerTest {
 
     @Mock
     private CreateBookingHoldUseCase createBookingHoldUseCase;
+
+    @Mock
+    private ConfirmBookingUseCase confirmBookingUseCase;
+
+    @Mock
+    private CancelBookingHoldUseCase cancelBookingHoldUseCase;
 
     @InjectMocks
     private BookingHoldController bookingHoldController;
@@ -191,4 +204,76 @@ class BookingHoldControllerTest {
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.code").value("INVALID_INPUT"));
     }
+
+    @Test
+    @DisplayName("POST /api/bookings/{holdId}/confirm returns 200 OK when confirmation is successful")
+    void testConfirmBookingSuccess() throws Exception {
+        UUID bookingId = UUID.randomUUID();
+        OffsetDateTime now = OffsetDateTime.now();
+
+        BookingHoldResult result = new BookingHoldResult(
+                bookingId,
+                customerId,
+                BookingStatus.CONFIRMED,
+                new BigDecimal("300.00"),
+                null,
+                Collections.emptyList(),
+                now
+        );
+
+        when(confirmBookingUseCase.execute(any())).thenReturn(result);
+
+        mockMvc.perform(post("/api/bookings/{holdId}/confirm", bookingId))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.bookingId").value(bookingId.toString()))
+                .andExpect(jsonPath("$.status").value("CONFIRMED"));
+    }
+
+    @Test
+    @DisplayName("POST /api/bookings/{holdId}/confirm returns 410 GONE when hold is expired")
+    void testConfirmBookingExpired() throws Exception {
+        UUID bookingId = UUID.randomUUID();
+        when(confirmBookingUseCase.execute(any()))
+                .thenThrow(new BookingHoldExpiredException(bookingId));
+
+        mockMvc.perform(post("/api/bookings/{holdId}/confirm", bookingId))
+                .andExpect(status().isGone())
+                .andExpect(jsonPath("$.code").value("BOOKING_HOLD_EXPIRED"));
+    }
+
+    @Test
+    @DisplayName("POST /api/bookings/{holdId}/confirm returns 403 FORBIDDEN when user is not owner")
+    void testConfirmBookingUnauthorized() throws Exception {
+        UUID bookingId = UUID.randomUUID();
+        when(confirmBookingUseCase.execute(any()))
+                .thenThrow(new UnauthorizedBookingAccessException(bookingId, customerId));
+
+        mockMvc.perform(post("/api/bookings/{holdId}/confirm", bookingId))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.code").value("UNAUTHORIZED_BOOKING_ACCESS"));
+    }
+
+    @Test
+    @DisplayName("DELETE /api/bookings/hold/{holdId} returns 204 NO_CONTENT when cancelled successfully")
+    void testCancelBookingHoldSuccess() throws Exception {
+        UUID bookingId = UUID.randomUUID();
+
+        mockMvc.perform(delete("/api/bookings/hold/{holdId}", bookingId))
+                .andExpect(status().isNoContent());
+
+        verify(cancelBookingHoldUseCase).execute(any());
+    }
+
+    @Test
+    @DisplayName("DELETE /api/bookings/hold/{holdId} returns 403 FORBIDDEN when user is not owner")
+    void testCancelBookingHoldUnauthorized() throws Exception {
+        UUID bookingId = UUID.randomUUID();
+        doThrow(new UnauthorizedBookingAccessException(bookingId, customerId))
+                .when(cancelBookingHoldUseCase).execute(any());
+
+        mockMvc.perform(delete("/api/bookings/hold/{holdId}", bookingId))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.code").value("UNAUTHORIZED_BOOKING_ACCESS"));
+    }
 }
+

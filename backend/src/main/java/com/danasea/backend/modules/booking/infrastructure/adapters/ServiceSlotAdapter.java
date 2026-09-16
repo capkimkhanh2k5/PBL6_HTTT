@@ -11,6 +11,8 @@ import java.util.stream.Collectors;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.danasea.backend.modules.booking.domain.exceptions.InsufficientInventoryException;
+import com.danasea.backend.modules.booking.domain.models.BookingItem;
 import com.danasea.backend.modules.booking.domain.models.SlotValidationDetails;
 import com.danasea.backend.modules.booking.domain.ports.ServiceSlotPort;
 import com.danasea.backend.modules.service.domain.models.ServiceStatus;
@@ -79,4 +81,20 @@ public class ServiceSlotAdapter implements ServiceSlotPort {
                 })
                 .toList();
     }
+
+    @Override
+    @Transactional
+    public void commitCapacityBatch(List<BookingItem> items) {
+        if (items == null || items.isEmpty()) {
+            return;
+        }
+
+        for (BookingItem item : items) {
+            int updated = jpaServiceSlotRepository.incrementBookedCount(item.getSlotId(), item.getQuantity());
+            if (updated == 0) {
+                throw new InsufficientInventoryException(item.getSlotId(), item.getQuantity(), 0);
+            }
+        }
+    }
 }
+

@@ -168,22 +168,22 @@
 - [ ] Vendor có quyền từ chối booking đã đặt (trước thanh toán), sau đó sẽ thông báo với khách hàng và recommend các vendor khác có slot trống (không tự động chuyển sang vendor khác), và nếu khách không đồng ý thì xoá booking + hoàn tiền mục từ chối đó
 
 ### API
-- [ ] POST /api/bookings/hold (giữ chỗ nhiều dịch vụ trong 1 lần, TTL 10-15 phút)
-- [ ] POST /api/bookings/{holdId}/confirm (chỉ xác nhận sau khi thanh toán toàn bộ thành công)
-- [ ] DELETE /api/bookings/hold/{holdId}
+- [x] POST /api/bookings/hold (giữ chỗ nhiều dịch vụ trong 1 lần, TTL 10-15 phút)
+- [x] POST /api/bookings/{holdId}/confirm (chỉ xác nhận sau khi thanh toán toàn bộ thành công)
+- [x] DELETE /api/bookings/hold/{holdId}
 - [ ] GET /api/bookings/{id}
 - [ ] GET /api/bookings
 - [ ] GET /api/vendor/bookings
 - [ ] PATCH /api/bookings/{id}/cancel (áp rule mất toàn bộ tiền nếu trễ)
 - [ ] PATCH /api/vendor/bookings/{id}/reject (nếu được cho phép)
-- [ ] Scheduled job dọn Redis hold hết hạn + rollback inventory
+- [x] Scheduled job dọn Redis hold hết hạn + rollback inventory
 
 ### Test
-- [ ] CreateBookingHoldUseCaseTest (nhiều dịch vụ trong 1 hold, slot hết → chặn, TTL đúng)
-- [ ] ConfirmBookingUseCaseTest (chỉ confirm khi đã thanh toán đủ, hold hết hạn → lỗi, sai owner → 403)
+- [x] CreateBookingHoldUseCaseTest (nhiều dịch vụ trong 1 hold, slot hết → chặn, TTL đúng)
+- [x] ConfirmBookingUseCaseTest (chỉ confirm khi đã thanh toán đủ, hold hết hạn → lỗi, sai owner → 403)
 - [ ] Test race condition đa luồng thật (2 request giữ slot cuối cùng, dùng Lua script atomic)
 - [ ] CancelBookingUseCaseTest (đúng mốc thời gian mất toàn bộ tiền)
-- [ ] BookingExpiryJobTest (rollback đúng, không rollback nhầm hold đã confirm)
+- [x] BookingExpiryJobTest (rollback đúng, không rollback nhầm hold đã confirm)
 - [ ] BookingControllerTest (IDOR: khách A/B, vendor không liên quan)
 
 ---
