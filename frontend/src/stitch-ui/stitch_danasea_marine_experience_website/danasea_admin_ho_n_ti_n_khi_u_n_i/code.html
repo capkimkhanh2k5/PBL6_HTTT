@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+
+<html lang="vi"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700&amp;family=Syne:wght@600;700&amp;display=swap" rel="stylesheet"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><style>@layer base{html,body{margin:0;padding:0;}body{overscroll-behavior:none;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config={darkMode:"class",theme:{extend:{"colors":{"tertiary-container":"#5a7784","on-tertiary":"#ffffff","on-error-container":"#93000a","surface-container-lowest":"#ffffff","on-secondary-fixed-variant":"#891d0f","on-surface-variant":"#3e494a","error":"#ba1a1a","on-tertiary-fixed":"#001f29","primary-container":"#087f8c","on-primary-container":"#effdff","outline":"#6e797b","surface-container-high":"#e4e9ea","surface":"#f5fafb","surface-bright":"#f5fafb","on-secondary":"#ffffff","on-secondary-container":"#6c0600","on-primary-fixed":"#001f24","on-primary":"#ffffff","secondary-fixed-dim":"#ffb4a7","tertiary":"#425e6a","background":"#f5fafb","secondary-fixed":"#ffdad4","surface-variant":"#dee3e4","secondary-container":"#fb7059","tertiary-fixed":"#c9e7f6","surface-tint":"#006874","inverse-primary":"#79d4e2","on-primary-fixed-variant":"#004f57","surface-container-highest":"#dee3e4","on-surface":"#171d1e","on-error":"#ffffff","primary":"#00646f","inverse-on-surface":"#edf2f3","outline-variant":"#bdc9ca","surface-container":"#eaeff0","secondary":"#aa3524","on-background":"#171d1e","surface-dim":"#d6dbdc","primary-fixed-dim":"#79d4e2","primary-fixed":"#95f1ff","error-container":"#ffdad6","on-tertiary-fixed-variant":"#2e4b56","surface-container-low":"#eff4f5","on-secondary-fixed":"#400200","on-tertiary-container":"#f4fbff","inverse-surface":"#2c3132","tertiary-fixed-dim":"#adcbd9"},"borderRadius":{"DEFAULT":"0.25rem","lg":"0.5rem","xl":"0.75rem","full":"9999px"},"spacing":{"margin":"5rem","margin-sm":"1.5rem","space-sm":"0.5rem","gutter":"1.5rem","space-xs":"0.25rem","gutter-sm":"1rem","space-md":"1rem","space-3xl":"4.5rem","space-lg":"1.5rem","space-2xl":"3rem","margin-md":"3rem","gutter-lg":"2rem","space-xl":"2rem"},"fontFamily":{"label-md":["Plus Jakarta Sans"],"headline-xl":["Syne"],"headline-lg":["Syne"],"headline-md":["Syne"],"body-xl":["Plus Jakarta Sans"],"label-lg":["Plus Jakarta Sans"],"body-sm":["Plus Jakarta Sans"],"body-lg":["Plus Jakarta Sans"],"label-sm":["Plus Jakarta Sans"],"display-xl":["Syne"],"headline-sm":["Syne"],"display-lg":["Syne"],"body-md":["Plus Jakarta Sans"]},"fontSize":{"label-md":["12px",{"lineHeight":"16px","letterSpacing":"0.02em","fontWeight":"600"}],"headline-xl":["36px",{"lineHeight":"44px","letterSpacing":"-0.015em","fontWeight":"700"}],"headline-lg":["28px",{"lineHeight":"36px","letterSpacing":"-0.01em","fontWeight":"600"}],"headline-md":["22px",{"lineHeight":"30px","letterSpacing":"-0.01em","fontWeight":"600"}],"body-xl":["18px",{"lineHeight":"28px","fontWeight":"400"}],"label-lg":["14px",{"lineHeight":"20px","letterSpacing":"0.01em","fontWeight":"600"}],"body-sm":["12px",{"lineHeight":"18px","fontWeight":"400"}],"body-lg":["16px",{"lineHeight":"24px","fontWeight":"400"}],"label-sm":["11px",{"lineHeight":"14px","letterSpacing":"0.04em","fontWeight":"700"}],"display-xl":["56px",{"lineHeight":"64px","letterSpacing":"-0.02em","fontWeight":"700"}],"headline-sm":["18px",{"lineHeight":"26px","fontWeight":"600"}],"display-lg":["44px",{"lineHeight":"52px","letterSpacing":"-0.02em","fontWeight":"700"}],"body-md":["14px",{"lineHeight":"22px","fontWeight":"400"}]}}}}</script></head><body class="bg-surface font-body-md text-on-surface antialiased"><aside class="fixed left-0 top-0 h-screen w-[260px] bg-inverse-surface z-50 flex flex-col justify-between shadow-[0_1px_8px_rgba(0,0,0,0.04)]"><div class="flex flex-col flex-1 overflow-y-auto"><div class="p-space-lg flex flex-col gap-space-xs"><div class="flex items-center gap-space-sm"><img alt="DANASEA brand logo with minimalistic dual ocean wave crest lines in ocean teal and coral accent, with modern bold wordmark in navy." class="h-8 w-auto object-contain" src="https://lh3.googleusercontent.com/aida/AEtjO1VvnQOF2WU9kDEsZEZSN1YNSkRu6Z2_49elqxL3W3H70QznUBWpRk31Nl8LKj_EuTvgl-aPxe6h0dUp3LQoVfVp01RNmSAB12-rEJv9MhU2f6AD8_vRSyZKyBDLqn3tWQ7HSf6YYVjpkEi7NAsR7cdkAV2bJI_xlmT9yaP7M2ZKZGl5F50so_t-2hiC_8z0eIbcNWKyv92AX50LCfgsO70-dTgI05kaKyZFg3UL59SF-eKVOPSxGgBwn7Ct"/><span class="font-headline-sm text-headline-sm font-bold tracking-tight text-on-primary">DANASEA</span></div><div class="mt-space-xs"><span class="inline-flex items-center px-space-xs py-0.5 rounded bg-primary-container/20 text-inverse-primary font-label-sm text-label-sm uppercase tracking-wider">HỆ THỐNG QUẢN TRỊ CẢNG VỤ</span></div></div><nav class="flex-1 px-space-md py-space-xs flex flex-col gap-1" data-active-classes="bg-primary-container text-on-primary-container font-semibold rounded-lg shadow-sm"><a class="flex items-center gap-space-sm px-space-md py-2.5 rounded-lg text-outline-variant hover:bg-surface-variant/20 hover:text-on-primary transition-colors" data-path="tong-quan" href="#"><span class="material-symbols-outlined text-[20px]">dashboard</span><span class="font-label-lg text-label-lg">Tổng quan</span></a><a class="flex items-center gap-space-sm px-space-md py-2.5 rounded-lg text-outline-variant hover:bg-surface-variant/20 hover:text-on-primary transition-colors" data-path="nguoi-dung-vai-tro" href="#"><span class="material-symbols-outlined text-[20px]">manage_accounts</span><span class="font-label-lg text-label-lg">Người dùng &amp; Vai trò</span></a><a class="flex items-center gap-space-sm px-space-md py-2.5 rounded-lg text-outline-variant hover:bg-surface-variant/20 hover:text-on-primary transition-colors" data-path="doi-tac-van-hanh" href="#"><span class="material-symbols-outlined text-[20px]">corporate_fare</span><span class="font-label-lg text-label-lg">Đối tác vận hành</span></a><a class="flex items-center gap-space-sm px-space-md py-2.5 rounded-lg text-outline-variant hover:bg-surface-variant/20 hover:text-on-primary transition-colors" data-path="dich-vu-duyet-tour" href="#"><span class="material-symbols-outlined text-[20px]">fact_check</span><span class="font-label-lg text-label-lg">Dịch vụ &amp; Duyệt tour</span></a><a class="flex items-center gap-space-sm px-space-md py-2.5 rounded-lg text-outline-variant hover:bg-surface-variant/20 hover:text-on-primary transition-colors" data-path="danh-muc-trai-nghiem" href="#"><span class="material-symbols-outlined text-[20px]">kayaking</span><span class="font-label-lg text-label-lg">Danh mục trải nghiệm</span></a><a class="flex items-center gap-space-sm px-space-md py-2.5 rounded-lg text-outline-variant hover:bg-surface-variant/20 hover:text-on-primary transition-colors" data-path="don-thanh-toan" href="#"><span class="material-symbols-outlined text-[20px]">receipt_long</span><span class="font-label-lg text-label-lg">Đơn &amp; Thanh toán</span></a><a class="flex items-center gap-space-sm px-space-md py-2.5 rounded-lg text-outline-variant hover:bg-surface-variant/20 hover:text-on-primary transition-colors" data-path="hoan-tien-khieu-nai" href="#"><span class="material-symbols-outlined text-[20px]">assignment_return</span><span class="font-label-lg text-label-lg">Hoàn tiền &amp; Khiếu nại</span></a><a class="flex items-center gap-space-sm px-space-md py-2.5 rounded-lg text-outline-variant hover:bg-surface-variant/20 hover:text-on-primary transition-colors" data-path="khuyen-mai-toan-san" href="#"><span class="material-symbols-outlined text-[20px]">sell</span><span class="font-label-lg text-label-lg">Khuyến mãi toàn sàn</span></a><a class="flex items-center gap-space-sm px-space-md py-2.5 rounded-lg text-outline-variant hover:bg-surface-variant/20 hover:text-on-primary transition-colors" data-path="doi-soat-quyet-toan" href="#"><span class="material-symbols-outlined text-[20px]">account_balance</span><span class="font-label-lg text-label-lg">Đối soát &amp; Quyết toán</span></a><a class="flex items-center gap-space-sm px-space-md py-2.5 rounded-lg text-outline-variant hover:bg-surface-variant/20 hover:text-on-primary transition-colors" data-path="cau-hinh-an-toan-bien" href="#"><span class="material-symbols-outlined text-[20px]">shield</span><span class="font-label-lg text-label-lg">Cấu hình &amp; An toàn biển</span></a><a class="flex items-center gap-space-sm px-space-md py-2.5 rounded-lg text-outline-variant hover:bg-surface-variant/20 hover:text-on-primary transition-colors" data-path="nhat-ky-he-thong" href="#"><span class="material-symbols-outlined text-[20px]">history_toggle_off</span><span class="font-label-lg text-label-lg">Nhật ký hệ thống</span></a></nav></div><div class="p-space-md bg-inverse-surface"><div class="flex items-center gap-space-sm p-space-sm rounded-xl bg-surface-variant/10 text-on-primary"><div class="w-9 h-9 rounded-full bg-primary flex items-center justify-center text-on-primary font-bold"><span class="material-symbols-outlined text-[20px]">person</span></div><div class="flex flex-col min-w-0 flex-1"><span class="font-label-md text-label-md text-on-primary truncate">Trần Hải Đăng</span><span class="font-label-sm text-label-sm text-outline-variant truncate">Ban QL Cảng VITA • ADMIN</span></div><span class="material-symbols-outlined text-outline-variant text-[18px]">more_vert</span></div></div></aside><div class="pl-[260px]"><header class="fixed top-0 left-[260px] right-0 h-16 bg-surface/80 backdrop-blur-xl shadow-[0_1px_8px_rgba(0,0,0,0.04)] z-40 flex items-center justify-between px-space-xl"><div class="flex items-center gap-space-lg flex-1 max-w-xl"><div class="relative w-full max-w-md"><span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline text-[20px]">search</span><input class="w-full h-10 pl-10 pr-space-md rounded-xl bg-surface-container-lowest text-on-surface font-body-md text-body-md placeholder:text-outline focus:outline-none focus:ring-1 focus:ring-primary shadow-sm" placeholder="Tìm kiếm hồ sơ, đơn vị vận hành, mã tour..." type="text"/></div><div class="hidden xl:flex items-center gap-2 px-space-sm py-1.5 rounded-full bg-surface-container"><span class="w-2 h-2 rounded-full bg-primary-container animate-pulse"></span><span class="font-label-sm text-label-sm text-on-surface-variant">Kết nối CSDL Hàng hải 100%</span></div></div><div class="flex items-center gap-space-md"><div class="hidden md:flex items-center gap-2 px-space-md py-1.5 rounded-lg bg-secondary-container/20 text-on-secondary-container font-label-md text-label-md"><span class="material-symbols-outlined text-secondary text-[18px]">notification_important</span><span>8 Cần duyệt</span></div><button class="relative w-10 h-10 rounded-full flex items-center justify-center text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors"><span class="material-symbols-outlined text-[22px]">notifications</span><span class="absolute top-2 right-2 w-2 h-2 bg-secondary rounded-full"></span></button><div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center"><span class="material-symbols-outlined text-on-primary text-[18px]">person</span></div></div></header><main class="w-full pt-16 bg-surface px-space-xl pb-space-2xl min-h-screen"><div class="flex flex-col w-full">
+<!-- Dynamic Notification Bar / Top Status Bar -->
+<div class="mb-space-lg flex flex-col md:flex-row md:items-center justify-between gap-space-md">
+<div>
+<div class="flex items-center gap-space-xs text-primary font-label-md text-label-md uppercase tracking-wider mb-1">
+<span class="material-symbols-outlined text-[16px]">verified_user</span>
+<span>Hội đồng Phân xử &amp; Giám sát Du lịch Biển Đà Nẵng</span>
+</div>
+<h1 class="font-headline-xl text-headline-xl text-on-surface tracking-tight">Thẩm định Khiếu nại &amp; Quản trị Hoàn tiền Dịch vụ Biển</h1>
+<p class="font-body-md text-body-md text-on-surface-variant max-w-3xl mt-1">
+        Trung tâm tiếp nhận tranh chấp du khách - đối tác và thực hiện lệnh hoàn tiền về phương thức gốc theo chuẩn quy chế Ban Quản lý.
+      </p>
+</div>
+<!-- Active Operational Badges -->
+<div class="flex items-center gap-space-sm self-start md:self-auto">
+<div class="px-space-md py-2 bg-surface-container rounded-xl flex items-center gap-space-sm shadow-sm">
+<span class="w-2.5 h-2.5 rounded-full bg-primary animate-ping"></span>
+<div class="text-left">
+<span class="block font-label-sm text-label-sm text-outline">Phiên làm việc</span>
+<span class="font-label-md text-label-md text-on-surface">Ca trực Hải Đăng #04</span>
+</div>
+</div>
+<button class="px-space-md py-2.5 bg-surface-container-lowest text-primary font-label-md text-label-md rounded-xl shadow-sm hover:bg-surface-container transition-all flex items-center gap-2">
+<span class="material-symbols-outlined text-[18px]">file_download</span>
+<span>Xuất biên bản đối soát</span>
+</button>
+</div>
+</div>
+<!-- Primary Navigation Tabs -->
+<div class="flex items-center gap-space-sm mb-space-lg">
+<button class="px-space-lg py-3 bg-primary-container text-on-primary-container font-label-lg text-label-lg rounded-xl shadow-sm flex items-center gap-2 transition-all">
+<span class="material-symbols-outlined text-[20px]">gavel</span>
+<span>Khiếu nại &amp; Tranh chấp (Disputes)</span>
+<span class="px-2 py-0.5 rounded-full bg-surface-container-lowest/30 text-on-primary font-label-sm text-label-sm ml-1">03 việc</span>
+</button>
+<button class="px-space-lg py-3 bg-surface-container-lowest text-on-surface-variant hover:text-on-surface font-label-lg text-label-lg rounded-xl shadow-sm flex items-center gap-2 transition-all">
+<span class="material-symbols-outlined text-[20px]">currency_exchange</span>
+<span>Lệnh hoàn tiền (Refunds)</span>
+<span class="px-2 py-0.5 rounded-full bg-surface-container text-on-surface-variant font-label-sm text-label-sm ml-1">18 giao dịch</span>
+</button>
+</div>
+<!-- Metric Statistics Cards -->
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-space-md mb-space-xl">
+<!-- Card 1 -->
+<div class="p-space-lg rounded-2xl bg-surface-container-lowest shadow-sm flex flex-col justify-between relative overflow-hidden group hover:shadow-md transition-all">
+<div class="flex items-start justify-between">
+<div>
+<span class="font-label-sm text-label-sm text-outline uppercase tracking-wider">Hồ sơ chờ xử lý</span>
+<h3 class="font-display-lg text-display-lg text-secondary mt-1">02</h3>
+</div>
+<div class="w-12 h-12 rounded-xl bg-secondary/10 text-secondary flex items-center justify-center">
+<span class="material-symbols-outlined text-[26px]">pending_actions</span>
+</div>
+</div>
+<div class="mt-space-md flex items-center gap-1.5 text-secondary font-label-sm text-label-sm">
+<span class="inline-block w-2 h-2 rounded-full bg-secondary"></span>
+<span>01 hồ sơ cần thẩm định hiện trường</span>
+</div>
+</div>
+<!-- Card 2 -->
+<div class="p-space-lg rounded-2xl bg-surface-container-lowest shadow-sm flex flex-col justify-between relative overflow-hidden group hover:shadow-md transition-all">
+<div class="flex items-start justify-between">
+<div>
+<span class="font-label-sm text-label-sm text-outline uppercase tracking-wider">Đã giải quyết công tâm</span>
+<h3 class="font-display-lg text-display-lg text-primary mt-1">45</h3>
+</div>
+<div class="w-12 h-12 rounded-xl bg-primary/10 text-primary flex items-center justify-center">
+<span class="material-symbols-outlined text-[26px]">task_alt</span>
+</div>
+</div>
+<div class="mt-space-md flex items-center gap-1.5 text-primary font-label-sm text-label-sm">
+<span class="material-symbols-outlined text-[16px]">balance</span>
+<span>100% hồ sơ minh bạch quy chế</span>
+</div>
+</div>
+<!-- Card 3 -->
+<div class="p-space-lg rounded-2xl bg-surface-container-lowest shadow-sm flex flex-col justify-between relative overflow-hidden group hover:shadow-md transition-all">
+<div class="flex items-start justify-between">
+<div>
+<span class="font-label-sm text-label-sm text-outline uppercase tracking-wider">Tỷ lệ hài lòng phân xử</span>
+<h3 class="font-display-lg text-display-lg text-on-surface mt-1">96.2<span class="text-headline-md">%</span></h3>
+</div>
+<div class="w-12 h-12 rounded-xl bg-primary-container/10 text-primary-container flex items-center justify-center">
+<span class="material-symbols-outlined text-[26px]">sentiment_very_satisfied</span>
+</div>
+</div>
+<div class="mt-space-md">
+<div class="w-full h-1.5 bg-surface-container rounded-full overflow-hidden">
+<div class="h-full bg-primary-container rounded-full" style="width: 96.2%"></div>
+</div>
+</div>
+</div>
+<!-- Card 4 -->
+<div class="p-space-lg rounded-2xl bg-surface-container-lowest shadow-sm flex flex-col justify-between relative overflow-hidden group hover:shadow-md transition-all">
+<div class="flex items-start justify-between">
+<div>
+<span class="font-label-sm text-label-sm text-outline uppercase tracking-wider">Hoàn tiền bảo vệ du khách</span>
+<h3 class="font-headline-xl text-headline-xl text-primary font-bold mt-1">18.420.000<span class="font-body-md text-body-md ml-1 text-on-surface-variant font-normal">đ</span></h3>
+</div>
+<div class="w-12 h-12 rounded-xl bg-primary/10 text-primary flex items-center justify-center">
+<span class="material-symbols-outlined text-[26px]">account_balance_wallet</span>
+</div>
+</div>
+<div class="mt-space-md flex items-center gap-1.5 text-on-surface-variant font-label-sm text-label-sm">
+<span class="material-symbols-outlined text-[16px]">lock_reset</span>
+<span>Chi trả trực tiếp về phương thức gốc</span>
+</div>
+</div>
+</div>
+<!-- Main 2-Column Split Workspace -->
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-space-lg items-start">
+<!-- LEFT COLUMN: Disputes List (5 cols) -->
+<div class="lg:col-span-5 flex flex-col gap-space-md">
+<div class="p-space-md bg-surface-container-lowest rounded-2xl shadow-sm flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-[20px]">filter_list</span>
+<span class="font-label-lg text-label-lg text-on-surface">Danh sách tranh chấp</span>
+<span class="px-2 py-0.5 rounded bg-surface-container text-on-surface-variant font-label-sm text-label-sm">3 vụ việc</span>
+</div>
+<div class="flex items-center gap-1 text-outline font-label-sm text-label-sm">
+<span>Sắp xếp:</span>
+<span class="text-on-surface font-semibold">Ưu tiên khẩn cấp</span>
+</div>
+</div>
+<!-- Case 1: Active / Selected -->
+<div class="p-space-lg rounded-2xl bg-surface-container-lowest shadow-md ring-2 ring-primary-container relative cursor-pointer transition-all">
+<div class="flex items-center justify-between gap-2 mb-2">
+<span class="px-2 py-0.5 rounded bg-primary-container/15 text-primary-container font-label-sm text-label-sm">#DISP-9921</span>
+<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-secondary-container/20 text-on-secondary-container font-label-sm text-label-sm">
+<span class="w-1.5 h-1.5 rounded-full bg-secondary animate-pulse"></span>
+            ĐANG THẨM ĐỊNH
+          </span>
+</div>
+<h4 class="font-headline-sm text-headline-sm text-on-surface mb-2 line-clamp-1">Mô tô nước Bãi Non Nước - Thiết bị bảo hộ cũ rách</h4>
+<div class="space-y-1.5 mb-space-md text-on-surface-variant font-body-sm text-body-sm">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[16px] text-outline">person</span>
+<span>Du khách: <strong class="text-on-surface font-semibold">Nguyễn Văn An</strong></span>
+</div>
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[16px] text-outline">sailing</span>
+<span>Đối tác: <span class="text-on-surface">CLB Jetski Sơn Trà Xanh</span></span>
+</div>
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[16px] text-outline">category</span>
+<span>Phân loại: <span class="px-1.5 py-0.5 rounded bg-surface-container font-medium text-on-surface">Trang thiết bị bảo hộ</span></span>
+</div>
+</div>
+<div class="pt-space-sm bg-surface-container-low -mx-space-lg -mb-space-lg px-space-lg py-2.5 rounded-b-2xl flex items-center justify-between">
+<span class="font-label-sm text-label-sm text-outline flex items-center gap-1">
+<span class="material-symbols-outlined text-[15px]">schedule</span>
+            Hôm nay lúc 10:15
+          </span>
+<span class="font-label-sm text-label-sm text-primary font-semibold flex items-center gap-1">
+            Đang mở chi tiết
+            <span class="material-symbols-outlined text-[16px]">chevron_right</span>
+</span>
+</div>
+</div>
+<!-- Case 2: Resolved -->
+<div class="p-space-lg rounded-2xl bg-surface-container-lowest shadow-sm hover:shadow-md transition-all cursor-pointer">
+<div class="flex items-center justify-between gap-2 mb-2">
+<span class="px-2 py-0.5 rounded bg-surface-container text-outline font-label-sm text-label-sm">#DISP-9840</span>
+<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-primary/10 text-primary font-label-sm text-label-sm">
+<span class="w-1.5 h-1.5 rounded-full bg-primary"></span>
+            ĐÃ GIẢI QUYẾT
+          </span>
+</div>
+<h4 class="font-headline-sm text-headline-sm text-on-surface mb-2 line-clamp-1">Lặn ngắm san hô Bãi Rạng - Xuất phát muộn 35 phút</h4>
+<div class="space-y-1.5 mb-space-md text-on-surface-variant font-body-sm text-body-sm">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[16px] text-outline">person</span>
+<span>Du khách: <strong class="text-on-surface font-semibold">Trần Thu Hà</strong></span>
+</div>
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[16px] text-outline">scuba_diving</span>
+<span>Đối tác: <span class="text-on-surface">Son Tra Marine Diving</span></span>
+</div>
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[16px] text-outline">handshake</span>
+<span>Kết luận: <span class="text-primary font-medium">Thỏa thuận đền bù hoàn 20%</span></span>
+</div>
+</div>
+<div class="pt-space-xs flex items-center justify-between font-label-sm text-label-sm text-outline">
+<span class="flex items-center gap-1">
+<span class="material-symbols-outlined text-[15px]">event</span>
+            Hôm qua, 16:40
+          </span>
+<span class="text-outline-variant">Lệnh #REF-0914 đã chuyển</span>
+</div>
+</div>
+<!-- Case 3: Rejected -->
+<div class="p-space-lg rounded-2xl bg-surface-container-lowest shadow-sm hover:shadow-md transition-all cursor-pointer">
+<div class="flex items-center justify-between gap-2 mb-2">
+<span class="px-2 py-0.5 rounded bg-surface-container text-outline font-label-sm text-label-sm">#DISP-9712</span>
+<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-surface-variant text-on-surface-variant font-label-sm text-label-sm">
+<span class="w-1.5 h-1.5 rounded-full bg-outline"></span>
+            TỪ CHỐI
+          </span>
+</div>
+<h4 class="font-headline-sm text-headline-sm text-on-surface mb-2 line-clamp-1">Chèo SUP Mũi Nghê - Thời tiết biển động có dòng chảy</h4>
+<div class="space-y-1.5 mb-space-md text-on-surface-variant font-body-sm text-body-sm">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[16px] text-outline">person</span>
+<span>Du khách: <strong class="text-on-surface font-semibold">Lê Quốc Bảo</strong></span>
+</div>
+<div class="flex items-start gap-2">
+<span class="material-symbols-outlined text-[16px] text-outline mt-0.5">info</span>
+<span class="line-clamp-2">Căn cứ nhật ký cảng vụ: Luồng chèo nằm trong vùng an toàn phao báo quy chuẩn.</span>
+</div>
+</div>
+<div class="pt-space-xs flex items-center justify-between font-label-sm text-label-sm text-outline">
+<span class="flex items-center gap-1">
+<span class="material-symbols-outlined text-[15px]">event</span>
+            14/10/2024
+          </span>
+<span class="text-outline-variant">Đã đóng hồ sơ</span>
+</div>
+</div>
+</div>
+<!-- RIGHT COLUMN: Detailed Adjudication Drawer (#DISP-9921) (7 cols) -->
+<div class="lg:col-span-7 flex flex-col gap-space-lg">
+<!-- Dispute Dossier Master Panel -->
+<div class="p-space-xl bg-surface-container-lowest rounded-3xl shadow-sm space-y-space-xl">
+<!-- Header & Dossier Identification -->
+<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-space-md pb-space-lg bg-surface-container-low -mx-space-xl -mt-space-xl p-space-xl rounded-t-3xl">
+<div>
+<div class="flex items-center gap-2">
+<span class="px-2.5 py-1 rounded-lg bg-primary text-on-primary font-label-sm text-label-sm font-bold">HỒ SƠ TRANH CHẤP #DISP-9921</span>
+<span class="px-2.5 py-1 rounded-lg bg-secondary-container/20 text-on-secondary-container font-label-sm text-label-sm font-semibold">CẦN PHÂN XỬ</span>
+</div>
+<h2 class="font-headline-md text-headline-md text-on-surface mt-2">Mô tô nước Bãi Non Nước - Thiết bị bảo hộ cũ rách</h2>
+</div>
+<div class="text-left sm:text-right">
+<span class="block font-label-sm text-label-sm text-outline">Thời gian tiếp nhận</span>
+<span class="font-label-md text-label-md text-on-surface">10:15 - 16/10/2024</span>
+</div>
+</div>
+<!-- Stakeholders Data Row -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-space-md">
+<!-- Du khách -->
+<div class="p-space-md rounded-2xl bg-surface-container flex flex-col gap-2">
+<div class="flex items-center justify-between">
+<span class="font-label-sm text-label-sm text-outline uppercase tracking-wider">Bên phản ánh (Du khách)</span>
+<span class="material-symbols-outlined text-primary text-[18px]">verified</span>
+</div>
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-full bg-primary-container text-on-primary flex items-center justify-center font-bold">
+                NA
+              </div>
+<div class="min-w-0">
+<p class="font-label-lg text-label-lg text-on-surface font-semibold truncate">Nguyễn Văn An</p>
+<p class="font-body-sm text-body-sm text-on-surface-variant truncate">0905 ••• 882 • an.nguyen@email.vn</p>
+</div>
+</div>
+<div class="pt-2 text-outline-variant font-label-sm text-label-sm flex items-center gap-2">
+<span class="material-symbols-outlined text-[15px]">credit_card</span>
+<span>Thanh toán qua: <strong class="text-on-surface">SEPAY (Techcombank ****5921)</strong></span>
+</div>
+</div>
+<!-- Đối tác -->
+<div class="p-space-md rounded-2xl bg-surface-container flex flex-col gap-2">
+<div class="flex items-center justify-between">
+<span class="font-label-sm text-label-sm text-outline uppercase tracking-wider">Đơn vị vận hành bị phản ánh</span>
+<span class="px-2 py-0.5 rounded bg-surface-container-high font-label-sm text-label-sm text-on-surface-variant">Hợp tác cấp 1</span>
+</div>
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-full bg-tertiary-container text-on-tertiary flex items-center justify-center">
+<span class="material-symbols-outlined text-[20px]">kayaking</span>
+</div>
+<div class="min-w-0">
+<p class="font-label-lg text-label-lg text-on-surface font-semibold truncate">CLB Jetski Sơn Trà Xanh</p>
+<p class="font-body-sm text-body-sm text-on-surface-variant truncate">Giấy phép bến bãi: #DN-MB-2023/88</p>
+</div>
+</div>
+<div class="pt-2 text-outline-variant font-label-sm text-label-sm flex items-center gap-2">
+<span class="material-symbols-outlined text-[15px]">receipt</span>
+<span>Đơn con: <strong class="text-on-surface">#SUB-88104-02</strong> • 850.000 đ</span>
+</div>
+</div>
+</div>
+<!-- Section: Traveler's Claim -->
+<div class="space-y-space-sm">
+<div class="flex items-center gap-2 text-on-surface font-label-lg text-label-lg">
+<span class="material-symbols-outlined text-secondary text-[20px]">chat_error</span>
+<span>Nội dung phản ánh từ du khách</span>
+</div>
+<div class="p-space-lg rounded-2xl bg-surface-container-low text-on-surface font-body-md text-body-md leading-relaxed">
+            “Tôi đặt gói mô tô nước 30 phút tại Bãi Non Nước lúc 09:30 sáng. Khi nhận áo phao, một bên dây khóa ngực đã bị đứt gãy sờn rách, tiềm ẩn nguy cơ chìm khi ngã xuống nước ở tốc độ cao. Tôi yêu cầu nhân viên đổi nhưng bãi báo hết áo size L, phải chờ điều phối từ kho khác mất gần 20 phút. Trải nghiệm bị gián đoạn và tôi cảm thấy an toàn hàng hải không được đảm bảo như cam kết của Danasea.”
+          </div>
+</div>
+<!-- Section: Photographic & Video Evidence -->
+<div class="space-y-space-sm">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2 text-on-surface font-label-lg text-label-lg">
+<span class="material-symbols-outlined text-primary text-[20px]">perm_media</span>
+<span>Hình ảnh bằng chứng hiện trường</span>
+<span class="font-label-sm text-label-sm text-outline">(02 tệp đính kèm)</span>
+</div>
+<span class="font-label-sm text-label-sm text-primary">Nhấp để phóng to ảnh</span>
+</div>
+<div class="grid grid-cols-1 sm:grid-cols-2 gap-space-md">
+<!-- Evidence 1 -->
+<div class="relative rounded-2xl overflow-hidden group shadow-sm bg-surface-container">
+<img class="w-full h-44 object-cover group-hover:scale-105 transition-transform duration-300" data-alt="Close up shot of damaged ocean sports life jacket with torn strap and frayed stitching lying on sandy beach in Da Nang, high detail nautical inspection style, teal water in background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBq6lHGGmZKrHAA4FsmmsMtvPcTe89SqQ3bli57j6QLa3a5bwAB4LxwkMKH6OOu8KDdKi5eNvgp1oLv3XYke2TMGZOVRL_YUyWJzlCWADhCX129cSc72BFiFVl2I0rXtqXJbKNrZ8gpcC3PbjMfe7hrI-5YjGj4w1Jt6NwFHHGa6R-0WUR1O8a7GTejIOm1mD0Pr2Zn1rreu-wTtMb6vZrDiZekY90vHdslimNmQw9MLq8qpOmnxih3Dw"/>
+<div class="absolute inset-0 bg-gradient-to-t from-inverse-surface/80 via-transparent to-transparent flex flex-col justify-end p-3">
+<span class="font-label-sm text-label-sm text-on-primary font-semibold">Ảnh 1: Khóa áo phao sờn đứt</span>
+<span class="font-body-sm text-body-sm text-surface-variant text-xs">Chụp lúc 09:38 AM • GPS: 16.0331° N, 108.2612° E</span>
+</div>
+</div>
+<!-- Evidence 2 -->
+<div class="relative rounded-2xl overflow-hidden group shadow-sm bg-surface-container">
+<img class="w-full h-44 object-cover group-hover:scale-105 transition-transform duration-300" data-alt="High quality photography of a watercraft jet ski docked at Son Tra Da Nang shoreline with safety staff in background, sunny daylight, high contrast professional travel evidence" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAlAxs0qxOlLwzqCqQKiFa1SOvVTcbiIEvUFxtIT_pSFEzOouLK9UFSPjASnyAKGuJAU2KQ833OTcoGzf0oK6PV1OChnECJYUINLwU4s7Gy9TWptQjyWlEPu7L0EQX-VYa7nj5ohUnEQ6t2lJiGZFb98qccBjJK82tpnSX6taY89lKGw3tVo6MpCayeXXPQF4zPGAR1D9tYTAI-avjrVCPR9BNCauo_eSUry3oQWbYKfFYtu8QWgQo-Ig"/>
+<div class="absolute inset-0 bg-gradient-to-t from-inverse-surface/80 via-transparent to-transparent flex flex-col justify-end p-3">
+<span class="font-label-sm text-label-sm text-on-primary font-semibold">Ảnh 2: Số hiệu phao &amp; Mô tô Jetski #04</span>
+<span class="font-body-sm text-body-sm text-surface-variant text-xs">Chụp lúc 09:40 AM • Trực tiếp tại phao tiêu bãi</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Section: Port Authority Maritime Field Telemetry -->
+<div class="p-space-lg rounded-2xl bg-surface-container space-y-space-sm">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2 text-on-surface font-label-lg text-label-lg">
+<span class="material-symbols-outlined text-primary text-[20px]">radar</span>
+<span>Nhật ký điều phối thực địa Cảng vụ Đà Nẵng</span>
+</div>
+<span class="px-2 py-0.5 rounded bg-primary/10 text-primary font-label-sm text-label-sm font-semibold">DỮ LIỆU ĐÃ XÁC THỰC</span>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-space-sm text-on-surface-variant font-body-sm text-body-sm">
+<div class="p-2.5 bg-surface-container-lowest rounded-xl">
+<span class="block text-outline text-xs">Tọa độ phao an toàn</span>
+<span class="font-semibold text-on-surface">Khu vực Non Nước Zone B</span>
+</div>
+<div class="p-2.5 bg-surface-container-lowest rounded-xl">
+<span class="block text-outline text-xs">Ca trực cứu hộ bãi</span>
+<span class="font-semibold text-on-surface">Tổ cứu hộ số 3 (Có mặt)</span>
+</div>
+<div class="p-2.5 bg-surface-container-lowest rounded-xl">
+<span class="block text-outline text-xs">Nhật ký can thiệp</span>
+<span class="font-semibold text-secondary">Đổi phao trễ 18 phút</span>
+</div>
+</div>
+<p class="text-xs text-outline italic">
+            * Căn cứ điều 14 Quy chế An toàn du lịch biển: Phương tiện và đồ cứu sinh phải sẵn sàng kiểm định trước khi đón khách. Hành vi chậm trễ gây cắt giảm thời gian trải nghiệm đủ điều kiện đền bù.
+          </p>
+</div>
+<!-- Resolution Decision Module -->
+<div class="p-space-xl rounded-2xl bg-surface-container-low space-y-space-md">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2 text-on-surface font-headline-sm text-headline-sm">
+<span class="material-symbols-outlined text-primary text-[22px]">admin_panel_settings</span>
+<span>Khối Quyết định của Quản trị viên Cảng vụ</span>
+</div>
+<span class="font-label-sm text-label-sm text-outline">Thẩm định viên: <strong class="text-on-surface">Trần Hải Đăng</strong></span>
+</div>
+<!-- Note text input -->
+<div>
+<label class="block font-label-md text-label-md text-on-surface mb-1.5 font-semibold">
+              Ghi chú giải quyết &amp; Kết luận thanh tra (resolution_note):
+            </label>
+<textarea class="w-full p-space-md rounded-xl bg-surface-container-lowest text-on-surface font-body-md text-body-md placeholder:text-outline focus:outline-none focus:ring-2 focus:ring-primary shadow-sm" id="resolution-note" placeholder="Nhập kết luận kiểm định, căn cứ quy chuẩn an toàn và mức độ bồi thường thống nhất..." rows="3">Xác minh thực địa: Đơn vị CLB Jetski Sơn Trà Xanh vi phạm quy chuẩn sẵn sàng thiết bị cứu sinh size L, làm trễ 18 phút trải nghiệm của khách. Đề xuất đền bù 30% giá trị gói dịch vụ (255.000 đ) hoàn trực tiếp qua SEPAY về thẻ ban đầu của du khách.</textarea>
+</div>
+<!-- Action Buttons Bar -->
+<div class="flex flex-wrap items-center gap-space-sm pt-space-xs">
+<!-- Primary Modal Trigger: Approve & Refund -->
+<button class="px-space-lg py-3 rounded-xl bg-secondary text-on-secondary font-label-lg text-label-lg shadow-sm hover:opacity-95 transition-all flex items-center gap-2" id="btn-open-refund">
+<span class="material-symbols-outlined text-[20px]">currency_exchange</span>
+<span>Chấp thuận &amp; Tạo lệnh hoàn tiền</span>
+</button>
+<!-- Reject Button -->
+<button class="px-space-md py-3 rounded-xl bg-surface-container-highest text-on-surface hover:bg-error-container hover:text-on-error-container font-label-lg text-label-lg transition-all flex items-center gap-2">
+<span class="material-symbols-outlined text-[18px]">cancel</span>
+<span>Bác bỏ khiếu nại (REJECT)</span>
+</button>
+<!-- Request info from partner -->
+<button class="px-space-md py-3 rounded-xl bg-surface-container-lowest text-primary hover:bg-surface-container font-label-lg text-label-lg shadow-sm transition-all flex items-center gap-2">
+<span class="material-symbols-outlined text-[18px]">forward_to_inbox</span>
+<span>Yêu cầu Đối tác giải trình thêm</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- MODAL: Create Direct Refund Order (SEPAY) -->
+<div class="fixed inset-0 bg-inverse-surface/60 backdrop-blur-sm z-50 hidden items-center justify-center p-4" id="refund-modal">
+<div class="w-full max-w-xl bg-surface-container-lowest rounded-3xl shadow-xl overflow-hidden transform transition-all">
+<!-- Modal Header -->
+<div class="px-space-xl py-space-lg bg-surface-container flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="w-8 h-8 rounded-lg bg-primary text-on-primary flex items-center justify-center">
+<span class="material-symbols-outlined text-[20px]">payments</span>
+</span>
+<div>
+<h3 class="font-headline-sm text-headline-sm text-on-surface">Lệnh Hoàn Tiền Bảo Vệ Quyền Lợi</h3>
+<span class="font-label-sm text-label-sm text-outline">Hồ sơ #DISP-9921 • Đơn #SUB-88104-02</span>
+</div>
+</div>
+<button class="w-8 h-8 rounded-full flex items-center justify-center hover:bg-surface-container-highest text-on-surface-variant" id="btn-close-modal">
+<span class="material-symbols-outlined text-[20px]">close</span>
+</button>
+</div>
+<!-- Modal Body -->
+<div class="p-space-xl space-y-space-lg">
+<!-- Target Gateway Notice -->
+<div class="p-space-md rounded-xl bg-primary/5 flex items-center gap-3">
+<span class="material-symbols-outlined text-primary text-[24px]">lock</span>
+<div class="text-sm">
+<span class="block font-semibold text-primary">Hoàn tiền tự động về phương thức thanh toán gốc</span>
+<span class="text-on-surface-variant font-body-sm text-body-sm">
+              Tiền sẽ hoàn qua cổng SEPAY vào tài khoản ngân hàng Techcombank: <strong>•••• 5921</strong> (Nguyễn Văn An). Không hoàn vào ví ảo.
+            </span>
+</div>
+</div>
+<!-- Classification of Refund -->
+<div>
+<label class="block font-label-md text-label-md text-on-surface mb-2 font-semibold">Phân loại tính chất hoàn tiền</label>
+<div class="grid grid-cols-2 gap-space-sm">
+<label class="p-space-md rounded-xl bg-surface-container cursor-pointer flex items-center gap-2">
+<input checked="" class="text-primary focus:ring-primary h-4 w-4" name="refund_type" type="radio" value="COMPENSATION"/>
+<div>
+<span class="block font-label-md text-label-md text-on-surface font-bold">COMPENSATION</span>
+<span class="text-xs text-outline">Đền bù thỏa thuận sự cố</span>
+</div>
+</label>
+<label class="p-space-md rounded-xl bg-surface-container cursor-pointer flex items-center gap-2">
+<input class="text-primary focus:ring-primary h-4 w-4" name="refund_type" type="radio" value="DISPUTE"/>
+<div>
+<span class="block font-label-md text-label-md text-on-surface font-bold">DISPUTE</span>
+<span class="text-xs text-outline">Phân xử thắng tranh chấp</span>
+</div>
+</label>
+</div>
+</div>
+<!-- Refund Percentage & Amount Calculation -->
+<div>
+<div class="flex items-center justify-between mb-1.5">
+<label class="font-label-md text-label-md text-on-surface font-semibold">Tỷ lệ hoàn tiền đề xuất</label>
+<span class="font-label-md text-label-md text-primary font-bold" id="percentage-label">30% (Thỏa thuận giảm trừ)</span>
+</div>
+<div class="grid grid-cols-4 gap-2 mb-space-md">
+<button class="percent-chip py-2 rounded-xl bg-surface-container hover:bg-primary/20 font-label-md text-label-md text-on-surface" data-percent="20" type="button">20%</button>
+<button class="percent-chip py-2 rounded-xl bg-primary text-on-primary font-label-md text-label-md font-bold" data-percent="30" type="button">30%</button>
+<button class="percent-chip py-2 rounded-xl bg-surface-container hover:bg-primary/20 font-label-md text-label-md text-on-surface" data-percent="50" type="button">50%</button>
+<button class="percent-chip py-2 rounded-xl bg-surface-container hover:bg-primary/20 font-label-md text-label-md text-on-surface" data-percent="100" type="button">100%</button>
+</div>
+<!-- Total Calculation breakdown -->
+<div class="p-space-md rounded-2xl bg-surface-container-low flex items-center justify-between">
+<div>
+<span class="block text-outline text-xs">Giá trị gốc gói dịch vụ:</span>
+<span class="font-semibold text-on-surface">850.000 đ</span>
+</div>
+<div class="text-right">
+<span class="block text-outline text-xs">Số tiền hoàn chi trả:</span>
+<span class="font-headline-md text-headline-md text-secondary font-bold" id="refund-amount">255.000 đ</span>
+</div>
+</div>
+</div>
+<!-- Confirmation Checkbox -->
+<div class="flex items-start gap-2 pt-1">
+<input checked="" class="mt-1 text-primary focus:ring-primary h-4 w-4 rounded" id="confirm-check" type="checkbox"/>
+<label class="text-xs text-on-surface-variant" for="confirm-check">
+            Xác nhận số tiền hoàn sẽ được khấu trừ vào kỳ quyết toán tới của đối tác <strong>CLB Jetski Sơn Trà Xanh</strong> theo đúng biên bản điều phối Cảng vụ.
+          </label>
+</div>
+</div>
+<!-- Modal Footer -->
+<div class="p-space-lg bg-surface-container flex items-center justify-end gap-space-md">
+<button class="px-space-lg py-2.5 rounded-xl bg-surface-container-lowest text-on-surface font-label-md text-label-md hover:bg-surface-container-high transition-colors" id="btn-cancel-refund">
+          Hủy bỏ
+        </button>
+<button class="px-space-xl py-2.5 rounded-xl bg-primary text-on-primary font-label-md text-label-md font-bold shadow-md hover:opacity-95 transition-all flex items-center gap-2" id="btn-execute-refund">
+<span class="material-symbols-outlined text-[18px]">send</span>
+<span>Phát lệnh chuyển tiền ngay</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Interactive Logic for Modal and Percentage Selection -->
+<script>
+    (function() {
+      const modal = document.getElementById('refund-modal');
+      const openBtn = document.getElementById('btn-open-refund');
+      const closeBtn = document.getElementById('btn-close-modal');
+      const cancelBtn = document.getElementById('btn-cancel-refund');
+      const executeBtn = document.getElementById('btn-execute-refund');
+      const amountEl = document.getElementById('refund-amount');
+      const percentLabel = document.getElementById('percentage-label');
+      const percentChips = document.querySelectorAll('.percent-chip');
+
+      const originalPrice = 850000;
+
+      function openModal() {
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+      }
+
+      function closeModal() {
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+      }
+
+      if(openBtn) openBtn.addEventListener('click', openModal);
+      if(closeBtn) closeBtn.addEventListener('click', closeModal);
+      if(cancelBtn) cancelBtn.addEventListener('click', closeModal);
+
+      modal.addEventListener('click', (e) => {
+        if(e.target === modal) closeModal();
+      });
+
+      percentChips.forEach(chip => {
+        chip.addEventListener('click', () => {
+          percentChips.forEach(c => {
+            c.classList.remove('bg-primary', 'text-on-primary', 'font-bold');
+            c.classList.add('bg-surface-container', 'text-on-surface');
+          });
+          chip.classList.remove('bg-surface-container', 'text-on-surface');
+          chip.classList.add('bg-primary', 'text-on-primary', 'font-bold');
+
+          const percent = parseInt(chip.getAttribute('data-percent'), 10);
+          const calculated = Math.round((originalPrice * percent) / 100);
+          amountEl.textContent = calculated.toLocaleString('vi-VN') + ' đ';
+          percentLabel.textContent = percent + '% (' + (percent === 100 ? 'Hoàn toàn bộ' : 'Thỏa thuận giảm trừ') + ')';
+        });
+      });
+
+      if(executeBtn) {
+        executeBtn.addEventListener('click', () => {
+          executeBtn.disabled = true;
+          executeBtn.innerHTML = '<span class="material-symbols-outlined text-[18px] animate-spin">refresh</span> Đang kết nối SEPAY...';
+          setTimeout(() => {
+            alert('Lệnh hoàn tiền #REF-9921 (255.000 đ) đã được phát qua SEPAY tới khách hàng Nguyễn Văn An thành công!');
+            closeModal();
+            executeBtn.disabled = false;
+            executeBtn.innerHTML = '<span class="material-symbols-outlined text-[18px]">send</span><span>Phát lệnh chuyển tiền ngay</span>';
+          }, 1200);
+        });
+      }
+    })();
+  </script>
+</div></main></div></body></html>

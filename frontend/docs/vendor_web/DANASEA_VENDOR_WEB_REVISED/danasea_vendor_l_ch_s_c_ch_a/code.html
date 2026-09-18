@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+
+<html lang="vi"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><title>DANASEA Partner Hub</title><link href="https://fonts.googleapis.com" rel="preconnect"/><link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/><link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&amp;family=Syne:wght@600;700;800&amp;display=swap" rel="stylesheet"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><style>@layer base{html,body{margin:0;padding:0;}body{overscroll-behavior:none;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config = {
+    darkMode: "class",
+    theme: {
+      extend: {
+        "colors": {
+          "primary-fixed-dim": "#79d4e2",
+          "error": "#ba1a1a",
+          "outline": "#6e797b",
+          "tertiary-container": "#5a7784",
+          "inverse-primary": "#79d4e2",
+          "surface": "#f5fafb",
+          "on-surface-variant": "#3e494a",
+          "background": "#f5fafb",
+          "on-error-container": "#93000a",
+          "secondary-fixed": "#ffdad4",
+          "on-primary-container": "#effdff",
+          "tertiary-fixed": "#c9e7f6",
+          "outline-variant": "#bdc9ca",
+          "on-tertiary-container": "#f4fbff",
+          "surface-dim": "#d6dbdc",
+          "on-secondary-fixed-variant": "#891d0f",
+          "primary-container": "#087f8c",
+          "on-primary-fixed-variant": "#004f57",
+          "on-surface": "#171d1e",
+          "on-tertiary": "#ffffff",
+          "primary-fixed": "#95f1ff",
+          "surface-container-highest": "#dee3e4",
+          "tertiary-fixed-dim": "#adcbd9",
+          "surface-bright": "#f5fafb",
+          "surface-container-lowest": "#ffffff",
+          "tertiary": "#425e6a",
+          "on-secondary-container": "#6c0600",
+          "error-container": "#ffdad6",
+          "secondary-fixed-dim": "#ffb4a7",
+          "on-error": "#ffffff",
+          "inverse-surface": "#2c3132",
+          "surface-container-low": "#eff4f5",
+          "secondary": "#aa3524",
+          "surface-tint": "#006874",
+          "on-background": "#171d1e",
+          "on-primary": "#ffffff",
+          "surface-container": "#eaeff0",
+          "primary": "#00646f",
+          "on-tertiary-fixed-variant": "#2e4b56",
+          "inverse-on-surface": "#edf2f3",
+          "surface-variant": "#dee3e4",
+          "surface-container-high": "#e4e9ea",
+          "on-secondary-fixed": "#400200",
+          "secondary-container": "#fb7059",
+          "on-secondary": "#ffffff",
+          "on-tertiary-fixed": "#001f29",
+          "on-primary-fixed": "#001f24"
+        },
+        "borderRadius": {
+          "DEFAULT": "0.25rem",
+          "lg": "0.5rem",
+          "xl": "0.75rem",
+          "full": "9999px"
+        },
+        "spacing": {
+          "space-xs": "0.25rem",
+          "margin-md": "3rem",
+          "gutter-sm": "1rem",
+          "space-lg": "1.5rem",
+          "gutter": "1.5rem",
+          "space-2xl": "3rem",
+          "space-3xl": "4.5rem",
+          "margin": "5rem",
+          "gutter-lg": "2rem",
+          "space-xl": "2rem",
+          "space-md": "1rem",
+          "space-sm": "0.5rem",
+          "margin-sm": "1.5rem"
+        },
+        "fontFamily": {
+          "headline-sm": ["Syne"],
+          "display-lg": ["Syne"],
+          "label-lg": ["Plus Jakarta Sans"],
+          "headline-md": ["Syne"],
+          "display-xl": ["Syne"],
+          "label-md": ["Plus Jakarta Sans"],
+          "headline-xl": ["Syne"],
+          "body-sm": ["Plus Jakarta Sans"],
+          "label-sm": ["Plus Jakarta Sans"],
+          "body-md": ["Plus Jakarta Sans"],
+          "headline-lg": ["Syne"],
+          "body-xl": ["Plus Jakarta Sans"],
+          "body-lg": ["Plus Jakarta Sans"]
+        },
+        "fontSize": {
+          "headline-sm": ["18px", {"lineHeight": "26px", "fontWeight": "600"}],
+          "display-lg": ["44px", {"lineHeight": "52px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+          "label-lg": ["14px", {"lineHeight": "20px", "letterSpacing": "0.01em", "fontWeight": "600"}],
+          "headline-md": ["22px", {"lineHeight": "30px", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+          "display-xl": ["56px", {"lineHeight": "64px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+          "label-md": ["12px", {"lineHeight": "16px", "letterSpacing": "0.02em", "fontWeight": "600"}],
+          "headline-xl": ["36px", {"lineHeight": "44px", "letterSpacing": "-0.015em", "fontWeight": "700"}],
+          "body-sm": ["12px", {"lineHeight": "18px", "fontWeight": "400"}],
+          "label-sm": ["11px", {"lineHeight": "14px", "letterSpacing": "0.04em", "fontWeight": "700"}],
+          "body-md": ["14px", {"lineHeight": "22px", "fontWeight": "400"}],
+          "headline-lg": ["28px", {"lineHeight": "36px", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+          "body-xl": ["18px", {"lineHeight": "28px", "fontWeight": "400"}],
+          "body-lg": ["16px", {"lineHeight": "24px", "fontWeight": "400"}]
+        }
+      }
+    }
+  };</script><link href="../vendor-web.css" rel="stylesheet"/></head><body class="bg-background text-on-surface selection:bg-primary selection:text-on-primary antialiased min-h-screen"><aside class="fixed left-0 top-0 bottom-0 w-72 bg-inverse-surface text-inverse-on-surface z-50 flex flex-col shadow-[0_12px_24px_-6px_rgba(8,127,140,0.08)]"><div class="p-space-lg flex items-center justify-between bg-inverse-surface"><div class="flex items-center gap-space-sm"><span aria-hidden="true" class="material-symbols-outlined text-primary-fixed" style="font-size:30px">waves</span><div class="flex flex-col"><span class="font-headline-sm text-headline-sm tracking-tight text-surface-bright">DANASEA</span><span class="font-label-sm text-label-sm uppercase tracking-widest text-primary-fixed-dim">Partner Hub</span></div></div></div><div class="mx-space-md mb-space-sm p-space-sm bg-tertiary-container/30 rounded-xl flex items-center gap-space-sm"><span class="material-symbols-outlined text-primary-fixed text-body-xl">verified_user</span><div class="flex-1 min-w-0"><div class="flex items-center gap-space-xs"><span class="font-label-sm text-label-sm text-surface-bright truncate">Cảng vụ Đà Nẵng</span><span class="px-1.5 py-0.5 rounded-full bg-primary-container text-on-primary-container text-[10px] font-bold">VITA</span></div><p class="font-body-sm text-body-sm text-tertiary-fixed-dim truncate">Đối tác Biển đạt chuẩn</p></div></div><nav class="flex-1 px-space-sm py-space-xs space-y-1 overflow-y-auto" data-active-classes="bg-primary-container text-on-primary-container font-semibold shadow-sm"><a class="flex items-center gap-space-md px-space-md py-space-sm rounded-xl text-inverse-on-surface/80 hover:bg-surface-container-high/10 hover:text-surface-bright transition-all" data-path="tong-quan" href="../danasea_vendor_t_ng_quan/code.html"><span class="material-symbols-outlined text-body-lg">dashboard</span><span class="font-label-lg text-label-lg">Tổng quan</span></a><a class="flex items-center gap-space-md px-space-md py-space-sm rounded-xl text-inverse-on-surface/80 hover:bg-surface-container-high/10 hover:text-surface-bright transition-all" data-path="ho-so-xac-minh" href="../danasea_vendor_h_s_x_c_minh/code.html"><span class="material-symbols-outlined text-body-lg">verified</span><span class="font-label-lg text-label-lg">Hồ sơ &amp; Xác minh</span></a><a class="flex items-center gap-space-md px-space-md py-space-sm rounded-xl text-inverse-on-surface/80 hover:bg-surface-container-high/10 hover:text-surface-bright transition-all" data-path="dich-vu-trai-nghiem" href="../danasea_vendor_d_ch_v/code.html"><span class="material-symbols-outlined text-body-lg">kitesurfing</span><span class="font-label-lg text-label-lg">Dịch vụ &amp; Trải nghiệm</span></a><a aria-current="page" class="flex items-center gap-space-md px-space-md py-space-sm rounded-xl transition-all bg-primary-container text-on-primary-container font-semibold shadow-sm" data-path="lich-suc-chua" href="../danasea_vendor_l_ch_s_c_ch_a/code.html"><span class="material-symbols-outlined text-body-lg">calendar_month</span><span class="font-label-lg text-label-lg">Lịch &amp; Sức chứa</span></a><a class="flex items-center gap-space-md px-space-md py-space-sm rounded-xl text-inverse-on-surface/80 hover:bg-surface-container-high/10 hover:text-surface-bright transition-all" data-path="don-hang-check-in" href="../danasea_vendor_n_h_ng_check_in/code.html"><span class="material-symbols-outlined text-body-lg">qr_code_scanner</span><span class="font-label-lg text-label-lg">Đơn hàng &amp; Check-in</span></a><a class="flex items-center gap-space-md px-space-md py-space-sm rounded-xl text-inverse-on-surface/80 hover:bg-surface-container-high/10 hover:text-surface-bright transition-all" data-path="tin-nhan-khach-hang" href="../danasea_vendor_tin_nh_n_nh_gi/code.html"><span class="material-symbols-outlined text-body-lg">chat</span><span class="font-label-lg text-label-lg">Tin nhắn &amp; Khách</span></a><a class="flex items-center gap-space-md px-space-md py-space-sm rounded-xl text-inverse-on-surface/80 hover:bg-surface-container-high/10 hover:text-surface-bright transition-all" data-path="danh-gia-cua-khach" href="../danasea_vendor_tin_nh_n_nh_gi/code.html"><span class="material-symbols-outlined text-body-lg">grade</span><span class="font-label-lg text-label-lg">Đánh giá của khách</span></a><a class="flex items-center gap-space-md px-space-md py-space-sm rounded-xl text-inverse-on-surface/80 hover:bg-surface-container-high/10 hover:text-surface-bright transition-all" data-path="khuyen-mai" href="../danasea_vendor_khuy_n_m_i/code.html"><span class="material-symbols-outlined text-body-lg">sell</span><span class="font-label-lg text-label-lg">Khuyến mãi</span></a><a class="flex items-center gap-space-md px-space-md py-space-sm rounded-xl text-inverse-on-surface/80 hover:bg-surface-container-high/10 hover:text-surface-bright transition-all" data-path="doi-soat-thanh-toan" href="../danasea_vendor_i_so_t_doanh_thu/code.html"><span class="material-symbols-outlined text-body-lg">account_balance_wallet</span><span class="font-label-lg text-label-lg">Đối soát &amp; Thanh toán</span></a><a class="v-side-link" href="../danasea_vendor_y_u_c_u_thanh_to_n/code.html">Yêu cầu nhận tiền</a><a class="v-side-link" href="../danasea_vendor_n_h_ng_check_in/code.html#disputes">Khiếu nại &amp; Hoàn tiền</a></nav><div class="p-space-md mx-space-sm mb-space-sm rounded-xl bg-tertiary/20 flex items-center justify-between"><div class="flex items-center gap-space-xs"><span class="w-2.5 h-2.5 rounded-full bg-primary-fixed animate-pulse"></span><span class="font-label-sm text-label-sm text-inverse-on-surface">Hệ thống Điều phối Biển</span></div><span class="font-label-sm text-label-sm text-primary-fixed">v2.4</span></div></aside><div class="pl-72 flex flex-col min-h-screen"><header class="fixed top-0 left-72 right-0 h-16 bg-surface/85 backdrop-blur-xl z-40 shadow-[0_1px_8px_rgba(0,0,0,0.04)]"><div class="h-16 w-full px-space-lg flex items-center justify-between gap-space-md"><div class="flex items-center gap-space-md flex-1 max-w-md"><div class="relative w-full"><span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant text-body-lg">search</span><input class="w-full pl-10 pr-space-md py-space-xs rounded-xl bg-surface-container-lowest text-on-surface placeholder:text-on-surface-variant text-body-md focus:outline-none focus:ring-2 focus:ring-primary shadow-sm" placeholder="Tìm mã đơn, tên khách hàng, số phao, cano..." type="text"/></div></div><div class="flex items-center gap-space-md"><div class="hidden xl:flex items-center gap-space-xs px-space-md py-1.5 rounded-full bg-surface-container-low"><span class="material-symbols-outlined text-primary text-body-lg">waves</span><div class="flex items-center gap-1 font-label-sm text-label-sm"><span class="text-on-surface font-semibold">Sóng 0.6m</span><span class="text-outline-variant">•</span><span class="text-on-surface font-semibold">Gió 14km/h</span><span class="px-1.5 py-0.5 rounded-full bg-primary-container/20 text-primary text-[10px] font-bold">An toàn</span></div></div><div class="flex items-center gap-space-xs px-space-md py-1.5 rounded-full bg-surface-container-lowest shadow-sm"><span class="w-2 h-2 rounded-full bg-primary"></span><span class="font-label-md text-label-md text-on-surface font-semibold">Đang nhận khách</span></div><div class="flex items-center gap-1"><button aria-label="Thông báo" class="p-space-sm rounded-xl text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors relative" onclick="vNotifications()" type="button"><span class="material-symbols-outlined text-body-xl">notifications</span><span class="absolute top-2 right-2 w-2 h-2 rounded-full bg-secondary-container"></span></button><button class="p-space-sm rounded-xl text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors" type="button"><span class="material-symbols-outlined text-body-xl">g_translate</span></button></div><div class="h-6 w-[1px] bg-outline-variant/40"></div><div class="flex items-center gap-space-sm"><div class="text-right hidden sm:block"><div class="font-label-md text-label-md text-on-surface font-semibold truncate max-w-[180px]">Danang Ocean Club</div><div class="font-label-sm text-label-sm text-secondary font-bold flex items-center justify-end gap-1"><span class="material-symbols-outlined text-[13px]">workspace_premium</span>Huy hiệu TOP_RATED</div></div><div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center"><span class="material-symbols-outlined text-on-primary text-[18px]">person</span></div></div></div></div></header><main class="w-full pt-16 bg-background flex-1"><div class="v-preview">Bản xem trước • Dữ liệu minh họa, chưa kết nối máy chủ. <a href="../index.html">Danh mục màn hình</a></div><div class="flex flex-col w-full">
+<div class="w-full px-space-lg py-space-md space-y-space-md max-w-[1400px] mx-auto">
+<!-- Top Action Bar & Filters -->
+<div class="flex flex-col lg:flex-row lg:items-center justify-between gap-space-md">
+<div>
+<div class="flex items-center gap-space-xs text-primary font-label-sm text-label-sm tracking-wider uppercase">
+<span class="material-symbols-outlined text-[16px]">schedule</span>
+<span>Hệ thống điều phối luồng bến Mỹ Khê</span>
+</div>
+<h1 class="font-headline-lg text-headline-lg text-on-surface">Quản lý Lịch khởi hành &amp; Sức chứa ca biển</h1>
+</div>
+<div class="flex flex-wrap items-center gap-space-sm">
+<!-- Service Selector Dropdown -->
+<div class="relative min-w-[320px]">
+<label class="sr-only" for="service-select">Dịch vụ trải nghiệm</label>
+<div class="flex items-center bg-surface-container-lowest px-space-md py-2.5 rounded-xl shadow-sm">
+<span class="material-symbols-outlined text-primary text-body-lg mr-2">surfing</span>
+<select class="w-full bg-transparent text-on-surface font-label-lg text-label-lg focus:outline-none appearance-none cursor-pointer pr-6" id="service-select">
+<option selected="" value="sup-sunrise">Chèo SUP đón bình minh biển Mỹ Khê (280.000 đ)</option>
+<option value="jetski-sontra">Mô tô nước Bán đảo Sơn Trà (650.000 đ)</option>
+<option value="coral-diving">Lặn ngắm san hô Hòn Sụp cano cao tốc (450.000 đ)</option>
+</select>
+<span class="material-symbols-outlined text-on-surface-variant text-body-md pointer-events-none absolute right-3">expand_more</span>
+</div>
+</div>
+<!-- View Segmented Switch -->
+<div class="inline-flex p-1 bg-surface-container-low rounded-xl">
+<button class="px-space-md py-1.5 rounded-lg bg-surface-container-lowest font-label-md text-label-md text-primary font-bold shadow-sm transition-all" type="button">Tuần</button>
+<button class="px-space-md py-1.5 rounded-lg font-label-md text-label-md text-on-surface-variant hover:text-on-surface transition-colors" type="button">Tháng</button>
+</div>
+<!-- New Slot Action -->
+<button class="flex items-center gap-space-xs px-space-lg py-2.5 bg-primary hover:bg-primary-container text-on-primary rounded-xl font-label-lg text-label-lg shadow-sm hover:shadow-md transition-all" id="btn-open-create-slot" onclick="vOpen('v-create-slot')" type="button">
+<span class="material-symbols-outlined text-body-lg">add_circle</span>
+<span>+ Tạo thêm ca khởi hành</span>
+</button>
+</div>
+</div>
+<!-- Weather Advisory Banner (Cảng vụ Đà Nẵng API Cache) -->
+<div class="bg-surface-container-lowest rounded-2xl p-space-md shadow-sm relative overflow-hidden">
+<div class="absolute left-0 top-0 bottom-0 w-1.5 bg-primary-container"></div>
+<div class="flex flex-col lg:flex-row lg:items-center justify-between gap-space-md pl-space-xs">
+<div class="flex items-start gap-space-md">
+<div class="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-primary text-[28px]">airwave</span>
+</div>
+<div class="space-y-1">
+<div class="flex flex-wrap items-center gap-space-xs">
+<span class="font-headline-sm text-headline-sm text-on-surface">Dữ liệu trạm đo Sơn Trà lúc 06:00</span>
+<span class="px-2 py-0.5 rounded-full bg-primary/15 text-primary font-label-sm text-label-sm font-semibold flex items-center gap-1">
+<span class="w-1.5 h-1.5 rounded-full bg-primary animate-ping"></span>
+                ĐỦ ĐIỀU KIỆN XUẤT BẾN HÀNG HẢI
+              </span>
+</div>
+<p class="font-body-md text-body-md text-on-surface-variant leading-relaxed">
+<strong class="text-on-surface font-semibold">Gió 12 km/h • Sóng 0.5m • Lượng mưa 0mm</strong> • Cập nhật cách đây 10 phút. 
+              <span class="text-tertiary">Lưu ý: Luôn tuân thủ phao cứu sinh và áo phao trợ nổi, không cam kết an toàn 100% khi có diễn biến bất thường của dòng chảy ngầm.</span>
+</p>
+</div>
+</div>
+<div class="flex items-center gap-space-sm shrink-0 pl-14 lg:pl-0">
+<div class="text-right hidden sm:block">
+<div class="font-label-sm text-label-sm text-outline">Quy chuẩn an toàn</div>
+<div class="font-label-md text-label-md text-primary font-semibold">QĐ 142/CV-ĐNG</div>
+</div>
+<button class="px-space-md py-2 bg-surface-container-high hover:bg-surface-container-highest rounded-xl text-on-surface font-label-md text-label-md transition-colors flex items-center gap-1" type="button">
+<span class="material-symbols-outlined text-body-md">verified</span>
+            Sổ nhật trình Cảng vụ
+          </button>
+</div>
+</div>
+</div>
+<!-- Date Navigation Strip -->
+<div class="flex items-center justify-between bg-surface-container-lowest p-space-sm rounded-2xl shadow-sm overflow-x-auto">
+<button class="p-2 rounded-xl text-on-surface-variant hover:bg-surface-container-low transition-colors" type="button">
+<span class="material-symbols-outlined">chevron_left</span>
+</button>
+<div class="flex items-center gap-space-xs">
+<button class="flex flex-col items-center px-space-md py-2 rounded-xl text-on-surface-variant hover:bg-surface-container-low transition-all" type="button">
+<span class="font-label-sm text-label-sm">Hôm nay</span>
+<span class="font-headline-sm text-headline-sm">23/10</span>
+<span class="font-label-sm text-[10px] text-outline">4 ca</span>
+</button>
+<button class="flex flex-col items-center px-space-lg py-2 rounded-xl bg-primary text-on-primary shadow-sm transition-all" type="button">
+<span class="font-label-sm text-label-sm opacity-90">Ngày mai</span>
+<span class="font-headline-sm text-headline-sm font-bold">24/10</span>
+<span class="font-label-sm text-[10px] bg-white/20 px-2 py-0.5 rounded-full mt-0.5">4 ca điều phối</span>
+</button>
+<button class="flex flex-col items-center px-space-md py-2 rounded-xl text-on-surface-variant hover:bg-surface-container-low transition-all" type="button">
+<span class="font-label-sm text-label-sm">Thứ Sáu</span>
+<span class="font-headline-sm text-headline-sm">25/10</span>
+<span class="font-label-sm text-[10px] text-outline">6 ca</span>
+</button>
+<button class="flex flex-col items-center px-space-md py-2 rounded-xl text-on-surface-variant hover:bg-surface-container-low transition-all" type="button">
+<span class="font-label-sm text-label-sm">Thứ Bảy</span>
+<span class="font-headline-sm text-headline-sm">26/10</span>
+<span class="font-label-sm text-[10px] text-secondary font-bold">Cao điểm</span>
+</button>
+<button class="flex flex-col items-center px-space-md py-2 rounded-xl text-on-surface-variant hover:bg-surface-container-low transition-all" type="button">
+<span class="font-label-sm text-label-sm">Chủ Nhật</span>
+<span class="font-headline-sm text-headline-sm">27/10</span>
+<span class="font-label-sm text-[10px] text-secondary font-bold">Cao điểm</span>
+</button>
+</div>
+<button class="p-2 rounded-xl text-on-surface-variant hover:bg-surface-container-low transition-colors" type="button">
+<span class="material-symbols-outlined">chevron_right</span>
+</button>
+</div>
+<!-- Main Content Layout: Slots Stream & Quick Control Rail -->
+<div class="grid grid-cols-1 xl:grid-cols-12 gap-space-lg">
+<!-- Primary Slots List (8 Cols) -->
+<div class="xl:col-span-8 space-y-space-md">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-space-xs">
+<span class="font-headline-sm text-headline-sm text-on-surface">Lịch khởi hành: Ngày mai, 24/10/2024</span>
+<span class="px-2 py-0.5 bg-surface-container-high rounded-full font-label-sm text-label-sm text-on-surface-variant">4 ca</span>
+</div>
+<div class="flex items-center gap-space-sm font-label-sm text-label-sm text-on-surface-variant">
+<span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-primary"></span> Đang mở</span>
+<span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-secondary-container"></span> Đang khóa/giữ</span>
+<span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-outline-variant"></span> Đã đóng</span>
+</div>
+</div>
+<!-- SLOT 1 -->
+<article class="bg-surface-container-lowest rounded-2xl p-space-lg shadow-sm hover:shadow-md transition-all space-y-space-md">
+<div class="flex flex-wrap items-start justify-between gap-space-sm">
+<div class="space-y-1">
+<div class="flex items-center gap-space-xs">
+<span class="px-2.5 py-1 rounded-lg bg-primary-fixed-dim/30 text-primary font-headline-sm text-headline-sm font-bold">Ca 1</span>
+<span class="font-headline-md text-headline-md text-on-surface">05:00 - 07:00</span>
+<span class="font-label-md text-label-md text-tertiary">(Sáng sớm - Đón bình minh)</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Bãi tắm Sao Biển • SUP Đơn &amp; Đôi</p>
+</div>
+<div class="flex items-center gap-2">
+<span class="px-3 py-1 rounded-full bg-primary/10 text-primary font-label-sm text-label-sm font-bold tracking-wide">ĐANG MỞ (OPEN)</span>
+<span class="px-2 py-1 rounded-full bg-secondary/10 text-secondary font-label-sm text-label-sm font-bold" data-first-slot-availability-label="">Hết chỗ</span>
+</div>
+</div>
+<!-- Capacity Meter Visualization -->
+<div class="space-y-2 bg-surface-container-low p-space-md rounded-xl">
+<div class="flex items-center justify-between text-on-surface">
+<div class="flex items-center gap-4">
+<div>
+<span class="font-label-sm text-label-sm text-outline">Sức chứa thiết lập:</span>
+<span class="font-headline-sm text-headline-sm font-bold ml-1 text-on-surface" data-first-slot-capacity="">12 khách</span>
+</div>
+<div class="h-4 w-[1px] bg-outline-variant"></div>
+<div>
+<span class="font-label-sm text-label-sm text-outline">Đã đặt (Booked):</span>
+<span class="font-headline-sm text-headline-sm font-bold ml-1 text-primary">10 khách</span>
+</div>
+<div class="h-4 w-[1px] bg-outline-variant"></div>
+<div>
+<span class="font-label-sm text-label-sm text-outline">Giữ chỗ (Holds):</span>
+<span class="font-headline-sm text-headline-sm font-bold ml-1 text-secondary-container">2 khách</span>
+</div>
+</div>
+<div class="text-right">
+<span class="font-label-sm text-label-sm text-outline">Chỗ trống:</span>
+<span class="font-headline-sm text-headline-sm font-bold ml-1 text-secondary" data-first-slot-available="">0 chỗ</span>
+</div>
+</div>
+<!-- Segmented Progress Bar -->
+<div class="w-full h-3 rounded-full bg-surface-container-highest overflow-hidden flex">
+<div class="bg-primary h-full transition-all" style="width: 83.33%;" title="Đã đặt: 10 khách"></div>
+<div class="bg-secondary-container h-full transition-all" style="width: 16.67%;" title="Đang giữ chỗ: 2 khách"></div>
+</div>
+<div class="flex justify-between font-label-sm text-[11px] text-on-surface-variant">
+<span>Đạt 100% tải trọng an toàn phân luồng</span>
+<span>Giữ tạm tự giải phóng khi hết thời hạn nếu chưa thanh toán</span>
+</div>
+</div>
+<!-- Card Actions -->
+<div class="flex flex-wrap items-center justify-between gap-space-sm pt-2">
+<div class="flex items-center gap-space-xs">
+<span class="material-symbols-outlined text-outline text-body-lg">group</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">10 khách đã đặt, 2 chỗ giữ tạm</span>
+</div>
+<div class="flex items-center gap-space-sm">
+<button class="px-space-md py-2 rounded-xl bg-surface-container hover:bg-surface-container-high text-on-surface font-label-md text-label-md transition-colors flex items-center gap-1" type="button">
+<span class="material-symbols-outlined text-body-md">visibility</span>
+<span>Xem 10 khách</span>
+</button>
+<button class="px-space-md py-2 rounded-xl bg-secondary/10 hover:bg-secondary/20 text-secondary font-label-md text-label-md font-semibold transition-colors flex items-center gap-1" title="Khóa nhận thêm khách nhưng giữ nguyên khách đã đặt" type="button">
+<span class="material-symbols-outlined text-body-md">lock</span>
+<span>Khóa ca tạm thời (BLOCKED)</span>
+</button>
+</div>
+</div>
+</article>
+<!-- SLOT 2 -->
+<article class="bg-surface-container-lowest rounded-2xl p-space-lg shadow-sm hover:shadow-md transition-all space-y-space-md" data-slot-card="2">
+<div class="flex flex-wrap items-start justify-between gap-space-sm">
+<div class="space-y-1">
+<div class="flex items-center gap-space-xs">
+<span class="px-2.5 py-1 rounded-lg bg-surface-container text-on-surface-variant font-headline-sm text-headline-sm font-bold">Ca 2</span>
+<span class="font-headline-md text-headline-md text-on-surface">07:30 - 09:30</span>
+<span class="font-label-md text-label-md text-tertiary">(Sáng)</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Bãi tắm Phạm Văn Đồng</p>
+</div>
+<div class="flex items-center gap-2">
+<span class="px-3 py-1 rounded-full bg-primary/10 text-primary font-label-sm text-label-sm font-bold tracking-wide">ĐANG MỞ (OPEN)</span>
+</div>
+</div>
+<div class="space-y-2 bg-surface-container-low p-space-md rounded-xl">
+<div class="flex items-center justify-between text-on-surface">
+<div class="flex items-center gap-4">
+<div>
+<span class="font-label-sm text-label-sm text-outline">Sức chứa:</span>
+<span class="font-headline-sm text-headline-sm font-bold ml-1 text-on-surface">12 khách</span>
+</div>
+<div class="h-4 w-[1px] bg-outline-variant"></div>
+<div>
+<span class="font-label-sm text-label-sm text-outline">Đã đặt:</span>
+<span class="font-headline-sm text-headline-sm font-bold ml-1 text-primary">4 khách</span>
+</div>
+<div class="h-4 w-[1px] bg-outline-variant"></div>
+<div>
+<span class="font-label-sm text-label-sm text-outline">Đang giữ:</span>
+<span class="font-headline-sm text-headline-sm font-bold ml-1 text-tertiary">0 khách</span>
+</div>
+</div>
+<div class="text-right">
+<span class="font-label-sm text-label-sm text-outline">Chỗ trống còn lại:</span>
+<span class="font-headline-sm text-headline-sm font-bold ml-1 text-primary-container">8 chỗ</span>
+</div>
+</div>
+<div class="w-full h-3 rounded-full bg-surface-container-highest overflow-hidden flex">
+<div class="bg-primary h-full transition-all" style="width: 33.33%;"></div>
+</div>
+<div class="flex justify-between font-label-sm text-[11px] text-on-surface-variant">
+<span>Đang mở nhận khách trên ứng dụng DANASEA</span>
+<span>Tỉ lệ lấp đầy: 33%</span>
+</div>
+</div>
+<div class="flex flex-wrap items-center justify-between gap-space-sm pt-2">
+<div class="flex items-center gap-space-xs">
+<span class="material-symbols-outlined text-outline text-body-lg">info</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Khung giờ nước biển êm, thuận lợi cho khách mới tập chèo</span>
+</div>
+<div class="flex items-center gap-space-sm">
+<button class="px-space-md py-2 rounded-xl bg-primary/10 hover:bg-primary/20 text-primary font-label-md text-label-md font-semibold transition-colors flex items-center gap-1" onclick="vEditSlot(2)" type="button">
+<span class="material-symbols-outlined text-body-md">edit</span>
+<span>Sửa sức chứa</span>
+</button>
+<button class="px-space-md py-2 rounded-xl bg-surface-container hover:bg-surface-container-high text-on-surface-variant font-label-md text-label-md transition-colors flex items-center gap-1" type="button">
+<span class="material-symbols-outlined text-body-md">cancel</span>
+<span>Đóng ca (CLOSED)</span>
+</button>
+</div>
+</div>
+</article>
+<!-- SLOT 3 -->
+<article class="bg-surface-container-lowest rounded-2xl p-space-lg shadow-sm hover:shadow-md transition-all space-y-space-md" data-slot-card="3">
+<div class="flex flex-wrap items-start justify-between gap-space-sm">
+<div class="space-y-1">
+<div class="flex items-center gap-space-xs">
+<span class="px-2.5 py-1 rounded-lg bg-surface-container text-on-surface-variant font-headline-sm text-headline-sm font-bold">Ca 3</span>
+<span class="font-headline-md text-headline-md text-on-surface">15:30 - 17:30</span>
+<span class="font-label-md text-label-md text-tertiary">(Chiều mát)</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Bãi tắm Mỹ Khê trung tâm • Hỗ trợ quay flycam theo đoàn</p>
+</div>
+<div class="flex items-center gap-2">
+<span class="px-3 py-1 rounded-full bg-primary/10 text-primary font-label-sm text-label-sm font-bold tracking-wide">ĐANG MỞ (OPEN)</span>
+</div>
+</div>
+<div class="space-y-2 bg-surface-container-low p-space-md rounded-xl">
+<div class="flex items-center justify-between text-on-surface">
+<div class="flex items-center gap-4">
+<div>
+<span class="font-label-sm text-label-sm text-outline">Sức chứa:</span>
+<span class="font-headline-sm text-headline-sm font-bold ml-1 text-on-surface">10 khách</span>
+</div>
+<div class="h-4 w-[1px] bg-outline-variant"></div>
+<div>
+<span class="font-label-sm text-label-sm text-outline">Đã đặt:</span>
+<span class="font-headline-sm text-headline-sm font-bold ml-1 text-primary">6 khách</span>
+</div>
+</div>
+<div class="text-right">
+<span class="font-label-sm text-label-sm text-outline">Chỗ trống còn lại:</span>
+<span class="font-headline-sm text-headline-sm font-bold ml-1 text-primary-container">4 chỗ</span>
+</div>
+</div>
+<div class="w-full h-3 rounded-full bg-surface-container-highest overflow-hidden flex">
+<div class="bg-primary h-full transition-all" style="width: 60%;"></div>
+</div>
+<div class="flex justify-between font-label-sm text-[11px] text-on-surface-variant">
+<span>Đang nhận thêm 4 khách</span>
+<span>Tỉ lệ lấp đầy: 60%</span>
+</div>
+</div>
+<div class="flex flex-wrap items-center justify-between gap-space-sm pt-2">
+<div class="flex items-center gap-space-xs">
+<span class="material-symbols-outlined text-outline text-body-lg">verified_user</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Theo dõi thông báo an toàn của khung giờ</span>
+</div>
+<div class="flex items-center gap-space-sm">
+<button class="px-space-md py-2 rounded-xl bg-primary/10 hover:bg-primary/20 text-primary font-label-md text-label-md font-semibold transition-colors flex items-center gap-1" onclick="vEditSlot(3)" type="button">
+<span class="material-symbols-outlined text-body-md">edit</span>
+<span>Sửa sức chứa</span>
+</button>
+<button class="px-space-md py-2 rounded-xl bg-surface-container hover:bg-surface-container-high text-on-surface-variant font-label-md text-label-md transition-colors flex items-center gap-1" type="button">
+<span class="material-symbols-outlined text-body-md">cancel</span>
+<span>Đóng ca</span>
+</button>
+</div>
+</div>
+</article>
+<!-- SLOT 4 (CLOSED) -->
+<article class="bg-surface-container-low rounded-2xl p-space-lg shadow-sm space-y-space-md opacity-90">
+<div class="flex flex-wrap items-start justify-between gap-space-sm">
+<div class="space-y-1">
+<div class="flex items-center gap-space-xs">
+<span class="px-2.5 py-1 rounded-lg bg-surface-container-high text-on-surface-variant font-headline-sm text-headline-sm font-bold">Ca 4</span>
+<span class="font-headline-md text-headline-md text-on-surface-variant">17:30 - 19:00</span>
+<span class="font-label-md text-label-md text-outline">(Ngắm hoàng hôn)</span>
+</div>
+<p class="font-body-sm text-body-sm text-secondary flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px]">build</span>
+                Tạm dừng: Do câu lạc bộ nghỉ bảo dưỡng ván SUP và kiểm tra van khí
+              </p>
+</div>
+<div class="flex items-center gap-2">
+<span class="px-3 py-1 rounded-full bg-outline-variant/50 text-on-surface-variant font-label-sm text-label-sm font-bold tracking-wide">ĐÃ ĐÓNG (CLOSED)</span>
+</div>
+</div>
+<div class="space-y-2 bg-surface-container-lowest/60 p-space-md rounded-xl">
+<div class="flex items-center justify-between text-on-surface-variant">
+<div class="flex items-center gap-4">
+<div>
+<span class="font-label-sm text-label-sm text-outline">Sức chứa:</span>
+<span class="font-headline-sm text-headline-sm font-bold ml-1">10 khách</span>
+</div>
+<div class="h-4 w-[1px] bg-outline-variant"></div>
+<div>
+<span class="font-label-sm text-label-sm text-outline">Đã đặt:</span>
+<span class="font-headline-sm text-headline-sm font-bold ml-1">0 khách</span>
+</div>
+</div>
+<span class="font-label-sm text-label-sm text-outline italic">Không phát sinh giao dịch đặt chỗ</span>
+</div>
+</div>
+<div class="flex flex-wrap items-center justify-end gap-space-sm pt-2">
+<button class="px-space-md py-2 rounded-xl bg-primary hover:bg-primary-container text-on-primary font-label-md text-label-md font-semibold shadow-sm transition-colors flex items-center gap-1" type="button">
+<span class="material-symbols-outlined text-body-md">lock_open</span>
+<span>Mở lại ca</span>
+</button>
+<button class="px-space-md py-2 rounded-xl bg-surface-container-high hover:bg-error-container hover:text-on-error-container text-on-surface-variant font-label-md text-label-md transition-colors flex items-center gap-1" type="button">
+<span class="material-symbols-outlined text-body-md">delete</span>
+<span>Xóa ca</span>
+</button>
+</div>
+</article>
+</div>
+<!-- Right Control Rail: Quick Capacity Panel & Safety Constraints (4 Cols) -->
+<div class="xl:col-span-4 space-y-space-md">
+<!-- Live Quick-Adjustment Modal / Card -->
+<div class="bg-surface-container-lowest rounded-2xl p-space-lg shadow-md space-y-space-md relative overflow-hidden" id="quick-edit-card">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="w-8 h-8 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-[20px]">tune</span>
+</span>
+<div>
+<h2 class="font-headline-sm text-headline-sm text-on-surface">Cập nhật sức chứa ca</h2>
+<p class="font-body-sm text-body-sm text-outline">Ca 1 • 05:00 - 07:00 (24/10)</p>
+</div>
+</div>
+<span class="px-2 py-0.5 rounded-full bg-secondary-fixed text-on-secondary-fixed font-label-sm text-[11px] font-bold">Quan trọng</span>
+</div>
+<!-- Capacity Counter Control -->
+<div class="space-y-space-xs">
+<label class="font-label-md text-label-md text-on-surface font-semibold" for="capacity-input-number">Sức chứa tối đa (Khách)</label>
+<div class="flex items-center gap-space-sm">
+<button class="w-12 h-12 rounded-xl bg-surface-container flex items-center justify-center text-on-surface-variant hover:bg-surface-container-high transition-colors text-headline-sm cursor-not-allowed opacity-50" onclick="vCapacityDelta(-1)" title="Không thể giảm dưới số khách đã đặt" type="button">
+<span class="material-symbols-outlined">remove</span>
+</button>
+<div class="flex-1 relative">
+<input class="w-full text-center py-2.5 font-headline-md text-headline-md font-bold text-on-surface bg-surface-container-low rounded-xl focus:outline-none" id="capacity-input-number" min="12" name="capacity" oninput="vCapacity()" required="" step="1" type="number" value="12"/>
+</div>
+<button class="w-12 h-12 rounded-xl bg-primary/15 flex items-center justify-center text-primary hover:bg-primary/25 transition-colors text-headline-sm" onclick="vCapacityDelta(1)" type="button">
+<span class="material-symbols-outlined">add</span>
+</button>
+</div>
+</div>
+<!-- Strict Maritime Platform Rule Callout -->
+<div class="p-space-md rounded-xl bg-secondary-fixed/30 text-on-surface space-y-2">
+<div class="flex items-start gap-2">
+<span class="material-symbols-outlined text-secondary text-body-lg shrink-0 mt-0.5">gavel</span>
+<div class="space-y-1">
+<p class="font-label-md text-label-md text-secondary font-bold">Nguyên tắc ràng buộc hệ thống DANASEA</p>
+<p class="font-body-sm text-body-sm text-on-surface-variant leading-normal">
+<strong>Không thể giảm sức chứa xuống dưới 12 chỗ</strong> vì có 10 khách đã đặt và 2 chỗ đang giữ tạm trong ca này.
+                </p>
+<p class="font-body-sm text-body-sm text-on-surface-variant leading-normal">
+                  Tuyệt đối <strong>không được tùy tiện hủy đổi lịch</strong> đã có khách thanh toán để bảo vệ quyền lợi du khách và uy tín hàng hải đối tác.
+                </p>
+</div>
+</div>
+</div>
+<!-- Quick Action Buttons -->
+<div class="space-y-2 pt-2">
+<button class="w-full py-3 bg-primary hover:bg-primary-container text-on-primary rounded-xl font-label-lg text-label-lg font-bold shadow-sm transition-all text-center" onclick="vSaveCapacity()" type="button">
+              Lưu thay đổi sức chứa
+            </button>
+<button class="w-full py-2.5 bg-transparent hover:bg-surface-container text-on-surface-variant rounded-xl font-label-md text-label-md transition-colors text-center" type="button">
+              Hủy bỏ
+            </button>
+</div>
+<p id="v-capacity-result" role="status">10 đã đặt + 2 giữ tạm; còn 0 chỗ.</p></div>
+<!-- Maritime Safety & Fleet Ratio Card -->
+<!-- Visual Beach Zone Card with Imagery Placeholder -->
+<div class="bg-surface-container-lowest rounded-2xl overflow-hidden shadow-sm">
+<div class="relative h-44 w-full">
+<img class="w-full h-full object-cover" data-alt="Scenic aerial view of My Khe beach in Da Nang Vietnam with stand up paddle boarders gliding in calm azure coastal waters during a bright sunrise with golden sunrays and soft ocean spray in ocean teal and coral accents" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBO0bYHp5u8X0ZraBrK5uY9ZzSEWNsAYKe882JP6h5RAdxE7_vUirgMNmRXMwtzK-ku301JVthrEFXbjfK-FArlgqgDh3SNFH_dmFcZU2K9pd7-jAkwl-oMliYbdra4CpEB96xBTiiZ4SXFj4H2fQKSECJtiVibHGXv5ZEk89WNfpfz89L2uyos6Zq3odB0xp1C3n45b60j8hMOZSpvE0ACfOaCyb8FhCVbJMcoubbOuMM6fU4l0AB3Hg"/>
+<div class="absolute inset-0 bg-gradient-to-t from-inverse-surface/80 via-transparent to-transparent flex items-end p-space-md">
+<div>
+<span class="px-2 py-0.5 rounded-full bg-primary text-on-primary font-label-sm text-[10px] font-bold uppercase">Luồng bến chỉ định</span>
+<p class="font-headline-sm text-headline-sm text-surface-bright">Khu vực SUP Mỹ Khê - Trạm 03</p>
+</div>
+</div>
+</div>
+<div class="p-space-md flex items-center justify-between">
+<div class="flex items-center gap-1.5 font-label-sm text-label-sm text-on-surface-variant">
+<span class="material-symbols-outlined text-primary text-body-md">location_on</span>
+<span>Phao tiêu định vị A-102</span>
+</div>
+<a class="font-label-sm text-label-sm text-primary font-bold hover:underline" href="#">Xem sơ đồ luồng</a>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Interactive Modal / Dialog for Capacity Adjustment (Hidden by default, triggered via Sửa sức chứa) -->
+</div><div class="v-extension"><section class="v-card"><h2>Ca vừa tạo trong bản xem trước</h2><div id="v-created-slots"></div></section></div></main></div><dialog aria-labelledby="v-notifications-title" class="v-dialog" id="v-notifications"><header><h2 id="v-notifications-title">Thông báo</h2><button aria-label="Đóng" class="v-icon" onclick="this.closest('dialog').close()" type="button">×</button></header><div id="v-notification-list"></div><div aria-live="polite" id="v-notification-detail"></div></dialog><div hidden="" id="v-toast" role="status"></div><script defer="" src="../vendor-web.js"></script><dialog aria-labelledby="v-create-slot-title" class="v-dialog" id="v-create-slot"><header><h2 id="v-create-slot-title">Tạo khung giờ</h2><button aria-label="Đóng" class="v-icon" onclick="this.closest('dialog').close()" type="button">×</button></header><form id="v-slot-form" onsubmit="return vCreateSlot(event)"><label class="v-field">Dịch vụ<select name="service_id" required=""><option value="SUP-01">Chèo SUP bình minh Mỹ Khê</option><option value="JET-02">Mô tô nước Sơn Trà</option><option value="DIVE-03">Lặn ngắm san hô Hòn Sụp</option></select></label><label class="v-field">Ngày<input name="date" required="" type="date" value=""/></label><div class="v-grid"><label class="v-field">Giờ bắt đầu<input name="start_time" required="" type="time" value=""/></label><label class="v-field">Giờ kết thúc<input name="end_time" required="" type="time" value=""/></label></div><label class="v-field">Sức chứa<input min="1" name="capacity" required="" step="1" type="number" value="12"/></label><p id="v-slot-error" role="alert"></p><button class="v-btn">Tạo khung giờ mẫu</button></form></dialog><dialog aria-labelledby="v-edit-slot-title" class="v-dialog" id="v-edit-slot"><header><h2 id="v-edit-slot-title">Sửa sức chứa</h2><button aria-label="Đóng" class="v-icon" onclick="this.closest('dialog').close()" type="button">×</button></header><form onsubmit="return vSaveOtherSlot(event)"><p id="v-edit-slot-summary"></p><label class="v-field">Sức chứa<input min="1" name="capacity" required="" step="1" type="number" value="12"/></label><button class="v-btn">Lưu bản xem trước</button></form></dialog></body></html>

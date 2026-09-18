@@ -1,0 +1,842 @@
+THIẾT KẾ CƠ SỞ DỮ LIỆU HỆ THỐNG DANASEA
+Một số nguyên tắc thiết kế xuyên suốt: 
+(1) Đơn hàng tách theo mô hình Master Order - Sub-Order, mỗi Sub-Order gắn với đúng một vendor; 
+(2) khóa giữ chỗ tạm thời (inventory lock) dùng Redis với TTL, không lưu trong PostgreSQL; 
+(3) webhook thanh toán chống trùng nhờ ràng buộc UNIQUE trên mã giao dịch của cổng thanh toán; 
+(4) nhật ký thao tác quản trị (audit_logs) dùng mô hình polymorphic (entity_type/entity_id) để dùng chung cho nhiều loại hành động; 
+(5) đa ngôn ngữ Việt/Anh xử lý bằng cột *_en song song thay vì bảng dịch tổng quát, vì hệ thống chỉ cần đúng 2 ngôn ngữ; 
+(6) nhãn Vendor uy tín (badge_tier) và điểm đánh giá trên vendors/services là dữ liệu cache, được tính lại định kỳ từ bảng reviews để tránh tính toán lại mỗi lần hiển thị.
+1. Định danh & Phân quyền (IAM) (EPIC-01)
+users  —  Tài khoản của cả 3 vai trò: Customer, Vendor, Admin.
+Trường
+Kiểu dữ liệu
+Ghi chú
+id
+UUID
+PK
+email
+VARCHAR(255)
+UNIQUE, NOT NULL
+phone
+VARCHAR(20)
+UNIQUE, có thể NULL
+password_hash
+VARCHAR(255)
+NOT NULL
+full_name
+VARCHAR(255)
+NOT NULL
+role
+ENUM(CUSTOMER,VENDOR,ADMIN)
+NOT NULL
+avatar_url
+TEXT
+
+is_email_verified
+BOOLEAN
+DEFAULT false
+is_locked
+BOOLEAN
+DEFAULT false — Admin khóa tài khoản
+locale
+VARCHAR(5)
+DEFAULT 'vi'
+created_at / updated_at
+TIMESTAMPTZ
+DEFAULT now()
+password_reset_tokens  —  Token cho luồng quên mật khẩu.
+Trường
+Kiểu dữ liệu
+Ghi chú
+id
+UUID
+PK
+user_id
+UUID
+FK -> users.id
+token_hash
+VARCHAR(255)
+UNIQUE, NOT NULL
+expires_at
+TIMESTAMPTZ
+NOT NULL
+used_at
+TIMESTAMPTZ
+NULL cho tới khi dùng
+refresh_tokens  —  Refresh token cho phiên đăng nhập, hỗ trợ rotation và revoke khi logout.
+Trường
+Kiểu dữ liệu
+Ghi chú
+id
+UUID
+PK
+user_id
+UUID
+FK -> users.id
+token_hash
+VARCHAR(255)
+UNIQUE, NOT NULL
+family_id
+UUID
+NOT NULL — nhóm các token cùng một chuỗi rotation, dùng để thu hồi toàn bộ chain khi phát hiện tái sử dụng
+replaced_by_id
+UUID
+FK -> refresh_tokens.id, NULL cho tới khi bị rotate
+expires_at
+TIMESTAMPTZ
+NOT NULL
+revoked_at
+TIMESTAMPTZ
+NULL cho tới khi bị thu hồi (logout hoặc phát hiện tái sử dụng)
+created_at
+TIMESTAMPTZ
+DEFAULT now()
+audit_logs  —  Nhật ký thao tác quản trị (duyệt vendor, khóa tài khoản, xử lý khiếu nại, hoàn tiền thủ công, đối soát...) (CÓ THỂ BỔ SUNG SAU)
+Trường
+Kiểu dữ liệu
+Ghi chú
+id
+UUID
+PK
+actor_user_id
+UUID
+FK -> users.id — người thực hiện
+action
+VARCHAR(100)
+vd: VENDOR_APPROVED, USER_LOCKED, DISPUTE_RESOLVED
+entity_type
+VARCHAR(50)
+vd: vendor, service, dispute, refund, payout
+entity_id
+UUID
+ID đối tượng bị tác động
+metadata
+JSONB
+Chi tiết thao tác (trạng thái trước/sau...)
+created_at
+TIMESTAMPTZ
+DEFAULT now()
+2. Nhà cung cấp & Danh mục dịch vụ (EPIC-02)
+vendors  —  Hồ sơ doanh nghiệp/cá nhân của nhà cung cấp (1-1 với users.role=VENDOR).
+Trường
+Kiểu dữ liệu
+Ghi chú
+id
+UUID
+PK
+user_id
+UUID
+FK -> users.id, UNIQUE
+business_name
+VARCHAR(255)
+NOT NULL
+tax_code
+VARCHAR(50)
+Có thể NULL (cá nhân)
+address
+TEXT
+
+bank_account_number
+VARCHAR(50)
+Phục vụ đối soát/rút tiền
+bank_name
+VARCHAR(255)
+
+bank_account_holder
+VARCHAR(255)
+
+verification_status
+ENUM(PENDING,APPROVED,REJECTED)
+DEFAULT PENDING
+verified_by / verified_at
+UUID / TIMESTAMPTZ
+Admin xác minh
+rating_avg
+NUMERIC(2,1)
+Cache điểm đánh giá trung bình
+rating_count
+INTEGER
+DEFAULT 0
+badge_tier
+ENUM(NONE,VERIFIED,TOP_RATED)
+Cache nhãn uy tín, tính định kỳ
+created_at
+TIMESTAMPTZ
+Dùng để tính "thời gian hoạt động" cho badge
+vendor_documents  —  Giấy phép hoạt động / chứng chỉ an toàn cấp vendor.
+Trường
+Kiểu dữ liệu
+Ghi chú
+id
+UUID
+PK
+vendor_id
+UUID
+FK -> vendors.id
+doc_type
+ENUM(BUSINESS_LICENSE,SAFETY_CERT)
+
+file_url
+TEXT
+NOT NULL
+status
+ENUM(PENDING,APPROVED,REJECTED)
+DEFAULT PENDING
+reviewed_by / reviewed_at
+UUID / TIMESTAMPTZ
+Admin duyệt
+categories  —  Danh mục dịch vụ (hỗ trợ phân cấp cha/con).
+Trường
+Kiểu dữ liệu
+Ghi chú
+id
+UUID
+PK
+name
+VARCHAR(100)
+NOT NULL
+name_en
+VARCHAR(100)
+Bản dịch tiếng Anh (đa ngôn ngữ)
+slug
+VARCHAR(120)
+UNIQUE
+parent_id
+UUID
+FK -> categories.id, NULL nếu là danh mục gốc
+icon_url
+TEXT
+
+is_active
+BOOLEAN
+DEFAULT true
+services  —  Dịch vụ/trải nghiệm biển do vendor đăng bán.
+Trường
+Kiểu dữ liệu
+Ghi chú
+id
+UUID
+PK
+vendor_id
+UUID
+FK -> vendors.id
+category_id
+UUID
+FK -> categories.id
+name / name_en
+VARCHAR(255)
+Tên hiển thị Việt/Anh
+slug
+VARCHAR(255)
+UNIQUE
+description / description_en
+TEXT
+
+price
+NUMERIC(12,2)
+NOT NULL
+duration_minutes
+INTEGER
+
+capacity_per_slot
+INTEGER
+Sức chứa tối đa mỗi khung giờ
+location_name / address
+VARCHAR(255) / TEXT
+
+latitude / longitude
+NUMERIC(9,6)
+Phục vụ tìm kiếm theo khu vực & bản đồ
+status
+ENUM(DRAFT,PENDING_REVIEW,
+PUBLISHED,REJECTED,PAUSED)
+DEFAULT DRAFT
+waiver_content
+TEXT
+Nội dung cam kết miễn trừ trách nhiệm
+weather_sensitive
+BOOLEAN
+Có áp dụng rule engine thời tiết không
+min_wind_kmh / max_wave_m
+NUMERIC
+Ngưỡng an toàn của dịch vụ
+avg_rating / rating_count
+NUMERIC(2,1) / INTEGER
+Cache từ bảng reviews
+view_count
+INTEGER
+DEFAULT 0 — phục vụ "nổi bật/phổ biến"
+created_at / updated_at
+TIMESTAMPTZ
+
+service_images  —  Hình ảnh của dịch vụ (nhiều ảnh/dịch vụ).
+Trường
+Kiểu dữ liệu
+Ghi chú
+id
+UUID
+PK
+service_id
+UUID
+FK -> services.id
+url
+TEXT
+NOT NULL — lưu trên Cloudinary
+sort_order
+SMALLINT
+DEFAULT 0
+service_safety_documents  —  Chứng chỉ an toàn riêng theo từng dịch vụ rủi ro cao (vd: chứng chỉ lặn).
+Trường
+Kiểu dữ liệu
+Ghi chú
+id
+UUID
+PK
+service_id
+UUID
+FK -> services.id
+file_url
+TEXT
+NOT NULL
+status
+ENUM(PENDING,APPROVED,REJECTED)
+DEFAULT PENDING
+reviewed_by / reviewed_at
+UUID / TIMESTAMPTZ
+
+wishlists  —  Dịch vụ khách hàng lưu yêu thích.
+Trường
+Kiểu dữ liệu
+Ghi chú
+id
+UUID
+PK
+user_id
+UUID
+FK -> users.id
+service_id
+UUID
+FK -> services.id
+created_at
+TIMESTAMPTZ
+UNIQUE(user_id, service_id)
+recently_viewed  —  Lịch sử xem dịch vụ, phục vụ khối "Gần đây bạn xem".
+Trường
+Kiểu dữ liệu
+Ghi chú
+id
+UUID
+PK
+user_id
+UUID
+FK -> users.id, có thể NULL (khách chưa đăng nhập dùng session_id)
+session_id
+VARCHAR(100)
+Dành cho khách chưa đăng nhập
+service_id
+UUID
+FK -> services.id
+viewed_at
+TIMESTAMPTZ
+Upsert theo (user_id, service_id)
+3. Booking Engine & Inventory Locking (EPIC-03)
+service_slots  —  Từng khung giờ nhận khách cụ thể của một dịch vụ theo ngày.
+Trường
+Kiểu dữ liệu
+Ghi chú
+id
+UUID
+PK
+service_id
+UUID
+FK -> services.id
+date
+DATE
+NOT NULL
+start_time / end_time
+TIME
+NOT NULL
+capacity
+INTEGER
+Sức chứa của khung giờ này
+booked_count
+INTEGER
+DEFAULT 0 — cập nhật khi thanh toán thành công
+status
+ENUM(OPEN,CLOSED,BLOCKED)
+BLOCKED khi vendor chủ động tạm ngừng
+Ghi chú kỹ thuật: khóa giữ chỗ (Inventory Locking)
+Bước giữ chỗ tạm thời (TTL ~10-15 phút) dùng Redis key dạng lock:slot:{slot_id} kèm số lượng giữ tạm, KHÔNG lưu trong PostgreSQL — vì đây là trạng thái ngắn hạn, cần tốc độ cao và tự hết hạn (TTL). Khi thanh toán thành công, hệ thống mới ghi nhận chính thức vào service_slots.booked_count và tạo sub_orders.
+4. Đơn hàng & Thanh toán (EPIC-04)
+master_orders  —  Đơn tổng của một lượt đặt (có thể gồm dịch vụ của nhiều vendor).
+Trường
+Kiểu dữ liệu
+Ghi chú
+id
+UUID
+PK
+customer_id
+UUID
+FK -> users.id
+status
+ENUM(PENDING_PAYMENT,PAID,
+PARTIALLY_COMPLETED,COMPLETED,CANCELLED)
+
+total_amount / discount_amount
+NUMERIC(12,2)
+
+discount_code_id
+UUID
+FK -> discount_codes.id, có thể NULL
+created_at / updated_at
+TIMESTAMPTZ
+
+sub_orders  —  Đơn con tách theo từng vendor trong một Master Order.
+Trường
+Kiểu dữ liệu
+Ghi chú
+id
+UUID
+PK
+master_order_id
+UUID
+FK -> master_orders.id
+vendor_id / service_id / slot_id
+UUID
+FK tương ứng
+quantity
+INTEGER
+Số lượng người/suất
+unit_price / subtotal_amount
+NUMERIC(12,2)
+
+commission_rate / commission_amount
+NUMERIC(5,2) / NUMERIC(12,2)
+Snapshot tại thời điểm đặt
+vendor_payout_amount
+NUMERIC(12,2)
+subtotal - commission
+status
+ENUM(PENDING,CONFIRMED,REJECTED,
+COMPLETED,CANCELLED,REFUNDED)
+
+waiver_accepted / waiver_accepted_at
+BOOLEAN / TIMESTAMPTZ
+Khách xác nhận cam kết miễn trừ
+qr_secret
+UUID
+Dùng để ký/xác minh mã QR check-in, có thể thu hồi
+checked_in_at
+TIMESTAMPTZ
+Thời điểm Vendor quét QR xác nhận
+payments  —  Giao dịch thanh toán qua cổng thứ ba.
+Trường
+Kiểu dữ liệu
+Ghi chú
+id
+UUID
+PK
+master_order_id
+UUID
+FK -> master_orders.id
+provider
+ENUM(VNPAY,MOMO,SEPAY)
+
+provider_transaction_id
+VARCHAR(100)
+UNIQUE — chống xử lý trùng (idempotent)
+amount
+NUMERIC(12,2)
+
+status
+ENUM(PENDING,SUCCESS,
+FAILED,REFUNDED)
+
+raw_webhook_payload
+JSONB
+Lưu nguyên payload IPN để đối chiếu
+created_at
+TIMESTAMPTZ
+
+refunds  —  Hoàn tiền theo chính sách hoặc do tranh chấp/thời tiết.
+Trường
+Kiểu dữ liệu
+Ghi chú
+id
+UUID
+PK
+sub_order_id
+UUID
+FK -> sub_orders.id
+amount / refund_percentage
+NUMERIC(12,2) / NUMERIC(5,2)
+
+reason
+ENUM(CUSTOMER_CANCEL,WEATHER,
+DISPUTE,COMPENSATION)
+COMPENSATION dùng cho cơ chế bù trừ tách đơn
+status
+ENUM(PENDING,PROCESSED,FAILED)
+
+processed_at
+TIMESTAMPTZ
+
+invoices  —  Hoá đơn/biên nhận điện tử sau khi thanh toán thành công.
+Trường
+Kiểu dữ liệu
+Ghi chú
+id
+UUID
+PK
+master_order_id
+UUID
+FK -> master_orders.id
+invoice_number
+VARCHAR(50)
+UNIQUE
+pdf_url
+TEXT
+
+issued_at
+TIMESTAMPTZ
+DEFAULT now()
+discount_codes  —  Mã giảm giá do Admin hoặc Vendor tạo.
+Trường
+Kiểu dữ liệu
+Ghi chú
+id
+UUID
+PK
+code
+VARCHAR(50)
+UNIQUE
+scope
+ENUM(PLATFORM,VENDOR)
+
+vendor_id
+UUID
+FK -> vendors.id, NULL nếu scope=PLATFORM
+discount_type / discount_value
+ENUM(PERCENTAGE,FIXED) / NUMERIC
+
+max_uses / used_count
+INTEGER
+
+valid_from / valid_to
+TIMESTAMPTZ
+
+is_active
+BOOLEAN
+DEFAULT true
+discount_redemptions  —  Lịch sử áp dụng mã giảm giá vào đơn hàng.
+Trường
+Kiểu dữ liệu
+Ghi chú
+id
+UUID
+PK
+discount_code_id
+UUID
+FK -> discount_codes.id
+master_order_id
+UUID
+FK -> master_orders.id
+amount_deducted
+NUMERIC(12,2)
+
+5. Thời tiết & Quy tắc an toàn (EPIC-05)
+weather_cache  —  Dữ liệu thời tiết đã lấy gần nhất theo khu vực.
+Trường
+Kiểu dữ liệu
+Ghi chú
+id
+UUID
+PK
+location_key
+VARCHAR(100)
+vd: toạ độ làm tròn theo bãi biển
+wind_speed_kmh / wave_height_m
+NUMERIC
+
+precipitation_mm
+NUMERIC
+
+raw_payload
+JSONB
+
+fetched_at / expires_at
+TIMESTAMPTZ
+
+safety_rule_evaluations  —  Log kết quả đối chiếu điều kiện thời tiết với ngưỡng an toàn của dịch vụ.
+Trường
+Kiểu dữ liệu
+Ghi chú
+id
+UUID
+PK
+service_id / slot_id
+UUID
+FK tương ứng
+is_safe
+BOOLEAN
+
+warning_message
+TEXT
+
+evaluated_at
+TIMESTAMPTZ
+
+6. Trợ lý AI (EPIC-06)
+ai_conversations  —  Phiên hội thoại giữa khách hàng và trợ lý AI.
+Trường
+Kiểu dữ liệu
+Ghi chú
+id
+UUID
+PK
+user_id
+UUID
+FK -> users.id
+started_at / ended_at
+TIMESTAMPTZ
+
+ai_messages  —  Từng lượt tin nhắn/tool-call trong phiên hội thoại AI.
+Trường
+Kiểu dữ liệu
+Ghi chú
+id
+UUID
+PK
+conversation_id
+UUID
+FK -> ai_conversations.id
+role
+ENUM(USER,ASSISTANT,TOOL)
+
+content
+TEXT
+
+tool_calls
+JSONB
+Ghi lại lệnh gọi function/tool calling (nếu có)
+created_at
+TIMESTAMPTZ
+
+7. Vận hành, Đối soát & Đánh giá (EPIC-07)
+reviews  —  Đánh giá của khách hàng sau khi hoàn thành dịch vụ.
+Trường
+Kiểu dữ liệu
+Ghi chú
+id
+UUID
+PK
+sub_order_id
+UUID
+FK -> sub_orders.id, UNIQUE — mỗi đơn chỉ đánh giá 1 lần
+customer_id / vendor_id / service_id
+UUID
+FK tương ứng
+rating
+SMALLINT
+1-5
+comment
+TEXT
+
+images
+JSONB
+Mảng URL ảnh đánh giá
+vendor_reply / vendor_replied_at
+TEXT / TIMESTAMPTZ
+
+is_flagged
+BOOLEAN
+Đánh dấu bị báo cáo nội dung
+settlements  —  Kỳ đối soát doanh thu cho một vendor.
+Trường
+Kiểu dữ liệu
+Ghi chú
+id
+UUID
+PK
+vendor_id
+UUID
+FK -> vendors.id
+period_start / period_end
+DATE
+
+gross_amount / commission_amount / net_payable_amount
+NUMERIC(12,2)
+
+status
+ENUM(PENDING,PAID)
+
+generated_at
+TIMESTAMPTZ
+
+settlement_items  —  Chi tiết các đơn con nằm trong một kỳ đối soát.
+Trường
+Kiểu dữ liệu
+Ghi chú
+id
+UUID
+PK
+settlement_id
+UUID
+FK -> settlements.id
+sub_order_id
+UUID
+FK -> sub_orders.id
+amount
+NUMERIC(12,2)
+
+payout_requests  —  Yêu cầu rút tiền chủ động từ Vendor.
+Trường
+Kiểu dữ liệu
+Ghi chú
+id
+UUID
+PK
+vendor_id
+UUID
+FK -> vendors.id
+settlement_id
+UUID
+FK -> settlements.id, có thể NULL nếu rút gộp nhiều kỳ
+amount
+NUMERIC(12,2)
+
+status
+ENUM(REQUESTED,APPROVED,PAID,REJECTED)
+
+processed_by / processed_at
+UUID / TIMESTAMPTZ
+Admin xử lý
+8. Cấu hình hệ thống (EPIC-08)
+system_configs  —  Cấu hình dạng key-value cho Admin (tỷ lệ hoa hồng mặc định, TTL giữ chỗ, ngưỡng thời tiết mặc định...).
+Trường
+Kiểu dữ liệu
+Ghi chú
+id
+UUID
+PK
+key
+VARCHAR(100)
+UNIQUE
+value
+JSONB
+
+description
+TEXT
+
+updated_by / updated_at
+UUID / TIMESTAMPTZ
+
+9. Thông báo, Nhắn tin & Khiếu nại (EPIC-09)
+notifications  —  Thông báo hệ thống gửi tới người dùng qua nhiều kênh.
+Trường
+Kiểu dữ liệu
+Ghi chú
+id
+UUID
+PK
+user_id
+UUID
+FK -> users.id
+type
+VARCHAR(50)
+vd: ORDER_CONFIRMED, WEATHER_ALERT, REFUND_STATUS
+channel
+ENUM(EMAIL,SMS,TELEGRAM,IN_APP)
+
+title / body
+VARCHAR(255) / TEXT
+
+related_entity_type / related_entity_id
+VARCHAR(50) / UUID
+
+status
+ENUM(PENDING,SENT,FAILED)
+
+created_at / sent_at
+TIMESTAMPTZ
+
+conversations  —  Luồng nhắn tin giữa một khách hàng và một vendor.
+Trường
+Kiểu dữ liệu
+Ghi chú
+id
+UUID
+PK
+customer_id / vendor_id
+UUID
+FK tương ứng
+master_order_id
+UUID
+FK -> master_orders.id, có thể NULL
+created_at
+TIMESTAMPTZ
+
+messages  —  Từng tin nhắn trong một conversation.
+Trường
+Kiểu dữ liệu
+Ghi chú
+id
+UUID
+PK
+conversation_id
+UUID
+FK -> conversations.id
+sender_id
+UUID
+FK -> users.id
+content
+TEXT
+
+attachment_url
+TEXT
+
+is_read
+BOOLEAN
+DEFAULT false
+created_at
+TIMESTAMPTZ
+
+disputes  —  Khiếu nại/tranh chấp liên quan một đơn hàng.
+Trường
+Kiểu dữ liệu
+Ghi chú
+id
+UUID
+PK
+sub_order_id
+UUID
+FK -> sub_orders.id
+raised_by
+UUID
+FK -> users.id
+category / description
+VARCHAR(100) / TEXT
+
+status
+ENUM(OPEN,IN_REVIEW,RESOLVED,REJECTED)
+
+resolution_note
+TEXT
+
+resolved_by / resolved_at
+UUID / TIMESTAMPTZ
+Admin xử lý
+dispute_attachments  —  Tệp đính kèm minh chứng cho khiếu nại.
+Trường
+Kiểu dữ liệu
+Ghi chú
+id
+UUID
+PK
+dispute_id
+UUID
+FK -> disputes.id
+file_url
+TEXT
+
+
