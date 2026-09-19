@@ -23,11 +23,14 @@ public class AssistantAuditLogJpaEntity extends BaseJpaEntity {
     @Column(nullable = false)
     private UUID conversationId;
 
-    @Column(nullable = false)
+    @Column(nullable = true)
     private UUID userId;
 
     @Column(nullable = false)
     private String toolName;
+    
+    @Column
+    private String keyMasked;
 
     @Column(columnDefinition = "TEXT", nullable = false)
     private String requestPayload;

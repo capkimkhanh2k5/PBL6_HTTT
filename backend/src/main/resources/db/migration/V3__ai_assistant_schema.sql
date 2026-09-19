@@ -1,0 +1,35 @@
+CREATE TABLE IF NOT EXISTS ai_conversations (
+    id UUID PRIMARY KEY,
+    user_id UUID,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    is_deleted BOOLEAN DEFAULT FALSE,
+    deleted_at TIMESTAMP WITH TIME ZONE
+);
+
+CREATE TABLE IF NOT EXISTS ai_messages (
+    id UUID PRIMARY KEY,
+    conversation_id UUID NOT NULL REFERENCES ai_conversations(id),
+    role VARCHAR(50) NOT NULL,
+    content TEXT,
+    tool_calls TEXT,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    is_deleted BOOLEAN DEFAULT FALSE,
+    deleted_at TIMESTAMP WITH TIME ZONE
+);
+
+CREATE TABLE IF NOT EXISTS assistant_audit_logs (
+    id UUID PRIMARY KEY,
+    conversation_id UUID NOT NULL,
+    user_id UUID,
+    tool_name VARCHAR(255) NOT NULL,
+    key_masked VARCHAR(255),
+    request_payload TEXT NOT NULL,
+    response_payload TEXT NOT NULL,
+    executed_at TIMESTAMP WITH TIME ZONE NOT NULL,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    is_deleted BOOLEAN DEFAULT FALSE,
+    deleted_at TIMESTAMP WITH TIME ZONE
+);

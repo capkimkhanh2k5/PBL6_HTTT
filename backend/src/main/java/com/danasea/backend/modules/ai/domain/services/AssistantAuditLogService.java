@@ -27,4 +27,18 @@ public class AssistantAuditLogService {
                 .build();
         auditLogRepository.save(log);
     }
+
+    @Transactional
+    public void logChatAction(UUID conversationId, UUID userId, String requestMessage, String responseMessage, String keyMasked) {
+        AssistantAuditLogJpaEntity log = AssistantAuditLogJpaEntity.builder()
+                .conversationId(conversationId)
+                .userId(userId)
+                .toolName("chat")
+                .requestPayload(requestMessage)
+                .responsePayload(responseMessage)
+                .executedAt(OffsetDateTime.now())
+                .keyMasked(keyMasked)
+                .build();
+        auditLogRepository.save(log);
+    }
 }
