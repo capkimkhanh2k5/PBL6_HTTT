@@ -163,8 +163,8 @@
 - [x] Booking bắt buộc thanh toán toàn bộ mới được xác nhận (không đặt cọc)
 
 ### Quyết định nghiệp vụ
-- [ ] Mốc thời gian cụ thể coi là "hủy trễ" (trước giờ dịch vụ 24h)
-- [ ] Hủy SỚM hơn mốc đó thì hoàn toàn bộ
+- [x] Mốc thời gian cụ thể coi là "hủy trễ" (trước giờ dịch vụ 24h)
+- [x] Hủy SỚM hơn mốc đó thì hoàn toàn bộ
 - [ ] Vendor có quyền từ chối booking đã đặt (trước thanh toán), sau đó sẽ thông báo với khách hàng và recommend các vendor khác có slot trống (không tự động chuyển sang vendor khác), và nếu khách không đồng ý thì xoá booking + hoàn tiền mục từ chối đó
 
 ### API
@@ -174,7 +174,7 @@
 - [x] GET /api/bookings/{id}
 - [x] GET /api/bookings
 - [x] GET /api/vendor/bookings
-- [ ] PATCH /api/bookings/{id}/cancel (áp rule mất toàn bộ tiền nếu trễ)
+- [x] PATCH /api/bookings/{id}/cancel (áp rule mất toàn bộ tiền nếu trễ)
 - [ ] PATCH /api/vendor/bookings/{id}/reject (nếu được cho phép)
 - [x] Scheduled job dọn Redis hold hết hạn + rollback inventory
 
@@ -182,7 +182,7 @@
 - [x] CreateBookingHoldUseCaseTest (nhiều dịch vụ trong 1 hold, slot hết → chặn, TTL đúng)
 - [x] ConfirmBookingUseCaseTest (chỉ confirm khi đã thanh toán đủ, hold hết hạn → lỗi, sai owner → 403)
 - [ ] Test race condition đa luồng thật (2 request giữ slot cuối cùng, dùng Lua script atomic)
-- [ ] CancelBookingUseCaseTest (đúng mốc thời gian mất toàn bộ tiền)
+- [x] CancelBookingUseCaseTest (đúng mốc thời gian mất toàn bộ tiền)
 - [x] BookingExpiryJobTest (rollback đúng, không rollback nhầm hold đã confirm)
 - [x] BookingControllerTest (IDOR: khách A/B, vendor không liên quan)
 
@@ -190,7 +190,7 @@
 
 ## EPIC-04 · Order & Payment
 
-### Quyết định nghiệp vụ 
+### Quyết định nghiệp vụ
 - [x] Không hỗ trợ đặt cọc — bắt buộc thanh toán toàn bộ
 - [x] Thanh toán 1 lần cho toàn bộ Master Order (không thanh toán riêng từng Sub-Order)
 - [x] Hoàn tiền tự động (không cần Admin duyệt thủ công)
@@ -237,25 +237,18 @@
 
 ## EPIC-06 · AI Smart Assistant
 
-### Quyết định nghiệp vụ — ĐÃ CHỐT
-- [x] Phạm vi: Hỗ trợ "Action Execution" (Hold Booking) NHƯNG phải qua luồng Structured Confirmation (UI sinh card, User bấm xác nhận thực tế). AI không tự ý hold.
-- [x] Giới hạn LLM: Rate-limit 2 lớp (user limit chat/phút). Cache kết quả search trong session.
-- [x] An toàn: Chống Prompt Injection (sanitize vendor content), bắt buộc trích dẫn nguyên văn Policy qua tool, không tự diễn giải.
-- [x] Observability: Log toàn bộ Audit Trail cho tool calls (kèm conversation_id, timestamp) để trace khiếu nại.
-- [x] Multi-turn state: Expire context/card xác nhận đồng bộ với TTL hold (10-15 phút).
+### Quyết định nghiệp vụ — CHƯA CHỐT
+- [ ] Phạm vi: chỉ gợi ý, hay thực thi hành động (đặt chỗ) qua chat
+- [ ] Giới hạn rate/cost gọi LLM
 
 ### API
-- [ ] POST /api/assistant/chat (Hỗ trợ sinh Structured JSON như `booking_confirmation_request` cho UI render Card)
+- [ ] POST /api/assistant/chat
 - [ ] GET /api/assistant/conversations/{id}
-- [ ] GET /api/assistant/conversations/{id}/history
 
 ### Test
-- [ ] AssistantChatUseCaseTest (tool calling đúng function: search, get_detail, get_policy)
-- [ ] BookingConfirmationFlowTest (Test luồng xác nhận qua UI, backend gọi lại get_service_detail để re-validate giá/tồn kho)
-- [ ] PromptInjectionProtectionTest (Đảm bảo vendor review chứa command lừa đảo bị ignore)
-- [ ] Test rate limit endpoint chat (2 lớp)
+- [ ] AssistantChatUseCaseTest (tool calling đúng function)
+- [ ] Test rate limit endpoint chat
 - [ ] Test fallback khi LLM lỗi/timeout
-- [ ] AssistantAuditLogTest (Đảm bảo tool calls được log đủ)
 
 ---
 

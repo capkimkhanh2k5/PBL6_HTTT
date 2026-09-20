@@ -27,9 +27,13 @@ import com.danasea.backend.modules.booking.application.dtos.BookingHoldItemResul
 import com.danasea.backend.modules.booking.application.dtos.BookingSummaryResult;
 import com.danasea.backend.modules.booking.application.dtos.GetBookingDetailQuery;
 import com.danasea.backend.modules.booking.application.dtos.GetCustomerBookingsQuery;
+import com.danasea.backend.modules.booking.application.dtos.BookingCancelResult;
+import com.danasea.backend.modules.booking.application.dtos.CancelBookingCommand;
+import com.danasea.backend.modules.booking.application.usecases.CancelBookingUseCase;
 import com.danasea.backend.modules.booking.application.usecases.GetBookingDetailUseCase;
 import com.danasea.backend.modules.booking.application.usecases.GetCustomerBookingsUseCase;
 import com.danasea.backend.modules.booking.domain.exceptions.BookingNotFoundException;
+import com.danasea.backend.modules.booking.domain.exceptions.InvalidBookingStateException;
 import com.danasea.backend.modules.booking.domain.exceptions.UnauthorizedBookingAccessException;
 import com.danasea.backend.modules.booking.domain.models.BookingStatus;
 import com.danasea.backend.modules.booking.domain.models.PagedResult;
@@ -40,6 +44,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -53,6 +58,9 @@ class BookingControllerTest {
 
     @Mock
     private GetCustomerBookingsUseCase getCustomerBookingsUseCase;
+
+    @Mock
+    private CancelBookingUseCase cancelBookingUseCase;
 
     @InjectMocks
     private BookingController bookingController;
@@ -187,5 +195,79 @@ class BookingControllerTest {
                 .andExpect(jsonPath("$.content[0].totalItems").value(2));
 
         verify(getCustomerBookingsUseCase).execute(any(GetCustomerBookingsQuery.class));
+    }
+
+    @Test
+    @DisplayName("PATCH /api/bookings/{id}/cancel returns 200 OK with cancellation details and refund policy")
+    void cancelBooking_Success() throws Exception {
+        BookingCancelResult cancelResult = new BookingCancelResult(
+                bookingId,
+                customerId,
+                BookingStatus.CANCELLED,
+                OffsetDateTime.now(),
+                OffsetDateTime.now().plusDays(2),
+                true,
+                100,
+                BigDecimal.valueOf(500000),
+                "Customer requested cancellation",
+                "Hủy thành công. Bạn đủ điều kiện hoàn 100% tiền theo chính sách trước 24h."
+        );
+
+        when(cancelBookingUseCase.execute(any(CancelBookingCommand.class))).thenReturn(cancelResult);
+
+        mockMvc.perform(patch("/api/bookings/" + bookingId + "/cancel")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"reason\":\"Kế hoạch thay đổi\"}"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.bookingId").value(bookingId.toString()))
+                .andExpect(jsonPath("$.status").value("CANCELLED"))
+                .andExpect(jsonPath("$.refundEligible").value(true))
+                .andExpect(jsonPath("$.refundPercentage").value(100))
+                .andExpect(jsonPath("$.refundAmount").value(500000))
+                .andExpect(jsonPath("$.message").value("Hủy thành công. Bạn đủ điều kiện hoàn 100% tiền theo chính sách trước 24h."));
+
+        verify(cancelBookingUseCase).execute(any(CancelBookingCommand.class));
+    }
+
+    @Test
+    @DisplayName("PATCH /api/bookings/{id}/cancel returns 403 FORBIDDEN when user is not owner (IDOR)")
+    void cancelBooking_Forbidden_IDOR() throws Exception {
+        when(cancelBookingUseCase.execute(any(CancelBookingCommand.class)))
+                .thenThrow(new UnauthorizedBookingAccessException(bookingId, customerId));
+
+        mockMvc.perform(patch("/api/bookings/" + bookingId + "/cancel")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.code").value("UNAUTHORIZED_BOOKING_ACCESS"));
+
+        verify(cancelBookingUseCase).execute(any(CancelBookingCommand.class));
+    }
+
+    @Test
+    @DisplayName("PATCH /api/bookings/{id}/cancel returns 400 BAD REQUEST when booking is already cancelled")
+    void cancelBooking_BadRequest_AlreadyCancelled() throws Exception {
+        when(cancelBookingUseCase.execute(any(CancelBookingCommand.class)))
+                .thenThrow(new InvalidBookingStateException("Booking is already cancelled."));
+
+        mockMvc.perform(patch("/api/bookings/" + bookingId + "/cancel")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("INVALID_BOOKING_STATE"));
+
+        verify(cancelBookingUseCase).execute(any(CancelBookingCommand.class));
+    }
+
+    @Test
+    @DisplayName("PATCH /api/bookings/{id}/cancel returns 404 NOT FOUND when booking does not exist")
+    void cancelBooking_NotFound() throws Exception {
+        when(cancelBookingUseCase.execute(any(CancelBookingCommand.class)))
+                .thenThrow(new BookingNotFoundException(bookingId));
+
+        mockMvc.perform(patch("/api/bookings/" + bookingId + "/cancel")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.code").value("BOOKING_NOT_FOUND"));
+
+        verify(cancelBookingUseCase).execute(any(CancelBookingCommand.class));
     }
 }

@@ -9,22 +9,29 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.danasea.backend.modules.booking.application.dtos.BookingCancelResult;
 import com.danasea.backend.modules.booking.application.dtos.BookingDetailResult;
 import com.danasea.backend.modules.booking.application.dtos.BookingSummaryResult;
+import com.danasea.backend.modules.booking.application.dtos.CancelBookingCommand;
 import com.danasea.backend.modules.booking.application.dtos.GetBookingDetailQuery;
 import com.danasea.backend.modules.booking.application.dtos.GetCustomerBookingsQuery;
+import com.danasea.backend.modules.booking.application.usecases.CancelBookingUseCase;
 import com.danasea.backend.modules.booking.application.usecases.GetBookingDetailUseCase;
 import com.danasea.backend.modules.booking.application.usecases.GetCustomerBookingsUseCase;
 import com.danasea.backend.modules.booking.domain.models.BookingStatus;
 import com.danasea.backend.modules.booking.domain.models.PagedResult;
+import com.danasea.backend.modules.booking.presentation.dtos.BookingCancelResponse;
 import com.danasea.backend.modules.booking.presentation.dtos.BookingDetailResponse;
 import com.danasea.backend.modules.booking.presentation.dtos.BookingHoldItemResponse;
 import com.danasea.backend.modules.booking.presentation.dtos.BookingSummaryResponse;
+import com.danasea.backend.modules.booking.presentation.dtos.CancelBookingRequest;
 import com.danasea.backend.modules.booking.presentation.dtos.PageResponse;
 import com.danasea.backend.security.infrastructure.SecurityUtils;
 import lombok.RequiredArgsConstructor;
@@ -36,6 +43,7 @@ public class BookingController {
 
     private final GetBookingDetailUseCase getBookingDetailUseCase;
     private final GetCustomerBookingsUseCase getCustomerBookingsUseCase;
+    private final CancelBookingUseCase cancelBookingUseCase;
 
     @GetMapping("/{id}")
     @PreAuthorize("isAuthenticated()")
@@ -120,5 +128,37 @@ public class BookingController {
                 result.totalElements(),
                 result.totalPages()
         ));
+    }
+
+    @PatchMapping("/{id}/cancel")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<BookingCancelResponse> cancelBooking(
+            @PathVariable("id") UUID id,
+            @RequestBody(required = false) CancelBookingRequest request) {
+
+        UUID currentUserId = SecurityUtils.getCurrentUserId()
+                .orElseThrow(() -> new AccessDeniedException("User is not authenticated"));
+
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        boolean isAdmin = auth != null && auth.getAuthorities().stream()
+                .anyMatch(a -> "ROLE_ADMIN".equals(a.getAuthority()));
+
+        String reason = request != null ? request.reason() : null;
+        CancelBookingCommand command = new CancelBookingCommand(id, currentUserId, isAdmin, reason);
+        BookingCancelResult result = cancelBookingUseCase.execute(command);
+
+        BookingCancelResponse response = new BookingCancelResponse(
+                result.bookingId(),
+                result.status(),
+                result.cancelledAt(),
+                result.earliestServiceTime(),
+                result.refundEligible(),
+                result.refundPercentage(),
+                result.refundAmount(),
+                result.cancellationReason(),
+                result.message()
+        );
+
+        return ResponseEntity.ok(response);
     }
 }

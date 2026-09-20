@@ -54,5 +54,17 @@ public class BookingBeans {
             com.danasea.backend.modules.booking.domain.ports.VendorLookupPort vendorLookupPort) {
         return new com.danasea.backend.modules.booking.application.usecases.GetVendorBookingsUseCase(bookingRepository, vendorLookupPort);
     }
+
+    @Bean
+    public com.danasea.backend.modules.booking.application.usecases.CancelBookingUseCase cancelBookingUseCase(
+            BookingRepositoryPort bookingRepository,
+            ServiceSlotPort serviceSlotPort,
+            InventoryLockPort inventoryLockPort) {
+        return new com.danasea.backend.modules.booking.application.usecases.CancelBookingUseCase(
+                bookingRepository,
+                serviceSlotPort,
+                inventoryLockPort
+        );
+    }
 }
 

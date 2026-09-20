@@ -2,9 +2,13 @@ package com.danasea.backend.modules.booking.domain.models;
 
 import java.math.BigDecimal;
 import java.time.Duration;
+import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
+import java.time.ZoneId;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import com.danasea.backend.modules.booking.domain.exceptions.BookingHoldExpiredException;
@@ -116,6 +120,29 @@ public class Booking extends BaseDomainModel {
         }
         this.status = BookingStatus.CANCELLED;
         setUpdatedAt(now);
+    }
+
+    public static final ZoneId VIETNAM_ZONE = ZoneId.of("Asia/Ho_Chi_Minh");
+
+    public Optional<OffsetDateTime> findEarliestServiceStartTime() {
+        if (items == null || items.isEmpty()) {
+            return Optional.empty();
+        }
+        return items.stream()
+                .filter(item -> item.getBookingDate() != null && item.getBookingTime() != null)
+                .map(item -> LocalDateTime.of(item.getBookingDate(), item.getBookingTime())
+                        .atZone(VIETNAM_ZONE)
+                        .toOffsetDateTime())
+                .min(Comparator.naturalOrder());
+    }
+
+    public boolean isEligibleForFullRefund(OffsetDateTime now) {
+        Optional<OffsetDateTime> earliestTimeOpt = findEarliestServiceStartTime();
+        if (earliestTimeOpt.isEmpty()) {
+            return false;
+        }
+        OffsetDateTime threshold = earliestTimeOpt.get().minusHours(24);
+        return !now.isAfter(threshold);
     }
 
     public void validateOwner(UUID userId) {
