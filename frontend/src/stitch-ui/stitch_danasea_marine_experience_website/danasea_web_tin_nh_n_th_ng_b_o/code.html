@@ -1,0 +1,554 @@
+<!DOCTYPE html>
+
+<html lang="vi"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/><link href="https://fonts.googleapis.com" rel="preconnect"/><link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/><link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&amp;family=Syne:wght@600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><style>@layer base { html, body { margin: 0; padding: 0; } body { overscroll-behavior: none; } main > :first-child { margin-top: 0 !important; } main > :last-child { margin-bottom: 0 !important; } } ::-webkit-scrollbar { display: none; }</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config = { darkMode: "class", theme: { extend: { "colors": { "surface-container-highest": "#dee3e4", "on-tertiary-container": "#f4fbff", "secondary-container": "#fb7059", "on-tertiary-fixed-variant": "#2e4b56", "on-error-container": "#93000a", "primary-fixed-dim": "#79d4e2", "primary-container": "#087f8c", "secondary": "#aa3524", "surface-container-lowest": "#ffffff", "surface-container": "#eaeff0", "tertiary-fixed": "#c9e7f6", "on-primary": "#ffffff", "outline": "#6e797b", "tertiary": "#425e6a", "surface-tint": "#006874", "inverse-surface": "#2c3132", "surface-bright": "#f5fafb", "on-primary-container": "#effdff", "on-error": "#ffffff", "on-background": "#171d1e", "tertiary-fixed-dim": "#adcbd9", "on-secondary-fixed-variant": "#891d0f", "surface-variant": "#dee3e4", "on-surface-variant": "#3e494a", "inverse-primary": "#79d4e2", "surface-container-high": "#e4e9ea", "background": "#f5fafb", "inverse-on-surface": "#edf2f3", "error-container": "#ffdad6", "surface-container-low": "#eff4f5", "on-tertiary-fixed": "#001f29", "primary": "#00646f", "secondary-fixed-dim": "#ffb4a7", "on-primary-fixed-variant": "#004f57", "on-surface": "#171d1e", "on-tertiary": "#ffffff", "surface": "#f5fafb", "on-secondary": "#ffffff", "error": "#ba1a1a", "on-secondary-container": "#6c0600", "primary-fixed": "#95f1ff", "secondary-fixed": "#ffdad4", "tertiary-container": "#5a7784", "outline-variant": "#bdc9ca", "on-secondary-fixed": "#400200", "on-primary-fixed": "#001f24", "surface-dim": "#d6dbdc" }, "borderRadius": { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" }, "spacing": { "space-md": "1rem", "space-sm": "0.5rem", "margin": "5rem", "space-xs": "0.25rem", "space-lg": "1.5rem", "space-2xl": "3rem", "margin-sm": "1.5rem", "space-xl": "2rem", "space-3xl": "4.5rem", "gutter": "1.5rem", "gutter-lg": "2rem", "gutter-sm": "1rem", "margin-md": "3rem" }, "fontFamily": { "label-md": ["Plus Jakarta Sans"], "headline-sm": ["Syne"], "label-lg": ["Plus Jakarta Sans"], "headline-md": ["Syne"], "body-sm": ["Plus Jakarta Sans"], "body-md": ["Plus Jakarta Sans"], "display-xl": ["Syne"], "headline-xl": ["Syne"], "body-xl": ["Plus Jakarta Sans"], "headline-lg": ["Syne"], "display-lg": ["Syne"], "body-lg": ["Plus Jakarta Sans"], "label-sm": ["Plus Jakarta Sans"] }, "fontSize": { "label-md": ["12px", { "lineHeight": "16px", "letterSpacing": "0.02em", "fontWeight": "600" }], "headline-sm": ["18px", { "lineHeight": "26px", "fontWeight": "600" }], "label-lg": ["14px", { "lineHeight": "20px", "letterSpacing": "0.01em", "fontWeight": "600" }], "headline-md": ["22px", { "lineHeight": "30px", "letterSpacing": "-0.01em", "fontWeight": "600" }], "body-sm": ["12px", { "lineHeight": "18px", "fontWeight": "400" }], "body-md": ["14px", { "lineHeight": "22px", "fontWeight": "400" }], "display-xl": ["56px", { "lineHeight": "64px", "letterSpacing": "-0.02em", "fontWeight": "700" }], "headline-xl": ["36px", { "lineHeight": "44px", "letterSpacing": "-0.015em", "fontWeight": "700" }], "body-xl": ["18px", { "lineHeight": "28px", "fontWeight": "400" }], "headline-lg": ["28px", { "lineHeight": "36px", "letterSpacing": "-0.01em", "fontWeight": "600" }], "display-lg": ["44px", { "lineHeight": "52px", "letterSpacing": "-0.02em", "fontWeight": "700" }], "body-lg": ["16px", { "lineHeight": "24px", "fontWeight": "400" }], "label-sm": ["11px", { "lineHeight": "14px", "letterSpacing": "0.04em", "fontWeight": "700" }] } } } };</script></head><body class="bg-surface font-body-md text-on-surface antialiased"><header class="fixed top-0 w-full z-50 bg-surface-container-lowest/85 backdrop-blur-xl shadow-[0_1px_8px_rgba(0,0,0,0.04)]"><div class="h-20 max-w-[1280px] mx-auto px-gutter flex items-center justify-between gap-gutter"><div class="flex items-center gap-space-md shrink-0"><img alt="DANASEA brand logo with minimalistic dual ocean wave crest lines in ocean teal and coral accent, with modern bold wordmark in navy." class="h-8 w-auto object-contain" src="https://lh3.googleusercontent.com/aida/AEtjO1VvnQOF2WU9kDEsZEZSN1YNSkRu6Z2_49elqxL3W3H70QznUBWpRk31Nl8LKj_EuTvgl-aPxe6h0dUp3LQoVfVp01RNmSAB12-rEJv9MhU2f6AD8_vRSyZKyBDLqn3tWQ7HSf6YYVjpkEi7NAsR7cdkAV2bJI_xlmT9yaP7M2ZKZGl5F50so_t-2hiC_8z0eIbcNWKyv92AX50LCfgsO70-dTgI05kaKyZFg3UL59SF-eKVOPSxGgBwn7Ct"/><span class="font-headline-sm text-headline-sm text-primary tracking-tight">DANASEA</span></div><nav class="hidden xl:flex items-center gap-space-xs" data-active-classes="bg-primary-container text-on-primary-container font-label-lg text-label-lg rounded-xl"><a class="px-space-md py-space-sm rounded-xl font-label-lg text-label-lg text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface transition-colors" data-path="kham-pha" href="#">Khám phá</a><a class="px-space-md py-space-sm rounded-xl font-label-lg text-label-lg text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface transition-colors" data-path="trai-nghiem-bien" href="#">Trải nghiệm biển</a><a class="px-space-md py-space-sm rounded-xl font-label-lg text-label-lg text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface transition-colors" data-path="tro-ly-ai" href="#">Trợ lý AI</a><a class="px-space-md py-space-sm rounded-xl font-label-lg text-label-lg text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface transition-colors" data-path="yeu-thich" href="#">Yêu thích</a><a class="px-space-md py-space-sm rounded-xl font-label-lg text-label-lg text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface transition-colors" data-path="don-hang" href="#">Đơn hàng</a><a class="px-space-md py-space-sm rounded-xl font-label-lg text-label-lg text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface transition-colors" data-path="hop-thu-thong-bao" href="#">Hộp thư &amp; Thông báo</a></nav><div class="flex items-center gap-space-md shrink-0"><div class="flex items-center bg-surface-container-low p-space-xs rounded-full"><button class="px-space-sm py-space-xs rounded-full font-label-sm text-label-sm bg-surface-container-lowest text-primary shadow-[0_1px_4px_rgba(0,0,0,0.04)]">VI</button><button class="px-space-sm py-space-xs rounded-full font-label-sm text-label-sm text-on-surface-variant hover:text-on-surface transition-colors">EN</button></div><div class="flex items-center gap-space-sm pl-space-xs"><div class="text-right hidden sm:block"><div class="font-label-lg text-label-lg text-on-surface leading-tight">Nguyễn Văn An</div><div class="font-label-sm text-label-sm text-on-surface-variant">Thành viên Vàng</div></div><div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center"><span class="material-symbols-outlined text-on-primary text-[18px]">person</span></div></div></div></div></header><main class="w-full pt-20 bg-surface min-h-screen"><div class="flex flex-col w-full">
+<!-- Subtle Ambient Ocean Glow Behind Header Area -->
+<div class="relative w-full max-w-[1280px] mx-auto px-gutter pt-space-xl pb-space-3xl flex flex-col gap-space-xl">
+<!-- Top Context & Dual Primary Tabs Switcher -->
+<div class="flex flex-col md:flex-row md:items-end justify-between gap-space-lg">
+<div class="flex flex-col gap-space-xs">
+<div class="flex items-center gap-space-sm text-primary font-label-md text-label-md">
+<span class="material-symbols-outlined text-[18px]">waves</span>
+<span>TRUNG TÂM TƯƠNG TÁC DU KHÁCH</span>
+<span class="w-1.5 h-1.5 rounded-full bg-secondary"></span>
+<span class="text-on-surface-variant">Thời gian thực</span>
+</div>
+<h1 class="font-headline-xl text-headline-xl text-on-surface tracking-tight">Hộp thư &amp; Thông báo</h1>
+<p class="font-body-md text-body-md text-on-surface-variant max-w-2xl">
+          Quản lý toàn bộ trao đổi trực tiếp với câu lạc bộ biển, huấn luyện viên đạt chuẩn và các cập nhật hành trình thể thao tại Đà Nẵng.
+        </p>
+</div>
+<!-- Segmented Tab Nav Control -->
+<div class="flex items-center p-1.5 bg-surface-container-low rounded-xl shadow-sm self-start md:self-auto">
+<button class="flex items-center gap-space-sm px-space-lg py-space-sm rounded-lg font-label-lg text-label-lg transition-all duration-200 bg-surface-container-lowest text-primary shadow-sm" id="tab-btn-messages" onclick="switchMainTab('messages')">
+<span class="material-symbols-outlined text-[20px]" style="font-variation-settings: 'FILL' 1;">chat_bubble</span>
+<span>Hộp thoại tin nhắn</span>
+<span class="ml-1 px-2 py-0.5 rounded-full bg-secondary text-on-secondary font-label-sm text-label-sm">3</span>
+</button>
+<button class="flex items-center gap-space-sm px-space-lg py-space-sm rounded-lg font-label-lg text-label-lg transition-all duration-200 text-on-surface-variant hover:text-on-surface" id="tab-btn-notifications" onclick="switchMainTab('notifications')">
+<span class="material-symbols-outlined text-[20px]">notifications</span>
+<span>Thông báo hệ thống</span>
+<span class="w-2 h-2 rounded-full bg-primary"></span>
+</button>
+</div>
+</div>
+<!-- TAB VIEW 1: HỘP THOẠI TIN NHẮN (MASTER-DETAIL CHAT) -->
+<div class="w-full grid grid-cols-12 gap-gutter items-start" id="view-messages">
+<!-- CỘT TRÁI (CONVERSATIONS LIST) -->
+<div class="col-span-12 lg:col-span-4 flex flex-col bg-surface-container-lowest rounded-xl shadow-sm overflow-hidden min-h-[720px] max-h-[780px]">
+<!-- Search & Filter Area -->
+<div class="p-space-md bg-surface-container-lowest flex flex-col gap-space-sm">
+<div class="relative w-full">
+<span class="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-outline text-[20px]">search</span>
+<input class="w-full h-11 pl-10 pr-4 rounded-xl bg-surface-container-low text-on-surface font-body-md text-body-md placeholder:text-outline focus:outline-none focus:bg-surface-container-lowest transition-colors" placeholder="Tìm câu lạc bộ, đối tác, số đơn..." type="text"/>
+</div>
+<div class="flex items-center justify-between text-on-surface-variant font-label-sm text-label-sm px-1 pt-1">
+<span>ĐỐI TÁC VẬN HÀNH BIỂN (4)</span>
+<span class="flex items-center gap-1 text-primary cursor-pointer hover:underline">
+<span class="material-symbols-outlined text-[14px]">tune</span>Bộ lọc
+            </span>
+</div>
+</div>
+<!-- Conversations Scroll List -->
+<div class="flex flex-col overflow-y-auto px-space-xs pb-space-md space-y-1">
+<!-- Conversation Item 1 (Active) -->
+<div class="chat-thread-item active-chat flex items-start gap-space-md p-space-md rounded-xl cursor-pointer transition-all duration-200 bg-surface-container-low" onclick="selectChat(this)">
+<div class="relative shrink-0">
+<div class="w-12 h-12 rounded-xl bg-primary-container text-on-primary-container flex items-center justify-center font-headline-sm text-headline-sm overflow-hidden shadow-sm">
+<span class="material-symbols-outlined text-[26px]">scuba_diving</span>
+</div>
+<span class="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 rounded-full bg-emerald-500 ring-2 ring-surface-container-lowest"></span>
+</div>
+<div class="flex-1 min-w-0">
+<div class="flex items-baseline justify-between gap-1 mb-0.5">
+<span class="font-headline-sm text-[15px] leading-tight text-on-surface truncate">Son Tra Marine Diving</span>
+<span class="font-label-sm text-label-sm text-primary shrink-0">10:42</span>
+</div>
+<p class="font-label-sm text-label-sm text-primary mb-1">Lặn ngắm san hô Bãi Bụt</p>
+<p class="font-body-md text-body-sm text-on-surface truncate font-semibold">
+                Dạ anh An, cano cao tốc đón anh lúc 07:30 sáng mai tại cầu cảng...
+              </p>
+</div>
+<span class="w-2.5 h-2.5 rounded-full bg-secondary shrink-0 mt-2"></span>
+</div>
+<!-- Conversation Item 2 -->
+<div class="chat-thread-item flex items-start gap-space-md p-space-md rounded-xl cursor-pointer transition-all duration-200 hover:bg-surface-container-low" onclick="selectChat(this)">
+<div class="relative shrink-0">
+<div class="w-12 h-12 rounded-xl bg-tertiary-container text-on-tertiary-container flex items-center justify-center font-headline-sm text-headline-sm overflow-hidden shadow-sm">
+<span class="material-symbols-outlined text-[26px]">surfing</span>
+</div>
+<span class="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 rounded-full bg-emerald-500 ring-2 ring-surface-container-lowest"></span>
+</div>
+<div class="flex-1 min-w-0">
+<div class="flex items-baseline justify-between gap-1 mb-0.5">
+<span class="font-headline-sm text-[15px] leading-tight text-on-surface truncate">Danang Ocean Club</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant shrink-0">Hôm qua</span>
+</div>
+<p class="font-label-sm text-label-sm text-tertiary mb-1">Chèo SUP &amp; Lướt ván Mỹ Khê</p>
+<p class="font-body-md text-body-sm text-on-surface-variant truncate">
+                HLV Huy đã gửi ảnh flycam buổi chèo SUP bình minh của anh rồi ạ!
+              </p>
+</div>
+<span class="w-2 h-2 rounded-full bg-secondary shrink-0 mt-2"></span>
+</div>
+<!-- Conversation Item 3 -->
+<div class="chat-thread-item flex items-start gap-space-md p-space-md rounded-xl cursor-pointer transition-all duration-200 hover:bg-surface-container-low" onclick="selectChat(this)">
+<div class="relative shrink-0">
+<div class="w-12 h-12 rounded-xl bg-surface-container-highest text-on-surface-variant flex items-center justify-center font-headline-sm text-headline-sm overflow-hidden shadow-sm">
+<span class="material-symbols-outlined text-[26px]">paragliding</span>
+</div>
+<span class="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 rounded-full bg-slate-400 ring-2 ring-surface-container-lowest"></span>
+</div>
+<div class="flex-1 min-w-0">
+<div class="flex items-baseline justify-between gap-1 mb-0.5">
+<span class="font-headline-sm text-[15px] leading-tight text-on-surface truncate">SkyFly Dù Lượn Bán Đảo</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant shrink-0">12/10</span>
+</div>
+<p class="font-label-sm text-label-sm text-tertiary mb-1">Dù lượn ngắm biển Phạm Văn Đồng</p>
+<p class="font-body-md text-body-sm text-on-surface-variant truncate">
+                Cảm ơn anh đã đánh giá 5 sao cho phi công của SkyFly! Hẹn gặp lại anh...
+              </p>
+</div>
+</div>
+<!-- Conversation Item 4 -->
+<div class="chat-thread-item flex items-start gap-space-md p-space-md rounded-xl cursor-pointer transition-all duration-200 hover:bg-surface-container-low" onclick="selectChat(this)">
+<div class="relative shrink-0">
+<div class="w-12 h-12 rounded-xl bg-surface-container-high text-primary flex items-center justify-center font-headline-sm text-headline-sm overflow-hidden shadow-sm">
+<span class="material-symbols-outlined text-[26px]">speed</span>
+</div>
+<span class="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 rounded-full bg-slate-400 ring-2 ring-surface-container-lowest"></span>
+</div>
+<div class="flex-1 min-w-0">
+<div class="flex items-baseline justify-between gap-1 mb-0.5">
+<span class="font-headline-sm text-[15px] leading-tight text-on-surface truncate">Jetski Express Danang</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant shrink-0">08/10</span>
+</div>
+<p class="font-label-sm text-label-sm text-tertiary mb-1">Mô tô nước tốc độ cao Bãi Non Nước</p>
+<p class="font-body-md text-body-sm text-on-surface-variant truncate">
+                Gói bảo hiểm biển quốc tế PADI của đơn #DNS-77402 đã được kích hoạt.
+              </p>
+</div>
+</div>
+</div>
+<!-- Maritime Safety Direct Support Callout -->
+<div class="mt-auto p-space-md bg-surface-container-low flex items-center gap-space-sm">
+<span class="material-symbols-outlined text-primary text-[22px]">support_agent</span>
+<div class="flex-1 min-w-0">
+<p class="font-label-md text-label-md text-on-surface">Cứu hộ &amp; Trực ban Bãi biển</p>
+<p class="font-body-sm text-body-sm text-on-surface-variant truncate">Kênh khẩn cấp Ban Quản lý Bán Đảo</p>
+</div>
+<button class="px-2.5 py-1.5 rounded-lg bg-surface-container-lowest text-primary font-label-sm text-label-sm shadow-sm hover:bg-primary hover:text-on-primary transition-colors">
+            Gọi ngay
+          </button>
+</div>
+</div>
+<!-- CỘT PHẢI (KHUNG CHAT CHI TIẾT) -->
+<div class="col-span-12 lg:col-span-8 flex flex-col bg-surface-container-lowest rounded-xl shadow-sm overflow-hidden min-h-[720px] max-h-[780px] relative">
+<!-- Header Chat -->
+<div class="px-space-lg py-space-md bg-surface-container-lowest flex items-center justify-between gap-space-md z-10 shadow-[0_1px_4px_rgba(0,0,0,0.03)]">
+<div class="flex items-center gap-space-md min-w-0">
+<div class="relative shrink-0">
+<div class="w-12 h-12 rounded-xl bg-primary-container text-on-primary-container flex items-center justify-center font-headline-sm text-headline-sm shadow-sm">
+<span class="material-symbols-outlined text-[26px]">scuba_diving</span>
+</div>
+<span class="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 rounded-full bg-emerald-500 ring-2 ring-surface-container-lowest"></span>
+</div>
+<div class="flex flex-col min-w-0">
+<div class="flex items-center gap-space-sm flex-wrap">
+<h2 class="font-headline-sm text-headline-sm text-on-surface truncate">Son Tra Marine Diving</h2>
+<span class="px-2 py-0.5 rounded-full bg-surface-container-low text-primary font-label-sm text-label-sm flex items-center gap-1">
+<span class="material-symbols-outlined text-[13px]">verified</span>Đối tác kim cương
+                </span>
+</div>
+<div class="flex items-center gap-space-sm text-body-sm font-body-sm text-on-surface-variant">
+<span class="flex items-center gap-1 text-emerald-600 font-label-sm text-label-sm">
+<span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>Đang trực tuyến
+                </span>
+<span>•</span>
+<span class="truncate">Trải nghiệm: Lặn bình khí &amp; Ngắm san hô Bãi Bụt</span>
+</div>
+</div>
+</div>
+<!-- Action Button: Xem đơn hàng liên quan -->
+<div class="shrink-0 flex items-center gap-space-sm">
+<button class="flex items-center gap-space-sm px-space-md py-2 rounded-xl bg-surface-container-low hover:bg-primary-container hover:text-on-primary-container text-primary font-label-lg text-label-lg transition-all shadow-sm group" onclick="toggleOrderSummary()">
+<span class="material-symbols-outlined text-[18px]">receipt_long</span>
+<span class="hidden sm:inline">Đơn hàng liên quan</span>
+<span class="font-bold text-secondary">#DNS-89412</span>
+<span class="material-symbols-outlined text-[18px] group-hover:rotate-180 transition-transform">expand_more</span>
+</button>
+</div>
+</div>
+<!-- Order Summary Floating Drawer (Collapsible) -->
+<div class="hidden bg-surface-container-low p-space-md transition-all duration-300" id="order-drawer">
+<div class="bg-surface-container-lowest rounded-xl p-space-md shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-space-md">
+<div class="flex items-start gap-space-md">
+<div class="w-16 h-16 rounded-lg overflow-hidden shrink-0 bg-surface-container-high">
+<img class="w-full h-full object-cover" data-alt="Clear turquoise waters of Son Tra Peninsula with coral reef snorkelers swimming under gentle tropical morning sunlight." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDRwwUIyOSWortLgdQ1Kf_wrw1sUE34F_S0nNjzkkhXvy1-CXljNUjJoMiUm96tk55rFrELYGs3QVzgkYyTUQJVcYKdKBHNNOz4Enuz2XehvL8NUimHY8rQ_qHcopg0p1_wLLD4CgFAD7Zvj6B3Z-YQMYjoC8DcjoZb4M-clK9RPdftKJjDueKrtcnTK5tUe8vXckszu_5_tVvVpbt66mH7FKS3k9VuRdb-K25Uil-t00Dl3IRIp-_ZEA"/>
+</div>
+<div class="flex flex-col">
+<div class="flex items-center gap-2">
+<span class="px-2 py-0.5 rounded-md bg-secondary-fixed text-on-secondary-fixed font-label-sm text-label-sm">ĐÃ XÁC NHẬN</span>
+<span class="font-label-md text-label-md text-on-surface">Mã vé: #DNS-89412</span>
+</div>
+<h4 class="font-headline-sm text-[16px] text-on-surface mt-0.5">Tour Lặn biển Chuyên nghiệp Khám phá Rạn San Hô Sơn Trà</h4>
+<p class="font-body-sm text-body-sm text-on-surface-variant flex items-center gap-2 mt-1">
+<span class="flex items-center gap-1"><span class="material-symbols-outlined text-[14px]">calendar_today</span>08:00 - 11:30, Ngày mai (18/10/2025)</span>
+<span class="flex items-center gap-1"><span class="material-symbols-outlined text-[14px]">group</span>02 Khách</span>
+</p>
+</div>
+</div>
+<div class="flex flex-row md:flex-col items-end justify-between md:justify-center gap-1 shrink-0">
+<span class="font-label-sm text-label-sm text-on-surface-variant">Tổng thanh toán</span>
+<span class="font-headline-md text-headline-md text-secondary">1.780.000 đ</span>
+<a class="font-label-sm text-label-sm text-primary hover:underline flex items-center gap-0.5" href="#">
+                Xem E-ticket vé điện tử <span class="material-symbols-outlined text-[14px]">open_in_new</span>
+</a>
+</div>
+</div>
+</div>
+<!-- Chat Messages Thread Area -->
+<div class="flex-1 overflow-y-auto p-space-lg flex flex-col gap-space-md bg-surface-bright" id="chat-messages-container">
+<!-- Timeline divider -->
+<div class="flex items-center justify-center my-space-xs">
+<span class="px-space-md py-1 rounded-full bg-surface-container text-on-surface-variant font-label-sm text-label-sm shadow-sm">
+              Hôm nay, 17 tháng 10, 2025
+            </span>
+</div>
+<!-- Vendor Message 1 -->
+<div class="flex items-end gap-space-sm max-w-[80%] self-start">
+<div class="w-8 h-8 rounded-full bg-primary-container text-on-primary-container flex items-center justify-center shrink-0 mb-1 shadow-sm">
+<span class="material-symbols-outlined text-[16px]">scuba_diving</span>
+</div>
+<div class="flex flex-col gap-1">
+<div class="p-space-md rounded-2xl rounded-bl-sm bg-surface-container-lowest text-on-surface shadow-sm">
+<p class="font-body-md text-body-md">
+                  Chào anh An! Đội ngũ huấn luyện viên lặn PADI của Son Tra Marine đã sẵn sàng cho chuyến thám hiểm san hô ngày mai của 2 bạn tại Bãi Bụt.
+                </p>
+</div>
+<span class="font-label-sm text-label-sm text-outline px-1">09:15</span>
+</div>
+</div>
+<!-- Customer Message 1 -->
+<div class="flex items-end gap-space-sm max-w-[78%] self-end">
+<div class="flex flex-col items-end gap-1">
+<div class="p-space-md rounded-2xl rounded-br-sm bg-primary text-on-primary shadow-sm">
+<p class="font-body-md text-body-md">
+                  Chào bạn! Mình và bạn gái đều mới lặn ngắm san hô lần đầu. Ngày mai bọn mình có cần mang theo chân vịt và kính lặn riêng không, hay bên bạn cung cấp sẵn?
+                </p>
+</div>
+<div class="flex items-center gap-1 px-1">
+<span class="font-label-sm text-label-sm text-outline">09:30</span>
+<span class="material-symbols-outlined text-primary text-[15px]">done_all</span>
+</div>
+</div>
+</div>
+<!-- Vendor Message 2 (With Image Attachment) -->
+<div class="flex items-end gap-space-sm max-w-[82%] self-start">
+<div class="w-8 h-8 rounded-full bg-primary-container text-on-primary-container flex items-center justify-center shrink-0 mb-1 shadow-sm">
+<span class="material-symbols-outlined text-[16px]">scuba_diving</span>
+</div>
+<div class="flex flex-col gap-1">
+<div class="p-space-md rounded-2xl rounded-bl-sm bg-surface-container-lowest text-on-surface shadow-sm flex flex-col gap-space-sm">
+<p class="font-body-md text-body-md">
+                  Anh hoàn toàn yên tâm nhé, gói tour #DNS-89412 đã bao gồm trọn bộ trang thiết bị chuẩn quốc tế đã khử khuẩn: kính lặn góc rộng kèm van thở khô, áo phao chuyên dụng, đồ bơi giữ nhiệt chống trầy xước và chân vịt bơi lặn.
+                </p>
+<!-- Attachment Image Preview -->
+<div class="rounded-xl overflow-hidden bg-surface-container-high group relative cursor-pointer">
+<img class="w-full h-44 object-cover group-hover:scale-105 transition-transform duration-300" data-alt="High quality sanitized snorkeling and scuba diving gear set laid out neatly on a clean teak boat deck against azure ocean water." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBnRISoBM9mVsBNdTOgJwIhopt022gNETQAODePmm-Eoxy0eDnjME6p_NgoJf23gCxC3OO6EUYTE9Vwf0FwjCXR1l5EU6vbSE_CKK1oBq2sXnEsuV95HW5lLSXgaG4wIY-Ru9hjBJK3WzoFrhIzbuE3rxKQ0URJ-AOkSpuE68uPgzMTiqEt-7ZOavrIHG5A-VZVF0NqaPTmhwugXi5_psAHqGXLkPCOi9NFSmBV4LFiqzCoetg3Ep9sYw"/>
+<div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent flex items-end p-space-sm">
+<span class="text-white font-label-sm text-label-sm flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px]">image</span>
+                      Bo-thiet-bi-lan-chuan-PADI-2025.jpg (1.4 MB)
+                    </span>
+</div>
+</div>
+</div>
+<span class="font-label-sm text-label-sm text-outline px-1">09:35</span>
+</div>
+</div>
+<!-- Vendor Message 3 (Departure Schedule Notice) -->
+<div class="flex items-end gap-space-sm max-w-[80%] self-start">
+<div class="w-8 h-8 rounded-full bg-primary-container text-on-primary-container flex items-center justify-center shrink-0 mb-1 shadow-sm">
+<span class="material-symbols-outlined text-[16px]">scuba_diving</span>
+</div>
+<div class="flex flex-col gap-1">
+<div class="p-space-md rounded-2xl rounded-bl-sm bg-surface-container-lowest text-on-surface shadow-sm">
+<p class="font-body-md text-body-md">
+                  Dạ anh An, cano cao tốc số hiệu ST-89 sẽ đón anh lúc <strong>07:30 sáng mai</strong> tại Cầu Cảng Du Lịch Sông Hàn (đối diện KS Novotel) hoặc đón trực tiếp tại sảnh khách sạn của anh ở đường Võ Nguyên Giáp. Anh cho em xin địa chỉ khách sạn để xe trung chuyển đón nhé!
+                </p>
+</div>
+<span class="font-label-sm text-label-sm text-outline px-1">10:42</span>
+</div>
+</div>
+<!-- Customer Message 2 (Replying) -->
+<div class="flex items-end gap-space-sm max-w-[75%] self-end">
+<div class="flex flex-col items-end gap-1">
+<div class="p-space-md rounded-2xl rounded-br-sm bg-primary text-on-primary shadow-sm">
+<p class="font-body-md text-body-md">
+                  Tuyệt vời quá. Bọn mình đang ở Sala Danang Beach Hotel, số 36 Lâm Hoành. Đón bọn mình lúc 07:15 nhé.
+                </p>
+</div>
+<div class="flex items-center gap-1 px-1">
+<span class="font-label-sm text-label-sm text-outline">10:45</span>
+<span class="material-symbols-outlined text-primary text-[15px]">done_all</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Sticky Chat Composer Input Box -->
+<div class="p-space-md bg-surface-container-lowest shadow-[0_-2px_8px_rgba(0,0,0,0.03)] z-10">
+<form class="flex items-center gap-space-sm" onsubmit="handleSendMessage(event)">
+<!-- Attachment Actions -->
+<button class="w-11 h-11 rounded-xl flex items-center justify-center text-on-surface-variant hover:text-primary hover:bg-surface-container-low transition-colors shrink-0" title="Đính kèm tệp / ảnh" type="button">
+<span class="material-symbols-outlined text-[22px]">attach_file</span>
+</button>
+<button class="w-11 h-11 rounded-xl flex items-center justify-center text-on-surface-variant hover:text-primary hover:bg-surface-container-low transition-colors shrink-0 hidden sm:flex" title="Chụp / Tải ảnh biển" type="button">
+<span class="material-symbols-outlined text-[22px]">add_photo_alternate</span>
+</button>
+<!-- Text Input -->
+<div class="flex-1 relative">
+<input class="w-full h-12 px-space-md rounded-xl bg-surface-container-low text-on-surface font-body-md text-body-md placeholder:text-outline focus:outline-none focus:bg-surface-container-lowest transition-all" id="chat-input-text" placeholder="Nhập tin nhắn trao đổi với Son Tra Marine Diving..." type="text"/>
+</div>
+<!-- Send Button -->
+<button class="h-12 px-space-lg rounded-xl bg-primary hover:bg-primary-container text-on-primary font-label-lg text-label-lg flex items-center justify-center gap-space-xs transition-all shadow-sm shrink-0" type="submit">
+<span>Gửi</span>
+<span class="material-symbols-outlined text-[18px]">send</span>
+</button>
+</form>
+<div class="flex items-center justify-between mt-2 px-1 text-on-surface-variant font-body-sm text-body-sm">
+<span class="flex items-center gap-1 text-[12px] text-tertiary">
+<span class="material-symbols-outlined text-[14px]">lock</span>
+              Cuộc trò chuyện được bảo mật và giám sát an toàn bởi DANASEA
+            </span>
+<span class="text-[11px] text-outline hidden sm:inline">Nhấn Enter để gửi tin</span>
+</div>
+</div>
+</div>
+</div>
+<!-- TAB VIEW 2: THÔNG BÁO HỆ THỐNG (SYSTEM NOTIFICATIONS) -->
+<div class="w-full flex-col gap-space-2xl hidden" id="view-notifications">
+<!-- Section: Hôm nay -->
+<div class="flex flex-col gap-space-md">
+<div class="flex items-center gap-space-sm">
+<span class="w-2 h-6 rounded-full bg-primary"></span>
+<h2 class="font-headline-md text-headline-md text-on-surface">Hôm nay</h2>
+<span class="px-2.5 py-0.5 rounded-full bg-surface-container-high text-on-surface-variant font-label-sm text-label-sm">2 thông báo</span>
+</div>
+<div class="flex flex-col gap-space-sm">
+<!-- Notif 1: Cập nhật lịch khởi hành (Sea Schedule / Weather) -->
+<div class="bg-surface-container-lowest p-space-lg rounded-2xl shadow-sm hover:shadow-md transition-all duration-200 flex flex-col md:flex-row md:items-center justify-between gap-space-lg">
+<div class="flex items-start gap-space-lg">
+<div class="w-12 h-12 rounded-xl bg-primary text-on-primary flex items-center justify-center shrink-0 shadow-sm">
+<span class="material-symbols-outlined text-[26px]">sailing</span>
+</div>
+<div class="flex flex-col gap-space-xs">
+<div class="flex items-center gap-space-sm flex-wrap">
+<span class="px-2 py-0.5 rounded-md bg-primary-fixed-dim text-on-primary-fixed-variant font-label-sm text-label-sm font-bold">LỊCH KHỞI HÀNH &amp; SÓNG BIỂN</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant">Vừa xong (10:15)</span>
+</div>
+<h3 class="font-headline-sm text-headline-sm text-on-surface">
+                  Điều kiện hải văn thuận lợi cho chuyến Lặn Biển Bán Đảo Sơn Trà ngày mai
+                </h3>
+<p class="font-body-md text-body-md text-on-surface-variant max-w-3xl">
+                  Dự báo độ cao sóng tại Bãi Bụt dao động 0.4m - 0.6m, tầm nhìn dưới nước đạt 12 mét, độ mặn tối ưu. Huấn luyện viên trưởng câu lạc bộ đã xác nhận tour #DNS-89412 khởi hành đúng 08:00 sáng mai.
+                </p>
+</div>
+</div>
+<div class="shrink-0 flex items-center self-start md:self-center">
+<a class="px-space-lg py-space-sm rounded-xl bg-primary hover:bg-primary-container text-on-primary font-label-lg text-label-lg transition-colors flex items-center gap-1 shadow-sm" href="#">
+<span>Xem chi tiết lịch đón</span>
+<span class="material-symbols-outlined text-[18px]">arrow_forward</span>
+</a>
+</div>
+</div>
+<!-- Notif 2: Xác nhận thanh toán & Vé điện tử (Order Success) -->
+<div class="bg-surface-container-lowest p-space-lg rounded-2xl shadow-sm hover:shadow-md transition-all duration-200 flex flex-col md:flex-row md:items-center justify-between gap-space-lg">
+<div class="flex items-start gap-space-lg">
+<div class="w-12 h-12 rounded-xl bg-secondary-container text-on-secondary-container flex items-center justify-center shrink-0 shadow-sm">
+<span class="material-symbols-outlined text-[26px]">confirmation_number</span>
+</div>
+<div class="flex flex-col gap-space-xs">
+<div class="flex items-center gap-space-sm flex-wrap">
+<span class="px-2 py-0.5 rounded-md bg-secondary-fixed text-on-secondary-fixed font-label-sm text-label-sm font-bold">ĐƠN HÀNG THÀNH CÔNG</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant">08:20 Sáng</span>
+</div>
+<h3 class="font-headline-sm text-headline-sm text-on-surface">
+                  Đã xuất E-ticket dịch vụ thể thao biển #SUB-89412-01
+                </h3>
+<p class="font-body-md text-body-md text-on-surface-variant max-w-3xl">
+                  Thanh toán qua VNPAY-QR thành công số tiền 1.780.000 đ cho trải nghiệm Lặn biển ngắm rạn san hô Sơn Trà. Mã QR Check-in điện tử đã sẵn sàng để quét tại cầu cảng.
+                </p>
+</div>
+</div>
+<div class="shrink-0 flex items-center self-start md:self-center">
+<a class="px-space-lg py-space-sm rounded-xl bg-surface-container-low hover:bg-surface-container text-primary font-label-lg text-label-lg transition-colors flex items-center gap-1 shadow-sm" href="#">
+<span>Xem chi tiết đơn #SUB-89412-01</span>
+<span class="material-symbols-outlined text-[18px]">open_in_new</span>
+</a>
+</div>
+</div>
+</div>
+</div>
+<!-- Section: Tuần này -->
+<div class="flex flex-col gap-space-md">
+<div class="flex items-center gap-space-sm">
+<span class="w-2 h-6 rounded-full bg-tertiary"></span>
+<h2 class="font-headline-md text-headline-md text-on-surface">Tuần này</h2>
+<span class="px-2.5 py-0.5 rounded-full bg-surface-container-high text-on-surface-variant font-label-sm text-label-sm">3 thông báo</span>
+</div>
+<div class="flex flex-col gap-space-sm">
+<!-- Notif 3: Khuyến mãi đặc quyền (Promotion) -->
+<div class="bg-surface-container-lowest p-space-lg rounded-2xl shadow-sm hover:shadow-md transition-all duration-200 flex flex-col md:flex-row md:items-center justify-between gap-space-lg">
+<div class="flex items-start gap-space-lg">
+<div class="w-12 h-12 rounded-xl bg-primary-container text-on-primary-container flex items-center justify-center shrink-0 shadow-sm">
+<span class="material-symbols-outlined text-[26px]">local_activity</span>
+</div>
+<div class="flex flex-col gap-space-xs">
+<div class="flex items-center gap-space-sm flex-wrap">
+<span class="px-2 py-0.5 rounded-md bg-tertiary-fixed text-on-tertiary-fixed font-label-sm text-label-sm font-bold">ƯU ĐÃI ĐỘC QUYỀN MÙA THU</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant">15/10/2025</span>
+</div>
+<h3 class="font-headline-sm text-headline-sm text-on-surface">
+                  Tặng Voucher 150.000 đ trải nghiệm Chèo SUP đón bình minh Mân Thái
+                </h3>
+<p class="font-body-md text-body-md text-on-surface-variant max-w-3xl">
+                  Dành riêng cho Thành viên Vàng Nguyễn Văn An. Áp dụng ngay khi đặt tour chèo SUP ngắm bình minh và thưởng thức cafe biển cùng các câu lạc bộ tại bãi biển Mân Thái, Sơn Trà.
+                </p>
+</div>
+</div>
+<div class="shrink-0 flex items-center self-start md:self-center">
+<a class="px-space-lg py-space-sm rounded-xl bg-surface-container-low hover:bg-surface-container text-primary font-label-lg text-label-lg transition-colors flex items-center gap-1 shadow-sm" href="#">
+<span>Xem chi tiết trải nghiệm</span>
+<span class="material-symbols-outlined text-[18px]">arrow_forward</span>
+</a>
+</div>
+</div>
+<!-- Notif 4: Thay đổi giờ hoạt động / Cập nhật an toàn hàng hải -->
+<div class="bg-surface-container-lowest p-space-lg rounded-2xl shadow-sm hover:shadow-md transition-all duration-200 flex flex-col md:flex-row md:items-center justify-between gap-space-lg">
+<div class="flex items-start gap-space-lg">
+<div class="w-12 h-12 rounded-xl bg-surface-container-highest text-on-surface-variant flex items-center justify-center shrink-0 shadow-sm">
+<span class="material-symbols-outlined text-[26px]">security_update_good</span>
+</div>
+<div class="flex flex-col gap-space-xs">
+<div class="flex items-center gap-space-sm flex-wrap">
+<span class="px-2 py-0.5 rounded-md bg-surface-container-high text-on-surface font-label-sm text-label-sm font-bold">QUY ĐỊNH AN TOÀN BÃI BIỂN</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant">14/10/2025</span>
+</div>
+<h3 class="font-headline-sm text-headline-sm text-on-surface">
+                  Quy chuẩn phao cứu sinh tự động và flycam ghi hình năm 2025
+                </h3>
+<p class="font-body-md text-body-md text-on-surface-variant max-w-3xl">
+                  Ban Quản lý Bán đảo Sơn Trà và các Bãi biển du lịch Đà Nẵng chính thức đưa vào áp dụng thiết bị định vị GPS cá nhân gắn trên áo phao cho tất cả du khách tham gia lặn biển và lướt sóng.
+                </p>
+</div>
+</div>
+<div class="shrink-0 flex items-center self-start md:self-center">
+<a class="px-space-lg py-space-sm rounded-xl bg-surface-container-low hover:bg-surface-container text-primary font-label-lg text-label-lg transition-colors flex items-center gap-1 shadow-sm" href="#">
+<span>Xem hướng dẫn an toàn</span>
+<span class="material-symbols-outlined text-[18px]">verified_user</span>
+</a>
+</div>
+</div>
+<!-- Notif 5: Hoàn tất trải nghiệm & Đánh giá dịch vụ -->
+<div class="bg-surface-container-lowest p-space-lg rounded-2xl shadow-sm hover:shadow-md transition-all duration-200 flex flex-col md:flex-row md:items-center justify-between gap-space-lg">
+<div class="flex items-start gap-space-lg">
+<div class="w-12 h-12 rounded-xl bg-secondary-fixed text-secondary flex items-center justify-center shrink-0 shadow-sm">
+<span class="material-symbols-outlined text-[26px]">hotel_class</span>
+</div>
+<div class="flex flex-col gap-space-xs">
+<div class="flex items-center gap-space-sm flex-wrap">
+<span class="px-2 py-0.5 rounded-md bg-secondary-fixed-dim text-on-secondary-fixed-variant font-label-sm text-label-sm font-bold">ĐÁNH GIÁ TRẢI NGHIỆM</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant">12/10/2025</span>
+</div>
+<h3 class="font-headline-sm text-headline-sm text-on-surface">
+                  Trải nghiệm Dù lượn ngắm toàn cảnh biển Mỹ Khê của bạn như thế nào?
+                </h3>
+<p class="font-body-md text-body-md text-on-surface-variant max-w-3xl">
+                  Đơn hàng #DNS-77109 cùng đơn vị SkyFly đã hoàn tất. Chia sẻ hình ảnh và nhận xét chuyến bay để tích lũy 500 điểm thưởng Thể Thao Biển DANASEA.
+                </p>
+</div>
+</div>
+<div class="shrink-0 flex items-center self-start md:self-center">
+<a class="px-space-lg py-space-sm rounded-xl bg-secondary-container hover:bg-secondary text-on-secondary-container hover:text-on-secondary font-label-lg text-label-lg transition-colors flex items-center gap-1 shadow-sm" href="#">
+<span>Đánh giá &amp; Nhận 500 điểm</span>
+<span class="material-symbols-outlined text-[18px]">rate_review</span>
+</a>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<script>
+  function switchMainTab(tab) {
+    const viewMessages = document.getElementById('view-messages');
+    const viewNotifications = document.getElementById('view-notifications');
+    const btnMessages = document.getElementById('tab-btn-messages');
+    const btnNotifications = document.getElementById('tab-btn-notifications');
+
+    if (tab === 'messages') {
+      viewMessages.classList.remove('hidden');
+      viewNotifications.classList.add('hidden');
+
+      btnMessages.className = "flex items-center gap-space-sm px-space-lg py-space-sm rounded-lg font-label-lg text-label-lg transition-all duration-200 bg-surface-container-lowest text-primary shadow-sm";
+      btnNotifications.className = "flex items-center gap-space-sm px-space-lg py-space-sm rounded-lg font-label-lg text-label-lg transition-all duration-200 text-on-surface-variant hover:text-on-surface";
+    } else {
+      viewMessages.classList.add('hidden');
+      viewNotifications.classList.remove('hidden');
+
+      btnNotifications.className = "flex items-center gap-space-sm px-space-lg py-space-sm rounded-lg font-label-lg text-label-lg transition-all duration-200 bg-surface-container-lowest text-primary shadow-sm";
+      btnMessages.className = "flex items-center gap-space-sm px-space-lg py-space-sm rounded-lg font-label-lg text-label-lg transition-all duration-200 text-on-surface-variant hover:text-on-surface";
+    }
+  }
+
+  function toggleOrderSummary() {
+    const drawer = document.getElementById('order-drawer');
+    if (drawer.classList.contains('hidden')) {
+      drawer.classList.remove('hidden');
+    } else {
+      drawer.classList.add('hidden');
+    }
+  }
+
+  function selectChat(element) {
+    const allChats = document.querySelectorAll('.chat-thread-item');
+    allChats.forEach(chat => {
+      chat.classList.remove('bg-surface-container-low');
+      chat.classList.add('hover:bg-surface-container-low');
+    });
+    element.classList.add('bg-surface-container-low');
+    element.classList.remove('hover:bg-surface-container-low');
+  }
+
+  function handleSendMessage(event) {
+    event.preventDefault();
+    const input = document.getElementById('chat-input-text');
+    const text = input.value.trim();
+    if (!text) return;
+
+    const chatContainer = document.getElementById('chat-messages-container');
+    const messageNode = document.createElement('div');
+    messageNode.className = 'flex items-end gap-space-sm max-w-[78%] self-end animate-fadeIn';
+    
+    const now = new Date();
+    const timeString = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+
+    messageNode.innerHTML = `
+      <div class="flex flex-col items-end gap-1">
+        <div class="p-space-md rounded-2xl rounded-br-sm bg-primary text-on-primary shadow-sm">
+          <p class="font-body-md text-body-md">${text}</p>
+        </div>
+        <div class="flex items-center gap-1 px-1">
+          <span class="font-label-sm text-label-sm text-outline">${timeString}</span>
+          <span class="material-symbols-outlined text-outline text-[15px]">done</span>
+        </div>
+      </div>
+    `;
+
+    chatContainer.appendChild(messageNode);
+    input.value = '';
+    chatContainer.scrollTop = chatContainer.scrollHeight;
+  }
+</script></main><footer class="w-full bg-surface-container-low shadow-[0_-1px_8px_rgba(0,0,0,0.03)]"><div class="max-w-[1280px] mx-auto px-gutter py-space-3xl flex flex-col gap-space-2xl"><div class="flex flex-wrap items-center justify-between gap-space-lg p-space-lg bg-surface-container-lowest rounded-xl shadow-[0_1px_8px_rgba(0,0,0,0.04)]"><div class="flex items-center gap-space-md"><span class="material-symbols-outlined text-primary text-[28px]">verified</span><div><div class="font-headline-sm text-headline-sm text-on-surface">Đối tác xác thực Đà Nẵng</div><div class="font-body-sm text-body-sm text-on-surface-variant">100% dịch vụ thể thao biển đạt chuẩn an toàn du lịch hàng hải</div></div></div><div class="flex items-center gap-space-lg"><div class="flex items-center gap-space-sm text-on-surface font-label-md text-label-md"><span class="material-symbols-outlined text-primary text-[20px]">pool</span>Chứng chỉ cứu hộ</div><div class="flex items-center gap-space-sm text-on-surface font-label-md text-label-md"><span class="material-symbols-outlined text-primary text-[20px]">shield_with_heart</span>Bảo hiểm du lịch biển</div><div class="flex items-center gap-space-sm text-on-surface font-label-md text-label-md"><span class="material-symbols-outlined text-primary text-[20px]">anchor</span>Cảng vụ Đà Nẵng</div></div></div><div class="grid grid-cols-1 md:grid-cols-4 gap-gutter"><div class="flex flex-col gap-space-md"><div class="flex items-center gap-space-sm"><span class="font-headline-md text-headline-md text-primary">DANASEA</span></div><p class="font-body-md text-body-md text-on-surface-variant">Nền tảng đặt vé và trải nghiệm thể thao biển hàng đầu tại Đà Nẵng. Kết nối trực tiếp với các đơn vị vận hành bãi biển được cấp phép.</p><div class="flex items-center gap-space-sm text-secondary font-label-lg text-label-lg"><span class="material-symbols-outlined text-[20px]">call</span><span>Hotline hỗ trợ 24/7: 1900 6868</span></div></div><div class="flex flex-col gap-space-sm"><span class="font-headline-sm text-headline-sm text-on-surface mb-space-xs">Trải nghiệm nổi bật</span><a class="font-body-md text-body-md text-on-surface-variant hover:text-primary transition-colors" href="#">Lặn ngắm san hô Bán đảo Sơn Trà</a><a class="font-body-md text-body-md text-on-surface-variant hover:text-primary transition-colors" href="#">Mô tô nước Bãi biển Mỹ Khê</a><a class="font-body-md text-body-md text-on-surface-variant hover:text-primary transition-colors" href="#">Dù lượn ngắm toàn cảnh biển</a><a class="font-body-md text-body-md text-on-surface-variant hover:text-primary transition-colors" href="#">Chèo SUP bình minh Mân Thái</a></div><div class="flex flex-col gap-space-sm"><span class="font-headline-sm text-headline-sm text-on-surface mb-space-xs">Hỗ trợ du khách</span><a class="font-body-md text-body-md text-on-surface-variant hover:text-primary transition-colors" href="#">Trung tâm trợ giúp du khách</a><a class="font-body-md text-body-md text-on-surface-variant hover:text-primary transition-colors" href="#">Chính sách hoàn hủy linh hoạt</a><a class="font-body-md text-body-md text-on-surface-variant hover:text-primary transition-colors" href="#">Quy chuẩn an toàn bãi biển</a><a class="font-body-md text-body-md text-on-surface-variant hover:text-primary transition-colors" href="#">Dự báo thời tiết &amp; sóng biển</a></div><div class="flex flex-col gap-space-sm"><span class="font-headline-sm text-headline-sm text-on-surface mb-space-xs">Chính sách &amp; Pháp lý</span><a class="font-body-md text-body-md text-on-surface-variant hover:text-primary transition-colors" href="#">Điều khoản sử dụng</a><a class="font-body-md text-body-md text-on-surface-variant hover:text-primary transition-colors" href="#">Chính sách bảo mật thông tin</a><a class="font-body-md text-body-md text-on-surface-variant hover:text-primary transition-colors" href="#">Quy chế bảo vệ người tiêu dùng</a><a class="font-body-md text-body-md text-on-surface-variant hover:text-primary transition-colors" href="#">Đăng ký đối tác vận hành biển</a></div></div><div class="flex flex-col sm:flex-row items-center justify-between gap-space-md pt-space-lg text-on-surface-variant font-body-sm text-body-sm"><div>© 2025 DANASEA. Nền tảng du lịch biển Đà Nẵng, Việt Nam. Bản quyền được bảo lưu.</div><div class="flex gap-space-md"><span class="flex items-center gap-space-xs"><span class="material-symbols-outlined text-[16px] text-primary">location_on</span>Bãi biển Mỹ Khê &amp; Bán đảo Sơn Trà, TP. Đà Nẵng</span></div></div></div></footer></body></html>

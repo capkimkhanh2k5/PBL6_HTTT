@@ -1,0 +1,443 @@
+<!DOCTYPE html><html lang="vi"><head><meta charset="utf-8"><meta content="width=device-width, initial-scale=1.0" name="viewport"><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"><link href="https://fonts.googleapis.com" rel="preconnect"><link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"><link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&amp;family=Syne:wght@600;700;800&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"><style>@layer base { html, body { margin: 0; padding: 0; } body { overscroll-behavior: none; } main > :first-child { margin-top: 0 !important; } main > :last-child { margin-bottom: 0 !important; } } ::-webkit-scrollbar { display: none; }</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config = { darkMode: "class", theme: { extend: { "colors": { "surface-container-highest": "#dee3e4", "on-tertiary-container": "#f4fbff", "secondary-container": "#fb7059", "on-tertiary-fixed-variant": "#2e4b56", "on-error-container": "#93000a", "primary-fixed-dim": "#79d4e2", "primary-container": "#087f8c", "secondary": "#aa3524", "surface-container-lowest": "#ffffff", "surface-container": "#eaeff0", "tertiary-fixed": "#c9e7f6", "on-primary": "#ffffff", "outline": "#6e797b", "tertiary": "#425e6a", "surface-tint": "#006874", "inverse-surface": "#2c3132", "surface-bright": "#f5fafb", "on-primary-container": "#effdff", "on-error": "#ffffff", "on-background": "#171d1e", "tertiary-fixed-dim": "#adcbd9", "on-secondary-fixed-variant": "#891d0f", "surface-variant": "#dee3e4", "on-surface-variant": "#3e494a", "inverse-primary": "#79d4e2", "surface-container-high": "#e4e9ea", "background": "#f5fafb", "inverse-on-surface": "#edf2f3", "error-container": "#ffdad6", "surface-container-low": "#eff4f5", "on-tertiary-fixed": "#001f29", "primary": "#00646f", "secondary-fixed-dim": "#ffb4a7", "on-primary-fixed-variant": "#004f57", "on-surface": "#171d1e", "on-tertiary": "#ffffff", "surface": "#f5fafb", "on-secondary": "#ffffff", "error": "#ba1a1a", "on-secondary-container": "#6c0600", "primary-fixed": "#95f1ff", "secondary-fixed": "#ffdad4", "tertiary-container": "#5a7784", "outline-variant": "#bdc9ca", "on-secondary-fixed": "#400200", "on-primary-fixed": "#001f24", "surface-dim": "#d6dbdc" }, "borderRadius": { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" }, "spacing": { "space-md": "1rem", "space-sm": "0.5rem", "margin": "5rem", "space-xs": "0.25rem", "space-lg": "1.5rem", "space-2xl": "3rem", "margin-sm": "1.5rem", "space-xl": "2rem", "space-3xl": "4.5rem", "gutter": "1.5rem", "gutter-lg": "2rem", "gutter-sm": "1rem", "margin-md": "3rem" }, "fontFamily": { "label-md": ["Plus Jakarta Sans"], "headline-sm": ["Syne"], "label-lg": ["Plus Jakarta Sans"], "headline-md": ["Syne"], "body-sm": ["Plus Jakarta Sans"], "body-md": ["Plus Jakarta Sans"], "display-xl": ["Syne"], "headline-xl": ["Syne"], "body-xl": ["Plus Jakarta Sans"], "headline-lg": ["Syne"], "display-lg": ["Syne"], "body-lg": ["Plus Jakarta Sans"], "label-sm": ["Plus Jakarta Sans"] }, "fontSize": { "label-md": ["12px", { "lineHeight": "16px", "letterSpacing": "0.02em", "fontWeight": "600" }], "headline-sm": ["18px", { "lineHeight": "26px", "fontWeight": "600" }], "label-lg": ["14px", { "lineHeight": "20px", "letterSpacing": "0.01em", "fontWeight": "600" }], "headline-md": ["22px", { "lineHeight": "30px", "letterSpacing": "-0.01em", "fontWeight": "600" }], "body-sm": ["12px", { "lineHeight": "18px", "fontWeight": "400" }], "body-md": ["14px", { "lineHeight": "22px", "fontWeight": "400" }], "display-xl": ["56px", { "lineHeight": "64px", "letterSpacing": "-0.02em", "fontWeight": "700" }], "headline-xl": ["36px", { "lineHeight": "44px", "letterSpacing": "-0.015em", "fontWeight": "700" }], "body-xl": ["18px", { "lineHeight": "28px", "fontWeight": "400" }], "headline-lg": ["28px", { "lineHeight": "36px", "letterSpacing": "-0.01em", "fontWeight": "600" }], "display-lg": ["44px", { "lineHeight": "52px", "letterSpacing": "-0.02em", "fontWeight": "700" }], "body-lg": ["16px", { "lineHeight": "24px", "fontWeight": "400" }], "label-sm": ["11px", { "lineHeight": "14px", "letterSpacing": "0.04em", "fontWeight": "700" }] } } } };</script></head><body class="bg-surface font-body-md text-on-surface antialiased"><main class="w-full min-h-screen bg-surface flex flex-col justify-center items-center"><div class="flex flex-col w-full">
+<!-- Interactive Presentation Mode Toggle & Header Scrim -->
+<div class="relative w-full overflow-hidden py-12 px-6 lg:px-20">
+<!-- Subtle Oceanic Ambient Background Orbs -->
+<div class="absolute -top-32 -left-20 w-96 h-96 rounded-full bg-primary-fixed-dim/20 blur-3xl pointer-events-none"></div>
+<div class="absolute top-1/2 -right-32 w-80 h-80 rounded-full bg-secondary-fixed/20 blur-3xl pointer-events-none"></div>
+<div class="max-w-7xl mx-auto flex flex-col gap-10">
+<!-- Top Navigation Context & Flow Switcher Bar -->
+<div class="flex flex-wrap items-center justify-between gap-4 bg-surface-container-lowest/80 backdrop-blur-md px-6 py-4 rounded-xl shadow-sm">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-lg bg-primary flex items-center justify-center text-on-primary">
+<span class="material-symbols-outlined text-[24px]">anchor</span>
+</div>
+<div>
+<div class="font-headline-sm text-headline-sm text-on-surface">DANASEA Security Portal</div>
+<div class="font-body-sm text-body-sm text-tertiary">Bảo vệ tài khoản hải trình &amp; đặt chỗ hàng hải cao cấp</div>
+</div>
+</div>
+<!-- Simulation Tabs for Design Evaluation -->
+<div class="flex items-center gap-1 bg-surface-container-high p-1.5 rounded-xl">
+<button class="px-4 py-2 rounded-lg font-label-md text-label-md transition-all duration-200 bg-primary-container text-on-primary-container shadow-sm" id="tab-btn-1" onclick="switchState(1)">
+            1. Gửi yêu cầu
+          </button>
+<button class="px-4 py-2 rounded-lg font-label-md text-label-md transition-all duration-200 text-tertiary hover:text-on-surface" id="tab-btn-2" onclick="switchState(2)">
+            2. Kiểm tra Email
+          </button>
+<button class="px-4 py-2 rounded-lg font-label-md text-label-md transition-all duration-200 text-tertiary hover:text-on-surface" id="tab-btn-3" onclick="switchState(3)">
+            3. Đặt mật khẩu mới
+          </button>
+<button class="px-4 py-2 rounded-lg font-label-md text-label-md transition-all duration-200 text-tertiary hover:text-on-surface" id="tab-btn-4" onclick="switchState(4)">
+            4. Trạng thái lỗi/hết hạn
+          </button>
+<button class="px-4 py-2 rounded-lg font-label-md text-label-md transition-all duration-200 text-tertiary hover:text-on-surface" id="tab-btn-5" onclick="switchState(5)">
+            5. Cập nhật thành công
+          </button>
+</div>
+</div>
+<!-- Main Layout Grid: Visual Maritime Hero Banner & Context Panels -->
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch">
+<!-- Left Column: Maritime Brand Storytelling & Safety Guarantee (5 Cols) -->
+<div class="lg:col-span-5 flex flex-col justify-between rounded-xl bg-surface-container-lowest shadow-sm p-8 relative overflow-hidden">
+<div class="absolute inset-0 bg-cover bg-center opacity-10" data-alt="Gentle pristine turquoise ocean water ripples surface with sparkling sunlight highlights, modern minimal coastal luxury aesthetic with teal cyan shades and serene atmosphere." style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuCBYMvCvw4APVy6HXmYf2xiApAtsKrcGjFMqT91Sw0jT4_de3RyC9nh5SBVAbYle-f6qrhLB7_nMajpKxbuH-6NEnRmZYaWffgLuQz-tM-U89orF6g1yU9zfLsYUSALSlE3UFTryqYA0R_8LAkOwl8FkhLBmHvFQc95FlfSQbRgyEVNRl3QW4ivSsTFVpN1flzBnb6u9pwN-v2JdQ8ZygcGn4kn7Vw6kZwMbxeQxN-5hkB1dYwae3grAA')"></div>
+<div class="relative z-10 flex flex-col gap-6">
+<div class="inline-flex items-center gap-2 self-start px-3 py-1.5 rounded-full bg-surface-container-high text-primary font-label-sm text-label-sm uppercase tracking-wider">
+<span class="material-symbols-outlined text-[16px]">verified_user</span>
+              Hệ thống xác thực chuẩn hàng hải
+            </div>
+<h1 class="font-headline-xl text-headline-xl text-on-surface tracking-tight">
+              An tâm khám phá đại dương cùng DANASEA
+            </h1>
+<p class="font-body-md text-body-md text-tertiary leading-relaxed">
+              Quy trình khôi phục và bảo mật tài khoản được mã hóa tiêu chuẩn quốc tế, bảo vệ quyền lợi cá nhân, lịch trình du thuyền và trải nghiệm lặn biển của bạn mọi lúc, mọi nơi.
+            </p>
+<!-- Marine Trust Feature List -->
+<div class="flex flex-col gap-3.5 pt-4"><div class="flex items-center gap-3 p-3 rounded-lg bg-surface-container-low"><div class="w-8 h-8 rounded-full bg-primary-fixed-dim/30 flex items-center justify-center text-primary"><span class="material-symbols-outlined text-[18px]">lock_clock</span></div><div class="flex flex-col"><span class="font-label-md text-label-md text-on-surface">Thời hạn liên kết theo quy định hệ thống</span><span class="font-body-sm text-body-sm text-outline">Tự động vô hiệu hóa sau thời gian quy định nhằm đảm bảo an toàn</span></div></div><div class="flex items-center gap-3 p-3 rounded-lg bg-surface-container-low"><div class="w-8 h-8 rounded-full bg-primary-fixed-dim/30 flex items-center justify-center text-primary"><span class="material-symbols-outlined text-[18px]">shield</span></div><div class="flex flex-col"><span class="font-label-md text-label-md text-on-surface">Mã hóa đa tầng SSL 256-bit</span><span class="font-body-sm text-body-sm text-outline">Bảo vệ toàn vẹn dữ liệu truyền nhận trên mọi nền tảng</span></div></div><div class="flex items-center gap-3 p-3 rounded-lg bg-surface-container-low"><div class="w-8 h-8 rounded-full bg-primary-fixed-dim/30 flex items-center justify-center text-primary"><span class="material-symbols-outlined text-[18px]">support_agent</span></div><div class="flex flex-col"><span class="font-label-md text-label-md text-on-surface">Hỗ trợ xác thực tài khoản 24/7</span><span class="font-body-sm text-body-sm text-outline">Hỗ trợ trực tuyến kịp thời khi gặp sự cố đăng nhập</span></div></div></div>
+</div>
+<!-- Bottom Customer Trust Footer -->
+
+</div>
+<!-- Right Column: Interactive State Containers (7 Cols) -->
+<div class="lg:col-span-7 flex flex-col justify-center">
+<!-- STATE 1: Request Password Recovery -->
+<div class="w-full bg-surface-container-lowest rounded-xl shadow-md p-8 md:p-12 transition-all duration-300" id="state-panel-1">
+<div class="flex items-center gap-3 mb-3">
+<div class="w-10 h-10 rounded-full bg-primary-fixed-dim/30 flex items-center justify-center text-primary-container">
+<span class="material-symbols-outlined text-[22px]">key</span>
+</div>
+<span class="font-label-sm text-label-sm uppercase tracking-widest text-primary font-bold">Bước 01 / Khôi phục quyền truy cập</span>
+</div>
+<h2 class="font-headline-lg text-headline-lg text-on-surface mb-3">Quên mật khẩu?</h2>
+<p class="font-body-md text-body-md text-tertiary mb-8">
+              Nhập địa chỉ email liên kết với tài khoản DANASEA của bạn để nhận liên kết thiết lập mật khẩu mới.
+            </p>
+<form class="flex flex-col gap-6" onsubmit="handleRequestSubmit(event)">
+<div class="flex flex-col gap-2">
+<label class="font-label-md text-label-md text-on-surface flex items-center justify-between" for="recovery-email">
+<span class="">Địa chỉ email tài khoản</span>
+<span class="text-tertiary font-body-sm">Đã đăng ký khi đặt tour</span>
+</label>
+<div class="relative flex items-center">
+<span class="material-symbols-outlined absolute left-4 text-outline text-[20px]">mail</span>
+<input class="w-full h-[52px] pl-12 pr-4 bg-surface-container-lowest text-on-surface rounded-xl shadow-sm outline-none focus:ring-2 focus:ring-primary-container transition font-body-md text-body-md" id="recovery-email" placeholder="nhap.email@example.com" required="" type="email" value="an.nguyen@example.com">
+</div>
+</div>
+<!-- Primary Submit Button -->
+<button class="w-full h-[52px] rounded-xl bg-primary-container text-on-primary font-label-lg text-label-lg flex items-center justify-center gap-2 hover:bg-primary transition shadow-md" type="submit">
+<span class="">Gửi liên kết khôi phục</span>
+<span class="material-symbols-outlined text-[18px]">arrow_forward</span>
+</button>
+<div class="flex items-center justify-center gap-2 pt-2">
+<span class="font-body-md text-body-md text-tertiary">Bạn đã nhớ lại mật khẩu?</span>
+<a class="font-label-md text-label-md text-primary-container hover:underline inline-flex items-center gap-1" href="#" onclick="alert('Chuyển hướng đến màn hình Đăng nhập DANASEA'); return false;">
+<span class="">Đăng nhập</span>
+<span class="material-symbols-outlined text-[16px]">arrow_back</span>
+</a>
+</div>
+</form>
+</div>
+<!-- STATE 2: Email Sent Confirmation & Countdown -->
+<div class="hidden w-full bg-surface-container-lowest rounded-xl shadow-md p-8 md:p-12 transition-all duration-300" id="state-panel-2">
+<div class="flex flex-col items-center text-center">
+<!-- Teal Pulse Ocean Mailbox Icon -->
+<div class="relative mb-6">
+<div class="w-20 h-20 rounded-full bg-primary-container/10 flex items-center justify-center text-primary-container">
+<span class="material-symbols-outlined text-[40px]">mark_email_read</span>
+</div>
+<div class="absolute inset-0 rounded-full bg-primary-container/20 animate-ping pointer-events-none"></div>
+</div>
+<div class="inline-block px-3 py-1 rounded-full bg-tertiary-fixed text-on-tertiary-fixed font-label-sm text-label-sm uppercase mb-3">
+                Đã gửi thành công
+              </div>
+<h2 class="font-headline-lg text-headline-lg text-on-surface mb-3">Kiểm tra hộp thư của bạn</h2>
+<p class="font-body-md text-body-md text-tertiary max-w-lg mb-6 leading-relaxed">
+                Đã gửi hướng dẫn khôi phục mật khẩu tới địa chỉ <span class="font-label-md text-label-md text-on-surface font-semibold underline decoration-primary-container">an.nguyen@example.com</span>. Vui lòng kiểm tra hộp thư đến (và thư rác).
+              </p>
+<!-- Instruction Guidance Box -->
+<div class="w-full bg-surface-container-low p-4 rounded-xl text-left mb-6 flex items-start gap-3">
+<span class="material-symbols-outlined text-primary-container text-[20px] shrink-0 mt-0.5">info</span>
+<p class="font-body-sm text-body-sm text-tertiary">
+                  Để bảo vệ an ninh hàng hải cá nhân, liên kết chỉ có hiệu lực trong vòng <strong class="text-on-surface">15 phút</strong>. Sau thời gian này, vui lòng gửi lại yêu cầu mới.
+                </p>
+</div>
+<!-- Resend Action and Timer -->
+<div class="w-full flex flex-col sm:flex-row items-center justify-center gap-4">
+<button class="w-full sm:w-auto h-[48px] px-6 rounded-xl bg-surface-container-high text-outline font-label-md text-label-md flex items-center justify-center gap-2 cursor-not-allowed transition" disabled="" id="resend-btn" onclick="resendEmail()">
+<span class="material-symbols-outlined text-[18px]">cached</span>
+<span class="">Gửi lại email (<span id="resend-timer" class="">54</span>s)</span>
+</button>
+<button class="w-full sm:w-auto h-[48px] px-6 rounded-xl bg-primary-container text-on-primary font-label-md text-label-md flex items-center justify-center gap-2 hover:bg-primary transition shadow-sm" onclick="switchState(3)">
+<span class="">Mở liên kết mẫu (Thử nghiệm)</span>
+<span class="material-symbols-outlined text-[18px]">open_in_new</span>
+</button>
+</div>
+<div class="mt-8 pt-6 w-full flex items-center justify-center border-t-0">
+<a class="font-label-md text-label-md text-tertiary hover:text-on-surface flex items-center gap-1.5" href="#" onclick="switchState(1); return false;">
+<span class="material-symbols-outlined text-[16px]">arrow_back</span>
+<span class="">Dùng địa chỉ email khác</span>
+</a>
+</div>
+</div>
+</div>
+<!-- STATE 3: Set New Password Form -->
+<div class="hidden w-full bg-surface-container-lowest rounded-xl shadow-md p-8 md:p-12 transition-all duration-300" id="state-panel-3">
+<div class="flex items-center gap-3 mb-3">
+<div class="w-10 h-10 rounded-full bg-primary-fixed-dim/30 flex items-center justify-center text-primary-container">
+<span class="material-symbols-outlined text-[22px]">lock_reset</span>
+</div>
+<span class="font-label-sm text-label-sm uppercase tracking-widest text-primary font-bold">Bước 02 / Hoàn tất xác minh</span>
+</div>
+<h2 class="font-headline-lg text-headline-lg text-on-surface mb-2">Tạo mật khẩu mới</h2>
+<p class="font-body-md text-body-md text-tertiary mb-6">
+              Thiết lập mật khẩu mạnh và an toàn để tiếp tục đăng nhập các chuyến du ngoạn trên biển cùng DANASEA.
+            </p>
+<form class="flex flex-col gap-5" onsubmit="handlePasswordSubmit(event)">
+<!-- New Password Field -->
+<div class="flex flex-col gap-2">
+<label class="font-label-md text-label-md text-on-surface" for="new-pass">Mật khẩu mới</label>
+<div class="relative flex items-center">
+<span class="material-symbols-outlined absolute left-4 text-outline text-[20px]">lock</span>
+<input class="w-full h-[52px] pl-12 pr-12 bg-surface-container-lowest text-on-surface rounded-xl shadow-sm outline-none focus:ring-2 focus:ring-primary-container transition font-body-md text-body-md" id="new-pass" oninput="checkStrength()" placeholder="Tối thiểu 8 ký tự..." required="" type="password">
+<button class="absolute right-4 text-outline hover:text-on-surface" onclick="togglePassVisibility('new-pass', this)" type="button">
+<span class="material-symbols-outlined text-[20px]">visibility</span>
+</button>
+</div>
+</div>
+<!-- Password Strength Meter Visual -->
+<div class="bg-surface-container-low p-4 rounded-xl flex flex-col gap-3">
+<div class="flex items-center justify-between">
+<span class="font-label-sm text-label-sm text-tertiary">Độ mạnh mật khẩu</span>
+<span class="font-label-sm text-label-sm text-secondary font-bold" id="strength-label">Chưa an toàn</span>
+</div>
+<!-- Strength bar (4 segments) -->
+<div class="grid grid-cols-4 gap-1.5 h-1.5 w-full">
+<div class="h-full rounded-full bg-secondary transition-all duration-300" id="bar-1"></div>
+<div class="h-full rounded-full bg-surface-container-highest transition-all duration-300" id="bar-2"></div>
+<div class="h-full rounded-full bg-surface-container-highest transition-all duration-300" id="bar-3"></div>
+<div class="h-full rounded-full bg-surface-container-highest transition-all duration-300" id="bar-4"></div>
+</div>
+<!-- Requirements Validation Checklist -->
+<div class="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1 font-body-sm text-body-sm">
+<div class="flex items-center gap-1.5 text-outline" id="req-length">
+<span class="material-symbols-outlined text-[16px]">cancel</span>
+<span class="">Tối thiểu 8 ký tự</span>
+</div>
+<div class="flex items-center gap-1.5 text-outline" id="req-uppercase">
+<span class="material-symbols-outlined text-[16px]">cancel</span>
+<span class="">Ít nhất 1 chữ hoa (A-Z)</span>
+</div>
+<div class="flex items-center gap-1.5 text-outline" id="req-number">
+<span class="material-symbols-outlined text-[16px]">cancel</span>
+<span class="">Ít nhất 1 chữ số (0-9)</span>
+</div>
+<div class="flex items-center gap-1.5 text-outline" id="req-special">
+<span class="material-symbols-outlined text-[16px]">cancel</span>
+<span class="">Ký tự đặc biệt (!@#$)</span>
+</div>
+</div>
+</div>
+<!-- Confirm Password Field -->
+<div class="flex flex-col gap-2">
+<label class="font-label-md text-label-md text-on-surface" for="confirm-pass">Xác nhận mật khẩu mới</label>
+<div class="relative flex items-center">
+<span class="material-symbols-outlined absolute left-4 text-outline text-[20px]">lock_clock</span>
+<input class="w-full h-[52px] pl-12 pr-12 bg-surface-container-lowest text-on-surface rounded-xl shadow-sm outline-none focus:ring-2 focus:ring-primary-container transition font-body-md text-body-md" id="confirm-pass" placeholder="Nhập lại mật khẩu mới..." required="" type="password">
+<button class="absolute right-4 text-outline hover:text-on-surface" onclick="togglePassVisibility('confirm-pass', this)" type="button">
+<span class="material-symbols-outlined text-[20px]">visibility</span>
+</button>
+</div>
+</div>
+<!-- Update Submit Button -->
+<button class="w-full h-[52px] mt-2 rounded-xl bg-primary-container text-on-primary font-label-lg text-label-lg flex items-center justify-center gap-2 hover:bg-primary transition shadow-md" type="submit">
+<span class="">Cập nhật mật khẩu</span>
+<span class="material-symbols-outlined text-[18px]">check_circle</span>
+</button>
+</form>
+</div>
+<!-- STATE 4: Exception State - Expired or Invalid Link Card -->
+<div class="hidden w-full bg-surface-container-lowest rounded-xl shadow-md p-8 md:p-12 transition-all duration-300" id="state-panel-4">
+<div class="flex flex-col items-center text-center">
+<!-- Subtle Coral Accent Warning Icon -->
+<div class="w-20 h-20 rounded-full bg-error-container/40 flex items-center justify-center text-secondary mb-6">
+<span class="material-symbols-outlined text-[44px]">link_off</span>
+</div>
+<div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-error-container text-on-error-container font-label-sm text-label-sm uppercase mb-3 font-semibold">
+<span class="material-symbols-outlined text-[14px]">warning</span>
+                Yêu cầu không khả dụng
+              </div>
+<h2 class="font-headline-lg text-headline-lg text-on-surface mb-3">Liên kết đã hết hạn</h2>
+<!-- The specified exception notice card -->
+<div class="w-full p-5 rounded-xl bg-surface-container-high/80 text-center mb-6">
+<p class="font-body-md text-body-md text-on-surface-variant leading-relaxed">
+                  Liên kết khôi phục mật khẩu đã hết hạn hoặc đã được sử dụng. Vui lòng gửi lại yêu cầu mới.
+                </p>
+</div>
+<div class="flex flex-col sm:flex-row items-center gap-4 w-full justify-center">
+<button class="w-full sm:w-auto h-[50px] px-8 rounded-xl bg-secondary-container text-on-secondary font-label-lg text-label-lg flex items-center justify-center gap-2 hover:bg-secondary transition shadow-md" onclick="switchState(1)">
+<span class="">Yêu cầu liên kết mới</span>
+<span class="material-symbols-outlined text-[18px]">refresh</span>
+</button>
+<a class="w-full sm:w-auto h-[50px] px-6 rounded-xl bg-surface-container-low text-tertiary font-label-lg text-label-lg flex items-center justify-center gap-2 hover:text-on-surface transition" href="#" onclick="alert('Chuyển hướng về trang chủ DANASEA'); return false;">
+<span class="">Về trang chủ</span>
+</a>
+</div>
+<div class="mt-8 text-center font-body-sm text-body-sm text-outline">
+                Cần thêm sự trợ giúp hàng hải? Liên hệ <a class="text-primary-container font-semibold hover:underline" href="#">hotline@danasea.vn</a>
+</div>
+</div>
+</div>
+<!-- STATE 5: Exception/Success State - Password Successfully Reset -->
+<div class="hidden w-full bg-surface-container-lowest rounded-xl shadow-md p-8 md:p-12 transition-all duration-300" id="state-panel-5">
+<div class="flex flex-col items-center text-center">
+<!-- Ocean Teal Celebration Badge -->
+<div class="w-20 h-20 rounded-full bg-primary-fixed flex items-center justify-center text-primary mb-6 shadow-sm">
+<span class="material-symbols-outlined text-[44px]">task_alt</span>
+</div>
+<div class="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-primary-fixed-dim/40 text-primary-container font-label-sm text-label-sm uppercase mb-3 font-semibold">
+<span class="material-symbols-outlined text-[15px]">security</span>
+                Bảo mật hoàn tất
+              </div>
+<h2 class="font-headline-lg text-headline-lg text-on-surface mb-3">Thành công tuyệt đối</h2>
+<!-- The specified success card -->
+<div class="w-full p-5 rounded-xl bg-primary-fixed/20 text-center mb-8">
+<p class="font-body-md text-body-md text-on-surface leading-relaxed">
+                  Mật khẩu đã được cập nhật thành công. Bạn có thể đăng nhập ngay bây giờ.
+                </p>
+</div>
+<div class="w-full max-w-sm flex flex-col gap-3">
+<button class="w-full h-[52px] rounded-xl bg-primary-container text-on-primary font-label-lg text-label-lg flex items-center justify-center gap-2 hover:bg-primary transition shadow-md" onclick="alert('Đang chuyển hướng bạn tới trang đăng nhập DANASEA...'); switchState(1);">
+<span class="">Đăng nhập ngay</span>
+<span class="material-symbols-outlined text-[18px]">login</span>
+</button>
+<button class="w-full h-[44px] rounded-xl bg-transparent text-tertiary font-label-md text-label-md hover:text-on-surface transition" onclick="switchState(1)">
+                  Quay về màn hình khôi phục ban đầu
+                </button>
+</div>
+<!-- Marine Trip Security Tip -->
+<div class="mt-8 pt-6 border-t-0 flex items-center gap-2 font-body-sm text-body-sm text-outline">
+<span class="material-symbols-outlined text-[18px] text-primary">sailing</span>
+<span class="">Thông tin xác nhận đã được gửi một bản tóm tắt đến hòm thư an ninh của bạn.</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Footer Maritime Security Certification Badges -->
+
+</div>
+</div>
+<script>
+    function switchState(stateNumber) {
+      for (let i = 1; i <= 5; i++) {
+        const panel = document.getElementById('state-panel-' + i);
+        const btn = document.getElementById('tab-btn-' + i);
+        if (panel) {
+          if (i === stateNumber) {
+            panel.classList.remove('hidden');
+          } else {
+            panel.classList.add('hidden');
+          }
+        }
+        if (btn) {
+          if (i === stateNumber) {
+            btn.className = 'px-4 py-2 rounded-lg font-label-md text-label-md transition-all duration-200 bg-primary-container text-on-primary-container shadow-sm';
+          } else {
+            btn.className = 'px-4 py-2 rounded-lg font-label-md text-label-md transition-all duration-200 text-tertiary hover:text-on-surface';
+          }
+        }
+      }
+    }
+
+    function handleRequestSubmit(e) {
+      e.preventDefault();
+      switchState(2);
+      startResendCountdown();
+    }
+
+    function handlePasswordSubmit(e) {
+      e.preventDefault();
+      const p1 = document.getElementById('new-pass').value;
+      const p2 = document.getElementById('confirm-pass').value;
+      if (p1 !== p2) {
+        alert('Mật khẩu xác nhận không khớp! Vui lòng kiểm tra lại.');
+        return;
+      }
+      switchState(5);
+    }
+
+    let countdownInterval;
+    function startResendCountdown() {
+      let seconds = 54;
+      const timerSpan = document.getElementById('resend-timer');
+      const resendBtn = document.getElementById('resend-btn');
+      
+      if (countdownInterval) clearInterval(countdownInterval);
+      
+      resendBtn.disabled = true;
+      resendBtn.className = 'w-full sm:w-auto h-[48px] px-6 rounded-xl bg-surface-container-high text-outline font-label-md text-label-md flex items-center justify-center gap-2 cursor-not-allowed transition';
+      timerSpan.textContent = seconds;
+
+      countdownInterval = setInterval(() => {
+        seconds--;
+        timerSpan.textContent = seconds;
+        if (seconds <= 0) {
+          clearInterval(countdownInterval);
+          resendBtn.disabled = false;
+          resendBtn.className = 'w-full sm:w-auto h-[48px] px-6 rounded-xl bg-surface-container-lowest text-primary-container hover:bg-surface-container font-label-md text-label-md flex items-center justify-center gap-2 cursor-pointer transition shadow-sm';
+          resendBtn.innerHTML = '<span class="material-symbols-outlined text-[18px]">cached</span><span>Gửi lại email ngay</span>';
+        }
+      }, 1000);
+    }
+
+    function resendEmail() {
+      alert('Đã gửi lại email hướng dẫn khôi phục mật khẩu!');
+      startResendCountdown();
+    }
+
+    function togglePassVisibility(inputId, triggerBtn) {
+      const input = document.getElementById(inputId);
+      const icon = triggerBtn.querySelector('span');
+      if (input.type === 'password') {
+        input.type = 'text';
+        icon.textContent = 'visibility_off';
+      } else {
+        input.type = 'password';
+        icon.textContent = 'visibility';
+      }
+    }
+
+    function checkStrength() {
+      const val = document.getElementById('new-pass').value;
+      const b1 = document.getElementById('bar-1');
+      const b2 = document.getElementById('bar-2');
+      const b3 = document.getElementById('bar-3');
+      const b4 = document.getElementById('bar-4');
+      const label = document.getElementById('strength-label');
+
+      const reqLen = document.getElementById('req-length');
+      const reqUpper = document.getElementById('req-uppercase');
+      const reqNum = document.getElementById('req-number');
+      const reqSpec = document.getElementById('req-special');
+
+      const hasLen = val.length >= 8;
+      const hasUpper = /[A-Z]/.test(val);
+      const hasNum = /[0-9]/.test(val);
+      const hasSpec = /[!@#$%^&*(),.?":{}|<>]/.test(val);
+
+      updateChecklist(reqLen, hasLen);
+      updateChecklist(reqUpper, hasUpper);
+      updateChecklist(reqNum, hasNum);
+      updateChecklist(reqSpec, hasSpec);
+
+      let score = 0;
+      if (hasLen) score++;
+      if (hasUpper) score++;
+      if (hasNum) score++;
+      if (hasSpec) score++;
+
+      // Reset bars
+      b1.className = 'h-full rounded-full bg-surface-container-highest transition-all duration-300';
+      b2.className = 'h-full rounded-full bg-surface-container-highest transition-all duration-300';
+      b3.className = 'h-full rounded-full bg-surface-container-highest transition-all duration-300';
+      b4.className = 'h-full rounded-full bg-surface-container-highest transition-all duration-300';
+
+      if (score <= 1) {
+        b1.className = 'h-full rounded-full bg-secondary transition-all duration-300';
+        label.textContent = 'Yếu';
+        label.className = 'font-label-sm text-label-sm text-secondary font-bold';
+      } else if (score === 2) {
+        b1.className = 'h-full rounded-full bg-secondary-container transition-all duration-300';
+        b2.className = 'h-full rounded-full bg-secondary-container transition-all duration-300';
+        label.textContent = 'Trung bình';
+        label.className = 'font-label-sm text-label-sm text-secondary font-bold';
+      } else if (score === 3) {
+        b1.className = 'h-full rounded-full bg-primary-fixed-dim transition-all duration-300';
+        b2.className = 'h-full rounded-full bg-primary-fixed-dim transition-all duration-300';
+        b3.className = 'h-full rounded-full bg-primary-fixed-dim transition-all duration-300';
+        label.textContent = 'Tốt';
+        label.className = 'font-label-sm text-label-sm text-primary-container font-bold';
+      } else if (score >= 4) {
+        b1.className = 'h-full rounded-full bg-primary-container transition-all duration-300';
+        b2.className = 'h-full rounded-full bg-primary-container transition-all duration-300';
+        b3.className = 'h-full rounded-full bg-primary-container transition-all duration-300';
+        b4.className = 'h-full rounded-full bg-primary-container transition-all duration-300';
+        label.textContent = 'Rất an toàn';
+        label.className = 'font-label-sm text-label-sm text-primary-container font-bold';
+      }
+    }
+
+    function updateChecklist(element, isValid) {
+      const icon = element.querySelector('span');
+      if (isValid) {
+        element.className = 'flex items-center gap-1.5 text-primary-container font-medium';
+        icon.textContent = 'check_circle';
+      } else {
+        element.className = 'flex items-center gap-1.5 text-outline';
+        icon.textContent = 'cancel';
+      }
+    }
+  </script>
+</div></main>
+
+</body></html>

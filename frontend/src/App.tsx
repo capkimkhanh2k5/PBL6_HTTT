@@ -1,122 +1,112 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
-import heroImg from './assets/hero.png'
-import './App.css'
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { CustomerLayout } from "./layouts/CustomerLayout";
+import { VendorLayout } from "./layouts/VendorLayout";
+import { AdminLayout } from "./layouts/AdminLayout";
+import { Home } from "./pages/customer/Home";
+import { Auth } from "./pages/customer/Auth";
+import { ForgotPassword } from "./pages/customer/Auth/ForgotPassword";
+import { Search } from "./pages/customer/Search";
+import { ExperienceDetail } from "./pages/customer/ExperienceDetail";
+import { Cart } from "./pages/customer/Cart/Cart";
+import { Checkout } from "./pages/customer/Checkout/Checkout";
+import { PaymentResult } from "./pages/customer/Checkout/PaymentResult";
+import { Profile } from "./pages/customer/Profile/Profile";
+import { Orders } from "./pages/customer/Profile/Orders";
+import { AiAssistant } from "./pages/customer/Profile/AiAssistant";
+import { ChangePassword } from "./pages/customer/Profile/ChangePassword";
+import { Wishlist } from "./pages/customer/Profile/Wishlist";
+import { Inbox } from "./pages/customer/Inbox/Inbox";
+
+// Vendor Phase 4
+import { Dashboard as VendorDashboard } from "./pages/vendor/Dashboard/Dashboard";
+import { Services } from "./pages/vendor/Services/Services";
+import { ServiceForm } from "./pages/vendor/Services/ServiceForm";
+import { Schedule } from "./pages/vendor/Schedule/Schedule";
+import { VendorOrders } from "./pages/vendor/Orders/VendorOrders";
+import { Promotions } from "./pages/vendor/Promotions/Promotions";
+import { VendorReviews } from "./pages/vendor/Reviews/VendorReviews";
+import { Revenue } from "./pages/vendor/Revenue/Revenue";
+import { Payouts } from "./pages/vendor/Revenue/Payouts";
+import { Disputes as VendorDisputes } from "./pages/vendor/Disputes/Disputes";
+import { DisputeDetail as VendorDisputeDetail } from "./pages/vendor/Disputes/DisputeDetail";
+import { Profile as VendorProfile } from "./pages/vendor/Profile/Profile";
+import { Schedule as VendorSchedule } from "./pages/vendor/Schedule/Schedule";
+
+// Admin Phase 5
+import { AdminDashboard } from "./pages/admin/Dashboard/AdminDashboard";
+import { Users } from "./pages/admin/Users/Users";
+import { VendorApproval } from "./pages/admin/VendorApproval/VendorApproval";
+import { Categories } from "./pages/admin/Categories/Categories";
+import { ServiceApproval } from "./pages/admin/ServiceApproval/ServiceApproval";
+import { AdminOrders } from "./pages/admin/Orders/AdminOrders";
+import { AdminPromotions } from "./pages/admin/Promotions/AdminPromotions";
+import { AdminPayouts } from "./pages/admin/Payouts/AdminPayouts";
+import { Disputes } from "./pages/admin/Disputes/Disputes";
+import { Settings } from "./pages/admin/Settings/Settings";
+import { Logs } from "./pages/admin/Logs/Logs";
+import { DevRoleSwitcher } from "./components/common/DevRoleSwitcher";
+import { PageLoader } from "./components/common/PageLoader";
 
 function App() {
-  const [count, setCount] = useState(0)
-
   return (
-    <>
-      <section id="center">
-        <div className="hero">
-          <img src={heroImg} className="base" width="170" height="179" alt="" />
-          <img src={reactLogo} className="framework" alt="React logo" />
-          <img src={viteLogo} className="vite" alt="Vite logo" />
-        </div>
-        <div>
-          <h1>Get started</h1>
-          <p>
-            Edit <code>src/App.tsx</code> and save to test <code>HMR</code>
-          </p>
-        </div>
-        <button
-          type="button"
-          className="counter"
-          onClick={() => setCount((count) => count + 1)}
-        >
-          Count is {count}
-        </button>
-      </section>
+    <BrowserRouter>
+      <PageLoader />
+      <DevRoleSwitcher />
+      <Routes>
+        {/* KHÁCH HÀNG */}
+        <Route path="/" element={<CustomerLayout />}>
+          <Route index element={<Home />} />
+          <Route path="auth" element={<Auth />} />
+          <Route path="auth/forgot-password" element={<ForgotPassword />} />
+          <Route path="search" element={<Search />} />
+          <Route path="tour/:id" element={<ExperienceDetail />} />
+          <Route path="experience/:id" element={<ExperienceDetail />} />
+          
+          {/* Phase 3 */}
+          <Route path="cart" element={<Cart />} />
+          <Route path="checkout" element={<Checkout />} />
+          <Route path="checkout/result" element={<PaymentResult />} />
+          <Route path="profile" element={<Profile />} />
+          <Route path="profile/orders" element={<Orders />} />
+          <Route path="profile/ai-assistant" element={<AiAssistant />} />
+          <Route path="profile/change-password" element={<ChangePassword />} />
+          <Route path="profile/wishlist" element={<Wishlist />} />
+          <Route path="inbox" element={<Inbox />} />
+        </Route>
 
-      <div className="ticks"></div>
+        {/* NHÀ CUNG CẤP */}
+        <Route path="/vendor" element={<VendorLayout />}>
+          <Route index element={<VendorDashboard />} />
+          <Route path="profile" element={<VendorProfile />} />
+          <Route path="services" element={<Services />} />
+          <Route path="services/new" element={<ServiceForm />} />
+          <Route path="schedule" element={<Schedule />} />
+          <Route path="orders" element={<VendorOrders />} />
+          <Route path="promotions" element={<Promotions />} />
+          <Route path="reviews" element={<VendorReviews />} />
+          <Route path="revenue" element={<Revenue />} />
+          <Route path="payouts" element={<Payouts />} />
+          <Route path="disputes" element={<VendorDisputes />} />
+          <Route path="disputes/:id" element={<VendorDisputeDetail />} />
+        </Route>
 
-      <section id="next-steps">
-        <div id="docs">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#documentation-icon"></use>
-          </svg>
-          <h2>Documentation</h2>
-          <p>Your questions, answered</p>
-          <ul>
-            <li>
-              <a href="https://vite.dev/" target="_blank">
-                <img className="logo" src={viteLogo} alt="" />
-                Explore Vite
-              </a>
-            </li>
-            <li>
-              <a href="https://react.dev/" target="_blank">
-                <img className="button-icon" src={reactLogo} alt="" />
-                Learn more
-              </a>
-            </li>
-          </ul>
-        </div>
-        <div id="social">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#social-icon"></use>
-          </svg>
-          <h2>Connect with us</h2>
-          <p>Join the Vite community</p>
-          <ul>
-            <li>
-              <a href="https://github.com/vitejs/vite" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#github-icon"></use>
-                </svg>
-                GitHub
-              </a>
-            </li>
-            <li>
-              <a href="https://chat.vite.dev/" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#discord-icon"></use>
-                </svg>
-                Discord
-              </a>
-            </li>
-            <li>
-              <a href="https://x.com/vite_js" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#x-icon"></use>
-                </svg>
-                X.com
-              </a>
-            </li>
-            <li>
-              <a href="https://bsky.app/profile/vite.dev" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#bluesky-icon"></use>
-                </svg>
-                Bluesky
-              </a>
-            </li>
-          </ul>
-        </div>
-      </section>
-
-      <div className="ticks"></div>
-      <section id="spacer"></section>
-    </>
-  )
+        {/* QUẢN TRỊ VIÊN */}
+        <Route path="/admin" element={<AdminLayout />}>
+          <Route index element={<AdminDashboard />} />
+          <Route path="users" element={<Users />} />
+          <Route path="vendor-approval" element={<VendorApproval />} />
+          <Route path="categories" element={<Categories />} />
+          <Route path="service-approval" element={<ServiceApproval />} />
+          <Route path="orders" element={<AdminOrders />} />
+          <Route path="promotions" element={<AdminPromotions />} />
+          <Route path="payouts" element={<AdminPayouts />} />
+          <Route path="disputes" element={<Disputes />} />
+          <Route path="settings" element={<Settings />} />
+          <Route path="logs" element={<Logs />} />
+        </Route>
+      </Routes>
+    </BrowserRouter>
+  );
 }
 
-export default App
+export default App;

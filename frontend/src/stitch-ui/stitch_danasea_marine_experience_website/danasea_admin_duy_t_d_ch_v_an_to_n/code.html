@@ -1,0 +1,637 @@
+<!DOCTYPE html>
+
+<html lang="vi"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700&amp;family=Syne:wght@600;700&amp;display=swap" rel="stylesheet"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><style>@layer base{html,body{margin:0;padding:0;}body{overscroll-behavior:none;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config={darkMode:"class",theme:{extend:{"colors":{"tertiary-container":"#5a7784","on-tertiary":"#ffffff","on-error-container":"#93000a","surface-container-lowest":"#ffffff","on-secondary-fixed-variant":"#891d0f","on-surface-variant":"#3e494a","error":"#ba1a1a","on-tertiary-fixed":"#001f29","primary-container":"#087f8c","on-primary-container":"#effdff","outline":"#6e797b","surface-container-high":"#e4e9ea","surface":"#f5fafb","surface-bright":"#f5fafb","on-secondary":"#ffffff","on-secondary-container":"#6c0600","on-primary-fixed":"#001f24","on-primary":"#ffffff","secondary-fixed-dim":"#ffb4a7","tertiary":"#425e6a","background":"#f5fafb","secondary-fixed":"#ffdad4","surface-variant":"#dee3e4","secondary-container":"#fb7059","tertiary-fixed":"#c9e7f6","surface-tint":"#006874","inverse-primary":"#79d4e2","on-primary-fixed-variant":"#004f57","surface-container-highest":"#dee3e4","on-surface":"#171d1e","on-error":"#ffffff","primary":"#00646f","inverse-on-surface":"#edf2f3","outline-variant":"#bdc9ca","surface-container":"#eaeff0","secondary":"#aa3524","on-background":"#171d1e","surface-dim":"#d6dbdc","primary-fixed-dim":"#79d4e2","primary-fixed":"#95f1ff","error-container":"#ffdad6","on-tertiary-fixed-variant":"#2e4b56","surface-container-low":"#eff4f5","on-secondary-fixed":"#400200","on-tertiary-container":"#f4fbff","inverse-surface":"#2c3132","tertiary-fixed-dim":"#adcbd9"},"borderRadius":{"DEFAULT":"0.25rem","lg":"0.5rem","xl":"0.75rem","full":"9999px"},"spacing":{"margin":"5rem","margin-sm":"1.5rem","space-sm":"0.5rem","gutter":"1.5rem","space-xs":"0.25rem","gutter-sm":"1rem","space-md":"1rem","space-3xl":"4.5rem","space-lg":"1.5rem","space-2xl":"3rem","margin-md":"3rem","gutter-lg":"2rem","space-xl":"2rem"},"fontFamily":{"label-md":["Plus Jakarta Sans"],"headline-xl":["Syne"],"headline-lg":["Syne"],"headline-md":["Syne"],"body-xl":["Plus Jakarta Sans"],"label-lg":["Plus Jakarta Sans"],"body-sm":["Plus Jakarta Sans"],"body-lg":["Plus Jakarta Sans"],"label-sm":["Plus Jakarta Sans"],"display-xl":["Syne"],"headline-sm":["Syne"],"display-lg":["Syne"],"body-md":["Plus Jakarta Sans"]},"fontSize":{"label-md":["12px",{"lineHeight":"16px","letterSpacing":"0.02em","fontWeight":"600"}],"headline-xl":["36px",{"lineHeight":"44px","letterSpacing":"-0.015em","fontWeight":"700"}],"headline-lg":["28px",{"lineHeight":"36px","letterSpacing":"-0.01em","fontWeight":"600"}],"headline-md":["22px",{"lineHeight":"30px","letterSpacing":"-0.01em","fontWeight":"600"}],"body-xl":["18px",{"lineHeight":"28px","fontWeight":"400"}],"label-lg":["14px",{"lineHeight":"20px","letterSpacing":"0.01em","fontWeight":"600"}],"body-sm":["12px",{"lineHeight":"18px","fontWeight":"400"}],"body-lg":["16px",{"lineHeight":"24px","fontWeight":"400"}],"label-sm":["11px",{"lineHeight":"14px","letterSpacing":"0.04em","fontWeight":"700"}],"display-xl":["56px",{"lineHeight":"64px","letterSpacing":"-0.02em","fontWeight":"700"}],"headline-sm":["18px",{"lineHeight":"26px","fontWeight":"600"}],"display-lg":["44px",{"lineHeight":"52px","letterSpacing":"-0.02em","fontWeight":"700"}],"body-md":["14px",{"lineHeight":"22px","fontWeight":"400"}]}}}}</script></head><body class="bg-surface font-body-md text-on-surface antialiased"><aside class="fixed left-0 top-0 h-screen w-[260px] bg-inverse-surface z-50 flex flex-col justify-between shadow-[0_1px_8px_rgba(0,0,0,0.04)]"><div class="flex flex-col flex-1 overflow-y-auto"><div class="p-space-lg flex flex-col gap-space-xs"><div class="flex items-center gap-space-sm"><img alt="DANASEA brand logo with minimalistic dual ocean wave crest lines in ocean teal and coral accent, with modern bold wordmark in navy." class="h-8 w-auto object-contain" src="https://lh3.googleusercontent.com/aida/AEtjO1VvnQOF2WU9kDEsZEZSN1YNSkRu6Z2_49elqxL3W3H70QznUBWpRk31Nl8LKj_EuTvgl-aPxe6h0dUp3LQoVfVp01RNmSAB12-rEJv9MhU2f6AD8_vRSyZKyBDLqn3tWQ7HSf6YYVjpkEi7NAsR7cdkAV2bJI_xlmT9yaP7M2ZKZGl5F50so_t-2hiC_8z0eIbcNWKyv92AX50LCfgsO70-dTgI05kaKyZFg3UL59SF-eKVOPSxGgBwn7Ct"/><span class="font-headline-sm text-headline-sm font-bold tracking-tight text-on-primary">DANASEA</span></div><div class="mt-space-xs"><span class="inline-flex items-center px-space-xs py-0.5 rounded bg-primary-container/20 text-inverse-primary font-label-sm text-label-sm uppercase tracking-wider">HỆ THỐNG QUẢN TRỊ CẢNG VỤ</span></div></div><nav class="flex-1 px-space-md py-space-xs flex flex-col gap-1" data-active-classes="bg-primary-container text-on-primary-container font-semibold rounded-lg shadow-sm"><a class="flex items-center gap-space-sm px-space-md py-2.5 rounded-lg text-outline-variant hover:bg-surface-variant/20 hover:text-on-primary transition-colors" data-path="tong-quan" href="#"><span class="material-symbols-outlined text-[20px]">dashboard</span><span class="font-label-lg text-label-lg">Tổng quan</span></a><a class="flex items-center gap-space-sm px-space-md py-2.5 rounded-lg text-outline-variant hover:bg-surface-variant/20 hover:text-on-primary transition-colors" data-path="nguoi-dung-vai-tro" href="#"><span class="material-symbols-outlined text-[20px]">manage_accounts</span><span class="font-label-lg text-label-lg">Người dùng &amp; Vai trò</span></a><a class="flex items-center gap-space-sm px-space-md py-2.5 rounded-lg text-outline-variant hover:bg-surface-variant/20 hover:text-on-primary transition-colors" data-path="doi-tac-van-hanh" href="#"><span class="material-symbols-outlined text-[20px]">corporate_fare</span><span class="font-label-lg text-label-lg">Đối tác vận hành</span></a><a class="flex items-center gap-space-sm px-space-md py-2.5 rounded-lg text-outline-variant hover:bg-surface-variant/20 hover:text-on-primary transition-colors" data-path="dich-vu-duyet-tour" href="#"><span class="material-symbols-outlined text-[20px]">fact_check</span><span class="font-label-lg text-label-lg">Dịch vụ &amp; Duyệt tour</span></a><a class="flex items-center gap-space-sm px-space-md py-2.5 rounded-lg text-outline-variant hover:bg-surface-variant/20 hover:text-on-primary transition-colors" data-path="danh-muc-trai-nghiem" href="#"><span class="material-symbols-outlined text-[20px]">kayaking</span><span class="font-label-lg text-label-lg">Danh mục trải nghiệm</span></a><a class="flex items-center gap-space-sm px-space-md py-2.5 rounded-lg text-outline-variant hover:bg-surface-variant/20 hover:text-on-primary transition-colors" data-path="don-thanh-toan" href="#"><span class="material-symbols-outlined text-[20px]">receipt_long</span><span class="font-label-lg text-label-lg">Đơn &amp; Thanh toán</span></a><a class="flex items-center gap-space-sm px-space-md py-2.5 rounded-lg text-outline-variant hover:bg-surface-variant/20 hover:text-on-primary transition-colors" data-path="hoan-tien-khieu-nai" href="#"><span class="material-symbols-outlined text-[20px]">assignment_return</span><span class="font-label-lg text-label-lg">Hoàn tiền &amp; Khiếu nại</span></a><a class="flex items-center gap-space-sm px-space-md py-2.5 rounded-lg text-outline-variant hover:bg-surface-variant/20 hover:text-on-primary transition-colors" data-path="khuyen-mai-toan-san" href="#"><span class="material-symbols-outlined text-[20px]">sell</span><span class="font-label-lg text-label-lg">Khuyến mãi toàn sàn</span></a><a class="flex items-center gap-space-sm px-space-md py-2.5 rounded-lg text-outline-variant hover:bg-surface-variant/20 hover:text-on-primary transition-colors" data-path="doi-soat-quyet-toan" href="#"><span class="material-symbols-outlined text-[20px]">account_balance</span><span class="font-label-lg text-label-lg">Đối soát &amp; Quyết toán</span></a><a class="flex items-center gap-space-sm px-space-md py-2.5 rounded-lg text-outline-variant hover:bg-surface-variant/20 hover:text-on-primary transition-colors" data-path="cau-hinh-an-toan-bien" href="#"><span class="material-symbols-outlined text-[20px]">shield</span><span class="font-label-lg text-label-lg">Cấu hình &amp; An toàn biển</span></a><a class="flex items-center gap-space-sm px-space-md py-2.5 rounded-lg text-outline-variant hover:bg-surface-variant/20 hover:text-on-primary transition-colors" data-path="nhat-ky-he-thong" href="#"><span class="material-symbols-outlined text-[20px]">history_toggle_off</span><span class="font-label-lg text-label-lg">Nhật ký hệ thống</span></a></nav></div><div class="p-space-md bg-inverse-surface"><div class="flex items-center gap-space-sm p-space-sm rounded-xl bg-surface-variant/10 text-on-primary"><div class="w-9 h-9 rounded-full bg-primary flex items-center justify-center text-on-primary font-bold"><span class="material-symbols-outlined text-[20px]">person</span></div><div class="flex flex-col min-w-0 flex-1"><span class="font-label-md text-label-md text-on-primary truncate">Trần Hải Đăng</span><span class="font-label-sm text-label-sm text-outline-variant truncate">Ban QL Cảng VITA • ADMIN</span></div><span class="material-symbols-outlined text-outline-variant text-[18px]">more_vert</span></div></div></aside><div class="pl-[260px]"><header class="fixed top-0 left-[260px] right-0 h-16 bg-surface/80 backdrop-blur-xl shadow-[0_1px_8px_rgba(0,0,0,0.04)] z-40 flex items-center justify-between px-space-xl"><div class="flex items-center gap-space-lg flex-1 max-w-xl"><div class="relative w-full max-w-md"><span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline text-[20px]">search</span><input class="w-full h-10 pl-10 pr-space-md rounded-xl bg-surface-container-lowest text-on-surface font-body-md text-body-md placeholder:text-outline focus:outline-none focus:ring-1 focus:ring-primary shadow-sm" placeholder="Tìm kiếm hồ sơ, đơn vị vận hành, mã tour..." type="text"/></div><div class="hidden xl:flex items-center gap-2 px-space-sm py-1.5 rounded-full bg-surface-container"><span class="w-2 h-2 rounded-full bg-primary-container animate-pulse"></span><span class="font-label-sm text-label-sm text-on-surface-variant">Kết nối CSDL Hàng hải 100%</span></div></div><div class="flex items-center gap-space-md"><div class="hidden md:flex items-center gap-2 px-space-md py-1.5 rounded-lg bg-secondary-container/20 text-on-secondary-container font-label-md text-label-md"><span class="material-symbols-outlined text-secondary text-[18px]">notification_important</span><span>8 Cần duyệt</span></div><button class="relative w-10 h-10 rounded-full flex items-center justify-center text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors"><span class="material-symbols-outlined text-[22px]">notifications</span><span class="absolute top-2 right-2 w-2 h-2 bg-secondary rounded-full"></span></button><div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center"><span class="material-symbols-outlined text-on-primary text-[18px]">person</span></div></div></header><main class="w-full pt-16 bg-surface px-space-xl pb-space-2xl min-h-screen"><div class="flex flex-col w-full">
+<!-- Dynamic Top Bar with Maritime Live Context & Status Header -->
+<section class="mb-space-xl">
+<div class="flex flex-col xl:flex-row xl:items-end justify-between gap-space-lg">
+<div class="space-y-space-xs">
+<div class="flex items-center gap-space-sm">
+<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-primary-container/15 text-primary font-label-sm uppercase tracking-wider">
+<span class="w-1.5 h-1.5 rounded-full bg-primary animate-pulse"></span>
+            Hải đồ Cảng vụ Đà Nẵng • Vùng nước hoạt động cấp phép
+          </span>
+<span class="text-outline-variant font-label-sm">•</span>
+<span class="font-label-sm text-on-surface-variant uppercase tracking-wider">Hệ thống thẩm định thời gian thực</span>
+</div>
+<h1 class="font-headline-xl text-headline-xl text-on-surface tracking-tight">
+          Thẩm định Dịch vụ Tour Biển &amp; Đánh giá An toàn Hải trình
+        </h1>
+<p class="font-body-md text-body-md text-on-surface-variant max-w-4xl">
+          Kiểm định phương án tổ chức, vùng mặt nước hoạt động, cam kết miễn trừ trách nhiệm và tự động đối soát với điều kiện khí tượng thủy văn thời gian thực.
+        </p>
+</div>
+<!-- Quick Action Controls -->
+<div class="flex items-center gap-space-sm shrink-0">
+<button class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-surface-container-lowest text-on-surface font-label-md text-label-md shadow-sm hover:bg-surface-container transition-all">
+<span class="material-symbols-outlined text-[18px]">history</span>
+          Nhật ký thẩm định
+        </button>
+<button class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-primary text-on-primary font-label-md text-label-md shadow-sm hover:bg-primary-container transition-all">
+<span class="material-symbols-outlined text-[18px]">sync</span>
+          Đồng bộ trạm phao biển
+        </button>
+</div>
+</div>
+</section>
+<!-- KPI & Maritime Hydro-Meteorological Telemetry Deck -->
+<section class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-space-md mb-space-xl">
+<!-- Son Tra Hydro-meteo Station Telemetry -->
+<div class="lg:col-span-2 rounded-2xl bg-surface-container-lowest p-space-lg shadow-sm relative overflow-hidden flex flex-col justify-between">
+<div class="flex items-start justify-between gap-space-md relative z-10">
+<div class="flex items-center gap-3">
+<div class="w-11 h-11 rounded-xl bg-primary/10 text-primary flex items-center justify-center">
+<span class="material-symbols-outlined text-[24px]">airwave</span>
+</div>
+<div>
+<div class="flex items-center gap-2">
+<span class="font-headline-sm text-headline-sm text-on-surface">Trạm Hải văn Sơn Trà</span>
+<span class="px-2 py-0.5 rounded-full bg-surface-container-high text-on-surface-variant font-label-sm text-[10px] tracking-wider uppercase">VITA-ST04</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Bộ đệm Cảng vụ: Cập nhật lúc 14:15 hôm nay</p>
+</div>
+</div>
+<div class="flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/10 text-primary">
+<span class="material-symbols-outlined text-[18px]">verified_user</span>
+<span class="font-label-sm text-label-sm uppercase tracking-wide">Đủ điều kiện xuất bến</span>
+</div>
+</div>
+<!-- Sensor Matrix -->
+<div class="grid grid-cols-3 gap-3 my-space-md relative z-10">
+<div class="rounded-xl bg-surface-container-low p-space-sm flex flex-col justify-between">
+<div class="flex items-center justify-between text-outline">
+<span class="font-label-sm text-label-sm">Gió hải lưu</span>
+<span class="material-symbols-outlined text-[16px]">navigation</span>
+</div>
+<div class="mt-1">
+<span class="font-headline-md text-headline-md text-on-surface">12</span>
+<span class="font-label-md text-label-md text-outline"> km/h</span>
+</div>
+<span class="font-body-sm text-body-sm text-primary">Hướng Đông Nam</span>
+</div>
+<div class="rounded-xl bg-surface-container-low p-space-sm flex flex-col justify-between">
+<div class="flex items-center justify-between text-outline">
+<span class="font-label-sm text-label-sm">Độ cao sóng</span>
+<span class="material-symbols-outlined text-[16px]">waves</span>
+</div>
+<div class="mt-1">
+<span class="font-headline-md text-headline-md text-on-surface">0.5</span>
+<span class="font-label-md text-label-md text-outline"> mét</span>
+</div>
+<span class="font-body-sm text-body-sm text-primary">Mặt biển êm (Cấp 1-2)</span>
+</div>
+<div class="rounded-xl bg-surface-container-low p-space-sm flex flex-col justify-between">
+<div class="flex items-center justify-between text-outline">
+<span class="font-label-sm text-label-sm">Lượng mưa</span>
+<span class="material-symbols-outlined text-[16px]">rainy</span>
+</div>
+<div class="mt-1">
+<span class="font-headline-md text-headline-md text-on-surface">0</span>
+<span class="font-label-md text-label-md text-outline"> mm</span>
+</div>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Tầm nhìn quang đãng</span>
+</div>
+</div>
+<div class="flex items-center justify-between pt-2 text-on-surface-variant font-label-sm text-label-sm relative z-10">
+<span class="flex items-center gap-1.5">
+<span class="material-symbols-outlined text-primary text-[16px]">check_circle</span>
+          Hải trình thể thao mặt biển: Giới hạn an toàn phao phân luồng &lt; 1.2m
+        </span>
+<span class="font-label-sm text-primary cursor-pointer hover:underline">Chi tiết trạm radar →</span>
+</div>
+<!-- Subtle oceanic gradient ambient backing -->
+<div class="absolute right-0 bottom-0 w-48 h-48 bg-gradient-to-tl from-primary-fixed-dim/20 to-transparent rounded-full pointer-events-none blur-2xl"></div>
+</div>
+<!-- Total Deck Breakdown -->
+<div class="rounded-2xl bg-surface-container-lowest p-space-lg shadow-sm flex flex-col justify-between">
+<div class="flex items-center justify-between">
+<span class="font-label-lg text-label-lg text-on-surface-variant">Tổng dịch vụ biển</span>
+<span class="w-8 h-8 rounded-lg bg-surface-container flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-[20px]">sailing</span>
+</span>
+</div>
+<div class="my-space-xs">
+<div class="flex items-baseline gap-2">
+<span class="font-headline-xl text-headline-xl text-on-surface">42</span>
+<span class="font-label-md text-label-md text-outline">Tour đăng ký</span>
+</div>
+</div>
+<div class="space-y-1.5">
+<div class="flex justify-between items-center font-label-sm text-label-sm">
+<span class="text-primary font-semibold flex items-center gap-1.5">
+<span class="w-2 h-2 rounded-full bg-primary"></span>
+            36 Đang mở bán (PUBLISHED)
+          </span>
+<span class="text-on-surface font-semibold">85%</span>
+</div>
+<div class="w-full bg-surface-container-high rounded-full h-1.5 overflow-hidden flex">
+<div class="bg-primary h-full" style="width: 85%"></div>
+<div class="bg-secondary-container h-full" style="width: 12%"></div>
+<div class="bg-outline h-full" style="width: 3%"></div>
+</div>
+</div>
+</div>
+<!-- Review Queue Status Indicator -->
+<div class="rounded-2xl bg-surface-container-lowest p-space-lg shadow-sm flex flex-col justify-between">
+<div class="flex items-center justify-between">
+<span class="font-label-lg text-label-lg text-on-surface-variant">Tình trạng kiểm định</span>
+<span class="w-8 h-8 rounded-lg bg-secondary-container/20 flex items-center justify-center text-secondary">
+<span class="material-symbols-outlined text-[20px]">pending_actions</span>
+</span>
+</div>
+<div class="my-space-xs">
+<div class="flex items-baseline gap-2">
+<span class="font-headline-xl text-headline-xl text-secondary">05</span>
+<span class="font-label-md text-label-md text-secondary">Chờ Cảng vụ duyệt</span>
+</div>
+</div>
+<div class="flex items-center justify-between pt-2 font-label-sm text-label-sm">
+<span class="text-outline flex items-center gap-1">
+<span class="material-symbols-outlined text-[15px]">pause_circle</span>
+          1 Tạm ngưng (PAUSED)
+        </span>
+<span class="px-2 py-0.5 rounded bg-secondary-container/20 text-on-secondary-container font-semibold">Cần xử lý</span>
+</div>
+</div>
+</section>
+<!-- Filter, Search & Activity Category Deck -->
+<section class="mb-space-lg rounded-2xl bg-surface-container-lowest p-space-md shadow-sm">
+<div class="flex flex-col lg:flex-row lg:items-center justify-between gap-space-md">
+<!-- Status Tabs -->
+<div class="flex items-center gap-1.5 overflow-x-auto pb-1 lg:pb-0" id="statusFilterTabs">
+<button class="px-3.5 py-1.5 rounded-lg bg-surface-container-low text-on-surface-variant font-label-md text-label-md hover:bg-surface-container transition-colors shrink-0">
+          Tất cả (42)
+        </button>
+<button class="px-3.5 py-1.5 rounded-lg bg-primary text-on-primary font-label-md text-label-md shadow-sm shrink-0">
+          Chờ duyệt (05)
+        </button>
+<button class="px-3.5 py-1.5 rounded-lg bg-surface-container-low text-on-surface-variant font-label-md text-label-md hover:bg-surface-container transition-colors shrink-0">
+          Đang mở bán (36)
+        </button>
+<button class="px-3.5 py-1.5 rounded-lg bg-surface-container-low text-on-surface-variant font-label-md text-label-md hover:bg-surface-container transition-colors shrink-0">
+          Bị từ chối (0)
+        </button>
+<button class="px-3.5 py-1.5 rounded-lg bg-surface-container-low text-on-surface-variant font-label-md text-label-md hover:bg-surface-container transition-colors shrink-0">
+          Tạm ngưng luồng (1)
+        </button>
+<button class="px-3.5 py-1.5 rounded-lg bg-surface-container-low text-on-surface-variant font-label-md text-label-md hover:bg-surface-container transition-colors shrink-0">
+          Bản nháp (2)
+        </button>
+</div>
+<!-- Activity Category Chips -->
+<div class="flex items-center gap-2 shrink-0">
+<div class="relative">
+<select class="h-9 pl-3 pr-8 rounded-lg bg-surface-container-low text-on-surface font-label-md text-label-md appearance-none focus:outline-none focus:ring-1 focus:ring-primary cursor-pointer">
+<option>Tất cả danh mục biển</option>
+<option selected="">Chèo SUP bán đảo</option>
+<option>Lặn ngắm san hô (Snorkeling / Scuba)</option>
+<option>Cano lướt sóng cao tốc</option>
+<option>Dù lượn &amp; Thể thao vịnh</option>
+</select>
+<span class="material-symbols-outlined absolute right-2 top-1/2 -translate-y-1/2 text-outline text-[18px] pointer-events-none">expand_more</span>
+</div>
+<div class="relative">
+<select class="h-9 pl-3 pr-8 rounded-lg bg-surface-container-low text-on-surface font-label-md text-label-md appearance-none focus:outline-none focus:ring-1 focus:ring-primary cursor-pointer">
+<option>Sắp xếp: Mới nộp hồ sơ</option>
+<option>Mức độ an toàn cao nhất</option>
+<option>Giá niêm yết tăng dần</option>
+</select>
+<span class="material-symbols-outlined absolute right-2 top-1/2 -translate-y-1/2 text-outline text-[18px] pointer-events-none">sort</span>
+</div>
+</div>
+</div>
+</section>
+<!-- Dual Workspace: Review Master List & Comprehensive Verification Panel -->
+<section class="grid grid-cols-1 lg:grid-cols-12 gap-space-lg items-start">
+<!-- Left Column: Maritime Tour Review Queue (5 Columns) -->
+<div class="lg:col-span-5 flex flex-col gap-space-md">
+<div class="flex items-center justify-between px-1">
+<span class="font-label-lg text-label-lg text-on-surface">Danh sách tour thẩm định</span>
+<span class="font-label-sm text-label-sm text-outline">Hiển thị 5 / 42 tour</span>
+</div>
+<!-- Tour 1: Active Selected -->
+<div class="rounded-2xl bg-surface-container-lowest p-space-md shadow-md transition-all cursor-pointer relative bg-gradient-to-r from-primary-fixed/20 via-surface-container-lowest to-surface-container-lowest">
+<div class="flex gap-space-md">
+<div class="relative w-28 h-28 rounded-xl overflow-hidden shrink-0 bg-surface-container">
+<img class="w-full h-full object-cover" data-alt="A pristine aerial view of colorful stand up paddleboards floating peacefully on crystalline turquoise ocean waters near My Khe Beach Danang with early golden sunrise light reflecting on clear waves." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDlUvyXJgRnjTvt-2XeDdj7ZKTdEIo4sHhm1rbCjjexu2CVuPh59QVIU6NaWwF4Jai90gI42HlEeCI_7SgqBwLXaNPSjb6Yjtk8VL9mNG3-CFp2r8Ly_CYSBTC3cPeB5RNKQlg1MKJ2jWPADiqEAQed0LXqyar_-Te-TUDitYlqINShv6qUQWHSPBoyRkv6MEYU3uOMW87qX1x1v8HhTJYv9rcgy47Wb4qyuLmTaq0QpZAGiOoecnaavQ"/>
+<span class="absolute top-1.5 left-1.5 px-1.5 py-0.5 rounded bg-inverse-surface/80 backdrop-blur-sm text-on-primary font-label-sm text-[10px]">120 PHÚT</span>
+</div>
+<div class="flex flex-col justify-between flex-1 min-w-0">
+<div>
+<div class="flex items-center justify-between gap-1 mb-1">
+<span class="font-label-sm text-label-sm text-primary uppercase font-bold tracking-wider">Danang Ocean Club</span>
+<span class="inline-flex items-center px-2 py-0.5 rounded-full bg-secondary-container/20 text-secondary font-label-sm text-[11px] font-semibold">
+                  Chờ Cảng vụ duyệt
+                </span>
+</div>
+<h3 class="font-headline-sm text-[16px] text-on-surface font-bold leading-tight truncate">
+                Chèo SUP đón bình minh biển Mỹ Khê
+              </h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant truncate mt-0.5">
+                Bãi tắm Mỹ Khê 2 • Sức chứa 12 khách/ca
+              </p>
+</div>
+<div class="flex items-center justify-between pt-2">
+<div>
+<span class="font-label-sm text-label-sm text-outline">Đơn giá: </span>
+<span class="font-headline-sm text-headline-sm text-primary font-bold">280.000 đ</span>
+<span class="font-body-sm text-body-sm text-outline">/khách</span>
+</div>
+<span class="w-7 h-7 rounded-full bg-primary text-on-primary flex items-center justify-center">
+<span class="material-symbols-outlined text-[16px]">arrow_forward</span>
+</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Tour 2: Published -->
+<div class="rounded-2xl bg-surface-container-lowest p-space-md shadow-sm hover:shadow-md transition-all cursor-pointer">
+<div class="flex gap-space-md">
+<div class="relative w-28 h-28 rounded-xl overflow-hidden shrink-0 bg-surface-container">
+<img class="w-full h-full object-cover" data-alt="Vibrant tropical coral reef underwater scene at Bai But Son Tra Danang with clear ocean teal water, sunbeams piercing the depth, and colorful schools of small sea fish." src="https://lh3.googleusercontent.com/aida-public/AB6AXuApoba1vNLLyMGX8Qd4MSLUquAx5m1J46mplXNB8ek-OLdWYg6Bq_XyzrjlPh44JjXDFb2mtQmK7RZwS2nyc_W5s1PqNNz9y0_FTLQAlRUgPg10ocnHe8lF6IDVG6CDknf2F70DFD9L-eIGbezVyJdW6i6aFovRThskScTBMOBaWEJR2XZynTucDP63b1FWJggp8R25rre14wQAnxwD1anTNjsV2hkjBTAn8SFwNjXlcogyi7KWU2-s5Q"/>
+<span class="absolute top-1.5 left-1.5 px-1.5 py-0.5 rounded bg-inverse-surface/80 backdrop-blur-sm text-on-primary font-label-sm text-[10px]">180 PHÚT</span>
+</div>
+<div class="flex flex-col justify-between flex-1 min-w-0">
+<div>
+<div class="flex items-center justify-between gap-1 mb-1">
+<span class="font-label-sm text-label-sm text-primary uppercase font-bold tracking-wider">Son Tra Marine Diving</span>
+<span class="inline-flex items-center px-2 py-0.5 rounded-full bg-primary-container/20 text-primary font-label-sm text-[11px] font-semibold">
+                  Đang mở bán
+                </span>
+</div>
+<h3 class="font-headline-sm text-[16px] text-on-surface font-bold leading-tight truncate">
+                Lặn biển ngắm san hô Bãi Bụt
+              </h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant truncate mt-0.5">
+                Vịnh Bãi Bụt • Giám sát thợ lặn cấp 2
+              </p>
+</div>
+<div class="flex items-center justify-between pt-2">
+<div>
+<span class="font-label-sm text-label-sm text-outline">Đơn giá: </span>
+<span class="font-headline-sm text-headline-sm text-on-surface font-bold">520.000 đ</span>
+<span class="font-body-sm text-body-sm text-outline">/khách</span>
+</div>
+<span class="w-7 h-7 rounded-full bg-surface-container text-outline flex items-center justify-center">
+<span class="material-symbols-outlined text-[16px]">chevron_right</span>
+</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Tour 3: Pending Review -->
+<div class="rounded-2xl bg-surface-container-lowest p-space-md shadow-sm hover:shadow-md transition-all cursor-pointer">
+<div class="flex gap-space-md">
+<div class="relative w-28 h-28 rounded-xl overflow-hidden shrink-0 bg-surface-container">
+<img class="w-full h-full object-cover" data-alt="A certified scuba diving instructor teaching beginner diver student hand signals underwater in calm shallow turquoise bay at Son Tra Peninsula Danang." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAxBWogZQR0TM3EUeBtZBbSZrjCxlZZ9XkCERjRz486z5dZI7i0LWnWr4icSk0557h0NTKK637Dmyytf4Fv1e2RrmMpdjw4xIVhBCUDBYU4Ahwzd6aOM6FywELiY7DzrLi0hgF7kUuaxZbVbjwNP7vfPsRMfTuUCs3I3WaJ-Ncp6HxQA87_2e2tW_Ip5co7YsEpVUXPwOO0H3Yvo94LkLSgPaHpk81vA3ryqzNyjK9uA-CTspwTLHhUdA"/>
+<span class="absolute top-1.5 left-1.5 px-1.5 py-0.5 rounded bg-inverse-surface/80 backdrop-blur-sm text-on-primary font-label-sm text-[10px]">240 PHÚT</span>
+</div>
+<div class="flex flex-col justify-between flex-1 min-w-0">
+<div>
+<div class="flex items-center justify-between gap-1 mb-1">
+<span class="font-label-sm text-label-sm text-primary uppercase font-bold tracking-wider">Son Tra Marine</span>
+<span class="inline-flex items-center px-2 py-0.5 rounded-full bg-secondary-container/20 text-secondary font-label-sm text-[11px] font-semibold">
+                  Chờ thẩm định
+                </span>
+</div>
+<h3 class="font-headline-sm text-[16px] text-on-surface font-bold leading-tight truncate">
+                Khóa học lặn biển cấp tốc PADI Discover
+              </h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant truncate mt-0.5">
+                Cầu Cảng Nam Bán Đảo • 6 học viên/khóa
+              </p>
+</div>
+<div class="flex items-center justify-between pt-2">
+<div>
+<span class="font-label-sm text-label-sm text-outline">Đơn giá: </span>
+<span class="font-headline-sm text-headline-sm text-on-surface font-bold">950.000 đ</span>
+<span class="font-body-sm text-body-sm text-outline">/khách</span>
+</div>
+<span class="w-7 h-7 rounded-full bg-surface-container text-outline flex items-center justify-center">
+<span class="material-symbols-outlined text-[16px]">chevron_right</span>
+</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Tour 4: Published -->
+<div class="rounded-2xl bg-surface-container-lowest p-space-md shadow-sm hover:shadow-md transition-all cursor-pointer">
+<div class="flex gap-space-md">
+<div class="relative w-28 h-28 rounded-xl overflow-hidden shrink-0 bg-surface-container">
+<img class="w-full h-full object-cover" data-alt="High speed bright motorboat towing an adventurous colorful parasail parachute high in the blue sky above the coast of Danang ocean bay with mountains behind." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBncbwUpYTHnGYLyANhI65759RAQO3isMoKZLULD0SpeAytJIwFb2sz5z-8-wolZJFTBYEWi_mCWQCSzL5dBlC9g3Hin7ZmhXXp_oDvb5Z3Ho95gCZ1g2yUf96Y-bZOuo7-vv3KlJhZPYNJCVtG-WwKcDbRB3v_W7xSVWTz2f_5B_mGPvFtDpyZMotYABvhg-iPtBZyy_YCMP-O5eVfGBIWQVe5-wo12oGpfhPHJkWV-t77PqdC5xDmmg"/>
+<span class="absolute top-1.5 left-1.5 px-1.5 py-0.5 rounded bg-inverse-surface/80 backdrop-blur-sm text-on-primary font-label-sm text-[10px]">45 PHÚT</span>
+</div>
+<div class="flex flex-col justify-between flex-1 min-w-0">
+<div>
+<div class="flex items-center justify-between gap-1 mb-1">
+<span class="font-label-sm text-label-sm text-primary uppercase font-bold tracking-wider">SkyFly Danang</span>
+<span class="inline-flex items-center px-2 py-0.5 rounded-full bg-primary-container/20 text-primary font-label-sm text-[11px] font-semibold">
+                  Đang mở bán
+                </span>
+</div>
+<h3 class="font-headline-sm text-[16px] text-on-surface font-bold leading-tight truncate">
+                Cano dù lượn vịnh Sơn Trà
+              </h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant truncate mt-0.5">
+                Vịnh Đà Nẵng • Ca nô cao tốc 150HP
+              </p>
+</div>
+<div class="flex items-center justify-between pt-2">
+<div>
+<span class="font-label-sm text-label-sm text-outline">Đơn giá: </span>
+<span class="font-headline-sm text-headline-sm text-on-surface font-bold">650.000 đ</span>
+<span class="font-body-sm text-body-sm text-outline">/khách</span>
+</div>
+<span class="w-7 h-7 rounded-full bg-surface-container text-outline flex items-center justify-center">
+<span class="material-symbols-outlined text-[16px]">chevron_right</span>
+</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Tour 5: Paused -->
+<div class="rounded-2xl bg-surface-container-lowest p-space-md shadow-sm hover:shadow-md transition-all cursor-pointer opacity-85">
+<div class="flex gap-space-md">
+<div class="relative w-28 h-28 rounded-xl overflow-hidden shrink-0 bg-surface-container">
+<img class="w-full h-full object-cover" data-alt="A modern motorized jetboard surfboard riding fast along the ocean swells off Bai Rang rocks Danang with sea spray kicking up in sunlight." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDATPPMENyygIW6i9KuC8WZsBI31Tg6Njlj3Jh3UCjN3xcEZwkfEcZ0OHfO45jFplXUl286hkxvJxtlzPPRyXVX9B3IreKzlIg38Xe92IVZWRg5XOVIRKeNZrett5YaTsvOILX-RzyPndolnTVK_hHEXMhe2-jIrknxCKHHfJMIdayQzFHbA7XZH772qte-BvHkc9LkoCgPV1UmWv1oEEf8SdoXnH0feSXDKFH-4M4_vWGFVmkDkYW2IQ"/>
+<span class="absolute top-1.5 left-1.5 px-1.5 py-0.5 rounded bg-inverse-surface/80 backdrop-blur-sm text-on-primary font-label-sm text-[10px]">60 PHÚT</span>
+</div>
+<div class="flex flex-col justify-between flex-1 min-w-0">
+<div>
+<div class="flex items-center justify-between gap-1 mb-1">
+<span class="font-label-sm text-label-sm text-outline uppercase font-bold tracking-wider">CLB Rạng Đông</span>
+<span class="inline-flex items-center px-2 py-0.5 rounded-full bg-surface-container-high text-on-surface-variant font-label-sm text-[11px] font-semibold">
+                  Tạm ngưng
+                </span>
+</div>
+<h3 class="font-headline-sm text-[16px] text-on-surface font-bold leading-tight truncate">
+                Lướt ván phản lực Bãi Rạng
+              </h3>
+<p class="font-body-sm text-body-sm text-secondary truncate mt-0.5">
+                Bảo trì hệ thống phao giới hạn luồng lạch
+              </p>
+</div>
+<div class="flex items-center justify-between pt-2">
+<div>
+<span class="font-label-sm text-label-sm text-outline">Đơn giá: </span>
+<span class="font-headline-sm text-headline-sm text-on-surface-variant font-bold">790.000 đ</span>
+</div>
+<span class="w-7 h-7 rounded-full bg-surface-container text-outline flex items-center justify-center">
+<span class="material-symbols-outlined text-[16px]">build</span>
+</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Right Column: Verification Dossier & Maritime Safety Clearance (7 Columns) -->
+<div class="lg:col-span-7 flex flex-col gap-space-lg">
+<!-- Primary Profile Card -->
+<div class="rounded-3xl bg-surface-container-lowest p-space-lg shadow-sm">
+<div class="flex flex-col md:flex-row md:items-start justify-between gap-space-md pb-space-md">
+<div>
+<div class="flex items-center gap-2 mb-1.5">
+<span class="px-2.5 py-0.5 rounded-full bg-primary/10 text-primary font-label-sm text-label-sm uppercase font-bold">
+                Mã Tour: SUP-MK2-094
+              </span>
+<span class="px-2.5 py-0.5 rounded-full bg-secondary-container/20 text-secondary font-label-sm text-label-sm font-semibold">
+                Đang chờ phê duyệt
+              </span>
+</div>
+<h2 class="font-headline-lg text-headline-lg text-on-surface tracking-tight">
+              Chèo SUP đón bình minh biển Mỹ Khê
+            </h2>
+<p class="font-body-md text-body-md text-on-surface-variant italic">
+              Sunrise Stand-up Paddleboarding at My Khe Beach
+            </p>
+</div>
+<!-- Single Price Schema Card -->
+<div class="rounded-2xl bg-surface-container-low p-space-md text-right shrink-0">
+<span class="font-label-sm text-label-sm text-outline block uppercase tracking-wider">Đơn giá niêm yết duy nhất</span>
+<div class="flex items-baseline justify-end gap-1 mt-0.5">
+<span class="font-headline-xl text-headline-xl text-primary font-bold">280.000</span>
+<span class="font-label-lg text-label-lg text-primary">VNĐ</span>
+</div>
+<span class="font-body-sm text-body-sm text-on-surface-variant block">/ 01 người lớn • Không phụ thu add-on</span>
+</div>
+</div>
+<!-- Partner & Capacity Overview Strip -->
+<div class="grid grid-cols-2 sm:grid-cols-4 gap-3 p-space-md rounded-2xl bg-surface-container-low mb-space-lg">
+<div>
+<span class="font-label-sm text-label-sm text-outline block">Đơn vị tổ chức</span>
+<span class="font-label-md text-label-md text-on-surface font-semibold">Danang Ocean Club</span>
+</div>
+<div>
+<span class="font-label-sm text-label-sm text-outline block">Thời lượng tour</span>
+<span class="font-label-md text-label-md text-on-surface font-semibold">120 phút (05:00 - 07:00)</span>
+</div>
+<div>
+<span class="font-label-sm text-label-sm text-outline block">Định mức phục vụ</span>
+<span class="font-label-md text-label-md text-on-surface font-semibold">Tối đa 12 khách / ca</span>
+</div>
+<div>
+<span class="font-label-sm text-label-sm text-outline block">Tỷ lệ cứu hộ viên</span>
+<span class="font-label-md text-label-md text-primary font-semibold">01 HLV / 04 Khách</span>
+</div>
+</div>
+<!-- Maritime Operational Water Map & Coordinates -->
+<div class="space-y-space-sm mb-space-lg">
+<div class="flex items-center justify-between">
+<span class="font-headline-sm text-headline-sm text-on-surface flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-[20px]">explore</span>
+              Vùng mặt nước &amp; Tọa độ GPS cấp phép
+            </span>
+<span class="font-label-sm text-label-sm text-on-surface-variant font-mono">16.0612° N, 108.2435° E</span>
+</div>
+<div class="relative rounded-2xl overflow-hidden shadow-sm h-64 bg-surface-container">
+<div class="w-full h-full bg-cover bg-center" data-location="My Khe Beach, Da Nang, Vietnam" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuDq7VeN0aj4WscIeETk1vonpDu2_-lv0_ZJBViH-ppkKcXlvNJNgfVDHycbRA7_XODIDPCNg_aZHpBpH2_17VjjLg_h5TzU_CeFbVaGE4pbD8_nhtqj3pJbcnDsLIWBa0U1f6O_uFgEi5ShcxbIPuLDJHYx6XJ9zKEXxMz7K85n82Rj3qk16YiEm4L0sAXA_6Y1wp4kGnY2IsGmZG82hOJzuUfj1Ayh3LxvAekhL_FzuU8zP-L0XkjcXA')">
+<!-- Overlay with nautical boundaries -->
+<div class="absolute inset-0 bg-gradient-to-t from-inverse-surface/80 via-transparent to-transparent flex flex-col justify-between p-space-md">
+<div class="flex justify-between items-start">
+<div class="px-3 py-1.5 rounded-lg bg-surface-container-lowest/90 backdrop-blur-md shadow-sm">
+<span class="font-label-sm text-label-sm font-bold text-on-surface flex items-center gap-1.5">
+<span class="w-2 h-2 rounded-full bg-primary"></span>
+                      Trạm cứu hộ bãi tắm Mỹ Khê 2
+                    </span>
+</div>
+<div class="px-3 py-1.5 rounded-lg bg-surface-container-lowest/90 backdrop-blur-md shadow-sm">
+<span class="font-label-sm text-label-sm text-secondary font-semibold">Ranh giới phao cờ: Tối đa 350m từ mép nước</span>
+</div>
+</div>
+<div class="flex items-center justify-between text-on-primary">
+<div class="flex items-center gap-4 text-xs font-label-sm">
+<span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-primary-fixed"></span> Luồng chèo SUP quy hoạch</span>
+<span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-secondary-container"></span> Vùng cano cao tốc cách ly</span>
+</div>
+<span class="font-label-sm text-label-sm text-inverse-primary">Giám sát vệ tinh tự động AIS</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Verified Image Gallery -->
+<div class="space-y-space-sm mb-space-lg">
+<div class="flex items-center justify-between">
+<span class="font-headline-sm text-headline-sm text-on-surface flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-[20px]">photo_library</span>
+              Thư viện ảnh thực địa kiểm định (05 ảnh)
+            </span>
+<span class="font-label-sm text-label-sm text-primary">Ảnh chụp kiểm tra thực tế</span>
+</div>
+<div class="grid grid-cols-5 gap-2.5">
+<div class="h-20 rounded-xl overflow-hidden bg-surface-container shadow-sm group relative">
+<img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" data-alt="High quality certified ocean lifejackets arranged neatly on coastal rack with safety whistle and reflective strips." src="https://lh3.googleusercontent.com/aida-public/AB6AXuB1MqOF_TEC-PkaghjSQ2B_RJgpaEjQzbV6CltBTGFVKbsrBLZ9J1mJWaqvp7Y62sgTVp_K5Fu83yn2XcJOF1_FDhan_hHLZshc03ml3EzL1tGA8a297vL4zSy9wdzWgAjSJrgek4e6L8VUpF0M6A5ivLsCZDuTUXC9mn-8RA_-885xmySREcTvEzm-NPFOWZOe-f2_Wv3UNvaYeJCEUgLFZ9umO2oqvw5KxsEd_30l0dkSYE265hdvkA"/>
+<span class="absolute bottom-1 right-1 px-1 rounded bg-inverse-surface/70 text-[9px] text-on-primary font-mono">Áo phao</span>
+</div>
+<div class="h-20 rounded-xl overflow-hidden bg-surface-container shadow-sm group relative">
+<img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" data-alt="Row of professional inflatable stand up paddleboards inflated to standard PSI at dawn on beach." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCCYtTNfc3v5ODKo3NxXHRWzmpwq0_zg2AJdCu7sdEMnAUQFqnMyKakSiC6ypQi3BQM-Fmag3R3M_VX47o8JxG75gz4lN0UPNwST8QDLrhOp8e5Lpn6_kkASzw_EA9-5UAFizrGaGYnTiXO0xX0OAWoC8XErWXXeOGccT7qQbW0yXgeDiFr4z4cK2c-eUk93ZX8vyUenqrReKX36tBC3xnqIVVTT_uEIjVS4t8LQ6zMiSWh6MFVuKtWlQ"/>
+<span class="absolute bottom-1 right-1 px-1 rounded bg-inverse-surface/70 text-[9px] text-on-primary font-mono">Ván SUP</span>
+</div>
+<div class="h-20 rounded-xl overflow-hidden bg-surface-container shadow-sm group relative">
+<img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" data-alt="Lifeguard rescue boat with trained maritime rescue swimmer wearing uniform ready at My Khe beach." src="https://lh3.googleusercontent.com/aida-public/AB6AXuD2ugxlMlhIJjCZTXQ4jyrbs6tx4mSMvPjQHVokIptlkZ99s0WaPFr2Y8m38dzSSyoIRO416_GwJuQDlzqqNEJJMkoLxwUyzuFzAEI9wX5wj3l49Ume4-CF4zLUtZYqcT_75CN6Nv8dvmM533pGch8dJwa8UaJMKhgOWMONr9TWrUqxT5KadezyC09Kqj1dmyK_howe6rv4VAGC6ONNGJlpdyK5zi_P9_zwUMyU1TiPqgaMKOnEq7m6SQ"/>
+<span class="absolute bottom-1 right-1 px-1 rounded bg-inverse-surface/70 text-[9px] text-on-primary font-mono">Cứu hộ</span>
+</div>
+<div class="h-20 rounded-xl overflow-hidden bg-surface-container shadow-sm group relative">
+<img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" data-alt="First aid marine kit and emergency resuscitation kit on lifeguard table with rescue radio." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCQ_A1TqJGTo5-_PvDAaXsf0UpqS-emkzNFREwjT4Did6LVP8mwC3vQZ0015Fg4ooo0I7WFOPwuN8tHucxDBblW_0sZbwrsNfaW9TzG_BnbWC7QnRYua8Xf1EIjGM6N_7QO0q81mXD8IhXKvMPbyeegbHAfU6fUd8zsHaFVyK-8bafIsrgzOJQn04Sj0OtezG18Ghf7dL9vN25dLTUdOr2IZmFAtCbqM_ZoTqsCJKVWZqRMj2_OPZ5QvA"/>
+<span class="absolute bottom-1 right-1 px-1 rounded bg-inverse-surface/70 text-[9px] text-on-primary font-mono">Y tế</span>
+</div>
+<div class="h-20 rounded-xl overflow-hidden bg-surface-container shadow-sm group relative">
+<img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" data-alt="Sunrise scene over My Khe ocean water with calm small ripples and morning silhouettes of paddlers." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDQ2XUYGOn-Ggspj1XLcqztyN344LdW0IPUMUL9-2gFmOnc01op29i-4sS7QAEqObAdEqv__AACKJK7ne6Uzuf33-HuEwvHfLfH6gGqaN1AKJ256drNvzY_barkSl8SGJVcn05-utko1A7Laqxd9Jorsiws36jmBC2KasF36ACBN_94RDIG633f6YwsRIUWmYMH2OThe4N-gWlofU8Gr-6sIhCyAr9LPM_lFyGXO20TElJcx6ht8Ui7Iw"/>
+<span class="absolute bottom-1 right-1 px-1 rounded bg-inverse-surface/70 text-[9px] text-on-primary font-mono">Mặt biển</span>
+</div>
+</div>
+</div>
+<!-- Rich Text Schedule & Safety Itinerary -->
+<div class="space-y-space-xs mb-space-lg">
+<span class="font-headline-sm text-headline-sm text-on-surface flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-[20px]">schedule</span>
+            Lịch trình &amp; Quy trình đảm bảo an toàn du khách
+          </span>
+<div class="p-space-md rounded-2xl bg-surface-container-low font-body-md text-body-md text-on-surface-variant space-y-2 leading-relaxed">
+<div class="flex items-start gap-3">
+<span class="px-2 py-0.5 rounded bg-primary/10 text-primary font-mono text-label-sm font-bold shrink-0">05:00</span>
+<p>Tập trung tại Trạm cứu hộ bãi tắm Mỹ Khê 2. Du khách ký xác nhận văn bản miễn trừ trách nhiệm và nhận trang bị áo phao đạt chuẩn VITA-Marine.</p>
+</div>
+<div class="flex items-start gap-3">
+<span class="px-2 py-0.5 rounded bg-primary/10 text-primary font-mono text-label-sm font-bold shrink-0">05:15</span>
+<p>Hướng dẫn viên phổ biến kỹ thuật chèo mái, phương pháp lật ván tự cứu, hiệu lệnh còi an toàn và khởi động cơ thể trên bờ cát.</p>
+</div>
+<div class="flex items-start gap-3">
+<span class="px-2 py-0.5 rounded bg-primary/10 text-primary font-mono text-label-sm font-bold shrink-0">05:30</span>
+<p>Xuất phát ra biển. Toàn đoàn di chuyển theo cụm trong luồng cờ phao chỉ định, cự ly cách mép nước tối đa 350m, luôn có 01 ca nô cứu hộ tuần tra vòng ngoài.</p>
+</div>
+<div class="flex items-start gap-3">
+<span class="px-2 py-0.5 rounded bg-primary/10 text-primary font-mono text-label-sm font-bold shrink-0">07:00</span>
+<p>Tập kết vào bờ, kiểm đếm quân số du khách, bàn giao trang bị thể thao, tắm tráng nước ngọt và kết thúc tour.</p>
+</div>
+</div>
+</div>
+<!-- Maritime Safety Verification Documents (service_safety_documents) -->
+<div class="space-y-space-sm mb-space-lg">
+<span class="font-headline-sm text-headline-sm text-on-surface flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-[20px]">assignment_turned_in</span>
+            Hồ sơ kiểm định an toàn tour biển
+          </span>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+<!-- Doc 1 -->
+<div class="p-space-md rounded-2xl bg-surface-container-low flex items-start justify-between gap-3">
+<div class="flex items-start gap-3">
+<span class="material-symbols-outlined text-primary text-[28px]">description</span>
+<div>
+<span class="font-label-md text-label-md text-on-surface font-semibold block">Hợp đồng ca nô cứu hộ thường trực</span>
+<span class="font-mono text-label-sm text-label-sm text-outline">hop_dong_cuu_ho_mykhe.pdf</span>
+<div class="mt-1 flex items-center gap-1.5">
+<span class="material-symbols-outlined text-primary text-[14px]">verified</span>
+<span class="font-label-sm text-label-sm text-primary font-semibold">Đã đối soát hợp lệ</span>
+</div>
+</div>
+</div>
+<button class="p-2 rounded-lg bg-surface-container hover:bg-surface-container-high text-on-surface-variant transition-colors">
+<span class="material-symbols-outlined text-[18px]">visibility</span>
+</button>
+</div>
+<!-- Doc 2 -->
+<div class="p-space-md rounded-2xl bg-surface-container-low flex items-start justify-between gap-3">
+<div class="flex items-start gap-3">
+<span class="material-symbols-outlined text-primary text-[28px]">verified</span>
+<div>
+<span class="font-label-md text-label-md text-on-surface font-semibold block">Giấy đăng kiểm SUP &amp; Phao cứu sinh</span>
+<span class="font-mono text-label-sm text-label-sm text-outline">giay_kiem_dinh_thiet_bi.pdf</span>
+<div class="mt-1 flex items-center gap-1.5">
+<span class="material-symbols-outlined text-primary text-[14px]">check</span>
+<span class="font-label-sm text-label-sm text-primary font-semibold">Còn hạn đến 12/2025</span>
+</div>
+</div>
+</div>
+<button class="p-2 rounded-lg bg-surface-container hover:bg-surface-container-high text-on-surface-variant transition-colors">
+<span class="material-symbols-outlined text-[18px]">visibility</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Real-time Maritime Weather Match Evaluation -->
+<div class="p-space-md rounded-2xl bg-surface-container mb-space-lg">
+<div class="flex items-center justify-between mb-space-xs">
+<div class="flex items-center gap-2">
+<span class="w-2.5 h-2.5 rounded-full bg-primary"></span>
+<span class="font-headline-sm text-[16px] text-on-surface font-bold">Đánh giá quy tắc an toàn khí tượng (safety_rule_evaluations)</span>
+</div>
+<span class="px-2.5 py-0.5 rounded-full bg-primary/15 text-primary font-label-sm text-label-sm font-bold uppercase">
+              is_safe = true (ĐẠT)
+            </span>
+</div>
+<div class="grid grid-cols-1 sm:grid-cols-2 gap-3 my-2 text-body-sm font-body-sm">
+<div class="p-3 rounded-xl bg-surface-container-lowest">
+<span class="text-outline block font-label-sm">Độ nhạy thời tiết hàng hải:</span>
+<span class="font-label-md text-label-md text-on-surface font-semibold">weather_sensitive = true (Bắt buộc kiểm tra)</span>
+</div>
+<div class="p-3 rounded-xl bg-surface-container-lowest">
+<span class="text-outline block font-label-sm">Ngưỡng sóng tối đa cho phép:</span>
+<span class="font-label-md text-label-md text-on-surface font-semibold">≤ 1.2 mét (Hiện tại: 0.5 mét)</span>
+</div>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant pt-1">
+<span class="font-semibold text-primary">Thông điệp hệ thống:</span> Điều kiện sóng 0.5m và sức gió hiện tại nằm trong giới hạn an toàn cho hoạt động thể thao mái chèo.
+          </p>
+</div>
+<!-- Standard Port Authority Waiver Form (waiver_content) -->
+<div class="mb-space-lg">
+<div class="flex items-center justify-between mb-space-xs">
+<span class="font-headline-sm text-headline-sm text-on-surface flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-[20px]">contract</span>
+              Cam kết Miễn trừ trách nhiệm chuẩn Cảng vụ (waiver_content)
+            </span>
+<span class="font-label-sm text-label-sm text-outline">Bắt buộc ký điện tử</span>
+</div>
+<div class="p-space-md rounded-2xl bg-surface-container-low max-h-36 overflow-y-auto font-body-sm text-body-sm text-on-surface-variant space-y-2 border-l-2 border-primary">
+<p>1. <strong>Sức khỏe du khách:</strong> Khách hàng cam kết không mắc các bệnh về tim mạch, huyết áp cao, động kinh hoặc có sử dụng đồ uống có cồn trước khi hạ thủy.</p>
+<p>2. <strong>Tuân thủ trang bị an toàn:</strong> Khách bắt buộc mặc áo phao cứu sinh đã kiểm định trong suốt hành trình, không tự ý tháo còi hiệu hay rời khỏi ván chèo.</p>
+<p>3. <strong>Khu vực hạn chế:</strong> Tuyệt đối không chèo vượt qua ranh giới cờ phao cảnh báo 350m và tuân thủ mệnh lệnh di chuyển của ca nô tuần tra Cảng vụ.</p>
+</div>
+</div>
+<!-- Admin Decision & Approval Action Deck -->
+<div class="pt-space-md bg-surface-container-low p-space-lg rounded-2xl">
+<span class="font-headline-sm text-headline-sm text-on-surface block mb-space-xs">
+            Quyết định Thẩm định của Quản trị viên Cảng vụ
+          </span>
+<div class="space-y-space-sm mb-space-md">
+<label class="font-label-md text-label-md text-on-surface-variant block">Ghi chú nghiệp vụ thẩm định nội bộ:</label>
+<textarea class="w-full p-space-sm rounded-xl bg-surface-container-lowest text-on-surface font-body-md text-body-md focus:outline-none focus:ring-1 focus:ring-primary shadow-sm resize-none" rows="2">Tuyến chèo nằm trong vùng bảo vệ, đã bố trí đủ 02 phao bè cứu sinh và hợp đồng ca nô sẵn sàng cơ động.</textarea>
+</div>
+<div class="flex flex-col sm:flex-row items-center justify-end gap-space-sm">
+<button class="w-full sm:w-auto px-5 py-3 rounded-xl bg-surface-container-highest text-on-surface font-label-md text-label-md hover:bg-surface-variant transition-colors">
+              Yêu cầu bổ sung hồ sơ
+            </button>
+<button class="w-full sm:w-auto px-5 py-3 rounded-xl bg-secondary text-on-secondary font-label-md text-label-md hover:bg-secondary-container transition-colors">
+              Từ chối duyệt (REJECT)
+            </button>
+<button class="w-full sm:w-auto px-6 py-3 rounded-xl bg-primary text-on-primary font-label-md text-label-md shadow-md hover:bg-primary-container transition-all flex items-center justify-center gap-2">
+<span class="material-symbols-outlined text-[18px]">done_all</span>
+              Phê duyệt xuất bản (PUBLISH TOUR)
+            </button>
+</div>
+</div>
+</div>
+</div>
+</section>
+</div></main></div></body></html>

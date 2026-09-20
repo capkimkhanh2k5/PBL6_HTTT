@@ -4,9 +4,16 @@ import java.util.UUID;
 
 import com.danasea.backend.modules.service.infrastructure.persistence.entities.ServiceSlotJpaEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
-import java.util.UUID;
 
 @Repository
 public interface JpaServiceSlotRepository extends JpaRepository<ServiceSlotJpaEntity, UUID> {
+
+    @Modifying(clearAutomatically = true, flushAutomatically = true)
+    @Query("UPDATE ServiceSlotJpaEntity s SET s.bookedCount = s.bookedCount + :quantity WHERE s.id = :slotId AND (s.capacity - s.bookedCount) >= :quantity")
+    int incrementBookedCount(@Param("slotId") UUID slotId, @Param("quantity") int quantity);
 }
+
