@@ -66,6 +66,8 @@ app:
     secret: ${APP_JWT_SECRET}
     access-token-minutes: ${APP_JWT_ACCESS_TOKEN_MINUTES:15}
     refresh-token-days: ${APP_JWT_REFRESH_TOKEN_DAYS:7}
+  weather:
+    monitoring-cron: ${APP_WEATHER_MONITORING_CRON:0 */30 * * * *}
 
 cloudinary:
   cloud-name: ${CLOUDINARY_CLOUD_NAME:}

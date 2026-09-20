@@ -40,16 +40,61 @@ public class OpenMeteoWeatherResponse {
 
         @JsonProperty("weather_code")
         private Integer weatherCode;
+
+        @JsonProperty("uv_index")
+        private Double uvIndex;
+
+        @JsonProperty("relative_humidity_2m")
+        private Double relativeHumidity2m;
+
+        @JsonProperty("dew_point_2m")
+        private Double dewPoint2m;
+
+        @JsonProperty("surface_pressure")
+        private Double surfacePressure;
     }
 
     @Data
     public static class HourlyData {
         private List<String> time;
 
+        @JsonProperty("temperature_2m")
+        private List<Double> temperature2m;
+
+        @JsonProperty("precipitation")
+        private List<Double> precipitation;
+
         @JsonProperty("precipitation_probability")
         private List<Integer> precipitationProbability;
 
+        @JsonProperty("wind_speed_10m")
+        private List<Double> windSpeed10m;
+
+        @JsonProperty("wind_gusts_10m")
+        private List<Double> windGusts10m;
+
+        @JsonProperty("wind_direction_10m")
+        private List<Double> windDirection10m;
+
+        @JsonProperty("weather_code")
+        private List<Integer> weatherCode;
+
+        @JsonProperty("visibility")
+        private List<Double> visibility;
+
         @JsonProperty("uv_index")
         private List<Double> uvIndex;
+
+        @JsonProperty("relative_humidity_2m")
+        private List<Integer> relativeHumidity2m;
+
+        @JsonProperty("dew_point_2m")
+        private List<Double> dewPoint2m;
+
+        @JsonProperty("surface_pressure")
+        private List<Double> surfacePressure;
+
+        @JsonProperty("cloud_cover")
+        private List<Integer> cloudCover;
     }
 }
