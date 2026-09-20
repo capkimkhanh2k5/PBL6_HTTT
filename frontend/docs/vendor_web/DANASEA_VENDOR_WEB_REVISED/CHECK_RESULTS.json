@@ -1,0 +1,109 @@
+{
+  "pages": [
+    {
+      "name": "danasea_vendor_chi_tiet_khieu_nai",
+      "errors": [],
+      "horizontal_overflow": false
+    },
+    {
+      "name": "danasea_vendor_d_ch_v",
+      "errors": [],
+      "horizontal_overflow": false
+    },
+    {
+      "name": "danasea_vendor_h_s_x_c_minh",
+      "errors": [],
+      "horizontal_overflow": false
+    },
+    {
+      "name": "danasea_vendor_i_so_t_doanh_thu",
+      "errors": [],
+      "horizontal_overflow": false
+    },
+    {
+      "name": "danasea_vendor_khuy_n_m_i",
+      "errors": [],
+      "horizontal_overflow": false
+    },
+    {
+      "name": "danasea_vendor_l_ch_s_c_ch_a",
+      "errors": [],
+      "horizontal_overflow": false
+    },
+    {
+      "name": "danasea_vendor_n_h_ng_check_in",
+      "errors": [],
+      "horizontal_overflow": false
+    },
+    {
+      "name": "danasea_vendor_so_n_d_ch_v",
+      "errors": [],
+      "horizontal_overflow": false
+    },
+    {
+      "name": "danasea_vendor_t_ng_quan",
+      "errors": [],
+      "horizontal_overflow": false
+    },
+    {
+      "name": "danasea_vendor_tin_nh_n_nh_gi",
+      "errors": [],
+      "horizontal_overflow": false
+    },
+    {
+      "name": "danasea_vendor_y_u_c_u_thanh_to_n",
+      "errors": [],
+      "horizontal_overflow": false
+    }
+  ],
+  "checks": [
+    "danasea_vendor_chi_tiet_khieu_nai loads without JS exception",
+    "danasea_vendor_d_ch_v loads without JS exception",
+    "danasea_vendor_h_s_x_c_minh loads without JS exception",
+    "danasea_vendor_i_so_t_doanh_thu loads without JS exception",
+    "danasea_vendor_khuy_n_m_i loads without JS exception",
+    "danasea_vendor_l_ch_s_c_ch_a loads without JS exception",
+    "danasea_vendor_n_h_ng_check_in loads without JS exception",
+    "danasea_vendor_so_n_d_ch_v loads without JS exception",
+    "danasea_vendor_t_ng_quan loads without JS exception",
+    "danasea_vendor_tin_nh_n_nh_gi loads without JS exception",
+    "danasea_vendor_y_u_c_u_thanh_to_n loads without JS exception",
+    "Profile status and badge are separate",
+    "Bank preserves leading zero and updates display",
+    "Bank requires name",
+    "Wind, wave, waiver, weather mapped",
+    "Image reordering changes sort_order",
+    "Weather off disables thresholds",
+    "Slot rejects reversed time",
+    "Slot creates OPEN record",
+    "Capacity rejects under booked plus holds",
+    "Capacity 12 gives zero available",
+    "All six order statuses exist",
+    "Check-in denies PENDING",
+    "Check-in denies REJECTED",
+    "Check-in denies CANCELLED",
+    "Check-in denies REFUNDED",
+    "Check-in denies COMPLETED",
+    "Check-in denies USED",
+    "Check-in denies INVALID",
+    "Check-in replay denied",
+    "Manual substring does not validate ticket",
+    "Dispute complete fields",
+    "Evidence preview kept",
+    "Refund view 0",
+    "Refund view 1",
+    "Refund view 2",
+    "Notification links service and slot",
+    "Discount enums match schema",
+    "Percentage capped at 100",
+    "Create fixed voucher",
+    "Edit voucher works",
+    "Payout over limit rejected",
+    "Payout starts REQUESTED",
+    "Duplicate payout disabled",
+    "Four payout statuses shown",
+    "Combined payout remains disabled",
+    "No runtime exception during interaction checks"
+  ],
+  "scope": "Static web prototype; no API/payment/concurrency/real QR verification tested."
+}

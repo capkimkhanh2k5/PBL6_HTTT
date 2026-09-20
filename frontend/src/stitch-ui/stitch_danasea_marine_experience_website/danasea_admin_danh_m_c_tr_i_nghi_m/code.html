@@ -1,0 +1,963 @@
+<!DOCTYPE html>
+
+<html lang="vi"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700&amp;family=Syne:wght@600;700&amp;display=swap" rel="stylesheet"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><style>@layer base{html,body{margin:0;padding:0;}body{overscroll-behavior:none;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config={darkMode:"class",theme:{extend:{"colors":{"tertiary-container":"#5a7784","on-tertiary":"#ffffff","on-error-container":"#93000a","surface-container-lowest":"#ffffff","on-secondary-fixed-variant":"#891d0f","on-surface-variant":"#3e494a","error":"#ba1a1a","on-tertiary-fixed":"#001f29","primary-container":"#087f8c","on-primary-container":"#effdff","outline":"#6e797b","surface-container-high":"#e4e9ea","surface":"#f5fafb","surface-bright":"#f5fafb","on-secondary":"#ffffff","on-secondary-container":"#6c0600","on-primary-fixed":"#001f24","on-primary":"#ffffff","secondary-fixed-dim":"#ffb4a7","tertiary":"#425e6a","background":"#f5fafb","secondary-fixed":"#ffdad4","surface-variant":"#dee3e4","secondary-container":"#fb7059","tertiary-fixed":"#c9e7f6","surface-tint":"#006874","inverse-primary":"#79d4e2","on-primary-fixed-variant":"#004f57","surface-container-highest":"#dee3e4","on-surface":"#171d1e","on-error":"#ffffff","primary":"#00646f","inverse-on-surface":"#edf2f3","outline-variant":"#bdc9ca","surface-container":"#eaeff0","secondary":"#aa3524","on-background":"#171d1e","surface-dim":"#d6dbdc","primary-fixed-dim":"#79d4e2","primary-fixed":"#95f1ff","error-container":"#ffdad6","on-tertiary-fixed-variant":"#2e4b56","surface-container-low":"#eff4f5","on-secondary-fixed":"#400200","on-tertiary-container":"#f4fbff","inverse-surface":"#2c3132","tertiary-fixed-dim":"#adcbd9"},"borderRadius":{"DEFAULT":"0.25rem","lg":"0.5rem","xl":"0.75rem","full":"9999px"},"spacing":{"margin":"5rem","margin-sm":"1.5rem","space-sm":"0.5rem","gutter":"1.5rem","space-xs":"0.25rem","gutter-sm":"1rem","space-md":"1rem","space-3xl":"4.5rem","space-lg":"1.5rem","space-2xl":"3rem","margin-md":"3rem","gutter-lg":"2rem","space-xl":"2rem"},"fontFamily":{"label-md":["Plus Jakarta Sans"],"headline-xl":["Syne"],"headline-lg":["Syne"],"headline-md":["Syne"],"body-xl":["Plus Jakarta Sans"],"label-lg":["Plus Jakarta Sans"],"body-sm":["Plus Jakarta Sans"],"body-lg":["Plus Jakarta Sans"],"label-sm":["Plus Jakarta Sans"],"display-xl":["Syne"],"headline-sm":["Syne"],"display-lg":["Syne"],"body-md":["Plus Jakarta Sans"]},"fontSize":{"label-md":["12px",{"lineHeight":"16px","letterSpacing":"0.02em","fontWeight":"600"}],"headline-xl":["36px",{"lineHeight":"44px","letterSpacing":"-0.015em","fontWeight":"700"}],"headline-lg":["28px",{"lineHeight":"36px","letterSpacing":"-0.01em","fontWeight":"600"}],"headline-md":["22px",{"lineHeight":"30px","letterSpacing":"-0.01em","fontWeight":"600"}],"body-xl":["18px",{"lineHeight":"28px","fontWeight":"400"}],"label-lg":["14px",{"lineHeight":"20px","letterSpacing":"0.01em","fontWeight":"600"}],"body-sm":["12px",{"lineHeight":"18px","fontWeight":"400"}],"body-lg":["16px",{"lineHeight":"24px","fontWeight":"400"}],"label-sm":["11px",{"lineHeight":"14px","letterSpacing":"0.04em","fontWeight":"700"}],"display-xl":["56px",{"lineHeight":"64px","letterSpacing":"-0.02em","fontWeight":"700"}],"headline-sm":["18px",{"lineHeight":"26px","fontWeight":"600"}],"display-lg":["44px",{"lineHeight":"52px","letterSpacing":"-0.02em","fontWeight":"700"}],"body-md":["14px",{"lineHeight":"22px","fontWeight":"400"}]}}}}</script></head><body class="bg-surface font-body-md text-on-surface antialiased"><aside class="fixed left-0 top-0 h-screen w-[260px] bg-inverse-surface z-50 flex flex-col justify-between shadow-[0_1px_8px_rgba(0,0,0,0.04)]"><div class="flex flex-col flex-1 overflow-y-auto"><div class="p-space-lg flex flex-col gap-space-xs"><div class="flex items-center gap-space-sm"><img alt="DANASEA brand logo with minimalistic dual ocean wave crest lines in ocean teal and coral accent, with modern bold wordmark in navy." class="h-8 w-auto object-contain" src="https://lh3.googleusercontent.com/aida/AEtjO1VvnQOF2WU9kDEsZEZSN1YNSkRu6Z2_49elqxL3W3H70QznUBWpRk31Nl8LKj_EuTvgl-aPxe6h0dUp3LQoVfVp01RNmSAB12-rEJv9MhU2f6AD8_vRSyZKyBDLqn3tWQ7HSf6YYVjpkEi7NAsR7cdkAV2bJI_xlmT9yaP7M2ZKZGl5F50so_t-2hiC_8z0eIbcNWKyv92AX50LCfgsO70-dTgI05kaKyZFg3UL59SF-eKVOPSxGgBwn7Ct"/><span class="font-headline-sm text-headline-sm font-bold tracking-tight text-on-primary">DANASEA</span></div><div class="mt-space-xs"><span class="inline-flex items-center px-space-xs py-0.5 rounded bg-primary-container/20 text-inverse-primary font-label-sm text-label-sm uppercase tracking-wider">HỆ THỐNG QUẢN TRỊ CẢNG VỤ</span></div></div><nav class="flex-1 px-space-md py-space-xs flex flex-col gap-1" data-active-classes="bg-primary-container text-on-primary-container font-semibold rounded-lg shadow-sm"><a class="flex items-center gap-space-sm px-space-md py-2.5 rounded-lg text-outline-variant hover:bg-surface-variant/20 hover:text-on-primary transition-colors" data-path="tong-quan" href="#"><span class="material-symbols-outlined text-[20px]">dashboard</span><span class="font-label-lg text-label-lg">Tổng quan</span></a><a class="flex items-center gap-space-sm px-space-md py-2.5 rounded-lg text-outline-variant hover:bg-surface-variant/20 hover:text-on-primary transition-colors" data-path="nguoi-dung-vai-tro" href="#"><span class="material-symbols-outlined text-[20px]">manage_accounts</span><span class="font-label-lg text-label-lg">Người dùng &amp; Vai trò</span></a><a class="flex items-center gap-space-sm px-space-md py-2.5 rounded-lg text-outline-variant hover:bg-surface-variant/20 hover:text-on-primary transition-colors" data-path="doi-tac-van-hanh" href="#"><span class="material-symbols-outlined text-[20px]">corporate_fare</span><span class="font-label-lg text-label-lg">Đối tác vận hành</span></a><a class="flex items-center gap-space-sm px-space-md py-2.5 rounded-lg text-outline-variant hover:bg-surface-variant/20 hover:text-on-primary transition-colors" data-path="dich-vu-duyet-tour" href="#"><span class="material-symbols-outlined text-[20px]">fact_check</span><span class="font-label-lg text-label-lg">Dịch vụ &amp; Duyệt tour</span></a><a class="flex items-center gap-space-sm px-space-md py-2.5 rounded-lg text-outline-variant hover:bg-surface-variant/20 hover:text-on-primary transition-colors" data-path="danh-muc-trai-nghiem" href="#"><span class="material-symbols-outlined text-[20px]">kayaking</span><span class="font-label-lg text-label-lg">Danh mục trải nghiệm</span></a><a class="flex items-center gap-space-sm px-space-md py-2.5 rounded-lg text-outline-variant hover:bg-surface-variant/20 hover:text-on-primary transition-colors" data-path="don-thanh-toan" href="#"><span class="material-symbols-outlined text-[20px]">receipt_long</span><span class="font-label-lg text-label-lg">Đơn &amp; Thanh toán</span></a><a class="flex items-center gap-space-sm px-space-md py-2.5 rounded-lg text-outline-variant hover:bg-surface-variant/20 hover:text-on-primary transition-colors" data-path="hoan-tien-khieu-nai" href="#"><span class="material-symbols-outlined text-[20px]">assignment_return</span><span class="font-label-lg text-label-lg">Hoàn tiền &amp; Khiếu nại</span></a><a class="flex items-center gap-space-sm px-space-md py-2.5 rounded-lg text-outline-variant hover:bg-surface-variant/20 hover:text-on-primary transition-colors" data-path="khuyen-mai-toan-san" href="#"><span class="material-symbols-outlined text-[20px]">sell</span><span class="font-label-lg text-label-lg">Khuyến mãi toàn sàn</span></a><a class="flex items-center gap-space-sm px-space-md py-2.5 rounded-lg text-outline-variant hover:bg-surface-variant/20 hover:text-on-primary transition-colors" data-path="doi-soat-quyet-toan" href="#"><span class="material-symbols-outlined text-[20px]">account_balance</span><span class="font-label-lg text-label-lg">Đối soát &amp; Quyết toán</span></a><a class="flex items-center gap-space-sm px-space-md py-2.5 rounded-lg text-outline-variant hover:bg-surface-variant/20 hover:text-on-primary transition-colors" data-path="cau-hinh-an-toan-bien" href="#"><span class="material-symbols-outlined text-[20px]">shield</span><span class="font-label-lg text-label-lg">Cấu hình &amp; An toàn biển</span></a><a class="flex items-center gap-space-sm px-space-md py-2.5 rounded-lg text-outline-variant hover:bg-surface-variant/20 hover:text-on-primary transition-colors" data-path="nhat-ky-he-thong" href="#"><span class="material-symbols-outlined text-[20px]">history_toggle_off</span><span class="font-label-lg text-label-lg">Nhật ký hệ thống</span></a></nav></div><div class="p-space-md bg-inverse-surface"><div class="flex items-center gap-space-sm p-space-sm rounded-xl bg-surface-variant/10 text-on-primary"><div class="w-9 h-9 rounded-full bg-primary flex items-center justify-center text-on-primary font-bold"><span class="material-symbols-outlined text-[20px]">person</span></div><div class="flex flex-col min-w-0 flex-1"><span class="font-label-md text-label-md text-on-primary truncate">Trần Hải Đăng</span><span class="font-label-sm text-label-sm text-outline-variant truncate">Ban QL Cảng VITA • ADMIN</span></div><span class="material-symbols-outlined text-outline-variant text-[18px]">more_vert</span></div></div></aside><div class="pl-[260px]"><header class="fixed top-0 left-[260px] right-0 h-16 bg-surface/80 backdrop-blur-xl shadow-[0_1px_8px_rgba(0,0,0,0.04)] z-40 flex items-center justify-between px-space-xl"><div class="flex items-center gap-space-lg flex-1 max-w-xl"><div class="relative w-full max-w-md"><span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline text-[20px]">search</span><input class="w-full h-10 pl-10 pr-space-md rounded-xl bg-surface-container-lowest text-on-surface font-body-md text-body-md placeholder:text-outline focus:outline-none focus:ring-1 focus:ring-primary shadow-sm" placeholder="Tìm kiếm hồ sơ, đơn vị vận hành, mã tour..." type="text"/></div><div class="hidden xl:flex items-center gap-2 px-space-sm py-1.5 rounded-full bg-surface-container"><span class="w-2 h-2 rounded-full bg-primary-container animate-pulse"></span><span class="font-label-sm text-label-sm text-on-surface-variant">Kết nối CSDL Hàng hải 100%</span></div></div><div class="flex items-center gap-space-md"><div class="hidden md:flex items-center gap-2 px-space-md py-1.5 rounded-lg bg-secondary-container/20 text-on-secondary-container font-label-md text-label-md"><span class="material-symbols-outlined text-secondary text-[18px]">notification_important</span><span>8 Cần duyệt</span></div><button class="relative w-10 h-10 rounded-full flex items-center justify-center text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors"><span class="material-symbols-outlined text-[22px]">notifications</span><span class="absolute top-2 right-2 w-2 h-2 bg-secondary rounded-full"></span></button><div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center"><span class="material-symbols-outlined text-on-primary text-[18px]">person</span></div></div></header><main class="w-full pt-16 bg-surface px-space-xl pb-space-2xl min-h-screen"><div class="flex flex-col w-full">
+<!-- Active Navigation Sync Script -->
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const links = document.querySelectorAll('aside nav a');
+      links.forEach(link => {
+        if (link.getAttribute('data-path') === 'danh-muc-trai-nghiem') {
+          link.className = 'flex items-center gap-space-sm px-space-md py-2.5 rounded-lg bg-primary-container text-on-primary-container font-semibold shadow-sm transition-colors';
+        }
+      });
+    });
+  </script>
+<!-- Page Sub-Header & Metadata -->
+<section class="flex flex-col lg:flex-row lg:items-center justify-between gap-space-md mb-space-xl">
+<div class="flex flex-col gap-space-xs">
+<div class="flex items-center gap-2">
+<span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-primary/10 text-primary font-label-sm text-label-sm uppercase tracking-wider">
+<span class="w-1.5 h-1.5 rounded-full bg-primary animate-pulse"></span>
+          Cơ sở dữ liệu hải trình &amp; dịch vụ
+        </span>
+<span class="text-outline-variant font-label-sm">|</span>
+<span class="text-on-surface-variant font-label-sm text-label-sm">Taxonomy Engine v2.4</span>
+</div>
+<h1 class="font-headline-xl text-headline-xl text-on-surface tracking-tight">
+        Cấu trúc Danh mục &amp; Phân loại Trải nghiệm Biển
+      </h1>
+<p class="font-body-md text-body-md text-on-surface-variant max-w-3xl">
+        Quản lý cây danh mục đa cấp, mã định danh URL (slug), biểu tượng nhận diện và trạng thái hiển thị trên toàn sàn DANASEA.
+      </p>
+</div>
+<!-- Quick Action Bar -->
+<div class="flex items-center gap-space-sm self-start lg:self-auto">
+<button class="flex items-center gap-2 px-space-md py-2.5 rounded-xl bg-surface-container-low hover:bg-surface-container text-on-surface font-label-lg text-label-lg transition-all shadow-sm">
+<span class="material-symbols-outlined text-[18px]">cached</span>
+<span>Đồng bộ Redis Cache</span>
+</button>
+<button class="flex items-center gap-2 px-space-lg py-2.5 rounded-xl bg-primary hover:bg-primary-container text-on-primary font-label-lg text-label-lg transition-all shadow-sm" onclick="resetToCreateMode()">
+<span class="material-symbols-outlined text-[20px]">add_circle</span>
+<span>Tạo Danh Mục Gốc</span>
+</button>
+</div>
+</section>
+<!-- KPI Overview Metrics -->
+<section class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-space-lg mb-space-xl">
+<!-- Stat 1 -->
+<div class="flex items-center gap-space-md p-space-lg rounded-2xl bg-surface-container-lowest shadow-sm">
+<div class="w-12 h-12 rounded-xl bg-primary-container/15 text-primary flex items-center justify-center">
+<span class="material-symbols-outlined text-[26px]">account_tree</span>
+</div>
+<div class="flex flex-col min-w-0">
+<span class="font-label-sm text-label-sm uppercase text-outline">Tổng số danh mục</span>
+<div class="flex items-baseline gap-2">
+<span class="font-headline-lg text-headline-lg text-on-surface">12</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">phân loại</span>
+</div>
+<span class="font-label-sm text-label-sm text-primary">8 cấp gốc • 4 chuyên sâu</span>
+</div>
+</div>
+<!-- Stat 2 -->
+<div class="flex items-center gap-space-md p-space-lg rounded-2xl bg-surface-container-lowest shadow-sm">
+<div class="w-12 h-12 rounded-xl bg-primary-container/15 text-primary flex items-center justify-center">
+<span class="material-symbols-outlined text-[26px]">check_circle</span>
+</div>
+<div class="flex flex-col min-w-0">
+<span class="font-label-sm text-label-sm uppercase text-outline">Đang kích hoạt (is_active)</span>
+<div class="flex items-baseline gap-2">
+<span class="font-headline-lg text-headline-lg text-primary">11</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">/ 12 danh mục</span>
+</div>
+<span class="font-label-sm text-label-sm text-outline-variant">91.6% khả dụng ngoài sàn</span>
+</div>
+</div>
+<!-- Stat 3 -->
+<div class="flex items-center gap-space-md p-space-lg rounded-2xl bg-surface-container-lowest shadow-sm">
+<div class="w-12 h-12 rounded-xl bg-secondary/10 text-secondary flex items-center justify-center">
+<span class="material-symbols-outlined text-[26px]">kayaking</span>
+</div>
+<div class="flex flex-col min-w-0">
+<span class="font-label-sm text-label-sm uppercase text-outline">Dịch vụ đang liên kết</span>
+<div class="flex items-baseline gap-2">
+<span class="font-headline-lg text-headline-lg text-secondary">42</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">tour thể thao biển</span>
+</div>
+<span class="font-label-sm text-label-sm text-secondary">100% neo giữ toàn vẹn</span>
+</div>
+</div>
+<!-- Stat 4 - Coastal Weather / System Health -->
+<div class="flex items-center justify-between p-space-lg rounded-2xl bg-surface-container-low">
+<div class="flex flex-col">
+<div class="flex items-center gap-1.5 text-on-surface-variant mb-1">
+<span class="material-symbols-outlined text-[18px] text-primary">cloud_done</span>
+<span class="font-label-sm text-label-sm uppercase tracking-wider">Hạ tầng Cảng VITA</span>
+</div>
+<span class="font-headline-sm text-headline-sm text-on-surface">Đồng bộ tức thì</span>
+<span class="font-body-sm text-body-sm text-outline">Index Web &amp; Mobile App: OK</span>
+</div>
+<!-- Mini Sparkline SVG -->
+<div class="w-16 h-10 flex items-center justify-center">
+<svg class="w-full h-full text-primary" fill="none" viewbox="0 0 64 36">
+<path d="M2 28L14 18L24 24L38 8L50 16L62 4" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"></path>
+<circle cx="62" cy="4" fill="currentColor" r="3"></circle>
+</svg>
+</div>
+</div>
+</section>
+<!-- Main 2-Column Responsive Workspace -->
+<section class="grid grid-cols-1 lg:grid-cols-12 gap-space-lg items-start">
+<!-- LEFT COLUMN (Span 7): Interactive Hierarchy Tree & Table List -->
+<div class="lg:col-span-7 flex flex-col gap-space-md">
+<!-- List Filter & Search Bar -->
+<div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-space-sm p-space-md bg-surface-container-lowest rounded-2xl shadow-sm">
+<div class="relative flex-1">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline text-[20px]">filter_list</span>
+<input class="w-full h-10 pl-10 pr-space-md rounded-xl bg-surface-container-low text-on-surface font-body-md text-body-md placeholder:text-outline focus:outline-none focus:ring-1 focus:ring-primary shadow-none" id="categoryTreeSearch" placeholder="Lọc theo tên phân loại hoặc slug..." type="text"/>
+</div>
+<div class="flex items-center gap-2">
+<button class="px-3 py-2 rounded-lg bg-surface-container-low hover:bg-surface-container text-on-surface-variant font-label-md text-label-md transition-colors flex items-center gap-1.5" onclick="expandAllCategories()">
+<span class="material-symbols-outlined text-[16px]">unfold_more</span>
+<span>Mở tất cả</span>
+</button>
+<button class="px-3 py-2 rounded-lg bg-surface-container-low hover:bg-surface-container text-on-surface-variant font-label-md text-label-md transition-colors flex items-center gap-1.5" onclick="collapseAllCategories()">
+<span class="material-symbols-outlined text-[16px]">unfold_less</span>
+<span>Thu gọn</span>
+</button>
+</div>
+</div>
+<!-- Category Interactive Tree / Table Container -->
+<div class="bg-surface-container-lowest rounded-2xl shadow-sm overflow-hidden flex flex-col">
+<!-- Table Header -->
+<div class="grid grid-cols-12 gap-2 px-space-lg py-3.5 bg-surface-container-low/70 text-on-surface-variant font-label-sm text-label-sm uppercase tracking-wider">
+<div class="col-span-6 flex items-center gap-2">
+<span>Cấu trúc phân cấp / Tên danh mục</span>
+</div>
+<div class="col-span-2 text-center">
+<span>Liên kết</span>
+</div>
+<div class="col-span-2 text-center">
+<span>Trạng thái</span>
+</div>
+<div class="col-span-2 text-right">
+<span>Thao tác</span>
+</div>
+</div>
+<!-- Tree Nodes List -->
+<div class="flex flex-col divide-y divide-surface-container-low">
+<!-- 1. ROOT CATEGORY: Thể thao mặt nước -->
+<div class="group/root hover:bg-surface/50 transition-colors">
+<div class="grid grid-cols-12 gap-2 px-space-lg py-3.5 items-center">
+<div class="col-span-6 flex items-center gap-space-sm min-w-0">
+<button class="p-1 rounded text-outline hover:text-on-surface hover:bg-surface-container transition-colors" onclick="toggleFolder('node-watersports')">
+<span class="material-symbols-outlined text-[20px]" id="icon-node-watersports">expand_more</span>
+</button>
+<div class="w-8 h-8 rounded-lg bg-primary/10 text-primary flex items-center justify-center flex-shrink-0">
+<span class="material-symbols-outlined text-[20px]">surfing</span>
+</div>
+<div class="flex flex-col min-w-0">
+<div class="flex items-center gap-2">
+<span class="font-headline-sm text-headline-sm text-on-surface truncate">Thể thao mặt nước</span>
+<span class="px-1.5 py-0.5 rounded bg-surface-container text-outline font-label-sm text-[10px]">ROOT</span>
+</div>
+<span class="font-body-sm text-body-sm text-outline truncate font-mono">/the-thao-mat-nuoc</span>
+</div>
+</div>
+<div class="col-span-2 text-center">
+<span class="inline-flex items-center px-2.5 py-1 rounded-full bg-primary/10 text-primary font-label-md text-label-md">
+                  18 tours
+                </span>
+</div>
+<div class="col-span-2 flex justify-center">
+<label class="relative inline-flex items-center cursor-pointer">
+<input checked="" class="sr-only peer" onchange="toggleCategoryStatus('the-thao-mat-nuoc', this.checked)" type="checkbox"/>
+<div class="w-9 h-5 bg-surface-dim peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-surface-container-lowest after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-primary-container"></div>
+</label>
+</div>
+<div class="col-span-2 flex items-center justify-end gap-1">
+<button class="p-1.5 rounded-lg hover:bg-surface-container text-on-surface-variant hover:text-primary transition-colors" onclick="selectCategoryForEdit('the-thao-mat-nuoc', 'Thể thao mặt nước', 'Water Sports', 'the-thao-mat-nuoc', 'none', 'surfing', 18, true)" title="Chỉnh sửa">
+<span class="material-symbols-outlined text-[18px]">edit</span>
+</button>
+<!-- Protected Delete Badge with Tooltip -->
+<div class="relative group/tooltip inline-block">
+<button class="p-1.5 rounded-lg text-outline-variant cursor-not-allowed opacity-60">
+<span class="material-symbols-outlined text-[18px]">delete_forever</span>
+</button>
+<div class="absolute right-0 bottom-full mb-2 hidden group-hover/tooltip:flex flex-col w-56 p-2 rounded-lg bg-inverse-surface text-inverse-on-surface font-label-sm text-[11px] shadow-lg z-30 pointer-events-none">
+<span class="font-bold text-secondary-fixed">Bảo vệ toàn vẹn dữ liệu:</span>
+<span>Không thể xóa danh mục đang có 18 dịch vụ liên kết!</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Children Sub-Tree -->
+<div class="flex flex-col pl-10 pr-space-lg pb-2 bg-surface-container-low/30" id="node-watersports">
+<!-- Sub 1.1: Chèo SUP & Kayak (Active Focus Node) -->
+<div class="grid grid-cols-12 gap-2 py-2.5 px-3 rounded-xl bg-primary/10 items-center">
+<div class="col-span-6 flex items-center gap-space-sm min-w-0">
+<span class="text-outline-variant font-mono">├─</span>
+<div class="w-7 h-7 rounded-lg bg-primary text-on-primary flex items-center justify-center flex-shrink-0">
+<span class="material-symbols-outlined text-[16px]">kayaking</span>
+</div>
+<div class="flex flex-col min-w-0">
+<div class="flex items-center gap-1.5">
+<span class="font-label-lg text-label-lg text-primary font-bold truncate">Chèo SUP &amp; Kayak</span>
+<span class="w-1.5 h-1.5 rounded-full bg-primary animate-ping"></span>
+</div>
+<span class="font-body-sm text-body-sm text-outline truncate font-mono text-[11px]">/cheo-sup-kayak</span>
+</div>
+</div>
+<div class="col-span-2 text-center">
+<span class="inline-flex items-center px-2 py-0.5 rounded-md bg-surface-container-lowest text-on-surface font-label-md text-label-md">
+                    10 tours
+                  </span>
+</div>
+<div class="col-span-2 flex justify-center">
+<label class="relative inline-flex items-center cursor-pointer">
+<input checked="" class="sr-only peer" onchange="toggleCategoryStatus('cheo-sup-kayak', this.checked)" type="checkbox"/>
+<div class="w-9 h-5 bg-surface-dim peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-surface-container-lowest after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-primary-container"></div>
+</label>
+</div>
+<div class="col-span-2 flex items-center justify-end gap-1">
+<button class="p-1.5 rounded-lg bg-primary text-on-primary shadow-sm" onclick="selectCategoryForEdit('cheo-sup-kayak', 'Chèo SUP &amp; Kayak', 'Stand-up Paddleboarding &amp; Kayak', 'cheo-sup-kayak', 'the-thao-mat-nuoc', 'kayaking', 10, true)" title="Đang chỉnh sửa">
+<span class="material-symbols-outlined text-[18px]">edit</span>
+</button>
+<div class="relative group/tooltip inline-block">
+<button class="p-1.5 rounded-lg text-outline-variant cursor-not-allowed opacity-60">
+<span class="material-symbols-outlined text-[18px]">delete_forever</span>
+</button>
+<div class="absolute right-0 bottom-full mb-2 hidden group-hover/tooltip:flex flex-col w-56 p-2 rounded-lg bg-inverse-surface text-inverse-on-surface font-label-sm text-[11px] shadow-lg z-30 pointer-events-none">
+<span class="font-bold text-secondary-fixed">Bảo vệ toàn vẹn:</span>
+<span>10 dịch vụ tour biển đang kết nối danh mục này!</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Sub 1.2: Lướt ván buồm & Phản lực -->
+<div class="grid grid-cols-12 gap-2 py-2 px-3 items-center hover:bg-surface-container-low rounded-lg transition-colors">
+<div class="col-span-6 flex items-center gap-space-sm min-w-0">
+<span class="text-outline-variant font-mono">├─</span>
+<div class="w-7 h-7 rounded-lg bg-surface-container text-on-surface flex items-center justify-center flex-shrink-0">
+<span class="material-symbols-outlined text-[16px]">kitesurfing</span>
+</div>
+<div class="flex flex-col min-w-0">
+<span class="font-body-md text-body-md text-on-surface font-semibold truncate">Lướt ván buồm &amp; Phản lực</span>
+<span class="font-body-sm text-body-sm text-outline truncate font-mono text-[11px]">/luot-van</span>
+</div>
+</div>
+<div class="col-span-2 text-center">
+<span class="inline-flex items-center px-2 py-0.5 rounded-md bg-surface-container-lowest text-on-surface font-label-sm text-label-sm">
+                    5 tours
+                  </span>
+</div>
+<div class="col-span-2 flex justify-center">
+<label class="relative inline-flex items-center cursor-pointer">
+<input checked="" class="sr-only peer" onchange="toggleCategoryStatus('luot-van', this.checked)" type="checkbox"/>
+<div class="w-9 h-5 bg-surface-dim peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-surface-container-lowest after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-primary-container"></div>
+</label>
+</div>
+<div class="col-span-2 flex items-center justify-end gap-1">
+<button class="p-1.5 rounded-lg hover:bg-surface-container text-on-surface-variant hover:text-primary transition-colors" onclick="selectCategoryForEdit('luot-van', 'Lướt ván buồm &amp; Phản lực', 'Windsurf &amp; Jetboard', 'luot-van', 'the-thao-mat-nuoc', 'kitesurfing', 5, true)">
+<span class="material-symbols-outlined text-[18px]">edit</span>
+</button>
+<div class="relative group/tooltip inline-block">
+<button class="p-1.5 rounded-lg text-outline-variant cursor-not-allowed opacity-60">
+<span class="material-symbols-outlined text-[18px]">delete_forever</span>
+</button>
+<div class="absolute right-0 bottom-full mb-2 hidden group-hover/tooltip:flex flex-col w-52 p-2 rounded-lg bg-inverse-surface text-inverse-on-surface font-label-sm text-[11px] shadow-lg z-30 pointer-events-none">
+<span>Có 5 tour liên kết</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Sub 1.3: Mô tô nước Bãi biển -->
+<div class="grid grid-cols-12 gap-2 py-2 px-3 items-center hover:bg-surface-container-low rounded-lg transition-colors">
+<div class="col-span-6 flex items-center gap-space-sm min-w-0">
+<span class="text-outline-variant font-mono">└─</span>
+<div class="w-7 h-7 rounded-lg bg-surface-container text-on-surface flex items-center justify-center flex-shrink-0">
+<span class="material-symbols-outlined text-[16px]">speed</span>
+</div>
+<div class="flex flex-col min-w-0">
+<span class="font-body-md text-body-md text-on-surface font-semibold truncate">Mô tô nước Bãi biển (Jetski Express)</span>
+<span class="font-body-sm text-body-sm text-outline truncate font-mono text-[11px]">/jetski-bien</span>
+</div>
+</div>
+<div class="col-span-2 text-center">
+<span class="inline-flex items-center px-2 py-0.5 rounded-md bg-surface-container-lowest text-on-surface font-label-sm text-label-sm">
+                    3 tours
+                  </span>
+</div>
+<div class="col-span-2 flex justify-center">
+<label class="relative inline-flex items-center cursor-pointer">
+<input checked="" class="sr-only peer" onchange="toggleCategoryStatus('jetski-bien', this.checked)" type="checkbox"/>
+<div class="w-9 h-5 bg-surface-dim peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-surface-container-lowest after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-primary-container"></div>
+</label>
+</div>
+<div class="col-span-2 flex items-center justify-end gap-1">
+<button class="p-1.5 rounded-lg hover:bg-surface-container text-on-surface-variant hover:text-primary transition-colors" onclick="selectCategoryForEdit('jetski-bien', 'Mô tô nước Bãi biển', 'Jetski Express', 'jetski-bien', 'the-thao-mat-nuoc', 'speed', 3, true)">
+<span class="material-symbols-outlined text-[18px]">edit</span>
+</button>
+<div class="relative group/tooltip inline-block">
+<button class="p-1.5 rounded-lg text-outline-variant cursor-not-allowed opacity-60">
+<span class="material-symbols-outlined text-[18px]">delete_forever</span>
+</button>
+<div class="absolute right-0 bottom-full mb-2 hidden group-hover/tooltip:flex flex-col w-52 p-2 rounded-lg bg-inverse-surface text-inverse-on-surface font-label-sm text-[11px] shadow-lg z-30 pointer-events-none">
+<span>Có 3 tour liên kết</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- 2. ROOT CATEGORY: Khám phá đáy biển & Rạn san hô -->
+<div class="group/root hover:bg-surface/50 transition-colors">
+<div class="grid grid-cols-12 gap-2 px-space-lg py-3.5 items-center">
+<div class="col-span-6 flex items-center gap-space-sm min-w-0">
+<button class="p-1 rounded text-outline hover:text-on-surface hover:bg-surface-container transition-colors" onclick="toggleFolder('node-scuba')">
+<span class="material-symbols-outlined text-[20px]" id="icon-node-scuba">expand_more</span>
+</button>
+<div class="w-8 h-8 rounded-lg bg-primary-fixed/40 text-primary flex items-center justify-center flex-shrink-0">
+<span class="material-symbols-outlined text-[20px]">scuba_diving</span>
+</div>
+<div class="flex flex-col min-w-0">
+<div class="flex items-center gap-2">
+<span class="font-headline-sm text-headline-sm text-on-surface truncate">Khám phá đáy biển &amp; San hô</span>
+<span class="px-1.5 py-0.5 rounded bg-surface-container text-outline font-label-sm text-[10px]">ROOT</span>
+</div>
+<span class="font-body-sm text-body-sm text-outline truncate font-mono">/lan-bien-ngam-san-ho</span>
+</div>
+</div>
+<div class="col-span-2 text-center">
+<span class="inline-flex items-center px-2.5 py-1 rounded-full bg-primary/10 text-primary font-label-md text-label-md">
+                  12 tours
+                </span>
+</div>
+<div class="col-span-2 flex justify-center">
+<label class="relative inline-flex items-center cursor-pointer">
+<input checked="" class="sr-only peer" onchange="toggleCategoryStatus('lan-bien-ngam-san-ho', this.checked)" type="checkbox"/>
+<div class="w-9 h-5 bg-surface-dim peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-surface-container-lowest after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-primary-container"></div>
+</label>
+</div>
+<div class="col-span-2 flex items-center justify-end gap-1">
+<button class="p-1.5 rounded-lg hover:bg-surface-container text-on-surface-variant hover:text-primary transition-colors" onclick="selectCategoryForEdit('lan-bien-ngam-san-ho', 'Khám phá đáy biển &amp; Rạn san hô', 'Scuba &amp; Snorkeling', 'lan-bien-ngam-san-ho', 'none', 'scuba_diving', 12, true)">
+<span class="material-symbols-outlined text-[18px]">edit</span>
+</button>
+<div class="relative group/tooltip inline-block">
+<button class="p-1.5 rounded-lg text-outline-variant cursor-not-allowed opacity-60">
+<span class="material-symbols-outlined text-[18px]">delete_forever</span>
+</button>
+<div class="absolute right-0 bottom-full mb-2 hidden group-hover/tooltip:flex flex-col w-56 p-2 rounded-lg bg-inverse-surface text-inverse-on-surface font-label-sm text-[11px] shadow-lg z-30 pointer-events-none">
+<span class="font-bold text-secondary-fixed">Bảo vệ toàn vẹn:</span>
+<span>12 tour đang phân bổ trong nhóm này.</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Sub 2.1 & 2.2 -->
+<div class="flex flex-col pl-10 pr-space-lg pb-2 bg-surface-container-low/30" id="node-scuba">
+<div class="grid grid-cols-12 gap-2 py-2 px-3 items-center hover:bg-surface-container-low rounded-lg transition-colors">
+<div class="col-span-6 flex items-center gap-space-sm min-w-0">
+<span class="text-outline-variant font-mono">├─</span>
+<div class="w-7 h-7 rounded-lg bg-surface-container text-on-surface flex items-center justify-center flex-shrink-0">
+<span class="material-symbols-outlined text-[16px]">water</span>
+</div>
+<div class="flex flex-col min-w-0">
+<span class="font-body-md text-body-md text-on-surface font-semibold truncate">Lặn ngắm san hô nông (Snorkeling Tour)</span>
+<span class="font-body-sm text-body-sm text-outline truncate font-mono text-[11px]">/snorkeling-son-tra</span>
+</div>
+</div>
+<div class="col-span-2 text-center">
+<span class="inline-flex items-center px-2 py-0.5 rounded-md bg-surface-container-lowest text-on-surface font-label-sm text-label-sm">
+                    7 tours
+                  </span>
+</div>
+<div class="col-span-2 flex justify-center">
+<label class="relative inline-flex items-center cursor-pointer">
+<input checked="" class="sr-only peer" onchange="toggleCategoryStatus('snorkeling-son-tra', this.checked)" type="checkbox"/>
+<div class="w-9 h-5 bg-surface-dim peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-surface-container-lowest after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-primary-container"></div>
+</label>
+</div>
+<div class="col-span-2 flex items-center justify-end gap-1">
+<button class="p-1.5 rounded-lg hover:bg-surface-container text-on-surface-variant hover:text-primary transition-colors" onclick="selectCategoryForEdit('snorkeling-son-tra', 'Lặn ngắm san hô nông', 'Snorkeling Tour', 'snorkeling-son-tra', 'lan-bien-ngam-san-ho', 'water', 7, true)">
+<span class="material-symbols-outlined text-[18px]">edit</span>
+</button>
+<div class="relative group/tooltip inline-block">
+<button class="p-1.5 rounded-lg text-outline-variant cursor-not-allowed opacity-60">
+<span class="material-symbols-outlined text-[18px]">delete_forever</span>
+</button>
+<div class="absolute right-0 bottom-full mb-2 hidden group-hover/tooltip:flex flex-col w-52 p-2 rounded-lg bg-inverse-surface text-inverse-on-surface font-label-sm text-[11px] shadow-lg z-30 pointer-events-none">
+<span>Có 7 tour liên kết</span>
+</div>
+</div>
+</div>
+</div>
+<div class="grid grid-cols-12 gap-2 py-2 px-3 items-center hover:bg-surface-container-low rounded-lg transition-colors">
+<div class="col-span-6 flex items-center gap-space-sm min-w-0">
+<span class="text-outline-variant font-mono">└─</span>
+<div class="w-7 h-7 rounded-lg bg-surface-container text-on-surface flex items-center justify-center flex-shrink-0">
+<span class="material-symbols-outlined text-[16px]">pool</span>
+</div>
+<div class="flex flex-col min-w-0">
+<span class="font-body-md text-body-md text-on-surface font-semibold truncate">Lặn bình khí chuyên nghiệp PADI</span>
+<span class="font-body-sm text-body-sm text-outline truncate font-mono text-[11px]">/scuba-padi</span>
+</div>
+</div>
+<div class="col-span-2 text-center">
+<span class="inline-flex items-center px-2 py-0.5 rounded-md bg-surface-container-lowest text-on-surface font-label-sm text-label-sm">
+                    5 tours
+                  </span>
+</div>
+<div class="col-span-2 flex justify-center">
+<label class="relative inline-flex items-center cursor-pointer">
+<input checked="" class="sr-only peer" onchange="toggleCategoryStatus('scuba-padi', this.checked)" type="checkbox"/>
+<div class="w-9 h-5 bg-surface-dim peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-surface-container-lowest after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-primary-container"></div>
+</label>
+</div>
+<div class="col-span-2 flex items-center justify-end gap-1">
+<button class="p-1.5 rounded-lg hover:bg-surface-container text-on-surface-variant hover:text-primary transition-colors" onclick="selectCategoryForEdit('scuba-padi', 'Lặn bình khí chuyên nghiệp PADI', 'Scuba Diving PADI', 'scuba-padi', 'lan-bien-ngam-san-ho', 'pool', 5, true)">
+<span class="material-symbols-outlined text-[18px]">edit</span>
+</button>
+<div class="relative group/tooltip inline-block">
+<button class="p-1.5 rounded-lg text-outline-variant cursor-not-allowed opacity-60">
+<span class="material-symbols-outlined text-[18px]">delete_forever</span>
+</button>
+<div class="absolute right-0 bottom-full mb-2 hidden group-hover/tooltip:flex flex-col w-52 p-2 rounded-lg bg-inverse-surface text-inverse-on-surface font-label-sm text-[11px] shadow-lg z-30 pointer-events-none">
+<span>Có 5 tour liên kết</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- 3. ROOT CATEGORY: Thể thao trên không & Bay lượn -->
+<div class="group/root hover:bg-surface/50 transition-colors">
+<div class="grid grid-cols-12 gap-2 px-space-lg py-3.5 items-center">
+<div class="col-span-6 flex items-center gap-space-sm min-w-0">
+<button class="p-1 rounded text-outline hover:text-on-surface hover:bg-surface-container transition-colors" onclick="toggleFolder('node-aerial')">
+<span class="material-symbols-outlined text-[20px]" id="icon-node-aerial">expand_more</span>
+</button>
+<div class="w-8 h-8 rounded-lg bg-primary-container/15 text-primary flex items-center justify-center flex-shrink-0">
+<span class="material-symbols-outlined text-[20px]">paragliding</span>
+</div>
+<div class="flex flex-col min-w-0">
+<div class="flex items-center gap-2">
+<span class="font-headline-sm text-headline-sm text-on-surface truncate">Thể thao trên không &amp; Bay lượn</span>
+<span class="px-1.5 py-0.5 rounded bg-surface-container text-outline font-label-sm text-[10px]">ROOT</span>
+</div>
+<span class="font-body-sm text-body-sm text-outline truncate font-mono">/the-thao-tren-khong</span>
+</div>
+</div>
+<div class="col-span-2 text-center">
+<span class="inline-flex items-center px-2.5 py-1 rounded-full bg-primary/10 text-primary font-label-md text-label-md">
+                  6 tours
+                </span>
+</div>
+<div class="col-span-2 flex justify-center">
+<label class="relative inline-flex items-center cursor-pointer">
+<input checked="" class="sr-only peer" onchange="toggleCategoryStatus('the-thao-tren-khong', this.checked)" type="checkbox"/>
+<div class="w-9 h-5 bg-surface-dim peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-surface-container-lowest after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-primary-container"></div>
+</label>
+</div>
+<div class="col-span-2 flex items-center justify-end gap-1">
+<button class="p-1.5 rounded-lg hover:bg-surface-container text-on-surface-variant hover:text-primary transition-colors" onclick="selectCategoryForEdit('the-thao-tren-khong', 'Thể thao trên không &amp; Bay lượn', 'Aerial Marine Sports', 'the-thao-tren-khong', 'none', 'paragliding', 6, true)">
+<span class="material-symbols-outlined text-[18px]">edit</span>
+</button>
+<div class="relative group/tooltip inline-block">
+<button class="p-1.5 rounded-lg text-outline-variant cursor-not-allowed opacity-60">
+<span class="material-symbols-outlined text-[18px]">delete_forever</span>
+</button>
+<div class="absolute right-0 bottom-full mb-2 hidden group-hover/tooltip:flex flex-col w-56 p-2 rounded-lg bg-inverse-surface text-inverse-on-surface font-label-sm text-[11px] shadow-lg z-30 pointer-events-none">
+<span class="font-bold text-secondary-fixed">Bảo vệ toàn vẹn:</span>
+<span>Có 6 tour đang mở bán.</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Sub 3.1 & 3.2 -->
+<div class="flex flex-col pl-10 pr-space-lg pb-2 bg-surface-container-low/30" id="node-aerial">
+<div class="grid grid-cols-12 gap-2 py-2 px-3 items-center hover:bg-surface-container-low rounded-lg transition-colors">
+<div class="col-span-6 flex items-center gap-space-sm min-w-0">
+<span class="text-outline-variant font-mono">├─</span>
+<div class="w-7 h-7 rounded-lg bg-surface-container text-on-surface flex items-center justify-center flex-shrink-0">
+<span class="material-symbols-outlined text-[16px]">flight_takeoff</span>
+</div>
+<div class="flex flex-col min-w-0">
+<span class="font-body-md text-body-md text-on-surface font-semibold truncate">Dù lượn Sơn Trà (Paragliding)</span>
+<span class="font-body-sm text-body-sm text-outline truncate font-mono text-[11px]">/du-luon-son-tra</span>
+</div>
+</div>
+<div class="col-span-2 text-center">
+<span class="inline-flex items-center px-2 py-0.5 rounded-md bg-surface-container-lowest text-on-surface font-label-sm text-label-sm">
+                    4 tours
+                  </span>
+</div>
+<div class="col-span-2 flex justify-center">
+<label class="relative inline-flex items-center cursor-pointer">
+<input checked="" class="sr-only peer" type="checkbox"/>
+<div class="w-9 h-5 bg-surface-dim peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-surface-container-lowest after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-primary-container"></div>
+</label>
+</div>
+<div class="col-span-2 flex items-center justify-end gap-1">
+<button class="p-1.5 rounded-lg hover:bg-surface-container text-on-surface-variant hover:text-primary transition-colors" onclick="selectCategoryForEdit('du-luon-son-tra', 'Dù lượn ngắm bán đảo Sơn Trà', 'Paragliding Son Tra', 'du-luon-son-tra', 'the-thao-tren-khong', 'flight_takeoff', 4, true)">
+<span class="material-symbols-outlined text-[18px]">edit</span>
+</button>
+<div class="relative group/tooltip inline-block">
+<button class="p-1.5 rounded-lg text-outline-variant cursor-not-allowed opacity-60">
+<span class="material-symbols-outlined text-[18px]">delete_forever</span>
+</button>
+<div class="absolute right-0 bottom-full mb-2 hidden group-hover/tooltip:flex flex-col w-52 p-2 rounded-lg bg-inverse-surface text-inverse-on-surface font-label-sm text-[11px] shadow-lg z-30 pointer-events-none">
+<span>Có 4 tour liên kết</span>
+</div>
+</div>
+</div>
+</div>
+<div class="grid grid-cols-12 gap-2 py-2 px-3 items-center hover:bg-surface-container-low rounded-lg transition-colors">
+<div class="col-span-6 flex items-center gap-space-sm min-w-0">
+<span class="text-outline-variant font-mono">└─</span>
+<div class="w-7 h-7 rounded-lg bg-surface-container text-on-surface flex items-center justify-center flex-shrink-0">
+<span class="material-symbols-outlined text-[16px]">air</span>
+</div>
+<div class="flex flex-col min-w-0">
+<span class="font-body-md text-body-md text-on-surface font-semibold truncate">Cano kéo dù bay trên biển</span>
+<span class="font-body-sm text-body-sm text-outline truncate font-mono text-[11px]">/cano-du-bay</span>
+</div>
+</div>
+<div class="col-span-2 text-center">
+<span class="inline-flex items-center px-2 py-0.5 rounded-md bg-surface-container-lowest text-on-surface font-label-sm text-label-sm">
+                    2 tours
+                  </span>
+</div>
+<div class="col-span-2 flex justify-center">
+<label class="relative inline-flex items-center cursor-pointer">
+<input checked="" class="sr-only peer" type="checkbox"/>
+<div class="w-9 h-5 bg-surface-dim peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-surface-container-lowest after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-primary-container"></div>
+</label>
+</div>
+<div class="col-span-2 flex items-center justify-end gap-1">
+<button class="p-1.5 rounded-lg hover:bg-surface-container text-on-surface-variant hover:text-primary transition-colors" onclick="selectCategoryForEdit('cano-du-bay', 'Cano kéo dù bay trên biển', 'Parasailing Speedboat', 'cano-du-bay', 'the-thao-tren-khong', 'air', 2, true)">
+<span class="material-symbols-outlined text-[18px]">edit</span>
+</button>
+<div class="relative group/tooltip inline-block">
+<button class="p-1.5 rounded-lg text-outline-variant cursor-not-allowed opacity-60">
+<span class="material-symbols-outlined text-[18px]">delete_forever</span>
+</button>
+<div class="absolute right-0 bottom-full mb-2 hidden group-hover/tooltip:flex flex-col w-52 p-2 rounded-lg bg-inverse-surface text-inverse-on-surface font-label-sm text-[11px] shadow-lg z-30 pointer-events-none">
+<span>Có 2 tour liên kết</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- 4. ROOT CATEGORY: Du thuyền & Tour cano cao tốc -->
+<div class="group/root hover:bg-surface/50 transition-colors">
+<div class="grid grid-cols-12 gap-2 px-space-lg py-3.5 items-center">
+<div class="col-span-6 flex items-center gap-space-sm min-w-0">
+<span class="p-1 text-transparent select-none"><span class="material-symbols-outlined text-[20px]">fiber_manual_record</span></span>
+<div class="w-8 h-8 rounded-lg bg-tertiary-fixed text-on-tertiary-fixed flex items-center justify-center flex-shrink-0">
+<span class="material-symbols-outlined text-[20px]">directions_boat</span>
+</div>
+<div class="flex flex-col min-w-0">
+<div class="flex items-center gap-2">
+<span class="font-headline-sm text-headline-sm text-on-surface truncate">Du thuyền &amp; Cano cao tốc</span>
+<span class="px-1.5 py-0.5 rounded bg-surface-container text-outline font-label-sm text-[10px]">ROOT</span>
+</div>
+<span class="font-body-sm text-body-sm text-outline truncate font-mono">/du-thuyen-cano</span>
+</div>
+</div>
+<div class="col-span-2 text-center">
+<span class="inline-flex items-center px-2.5 py-1 rounded-full bg-primary/10 text-primary font-label-md text-label-md">
+                  4 tours
+                </span>
+</div>
+<div class="col-span-2 flex justify-center">
+<label class="relative inline-flex items-center cursor-pointer">
+<input checked="" class="sr-only peer" type="checkbox"/>
+<div class="w-9 h-5 bg-surface-dim peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-surface-container-lowest after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-primary-container"></div>
+</label>
+</div>
+<div class="col-span-2 flex items-center justify-end gap-1">
+<button class="p-1.5 rounded-lg hover:bg-surface-container text-on-surface-variant hover:text-primary transition-colors" onclick="selectCategoryForEdit('du-thuyen-cano', 'Du thuyền &amp; Tour cano cao tốc', 'Yacht &amp; Speedboat Tours', 'du-thuyen-cano', 'none', 'directions_boat', 4, true)">
+<span class="material-symbols-outlined text-[18px]">edit</span>
+</button>
+<div class="relative group/tooltip inline-block">
+<button class="p-1.5 rounded-lg text-outline-variant cursor-not-allowed opacity-60">
+<span class="material-symbols-outlined text-[18px]">delete_forever</span>
+</button>
+<div class="absolute right-0 bottom-full mb-2 hidden group-hover/tooltip:flex flex-col w-56 p-2 rounded-lg bg-inverse-surface text-inverse-on-surface font-label-sm text-[11px] shadow-lg z-30 pointer-events-none">
+<span class="font-bold text-secondary-fixed">Bảo vệ toàn vẹn:</span>
+<span>Có 4 tour liên kết.</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- 5. ROOT CATEGORY: Câu cá & Trải nghiệm sinh thái ngư dân (Đang ẩn) -->
+<div class="group/root hover:bg-surface/50 transition-colors bg-surface-container-low/20">
+<div class="grid grid-cols-12 gap-2 px-space-lg py-3.5 items-center">
+<div class="col-span-6 flex items-center gap-space-sm min-w-0">
+<span class="p-1 text-transparent select-none"><span class="material-symbols-outlined text-[20px]">fiber_manual_record</span></span>
+<div class="w-8 h-8 rounded-lg bg-surface-container-highest text-outline flex items-center justify-center flex-shrink-0">
+<span class="material-symbols-outlined text-[20px]">phishing</span>
+</div>
+<div class="flex flex-col min-w-0">
+<div class="flex items-center gap-2">
+<span class="font-headline-sm text-headline-sm text-outline truncate">Câu cá &amp; Sinh thái ngư dân</span>
+<span class="px-1.5 py-0.5 rounded bg-surface-variant/40 text-on-surface-variant font-label-sm text-[10px]">ĐANG ẨN</span>
+</div>
+<span class="font-body-sm text-body-sm text-outline truncate font-mono">/cau-ca-ngu-dan</span>
+</div>
+</div>
+<div class="col-span-2 text-center">
+<span class="inline-flex items-center px-2.5 py-1 rounded-full bg-surface-variant text-on-surface-variant font-label-md text-label-md">
+                  2 tours
+                </span>
+</div>
+<div class="col-span-2 flex justify-center">
+<label class="relative inline-flex items-center cursor-pointer">
+<input class="sr-only peer" onchange="toggleCategoryStatus('cau-ca-ngu-dan', this.checked)" type="checkbox"/>
+<div class="w-9 h-5 bg-surface-dim peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-surface-container-lowest after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-primary-container"></div>
+</label>
+</div>
+<div class="col-span-2 flex items-center justify-end gap-1">
+<button class="p-1.5 rounded-lg hover:bg-surface-container text-on-surface-variant hover:text-primary transition-colors" onclick="selectCategoryForEdit('cau-ca-ngu-dan', 'Câu cá &amp; Sinh thái ngư dân', 'Fishing &amp; Eco Tours', 'cau-ca-ngu-dan', 'none', 'phishing', 2, false)">
+<span class="material-symbols-outlined text-[18px]">edit</span>
+</button>
+<div class="relative group/tooltip inline-block">
+<button class="p-1.5 rounded-lg text-outline-variant cursor-not-allowed opacity-60">
+<span class="material-symbols-outlined text-[18px]">delete_forever</span>
+</button>
+<div class="absolute right-0 bottom-full mb-2 hidden group-hover/tooltip:flex flex-col w-56 p-2 rounded-lg bg-inverse-surface text-inverse-on-surface font-label-sm text-[11px] shadow-lg z-30 pointer-events-none">
+<span class="font-bold text-secondary-fixed">Bảo vệ toàn vẹn:</span>
+<span>Có 2 tour liên kết.</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Tree Status Footer -->
+<div class="px-space-lg py-3 bg-surface-container-low flex flex-col sm:flex-row items-center justify-between gap-2 text-on-surface-variant">
+<div class="flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-primary"></span>
+<span class="font-body-sm text-body-sm">Kéo thả để sắp xếp thứ tự hiển thị ưu tiên trên thanh điều hướng người dùng</span>
+</div>
+<span class="font-label-sm text-label-sm text-outline">Hierarchy Cycle Prevention: Active</span>
+</div>
+</div>
+<!-- Quick Showcase Activity Card (Visual Aesthetic Anchor) -->
+<div class="p-space-lg rounded-2xl bg-surface-container-lowest shadow-sm flex flex-col md:flex-row items-center gap-space-lg">
+<div class="w-full md:w-44 h-28 rounded-xl overflow-hidden flex-shrink-0 relative">
+<img class="w-full h-full object-cover" data-alt="High-speed modern blue passenger speedboat racing across pristine crystal azure waters along the dramatic green mountain coastline of Son Tra Peninsula in Da Nang Vietnam under sunny clear skies with ocean teal waves and sea spray." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCx26tmAzmBXe6IBikaszadPQ69G8WodOOTld9WAArKHPgj46T7cVfMMmKaBVQGp-j7rd1kEggmz1sA6WcZ06-6WKxb6MaDVk42Q0tBVt53xht_5-8_IeUW0lz9GxhFgNVbfPqXT3ym65uLV2a1mWhFxSaKB-qxcXzzc2u6xzMOTwSi8yqz9HNmfnpY6m8CLXVHLjQeFw7n7LOSfu22YXQjKeTrkot5vc9FWJfJqqRMzthaLNd8WaJZsA"/>
+<div class="absolute inset-0 bg-gradient-to-t from-inverse-surface/60 via-transparent to-transparent"></div>
+<span class="absolute bottom-2 left-2 px-2 py-0.5 rounded-md bg-inverse-surface/80 text-on-primary font-label-sm text-[10px] backdrop-blur-md">DANASEA Live Fleet</span>
+</div>
+<div class="flex flex-col min-w-0 flex-1">
+<span class="font-label-sm text-label-sm text-primary uppercase font-bold tracking-wider">Cập nhật danh mục trải nghiệm mùa cao điểm</span>
+<h3 class="font-headline-sm text-headline-sm text-on-surface">Đồng bộ lịch trình Tour Biển Sơn Trà 2025</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-1">
+            Tất cả các dịch vụ ca-nô cao tốc và lặn biển san hô hòn Sụp đang được phân loại chính xác để tối ưu bộ lọc tốc độ cao cho du khách quốc tế.
+          </p>
+</div>
+</div>
+</div>
+<!-- RIGHT COLUMN (Span 5): Create & Edit Detail Management Form -->
+<div class="lg:col-span-5 flex flex-col gap-space-md">
+<!-- Edit Form Card Container -->
+<div class="bg-surface-container-lowest rounded-2xl shadow-sm p-space-xl flex flex-col relative overflow-hidden">
+<!-- Header Ribbon with Dynamic Title -->
+<div class="flex items-center justify-between pb-space-md mb-space-md">
+<div class="flex items-center gap-space-sm">
+<div class="w-10 h-10 rounded-xl bg-primary text-on-primary flex items-center justify-center shadow-sm" id="formIconPreviewBox">
+<span class="material-symbols-outlined text-[24px]" id="previewIconSymbol">kayaking</span>
+</div>
+<div class="flex flex-col">
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-primary font-bold" id="formModeLabel">Chỉnh sửa phân loại con</span>
+<h2 class="font-headline-md text-headline-md text-on-surface truncate" id="formCategoryHeading">
+                Chỉnh sửa: Chèo SUP &amp; Kayak
+              </h2>
+</div>
+</div>
+<button class="px-2.5 py-1.5 rounded-lg bg-surface-container-low hover:bg-surface-container text-on-surface-variant font-label-sm text-label-sm transition-colors flex items-center gap-1" onclick="resetToCreateMode()" title="Tạo mới thay vì sửa">
+<span class="material-symbols-outlined text-[16px]">add</span>
+<span>Tạo mới</span>
+</button>
+</div>
+<!-- Form Elements -->
+<form class="flex flex-col gap-space-md" id="categoryForm" onsubmit="handleFormSubmit(event)">
+<!-- Category Name (VI) -->
+<div class="flex flex-col gap-1.5">
+<label class="font-label-md text-label-md text-on-surface flex items-center justify-between">
+<span>Tên danh mục (Tiếng Việt) <span class="text-secondary">*</span></span>
+<span class="font-body-sm text-body-sm text-outline">Bắt buộc</span>
+</label>
+<input class="h-[52px] px-space-md rounded-xl bg-surface-container-lowest text-on-surface font-body-md text-body-md focus:outline-none focus:ring-1 focus:ring-primary shadow-sm" id="inputNameVi" oninput="autoGenerateSlug(this.value)" required="" type="text" value="Chèo SUP &amp; Kayak"/>
+</div>
+<!-- Category Name (EN) -->
+<div class="flex flex-col gap-1.5">
+<label class="font-label-md text-label-md text-on-surface flex items-center justify-between">
+<span>Tên tiếng Anh (name_en) <span class="text-secondary">*</span></span>
+<span class="font-body-sm text-body-sm text-outline">Hiển thị cho khách quốc tế</span>
+</label>
+<input class="h-[52px] px-space-md rounded-xl bg-surface-container-lowest text-on-surface font-body-md text-body-md focus:outline-none focus:ring-1 focus:ring-primary shadow-sm" id="inputNameEn" required="" type="text" value="Stand-up Paddleboarding &amp; Kayak"/>
+</div>
+<!-- Slug / Canonical URL Identifier -->
+<div class="flex flex-col gap-1.5">
+<div class="flex items-center justify-between">
+<label class="font-label-md text-label-md text-on-surface">Mã định danh duy nhất (Slug) <span class="text-secondary">*</span></label>
+<span class="inline-flex items-center gap-1 font-label-sm text-label-sm text-primary" id="slugValidationBadge">
+<span class="material-symbols-outlined text-[14px]">verified</span>
+<span>Duy nhất độc bản</span>
+</span>
+</div>
+<div class="relative">
+<span class="absolute left-3.5 top-1/2 -translate-y-1/2 text-outline font-mono text-[13px]">danasea.vn/</span>
+<input class="w-full h-[52px] pl-28 pr-space-md rounded-xl bg-surface-container-low text-on-surface font-mono text-body-md focus:outline-none focus:ring-1 focus:ring-primary" id="inputSlug" required="" type="text" value="cheo-sup-kayak"/>
+</div>
+</div>
+<!-- Parent Category Dropdown with Hierarchy Cycle Prevention -->
+<div class="flex flex-col gap-1.5">
+<div class="flex items-center justify-between">
+<label class="font-label-md text-label-md text-on-surface">Danh mục cha (parent_id)</label>
+<span class="font-label-sm text-label-sm text-primary flex items-center gap-1" title="Cơ chế chống vòng lặp phân cấp">
+<span class="material-symbols-outlined text-[14px]">lock_reset</span>
+<span>Hierarchy Cycle Safe</span>
+</span>
+</div>
+<div class="relative">
+<select class="w-full h-[52px] px-space-md rounded-xl bg-surface-container-lowest text-on-surface font-body-md text-body-md appearance-none focus:outline-none focus:ring-1 focus:ring-primary shadow-sm cursor-pointer pr-10" id="inputParentId">
+<option value="none">-- Không (Là Danh mục gốc cấp 1) --</option>
+<option selected="" value="the-thao-mat-nuoc">🏄 Thể thao mặt nước (Water Sports)</option>
+<option value="lan-bien-ngam-san-ho">🤿 Khám phá đáy biển &amp; Rạn san hô (Scuba &amp; Snorkeling)</option>
+<option value="the-thao-tren-khong">🪂 Thể thao trên không &amp; Bay lượn (Aerial Marine)</option>
+<option value="du-thuyen-cano">🚤 Du thuyền &amp; Tour cano cao tốc (Yacht &amp; Speedboat)</option>
+<option value="cau-ca-ngu-dan">🎣 Câu cá &amp; Trải nghiệm sinh thái ngư dân</option>
+</select>
+<span class="material-symbols-outlined absolute right-3.5 top-1/2 -translate-y-1/2 pointer-events-none text-outline text-[20px]">expand_more</span>
+</div>
+<span class="font-body-sm text-[11px] text-outline">
+              Lưu ý: Không thể chọn chính danh mục này hoặc các nhánh con của nó làm danh mục cha.
+            </span>
+</div>
+<!-- Icon Selector & Visual Identity -->
+<div class="flex flex-col gap-1.5">
+<label class="font-label-md text-label-md text-on-surface">Biểu tượng nhận diện (Icon / SVG)</label>
+<div class="grid grid-cols-6 gap-2">
+<!-- Icon Option 1 -->
+<button class="icon-selector-btn h-11 rounded-xl bg-primary text-on-primary flex items-center justify-center transition-all shadow-sm" data-icon="kayaking" onclick="selectIcon('kayaking')" type="button">
+<span class="material-symbols-outlined text-[22px]">kayaking</span>
+</button>
+<!-- Icon Option 2 -->
+<button class="icon-selector-btn h-11 rounded-xl bg-surface-container-low hover:bg-surface-container text-on-surface-variant flex items-center justify-center transition-all" data-icon="surfing" onclick="selectIcon('surfing')" type="button">
+<span class="material-symbols-outlined text-[22px]">surfing</span>
+</button>
+<!-- Icon Option 3 -->
+<button class="icon-selector-btn h-11 rounded-xl bg-surface-container-low hover:bg-surface-container text-on-surface-variant flex items-center justify-center transition-all" data-icon="scuba_diving" onclick="selectIcon('scuba_diving')" type="button">
+<span class="material-symbols-outlined text-[22px]">scuba_diving</span>
+</button>
+<!-- Icon Option 4 -->
+<button class="icon-selector-btn h-11 rounded-xl bg-surface-container-low hover:bg-surface-container text-on-surface-variant flex items-center justify-center transition-all" data-icon="paragliding" onclick="selectIcon('paragliding')" type="button">
+<span class="material-symbols-outlined text-[22px]">paragliding</span>
+</button>
+<!-- Icon Option 5 -->
+<button class="icon-selector-btn h-11 rounded-xl bg-surface-container-low hover:bg-surface-container text-on-surface-variant flex items-center justify-center transition-all" data-icon="directions_boat" onclick="selectIcon('directions_boat')" type="button">
+<span class="material-symbols-outlined text-[22px]">directions_boat</span>
+</button>
+<!-- Icon Option 6 -->
+<button class="icon-selector-btn h-11 rounded-xl bg-surface-container-low hover:bg-surface-container text-on-surface-variant flex items-center justify-center transition-all" data-icon="phishing" onclick="selectIcon('phishing')" type="button">
+<span class="material-symbols-outlined text-[22px]">phishing</span>
+</button>
+</div>
+</div>
+<!-- Status Toggle Switch & Associated Tours Info -->
+<div class="flex items-center justify-between p-space-md rounded-xl bg-surface-container-low">
+<div class="flex flex-col">
+<span class="font-label-md text-label-md text-on-surface font-semibold">Trạng thái kích hoạt (is_active)</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Cho phép du khách tìm thấy trên sàn DANASEA</span>
+</div>
+<label class="relative inline-flex items-center cursor-pointer">
+<input checked="" class="sr-only peer" id="inputIsActive" type="checkbox"/>
+<div class="w-11 h-6 bg-surface-dim peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-surface-container-lowest after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary-container"></div>
+</label>
+</div>
+<!-- Associated Link Metric Badge -->
+<div class="flex items-center justify-between px-space-md py-2.5 rounded-xl bg-primary/10 text-primary">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[20px]">link</span>
+<span class="font-label-md text-label-md">Thống kê dịch vụ liên kết:</span>
+</div>
+<span class="font-headline-sm text-headline-sm font-bold" id="linkedToursCountBadge">10 Tour biển</span>
+</div>
+<!-- Action Buttons Group -->
+<div class="flex items-center gap-space-sm pt-space-xs">
+<button class="flex-1 h-12 rounded-xl bg-primary hover:bg-primary-container text-on-primary font-label-lg text-label-lg transition-all shadow-sm flex items-center justify-center gap-2" type="submit">
+<span class="material-symbols-outlined text-[20px]">save</span>
+<span id="submitBtnText">Lưu Thay Đổi Danh Mục</span>
+</button>
+<button class="h-12 px-space-lg rounded-xl bg-surface-container-low hover:bg-surface-container text-on-surface-variant font-label-lg text-label-lg transition-colors" onclick="resetToCreateMode()" type="button">
+              Hủy bỏ
+            </button>
+<button class="h-12 px-space-md rounded-xl bg-surface-container-low hover:bg-surface-container text-primary font-label-lg text-label-lg transition-colors flex items-center gap-1.5" onclick="prepareAddSubCategory()" title="Thêm phân mục con ngay dưới danh mục này" type="button">
+<span class="material-symbols-outlined text-[20px]">add_link</span>
+<span class="hidden sm:inline">Thêm con</span>
+</button>
+</div>
+</form>
+<!-- Integrity & Regulatory Rules Card -->
+<div class="mt-space-lg p-space-md rounded-xl bg-secondary/10 flex items-start gap-space-sm">
+<span class="material-symbols-outlined text-secondary text-[20px] flex-shrink-0 mt-0.5">verified_user</span>
+<div class="flex flex-col">
+<span class="font-label-md text-label-md text-on-surface font-semibold">Nguyên tắc Toàn vẹn Dữ liệu &amp; Quản trị Cảng vụ</span>
+<p class="font-body-sm text-[12px] text-on-surface-variant mt-0.5">
+              Mọi thay đổi về cấu trúc danh mục, ẩn/hiện hoặc đổi URL slug sẽ đồng bộ tức thời với API tìm kiếm, danh mục tour tại Bến thủy du thuyền và ứng dụng di động DANASEA. Không xóa danh mục có dịch vụ đang hoạt động.
+            </p>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Interactive Client-side Script -->
+<script>
+    let currentSelectedIcon = 'kayaking';
+
+    function toggleFolder(nodeId) {
+      const node = document.getElementById(nodeId);
+      const icon = document.getElementById('icon-' + nodeId);
+      if (!node) return;
+      
+      if (node.classList.contains('hidden')) {
+        node.classList.remove('hidden');
+        if (icon) icon.innerText = 'expand_more';
+      } else {
+        node.classList.add('hidden');
+        if (icon) icon.innerText = 'chevron_right';
+      }
+    }
+
+    function expandAllCategories() {
+      ['node-watersports', 'node-scuba', 'node-aerial'].forEach(id => {
+        const node = document.getElementById(id);
+        const icon = document.getElementById('icon-' + id);
+        if (node) node.classList.remove('hidden');
+        if (icon) icon.innerText = 'expand_more';
+      });
+    }
+
+    function collapseAllCategories() {
+      ['node-watersports', 'node-scuba', 'node-aerial'].forEach(id => {
+        const node = document.getElementById(id);
+        const icon = document.getElementById('icon-' + id);
+        if (node) node.classList.add('hidden');
+        if (icon) icon.innerText = 'chevron_right';
+      });
+    }
+
+    function selectIcon(iconName) {
+      currentSelectedIcon = iconName;
+      document.getElementById('previewIconSymbol').innerText = iconName;
+      
+      const buttons = document.querySelectorAll('.icon-selector-btn');
+      buttons.forEach(btn => {
+        if (btn.getAttribute('data-icon') === iconName) {
+          btn.className = 'icon-selector-btn h-11 rounded-xl bg-primary text-on-primary flex items-center justify-center transition-all shadow-sm';
+        } else {
+          btn.className = 'icon-selector-btn h-11 rounded-xl bg-surface-container-low hover:bg-surface-container text-on-surface-variant flex items-center justify-center transition-all';
+        }
+      });
+    }
+
+    function selectCategoryForEdit(id, nameVi, nameEn, slug, parentId, icon, toursCount, isActive) {
+      document.getElementById('formModeLabel').innerText = 'Chỉnh sửa phân loại';
+      document.getElementById('formCategoryHeading').innerText = 'Chỉnh sửa: ' + nameVi;
+      document.getElementById('inputNameVi').value = nameVi;
+      document.getElementById('inputNameEn').value = nameEn;
+      document.getElementById('inputSlug').value = slug;
+      document.getElementById('inputParentId').value = parentId;
+      document.getElementById('inputIsActive').checked = isActive;
+      document.getElementById('linkedToursCountBadge').innerText = toursCount + ' Tour biển';
+      document.getElementById('submitBtnText').innerText = 'Lưu Thay Đổi Danh Mục';
+      
+      selectIcon(icon);
+
+      // Smooth scroll to form on mobile devices
+      if (window.innerWidth < 1024) {
+        document.getElementById('categoryForm').scrollIntoView({ behavior: 'smooth' });
+      }
+    }
+
+    function resetToCreateMode() {
+      document.getElementById('formModeLabel').innerText = 'Tạo mới danh mục';
+      document.getElementById('formCategoryHeading').innerText = 'Thêm phân loại trải nghiệm mới';
+      document.getElementById('inputNameVi').value = '';
+      document.getElementById('inputNameEn').value = '';
+      document.getElementById('inputSlug').value = '';
+      document.getElementById('inputParentId').value = 'none';
+      document.getElementById('inputIsActive').checked = true;
+      document.getElementById('linkedToursCountBadge').innerText = '0 Tour biển (Mới)';
+      document.getElementById('submitBtnText').innerText = 'Tạo Mới Danh Mục';
+      selectIcon('surfing');
+    }
+
+    function prepareAddSubCategory() {
+      const currentSlug = document.getElementById('inputSlug').value;
+      const currentNameVi = document.getElementById('inputNameVi').value;
+      
+      document.getElementById('formModeLabel').innerText = 'Thêm phân loại con';
+      document.getElementById('formCategoryHeading').innerText = 'Thuộc: ' + currentNameVi;
+      document.getElementById('inputNameVi').value = '';
+      document.getElementById('inputNameEn').value = '';
+      document.getElementById('inputSlug').value = '';
+      
+      const parentSelect = document.getElementById('inputParentId');
+      if (parentSelect) {
+        parentSelect.value = currentSlug || 'the-thao-mat-nuoc';
+      }
+      
+      document.getElementById('inputIsActive').checked = true;
+      document.getElementById('linkedToursCountBadge').innerText = '0 Tour (Khởi tạo)';
+      document.getElementById('submitBtnText').innerText = 'Xác Nhận Tạo Phân Mục Con';
+    }
+
+    function autoGenerateSlug(text) {
+      if (!text) return;
+      const slug = text
+        .toLowerCase()
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .replace(/[đĐ]/g, 'd')
+        .replace(/[^a-z0-9\s-]/g, '')
+        .trim()
+        .replace(/\s+/g, '-');
+      document.getElementById('inputSlug').value = slug;
+    }
+
+    function toggleCategoryStatus(slug, isActive) {
+      // Visual notification simulation
+      console.log('Category ' + slug + ' active state changed to: ' + isActive);
+    }
+
+    function handleFormSubmit(event) {
+      event.preventDefault();
+      const name = document.getElementById('inputNameVi').value;
+      alert('Đã đồng bộ thành công danh mục "' + name + '" vào hệ thống CSDL DANASEA!');
+    }
+
+    // Filter categories dynamically
+    document.getElementById('categoryTreeSearch')?.addEventListener('input', function(e) {
+      const keyword = e.target.value.toLowerCase().trim();
+      const allRows = document.querySelectorAll('.group\\/root, #node-watersports > div, #node-scuba > div, #node-aerial > div');
+      allRows.forEach(row => {
+        const text = row.innerText.toLowerCase();
+        if (text.includes(keyword)) {
+          row.style.display = '';
+        } else {
+          row.style.display = 'none';
+        }
+      });
+      if (keyword.length > 0) {
+        expandAllCategories();
+      }
+    });
+  </script>
+</div></main></div></body></html>

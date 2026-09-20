@@ -1,0 +1,494 @@
+<!DOCTYPE html><html lang="vi"><head><meta charset="utf-8"><meta content="width=device-width, initial-scale=1.0" name="viewport"><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"><link href="https://fonts.googleapis.com" rel="preconnect"><link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"><link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&amp;family=Syne:wght@600;700;800&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"><style>@layer base { html, body { margin: 0; padding: 0; } body { overscroll-behavior: none; } main > :first-child { margin-top: 0 !important; } main > :last-child { margin-bottom: 0 !important; } } ::-webkit-scrollbar { display: none; }</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config = { darkMode: "class", theme: { extend: { "colors": { "surface-container-highest": "#dee3e4", "on-tertiary-container": "#f4fbff", "secondary-container": "#fb7059", "on-tertiary-fixed-variant": "#2e4b56", "on-error-container": "#93000a", "primary-fixed-dim": "#79d4e2", "primary-container": "#087f8c", "secondary": "#aa3524", "surface-container-lowest": "#ffffff", "surface-container": "#eaeff0", "tertiary-fixed": "#c9e7f6", "on-primary": "#ffffff", "outline": "#6e797b", "tertiary": "#425e6a", "surface-tint": "#006874", "inverse-surface": "#2c3132", "surface-bright": "#f5fafb", "on-primary-container": "#effdff", "on-error": "#ffffff", "on-background": "#171d1e", "tertiary-fixed-dim": "#adcbd9", "on-secondary-fixed-variant": "#891d0f", "surface-variant": "#dee3e4", "on-surface-variant": "#3e494a", "inverse-primary": "#79d4e2", "surface-container-high": "#e4e9ea", "background": "#f5fafb", "inverse-on-surface": "#edf2f3", "error-container": "#ffdad6", "surface-container-low": "#eff4f5", "on-tertiary-fixed": "#001f29", "primary": "#00646f", "secondary-fixed-dim": "#ffb4a7", "on-primary-fixed-variant": "#004f57", "on-surface": "#171d1e", "on-tertiary": "#ffffff", "surface": "#f5fafb", "on-secondary": "#ffffff", "error": "#ba1a1a", "on-secondary-container": "#6c0600", "primary-fixed": "#95f1ff", "secondary-fixed": "#ffdad4", "tertiary-container": "#5a7784", "outline-variant": "#bdc9ca", "on-secondary-fixed": "#400200", "on-primary-fixed": "#001f24", "surface-dim": "#d6dbdc" }, "borderRadius": { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" }, "spacing": { "space-md": "1rem", "space-sm": "0.5rem", "margin": "5rem", "space-xs": "0.25rem", "space-lg": "1.5rem", "space-2xl": "3rem", "margin-sm": "1.5rem", "space-xl": "2rem", "space-3xl": "4.5rem", "gutter": "1.5rem", "gutter-lg": "2rem", "gutter-sm": "1rem", "margin-md": "3rem" }, "fontFamily": { "label-md": ["Plus Jakarta Sans"], "headline-sm": ["Syne"], "label-lg": ["Plus Jakarta Sans"], "headline-md": ["Syne"], "body-sm": ["Plus Jakarta Sans"], "body-md": ["Plus Jakarta Sans"], "display-xl": ["Syne"], "headline-xl": ["Syne"], "body-xl": ["Plus Jakarta Sans"], "headline-lg": ["Syne"], "display-lg": ["Syne"], "body-lg": ["Plus Jakarta Sans"], "label-sm": ["Plus Jakarta Sans"] }, "fontSize": { "label-md": ["12px", { "lineHeight": "16px", "letterSpacing": "0.02em", "fontWeight": "600" }], "headline-sm": ["18px", { "lineHeight": "26px", "fontWeight": "600" }], "label-lg": ["14px", { "lineHeight": "20px", "letterSpacing": "0.01em", "fontWeight": "600" }], "headline-md": ["22px", { "lineHeight": "30px", "letterSpacing": "-0.01em", "fontWeight": "600" }], "body-sm": ["12px", { "lineHeight": "18px", "fontWeight": "400" }], "body-md": ["14px", { "lineHeight": "22px", "fontWeight": "400" }], "display-xl": ["56px", { "lineHeight": "64px", "letterSpacing": "-0.02em", "fontWeight": "700" }], "headline-xl": ["36px", { "lineHeight": "44px", "letterSpacing": "-0.015em", "fontWeight": "700" }], "body-xl": ["18px", { "lineHeight": "28px", "fontWeight": "400" }], "headline-lg": ["28px", { "lineHeight": "36px", "letterSpacing": "-0.01em", "fontWeight": "600" }], "display-lg": ["44px", { "lineHeight": "52px", "letterSpacing": "-0.02em", "fontWeight": "700" }], "body-lg": ["16px", { "lineHeight": "24px", "fontWeight": "400" }], "label-sm": ["11px", { "lineHeight": "14px", "letterSpacing": "0.04em", "fontWeight": "700" }] } } } };</script></head><body class="bg-surface font-body-md text-on-surface antialiased"><main class="w-full min-h-screen bg-surface flex flex-col justify-center items-center"><div class="flex flex-col w-full">
+<!-- Subtle ambient mist glows -->
+<div class="relative w-full overflow-hidden py-space-2xl px-space-lg lg:px-margin flex justify-center items-center">
+<div class="absolute -top-40 -left-20 w-96 h-96 rounded-full bg-primary-fixed-dim/20 blur-3xl pointer-events-none"></div>
+<div class="absolute top-1/2 -right-32 w-[30rem] h-[30rem] rounded-full bg-secondary-container/10 blur-3xl pointer-events-none"></div>
+<div class="absolute -bottom-24 left-1/3 w-[26rem] h-[26rem] rounded-full bg-tertiary-fixed/30 blur-3xl pointer-events-none"></div>
+<!-- Main Container: Max 1280px Centered 12-col Desktop Shell -->
+<div class="relative w-full max-w-[1280px] grid grid-cols-1 lg:grid-cols-12 gap-gutter-lg items-center z-10">
+<!-- LEFT COLUMN: Brand Ecosystem & Coastal Prestige Showcase (5 Cols) -->
+<div class="lg:col-span-5 flex flex-col space-y-space-xl">
+<!-- Brand Kicker -->
+<div class="inline-flex items-center gap-space-xs px-space-md py-1.5 rounded-full bg-surface-container-low text-primary w-fit shadow-sm">
+<span class="material-symbols-outlined text-headline-sm" style="font-variation-settings: 'FILL' 1;">sailing</span>
+<span class="font-label-sm text-label-sm uppercase tracking-wider">Nền tảng trải nghiệm &amp; thể thao biển Đà Nẵng</span>
+</div>
+<!-- Headline & Narrative -->
+<div class="space-y-space-sm">
+<h1 class="font-headline-xl text-headline-xl text-on-surface leading-tight">
+            Khám phá đại dương cùng <span class="text-primary-container">DANASEA</span>
+</h1>
+<p class="font-body-lg text-body-lg text-on-surface-variant max-w-md">Cổng xác thực tập trung dành cho du khách trải nghiệm cano, lặn biển ngắm san hô Bán đảo Sơn Trà và nền tảng trải nghiệm &amp; thể thao biển Đà Nẵng.</p>
+</div>
+<!-- Visual Hero Card with Ambient Image & Badges -->
+<div class="relative rounded-3xl overflow-hidden shadow-md bg-surface-container-lowest p-space-xs group">
+<div class="relative h-48 w-full rounded-2xl overflow-hidden">
+<img class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" data-alt="Breathtaking aerial view of turquoise blue coastal waters in Son Tra Da Nang with modern luxury motor yachts and coral reef visible under crystal clear sunlight, editorial maritime photography, vibrant teal and soft mist tones" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDtF8RVAZXhA_hg49yvdsETzB-AGFiMFAzeg5WEXMZ7AtLOr-55S8OGJc1AAL-mYl8m4d8NVg15y1ebxhiHo5PLGz7ccSzepmI0NX-nWUH9P6v2YFj86L_M-OR_GhHWvMAmuqYeFSiw47YE7kydT7t3koF-G1i9a-3tftGakOTQQeHqQ55bJ2kCsP_thsYBONBQrVSaR_HyATf-HFzx2_eQwCBYUEAN6iO37-ir4VWS5t_pfHE36dgn_g">
+<div class="absolute inset-0 bg-gradient-to-t from-on-surface/80 via-on-surface/20 to-transparent"></div>
+<div class="absolute bottom-space-md left-space-md right-space-md flex items-center justify-between text-on-primary"><div><span class="font-label-sm text-label-sm uppercase tracking-widest text-primary-fixed">Vịnh Sơn Trà &amp; Mỹ Khê</span><p class="font-headline-sm text-headline-sm font-semibold">Trải Nghiệm Biển Đỉnh Cao</p></div><div class="flex items-center justify-center w-10 h-10 rounded-xl bg-surface-container-lowest/20 backdrop-blur-md"><span class="material-symbols-outlined text-primary-fixed" style="font-variation-settings: 'FILL' 1;">surfing</span></div></div>
+</div>
+</div>
+<!-- Ecosystem Value Props List -->
+<div class="space-y-space-md">
+<!-- Item 1 -->
+<div class="flex items-start gap-space-md p-space-md rounded-2xl bg-surface-container-low transition-all duration-200 hover:bg-surface-container hover:shadow-sm">
+<div class="flex-shrink-0 w-11 h-11 rounded-xl bg-primary-container/10 flex items-center justify-center text-primary-container">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">scuba_diving</span>
+</div>
+<div class="space-y-0.5">
+<h2 class="font-headline-sm text-headline-sm text-on-surface">Đặt trải nghiệm biển chính thống</h2>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Lặn ngắm san hô Bãi Bụt, bay dù lượn Mỹ Khê, tour cano cao cấp đạt chuẩn cứu hộ quốc tế.</p>
+</div>
+</div>
+<!-- Item 2 -->
+<div class="flex items-start gap-space-md p-space-md rounded-2xl bg-surface-container-low transition-all duration-200 hover:bg-surface-container hover:shadow-sm">
+<div class="flex-shrink-0 w-11 h-11 rounded-xl bg-primary-container/10 flex items-center justify-center text-primary-container">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">qr_code_2</span>
+</div>
+<div class="space-y-0.5">
+<h2 class="font-headline-sm text-headline-sm text-on-surface">Quản lý vé QR &amp; bảo mật hành trình</h2>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Vé điện tử mã hóa chống giả mạo, check-in không chạm tức thì ngay tại cầu cảng Sông Hàn.</p>
+</div>
+</div>
+<!-- Item 3 -->
+<div class="flex items-start gap-space-md p-space-md rounded-2xl bg-surface-container-low transition-all duration-200 hover:bg-surface-container hover:shadow-sm">
+<div class="flex-shrink-0 w-11 h-11 rounded-xl bg-primary-container/10 flex items-center justify-center text-primary-container">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">handshake</span>
+</div>
+<div class="space-y-0.5">
+<h2 class="font-headline-sm text-headline-sm text-on-surface">Hỗ trợ đối tác ngư trường bản địa</h2>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Đồng hành cùng thuyền trưởng địa phương Đà Nẵng, cam kết bảo vệ hệ sinh thái rạn san hô tự nhiên.</p>
+</div>
+</div>
+</div>
+<!-- Maritime Safety Trust Banner -->
+<div class="flex items-center gap-space-sm px-space-md py-space-sm rounded-xl bg-surface-container-highest/60 text-tertiary"><span class="material-symbols-outlined text-body-lg">security</span><span class="font-label-md text-label-md">Bảo mật tiêu chuẩn ngành &amp; Mã hóa dữ liệu an toàn</span></div>
+</div>
+<!-- RIGHT COLUMN: Premium Authentication Card (7 Cols) -->
+<div class="lg:col-span-7 flex justify-center">
+<div class="w-full max-w-xl bg-surface-container-lowest rounded-[24px] shadow-xl p-space-xl sm:p-space-2xl space-y-space-lg">
+<!-- Top Brand Wordmark & Mode Switcher -->
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2">
+<div class="w-9 h-9 rounded-xl bg-primary-container flex items-center justify-center text-on-primary shadow-sm">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">waves</span>
+</div>
+<span class="font-headline-md text-headline-md text-on-surface tracking-tight">DANA<span class="text-primary-container">SEA</span></span>
+</div>
+<span class="font-label-sm text-label-sm text-on-surface-variant bg-surface-container-high px-space-sm py-1 rounded-full uppercase">
+              Cổng Tài Khoản
+            </span>
+</div>
+<!-- Segmented Tab Controls (Tabs: Đăng nhập vs Đăng ký) -->
+<div class="relative p-1 bg-surface-container rounded-2xl flex items-center">
+<button class="relative z-10 w-1/2 py-2.5 rounded-xl font-label-lg text-label-lg text-primary-container bg-surface-container-lowest shadow-sm transition-all duration-200 flex items-center justify-center gap-2" id="tab-login-btn" onclick="switchAuthTab('login')">
+<span class="material-symbols-outlined text-body-lg">login</span>
+<span class="">Đăng nhập</span>
+</button>
+<button class="relative z-10 w-1/2 py-2.5 rounded-xl font-label-lg text-label-lg text-on-surface-variant hover:text-on-surface transition-all duration-200 flex items-center justify-center gap-2" id="tab-register-btn" onclick="switchAuthTab('register')">
+<span class="material-symbols-outlined text-body-lg">person_add</span>
+<span class="">Tạo tài khoản mới</span>
+</button>
+</div>
+<!-- ================= TAB 1: LOGIN PANE ================= -->
+<div class="space-y-space-lg block" id="pane-login">
+<!-- State Simulation Toggles (Interactive UX Test Controls) -->
+<div class="p-space-sm bg-surface-container-low rounded-xl space-y-space-xs">
+<div class="flex items-center justify-between">
+<span class="font-label-sm text-label-sm text-tertiary flex items-center gap-1">
+<span class="material-symbols-outlined text-body-sm">tune</span>
+                  Chế độ mô phỏng trạng thái thông báo:
+                </span>
+</div>
+<div class="flex flex-wrap gap-2 pt-1">
+<button class="px-2.5 py-1 rounded-lg bg-surface-container-highest hover:bg-surface-dim font-label-sm text-label-sm text-on-surface-variant transition-colors" onclick="triggerLoginBanner('locked')">
+                  Lỗi: Khóa tài khoản
+                </button>
+<button class="px-2.5 py-1 rounded-lg bg-surface-container-highest hover:bg-surface-dim font-label-sm text-label-sm text-on-surface-variant transition-colors" onclick="triggerLoginBanner('wrong_creds')">
+                  Lỗi: Sai email/mật khẩu
+                </button>
+<button class="px-2.5 py-1 rounded-lg bg-surface-container-highest hover:bg-surface-dim font-label-sm text-label-sm text-on-surface-variant transition-colors" onclick="triggerLoginBanner('unverified')">
+                  Cảnh báo: Chưa xác minh Email
+                </button>
+<button class="px-2 py-1 rounded-lg bg-surface-container text-tertiary font-label-sm text-label-sm hover:text-on-surface" onclick="triggerLoginBanner('clear')">
+                  Xóa thông báo
+                </button>
+</div>
+</div>
+<!-- DYNAMIC STATUS BANNERS -->
+<div class="space-y-space-sm" id="banner-container">
+<!-- Banner 1: Account Locked / Error (Default hidden, triggerable) -->
+<div class="hidden p-space-md rounded-2xl bg-error-container text-on-error-container" id="banner-locked">
+<div class="flex items-start gap-space-sm">
+<span class="material-symbols-outlined text-headline-sm flex-shrink-0" style="font-variation-settings: 'FILL' 1;">gpp_bad</span>
+<div class="space-y-1">
+<p class="font-label-lg text-label-lg font-bold">Tài khoản tạm thời bị khóa</p>
+<p class="font-body-sm text-body-sm">Tài khoản của bạn tạm thời bị khóa do vi phạm bảo mật hoặc nghi vấn truy cập bất thường. Vui lòng liên hệ bộ phận hỗ trợ kỹ thuật DANASEA để xác minh khôi phục.</p>
+<div class="pt-1">
+<a class="font-label-sm text-label-sm underline font-semibold hover:opacity-80" href="#support">Liên hệ Tổng đài: 1900 6886 (Miễn phí)</a>
+</div>
+</div>
+</div>
+</div>
+<!-- Banner 2: Incorrect Credentials Error -->
+<div class="hidden p-space-md rounded-2xl bg-error-container text-on-error-container" id="banner-wrong">
+<div class="flex items-center gap-space-sm">
+<span class="material-symbols-outlined text-headline-sm flex-shrink-0">error</span>
+<p class="font-body-sm text-body-sm font-medium">Email hoặc mật khẩu không chính xác. Vui lòng kiểm tra lại thông tin hoặc đặt lại mật khẩu.</p>
+</div>
+</div>
+<!-- Banner 3: Unverified Email Warning -->
+<div class="p-space-md rounded-2xl bg-secondary-fixed text-on-secondary-fixed shadow-sm" id="banner-unverified">
+<div class="flex items-start gap-space-sm">
+<span class="material-symbols-outlined text-secondary text-headline-sm flex-shrink-0" style="font-variation-settings: 'FILL' 1;">mark_email_unread</span>
+<div class="space-y-1.5 flex-1">
+<p class="font-label-lg text-label-lg font-bold">Email của bạn chưa được xác minh</p>
+<p class="font-body-sm text-body-sm text-on-secondary-fixed-variant">Để đặt vé cano cao tốc và nhận mã QR qua hòm thư điện tử, bạn cần kích hoạt liên kết xác minh đã gửi.</p>
+<div class="pt-1 flex items-center gap-3">
+<button class="inline-flex items-center gap-1 font-label-sm text-label-sm font-bold text-secondary hover:underline cursor-pointer bg-transparent border-0 p-0" id="resend-email-btn" onclick="resendVerificationEmail()">
+<span class="material-symbols-outlined text-label-sm">send</span>
+<span class="">[Gửi lại email xác thực]</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+<!-- Banner 4: Resend Email Success Confirmation -->
+<div class="hidden p-space-md rounded-2xl bg-surface-container-high text-primary" id="banner-resend-success">
+<div class="flex items-center gap-space-sm">
+<span class="material-symbols-outlined text-headline-sm text-primary-container" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+<p class="font-body-sm text-body-sm font-semibold">Đã gửi lại email xác thực, vui lòng kiểm tra hộp thư (bao gồm cả thư mục Spam/Quảng cáo).</p>
+</div>
+</div>
+</div>
+<!-- Login Form Fields -->
+<form class="space-y-space-md" onsubmit="handleLoginSubmit(event)">
+<!-- Email Input -->
+<div class="space-y-1.5">
+<label class="font-label-md text-label-md text-on-surface flex items-center justify-between" for="login-email">
+<span class="">Địa chỉ Email</span>
+<span class="text-secondary font-label-sm text-label-sm">*Bắt buộc</span>
+</label>
+<div class="relative flex items-center">
+<span class="material-symbols-outlined absolute left-4 text-outline text-body-lg pointer-events-none">mail</span>
+<input class="w-full h-[52px] pl-11 pr-4 rounded-xl bg-surface-container-lowest text-on-surface font-body-md text-body-md shadow-sm outline-none focus:bg-surface-container-lowest focus:shadow-md transition-all placeholder:text-outline-variant" id="login-email" placeholder="ban@email.com" required="" type="email" value="haianh.danang@gmail.com">
+</div>
+</div>
+<!-- Password Input with Show/Hide -->
+<div class="space-y-1.5">
+<div class="flex items-center justify-between">
+<label class="font-label-md text-label-md text-on-surface" for="login-password">Mật khẩu</label>
+<a class="font-label-sm text-label-sm text-primary-container hover:underline" href="javascript:void(0)" onclick="alert('Liên kết đặt lại mật khẩu đã sẵn sàng. Vui lòng nhập email của bạn.');">
+                    Quên mật khẩu?
+                  </a>
+</div>
+<div class="relative flex items-center">
+<span class="material-symbols-outlined absolute left-4 text-outline text-body-lg pointer-events-none">lock</span>
+<input class="w-full h-[52px] pl-11 pr-12 rounded-xl bg-surface-container-lowest text-on-surface font-body-md text-body-md shadow-sm outline-none focus:shadow-md transition-all placeholder:text-outline-variant" id="login-password" placeholder="Nhập mật khẩu của bạn" required="" type="password" value="OceanSecure2025#">
+<button class="absolute right-3.5 p-1.5 rounded-lg text-outline hover:text-on-surface transition-colors flex items-center justify-center" onclick="togglePasswordVisibility('login-password', 'login-pwd-icon')" type="button">
+<span class="material-symbols-outlined text-body-lg" id="login-pwd-icon">visibility</span>
+</button>
+</div>
+</div>
+<!-- Remember & Security Note -->
+<div class="flex items-center justify-between pt-1">
+<label class="flex items-center gap-2 cursor-pointer select-none">
+<input checked="" class="w-4 h-4 rounded text-primary-container focus:ring-0 cursor-pointer accent-primary-container" type="checkbox">
+<span class="font-body-sm text-body-sm text-on-surface-variant">Duy trì đăng nhập trên thiết bị này</span>
+</label>
+<div class="flex items-center gap-1 text-tertiary">
+<span class="material-symbols-outlined text-label-sm">verified_user</span>
+<span class="font-label-sm text-label-sm">SSL 256-bit</span>
+</div>
+</div>
+<!-- Submit Action Button -->
+<button class="w-full h-[52px] rounded-xl bg-primary-container text-on-primary font-label-lg text-label-lg font-semibold flex items-center justify-center gap-2 shadow-md hover:bg-primary transition-all duration-200 cursor-pointer" type="submit">
+<span class="">Đăng nhập hệ sinh thái DANASEA</span>
+<span class="material-symbols-outlined text-body-lg">arrow_forward</span>
+</button>
+</form>
+<!-- Bottom Prompt -->
+<div class="pt-space-xs text-center">
+<p class="font-body-sm text-body-sm text-on-surface-variant">
+                Chưa có tài khoản tham gia trải nghiệm? 
+                <button class="text-primary-container font-semibold hover:underline bg-transparent border-0 cursor-pointer" onclick="switchAuthTab('register')">Đăng ký thành viên ngay</button>
+</p>
+</div>
+</div>
+<!-- ================= TAB 2: REGISTER PANE ================= -->
+<div class="space-y-space-md hidden" id="pane-register">
+<div class="space-y-1">
+<h3 class="font-headline-sm text-headline-sm text-on-surface">Đăng ký tài khoản du khách &amp; đối tác</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Điền đầy đủ thông tin chuẩn định danh để nhận vé QR chính chủ tại cảng biển Đà Nẵng.</p>
+</div>
+<!-- Form Validation Error Banner (Demonstration of existing email error) -->
+<div class="hidden p-space-md rounded-2xl bg-error-container text-on-error-container" id="register-error-banner">
+<div class="flex items-center gap-space-sm">
+<span class="material-symbols-outlined text-headline-sm flex-shrink-0">report</span>
+<p class="font-body-sm text-body-sm font-semibold">Địa chỉ email này đã được đăng ký trong hệ thống DANASEA. Vui lòng đăng nhập hoặc sử dụng email khác.</p>
+</div>
+</div>
+<!-- Registration Form Strict Users Schema -->
+<form class="space-y-space-md" onsubmit="handleRegisterSubmit(event)">
+<!-- 1. Full Name (full_name, required) -->
+<div class="space-y-1">
+<label class="font-label-md text-label-md text-on-surface flex items-center justify-between" for="reg-fullname">
+<span class="">Họ và tên</span>
+<span class="text-secondary font-label-sm text-label-sm">*Bắt buộc</span>
+</label>
+<div class="relative flex items-center">
+<span class="material-symbols-outlined absolute left-4 text-outline text-body-lg pointer-events-none">badge</span>
+<input class="w-full h-[50px] pl-11 pr-4 rounded-xl bg-surface-container-lowest text-on-surface font-body-md text-body-md shadow-sm outline-none focus:shadow-md transition-all placeholder:text-outline-variant" id="reg-fullname" placeholder="Ví dụ: Nguyễn Hải Đăng" required="" type="text">
+</div>
+</div>
+<!-- 2. Email Address (email, required) + Validation Feedback -->
+<div class="space-y-1">
+<label class="font-label-md text-label-md text-on-surface flex items-center justify-between" for="reg-email">
+<span class="">Địa chỉ Email</span>
+<span class="text-secondary font-label-sm text-label-sm">*Bắt buộc</span>
+</label>
+<div class="relative flex items-center">
+<span class="material-symbols-outlined absolute left-4 text-outline text-body-lg pointer-events-none">alternate_email</span>
+<input class="w-full h-[50px] pl-11 pr-4 rounded-xl bg-surface-container-lowest text-on-surface font-body-md text-body-md shadow-sm outline-none focus:shadow-md transition-all placeholder:text-outline-variant" id="reg-email" oninput="checkEmailDuplicate(this.value)" placeholder="ban@email.com" required="" type="email">
+</div>
+<p class="hidden font-label-sm text-label-sm text-error flex items-center gap-1 pt-0.5" id="email-duplicate-msg">
+<span class="material-symbols-outlined text-label-sm">info</span>
+                  Địa chỉ email này đã được đăng ký trong hệ thống
+                </p>
+</div>
+<!-- 3. Phone Number (phone, optional) -->
+<div class="space-y-1">
+<label class="font-label-md text-label-md text-on-surface flex items-center justify-between" for="reg-phone">
+<span class="">Số điện thoại di động</span>
+<span class="text-outline font-label-sm text-label-sm">Tùy chọn</span>
+</label>
+<div class="relative flex items-center">
+<span class="material-symbols-outlined absolute left-4 text-outline text-body-lg pointer-events-none">phone_iphone</span>
+<input class="w-full h-[50px] pl-11 pr-4 rounded-xl bg-surface-container-lowest text-on-surface font-body-md text-body-md shadow-sm outline-none focus:shadow-md transition-all placeholder:text-outline-variant" id="reg-phone" placeholder="0905 123 456 (để nhận SMS điều phối cano)" type="tel">
+</div>
+<span class="font-body-sm text-body-sm text-on-surface-variant block">Dùng liên hệ gấp khi thời tiết biển động hoặc thay đổi lịch đón tại cảng.</span>
+</div>
+<!-- 4. Password (password, required, min 8 chars) -->
+<div class="space-y-1">
+<label class="font-label-md text-label-md text-on-surface flex items-center justify-between" for="reg-password">
+<span class="">Mật khẩu</span>
+<span class="text-secondary font-label-sm text-label-sm">*Tối thiểu 8 ký tự</span>
+</label>
+<div class="relative flex items-center">
+<span class="material-symbols-outlined absolute left-4 text-outline text-body-lg pointer-events-none">lock</span>
+<input class="w-full h-[50px] pl-11 pr-12 rounded-xl bg-surface-container-lowest text-on-surface font-body-md text-body-md shadow-sm outline-none focus:shadow-md transition-all placeholder:text-outline-variant" id="reg-password" minlength="8" oninput="validatePasswordStrength(this.value)" placeholder="Tạo mật khẩu an toàn" required="" type="password">
+<button class="absolute right-3.5 p-1.5 rounded-lg text-outline hover:text-on-surface transition-colors flex items-center justify-center" onclick="togglePasswordVisibility('reg-password', 'reg-pwd-icon')" type="button">
+<span class="material-symbols-outlined text-body-lg" id="reg-pwd-icon">visibility</span>
+</button>
+</div>
+<!-- Dynamic Rule Feedback -->
+<div class="flex items-center gap-1 pt-0.5 text-on-surface-variant font-label-sm text-label-sm" id="pwd-hint-box">
+<span class="material-symbols-outlined text-label-sm" id="pwd-check-icon">check_circle</span>
+<span id="pwd-check-text" class="">Mật khẩu tối thiểu 8 ký tự (bao gồm chữ cái và chữ số)</span>
+</div>
+</div>
+<!-- 5. Confirm Password (confirm password, required) -->
+<div class="space-y-1">
+<label class="font-label-md text-label-md text-on-surface flex items-center justify-between" for="reg-confirm">
+<span class="">Xác nhận mật khẩu</span>
+<span class="text-secondary font-label-sm text-label-sm">*Bắt buộc</span>
+</label>
+<div class="relative flex items-center">
+<span class="material-symbols-outlined absolute left-4 text-outline text-body-lg pointer-events-none">verified</span>
+<input class="w-full h-[50px] pl-11 pr-12 rounded-xl bg-surface-container-lowest text-on-surface font-body-md text-body-md shadow-sm outline-none focus:shadow-md transition-all placeholder:text-outline-variant" id="reg-confirm" oninput="validateConfirmPassword()" placeholder="Nhập lại chính xác mật khẩu trên" required="" type="password">
+<button class="absolute right-3.5 p-1.5 rounded-lg text-outline hover:text-on-surface transition-colors flex items-center justify-center" onclick="togglePasswordVisibility('reg-confirm', 'reg-confirm-icon')" type="button">
+<span class="material-symbols-outlined text-body-lg" id="reg-confirm-icon">visibility</span>
+</button>
+</div>
+<p class="hidden font-label-sm text-label-sm text-error flex items-center gap-1 pt-0.5" id="pwd-match-error">
+<span class="material-symbols-outlined text-label-sm">cancel</span>
+                  Mật khẩu xác nhận không khớp
+                </p>
+</div>
+<!-- Terms & Agreement Checkbox -->
+<div class="p-space-sm rounded-xl bg-surface-container-low space-y-2">
+<label class="flex items-start gap-2.5 cursor-pointer select-none">
+<input class="mt-0.5 w-4 h-4 rounded text-primary-container focus:ring-0 cursor-pointer accent-primary-container" id="terms-agree" required="" type="checkbox">
+<span class="font-body-sm text-body-sm text-on-surface-variant leading-tight">
+                    Tôi đã đọc, hiểu rõ và hoàn toàn đồng ý với 
+                    <a class="text-primary-container font-semibold hover:underline" href="#terms">Điều khoản điều kiện dịch vụ DANASEA</a>, 
+                    Quy tắc an toàn hàng hải &amp; Chính sách bảo mật dữ liệu du khách.
+                  </span>
+</label>
+</div>
+<!-- Register Submit Button (Coral Highlight CTA) -->
+<button class="w-full h-[52px] rounded-xl bg-secondary-container text-on-secondary font-label-lg text-label-lg font-bold flex items-center justify-center gap-2 shadow-md hover:opacity-95 transition-all duration-200 cursor-pointer" type="submit">
+<span class="">Hoàn tất đăng ký tài khoản</span>
+<span class="material-symbols-outlined text-body-lg">arrow_forward</span>
+</button>
+</form>
+<!-- Back to Login Link -->
+<div class="pt-space-xs text-center">
+<p class="font-body-sm text-body-sm text-on-surface-variant">
+                Đã có tài khoản DANASEA? 
+                <button class="text-primary-container font-semibold hover:underline bg-transparent border-0 cursor-pointer" onclick="switchAuthTab('login')">Đăng nhập ngay</button>
+</p>
+</div>
+</div>
+<!-- Strict Compliance & System Notice (Zero Social / Zero eKYC assurance) -->
+<div class="pt-space-xs flex items-center justify-between text-on-surface-variant font-label-sm text-label-sm">
+<span class="flex items-center gap-1"><span class="material-symbols-outlined text-label-sm text-primary">verified_user</span><span class="">Bảo mật tiêu chuẩn ngành &amp; Mã hóa dữ liệu an toàn</span></span>
+<span class="flex items-center gap-1">
+<span class="material-symbols-outlined text-label-sm text-primary">lock_reset</span>
+              Không lưu trữ thẻ thanh toán
+            </span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<script>
+  // Tab Switching Functionality
+  function switchAuthTab(tabName) {
+    const loginPane = document.getElementById('pane-login');
+    const registerPane = document.getElementById('pane-register');
+    const loginBtn = document.getElementById('tab-login-btn');
+    const registerBtn = document.getElementById('tab-register-btn');
+
+    if (tabName === 'login') {
+      loginPane.classList.remove('hidden');
+      loginPane.classList.add('block');
+      registerPane.classList.add('hidden');
+      registerPane.classList.remove('block');
+
+      // Update button active states
+      loginBtn.className = "relative z-10 w-1/2 py-2.5 rounded-xl font-label-lg text-label-lg text-primary-container bg-surface-container-lowest shadow-sm transition-all duration-200 flex items-center justify-center gap-2";
+      registerBtn.className = "relative z-10 w-1/2 py-2.5 rounded-xl font-label-lg text-label-lg text-on-surface-variant hover:text-on-surface transition-all duration-200 flex items-center justify-center gap-2";
+    } else {
+      registerPane.classList.remove('hidden');
+      registerPane.classList.add('block');
+      loginPane.classList.add('hidden');
+      loginPane.classList.remove('block');
+
+      // Update button active states
+      registerBtn.className = "relative z-10 w-1/2 py-2.5 rounded-xl font-label-lg text-label-lg text-primary-container bg-surface-container-lowest shadow-sm transition-all duration-200 flex items-center justify-center gap-2";
+      loginBtn.className = "relative z-10 w-1/2 py-2.5 rounded-xl font-label-lg text-label-lg text-on-surface-variant hover:text-on-surface transition-all duration-200 flex items-center justify-center gap-2";
+    }
+  }
+
+  // Password Visibility Toggle
+  function togglePasswordVisibility(inputId, iconId) {
+    const input = document.getElementById(inputId);
+    const icon = document.getElementById(iconId);
+    if (!input || !icon) return;
+
+    if (input.type === 'password') {
+      input.type = 'text';
+      icon.textContent = 'visibility_off';
+    } else {
+      input.type = 'password';
+      icon.textContent = 'visibility';
+    }
+  }
+
+  // Banner State Management for Testing/Simulation
+  function triggerLoginBanner(state) {
+    const bLocked = document.getElementById('banner-locked');
+    const bWrong = document.getElementById('banner-wrong');
+    const bUnverified = document.getElementById('banner-unverified');
+    const bResend = document.getElementById('banner-resend-success');
+
+    // Hide all first
+    bLocked.classList.add('hidden');
+    bWrong.classList.add('hidden');
+    bUnverified.classList.add('hidden');
+    bResend.classList.add('hidden');
+
+    if (state === 'locked') {
+      bLocked.classList.remove('hidden');
+    } else if (state === 'wrong_creds') {
+      bWrong.classList.remove('hidden');
+    } else if (state === 'unverified') {
+      bUnverified.classList.remove('hidden');
+    }
+  }
+
+  // Resend Verification Email Simulation
+  function resendVerificationEmail() {
+    const btn = document.getElementById('resend-email-btn');
+    const successBanner = document.getElementById('banner-resend-success');
+    
+    btn.innerHTML = `<span class="material-symbols-outlined text-label-sm animate-spin">sync</span><span>Đang gửi...</span>`;
+    
+    setTimeout(() => {
+      btn.innerHTML = `<span class="material-symbols-outlined text-label-sm">check</span><span>Đã gửi lệnh</span>`;
+      successBanner.classList.remove('hidden');
+      setTimeout(() => {
+        btn.innerHTML = `<span class="material-symbols-outlined text-label-sm">send</span><span>[Gửi lại email xác thực]</span>`;
+      }, 3000);
+    }, 600);
+  }
+
+  // Simulated Email Duplicate Validation Rule
+  function checkEmailDuplicate(val) {
+    const duplicateNotice = document.getElementById('email-duplicate-msg');
+    const registerBanner = document.getElementById('register-error-banner');
+    
+    // Example registered email in database
+    const registeredEmails = ['haianh.danang@gmail.com', 'admin@danasea.vn', 'contact@danasea.vn'];
+    
+    if (registeredEmails.includes(val.trim().toLowerCase())) {
+      duplicateNotice.classList.remove('hidden');
+      registerBanner.classList.remove('hidden');
+    } else {
+      duplicateNotice.classList.add('hidden');
+      registerBanner.classList.add('hidden');
+    }
+  }
+
+  // Password Length Validation Feedback
+  function validatePasswordStrength(val) {
+    const hintText = document.getElementById('pwd-check-text');
+    const hintIcon = document.getElementById('pwd-check-icon');
+    const hintBox = document.getElementById('pwd-hint-box');
+
+    if (val.length >= 8) {
+      hintBox.className = "flex items-center gap-1 pt-0.5 text-primary font-label-sm text-label-sm";
+      hintIcon.textContent = "check_circle";
+      hintText.textContent = "Mật khẩu hợp lệ (đã đạt trên 8 ký tự an toàn)";
+    } else {
+      hintBox.className = "flex items-center gap-1 pt-0.5 text-secondary font-label-sm text-label-sm";
+      hintIcon.textContent = "error";
+      hintText.textContent = "Mật khẩu tối thiểu 8 ký tự (" + val.length + "/8)";
+    }
+  }
+
+  // Password Match Validation
+  function validateConfirmPassword() {
+    const pwd = document.getElementById('reg-password').value;
+    const confirm = document.getElementById('reg-confirm').value;
+    const errorMsg = document.getElementById('pwd-match-error');
+
+    if (confirm && pwd !== confirm) {
+      errorMsg.classList.remove('hidden');
+    } else {
+      errorMsg.classList.add('hidden');
+    }
+  }
+
+  function handleLoginSubmit(e) {
+    e.preventDefault();
+    alert("Đang kiểm tra thông tin đăng nhập với cơ sở dữ liệu DANASEA...");
+  }
+
+  function handleRegisterSubmit(e) {
+    e.preventDefault();
+    const pwd = document.getElementById('reg-password').value;
+    const confirm = document.getElementById('reg-confirm').value;
+    
+    if (pwd !== confirm) {
+      alert("Mật khẩu xác nhận chưa khớp. Vui lòng kiểm tra lại.");
+      return;
+    }
+    alert("Đăng ký tài khoản thành công! Mã xác thực kích hoạt vừa được gửi đến email của bạn.");
+  }
+</script></main>
+
+</body></html>

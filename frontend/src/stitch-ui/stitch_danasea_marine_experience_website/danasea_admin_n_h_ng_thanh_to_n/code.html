@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+
+<html lang="vi"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700&amp;family=Syne:wght@600;700&amp;display=swap" rel="stylesheet"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><style>@layer base{html,body{margin:0;padding:0;}body{overscroll-behavior:none;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config={darkMode:"class",theme:{extend:{"colors":{"tertiary-container":"#5a7784","on-tertiary":"#ffffff","on-error-container":"#93000a","surface-container-lowest":"#ffffff","on-secondary-fixed-variant":"#891d0f","on-surface-variant":"#3e494a","error":"#ba1a1a","on-tertiary-fixed":"#001f29","primary-container":"#087f8c","on-primary-container":"#effdff","outline":"#6e797b","surface-container-high":"#e4e9ea","surface":"#f5fafb","surface-bright":"#f5fafb","on-secondary":"#ffffff","on-secondary-container":"#6c0600","on-primary-fixed":"#001f24","on-primary":"#ffffff","secondary-fixed-dim":"#ffb4a7","tertiary":"#425e6a","background":"#f5fafb","secondary-fixed":"#ffdad4","surface-variant":"#dee3e4","secondary-container":"#fb7059","tertiary-fixed":"#c9e7f6","surface-tint":"#006874","inverse-primary":"#79d4e2","on-primary-fixed-variant":"#004f57","surface-container-highest":"#dee3e4","on-surface":"#171d1e","on-error":"#ffffff","primary":"#00646f","inverse-on-surface":"#edf2f3","outline-variant":"#bdc9ca","surface-container":"#eaeff0","secondary":"#aa3524","on-background":"#171d1e","surface-dim":"#d6dbdc","primary-fixed-dim":"#79d4e2","primary-fixed":"#95f1ff","error-container":"#ffdad6","on-tertiary-fixed-variant":"#2e4b56","surface-container-low":"#eff4f5","on-secondary-fixed":"#400200","on-tertiary-container":"#f4fbff","inverse-surface":"#2c3132","tertiary-fixed-dim":"#adcbd9"},"borderRadius":{"DEFAULT":"0.25rem","lg":"0.5rem","xl":"0.75rem","full":"9999px"},"spacing":{"margin":"5rem","margin-sm":"1.5rem","space-sm":"0.5rem","gutter":"1.5rem","space-xs":"0.25rem","gutter-sm":"1rem","space-md":"1rem","space-3xl":"4.5rem","space-lg":"1.5rem","space-2xl":"3rem","margin-md":"3rem","gutter-lg":"2rem","space-xl":"2rem"},"fontFamily":{"label-md":["Plus Jakarta Sans"],"headline-xl":["Syne"],"headline-lg":["Syne"],"headline-md":["Syne"],"body-xl":["Plus Jakarta Sans"],"label-lg":["Plus Jakarta Sans"],"body-sm":["Plus Jakarta Sans"],"body-lg":["Plus Jakarta Sans"],"label-sm":["Plus Jakarta Sans"],"display-xl":["Syne"],"headline-sm":["Syne"],"display-lg":["Syne"],"body-md":["Plus Jakarta Sans"]},"fontSize":{"label-md":["12px",{"lineHeight":"16px","letterSpacing":"0.02em","fontWeight":"600"}],"headline-xl":["36px",{"lineHeight":"44px","letterSpacing":"-0.015em","fontWeight":"700"}],"headline-lg":["28px",{"lineHeight":"36px","letterSpacing":"-0.01em","fontWeight":"600"}],"headline-md":["22px",{"lineHeight":"30px","letterSpacing":"-0.01em","fontWeight":"600"}],"body-xl":["18px",{"lineHeight":"28px","fontWeight":"400"}],"label-lg":["14px",{"lineHeight":"20px","letterSpacing":"0.01em","fontWeight":"600"}],"body-sm":["12px",{"lineHeight":"18px","fontWeight":"400"}],"body-lg":["16px",{"lineHeight":"24px","fontWeight":"400"}],"label-sm":["11px",{"lineHeight":"14px","letterSpacing":"0.04em","fontWeight":"700"}],"display-xl":["56px",{"lineHeight":"64px","letterSpacing":"-0.02em","fontWeight":"700"}],"headline-sm":["18px",{"lineHeight":"26px","fontWeight":"600"}],"display-lg":["44px",{"lineHeight":"52px","letterSpacing":"-0.02em","fontWeight":"700"}],"body-md":["14px",{"lineHeight":"22px","fontWeight":"400"}]}}}}</script></head><body class="bg-surface font-body-md text-on-surface antialiased"><aside class="fixed left-0 top-0 h-screen w-[260px] bg-inverse-surface z-50 flex flex-col justify-between shadow-[0_1px_8px_rgba(0,0,0,0.04)]"><div class="flex flex-col flex-1 overflow-y-auto"><div class="p-space-lg flex flex-col gap-space-xs"><div class="flex items-center gap-space-sm"><img alt="DANASEA brand logo with minimalistic dual ocean wave crest lines in ocean teal and coral accent, with modern bold wordmark in navy." class="h-8 w-auto object-contain" src="https://lh3.googleusercontent.com/aida/AEtjO1VvnQOF2WU9kDEsZEZSN1YNSkRu6Z2_49elqxL3W3H70QznUBWpRk31Nl8LKj_EuTvgl-aPxe6h0dUp3LQoVfVp01RNmSAB12-rEJv9MhU2f6AD8_vRSyZKyBDLqn3tWQ7HSf6YYVjpkEi7NAsR7cdkAV2bJI_xlmT9yaP7M2ZKZGl5F50so_t-2hiC_8z0eIbcNWKyv92AX50LCfgsO70-dTgI05kaKyZFg3UL59SF-eKVOPSxGgBwn7Ct"/><span class="font-headline-sm text-headline-sm font-bold tracking-tight text-on-primary">DANASEA</span></div><div class="mt-space-xs"><span class="inline-flex items-center px-space-xs py-0.5 rounded bg-primary-container/20 text-inverse-primary font-label-sm text-label-sm uppercase tracking-wider">HỆ THỐNG QUẢN TRỊ CẢNG VỤ</span></div></div><nav class="flex-1 px-space-md py-space-xs flex flex-col gap-1" data-active-classes="bg-primary-container text-on-primary-container font-semibold rounded-lg shadow-sm"><a class="flex items-center gap-space-sm px-space-md py-2.5 rounded-lg text-outline-variant hover:bg-surface-variant/20 hover:text-on-primary transition-colors" data-path="tong-quan" href="#"><span class="material-symbols-outlined text-[20px]">dashboard</span><span class="font-label-lg text-label-lg">Tổng quan</span></a><a class="flex items-center gap-space-sm px-space-md py-2.5 rounded-lg text-outline-variant hover:bg-surface-variant/20 hover:text-on-primary transition-colors" data-path="nguoi-dung-vai-tro" href="#"><span class="material-symbols-outlined text-[20px]">manage_accounts</span><span class="font-label-lg text-label-lg">Người dùng &amp; Vai trò</span></a><a class="flex items-center gap-space-sm px-space-md py-2.5 rounded-lg text-outline-variant hover:bg-surface-variant/20 hover:text-on-primary transition-colors" data-path="doi-tac-van-hanh" href="#"><span class="material-symbols-outlined text-[20px]">corporate_fare</span><span class="font-label-lg text-label-lg">Đối tác vận hành</span></a><a class="flex items-center gap-space-sm px-space-md py-2.5 rounded-lg text-outline-variant hover:bg-surface-variant/20 hover:text-on-primary transition-colors" data-path="dich-vu-duyet-tour" href="#"><span class="material-symbols-outlined text-[20px]">fact_check</span><span class="font-label-lg text-label-lg">Dịch vụ &amp; Duyệt tour</span></a><a class="flex items-center gap-space-sm px-space-md py-2.5 rounded-lg text-outline-variant hover:bg-surface-variant/20 hover:text-on-primary transition-colors" data-path="danh-muc-trai-nghiem" href="#"><span class="material-symbols-outlined text-[20px]">kayaking</span><span class="font-label-lg text-label-lg">Danh mục trải nghiệm</span></a><a class="flex items-center gap-space-sm px-space-md py-2.5 rounded-lg text-outline-variant hover:bg-surface-variant/20 hover:text-on-primary transition-colors" data-path="don-thanh-toan" href="#"><span class="material-symbols-outlined text-[20px]">receipt_long</span><span class="font-label-lg text-label-lg">Đơn &amp; Thanh toán</span></a><a class="flex items-center gap-space-sm px-space-md py-2.5 rounded-lg text-outline-variant hover:bg-surface-variant/20 hover:text-on-primary transition-colors" data-path="hoan-tien-khieu-nai" href="#"><span class="material-symbols-outlined text-[20px]">assignment_return</span><span class="font-label-lg text-label-lg">Hoàn tiền &amp; Khiếu nại</span></a><a class="flex items-center gap-space-sm px-space-md py-2.5 rounded-lg text-outline-variant hover:bg-surface-variant/20 hover:text-on-primary transition-colors" data-path="khuyen-mai-toan-san" href="#"><span class="material-symbols-outlined text-[20px]">sell</span><span class="font-label-lg text-label-lg">Khuyến mãi toàn sàn</span></a><a class="flex items-center gap-space-sm px-space-md py-2.5 rounded-lg text-outline-variant hover:bg-surface-variant/20 hover:text-on-primary transition-colors" data-path="doi-soat-quyet-toan" href="#"><span class="material-symbols-outlined text-[20px]">account_balance</span><span class="font-label-lg text-label-lg">Đối soát &amp; Quyết toán</span></a><a class="flex items-center gap-space-sm px-space-md py-2.5 rounded-lg text-outline-variant hover:bg-surface-variant/20 hover:text-on-primary transition-colors" data-path="cau-hinh-an-toan-bien" href="#"><span class="material-symbols-outlined text-[20px]">shield</span><span class="font-label-lg text-label-lg">Cấu hình &amp; An toàn biển</span></a><a class="flex items-center gap-space-sm px-space-md py-2.5 rounded-lg text-outline-variant hover:bg-surface-variant/20 hover:text-on-primary transition-colors" data-path="nhat-ky-he-thong" href="#"><span class="material-symbols-outlined text-[20px]">history_toggle_off</span><span class="font-label-lg text-label-lg">Nhật ký hệ thống</span></a></nav></div><div class="p-space-md bg-inverse-surface"><div class="flex items-center gap-space-sm p-space-sm rounded-xl bg-surface-variant/10 text-on-primary"><div class="w-9 h-9 rounded-full bg-primary flex items-center justify-center text-on-primary font-bold"><span class="material-symbols-outlined text-[20px]">person</span></div><div class="flex flex-col min-w-0 flex-1"><span class="font-label-md text-label-md text-on-primary truncate">Trần Hải Đăng</span><span class="font-label-sm text-label-sm text-outline-variant truncate">Ban QL Cảng VITA • ADMIN</span></div><span class="material-symbols-outlined text-outline-variant text-[18px]">more_vert</span></div></div></aside><div class="pl-[260px]"><header class="fixed top-0 left-[260px] right-0 h-16 bg-surface/80 backdrop-blur-xl shadow-[0_1px_8px_rgba(0,0,0,0.04)] z-40 flex items-center justify-between px-space-xl"><div class="flex items-center gap-space-lg flex-1 max-w-xl"><div class="relative w-full max-w-md"><span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline text-[20px]">search</span><input class="w-full h-10 pl-10 pr-space-md rounded-xl bg-surface-container-lowest text-on-surface font-body-md text-body-md placeholder:text-outline focus:outline-none focus:ring-1 focus:ring-primary shadow-sm" placeholder="Tìm kiếm hồ sơ, đơn vị vận hành, mã tour..." type="text"/></div><div class="hidden xl:flex items-center gap-2 px-space-sm py-1.5 rounded-full bg-surface-container"><span class="w-2 h-2 rounded-full bg-primary-container animate-pulse"></span><span class="font-label-sm text-label-sm text-on-surface-variant">Kết nối CSDL Hàng hải 100%</span></div></div><div class="flex items-center gap-space-md"><div class="hidden md:flex items-center gap-2 px-space-md py-1.5 rounded-lg bg-secondary-container/20 text-on-secondary-container font-label-md text-label-md"><span class="material-symbols-outlined text-secondary text-[18px]">notification_important</span><span>8 Cần duyệt</span></div><button class="relative w-10 h-10 rounded-full flex items-center justify-center text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors"><span class="material-symbols-outlined text-[22px]">notifications</span><span class="absolute top-2 right-2 w-2 h-2 bg-secondary rounded-full"></span></button><div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center"><span class="material-symbols-outlined text-on-primary text-[18px]">person</span></div></div></header><main class="w-full pt-16 bg-surface px-space-xl pb-space-2xl min-h-screen"><div class="flex flex-col w-full">
+<!-- Script for highlighting active sidebar item dynamically -->
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const activeLink = document.querySelector('nav a[data-path="don-thanh-toan"]');
+      if (activeLink) {
+        activeLink.className = "flex items-center gap-space-sm px-space-md py-2.5 rounded-lg bg-primary-container text-on-primary-container font-semibold shadow-sm transition-colors";
+        const icon = activeLink.querySelector('.material-symbols-outlined');
+        if (icon) icon.style.fontVariationSettings = "'FILL' 1";
+      }
+    });
+  </script>
+<!-- Top Page Header / Strategic Breadcrumb -->
+<div class="flex flex-col md:flex-row md:items-center justify-between gap-space-md mb-space-xl">
+<div>
+<div class="flex items-center gap-space-xs text-outline font-label-md text-label-md mb-1">
+<span class="hover:text-primary cursor-pointer transition-colors">Trung tâm Cảng vụ</span>
+<span class="material-symbols-outlined text-[14px]">chevron_right</span>
+<span class="hover:text-primary cursor-pointer transition-colors">Vận hành sàn</span>
+<span class="material-symbols-outlined text-[14px]">chevron_right</span>
+<span class="text-primary font-semibold">Đơn &amp; Thanh toán</span>
+</div>
+<h1 class="font-headline-xl text-headline-xl text-on-surface tracking-tight flex items-center gap-3">
+        Giám sát Đơn đặt tour &amp; Giao dịch Thanh toán Toàn sàn
+        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-label-sm font-label-sm bg-primary-container/15 text-primary">
+<span class="w-1.5 h-1.5 rounded-full bg-primary mr-1.5 animate-ping"></span> Realtime VITA Sync
+        </span>
+</h1>
+<p class="font-body-md text-body-md text-on-surface-variant mt-1">
+        Theo dõi toàn bộ luồng giao dịch từ Master Orders, Sub Orders nhà cung cấp, đối soát trạng thái cổng thanh toán và hóa đơn điện tử.
+      </p>
+</div>
+<div class="flex items-center gap-space-sm flex-shrink-0">
+<button class="inline-flex items-center gap-2 px-space-md py-2.5 rounded-xl bg-surface-container-lowest text-primary hover:bg-surface-container shadow-sm transition-all font-label-lg text-label-lg">
+<span class="material-symbols-outlined text-[18px]">file_download</span>
+        Xuất file đối soát (CSV)
+      </button>
+<button class="inline-flex items-center gap-2 px-space-md py-2.5 rounded-xl bg-primary text-on-primary hover:bg-primary-container shadow-sm transition-all font-label-lg text-label-lg">
+<span class="material-symbols-outlined text-[18px]">sync_alt</span>
+        Đối soát tức thời (Webhooks)
+      </button>
+</div>
+</div>
+<!-- KPI Overview Cards (Coastal Bento Metrics) -->
+<div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-gutter mb-space-xl">
+<!-- Metric 1: Master Orders -->
+<div class="bg-surface-container-lowest p-space-lg rounded-2xl shadow-sm relative overflow-hidden flex flex-col justify-between">
+<div class="absolute -right-4 -bottom-4 w-24 h-24 rounded-full bg-primary/5 pointer-events-none"></div>
+<div class="flex items-center justify-between">
+<span class="font-label-md text-label-md text-outline uppercase tracking-wider">Tổng Master Orders Tháng Này</span>
+<div class="w-9 h-9 rounded-xl bg-surface-container-low flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-[20px]">shopping_bag</span>
+</div>
+</div>
+<div class="mt-space-md flex items-baseline gap-2">
+<span class="font-headline-xl text-headline-xl text-on-surface font-bold">368</span>
+<span class="font-label-md text-label-md text-primary font-semibold flex items-center">
+<span class="material-symbols-outlined text-[16px]">arrow_upward</span> +14.2%
+        </span>
+</div>
+<div class="mt-space-sm pt-space-sm flex items-center justify-between text-on-surface-variant font-label-sm text-label-sm">
+<span class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-primary"></span>Đã trả: <strong class="text-on-surface">342</strong></span>
+<span class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-secondary-container"></span>Chờ: <strong class="text-on-surface">18</strong></span>
+<span class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-secondary"></span>Hủy: <strong class="text-on-surface">8</strong></span>
+</div>
+</div>
+<!-- Metric 2: Gross Cashflow -->
+<div class="bg-surface-container-lowest p-space-lg rounded-2xl shadow-sm relative overflow-hidden flex flex-col justify-between">
+<div class="absolute -right-4 -bottom-4 w-24 h-24 rounded-full bg-secondary-container/10 pointer-events-none"></div>
+<div class="flex items-center justify-between">
+<span class="font-label-md text-label-md text-outline uppercase tracking-wider">Tổng Dòng Tiền Thành Công</span>
+<div class="w-9 h-9 rounded-xl bg-surface-container-low flex items-center justify-center text-secondary-container">
+<span class="material-symbols-outlined text-[20px]">payments</span>
+</div>
+</div>
+<div class="mt-space-md flex items-baseline gap-2">
+<span class="font-headline-lg text-headline-lg text-on-surface font-bold text-secondary">482.500.000 <span class="text-body-md font-normal text-outline">đ</span></span>
+</div>
+<div class="mt-space-sm pt-space-sm flex items-center justify-between text-outline font-label-sm text-label-sm">
+<span class="text-primary font-medium flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">verified</span> 100% CSDL Hàng hải
+        </span>
+<span class="text-on-surface-variant">Quy đổi: 342 vé xác nhận</span>
+</div>
+</div>
+<!-- Metric 3: Gateway Distribution -->
+<div class="bg-surface-container-lowest p-space-lg rounded-2xl shadow-sm relative overflow-hidden flex flex-col justify-between">
+<div class="flex items-center justify-between">
+<span class="font-label-md text-label-md text-outline uppercase tracking-wider">Cổng Thanh Toán (Payments)</span>
+<div class="w-9 h-9 rounded-xl bg-surface-container-low flex items-center justify-center text-tertiary">
+<span class="material-symbols-outlined text-[20px]">account_balance_wallet</span>
+</div>
+</div>
+<!-- Inline Minimalist SVG Distribution Bar -->
+<div class="mt-space-md">
+<div class="flex items-center justify-between text-body-sm font-label-sm mb-2">
+<span class="text-primary font-bold">SEPAY 62%</span>
+<span class="text-tertiary font-bold">VNPAY 28%</span>
+<span class="text-secondary-container font-bold">MoMo 10%</span>
+</div>
+<div class="w-full h-2.5 rounded-full bg-surface-container flex overflow-hidden">
+<div class="h-full bg-primary" style="width: 62%"></div>
+<div class="h-full bg-tertiary" style="width: 28%"></div>
+<div class="h-full bg-secondary-container" style="width: 10%"></div>
+</div>
+</div>
+<div class="mt-space-sm pt-space-sm flex items-center justify-between text-outline font-label-sm text-label-sm">
+<span>Tự động đối soát Webhook</span>
+<span class="text-primary font-semibold">Tỉ lệ lỗi &lt; 0.01%</span>
+</div>
+</div>
+<!-- Metric 4: Sub-orders Execution -->
+<div class="bg-surface-container-lowest p-space-lg rounded-2xl shadow-sm relative overflow-hidden flex flex-col justify-between">
+<div class="flex items-center justify-between">
+<span class="font-label-md text-label-md text-outline uppercase tracking-wider">Sub Orders Nhà Cung Cấp</span>
+<div class="w-9 h-9 rounded-xl bg-surface-container-low flex items-center justify-center text-primary-container">
+<span class="material-symbols-outlined text-[20px]">kayaking</span>
+</div>
+</div>
+<div class="mt-space-md flex items-baseline gap-2">
+<span class="font-headline-xl text-headline-xl text-on-surface font-bold">542</span>
+<span class="font-body-md text-body-md text-outline">dịch vụ biển con</span>
+</div>
+<div class="mt-space-sm pt-space-sm flex items-center justify-between font-label-sm text-label-sm">
+<span class="text-primary font-medium flex items-center gap-1">
+<span class="material-symbols-outlined text-[15px]">check_circle</span> Đã Check-in: 490
+        </span>
+<span class="text-secondary-container font-medium flex items-center gap-1">
+<span class="material-symbols-outlined text-[15px]">pending_actions</span> Đang chờ: 52
+        </span>
+</div>
+</div>
+</div>
+<!-- Main 2-Column Split Console -->
+<div class="grid grid-cols-12 gap-gutter items-start">
+<!-- LEFT COLUMN (62% ~ col-span-12 xl:col-span-7) Master & Sub Orders Table System -->
+<div class="col-span-12 xl:col-span-7 flex flex-col gap-space-lg">
+<!-- Filter Bar Card -->
+<div class="bg-surface-container-lowest p-space-md rounded-2xl shadow-sm flex flex-col gap-space-md">
+<div class="grid grid-cols-1 md:grid-cols-12 gap-space-sm items-center">
+<!-- Text Search -->
+<div class="md:col-span-5 relative">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline text-[18px]">search</span>
+<input class="w-full h-10 pl-9 pr-3 rounded-xl bg-surface-container-low text-on-surface font-body-md text-body-md placeholder:text-outline focus:outline-none focus:ring-1 focus:ring-primary shadow-sm" placeholder="Mã Master (#DNS-...), tên khách, SĐT..." type="text" value="#DNS-89412"/>
+</div>
+<!-- Master Status Filter -->
+<div class="md:col-span-4 relative">
+<select class="w-full h-10 px-3 rounded-xl bg-surface-container-low text-on-surface font-body-md text-body-md focus:outline-none focus:ring-1 focus:ring-primary shadow-sm appearance-none pr-8">
+<option value="">Trạng thái Master: Tất cả</option>
+<option selected="" value="PAID">PAID (Đã thanh toán)</option>
+<option value="PENDING_PAYMENT">PENDING_PAYMENT</option>
+<option value="PARTIALLY_COMPLETED">PARTIALLY_COMPLETED</option>
+<option value="COMPLETED">COMPLETED</option>
+<option value="CANCELLED">CANCELLED</option>
+</select>
+<span class="material-symbols-outlined absolute right-2.5 top-1/2 -translate-y-1/2 text-outline pointer-events-none text-[18px]">expand_more</span>
+</div>
+<!-- Gateway Filter -->
+<div class="md:col-span-3 relative">
+<select class="w-full h-10 px-3 rounded-xl bg-surface-container-low text-on-surface font-body-md text-body-md focus:outline-none focus:ring-1 focus:ring-primary shadow-sm appearance-none pr-8">
+<option value="">Cổng: Tất cả</option>
+<option selected="" value="SEPAY">SEPAY QR</option>
+<option value="VNPAY">VNPAY-QR</option>
+<option value="MOMO">MoMo Pay</option>
+</select>
+<span class="material-symbols-outlined absolute right-2.5 top-1/2 -translate-y-1/2 text-outline pointer-events-none text-[18px]">expand_more</span>
+</div>
+</div>
+<!-- Sub-status quick filter pills -->
+<div class="flex items-center gap-2 overflow-x-auto pb-1 text-label-sm font-label-sm">
+<span class="text-outline uppercase text-[10px] tracking-wider whitespace-nowrap">Lọc Sub:</span>
+<button class="px-3 py-1 rounded-full bg-primary text-on-primary font-semibold shadow-sm whitespace-nowrap">Tất cả Sub</button>
+<button class="px-3 py-1 rounded-full bg-surface-container-low text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors whitespace-nowrap">CONFIRMED (Chấp thuận)</button>
+<button class="px-3 py-1 rounded-full bg-surface-container-low text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors whitespace-nowrap">PENDING (Chờ nhận)</button>
+<button class="px-3 py-1 rounded-full bg-surface-container-low text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors whitespace-nowrap">COMPLETED (Hoàn tất)</button>
+<button class="px-3 py-1 rounded-full bg-surface-container-low text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors whitespace-nowrap">REFUNDED (Hoàn tiền)</button>
+</div>
+</div>
+<!-- Orders List Container -->
+<div class="flex flex-col gap-space-md">
+<!-- ORDER 1: ACTIVE / SELECTED ORDER WITH NESTED SUB-ORDERS -->
+<div class="bg-surface-container-lowest rounded-2xl shadow-md p-space-lg transition-all duration-200 relative">
+<!-- Active Highlight Indicator -->
+<div class="absolute left-0 top-0 bottom-0 w-1.5 bg-primary rounded-l-2xl"></div>
+<!-- Master Order Row -->
+<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-space-sm pb-space-md">
+<div class="flex items-start gap-space-sm">
+<div class="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary flex-shrink-0 mt-0.5">
+<span class="material-symbols-outlined text-[22px]">anchor</span>
+</div>
+<div class="flex flex-col">
+<div class="flex items-center gap-2">
+<span class="font-headline-sm text-headline-sm text-primary font-bold">#DNS-89412</span>
+<span class="inline-flex items-center px-2 py-0.5 rounded-full text-label-sm font-label-sm bg-primary/10 text-primary font-semibold">
+                    PAID • ĐÃ THANH TOÁN
+                  </span>
+<span class="inline-flex items-center px-2 py-0.5 rounded-full text-label-sm font-label-sm bg-surface-container text-on-surface-variant">
+                    SEPAY
+                  </span>
+</div>
+<div class="flex items-center gap-3 mt-1 font-body-sm text-body-sm text-on-surface-variant">
+<span class="font-semibold text-on-surface">Nguyễn Văn An</span>
+<span>•</span>
+<span>0912 345 678</span>
+<span>•</span>
+<span class="text-outline">14:18 hôm nay</span>
+</div>
+</div>
+</div>
+<div class="flex flex-col sm:items-end">
+<span class="font-headline-sm text-headline-sm text-secondary font-bold">1.030.000 đ</span>
+<span class="font-label-sm text-label-sm text-outline flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px] text-secondary-container">loyalty</span>
+                Voucher DANASEA50 (-50k)
+              </span>
+</div>
+</div>
+<!-- Sub-orders Hierarchy Area -->
+<div class="mt-space-md pt-space-md bg-surface-container-low/60 rounded-xl p-space-md flex flex-col gap-space-sm">
+<div class="flex items-center justify-between mb-1">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[16px] text-primary">subdirectory_arrow_right</span>
+<span class="font-label-md text-label-md text-outline uppercase tracking-wider font-bold">Danh Sách 2 Sub-Orders Trực Thuộc Nhà Cung Cấp</span>
+</div>
+<span class="font-label-sm text-label-sm text-primary font-semibold">Tự động điều phối vé QR</span>
+</div>
+<!-- Sub Order 01: Confirmed -->
+<div class="bg-surface-container-lowest rounded-xl p-space-md shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-space-sm">
+<div class="flex items-center gap-3">
+<div class="w-12 h-12 rounded-lg overflow-hidden flex-shrink-0 bg-surface-container relative">
+<img class="w-full h-full object-cover" data-alt="Tourists paddleboarding on clear turquoise ocean waters at My Khe beach Danang during golden morning dawn, teal sea water and coral sunset tone, clean coastal sports view" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAj_nhYskyw9ZBBSIFOmhZ3Gud5CqguZY4rHNR94Tjuj1Dra2f7LHjT3nfQ1qo51LHGb37IoPpdomCLDwlLrPfQm1cDw9OVCmIbGdYh3c5o8Mj_u379deMeRdIlsTtXxBuP67LU2VGXS6Jt-_pKwgHcNJAMVl_WCYwr5qZj6hzuoFjiODfnjlEo1ObvVI4lPiSThqwJN7E-orbIGXbNmN0WA5QOMSokNecHrXgITnTfD1GeMu825GATCg"/>
+</div>
+<div>
+<div class="flex items-center gap-2">
+<span class="font-label-md text-label-md font-bold text-on-surface">#SUB-89412-01</span>
+<span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-primary/10 text-primary">
+                      CONFIRMED
+                    </span>
+</div>
+<div class="font-headline-sm text-[15px] font-semibold text-on-surface mt-0.5">
+                    Chèo SUP đón bình minh Mỹ Khê (2 Khách)
+                  </div>
+<div class="flex items-center gap-2 text-on-surface-variant text-[12px] font-body-sm mt-0.5">
+<span class="text-tertiary font-medium">NCC: Danang Ocean Club</span>
+<span>•</span>
+<span class="text-primary flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">qr_code_scanner</span> Đã duyệt vé QR
+                    </span>
+<span>•</span>
+<span class="text-outline">Waiver an toàn: 14:15</span>
+</div>
+</div>
+</div>
+<div class="flex flex-row sm:flex-col sm:items-end justify-between items-center flex-shrink-0">
+<span class="font-label-lg text-label-lg font-bold text-on-surface">560.000 đ</span>
+<span class="inline-flex items-center gap-1 text-[11px] font-semibold text-primary">
+<span class="material-symbols-outlined text-[13px]">verified_user</span> Đã khóa slot
+                </span>
+</div>
+</div>
+<!-- Sub Order 02: Pending Vendor Confirmation -->
+<div class="bg-surface-container-lowest rounded-xl p-space-md shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-space-sm">
+<div class="flex items-center gap-3">
+<div class="w-12 h-12 rounded-lg overflow-hidden flex-shrink-0 bg-surface-container relative">
+<img class="w-full h-full object-cover" data-alt="Scuba diver exploring coral reef at Bai But Son Tra peninsula Danang, deep teal and turquoise ocean water, exotic marine life, natural lighting under waves" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA1Oty9sQ5o18ivfPK_wlPszbeLyJ_UjhPa4OvEHJpfX7s94l9IURGQtMpHU5muBMH9r-KP1TxmIGE9y4B5qawa5Rc9A2F4fMzdSJ-RQrUhba0sACAKPPejuwq5hGKmOTqOIx_Q05UDLP16T7G1df6ro4_WvCWSkrLipg7PDxlwPX70LyAW5bKsROJl2gmE9VZ7W5_yIAkWCFykyrP8azFEAXfX4N5Evqnak88QKLKVFtsvNShoz1LjkQ"/>
+</div>
+<div>
+<div class="flex items-center gap-2">
+<span class="font-label-md text-label-md font-bold text-on-surface">#SUB-89412-02</span>
+<span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-secondary-container/20 text-on-secondary-container">
+                      PENDING
+                    </span>
+</div>
+<div class="font-headline-sm text-[15px] font-semibold text-on-surface mt-0.5">
+                    Lặn ngắm san hô Bãi Bụt (1 Khách)
+                  </div>
+<div class="flex items-center gap-2 text-on-surface-variant text-[12px] font-body-sm mt-0.5">
+<span class="text-tertiary font-medium">NCC: Son Tra Marine Diving</span>
+<span>•</span>
+<span class="text-secondary-container flex items-center gap-1 font-semibold">
+<span class="material-symbols-outlined text-[14px]">hourglass_empty</span> Chờ nhà cung cấp nhận ca lặn
+                    </span>
+</div>
+</div>
+</div>
+<div class="flex flex-row sm:flex-col sm:items-end justify-between items-center flex-shrink-0">
+<span class="font-label-lg text-label-lg font-bold text-on-surface">520.000 đ</span>
+<button class="px-2 py-1 rounded-md bg-secondary-container/10 text-secondary hover:bg-secondary-container/20 text-[11px] font-semibold transition-colors mt-1">
+                  Nhắc NCC duyệt
+                </button>
+</div>
+</div>
+</div>
+</div>
+<!-- ORDER 2: COMPLETED -->
+<div class="bg-surface-container-lowest rounded-2xl shadow-sm hover:shadow-md p-space-lg transition-all duration-200 cursor-pointer">
+<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-space-sm">
+<div class="flex items-start gap-space-sm">
+<div class="w-10 h-10 rounded-xl bg-surface-container flex items-center justify-center text-outline flex-shrink-0 mt-0.5">
+<span class="material-symbols-outlined text-[22px]">sailing</span>
+</div>
+<div>
+<div class="flex items-center gap-2">
+<span class="font-headline-sm text-headline-sm text-on-surface font-bold">#DNS-89410</span>
+<span class="inline-flex items-center px-2 py-0.5 rounded-full text-label-sm font-label-sm bg-primary/10 text-primary font-semibold">
+                    COMPLETED • HOÀN TẤT
+                  </span>
+<span class="inline-flex items-center px-2 py-0.5 rounded-full text-label-sm font-label-sm bg-surface-container text-on-surface-variant">
+                    VNPAY
+                  </span>
+</div>
+<div class="flex items-center gap-3 mt-1 font-body-sm text-body-sm text-on-surface-variant">
+<span class="font-semibold text-on-surface">Lê Quốc Bảo</span>
+<span>•</span>
+<span>0903 881 229</span>
+<span>•</span>
+<span>3 Sub-orders (Tour thuyền buồm Cù Lao Chàm)</span>
+</div>
+</div>
+</div>
+<div class="flex flex-col sm:items-end">
+<span class="font-headline-sm text-headline-sm text-on-surface font-bold">1.800.000 đ</span>
+<span class="font-label-sm text-label-sm text-primary flex items-center gap-1 font-semibold">
+<span class="material-symbols-outlined text-[14px]">task_alt</span> Đã xuất hóa đơn VAT
+              </span>
+</div>
+</div>
+</div>
+<!-- ORDER 3: PARTIALLY COMPLETED -->
+<div class="bg-surface-container-lowest rounded-2xl shadow-sm hover:shadow-md p-space-lg transition-all duration-200 cursor-pointer">
+<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-space-sm">
+<div class="flex items-start gap-space-sm">
+<div class="w-10 h-10 rounded-xl bg-surface-container flex items-center justify-center text-outline flex-shrink-0 mt-0.5">
+<span class="material-symbols-outlined text-[22px]">water_drop</span>
+</div>
+<div>
+<div class="flex items-center gap-2">
+<span class="font-headline-sm text-headline-sm text-on-surface font-bold">#DNS-89408</span>
+<span class="inline-flex items-center px-2 py-0.5 rounded-full text-label-sm font-label-sm bg-tertiary-fixed text-on-tertiary-fixed font-semibold">
+                    PARTIALLY_COMPLETED
+                  </span>
+<span class="inline-flex items-center px-2 py-0.5 rounded-full text-label-sm font-label-sm bg-secondary-container/20 text-on-secondary-container">
+                    MOMO
+                  </span>
+</div>
+<div class="flex items-center gap-3 mt-1 font-body-sm text-body-sm text-on-surface-variant">
+<span class="font-semibold text-on-surface">Trần Thu Hà</span>
+<span>•</span>
+<span>0987 112 344</span>
+<span>•</span>
+<span class="text-secondary font-medium">1 Sub hoàn tất, 1 Sub đã refund do bão biển</span>
+</div>
+</div>
+</div>
+<div class="flex flex-col sm:items-end">
+<span class="font-headline-sm text-headline-sm text-on-surface font-bold">720.000 đ</span>
+<span class="font-label-sm text-label-sm text-outline">Đã đối soát hoàn tiền 360k</span>
+</div>
+</div>
+</div>
+<!-- ORDER 4: CANCELLED -->
+<div class="bg-surface-container-lowest rounded-2xl shadow-sm hover:shadow-md p-space-lg transition-all duration-200 cursor-pointer opacity-85">
+<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-space-sm">
+<div class="flex items-start gap-space-sm">
+<div class="w-10 h-10 rounded-xl bg-error/10 flex items-center justify-center text-error flex-shrink-0 mt-0.5">
+<span class="material-symbols-outlined text-[22px]">cancel</span>
+</div>
+<div>
+<div class="flex items-center gap-2">
+<span class="font-headline-sm text-headline-sm text-on-surface font-bold">#DNS-89405</span>
+<span class="inline-flex items-center px-2 py-0.5 rounded-full text-label-sm font-label-sm bg-error-container text-on-error-container font-semibold">
+                    CANCELLED • ĐÃ HỦY
+                  </span>
+</div>
+<div class="flex items-center gap-3 mt-1 font-body-sm text-body-sm text-on-surface-variant">
+<span class="font-semibold text-on-surface">John Miller</span>
+<span>•</span>
+<span>john.miller@int-travel.com</span>
+<span>•</span>
+<span>Hết hạn thanh toán cổng SEPAY (15 phút)</span>
+</div>
+</div>
+</div>
+<div class="flex flex-col sm:items-end">
+<span class="font-headline-sm text-headline-sm text-outline line-through">950.000 đ</span>
+<span class="font-label-sm text-label-sm text-error">Giao dịch hủy tự động</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Pagination and Maritime Safety Notice -->
+<div class="flex flex-col sm:flex-row items-center justify-between gap-space-md py-space-sm text-on-surface-variant font-label-md text-label-md">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-[18px]">verified</span>
+<span>Hiển thị 4 trên 368 đơn hàng • CSDL Cảng vụ bảo vệ AES-256</span>
+</div>
+<div class="flex items-center gap-1">
+<button class="w-8 h-8 rounded-lg bg-surface-container-lowest hover:bg-surface-container flex items-center justify-center text-outline transition-colors">
+<span class="material-symbols-outlined text-[18px]">chevron_left</span>
+</button>
+<button class="w-8 h-8 rounded-lg bg-primary text-on-primary font-bold flex items-center justify-center">1</button>
+<button class="w-8 h-8 rounded-lg bg-surface-container-lowest hover:bg-surface-container flex items-center justify-center text-on-surface transition-colors">2</button>
+<button class="w-8 h-8 rounded-lg bg-surface-container-lowest hover:bg-surface-container flex items-center justify-center text-on-surface transition-colors">3</button>
+<span class="px-1 text-outline">...</span>
+<button class="w-8 h-8 rounded-lg bg-surface-container-lowest hover:bg-surface-container flex items-center justify-center text-on-surface transition-colors">37</button>
+<button class="w-8 h-8 rounded-lg bg-surface-container-lowest hover:bg-surface-container flex items-center justify-center text-outline transition-colors">
+<span class="material-symbols-outlined text-[18px]">chevron_right</span>
+</button>
+</div>
+</div>
+</div>
+<!-- RIGHT COLUMN (38% ~ col-span-12 xl:col-span-5) Drawer Chi tiết Đơn hàng & Đối soát -->
+<div class="col-span-12 xl:col-span-5 flex flex-col gap-space-lg">
+<!-- Drawer Card -->
+<div class="bg-surface-container-lowest rounded-2xl shadow-md p-space-lg flex flex-col gap-space-lg sticky top-20">
+<!-- Drawer Header -->
+<div class="flex items-start justify-between pb-space-sm border-b-0">
+<div>
+<div class="flex items-center gap-2">
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-primary font-bold">DRAWER CHI TIẾT MASTER ORDER</span>
+<span class="inline-flex items-center px-2 py-0.5 rounded-full text-label-sm font-label-sm bg-primary/10 text-primary font-semibold">
+                PAID
+              </span>
+</div>
+<h2 class="font-headline-lg text-headline-lg text-on-surface font-bold mt-1">#DNS-89412</h2>
+</div>
+<div class="text-right">
+<span class="font-label-sm text-label-sm text-outline">Thời gian tạo:</span>
+<div class="font-label-md text-label-md text-on-surface font-semibold">14:02:10 • 28/10/2024</div>
+</div>
+</div>
+<!-- Khách hàng & Hội viên -->
+<div class="bg-surface-container-low p-space-md rounded-xl flex items-center justify-between">
+<div class="flex items-center gap-3">
+<div class="w-11 h-11 rounded-full bg-primary text-on-primary flex items-center justify-center font-bold font-headline-sm">
+              NA
+            </div>
+<div>
+<div class="flex items-center gap-2">
+<span class="font-headline-sm text-[16px] font-bold text-on-surface">Nguyễn Văn An</span>
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-bold bg-secondary-fixed text-on-secondary-fixed">
+<span class="material-symbols-outlined text-[13px]">military_tech</span> VITA Silver
+                </span>
+</div>
+<div class="font-body-sm text-body-sm text-on-surface-variant mt-0.5">
+                an.nguyen@example.com • 0912 345 678
+              </div>
+</div>
+</div>
+<button class="w-8 h-8 rounded-lg bg-surface-container hover:bg-surface-container-high text-on-surface-variant flex items-center justify-center transition-colors" title="Xem hồ sơ du khách">
+<span class="material-symbols-outlined text-[18px]">open_in_new</span>
+</button>
+</div>
+<!-- KHỐI ĐỐI SOÁT CỔNG THANH TOÁN (PAYMENTS) -->
+<div class="bg-surface-container-lowest p-space-md rounded-xl bg-gradient-to-br from-surface-container-low/80 to-surface-container-lowest flex flex-col gap-space-sm relative">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-[20px]">verified</span>
+<span class="font-label-md text-label-md uppercase tracking-wider font-bold text-on-surface">Đối Soát Cổng Thanh Toán (Payments)</span>
+</div>
+<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-label-sm font-label-sm bg-primary text-on-primary font-bold">
+              THÀNH CÔNG (SUCCESS)
+            </span>
+</div>
+<!-- Strict Transparency Protocol Warning / Assurance -->
+<div class="p-space-sm rounded-lg bg-surface-container text-[12px] font-body-sm text-on-surface-variant flex items-start gap-2">
+<span class="material-symbols-outlined text-primary text-[18px] flex-shrink-0 mt-0.5">security</span>
+<div>
+<strong>Nguyên tắc minh bạch dữ liệu:</strong> Cổng thanh toán đã nhận tiền <em>(SUCCESS)</em> độc lập với việc Nhà cung cấp giữ slot <em>(CONFIRMED)</em>. Hệ thống không cho phép Admin tự ý can thiệp đổi trạng thái thanh toán thủ công.
+            </div>
+</div>
+<!-- Payment Details Metadata Grid -->
+<div class="grid grid-cols-2 gap-space-sm pt-space-xs font-body-sm text-body-sm">
+<div>
+<span class="text-outline block text-label-sm font-label-sm">Cổng giao dịch</span>
+<span class="font-semibold text-on-surface flex items-center gap-1.5 mt-0.5">
+<span class="w-2 h-2 rounded-full bg-primary"></span> SEPAY Gateway
+              </span>
+</div>
+<div>
+<span class="text-outline block text-label-sm font-label-sm">Phương thức</span>
+<span class="font-semibold text-on-surface mt-0.5 block">QR Chuyển khoản VietQR</span>
+</div>
+<div class="col-span-2">
+<span class="text-outline block text-label-sm font-label-sm">Mã giao dịch cổng (provider_transaction_id)</span>
+<div class="flex items-center justify-between font-mono text-[13px] bg-surface-container px-2.5 py-1.5 rounded-lg text-primary font-semibold mt-0.5">
+<span>SEPAY_FT24292881920</span>
+<span class="material-symbols-outlined text-[16px] text-outline cursor-pointer hover:text-primary" title="Sao chép mã">content_copy</span>
+</div>
+</div>
+<div>
+<span class="text-outline block text-label-sm font-label-sm">Số tiền thực thu</span>
+<span class="font-headline-sm text-headline-sm font-bold text-secondary mt-0.5 block">1.030.000 đ</span>
+</div>
+<div>
+<span class="text-outline block text-label-sm font-label-sm">Thời gian ghi nhận</span>
+<span class="font-semibold text-on-surface mt-0.5 block">14:18:22 hôm nay</span>
+</div>
+</div>
+<!-- Security Badge: Protected Raw Payloads -->
+<div class="flex items-center justify-between pt-space-xs text-[11px] font-label-sm text-outline">
+<span class="flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px] text-primary">lock</span>
+              Webhook Signature Đã Xác Thực SHA-256
+            </span>
+<span class="text-on-surface-variant font-mono">qr_secret: •••••••••• (Đã ẩn)</span>
+</div>
+</div>
+<!-- KHỐI HÓA ĐƠN ĐIỆN TỬ (INVOICES) & KHUYẾN MÃI -->
+<div class="grid grid-cols-1 sm:grid-cols-2 gap-space-sm">
+<!-- Hóa đơn điện tử -->
+<div class="p-space-md rounded-xl bg-surface-container-low flex flex-col justify-between">
+<div>
+<div class="flex items-center justify-between mb-1">
+<span class="font-label-sm text-label-sm text-outline uppercase font-bold">Hóa Đơn Điện Tử</span>
+<span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-bold bg-primary/10 text-primary">
+                  ISSUED
+                </span>
+</div>
+<div class="font-label-md text-label-md font-bold text-on-surface font-mono">#HD-2024-89412</div>
+<div class="text-[11px] text-outline mt-0.5">VAT 8% đã bao gồm trong tổng chi phí</div>
+</div>
+<button class="mt-space-sm inline-flex items-center justify-center gap-1.5 px-space-sm py-1.5 rounded-lg bg-surface-container-lowest hover:bg-surface-container text-primary font-label-sm text-label-sm font-semibold transition-colors shadow-sm">
+<span class="material-symbols-outlined text-[16px]">download</span> Tải PDF Hóa Đơn VAT
+            </button>
+</div>
+<!-- Khuyến mãi áp dụng -->
+<div class="p-space-md rounded-xl bg-surface-container-low flex flex-col justify-between">
+<div>
+<div class="flex items-center justify-between mb-1">
+<span class="font-label-sm text-label-sm text-outline uppercase font-bold">Khuyến Mãi Toàn Sàn</span>
+<span class="material-symbols-outlined text-secondary-container text-[18px]">sell</span>
+</div>
+<div class="font-label-md text-label-md font-bold text-secondary-container">Mã: DANASEA50</div>
+<div class="text-[11px] text-outline mt-0.5">Khuyến mại cấp nền tảng (PLATFORM)</div>
+</div>
+<div class="mt-space-sm flex items-center justify-between font-label-sm text-label-sm">
+<span class="text-on-surface-variant">Giảm trừ ví:</span>
+<span class="font-bold text-secondary">-50.000 đ</span>
+</div>
+</div>
+</div>
+<!-- HÀNH ĐỘNG HỖ TRỢ & ĐIỀU PHỐI (ACTIONS) -->
+<div class="flex flex-col gap-space-sm pt-space-xs">
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-outline font-bold">Hành Động Hỗ Trợ Giao Dịch &amp; CSKH</span>
+<div class="grid grid-cols-1 sm:grid-cols-2 gap-space-sm">
+<button class="w-full inline-flex items-center justify-center gap-2 px-space-md py-3 rounded-xl bg-surface-container-high hover:bg-surface-variant/70 text-on-surface font-label-md text-label-md font-semibold transition-all">
+<span class="material-symbols-outlined text-[18px] text-primary">troubleshoot</span>
+              Mở quy trình Tra soát / Khiếu nại
+            </button>
+<!-- Targeted refund for pending Sub-order 02 -->
+<button class="w-full inline-flex items-center justify-center gap-2 px-space-md py-3 rounded-xl bg-secondary-container/15 hover:bg-secondary-container/25 text-on-secondary-container font-label-md text-label-md font-semibold transition-all">
+<span class="material-symbols-outlined text-[18px] text-secondary">assignment_return</span>
+              Khởi tạo Refund #SUB-02
+            </button>
+</div>
+<div class="flex items-center justify-between pt-space-xs text-outline text-[12px] font-body-sm">
+<span class="flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px]">history</span> Lịch sử thay đổi audit log: 4 bản ghi
+            </span>
+<span class="hover:text-primary cursor-pointer underline font-medium">Chi tiết webhook log</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div></main></div></body></html>
