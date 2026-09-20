@@ -171,9 +171,9 @@
 - [x] POST /api/bookings/hold (giữ chỗ nhiều dịch vụ trong 1 lần, TTL 10-15 phút)
 - [x] POST /api/bookings/{holdId}/confirm (chỉ xác nhận sau khi thanh toán toàn bộ thành công)
 - [x] DELETE /api/bookings/hold/{holdId}
-- [ ] GET /api/bookings/{id}
-- [ ] GET /api/bookings
-- [ ] GET /api/vendor/bookings
+- [x] GET /api/bookings/{id}
+- [x] GET /api/bookings
+- [x] GET /api/vendor/bookings
 - [ ] PATCH /api/bookings/{id}/cancel (áp rule mất toàn bộ tiền nếu trễ)
 - [ ] PATCH /api/vendor/bookings/{id}/reject (nếu được cho phép)
 - [x] Scheduled job dọn Redis hold hết hạn + rollback inventory
@@ -184,7 +184,7 @@
 - [ ] Test race condition đa luồng thật (2 request giữ slot cuối cùng, dùng Lua script atomic)
 - [ ] CancelBookingUseCaseTest (đúng mốc thời gian mất toàn bộ tiền)
 - [x] BookingExpiryJobTest (rollback đúng, không rollback nhầm hold đã confirm)
-- [ ] BookingControllerTest (IDOR: khách A/B, vendor không liên quan)
+- [x] BookingControllerTest (IDOR: khách A/B, vendor không liên quan)
 
 ---
 
