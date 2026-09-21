@@ -41,6 +41,12 @@ public class OpenMeteoMarineResponse {
 
         @JsonProperty("ocean_current_direction")
         private Double oceanCurrentDirection;
+
+        @JsonProperty("sea_level_height_msl")
+        private Double seaLevelHeightMsl;
+
+        @JsonProperty("sea_surface_temperature")
+        private Double seaSurfaceTemperature;
     }
 
     private HourlyData hourly;

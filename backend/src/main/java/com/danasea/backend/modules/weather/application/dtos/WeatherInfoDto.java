@@ -33,6 +33,17 @@ public class WeatherInfoDto {
         private Integer weatherCode;
         private Integer precipitationProbability;
         private Double uvIndex;
+        private Double relativeHumidity;
+        private Double dewPoint;
+        private Double surfacePressure;
+
+        public Double getRelativeHumidity2m() {
+            return relativeHumidity;
+        }
+
+        public Double getDewPoint2m() {
+            return dewPoint;
+        }
     }
 
     @Data
@@ -51,5 +62,22 @@ public class WeatherInfoDto {
         private Double oceanCurrentDirection;
         private Double seaLevelHeight;
         private Double seaSurfaceTemperature;
+    }
+
+    @Data
+    @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class TimeWindowForecast {
+        private Double peakWaveHeight;
+        private Double peakWindSpeed;
+        private Double peakWindGust;
+        private Double peakOceanCurrent;
+        private Double minVisibility;
+        private Integer severeWeatherCode;
+        private Double totalPrecipitation;
+        private Double maxUvIndex;
+        private Double avgHumidity;
+        private Double maxCloudCover;
     }
 }

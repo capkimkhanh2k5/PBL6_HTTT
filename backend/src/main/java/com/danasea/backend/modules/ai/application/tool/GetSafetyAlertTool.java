@@ -20,6 +20,7 @@ public class GetSafetyAlertTool implements ToolExecutor {
     private final GetWeatherInfoUseCase weatherInfoUseCase;
     private final StringRedisTemplate redisTemplate;
     private final ObjectMapper objectMapper;
+    private final com.danasea.backend.modules.weather.domain.services.WeatherRuleEngine weatherRuleEngine;
 
     private static final String CACHE_PREFIX = "ai:weather:safety:";
     private static final Duration TTL = Duration.ofMinutes(10); // 5-15 min TTL
@@ -27,20 +28,26 @@ public class GetSafetyAlertTool implements ToolExecutor {
     private static final String ALERT_GREEN = "GREEN";
     private static final String ALERT_YELLOW = "YELLOW";
     private static final String ALERT_RED = "RED";
-    private static final double HIGH_WAVE_THRESHOLD = 2.0;
-    private static final double MODERATE_WAVE_THRESHOLD = 1.0;
 
     @Autowired
     public GetSafetyAlertTool(@Autowired(required = false) GetWeatherInfoUseCase weatherInfoUseCase,
                               @Autowired(required = false) StringRedisTemplate redisTemplate,
-                              ObjectMapper objectMapper) {
+                              ObjectMapper objectMapper,
+                              @Autowired(required = false) com.danasea.backend.modules.weather.domain.services.WeatherRuleEngine weatherRuleEngine) {
         this.weatherInfoUseCase = weatherInfoUseCase;
         this.redisTemplate = redisTemplate;
         this.objectMapper = objectMapper;
+        this.weatherRuleEngine = weatherRuleEngine != null ? weatherRuleEngine : new com.danasea.backend.modules.weather.domain.services.WeatherRuleEngine();
+    }
+
+    public GetSafetyAlertTool(GetWeatherInfoUseCase weatherInfoUseCase,
+                              StringRedisTemplate redisTemplate,
+                              ObjectMapper objectMapper) {
+        this(weatherInfoUseCase, redisTemplate, objectMapper, new com.danasea.backend.modules.weather.domain.services.WeatherRuleEngine());
     }
 
     public GetSafetyAlertTool() {
-        this(null, null, new ObjectMapper());
+        this(null, null, new ObjectMapper(), new com.danasea.backend.modules.weather.domain.services.WeatherRuleEngine());
     }
 
     @Override
@@ -51,6 +58,7 @@ public class GetSafetyAlertTool implements ToolExecutor {
     @Override
     public String execute(String argumentsJson) {
         String location = DEFAULT_LOCATION;
+        String categorySlug = "default";
 
         try {
             if (argumentsJson != null && !argumentsJson.isBlank()) {
@@ -58,12 +66,21 @@ public class GetSafetyAlertTool implements ToolExecutor {
                 if (node.has("location") && !node.get("location").isNull()) {
                     location = node.get("location").asText();
                 }
+                if (node.has("category") && !node.get("category").isNull()) {
+                    categorySlug = node.get("category").asText();
+                } else if (node.has("category_slug") && !node.get("category_slug").isNull()) {
+                    categorySlug = node.get("category_slug").asText();
+                } else if (node.has("activity") && !node.get("activity").isNull()) {
+                    categorySlug = node.get("activity").asText();
+                }
             }
         } catch (Exception e) {
             log.warn("Failed to parse get_safety_alert arguments: {}", argumentsJson, e);
         }
 
-        String cacheKey = CACHE_PREFIX + location;
+        String cacheKey = "default".equalsIgnoreCase(categorySlug)
+                ? CACHE_PREFIX + location
+                : CACHE_PREFIX + location + ":" + categorySlug;
         if (redisTemplate != null) {
             try {
                 String cached = redisTemplate.opsForValue().get(cacheKey);
@@ -77,6 +94,7 @@ public class GetSafetyAlertTool implements ToolExecutor {
 
         Map<String, Object> result = new HashMap<>();
         result.put("location", location);
+        result.put("category", categorySlug);
 
         boolean isSafe = true;
         String alertLevel = ALERT_GREEN;
@@ -84,18 +102,20 @@ public class GetSafetyAlertTool implements ToolExecutor {
 
         try {
             WeatherInfoDto weatherInfo = weatherInfoUseCase != null ? weatherInfoUseCase.execute() : null;
-            if (weatherInfo != null && weatherInfo.getMarine() != null) {
-                Double waveHeight = weatherInfo.getMarine().getWaveHeight();
+            if (weatherInfo != null) {
+                Double waveHeight = weatherInfo.getMarine() != null ? weatherInfo.getMarine().getWaveHeight() : null;
+                Double oceanCurrent = weatherInfo.getMarine() != null ? weatherInfo.getMarine().getOceanCurrentVelocity() : null;
+                Double windSpeed = weatherInfo.getWeather() != null ? weatherInfo.getWeather().getWindSpeed() : null;
+                Double windGust = weatherInfo.getWeather() != null ? weatherInfo.getWeather().getWindGust() : null;
+                Double visibility = weatherInfo.getWeather() != null ? weatherInfo.getWeather().getVisibility() : null;
+                Integer weatherCode = weatherInfo.getWeather() != null ? weatherInfo.getWeather().getWeatherCode() : null;
 
-                if (waveHeight != null && waveHeight > HIGH_WAVE_THRESHOLD) {
-                    isSafe = false;
-                    alertLevel = ALERT_RED;
-                    message = "Cảnh báo sóng biển cao trên 2.0m. Tạm ngưng các hoạt động tàu bè và lặn biển.";
-                } else if (waveHeight != null && waveHeight > MODERATE_WAVE_THRESHOLD) {
-                    isSafe = true;
-                    alertLevel = ALERT_YELLOW;
-                    message = "Cảnh báo sóng ngầm nhẹ, khuyến cáo chỉ bơi trong vùng phao cứu sinh.";
-                }
+                var rule = com.danasea.backend.modules.weather.domain.models.CategorySafetyRule.getBySlug(categorySlug);
+                var eval = weatherRuleEngine.evaluate(rule, waveHeight, windSpeed, windGust, oceanCurrent, visibility, weatherCode);
+
+                isSafe = eval.isSafe();
+                alertLevel = eval.getAlertLevel();
+                message = eval.getWarningMessage();
             }
         } catch (Exception e) {
             log.warn("Safety rule evaluation failed, using default safe status", e);
