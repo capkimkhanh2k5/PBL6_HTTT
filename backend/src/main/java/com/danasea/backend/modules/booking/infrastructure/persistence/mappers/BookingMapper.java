@@ -8,6 +8,7 @@ import org.springframework.stereotype.Component;
 
 import com.danasea.backend.modules.booking.domain.models.Booking;
 import com.danasea.backend.modules.booking.domain.models.BookingItem;
+import com.danasea.backend.modules.booking.domain.models.BookingStatus;
 import com.danasea.backend.modules.booking.infrastructure.persistence.entities.BookingItemJpaEntity;
 import com.danasea.backend.modules.booking.infrastructure.persistence.entities.BookingJpaEntity;
 
@@ -54,6 +55,31 @@ public class BookingMapper {
         return entity;
     }
 
+    public BookingItem toDomainItem(BookingItemJpaEntity itemEntity) {
+        if (itemEntity == null) {
+            return null;
+        }
+        BookingStatus status = null;
+        if (itemEntity.getBooking() != null) {
+            status = itemEntity.getBooking().getStatus();
+        }
+
+        return BookingItem.builder()
+                .id(itemEntity.getId())
+                .bookingId(itemEntity.getBooking() != null ? itemEntity.getBooking().getId() : null)
+                .serviceId(itemEntity.getServiceId())
+                .vendorId(itemEntity.getVendorId())
+                .slotId(itemEntity.getSlotId())
+                .quantity(itemEntity.getQuantity())
+                .bookingDate(itemEntity.getBookingDate())
+                .bookingTime(itemEntity.getBookingTime())
+                .price(itemEntity.getPrice())
+                .bookingStatus(status)
+                .createdAt(itemEntity.getCreatedAt())
+                .updatedAt(itemEntity.getUpdatedAt())
+                .build();
+    }
+
     public Booking toDomain(BookingJpaEntity entity) {
         if (entity == null) {
             return null;
@@ -62,19 +88,13 @@ public class BookingMapper {
         List<BookingItem> items = new ArrayList<>();
         if (entity.getItems() != null) {
             for (BookingItemJpaEntity itemEntity : entity.getItems()) {
-                items.add(BookingItem.builder()
-                        .id(itemEntity.getId())
-                        .bookingId(entity.getId())
-                        .serviceId(itemEntity.getServiceId())
-                        .vendorId(itemEntity.getVendorId())
-                        .slotId(itemEntity.getSlotId())
-                        .quantity(itemEntity.getQuantity())
-                        .bookingDate(itemEntity.getBookingDate())
-                        .bookingTime(itemEntity.getBookingTime())
-                        .price(itemEntity.getPrice())
-                        .createdAt(itemEntity.getCreatedAt())
-                        .updatedAt(itemEntity.getUpdatedAt())
-                        .build());
+                BookingItem item = toDomainItem(itemEntity);
+                if (item != null) {
+                    if (item.getBookingId() == null) {
+                        item.setBookingId(entity.getId());
+                    }
+                    items.add(item);
+                }
             }
         }
 
