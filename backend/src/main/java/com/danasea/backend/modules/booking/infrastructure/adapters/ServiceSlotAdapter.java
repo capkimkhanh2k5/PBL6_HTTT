@@ -96,5 +96,19 @@ public class ServiceSlotAdapter implements ServiceSlotPort {
             }
         }
     }
+
+    @Override
+    @Transactional
+    public void releaseCapacityBatch(List<BookingItem> items) {
+        if (items == null || items.isEmpty()) {
+            return;
+        }
+
+        for (BookingItem item : items) {
+            if (item.getSlotId() != null && item.getQuantity() != null && item.getQuantity() > 0) {
+                jpaServiceSlotRepository.decrementBookedCount(item.getSlotId(), item.getQuantity());
+            }
+        }
+    }
 }
 

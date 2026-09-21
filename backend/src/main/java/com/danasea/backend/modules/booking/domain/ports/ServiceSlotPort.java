@@ -14,5 +14,7 @@ public interface ServiceSlotPort {
     List<SlotValidationDetails> findSlotDetailsBatch(List<UUID> slotIds);
 
     void commitCapacityBatch(List<BookingItem> items);
+
+    void releaseCapacityBatch(List<BookingItem> items);
 }
 

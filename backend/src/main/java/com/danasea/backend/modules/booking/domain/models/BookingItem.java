@@ -26,6 +26,7 @@ public class BookingItem extends BaseDomainModel {
     private LocalDate bookingDate;
     private LocalTime bookingTime;
     private BigDecimal price;
+    private BookingStatus bookingStatus;
 
     public BigDecimal calculateSubtotal() {
         if (price == null || quantity == null) {
