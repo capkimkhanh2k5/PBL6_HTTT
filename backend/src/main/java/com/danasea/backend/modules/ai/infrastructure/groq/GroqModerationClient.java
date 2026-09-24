@@ -2,17 +2,19 @@ package com.danasea.backend.modules.ai.infrastructure.groq;
 
 import com.danasea.backend.modules.ai.application.port.KeyRotatorPort;
 import com.danasea.backend.modules.ai.application.port.ModerationPort;
+import com.danasea.backend.configs.properties.HttpClientProperties;
 import com.danasea.backend.modules.ai.infrastructure.groq.config.GroqProperties;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.MediaType;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.List;
@@ -26,32 +28,39 @@ public class GroqModerationClient implements ModerationPort {
     private static final int CHARS_PER_TOKEN = 4;
     private static final String DEFAULT_BASE_URL = "https://api.groq.com/openai/v1";
     private static final String CHAT_COMPLETIONS_ENDPOINT = "/chat/completions";
-    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
-
-    private final RestTemplate restTemplate;
+    private final RestClient restClient;
+    private final RestTemplate legacyRestTemplate;
     private final KeyRotatorPort keyRotator;
     private final String moderationModel;
     private final String groqApiUrl;
+    private final ObjectMapper objectMapper;
 
     @Autowired
     public GroqModerationClient(
+            RestClient.Builder restClientBuilder,
             KeyRotatorPort keyRotator,
             GroqProperties properties,
-            @Value("${groq.api.url:}") String groqApiUrlOverride) {
-        this(new RestTemplate(), keyRotator,
-                properties != null ? properties.moderationModel() : null,
-                (groqApiUrlOverride != null && !groqApiUrlOverride.isBlank())
-                        ? groqApiUrlOverride
-                        : ((properties != null && properties.baseUrl() != null && !properties.baseUrl().isBlank())
-                                ? properties.baseUrl()
-                                : DEFAULT_BASE_URL) + CHAT_COMPLETIONS_ENDPOINT);
+            HttpClientProperties httpClientProperties,
+            ObjectMapper objectMapper) {
+        SimpleClientHttpRequestFactory requestFactory = new SimpleClientHttpRequestFactory();
+        requestFactory.setConnectTimeout(httpClientProperties.connectTimeout());
+        requestFactory.setReadTimeout(httpClientProperties.readTimeout());
+        this.restClient = restClientBuilder.requestFactory(requestFactory).build();
+        this.legacyRestTemplate = null;
+        this.keyRotator = keyRotator;
+        this.moderationModel = properties != null ? properties.moderationModel() : null;
+        String baseUrl = properties != null && properties.baseUrl() != null && !properties.baseUrl().isBlank()
+                ? properties.baseUrl()
+                : DEFAULT_BASE_URL;
+        this.groqApiUrl = baseUrl + CHAT_COMPLETIONS_ENDPOINT;
+        this.objectMapper = objectMapper;
     }
 
     public GroqModerationClient(
             KeyRotatorPort keyRotator,
             String moderationModel,
             String groqApiUrl) {
-        this(new RestTemplate(), keyRotator, moderationModel, groqApiUrl);
+        this(RestClient.create(), keyRotator, moderationModel, groqApiUrl, new ObjectMapper());
     }
 
     public GroqModerationClient(
@@ -59,10 +68,26 @@ public class GroqModerationClient implements ModerationPort {
             KeyRotatorPort keyRotator,
             String moderationModel,
             String groqApiUrl) {
-        this.restTemplate = restTemplate;
+        this.restClient = null;
+        this.legacyRestTemplate = java.util.Objects.requireNonNull(restTemplate, "restTemplate");
         this.keyRotator = keyRotator;
         this.moderationModel = moderationModel;
         this.groqApiUrl = groqApiUrl;
+        this.objectMapper = new ObjectMapper();
+    }
+
+    GroqModerationClient(
+            RestClient restClient,
+            KeyRotatorPort keyRotator,
+            String moderationModel,
+            String groqApiUrl,
+            ObjectMapper objectMapper) {
+        this.restClient = restClient;
+        this.legacyRestTemplate = null;
+        this.keyRotator = keyRotator;
+        this.moderationModel = moderationModel;
+        this.groqApiUrl = groqApiUrl;
+        this.objectMapper = objectMapper;
     }
 
     /**
@@ -105,7 +130,7 @@ public class GroqModerationClient implements ModerationPort {
      */
     public boolean parseModerationOutput(String output) {
         if (output == null || output.isBlank()) {
-            return true;
+            return false;
         }
         String trimmed = output.trim();
 
@@ -127,7 +152,7 @@ public class GroqModerationClient implements ModerationPort {
             return true;
         }
 
-        return true;
+        return false;
     }
 
     @Override
@@ -140,20 +165,32 @@ public class GroqModerationClient implements ModerationPort {
             String truncatedText = truncateForModeration(text, DEFAULT_MAX_TOKENS);
             String apiKey = keyRotator.getActiveKey();
 
-            HttpHeaders headers = new HttpHeaders();
-            headers.setContentType(MediaType.APPLICATION_JSON);
-            headers.setBearerAuth(apiKey);
-
             Map<String, Object> requestBody = Map.of(
                     "model", moderationModel,
                     "messages", List.of(
                             Map.of("role", "user", "content", truncatedText)));
 
-            HttpEntity<Map<String, Object>> entity = new HttpEntity<>(requestBody, headers);
-
-            ResponseEntity<String> response = restTemplate.postForEntity(groqApiUrl, entity, String.class);
-            if (response.getBody() != null) {
-                JsonNode body = OBJECT_MAPPER.readTree(response.getBody());
+            String response;
+            if (legacyRestTemplate != null) {
+                HttpHeaders headers = new HttpHeaders();
+                headers.setContentType(MediaType.APPLICATION_JSON);
+                headers.setBearerAuth(apiKey);
+                ResponseEntity<String> responseEntity = legacyRestTemplate.postForEntity(
+                        groqApiUrl,
+                        new HttpEntity<>(requestBody, headers),
+                        String.class);
+                response = responseEntity.getBody();
+            } else {
+                response = restClient.post()
+                        .uri(groqApiUrl)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .headers(headers -> headers.setBearerAuth(apiKey))
+                        .body(requestBody)
+                        .retrieve()
+                        .body(String.class);
+            }
+            if (response != null) {
+                JsonNode body = objectMapper.readTree(response);
                 if (body.has("choices")) {
                     JsonNode choices = body.get("choices");
                     if (choices.isArray() && !choices.isEmpty()) {
@@ -162,10 +199,10 @@ public class GroqModerationClient implements ModerationPort {
                     }
                 }
             }
-            return true;
+            return false;
         } catch (Exception e) {
-            log.error("Moderation API failed, failing open: {}", e.getMessage());
-            return true;
+            log.error("Moderation API failed; the request was rejected: {}", e.getMessage());
+            return false;
         }
     }
 }

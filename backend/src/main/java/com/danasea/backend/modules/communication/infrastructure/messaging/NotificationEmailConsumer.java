@@ -8,7 +8,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.AmqpRejectAndDontRequeueException;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.mail.autoconfigure.MailProperties;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Component;
@@ -22,22 +22,20 @@ public class NotificationEmailConsumer {
 
     private final JavaMailSender mailSender;
     private final JpaNotificationRepository notificationRepository;
-
-    @Value("${spring.mail.username:noreply@danasea.com}")
-    private String fromEmail;
+    private final MailProperties mailProperties;
 
     @RabbitListener(queues = RabbitMQConfig.NOTIFICATION_EMAIL_QUEUE)
     public void handleNotificationEmail(NotificationEmailEvent event) {
-        log.info("Processing NotificationEmailEvent for: {} (Subject: {})", event.toEmail(), event.subject());
+        log.info("Processing notification email with subject: {}", event.subject());
         try {
             SimpleMailMessage message = new SimpleMailMessage();
-            message.setFrom(fromEmail);
+            message.setFrom(mailProperties.getUsername());
             message.setTo(event.toEmail());
             message.setSubject("[DANASEA] " + event.subject());
-            message.setText(event.content() + "\n\n---\nDANASEA Marine Tourism Platform\nĐà Nẵng, Việt Nam");
+            message.setText(event.content() + "\n\n---\nDANASEA Marine Tourism Platform\nDa Nang, Vietnam");
 
             mailSender.send(message);
-            log.info("Successfully sent notification email to: {}", event.toEmail());
+            log.info("Notification email sent successfully");
 
             if (event.notificationId() != null) {
                 notificationRepository.findById(event.notificationId()).ifPresent(entity -> {
@@ -47,7 +45,7 @@ public class NotificationEmailConsumer {
                 });
             }
         } catch (Exception e) {
-            log.error("Failed to send notification email to: {}", event.toEmail(), e);
+            log.error("Notification email delivery failed", e);
             if (event.notificationId() != null) {
                 notificationRepository.findById(event.notificationId()).ifPresent(entity -> {
                     entity.setStatus(NotificationStatus.FAILED);

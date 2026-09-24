@@ -109,7 +109,7 @@ public class EmpiricalAdversarialChallengerTest {
             LlmResponse result = chatUseCase.processMessage(conversationId, "Hủy tour có được hoàn tiền không?");
 
             assertNotNull(result);
-            assertEquals("Tôi không thể cung cấp thông tin về chính sách hoàn hủy khi chưa tra cứu hệ thống chính thức. Vui lòng yêu cầu kiểm tra chính sách cụ thể để tôi hỗ trợ.",
+            assertEquals("I cannot provide cancellation or refund policy details without consulting the official policy source. Please ask me to check a specific policy.",
                     result.getContent(), "Hallucinated refund policy must be intercepted and rejected");
             verify(policyTool, never()).execute(anyString());
         }
@@ -126,7 +126,7 @@ public class EmpiricalAdversarialChallengerTest {
             LlmResponse result = chatUseCase.processMessage(conversationId, "What is the cancellation policy?");
 
             assertNotNull(result);
-            assertTrue(result.getContent().contains("Tôi không thể cung cấp thông tin về chính sách hoàn hủy khi chưa tra cứu"),
+            assertTrue(result.getContent().contains("I cannot provide cancellation or refund policy details"),
                     "English cancellation policy without get_policy must be intercepted");
         }
 
@@ -141,7 +141,7 @@ public class EmpiricalAdversarialChallengerTest {
 
             LlmResponse result = chatUseCase.processMessage(conversationId, "Chính sách hủy thế nào?");
 
-            assertEquals("Tôi không thể cung cấp thông tin về chính sách hoàn hủy khi chưa tra cứu hệ thống chính thức. Vui lòng yêu cầu kiểm tra chính sách cụ thể để tôi hỗ trợ.",
+            assertEquals("I cannot provide cancellation or refund policy details without consulting the official policy source. Please ask me to check a specific policy.",
                     result.getContent());
         }
 
@@ -188,7 +188,7 @@ public class EmpiricalAdversarialChallengerTest {
 
             LlmResponse result = chatUseCase.processMessage(conversationId, "Tìm tour và cho biết chính sách hoàn tiền");
 
-            assertEquals("Tôi không thể cung cấp thông tin về chính sách hoàn hủy khi chưa tra cứu hệ thống chính thức. Vui lòng yêu cầu kiểm tra chính sách cụ thể để tôi hỗ trợ.",
+            assertEquals("I cannot provide cancellation or refund policy details without consulting the official policy source. Please ask me to check a specific policy.",
                     result.getContent(), "Calling another tool does not bypass the requirement for get_policy");
         }
 
@@ -357,7 +357,7 @@ public class EmpiricalAdversarialChallengerTest {
             Map<String, Object> response = confirmBookingUseCase.execute("card-adv-1", userId, sessionId);
 
             assertEquals("out_of_stock", response.get("status"));
-            assertTrue(response.get("message").toString().contains("Khung giờ hoặc dịch vụ đã hết chỗ"));
+            assertTrue(response.get("message").toString().contains("no longer available"));
             assertEquals("CANCELLED", pendingCard.getStatus());
             verify(cardStorePort, times(1)).save(pendingCard);
         }
@@ -433,7 +433,7 @@ public class EmpiricalAdversarialChallengerTest {
             GetWeatherForecastTool tool = new GetWeatherForecastTool(weatherInfoUseCase, redisTemplate, objectMapper);
 
             String location = "Sơn Trà";
-            String date = "2026-09-21";
+            String date = "today";
             String expectedCacheKey = "ai:weather:forecast:" + location + ":" + date;
 
             when(valueOperations.get(expectedCacheKey)).thenReturn(null); // Cache miss
@@ -471,7 +471,7 @@ public class EmpiricalAdversarialChallengerTest {
             GetWeatherForecastTool tool = new GetWeatherForecastTool(weatherInfoUseCase, redisTemplate, objectMapper);
 
             String location = "Mỹ Khê";
-            String date = "2026-09-22";
+            String date = "today";
             String expectedCacheKey = "ai:weather:forecast:" + location + ":" + date;
             String cachedJson = "{\"location\":\"Mỹ Khê\",\"temperature\":29.0,\"condition\":\"Sunny\"}";
 
@@ -539,7 +539,7 @@ public class EmpiricalAdversarialChallengerTest {
             when(valueOperations.get(anyString())).thenThrow(new RedisConnectionFailureException("Redis timeout"));
             doThrow(new RedisConnectionFailureException("Redis timeout")).when(valueOperations).set(anyString(), anyString(), any(Duration.class));
 
-            assertDoesNotThrow(() -> weatherTool.execute("{\"location\":\"Đà Nẵng\",\"date\":\"2026-09-20\"}"));
+            assertDoesNotThrow(() -> weatherTool.execute("{\"location\":\"Đà Nẵng\",\"date\":\"today\"}"));
             assertDoesNotThrow(() -> safetyTool.execute("{\"location\":\"Đà Nẵng\"}"));
         }
     }
@@ -596,14 +596,14 @@ public class EmpiricalAdversarialChallengerTest {
 
             SystemConfigJpaEntity entity = new SystemConfigJpaEntity();
             entity.setKey("POLICY_CANCELLATION");
-            entity.setValue("Chính sách hủy tour: Hoàn 100% trước 48 tiếng, hoàn 50% trước 24 tiếng.");
+            entity.setValue("Tour cancellation policy: 100% refund before 48 hours and 50% before 24 hours.");
 
             when(systemConfigRepository.findByKey("POLICY_CANCELLATION")).thenReturn(Optional.of(entity));
 
             String result = tool.execute("{\"policy_type\":\"CANCELLATION\"}");
 
             assertNotNull(result);
-            assertTrue(result.contains("Chính sách hủy tour: Hoàn 100% trước 48 tiếng"));
+            assertTrue(result.contains("Tour cancellation policy: 100% refund before 48 hours and 50% before 24 hours."));
             verify(systemConfigRepository).findByKey("POLICY_CANCELLATION");
         }
 
@@ -617,7 +617,7 @@ public class EmpiricalAdversarialChallengerTest {
             String result = tool.execute("{\"policy_type\":\"REFUND\"}");
 
             assertNotNull(result);
-            assertTrue(result.contains("Chính sách hoàn tiền: Hoàn 100% tiền cọc"));
+            assertTrue(result.contains("Refund policy:"));
         }
     }
 }

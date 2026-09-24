@@ -5,6 +5,7 @@ import com.danasea.backend.modules.ai.application.port.ServiceSearchResultDto;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
@@ -13,7 +14,11 @@ import java.util.Map;
 
 @Component
 @RequiredArgsConstructor
+@Slf4j
 public class SearchServiceTool implements ToolExecutor {
+
+    private static final int MAX_QUERY_LENGTH = 200;
+    private static final int MAX_CATEGORY_LENGTH = 100;
 
     private final ServiceSearchPort serviceSearchPort;
     private final ObjectMapper objectMapper;
@@ -26,26 +31,68 @@ public class SearchServiceTool implements ToolExecutor {
     @Override
     public String execute(String argumentsJson) {
         try {
-            JsonNode args = objectMapper.readTree(argumentsJson);
-            
-            String query = args.has("query") && !args.get("query").isNull() ? args.get("query").asText() : null;
-            String category = args.has("category") && !args.get("category").isNull() ? args.get("category").asText() : null;
-            
-            BigDecimal minPrice = null;
-            if (args.has("min_price") && !args.get("min_price").isNull()) {
-                minPrice = new BigDecimal(args.get("min_price").asText());
+            JsonNode args = argumentsJson == null || argumentsJson.isBlank()
+                    ? objectMapper.createObjectNode()
+                    : objectMapper.readTree(argumentsJson);
+            if (args == null || !args.isObject()) {
+                return error("INVALID_ARGUMENTS", "arguments must be a JSON object");
             }
             
-            BigDecimal maxPrice = null;
-            if (args.has("max_price") && !args.get("max_price").isNull()) {
-                maxPrice = new BigDecimal(args.get("max_price").asText());
+            String query = optionalText(args, "query");
+            String category = optionalText(args, "category");
+            if (query != null && query.length() > MAX_QUERY_LENGTH) {
+                return error("INVALID_ARGUMENTS", "query must not exceed 200 characters");
+            }
+            if (category != null && category.length() > MAX_CATEGORY_LENGTH) {
+                return error("INVALID_ARGUMENTS", "category must not exceed 100 characters");
+            }
+            
+            BigDecimal minPrice = optionalDecimal(args, "min_price");
+            BigDecimal maxPrice = optionalDecimal(args, "max_price");
+            if ((minPrice != null && minPrice.signum() < 0) || (maxPrice != null && maxPrice.signum() < 0)) {
+                return error("INVALID_ARGUMENTS", "prices must not be negative");
+            }
+            if (minPrice != null && maxPrice != null && minPrice.compareTo(maxPrice) > 0) {
+                return error("INVALID_ARGUMENTS", "min_price must not exceed max_price");
             }
 
             List<ServiceSearchResultDto> results = serviceSearchPort.exactAndFilterSearch(query, category, minPrice, maxPrice);
 
-            return objectMapper.writeValueAsString(Map.of("results", results));
+            return objectMapper.writeValueAsString(Map.of("results", results == null ? List.of() : results));
+        } catch (IllegalArgumentException e) {
+            return error("INVALID_ARGUMENTS", e.getMessage());
         } catch (Exception e) {
-            return "{\"error\": \"Failed to execute search_services: " + e.getMessage() + "\"}";
+            log.warn("Service search tool execution failed", e);
+            return error("SEARCH_UNAVAILABLE", "Service search is temporarily unavailable");
+        }
+    }
+
+    private String optionalText(JsonNode args, String field) {
+        if (!args.has(field) || args.get(field).isNull()) {
+            return null;
+        }
+        if (!args.get(field).isTextual()) {
+            throw new IllegalArgumentException(field + " must be a string");
+        }
+        String value = args.get(field).asText().trim();
+        return value.isEmpty() ? null : value;
+    }
+
+    private BigDecimal optionalDecimal(JsonNode args, String field) {
+        if (!args.has(field) || args.get(field).isNull()) {
+            return null;
+        }
+        if (!args.get(field).isNumber()) {
+            throw new IllegalArgumentException(field + " must be a number");
+        }
+        return args.get(field).decimalValue();
+    }
+
+    private String error(String code, String message) {
+        try {
+            return objectMapper.writeValueAsString(Map.of("error", code, "message", message));
+        } catch (Exception exception) {
+            return "{\"error\":\"" + code + "\"}";
         }
     }
 }

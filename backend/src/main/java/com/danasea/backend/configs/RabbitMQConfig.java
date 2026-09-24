@@ -12,7 +12,10 @@ import org.springframework.amqp.support.converter.MessageConverter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import lombok.extern.slf4j.Slf4j;
+
 @Configuration
+@Slf4j
 public class RabbitMQConfig {
 
     public static final String EXCHANGE_NAME = "danasea.exchange.topic";
@@ -97,12 +100,13 @@ public class RabbitMQConfig {
 
         template.setConfirmCallback((correlationData, ack, cause) -> {
             if (!ack) {
-                System.err.println("Message failed to publish: " + cause);
+                log.error("RabbitMQ publisher confirmation failed: {}", cause);
             }
         });
 
         template.setReturnsCallback(returned -> {
-            System.err.println("Message returned: " + returned.getMessage() + " with reply code: " + returned.getReplyCode());
+            log.error("RabbitMQ returned an unroutable message with reply code {} and reply text {}",
+                    returned.getReplyCode(), returned.getReplyText());
         });
 
         return template;

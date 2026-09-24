@@ -1,6 +1,5 @@
 package com.danasea.backend.modules.service.application.usecases;
 
-import java.io.IOException;
 import java.util.Set;
 import java.util.UUID;
 
@@ -16,10 +15,13 @@ import com.danasea.backend.modules.service.infrastructure.persistence.entities.S
 import com.danasea.backend.modules.service.infrastructure.persistence.repositories.JpaServiceRepository;
 import com.danasea.backend.modules.service.infrastructure.persistence.repositories.JpaServiceSafetyDocumentRepository;
 import lombok.RequiredArgsConstructor;
+import com.danasea.backend.modules.service.application.usecases.helpers.FileSignatureValidator;
 
 @Service
 @RequiredArgsConstructor
 public class UploadSafetyDocumentUseCase {
+
+    private static final long MAX_DOCUMENT_BYTES = 20L * 1024 * 1024;
 
     private static final Set<String> ALLOWED_CONTENT_TYPES = Set.of(
             "application/pdf",
@@ -41,18 +43,13 @@ public class UploadSafetyDocumentUseCase {
         }
 
         // 3. Validate file type — safety documents can be PDF or images
-        if (file.isEmpty() || !ALLOWED_CONTENT_TYPES.contains(file.getContentType())) {
-            throw new InvalidFileTypeException("Only PDF or image files are allowed for safety documents");
-        }
+        byte[] fileBytes = FileSignatureValidator.readAndValidate(
+                file, ALLOWED_CONTENT_TYPES, MAX_DOCUMENT_BYTES);
 
         // 4. Upload to Cloudinary
         String folderPath = "services/" + serviceId + "/documents";
         String uploadedUrl;
-        try {
-            uploadedUrl = fileStoragePort.uploadFile(file.getBytes(), file.getOriginalFilename(), folderPath);
-        } catch (IOException e) {
-            throw new RuntimeException("Failed to read uploaded file", e);
-        }
+        uploadedUrl = fileStoragePort.uploadFile(fileBytes, file.getOriginalFilename(), folderPath);
 
         // 5. Save with PENDING status, no audit trail yet
         var documentEntity = new ServiceSafetyDocumentJpaEntity();
@@ -66,4 +63,3 @@ public class UploadSafetyDocumentUseCase {
         return safetyDocumentRepository.save(documentEntity);
     }
 }
-

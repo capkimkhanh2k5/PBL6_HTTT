@@ -7,6 +7,5 @@ public class FullContextLoadTest extends BaseSecurityIntegrationTest {
 
     @Test
     void contextLoadsWithoutBeanConflicts() {
-        System.out.println("FULL CONTEXT LOADED SUCCESSFULLY WITH TESTCONTAINERS!");
     }
 }

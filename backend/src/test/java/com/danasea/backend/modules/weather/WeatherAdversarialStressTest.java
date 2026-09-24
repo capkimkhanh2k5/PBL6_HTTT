@@ -344,7 +344,7 @@ class WeatherAdversarialStressTest {
             assertEquals(BigDecimal.valueOf(2000000), refund.getAmount());
             assertEquals(BigDecimal.valueOf(100.0), refund.getRefundPercentage());
             assertEquals(RefundReason.WEATHER, refund.getReason());
-            assertEquals(RefundStatus.PROCESSED, refund.getStatus());
+            assertEquals(RefundStatus.PENDING, refund.getStatus());
 
             // Verify alert status updated
             assertEquals("AUTO_CANCELLED_FOR_SAFETY", redAlert.getStatus());
@@ -354,15 +354,15 @@ class WeatherAdversarialStressTest {
             // Verify tri-party notifications (Admin, Vendor, Customer)
             verify(sendNotificationUseCase, times(1)).execute(
                     isNull(), eq("AUTO_CANCELLED_FOR_SAFETY"), eq(NotificationChannel.IN_APP),
-                    contains("Hệ thống tự động can thiệp"), anyString(), eq("SERVICE_SLOT"), eq(slotId), isNull()
+                    contains("Automatic safety intervention"), anyString(), eq("SERVICE_SLOT"), eq(slotId), isNull()
             );
             verify(sendNotificationUseCase, times(1)).execute(
                     eq(vendorId), eq("AUTO_CANCELLED_FOR_SAFETY"), eq(NotificationChannel.IN_APP),
-                    contains("Chuyến đi bị hủy tự động"), anyString(), eq("SERVICE_SLOT"), eq(slotId), isNull()
+                    contains("Trip automatically cancelled"), anyString(), eq("SERVICE_SLOT"), eq(slotId), isNull()
             );
             verify(sendNotificationUseCase, times(1)).execute(
                     eq(customerId), eq("AUTO_CANCELLED_FOR_SAFETY"), eq(NotificationChannel.IN_APP),
-                    contains("Hoàn tiền 100%"), anyString(), eq("SUB_ORDER"), eq(subOrder.getId()), isNull()
+                    contains("full refund requested"), anyString(), eq("SUB_ORDER"), eq(subOrder.getId()), isNull()
             );
         }
 
@@ -674,15 +674,15 @@ class WeatherAdversarialStressTest {
             // Escalation notifications sent:
             // 1. Vendor with [LEO THANG NGUY HIỂM]
             verify(sendNotificationUseCase, times(1)).execute(
-                    eq(vendorId), eq("WEATHER_ALERT"), any(), contains("LEO THANG"), anyString(), eq("SERVICE_SLOT"), eq(slotId), isNull()
+                    eq(vendorId), eq("WEATHER_ALERT"), any(), contains("ESCALATED ALERT"), anyString(), eq("SERVICE_SLOT"), eq(slotId), isNull()
             );
             // 2. Customer with [LEO THANG NGUY HIỂM]
             verify(sendNotificationUseCase, times(1)).execute(
-                    eq(customerId), eq("WEATHER_WARNING"), any(), contains("LEO THANG"), anyString(), eq("SUB_ORDER"), eq(subOrder.getId()), isNull()
+                    eq(customerId), eq("WEATHER_WARNING"), any(), contains("ESCALATED ALERT"), anyString(), eq("SUB_ORDER"), eq(subOrder.getId()), isNull()
             );
             // 3. Admin urgent alert
             verify(sendNotificationUseCase, times(1)).execute(
-                    isNull(), eq("WEATHER_ALERT"), any(), contains("leo thang lên mức ĐỎ"), anyString(), eq("SERVICE_SLOT"), eq(slotId), isNull()
+                    isNull(), eq("WEATHER_ALERT"), any(), contains("escalated to RED"), anyString(), eq("SERVICE_SLOT"), eq(slotId), isNull()
             );
 
             // STEP 3: Repeat run after escalation -> Stays at RED, in-place update, NO extra alerts
@@ -691,7 +691,7 @@ class WeatherAdversarialStressTest {
             assertEquals(1, dbStore.size());
             // Notifications counts remain unchanged
             verify(sendNotificationUseCase, times(1)).execute(
-                    eq(vendorId), eq("WEATHER_ALERT"), any(), contains("LEO THANG"), anyString(), eq("SERVICE_SLOT"), eq(slotId), isNull()
+                    eq(vendorId), eq("WEATHER_ALERT"), any(), contains("ESCALATED ALERT"), anyString(), eq("SERVICE_SLOT"), eq(slotId), isNull()
             );
         }
     }

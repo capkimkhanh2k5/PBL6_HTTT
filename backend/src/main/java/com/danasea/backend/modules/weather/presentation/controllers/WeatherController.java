@@ -15,11 +15,12 @@ import org.springframework.web.bind.annotation.RestController;
 import io.swagger.v3.oas.annotations.security.SecurityRequirements;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/api/v1/weather")
+@RequestMapping({"/api/weather", "/api/v1/weather"})
 @RequiredArgsConstructor
 public class WeatherController {
 
@@ -28,8 +29,10 @@ public class WeatherController {
 
     @GetMapping("/current")
     @SecurityRequirements()
-    public ResponseEntity<WeatherInfoDto> getCurrentWeatherAndMarine() {
-        WeatherInfoDto weatherInfo = getWeatherInfoUseCase.execute();
+    public ResponseEntity<WeatherInfoDto> getCurrentWeatherAndMarine(
+            @RequestParam(name = "lat", defaultValue = "16.089035780716284") double latitude,
+            @RequestParam(name = "lng", defaultValue = "108.24959555394304") double longitude) {
+        WeatherInfoDto weatherInfo = getWeatherInfoUseCase.execute(latitude, longitude);
         if (weatherInfo == null) {
             return ResponseEntity.notFound().build();
         }
@@ -40,9 +43,12 @@ public class WeatherController {
     @SecurityRequirements()
     public ResponseEntity<AdvanceBookingSafetyResponse> checkAdvanceBookingSafety(
             @RequestParam(required = false) UUID slotId,
-            @RequestParam(required = false, defaultValue = "cheo-sup-kayak") String categorySlug,
+            @RequestParam(required = false) UUID categoryId,
+            @RequestParam(required = false) String categorySlug,
             @RequestParam(required = false, defaultValue = "16.089035780716284") double latitude,
             @RequestParam(required = false, defaultValue = "108.24959555394304") double longitude,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
+            LocalDateTime targetDateTime,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate bookingDate,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.TIME) LocalTime startTime,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.TIME) LocalTime endTime) {
@@ -51,16 +57,27 @@ public class WeatherController {
             return ResponseEntity.ok(checkAdvanceBookingSafetyUseCase.checkBySlotId(slotId));
         }
 
-        if (bookingDate == null) {
-            throw new IllegalArgumentException("Date is required");
+        LocalDate resolvedDate = bookingDate != null
+                ? bookingDate
+                : targetDateTime != null ? targetDateTime.toLocalDate() : null;
+        if (resolvedDate == null) {
+            throw new IllegalArgumentException("Either bookingDate or targetDateTime is required");
         }
 
+        LocalTime resolvedStartTime = startTime != null
+                ? startTime
+                : targetDateTime != null ? targetDateTime.toLocalTime() : LocalTime.of(8, 0);
+        String resolvedCategorySlug = categoryId == null
+                ? (categorySlug == null || categorySlug.isBlank() ? "cheo-sup-kayak" : categorySlug)
+                : null;
+
         AdvanceBookingSafetyRequest request = AdvanceBookingSafetyRequest.builder()
-                .categorySlug(categorySlug)
+                .categoryId(categoryId)
+                .categorySlug(resolvedCategorySlug)
                 .latitude(latitude)
                 .longitude(longitude)
-                .bookingDate(bookingDate)
-                .startTime(startTime != null ? startTime : LocalTime.of(8, 0))
+                .bookingDate(resolvedDate)
+                .startTime(resolvedStartTime)
                 .endTime(endTime != null ? endTime : LocalTime.of(17, 0))
                 .build();
 

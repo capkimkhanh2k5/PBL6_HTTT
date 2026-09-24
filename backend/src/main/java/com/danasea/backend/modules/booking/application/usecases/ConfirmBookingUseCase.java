@@ -10,17 +10,40 @@ import com.danasea.backend.modules.booking.domain.exceptions.BookingNotFoundExce
 import com.danasea.backend.modules.booking.domain.models.Booking;
 import com.danasea.backend.modules.booking.domain.models.InventoryLockItem;
 import com.danasea.backend.modules.booking.domain.ports.BookingRepositoryPort;
+import com.danasea.backend.modules.booking.domain.ports.BookingPaymentStatusPort;
 import com.danasea.backend.modules.booking.domain.ports.InventoryLockPort;
 import com.danasea.backend.modules.booking.domain.ports.ServiceSlotPort;
 import lombok.RequiredArgsConstructor;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
-@RequiredArgsConstructor
 public class ConfirmBookingUseCase {
 
     private final BookingRepositoryPort bookingRepository;
     private final InventoryLockPort inventoryLockPort;
     private final ServiceSlotPort serviceSlotPort;
+    private final BookingPaymentStatusPort bookingPaymentStatusPort;
 
+    public ConfirmBookingUseCase(
+            BookingRepositoryPort bookingRepository,
+            InventoryLockPort inventoryLockPort,
+            ServiceSlotPort serviceSlotPort,
+            BookingPaymentStatusPort bookingPaymentStatusPort) {
+        this.bookingRepository = bookingRepository;
+        this.inventoryLockPort = inventoryLockPort;
+        this.serviceSlotPort = serviceSlotPort;
+        this.bookingPaymentStatusPort = bookingPaymentStatusPort;
+    }
+
+    public ConfirmBookingUseCase(
+            BookingRepositoryPort bookingRepository,
+            InventoryLockPort inventoryLockPort,
+            ServiceSlotPort serviceSlotPort) {
+        this(bookingRepository, inventoryLockPort, serviceSlotPort, bookingId -> false);
+    }
+
+    @Transactional
     public BookingHoldResult execute(ConfirmBookingCommand command) {
         if (command == null || command.bookingId() == null) {
             throw new IllegalArgumentException("Booking ID cannot be null");
@@ -29,10 +52,19 @@ public class ConfirmBookingUseCase {
             throw new IllegalArgumentException("Customer ID cannot be null");
         }
 
-        Booking booking = bookingRepository.findById(command.bookingId())
+        Booking booking = bookingRepository.findByIdWithItemsForUpdate(command.bookingId())
                 .orElseThrow(() -> new BookingNotFoundException(command.bookingId()));
 
         booking.validateOwner(command.customerId());
+
+        if (!bookingPaymentStatusPort.hasSuccessfulPayment(booking.getId())) {
+            throw new com.danasea.backend.modules.booking.domain.exceptions.InvalidBookingStateException(
+                    "Booking confirmation requires a successful payment webhook.");
+        }
+
+        if (booking.isConfirmed()) {
+            return mapToResult(booking);
+        }
 
         OffsetDateTime now = OffsetDateTime.now();
         booking.confirm(now);
@@ -40,14 +72,26 @@ public class ConfirmBookingUseCase {
         // Deduct/commit capacity into PostgreSQL service_slots
         serviceSlotPort.commitCapacityBatch(booking.getItems());
 
-        // Release temporary hold from Redis cache
         List<InventoryLockItem> lockItems = booking.getItems().stream()
                 .map(item -> InventoryLockItem.of(item.getSlotId(), item.getQuantity(), 0))
                 .toList();
-        inventoryLockPort.releaseHolds(booking.getId(), lockItems);
 
         Booking savedBooking = bookingRepository.save(booking);
+        releaseHoldsAfterCommit(booking.getId(), lockItems);
         return mapToResult(savedBooking);
+    }
+
+    private void releaseHoldsAfterCommit(java.util.UUID bookingId, List<InventoryLockItem> lockItems) {
+        if (!TransactionSynchronizationManager.isSynchronizationActive()) {
+            inventoryLockPort.releaseHolds(bookingId, lockItems);
+            return;
+        }
+        TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+            @Override
+            public void afterCommit() {
+                inventoryLockPort.releaseHolds(bookingId, lockItems);
+            }
+        });
     }
 
     private BookingHoldResult mapToResult(Booking booking) {

@@ -18,4 +18,12 @@ public class CatalogExceptionHandler {
                 "message", ex.getMessage()
         ));
     }
+
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<Map<String, String>> handleInvalidInput(IllegalArgumentException ex) {
+        return ResponseEntity.badRequest().body(Map.of(
+                "code", "INVALID_INPUT",
+                "message", ex.getMessage()
+        ));
+    }
 }

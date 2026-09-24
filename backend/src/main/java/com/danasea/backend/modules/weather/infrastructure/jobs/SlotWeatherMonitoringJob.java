@@ -2,9 +2,11 @@ package com.danasea.backend.modules.weather.infrastructure.jobs;
 
 import com.danasea.backend.modules.communication.application.usecases.SendNotificationUseCase;
 import com.danasea.backend.modules.communication.domain.models.NotificationChannel;
+import com.danasea.backend.modules.order.domain.models.RefundEvaluationResult;
 import com.danasea.backend.modules.order.domain.models.RefundReason;
 import com.danasea.backend.modules.order.domain.models.RefundStatus;
 import com.danasea.backend.modules.order.domain.models.SubOrderStatus;
+import com.danasea.backend.modules.order.domain.services.RefundPolicyEngine;
 import com.danasea.backend.modules.order.infrastructure.persistence.entities.MasterOrderJpaEntity;
 import com.danasea.backend.modules.order.infrastructure.persistence.entities.RefundJpaEntity;
 import com.danasea.backend.modules.order.infrastructure.persistence.entities.SubOrderJpaEntity;
@@ -33,9 +35,11 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.Duration;
+import java.time.Clock;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
+import java.time.ZoneId;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -43,6 +47,9 @@ import java.util.UUID;
 @Slf4j
 @Component
 public class SlotWeatherMonitoringJob {
+
+    @Autowired
+    private Clock clock;
 
     private final JpaServiceSlotRepository slotRepository;
     private final JpaServiceRepository serviceRepository;
@@ -55,6 +62,7 @@ public class SlotWeatherMonitoringJob {
     private final JpaRefundRepository refundRepository;
     private final CategorySafetyRuleService categorySafetyRuleService;
     private final JpaMasterOrderRepository masterOrderRepository;
+    private final RefundPolicyEngine refundPolicyEngine;
 
     private static final double DEFAULT_LAT = 16.089035780716284;
     private static final double DEFAULT_LNG = 108.24959555394304;
@@ -71,7 +79,8 @@ public class SlotWeatherMonitoringJob {
             SendNotificationUseCase sendNotificationUseCase,
             @Autowired(required = false) JpaRefundRepository refundRepository,
             @Autowired(required = false) CategorySafetyRuleService categorySafetyRuleService,
-            @Autowired(required = false) JpaMasterOrderRepository masterOrderRepository
+            @Autowired(required = false) JpaMasterOrderRepository masterOrderRepository,
+            @Autowired(required = false) RefundPolicyEngine refundPolicyEngine
     ) {
         this.slotRepository = slotRepository;
         this.serviceRepository = serviceRepository;
@@ -84,6 +93,26 @@ public class SlotWeatherMonitoringJob {
         this.refundRepository = refundRepository;
         this.categorySafetyRuleService = categorySafetyRuleService;
         this.masterOrderRepository = masterOrderRepository;
+        this.refundPolicyEngine = refundPolicyEngine != null ? refundPolicyEngine : new RefundPolicyEngine();
+        this.clock = Clock.system(ZoneId.of("Asia/Ho_Chi_Minh"));
+    }
+
+    public SlotWeatherMonitoringJob(
+            JpaServiceSlotRepository slotRepository,
+            JpaServiceRepository serviceRepository,
+            JpaCategoryRepository categoryRepository,
+            JpaSafetyRuleEvaluationRepository evaluationRepository,
+            JpaSubOrderRepository subOrderRepository,
+            WeatherProviderPort weatherProviderPort,
+            WeatherRuleEngine weatherRuleEngine,
+            SendNotificationUseCase sendNotificationUseCase,
+            JpaRefundRepository refundRepository,
+            CategorySafetyRuleService categorySafetyRuleService,
+            JpaMasterOrderRepository masterOrderRepository
+    ) {
+        this(slotRepository, serviceRepository, categoryRepository, evaluationRepository,
+             subOrderRepository, weatherProviderPort, weatherRuleEngine, sendNotificationUseCase,
+             refundRepository, categorySafetyRuleService, masterOrderRepository, null);
     }
 
     public SlotWeatherMonitoringJob(
@@ -100,7 +129,7 @@ public class SlotWeatherMonitoringJob {
     ) {
         this(slotRepository, serviceRepository, categoryRepository, evaluationRepository,
              subOrderRepository, weatherProviderPort, weatherRuleEngine, sendNotificationUseCase,
-             refundRepository, categorySafetyRuleService, null);
+             refundRepository, categorySafetyRuleService, null, null);
     }
 
     public SlotWeatherMonitoringJob(
@@ -115,7 +144,7 @@ public class SlotWeatherMonitoringJob {
     ) {
         this(slotRepository, serviceRepository, categoryRepository, evaluationRepository,
              subOrderRepository, weatherProviderPort, weatherRuleEngine, sendNotificationUseCase,
-             null, null, null);
+             null, null, null, null);
     }
 
     /**
@@ -123,10 +152,12 @@ public class SlotWeatherMonitoringJob {
      * Evaluates booked slots in sliding windows T-24h and T-2h,
      * and performs auto-escalation fallback for unhandled RED incidents within 60 minutes.
      */
-    @Scheduled(cron = "${app.weather.monitoring-cron:0 */30 * * * *}")
+    @Scheduled(
+            cron = "${app.weather.monitoring-cron:0 */30 * * * *}",
+            zone = "${app.scheduler.zone:Asia/Ho_Chi_Minh}")
     @Transactional
     public void monitorUpcomingSlots() {
-        monitorUpcomingSlots(LocalDateTime.now());
+        monitorUpcomingSlots(LocalDateTime.now(clock));
     }
 
     @Transactional
@@ -184,7 +215,7 @@ public class SlotWeatherMonitoringJob {
      */
     @Transactional
     public boolean checkAutoEscalationFallback(ServiceSlotJpaEntity slot) {
-        return checkAutoEscalationFallback(slot, LocalDateTime.now());
+        return checkAutoEscalationFallback(slot, LocalDateTime.now(clock));
     }
 
     @Transactional
@@ -219,14 +250,24 @@ public class SlotWeatherMonitoringJob {
                             subOrderRepository.save(subOrder);
 
                             if (refundRepository != null && subOrder.getSubtotalAmount() != null) {
-                                RefundJpaEntity refund = new RefundJpaEntity();
-                                refund.setSubOrderId(subOrder.getId());
-                                refund.setAmount(subOrder.getSubtotalAmount());
-                                refund.setRefundPercentage(BigDecimal.valueOf(100.0));
-                                refund.setReason(RefundReason.WEATHER);
-                                refund.setStatus(RefundStatus.PROCESSED);
-                                refund.setProcessedAt(OffsetDateTime.now());
-                                refundRepository.save(refund);
+                                RefundEvaluationResult evalResult = refundPolicyEngine.evaluate(
+                                        RefundReason.WEATHER,
+                                        slotStart,
+                                        now,
+                                        subOrder.getSubtotalAmount()
+                                );
+                                String idempotencyKey = "weather-auto-" + alert.getId();
+                                if (refundRepository.findBySubOrderIdAndIdempotencyKey(
+                                        subOrder.getId(), idempotencyKey).isEmpty()) {
+                                    RefundJpaEntity refund = new RefundJpaEntity();
+                                    refund.setSubOrderId(subOrder.getId());
+                                    refund.setAmount(evalResult.refundAmount());
+                                    refund.setRefundPercentage(evalResult.refundPercentage());
+                                    refund.setReason(RefundReason.WEATHER);
+                                    refund.setStatus(RefundStatus.PENDING);
+                                    refund.setIdempotencyKey(idempotencyKey);
+                                    refundRepository.save(refund);
+                                }
                             }
                             cancelledCount++;
                         }
@@ -252,7 +293,7 @@ public class SlotWeatherMonitoringJob {
                             null,
                             "AUTO_CANCELLED_FOR_SAFETY",
                             NotificationChannel.IN_APP,
-                            "System Auto-Cancelled: Slot cancelled and 100% refund due to dangerous weather (T <= 60m)",
+                        "Automatic safety intervention: slot cancelled and full refund requested (T <= 60m)",
                             String.format("Slot %s (%s at %s) has been auto-cancelled due to RED alert not being addressed within 60 minutes.",
                                     slot.getId(), slot.getDate(), slot.getStartTime()),
                             "SERVICE_SLOT",
@@ -266,7 +307,7 @@ public class SlotWeatherMonitoringJob {
                                 serviceOpt.get().getVendorId(),
                                 "AUTO_CANCELLED_FOR_SAFETY",
                                 NotificationChannel.IN_APP,
-                                "Trip auto-cancelled for maritime safety: " + serviceName,
+                                "Trip automatically cancelled for maritime safety: " + serviceName,
                                 String.format("Trip at %s on %s has been auto-cancelled by the system for maritime safety reasons.",
                                         slot.getStartTime(), slot.getDate()),
                                 "SERVICE_SLOT",
@@ -282,8 +323,8 @@ public class SlotWeatherMonitoringJob {
                                 customerId,
                                 "AUTO_CANCELLED_FOR_SAFETY",
                                 NotificationChannel.IN_APP,
-                                "Trip cancelled for maritime safety & 100% refund: " + serviceName,
-                                String.format("Your trip at %s on %s has been cancelled due to dangerous weather conditions. A full 100%% refund has been processed successfully.",
+                                "Trip cancelled and full refund requested: " + serviceName,
+                                String.format("Your trip at %s on %s has been cancelled due to dangerous weather conditions. A full refund request is pending payment-provider processing.",
                                         slot.getStartTime(), slot.getDate()),
                                 "SUB_ORDER",
                                 subOrder.getId(),
@@ -490,7 +531,7 @@ public class SlotWeatherMonitoringJob {
 
     private void sendRedAlertNotifications(ServiceJpaEntity service, ServiceSlotJpaEntity slot,
                                            WeatherRuleEngine.SafetyEvaluationResult evalResult, boolean isEscalation) {
-        String prefix = isEscalation ? "[ESCALATION ALERT] " : "";
+        String prefix = isEscalation ? "[ESCALATED ALERT] " : "";
 
         // 1. Vendor
         if (service.getVendorId() != null) {
@@ -531,7 +572,7 @@ public class SlotWeatherMonitoringJob {
                     null,
                     "WEATHER_ALERT",
                     NotificationChannel.IN_APP,
-                    "Weather alert escalated to RED level",
+                    "Weather alert escalated to RED: " + service.getName(),
                     String.format("Slot %s of service %s has escalated to RED alert level: %s",
                             slot.getId(), service.getName(), evalResult.getWarningMessage()),
                     "SERVICE_SLOT",

@@ -24,10 +24,6 @@ public class CustomAccessDeniedHandler implements AccessDeniedHandler {
         this.objectMapper = objectMapper;
     }
 
-    public CustomAccessDeniedHandler() {
-        this(new ObjectMapper());
-    }
-
     @Override
     public void handle(
             HttpServletRequest request,
@@ -38,10 +34,7 @@ public class CustomAccessDeniedHandler implements AccessDeniedHandler {
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
         response.setCharacterEncoding(StandardCharsets.UTF_8.name());
 
-        String message = (accessDeniedException != null && accessDeniedException.getMessage() != null && !accessDeniedException.getMessage().isBlank())
-                ? accessDeniedException.getMessage()
-                : "Access denied";
-        ErrorResponse errorResponse = new ErrorResponse("ACCESS_DENIED", message);
+        ErrorResponse errorResponse = new ErrorResponse("ACCESS_DENIED", "Access denied.");
 
         response.getWriter().write(objectMapper.writeValueAsString(errorResponse));
         response.getWriter().flush();

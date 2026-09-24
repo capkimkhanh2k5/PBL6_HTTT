@@ -10,11 +10,17 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+import jakarta.persistence.LockModeType;
 
 @Repository
 public interface JpaServiceRepository extends JpaRepository<ServiceJpaEntity, UUID>, JpaSpecificationExecutor<ServiceJpaEntity> {
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("SELECT s FROM ServiceJpaEntity s WHERE s.id = :id")
+    Optional<ServiceJpaEntity> findByIdForUpdate(@Param("id") UUID id);
+
     boolean existsByCategoryIdAndStatus(UUID categoryId, ServiceStatus status);
 
     List<ServiceJpaEntity> findByVendorId(UUID vendorId);
@@ -33,4 +39,3 @@ public interface JpaServiceRepository extends JpaRepository<ServiceJpaEntity, UU
 
     Optional<ServiceJpaEntity> findByIdAndStatus(UUID id, ServiceStatus status);
 }
-

@@ -13,19 +13,22 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.access.prepost.PreAuthorize;
+import com.danasea.backend.modules.service.domain.ports.VendorPort;
 
-import java.security.Principal;
 import java.util.List;
 import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/vendor/services/{serviceId}/images")
 @RequiredArgsConstructor
+@PreAuthorize("hasRole('VENDOR')")
 public class VendorServiceImageController {
 
     private final UploadServiceImageUseCase uploadServiceImageUseCase;
     private final DeleteServiceImageUseCase deleteServiceImageUseCase;
     private final ReorderServiceImagesUseCase reorderServiceImagesUseCase;
+    private final VendorPort vendorPort;
 
     /**
      * POST /api/vendor/services/{serviceId}/images
@@ -34,11 +37,9 @@ public class VendorServiceImageController {
     @PostMapping(consumes = "multipart/form-data")
     public ResponseEntity<ServiceImageResponse> uploadImage(
             @PathVariable UUID serviceId,
-            @RequestParam("file") MultipartFile file,
-            Principal principal) {
+            @RequestParam("file") MultipartFile file) {
 
-        UUID vendorId = SecurityUtils.getCurrentUserId()
-                .orElseThrow(() -> new AccessDeniedException("User ID not found"));
+        UUID vendorId = currentVendorId();
         var saved = uploadServiceImageUseCase.execute(serviceId, vendorId, file);
         return ResponseEntity.status(HttpStatus.CREATED).body(ServiceImageResponse.from(saved));
     }
@@ -49,11 +50,9 @@ public class VendorServiceImageController {
     @DeleteMapping("/{imageId}")
     public ResponseEntity<Void> deleteImage(
             @PathVariable UUID serviceId,
-            @PathVariable UUID imageId,
-            Principal principal) {
+            @PathVariable UUID imageId) {
 
-        UUID vendorId = SecurityUtils.getCurrentUserId()
-                .orElseThrow(() -> new AccessDeniedException("User ID not found"));
+        UUID vendorId = currentVendorId();
         deleteServiceImageUseCase.execute(serviceId, imageId, vendorId);
         return ResponseEntity.noContent().build();
     }
@@ -65,12 +64,18 @@ public class VendorServiceImageController {
     @PatchMapping("/reorder")
     public ResponseEntity<List<ServiceImageResponse>> reorderImages(
             @PathVariable UUID serviceId,
-            @Valid @RequestBody ReorderImagesRequest request,
-            Principal principal) {
+            @Valid @RequestBody ReorderImagesRequest request) {
 
-        UUID vendorId = SecurityUtils.getCurrentUserId()
-                .orElseThrow(() -> new AccessDeniedException("User ID not found"));
+        UUID vendorId = currentVendorId();
         var reordered = reorderServiceImagesUseCase.execute(serviceId, vendorId, request.imageIds());
         return ResponseEntity.ok(reordered.stream().map(ServiceImageResponse::from).toList());
+    }
+
+    private UUID currentVendorId() {
+        UUID userId = SecurityUtils.getCurrentUserId()
+                .orElseThrow(() -> new AccessDeniedException("User ID not found"));
+        return vendorPort.findByUserId(userId)
+                .map(vendor -> vendor.getId())
+                .orElseThrow(() -> new AccessDeniedException("Vendor profile not found"));
     }
 }

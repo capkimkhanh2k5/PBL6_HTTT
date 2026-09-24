@@ -4,7 +4,11 @@ import java.util.UUID;
 
 import com.danasea.backend.modules.weather.infrastructure.persistence.entities.SafetyRuleEvaluationJpaEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Lock;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+import jakarta.persistence.LockModeType;
 
 import java.util.List;
 import java.util.Optional;
@@ -18,4 +22,8 @@ public interface JpaSafetyRuleEvaluationRepository extends JpaRepository<SafetyR
     Optional<SafetyRuleEvaluationJpaEntity> findTopBySlotIdOrderByEvaluatedAtDesc(UUID slotId);
     Optional<SafetyRuleEvaluationJpaEntity> findTopBySlotIdAndStatusInOrderByEvaluatedAtDesc(UUID slotId, List<String> statuses);
     List<SafetyRuleEvaluationJpaEntity> findBySlotId(UUID slotId);
+
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("SELECT e FROM SafetyRuleEvaluationJpaEntity e WHERE e.id = :id")
+    Optional<SafetyRuleEvaluationJpaEntity> findByIdForUpdate(@Param("id") UUID id);
 }

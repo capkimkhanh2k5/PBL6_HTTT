@@ -62,7 +62,7 @@ class UploadSafetyDocumentUseCaseTest {
     @DisplayName("AC3.1: Upload chứng chỉ an toàn (PDF) thành công với trạng thái PENDING và audit fields null")
     void shouldUploadSafetyDocumentSuccessfullyWithPendingStatus() throws Exception {
         MockMultipartFile file = new MockMultipartFile(
-                "file", "padi_certificate.pdf", "application/pdf", "dummy-pdf-content".getBytes()
+                "file", "padi_certificate.pdf", "application/pdf", "%PDF-1.7".getBytes()
         );
         String uploadedUrl = "https://res.cloudinary.com/danasea/raw/upload/v1/services/padi_certificate.pdf";
 
@@ -93,7 +93,7 @@ class UploadSafetyDocumentUseCaseTest {
     @DisplayName("AC3.2: Upload chứng chỉ an toàn dạng ảnh (JPG/PNG) hợp lệ thành công")
     void shouldUploadSafetyDocumentAsImageSuccessfully() {
         MockMultipartFile file = new MockMultipartFile(
-                "file", "license.png", "image/png", "png-image-content".getBytes()
+                "file", "license.png", "image/png", pngBytes()
         );
         String uploadedUrl = "https://res.cloudinary.com/danasea/image/upload/v1/services/license.png";
 
@@ -158,5 +158,22 @@ class UploadSafetyDocumentUseCaseTest {
 
         verifyNoInteractions(fileStoragePort);
         verifyNoInteractions(safetyDocumentRepository);
+    }
+
+    @Test
+    void shouldRejectContentThatDoesNotMatchDeclaredType() {
+        MockMultipartFile disguisedFile = new MockMultipartFile(
+                "file", "fake.png", "image/png", "%PDF-1.7".getBytes());
+        when(serviceRepository.findById(serviceId)).thenReturn(Optional.of(serviceEntity));
+
+        assertThrows(InvalidFileTypeException.class, () ->
+                useCase.execute(serviceId, vendorId, disguisedFile));
+
+        verifyNoInteractions(fileStoragePort);
+        verify(safetyDocumentRepository, never()).save(any());
+    }
+
+    private byte[] pngBytes() {
+        return new byte[] {(byte) 0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A};
     }
 }

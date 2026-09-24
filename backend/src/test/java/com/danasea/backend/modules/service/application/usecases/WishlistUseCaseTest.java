@@ -5,6 +5,7 @@ import com.danasea.backend.modules.service.domain.exceptions.ServiceNotFoundExce
 import com.danasea.backend.modules.service.domain.models.Service;
 import com.danasea.backend.modules.service.domain.models.Wishlist;
 import com.danasea.backend.modules.service.domain.ports.ServiceRepositoryPort;
+import com.danasea.backend.modules.service.domain.ports.ServiceImageRepositoryPort;
 import com.danasea.backend.modules.service.domain.ports.WishlistRepositoryPort;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -30,6 +31,9 @@ class WishlistUseCaseTest {
     @Mock
     private ServiceRepositoryPort serviceRepositoryPort;
 
+    @Mock
+    private ServiceImageRepositoryPort serviceImageRepositoryPort;
+
     @InjectMocks
     private WishlistUseCase wishlistUseCase;
 
@@ -38,7 +42,8 @@ class WishlistUseCaseTest {
         UUID userId = UUID.randomUUID();
         UUID serviceId = UUID.randomUUID();
         
-        when(serviceRepositoryPort.existsById(serviceId)).thenReturn(true);
+        when(serviceRepositoryPort.findPublishedById(serviceId))
+                .thenReturn(Optional.of(Service.builder().id(serviceId).build()));
         when(wishlistRepositoryPort.existsByUserIdAndServiceId(userId, serviceId)).thenReturn(false);
 
         wishlistUseCase.addWishlist(userId, serviceId);
@@ -51,7 +56,8 @@ class WishlistUseCaseTest {
         UUID userId = UUID.randomUUID();
         UUID serviceId = UUID.randomUUID();
         
-        when(serviceRepositoryPort.existsById(serviceId)).thenReturn(true);
+        when(serviceRepositoryPort.findPublishedById(serviceId))
+                .thenReturn(Optional.of(Service.builder().id(serviceId).build()));
         when(wishlistRepositoryPort.existsByUserIdAndServiceId(userId, serviceId)).thenReturn(true);
 
         wishlistUseCase.addWishlist(userId, serviceId);
@@ -64,7 +70,7 @@ class WishlistUseCaseTest {
         UUID userId = UUID.randomUUID();
         UUID serviceId = UUID.randomUUID();
         
-        when(serviceRepositoryPort.existsById(serviceId)).thenReturn(false);
+        when(serviceRepositoryPort.findPublishedById(serviceId)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> wishlistUseCase.addWishlist(userId, serviceId))
                 .isInstanceOf(ServiceNotFoundException.class);

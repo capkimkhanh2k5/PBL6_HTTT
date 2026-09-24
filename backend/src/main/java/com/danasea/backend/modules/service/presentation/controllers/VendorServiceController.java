@@ -95,7 +95,7 @@ public class VendorServiceController {
     @PatchMapping("/{id}")
     public ResponseEntity<ServiceResult> updateService(
             @PathVariable UUID id,
-            @RequestBody UpdateServiceRequest request) {
+            @Valid @RequestBody UpdateServiceRequest request) {
         UUID userId = SecurityUtils.getCurrentUserId()
                 .orElseThrow(() -> new AccessDeniedException("User ID not found"));
         UpdateServiceCommand cmd = new UpdateServiceCommand(

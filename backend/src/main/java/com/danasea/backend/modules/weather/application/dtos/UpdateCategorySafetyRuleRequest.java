@@ -16,25 +16,25 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class UpdateCategorySafetyRuleRequest {
 
-    @PositiveOrZero(message = "Ngưỡng sóng vàng không được âm")
+    @PositiveOrZero(message = "Caution wave threshold must not be negative")
     private Double cautionWaveHeightM;
 
-    @PositiveOrZero(message = "Ngưỡng sóng đỏ không được âm")
+    @PositiveOrZero(message = "Danger wave threshold must not be negative")
     private Double maxWaveHeightM;
 
-    @PositiveOrZero(message = "Ngưỡng gió duy trì vàng không được âm")
+    @PositiveOrZero(message = "Caution sustained-wind threshold must not be negative")
     private Double cautionWindSpeedKmh;
 
-    @PositiveOrZero(message = "Ngưỡng gió duy trì đỏ không được âm")
+    @PositiveOrZero(message = "Danger sustained-wind threshold must not be negative")
     private Double maxWindSpeedKmh;
 
-    @PositiveOrZero(message = "Ngưỡng gió giật đỏ không được âm")
+    @PositiveOrZero(message = "Danger wind-gust threshold must not be negative")
     private Double maxWindGustKmh;
 
-    @PositiveOrZero(message = "Ngưỡng dòng hải lưu đỏ không được âm")
+    @PositiveOrZero(message = "Danger ocean-current threshold must not be negative")
     private Double maxOceanCurrentMs;
 
-    @PositiveOrZero(message = "Tầm nhìn tối thiểu không được âm")
+    @PositiveOrZero(message = "Minimum visibility must not be negative")
     private Double minVisibilityM;
 
     private String fatalThunderstormCodes;

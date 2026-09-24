@@ -33,6 +33,9 @@ public class AdminAuditLogController {
     public ResponseEntity<Page<AuditLogResponse>> getAuditLogs(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size) {
+        if (page < 0 || size < 1 || size > 100) {
+            throw new IllegalArgumentException("page must be non-negative and size must be between 1 and 100");
+        }
         Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
         Page<AuditLogResponse> response = getAuditLogsUseCase.execute(pageable);
         return ResponseEntity.ok(response);

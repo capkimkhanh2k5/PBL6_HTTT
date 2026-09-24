@@ -31,7 +31,7 @@ public class RefreshTokenUseCase {
     public LoginResult execute(String rawRefreshToken) {
         String tokenHash = HashUtils.sha256(rawRefreshToken);
 
-        RefreshToken refreshToken = accountApi.findRefreshTokenByHash(tokenHash)
+        RefreshToken refreshToken = accountApi.findRefreshTokenByHashForUpdate(tokenHash)
                 .orElseThrow(() -> new InvalidCredentialsException("Invalid refresh token"));
 
         // If the token is already revoked, it means someone is trying to reuse an old
@@ -63,18 +63,19 @@ public class RefreshTokenUseCase {
         String newAccessToken = tokenProvider.generateAccessToken(auth);
         String newRawRefreshToken = tokenProvider.generateRefreshToken(auth);
         String newHash = HashUtils.sha256(newRawRefreshToken);
+        UUID newRefreshTokenId = UUID.randomUUID();
 
         // Revoke the old token
         refreshToken.setRevokedAt(OffsetDateTime.now());
+        refreshToken.setReplacedById(newRefreshTokenId);
         accountApi.saveRefreshToken(refreshToken);
 
         // Save the new token
         RefreshToken newRefreshTokenModel = RefreshToken.builder()
-                .id(UUID.randomUUID())
+                .id(newRefreshTokenId)
                 .userId(user.getId())
                 .tokenHash(newHash)
                 .familyId(refreshToken.getFamilyId()) // Keep the same family
-                .replacedById(refreshToken.getId()) // Link to the old one
                 .expiresAt(OffsetDateTime.now().plusDays(jwtProperties.refreshTokenDays()))
                 .build();
         accountApi.saveRefreshToken(newRefreshTokenModel);

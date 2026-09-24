@@ -24,6 +24,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -123,14 +124,8 @@ class GetCustomerBookingsUseCaseTest {
     }
 
     @Test
-    @DisplayName("execute normalizes page and size defaults when invalid values provided")
-    void execute_NormalizesPageAndSizeDefaults() {
-        PagedResult<Booking> repoResult = new PagedResult<>(List.of(), 0, 10, 0L, 0);
-
-        when(bookingRepository.findCustomerBookings(customerId, null, 0, 10, "createdAt", "desc"))
-                .thenReturn(repoResult);
-
-        // Negative page and size <= 0
+    @DisplayName("execute rejects invalid pagination values")
+    void execute_RejectsInvalidPagination() {
         GetCustomerBookingsQuery query = new GetCustomerBookingsQuery(
                 customerId,
                 null,
@@ -140,10 +135,10 @@ class GetCustomerBookingsUseCaseTest {
                 null
         );
 
-        PagedResult<BookingSummaryResult> result = useCase.execute(query);
-
-        assertThat(result).isNotNull();
-        verify(bookingRepository).findCustomerBookings(customerId, null, 0, 10, "createdAt", "desc");
+        assertThatThrownBy(() -> useCase.execute(query))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("size");
+        verifyNoInteractions(bookingRepository);
     }
 
     @Test

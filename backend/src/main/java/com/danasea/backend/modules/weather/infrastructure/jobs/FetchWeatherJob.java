@@ -29,9 +29,9 @@ public class FetchWeatherJob {
     private static final double LONGITUDE = 108.24959555394304;
     private static final String LOCATION_KEY = "MAN_THAI_BEACH";
 
-    @Scheduled(fixedRate = 1800000) // 30 phút = 30 * 60 * 1000 ms = 1800000 ms
+    @Scheduled(fixedRateString = "${app.scheduler.weather-fetch-rate:30m}")
     public void fetchAndCacheWeatherInfo() {
-        log.info("Starting scheduled job: Fetching weather and marine data for Mân Thái Beach...");
+        log.info("Starting scheduled job: fetching weather and marine data for Man Thai Beach");
 
         CompletableFuture<WeatherInfoDto.WeatherData> weatherFuture = CompletableFuture
                 .supplyAsync(() -> weatherProviderPort.getWeatherByCoordinates(LATITUDE, LONGITUDE));

@@ -129,4 +129,18 @@ class GetVendorBookingsUseCaseTest {
         assertThatThrownBy(() -> useCase.execute(invalidQuery))
                 .isInstanceOf(IllegalArgumentException.class);
     }
+
+    @Test
+    @DisplayName("execute rejects unsafe pagination and sort values")
+    void execute_RejectsUnsafePaginationAndSort() {
+        assertThatThrownBy(() -> useCase.execute(new GetVendorBookingsQuery(
+                userId, null, 0, 101, "createdAt", "desc")))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("size");
+
+        assertThatThrownBy(() -> useCase.execute(new GetVendorBookingsQuery(
+                userId, null, 0, 10, "unknown", "desc")))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("Unsupported sort field");
+    }
 }

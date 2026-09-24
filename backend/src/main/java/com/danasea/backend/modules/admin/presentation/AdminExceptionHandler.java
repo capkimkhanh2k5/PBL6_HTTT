@@ -11,6 +11,8 @@ import com.danasea.backend.modules.admin.domain.exceptions.SelfLockNotAllowedExc
 import com.danasea.backend.modules.admin.domain.exceptions.UserAlreadyLockedException;
 import com.danasea.backend.modules.admin.domain.exceptions.UserAlreadyUnlockedException;
 import com.danasea.backend.modules.admin.domain.exceptions.UserNotFoundException;
+import com.danasea.backend.modules.admin.domain.exceptions.AuditLogNotFoundException;
+import com.danasea.backend.modules.admin.domain.exceptions.VendorDocumentsIncompleteException;
 import com.danasea.backend.security.authorization.domain.exceptions.AccessDeniedException;
 import com.danasea.backend.shared.presentation.ErrorResponse;
 
@@ -22,6 +24,20 @@ public class AdminExceptionHandler {
         return ResponseEntity
                 .status(HttpStatus.NOT_FOUND)
                 .body(new ErrorResponse("USER_NOT_FOUND", ex.getMessage()));
+    }
+
+    @ExceptionHandler(AuditLogNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleAuditLogNotFound(AuditLogNotFoundException ex) {
+        return ResponseEntity
+                .status(HttpStatus.NOT_FOUND)
+                .body(new ErrorResponse("AUDIT_LOG_NOT_FOUND", ex.getMessage()));
+    }
+
+    @ExceptionHandler(VendorDocumentsIncompleteException.class)
+    public ResponseEntity<ErrorResponse> handleVendorDocumentsIncomplete(VendorDocumentsIncompleteException ex) {
+        return ResponseEntity
+                .status(HttpStatus.UNPROCESSABLE_ENTITY)
+                .body(new ErrorResponse("VENDOR_DOCUMENTS_INCOMPLETE", ex.getMessage()));
     }
 
     @ExceptionHandler(SelfLockNotAllowedException.class)

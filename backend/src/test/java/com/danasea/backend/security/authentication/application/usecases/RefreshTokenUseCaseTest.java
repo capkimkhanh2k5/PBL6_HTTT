@@ -33,7 +33,7 @@ class RefreshTokenUseCaseTest {
     void setUp() {
         accountInternalApi = mock(AccountInternalApi.class);
         tokenProvider = mock(TokenProvider.class);
-        jwtProperties = new JwtProperties("secret", 15, 7);
+        jwtProperties = new JwtProperties("test-secret-with-at-least-32-bytes", 15, 7);
         refreshTokenUseCase = new RefreshTokenUseCase(accountInternalApi, tokenProvider, jwtProperties);
     }
 
@@ -59,7 +59,7 @@ class RefreshTokenUseCaseTest {
         user.setIsLocked(false);
         user.setIsEmailVerified(true);
 
-        when(accountInternalApi.findRefreshTokenByHash(tokenHash)).thenReturn(Optional.of(refreshToken));
+        when(accountInternalApi.findRefreshTokenByHashForUpdate(tokenHash)).thenReturn(Optional.of(refreshToken));
         when(accountInternalApi.findUserById(userId)).thenReturn(Optional.of(user));
         when(tokenProvider.generateAccessToken(any(Authentication.class))).thenReturn("new-access");
         when(tokenProvider.generateRefreshToken(any(Authentication.class))).thenReturn("new-refresh");
@@ -76,6 +76,7 @@ class RefreshTokenUseCaseTest {
 
         // Verify a new token was saved
         verify(accountInternalApi, times(2)).saveRefreshToken(any(RefreshToken.class));
+        assertNotNull(refreshToken.getReplacedById());
     }
 
     @Test
@@ -92,7 +93,7 @@ class RefreshTokenUseCaseTest {
                 .revokedAt(OffsetDateTime.now().minusHours(1)) // Already revoked
                 .build();
 
-        when(accountInternalApi.findRefreshTokenByHash(tokenHash)).thenReturn(Optional.of(refreshToken));
+        when(accountInternalApi.findRefreshTokenByHashForUpdate(tokenHash)).thenReturn(Optional.of(refreshToken));
 
         assertThrows(InvalidCredentialsException.class, () -> refreshTokenUseCase.execute(rawToken));
         verify(accountInternalApi).revokeRefreshTokenFamily(familyId);
@@ -115,7 +116,7 @@ class RefreshTokenUseCaseTest {
         user.setIsLocked(false);
         user.setIsEmailVerified(false);
 
-        when(accountInternalApi.findRefreshTokenByHash(tokenHash)).thenReturn(Optional.of(refreshToken));
+        when(accountInternalApi.findRefreshTokenByHashForUpdate(tokenHash)).thenReturn(Optional.of(refreshToken));
         when(accountInternalApi.findUserById(userId)).thenReturn(Optional.of(user));
 
         assertThrows(InvalidCredentialsException.class, () -> refreshTokenUseCase.execute(rawToken));

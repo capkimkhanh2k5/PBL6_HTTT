@@ -7,6 +7,7 @@ import com.danasea.backend.modules.ai.domain.models.LlmResponse;
 import com.danasea.backend.modules.ai.domain.models.ToolCall;
 import com.danasea.backend.modules.ai.domain.services.ChatHistoryService;
 import com.danasea.backend.modules.ai.application.tool.ToolExecutor;
+import com.danasea.backend.modules.ai.application.tool.ConversationAwareToolExecutor;
 import com.danasea.backend.modules.ai.infrastructure.persistence.entities.AiMessageJpaEntity;
 import com.danasea.backend.modules.ai.domain.models.AiMessage;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -122,7 +123,9 @@ public class ChatUseCase {
                     ToolExecutor executor = toolExecutors.get(tc.getName());
                     String result;
                     if (executor != null) {
-                        result = executor.execute(tc.getArguments());
+                        result = executor instanceof ConversationAwareToolExecutor conversationAwareTool
+                                ? conversationAwareTool.execute(tc.getArguments(), conversationId)
+                                : executor.execute(tc.getArguments());
                     } else {
                         result = "{\"error\": \"Unknown tool\"}";
                     }
@@ -132,7 +135,7 @@ public class ChatUseCase {
             } else {
                 // If response mentions policy keywords but get_policy was never called, reject hallucinated policy
                 if (!policyToolCalled && containsPolicyKeywords(response.getContent())) {
-                    String rejectionMessage = "Tôi không thể cung cấp thông tin về chính sách hoàn hủy khi chưa tra cứu hệ thống chính thức. Vui lòng yêu cầu kiểm tra chính sách cụ thể để tôi hỗ trợ.";
+                    String rejectionMessage = "I cannot provide cancellation or refund policy details without consulting the official policy source. Please ask me to check a specific policy.";
                     response.setContent(rejectionMessage);
                 }
 

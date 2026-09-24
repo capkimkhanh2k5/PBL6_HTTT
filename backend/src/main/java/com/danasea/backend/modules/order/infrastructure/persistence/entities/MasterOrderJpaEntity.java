@@ -15,6 +15,9 @@ import lombok.Setter;
 @Table(name = "master_orders")
 public class MasterOrderJpaEntity extends BaseJpaEntity {
 
+    @Column(name = "booking_id")
+    private UUID bookingId;
+
     private UUID customerId;
 
     @Enumerated(EnumType.STRING)
@@ -25,5 +28,8 @@ public class MasterOrderJpaEntity extends BaseJpaEntity {
     private BigDecimal discountAmount;
 
     private UUID discountCodeId;
+
+    @Column(name = "idempotency_key", length = 100)
+    private String idempotencyKey;
 
 }

@@ -23,6 +23,7 @@ import com.danasea.backend.modules.vendor.infrastructure.persistence.entities.Ve
 import com.danasea.backend.modules.vendor.infrastructure.persistence.entities.VendorJpaEntity;
 import com.danasea.backend.modules.vendor.infrastructure.persistence.repositories.JpaVendorDocumentRepository;
 import com.danasea.backend.modules.vendor.infrastructure.persistence.repositories.JpaVendorRepository;
+import com.danasea.backend.modules.service.domain.exceptions.InvalidFileTypeException;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -76,7 +77,7 @@ class UploadVendorDocumentUseCaseTest {
                 "file",
                 "business_license.pdf",
                 "application/pdf",
-                "sample-content".getBytes()
+                "%PDF-1.7 sample-content".getBytes()
         );
     }
 
@@ -185,9 +186,9 @@ class UploadVendorDocumentUseCaseTest {
     }
 
     @Test
-    @DisplayName("Should throw IllegalArgumentException when file is null")
-    void shouldThrowIllegalArgumentExceptionWhenFileIsNull() {
-        assertThrows(IllegalArgumentException.class, () ->
+    @DisplayName("Should reject a null file")
+    void shouldRejectNullFile() {
+        assertThrows(InvalidFileTypeException.class, () ->
                 uploadVendorDocumentUseCase.execute(userId, null, "BUSINESS_LICENSE"));
 
         verify(jpaVendorRepository, never()).findByUserId(any());
@@ -196,16 +197,29 @@ class UploadVendorDocumentUseCaseTest {
     }
 
     @Test
-    @DisplayName("Should throw IllegalArgumentException when file is empty")
-    void shouldThrowIllegalArgumentExceptionWhenFileIsEmpty() {
+    @DisplayName("Should reject an empty file")
+    void shouldRejectEmptyFile() {
         MockMultipartFile emptyFile = new MockMultipartFile(
                 "file", "empty.pdf", "application/pdf", new byte[0]);
 
-        assertThrows(IllegalArgumentException.class, () ->
+        assertThrows(InvalidFileTypeException.class, () ->
                 uploadVendorDocumentUseCase.execute(userId, emptyFile, "BUSINESS_LICENSE"));
 
         verify(jpaVendorRepository, never()).findByUserId(any());
         verify(documentStoragePort, never()).uploadDocument(any(), any());
         verify(jpaVendorDocumentRepository, never()).save(any());
+    }
+
+    @Test
+    @DisplayName("Should reject a file whose content does not match its declared MIME type")
+    void shouldRejectSpoofedDocumentContent() {
+        MockMultipartFile spoofedFile = new MockMultipartFile(
+                "file", "license.pdf", "application/pdf", "not-a-pdf".getBytes());
+
+        assertThrows(InvalidFileTypeException.class, () ->
+                uploadVendorDocumentUseCase.execute(userId, spoofedFile, "BUSINESS_LICENSE"));
+
+        verify(jpaVendorRepository, never()).findByUserId(any());
+        verify(documentStoragePort, never()).uploadDocument(any(), any());
     }
 }

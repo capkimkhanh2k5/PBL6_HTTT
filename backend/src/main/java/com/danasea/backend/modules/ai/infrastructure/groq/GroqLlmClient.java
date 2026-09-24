@@ -7,6 +7,7 @@ import com.danasea.backend.modules.ai.domain.models.LlmResponse;
 import com.danasea.backend.modules.ai.domain.models.ToolCall;
 import com.danasea.backend.modules.ai.domain.services.AIToolRegistry;
 import com.danasea.backend.modules.ai.infrastructure.groq.config.GroqProperties;
+import com.danasea.backend.configs.properties.HttpClientProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -15,6 +16,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestClientResponseException;
@@ -40,14 +42,19 @@ public class GroqLlmClient implements LlmClientPort {
     public GroqLlmClient(RestClient.Builder restClientBuilder,
             KeyRotatorPort keyRotator,
             AIToolRegistry aiToolRegistry,
-            GroqProperties properties) {
-        this(restClientBuilder.baseUrl(properties != null && properties.baseUrl() != null && !properties.baseUrl().isBlank()
+            GroqProperties properties,
+            HttpClientProperties httpClientProperties) {
+        SimpleClientHttpRequestFactory requestFactory = new SimpleClientHttpRequestFactory();
+        requestFactory.setConnectTimeout(httpClientProperties.connectTimeout());
+        requestFactory.setReadTimeout(httpClientProperties.readTimeout());
+        this.restClient = restClientBuilder.requestFactory(requestFactory)
+                .baseUrl(properties != null && properties.baseUrl() != null && !properties.baseUrl().isBlank()
                 ? properties.baseUrl()
-                : DEFAULT_BASE_URL).build(),
-                keyRotator,
-                aiToolRegistry,
-                properties != null ? properties.model() : null,
-                properties != null ? properties.fallbackModel() : null);
+                : DEFAULT_BASE_URL).build();
+        this.keyRotator = keyRotator;
+        this.aiToolRegistry = aiToolRegistry;
+        this.defaultModel = properties != null ? properties.model() : null;
+        this.fallbackModel = properties != null ? properties.fallbackModel() : null;
     }
 
     public GroqLlmClient(RestClient.Builder restClientBuilder,

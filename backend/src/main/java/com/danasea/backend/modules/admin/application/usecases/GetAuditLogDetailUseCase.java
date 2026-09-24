@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import com.danasea.backend.modules.audit.application.api.AuditLogInternalApi;
 import com.danasea.backend.modules.admin.presentation.dtos.AuditLogResponse;
 import com.danasea.backend.modules.audit.domain.models.AuditLog;
+import com.danasea.backend.modules.admin.domain.exceptions.AuditLogNotFoundException;
 
 import lombok.RequiredArgsConstructor;
 
@@ -18,7 +19,7 @@ public class GetAuditLogDetailUseCase {
 
     public AuditLogResponse execute(UUID id) {
         AuditLog auditLog = auditLogInternalApi.getAuditLogById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Audit log not found with id: " + id));
+                .orElseThrow(() -> new AuditLogNotFoundException("Audit log not found with id: " + id));
         
         return AuditLogResponse.builder()
                 .id(auditLog.getId())

@@ -1,12 +1,10 @@
 package com.danasea.backend.modules.service.e2e;
-import com.danasea.backend.modules.service.presentation.controllers.AdminServiceController;
-import com.danasea.backend.modules.service.presentation.controllers.VendorServiceController;
-import com.danasea.backend.modules.service.presentation.handlers.ServiceExceptionHandler;
-import org.junit.jupiter.api.Assertions;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
@@ -19,8 +17,6 @@ import java.util.*;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 
-import org.junit.jupiter.api.Disabled;
-
 /**
  * Base class for all Services Module End-to-End (E2E) Test Tiers.
  *
@@ -28,9 +24,10 @@ import org.junit.jupiter.api.Disabled;
  * - Exercises endpoints exclusively as an external HTTP client (/api/vendor/services/** and /api/admin/services/**).
  * - Tests send HTTP requests with JSON payloads and verify HTTP status codes and JSON response bodies.
  * - Decoupled from internal implementation classes; detects controller availability dynamically.
- * - Staged for execution in Milestone M5 (Final Milestone: E2E Test Pass & Hardening).
+ * - Retained only as historical scaffolding; assertions permit broad status ranges and do not
+ *   provide release evidence. Current coverage lives in executable integration/controller tests.
  */
-@Disabled("Pending Milestone M5 - E2E tests require full context wiring")
+@Disabled("Legacy permissive placeholder suite; superseded by ServiceIntegrationE2ETest and focused controller/use-case tests")
 public abstract class BaseServiceE2ETest {
 
     protected MockMvc mockMvc;

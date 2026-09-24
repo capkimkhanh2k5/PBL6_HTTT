@@ -29,6 +29,7 @@ import com.danasea.backend.modules.booking.domain.models.BookingItem;
 import com.danasea.backend.modules.booking.domain.models.BookingStatus;
 import com.danasea.backend.modules.booking.domain.models.InventoryLockItem;
 import com.danasea.backend.modules.booking.domain.ports.BookingRepositoryPort;
+import com.danasea.backend.modules.booking.domain.ports.BookingPaymentStatusPort;
 import com.danasea.backend.modules.booking.domain.ports.InventoryLockPort;
 import com.danasea.backend.modules.booking.domain.ports.ServiceSlotPort;
 
@@ -53,6 +54,9 @@ class ConfirmBookingUseCaseTest {
     @Mock
     private ServiceSlotPort serviceSlotPort;
 
+    @Mock
+    private BookingPaymentStatusPort bookingPaymentStatusPort;
+
     private ConfirmBookingUseCase confirmBookingUseCase;
 
     private UUID customerId;
@@ -62,7 +66,8 @@ class ConfirmBookingUseCaseTest {
 
     @BeforeEach
     void setUp() {
-        confirmBookingUseCase = new ConfirmBookingUseCase(bookingRepository, inventoryLockPort, serviceSlotPort);
+        confirmBookingUseCase = new ConfirmBookingUseCase(
+                bookingRepository, inventoryLockPort, serviceSlotPort, bookingPaymentStatusPort);
 
         customerId = UUID.randomUUID();
         bookingId = UUID.randomUUID();
@@ -94,7 +99,8 @@ class ConfirmBookingUseCaseTest {
     void execute_WhenValidHold_ShouldConfirmSuccessfully() {
         ConfirmBookingCommand command = new ConfirmBookingCommand(bookingId, customerId);
 
-        when(bookingRepository.findById(bookingId)).thenReturn(Optional.of(sampleHoldBooking));
+        when(bookingRepository.findByIdWithItemsForUpdate(bookingId)).thenReturn(Optional.of(sampleHoldBooking));
+        when(bookingPaymentStatusPort.hasSuccessfulPayment(bookingId)).thenReturn(true);
         when(bookingRepository.save(any(Booking.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
         BookingHoldResult result = confirmBookingUseCase.execute(command);
@@ -118,7 +124,7 @@ class ConfirmBookingUseCaseTest {
     @DisplayName("Confirm non-existent booking throws BookingNotFoundException")
     void execute_WhenBookingNotFound_ShouldThrowException() {
         ConfirmBookingCommand command = new ConfirmBookingCommand(bookingId, customerId);
-        when(bookingRepository.findById(bookingId)).thenReturn(Optional.empty());
+        when(bookingRepository.findByIdWithItemsForUpdate(bookingId)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> confirmBookingUseCase.execute(command))
                 .isInstanceOf(BookingNotFoundException.class);
@@ -132,7 +138,7 @@ class ConfirmBookingUseCaseTest {
     void execute_WhenDifferentCustomer_ShouldThrowException() {
         UUID otherCustomer = UUID.randomUUID();
         ConfirmBookingCommand command = new ConfirmBookingCommand(bookingId, otherCustomer);
-        when(bookingRepository.findById(bookingId)).thenReturn(Optional.of(sampleHoldBooking));
+        when(bookingRepository.findByIdWithItemsForUpdate(bookingId)).thenReturn(Optional.of(sampleHoldBooking));
 
         assertThatThrownBy(() -> confirmBookingUseCase.execute(command))
                 .isInstanceOf(UnauthorizedBookingAccessException.class);
@@ -146,7 +152,8 @@ class ConfirmBookingUseCaseTest {
     void execute_WhenHoldExpired_ShouldThrowException() {
         sampleHoldBooking.setHoldExpiresAt(OffsetDateTime.now().minusMinutes(1));
         ConfirmBookingCommand command = new ConfirmBookingCommand(bookingId, customerId);
-        when(bookingRepository.findById(bookingId)).thenReturn(Optional.of(sampleHoldBooking));
+        when(bookingRepository.findByIdWithItemsForUpdate(bookingId)).thenReturn(Optional.of(sampleHoldBooking));
+        when(bookingPaymentStatusPort.hasSuccessfulPayment(bookingId)).thenReturn(true);
 
         assertThatThrownBy(() -> confirmBookingUseCase.execute(command))
                 .isInstanceOf(BookingHoldExpiredException.class);
@@ -156,24 +163,40 @@ class ConfirmBookingUseCaseTest {
     }
 
     @Test
-    @DisplayName("Confirm already confirmed booking throws InvalidBookingStateException")
-    void execute_WhenAlreadyConfirmed_ShouldThrowException() {
+    @DisplayName("Confirm already confirmed paid booking is idempotent")
+    void execute_WhenAlreadyConfirmed_ShouldBeIdempotent() {
         sampleHoldBooking.setStatus(BookingStatus.CONFIRMED);
         ConfirmBookingCommand command = new ConfirmBookingCommand(bookingId, customerId);
-        when(bookingRepository.findById(bookingId)).thenReturn(Optional.of(sampleHoldBooking));
+        when(bookingRepository.findByIdWithItemsForUpdate(bookingId)).thenReturn(Optional.of(sampleHoldBooking));
+        when(bookingPaymentStatusPort.hasSuccessfulPayment(bookingId)).thenReturn(true);
 
-        assertThatThrownBy(() -> confirmBookingUseCase.execute(command))
-                .isInstanceOf(InvalidBookingStateException.class);
+        BookingHoldResult result = confirmBookingUseCase.execute(command);
 
+        assertThat(result.status()).isEqualTo(BookingStatus.CONFIRMED);
         verify(serviceSlotPort, never()).commitCapacityBatch(any());
         verify(inventoryLockPort, never()).releaseHolds(any(), any());
+    }
+
+    @Test
+    @DisplayName("Confirm without successful payment is rejected")
+    void execute_WhenPaymentNotSuccessful_ShouldReject() {
+        when(bookingRepository.findByIdWithItemsForUpdate(bookingId)).thenReturn(Optional.of(sampleHoldBooking));
+        when(bookingPaymentStatusPort.hasSuccessfulPayment(bookingId)).thenReturn(false);
+
+        assertThatThrownBy(() -> confirmBookingUseCase.execute(new ConfirmBookingCommand(bookingId, customerId)))
+                .isInstanceOf(InvalidBookingStateException.class)
+                .hasMessageContaining("successful payment webhook");
+
+        verify(serviceSlotPort, never()).commitCapacityBatch(any());
+        verify(bookingRepository, never()).save(any());
     }
 
     @Test
     @DisplayName("When DB commitCapacityBatch throws InsufficientInventoryException, Redis hold is not released")
     void execute_WhenCommitCapacityFails_ShouldThrowAndNotReleaseRedis() {
         ConfirmBookingCommand command = new ConfirmBookingCommand(bookingId, customerId);
-        when(bookingRepository.findById(bookingId)).thenReturn(Optional.of(sampleHoldBooking));
+        when(bookingRepository.findByIdWithItemsForUpdate(bookingId)).thenReturn(Optional.of(sampleHoldBooking));
+        when(bookingPaymentStatusPort.hasSuccessfulPayment(bookingId)).thenReturn(true);
         doThrow(new InsufficientInventoryException(slotId, 2, 0))
                 .when(serviceSlotPort).commitCapacityBatch(any());
 

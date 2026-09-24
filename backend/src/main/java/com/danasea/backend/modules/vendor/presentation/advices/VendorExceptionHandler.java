@@ -10,6 +10,7 @@ import com.danasea.backend.modules.vendor.domain.exceptions.InvalidDocTypeExcept
 import com.danasea.backend.modules.vendor.domain.exceptions.UserLockedException;
 import com.danasea.backend.modules.vendor.domain.exceptions.VendorAlreadyExistsException;
 import com.danasea.backend.modules.vendor.domain.exceptions.VendorNotFoundException;
+import com.danasea.backend.modules.service.domain.exceptions.InvalidFileTypeException;
 import com.danasea.backend.shared.presentation.ErrorResponse;
 
 @RestControllerAdvice(basePackages = "com.danasea.backend.modules.vendor")
@@ -41,6 +42,13 @@ public class VendorExceptionHandler {
         return ResponseEntity
                 .status(HttpStatus.BAD_REQUEST)
                 .body(new ErrorResponse("INVALID_DOC_TYPE", ex.getMessage()));
+    }
+
+    @ExceptionHandler(InvalidFileTypeException.class)
+    public ResponseEntity<ErrorResponse> handleInvalidFileType(InvalidFileTypeException ex) {
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(new ErrorResponse("INVALID_FILE_TYPE", ex.getMessage()));
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)

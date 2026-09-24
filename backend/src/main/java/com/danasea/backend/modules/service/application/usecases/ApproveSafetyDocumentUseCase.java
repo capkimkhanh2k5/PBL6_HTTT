@@ -22,9 +22,8 @@ public class ApproveSafetyDocumentUseCase {
     private final JpaServiceRepository serviceRepository;
     private final JpaCategoryRepository categoryRepository;
 
-    public ServiceSafetyDocumentJpaEntity approve(UUID documentId, UUID adminId) {
-        var document = safetyDocumentRepository.findById(documentId)
-                .orElseThrow(() -> new RuntimeException("Safety document not found: " + documentId));
+    public ServiceSafetyDocumentJpaEntity approve(UUID serviceId, UUID documentId, UUID adminId) {
+        var document = findDocument(serviceId, documentId);
 
         document.setStatus(DocStatus.APPROVED);
         document.setReviewedBy(adminId);
@@ -34,9 +33,12 @@ public class ApproveSafetyDocumentUseCase {
         return safetyDocumentRepository.save(document);
     }
 
-    public ServiceSafetyDocumentJpaEntity reject(UUID documentId, UUID adminId, String rejectionReason) {
-        var document = safetyDocumentRepository.findById(documentId)
-                .orElseThrow(() -> new RuntimeException("Safety document not found: " + documentId));
+    public ServiceSafetyDocumentJpaEntity reject(
+            UUID serviceId,
+            UUID documentId,
+            UUID adminId,
+            String rejectionReason) {
+        var document = findDocument(serviceId, documentId);
 
         document.setStatus(DocStatus.REJECTED);
         document.setReviewedBy(adminId);
@@ -44,6 +46,12 @@ public class ApproveSafetyDocumentUseCase {
         document.setRejectionReason(rejectionReason);
 
         return safetyDocumentRepository.save(document);
+    }
+
+    private ServiceSafetyDocumentJpaEntity findDocument(UUID serviceId, UUID documentId) {
+        return safetyDocumentRepository.findByIdAndServiceId(documentId, serviceId)
+                .orElseThrow(() -> new ServiceNotFoundException(
+                        "Safety document not found for service: " + documentId));
     }
 
     public boolean canPublish(UUID serviceId) {
@@ -76,4 +84,3 @@ public class ApproveSafetyDocumentUseCase {
         return true;
     }
 }
-

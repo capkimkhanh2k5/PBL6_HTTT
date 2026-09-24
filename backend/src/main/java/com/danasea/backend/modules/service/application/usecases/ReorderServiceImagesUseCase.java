@@ -8,6 +8,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.danasea.backend.modules.service.domain.exceptions.ImageNotFoundException;
 import com.danasea.backend.modules.service.domain.exceptions.ServiceNotFoundException;
@@ -24,6 +25,7 @@ public class ReorderServiceImagesUseCase {
     private final JpaServiceRepository serviceRepository;
     private final JpaServiceImageRepository serviceImageRepository;
 
+    @Transactional
     public List<ServiceImageJpaEntity> execute(UUID serviceId, UUID vendorId, List<UUID> imageIds) {
         // 1. Validate service exists
         var serviceEntity = serviceRepository.findById(serviceId)
@@ -72,4 +74,3 @@ public class ReorderServiceImagesUseCase {
         return serviceImageRepository.saveAll(toUpdate);
     }
 }
-

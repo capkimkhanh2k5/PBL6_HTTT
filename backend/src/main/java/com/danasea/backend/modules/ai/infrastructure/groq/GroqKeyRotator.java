@@ -66,11 +66,6 @@ public class GroqKeyRotator implements KeyRotatorPort {
         this.apiKeys = List.copyOf(cleaned);
 
         log.info("GroqKeyRotator initialized with {} Groq API keys", this.apiKeys.size());
-        for (int i = 0; i < this.apiKeys.size(); i++) {
-            String k = this.apiKeys.get(i);
-            String masked = (k.length() >= 4) ? "..." + k.substring(k.length() - 4) : "****";
-            log.info("Loaded Groq Key [{}]: {}", i, masked);
-        }
     }
 
     @Override

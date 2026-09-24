@@ -1,25 +1,39 @@
 package com.danasea.backend.security.authentication.infrastructure.security;
 
-import jakarta.servlet.http.Cookie;
+import java.time.Duration;
+
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseCookie;
+
 import jakarta.servlet.http.HttpServletResponse;
 
-public class CookieUtils {
+public final class CookieUtils {
 
-    public static void addRefreshTokenCookie(HttpServletResponse response, String refreshToken) {
-        Cookie cookie = new Cookie("refresh_token", refreshToken);
-        cookie.setHttpOnly(true);
-        cookie.setSecure(true);
-        cookie.setPath("/api/auth");
-        cookie.setMaxAge(7 * 24 * 60 * 60); // 7 days
-        response.addCookie(cookie);
+    private static final String REFRESH_TOKEN_COOKIE = "refresh_token";
+    private static final String REFRESH_TOKEN_PATH = "/api/auth";
+
+    private CookieUtils() {
+    }
+
+    public static void addRefreshTokenCookie(
+            HttpServletResponse response,
+            String refreshToken,
+            long maxAgeSeconds) {
+        addCookie(response, refreshToken, Duration.ofSeconds(maxAgeSeconds));
     }
 
     public static void clearRefreshTokenCookie(HttpServletResponse response) {
-        Cookie cookie = new Cookie("refresh_token", null);
-        cookie.setHttpOnly(true);
-        cookie.setSecure(true);
-        cookie.setPath("/api/auth");
-        cookie.setMaxAge(0);
-        response.addCookie(cookie);
+        addCookie(response, "", Duration.ZERO);
+    }
+
+    private static void addCookie(HttpServletResponse response, String value, Duration maxAge) {
+        ResponseCookie cookie = ResponseCookie.from(REFRESH_TOKEN_COOKIE, value)
+                .httpOnly(true)
+                .secure(true)
+                .sameSite("Strict")
+                .path(REFRESH_TOKEN_PATH)
+                .maxAge(maxAge)
+                .build();
+        response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
     }
 }

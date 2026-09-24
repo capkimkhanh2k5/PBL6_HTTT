@@ -65,7 +65,7 @@ public class AdvanceBookingSafetyAdversarialTest {
     private WeatherRuleEngine weatherRuleEngine;
     private CheckAdvanceBookingSafetyUseCase useCase;
 
-    private final LocalDate today = LocalDate.of(2026, 9, 20);
+    private final LocalDate today = LocalDate.now();
     private CategorySafetyRule supRule;
     private CategorySafetyRule parasailingRule;
 
@@ -217,7 +217,7 @@ public class AdvanceBookingSafetyAdversarialTest {
             assertTrue(res.isProvisional());
             assertTrue(res.isMarineCutoffExceeded());
             assertTrue(res.isSafe());
-            assertTrue(res.getDetails().stream().anyMatch(d -> d.contains("Khung thời gian đặt trước 14 ngày")));
+            assertTrue(res.getDetails().stream().anyMatch(d -> d.contains("14 days ahead")));
         }
     }
 
@@ -325,7 +325,7 @@ public class AdvanceBookingSafetyAdversarialTest {
             assertEquals(17, res.getDaysAhead());
             assertEquals("OUT_OF_RANGE", res.getDataCoverage());
             assertEquals(WeatherRuleEngine.ALERT_YELLOW, res.getAlertLevel());
-            assertTrue(res.getWarningMessage().contains("17 ngày tới"));
+            assertTrue(res.getWarningMessage().contains("17 days ahead"));
             verify(weatherProviderPort, never()).getTimeWindowForecast(anyDouble(), anyDouble(), any(), any(), any());
         }
 
@@ -339,7 +339,7 @@ public class AdvanceBookingSafetyAdversarialTest {
                             day17, LocalTime.of(8, 0), LocalTime.of(10, 0), 16.089, 108.249)
             );
 
-            assertTrue(ex.getMessage().contains("Vượt quá phạm vi dự báo tối đa"));
+            assertTrue(ex.getMessage().contains("exceeds the 16-day Open-Meteo forecast range"));
         }
 
         @Test
@@ -368,7 +368,7 @@ public class AdvanceBookingSafetyAdversarialTest {
             IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () ->
                     useCase.checkBySlotId(unknownSlotId)
             );
-            assertTrue(ex.getMessage().contains("Slot không tồn tại"));
+            assertTrue(ex.getMessage().contains("Service slot not found"));
         }
 
         @Test
@@ -514,10 +514,10 @@ public class AdvanceBookingSafetyAdversarialTest {
             assertEquals(WeatherRuleEngine.ALERT_RED, res.getAlertLevel());
 
             // Details must contain wave, wind, gust, and thunderstorm violations
-            assertTrue(res.getDetails().stream().anyMatch(d -> d.contains("sóng biển 1.2m")));
+            assertTrue(res.getDetails().stream().anyMatch(d -> d.contains("Wave height 1.2m")));
             assertTrue(res.getDetails().stream().anyMatch(d -> d.contains("35.0 km/h")));
             assertTrue(res.getDetails().stream().anyMatch(d -> d.contains("55.0 km/h")));
-            assertTrue(res.getDetails().stream().anyMatch(d -> d.contains("Mã WMO: 95")));
+            assertTrue(res.getDetails().stream().anyMatch(d -> d.contains("WMO code: 95")));
         }
 
         @Test
@@ -543,7 +543,7 @@ public class AdvanceBookingSafetyAdversarialTest {
 
             assertFalse(res.isSafe());
             assertEquals("RED", res.getSafetyStatus());
-            assertTrue(res.getWarningMessage().contains("Gió giật cực đại 38.0 km/h vượt trần"));
+            assertTrue(res.getWarningMessage().contains("Peak wind gust 38.0 km/h exceeds the aerodynamic safety limit"));
         }
 
         @Test
@@ -569,7 +569,7 @@ public class AdvanceBookingSafetyAdversarialTest {
 
             assertFalse(res.isSafe());
             assertEquals("RED", res.getSafetyStatus());
-            assertTrue(res.getWarningMessage().contains("Mã WMO: 99"));
+            assertTrue(res.getWarningMessage().contains("WMO code: 99"));
         }
 
         @Test

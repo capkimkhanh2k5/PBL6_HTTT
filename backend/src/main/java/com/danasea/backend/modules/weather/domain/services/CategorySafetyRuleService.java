@@ -82,19 +82,19 @@ public class CategorySafetyRuleService {
             log.error("Database error retrieving category safety rule for categoryId '{}'. Error: {}", categoryId, ex.getMessage());
         }
 
-        throw new CategorySafetyRuleNotFoundException("Không tìm thấy quy chuẩn an toàn cho danh mục với ID: " + categoryId);
+        throw new CategorySafetyRuleNotFoundException("Category safety rule not found for ID: " + categoryId);
     }
 
     @Transactional
     @CacheEvict(value = "categorySafetyRules", allEntries = true)
     public CategorySafetyRule updateRule(UUID categoryId, UpdateCategorySafetyRuleRequest request) {
         if (categoryId == null) {
-            throw new CategorySafetyRuleNotFoundException("ID danh mục không được để trống");
+            throw new CategorySafetyRuleNotFoundException("Category ID is required");
         }
 
         CategorySafetyRuleJpaEntity entity = repository.findByCategoryId(categoryId)
                 .or(() -> repository.findById(categoryId))
-                .orElseThrow(() -> new CategorySafetyRuleNotFoundException("Không tìm thấy quy chuẩn an toàn cho danh mục với ID: " + categoryId));
+                .orElseThrow(() -> new CategorySafetyRuleNotFoundException("Category safety rule not found for ID: " + categoryId));
 
         validateThresholds(entity, request);
 
@@ -142,7 +142,7 @@ public class CategorySafetyRuleService {
             (request.getMaxWindGustKmh() != null && request.getMaxWindGustKmh() < 0) ||
             (request.getMaxOceanCurrentMs() != null && request.getMaxOceanCurrentMs() < 0) ||
             (request.getMinVisibilityM() != null && request.getMinVisibilityM() < 0)) {
-            throw new InvalidSafetyRuleThresholdException("Thông số ngưỡng an toàn không được là số âm");
+            throw new InvalidSafetyRuleThresholdException("Safety thresholds must not be negative");
         }
 
         // 2. Kiểm tra ngưỡng sóng: caution <= max
@@ -150,7 +150,7 @@ public class CategorySafetyRuleService {
         Double mergedMaxWave = request.getMaxWaveHeightM() != null ? request.getMaxWaveHeightM() : entity.getMaxWaveHeightM();
         if (mergedCautionWave != null && mergedMaxWave != null && mergedCautionWave > mergedMaxWave) {
             throw new InvalidSafetyRuleThresholdException(String.format(
-                    "Ngưỡng sóng vàng (%.2fm) không được vượt quá ngưỡng sóng đỏ (%.2fm)", mergedCautionWave, mergedMaxWave));
+                    "The caution wave threshold (%.2fm) must not exceed the danger threshold (%.2fm)", mergedCautionWave, mergedMaxWave));
         }
 
         // 3. Kiểm tra ngưỡng gió: caution <= max
@@ -158,7 +158,7 @@ public class CategorySafetyRuleService {
         Double mergedMaxWind = request.getMaxWindSpeedKmh() != null ? request.getMaxWindSpeedKmh() : entity.getMaxWindSpeedKmh();
         if (mergedCautionWind != null && mergedMaxWind != null && mergedCautionWind > mergedMaxWind) {
             throw new InvalidSafetyRuleThresholdException(String.format(
-                    "Ngưỡng gió duy trì vàng (%.2f km/h) không được vượt quá ngưỡng gió đỏ (%.2f km/h)", mergedCautionWind, mergedMaxWind));
+                    "The caution sustained-wind threshold (%.2f km/h) must not exceed the danger threshold (%.2f km/h)", mergedCautionWind, mergedMaxWind));
         }
     }
 

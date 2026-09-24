@@ -236,9 +236,9 @@ public class PromptInjectionProtectionTest {
         assertFalse(groqModerationClient.parseModerationOutput("0.51"));
         assertFalse(groqModerationClient.parseModerationOutput("0.92"));
 
-        // Null or blank defaults to safe
-        assertTrue(groqModerationClient.parseModerationOutput(null));
-        assertTrue(groqModerationClient.parseModerationOutput("   "));
+        // Unparseable output fails closed.
+        assertFalse(groqModerationClient.parseModerationOutput(null));
+        assertFalse(groqModerationClient.parseModerationOutput("   "));
     }
 
     @Test

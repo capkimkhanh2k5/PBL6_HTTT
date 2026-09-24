@@ -438,7 +438,7 @@ class SlotWeatherMonitoringJobTest {
                     eq(vendorId),
                     eq("WEATHER_ALERT"),
                     any(),
-                    contains("LEO THANG"),
+                    contains("ESCALATED ALERT"),
                     anyString(),
                     eq("SERVICE_SLOT"),
                     eq(slotId),
@@ -450,7 +450,7 @@ class SlotWeatherMonitoringJobTest {
                     isNull(),
                     eq("WEATHER_WARNING"),
                     any(),
-                    contains("LEO THANG"),
+                    contains("ESCALATED ALERT"),
                     anyString(),
                     eq("SUB_ORDER"),
                     eq(subOrder.getId()),
@@ -462,7 +462,7 @@ class SlotWeatherMonitoringJobTest {
                     isNull(),
                     eq("WEATHER_ALERT"),
                     any(),
-                    contains("leo thang lên mức ĐỎ"),
+                    contains("escalated to RED"),
                     anyString(),
                     eq("SERVICE_SLOT"),
                     eq(slotId),
@@ -564,14 +564,14 @@ class SlotWeatherMonitoringJobTest {
             assertEquals(SubOrderStatus.CANCELLED, subOrder.getStatus());
             verify(subOrderRepository, times(1)).save(subOrder);
 
-            // 2. Tạo bản ghi hoàn tiền 100% với RefundReason.WEATHER và PROCESSED
+            // 2. Create a pending full-refund request; only the provider webhook may complete it.
             ArgumentCaptor<RefundJpaEntity> refundCaptor = ArgumentCaptor.forClass(RefundJpaEntity.class);
             verify(refundRepository, times(1)).save(refundCaptor.capture());
             RefundJpaEntity refund = refundCaptor.getValue();
             assertEquals(BigDecimal.valueOf(1500000), refund.getAmount());
             assertEquals(BigDecimal.valueOf(100.0), refund.getRefundPercentage());
             assertEquals(RefundReason.WEATHER, refund.getReason());
-            assertEquals(RefundStatus.PROCESSED, refund.getStatus());
+            assertEquals(RefundStatus.PENDING, refund.getStatus());
 
             // 3. Trạng thái bản ghi sự cố cập nhật sang AUTO_CANCELLED_FOR_SAFETY
             assertEquals("AUTO_CANCELLED_FOR_SAFETY", redAlert.getStatus());
@@ -584,7 +584,7 @@ class SlotWeatherMonitoringJobTest {
                     isNull(),
                     eq("AUTO_CANCELLED_FOR_SAFETY"),
                     eq(NotificationChannel.IN_APP),
-                    contains("Hệ thống tự động can thiệp"),
+                    contains("Automatic safety intervention"),
                     anyString(),
                     eq("SERVICE_SLOT"),
                     eq(slotId),
@@ -596,7 +596,7 @@ class SlotWeatherMonitoringJobTest {
                     eq(vendorId),
                     eq("AUTO_CANCELLED_FOR_SAFETY"),
                     eq(NotificationChannel.IN_APP),
-                    contains("Chuyến đi bị hủy tự động"),
+                    contains("Trip automatically cancelled"),
                     anyString(),
                     eq("SERVICE_SLOT"),
                     eq(slotId),
@@ -608,7 +608,7 @@ class SlotWeatherMonitoringJobTest {
                     eq(customerId),
                     eq("AUTO_CANCELLED_FOR_SAFETY"),
                     eq(NotificationChannel.IN_APP),
-                    contains("Hoàn tiền 100%"),
+                    contains("full refund requested"),
                     anyString(),
                     eq("SUB_ORDER"),
                     eq(subOrder.getId()),

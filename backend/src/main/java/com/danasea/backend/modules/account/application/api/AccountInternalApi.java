@@ -23,6 +23,8 @@ public interface AccountInternalApi {
 
     Optional<RefreshToken> findRefreshTokenByHash(String tokenHash);
 
+    Optional<RefreshToken> findRefreshTokenByHashForUpdate(String tokenHash);
+
     void revokeRefreshTokenFamily(UUID familyId);
 
     void revokeAllTokensByUserId(UUID userId);

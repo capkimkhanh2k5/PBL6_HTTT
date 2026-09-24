@@ -13,6 +13,11 @@ import com.danasea.backend.modules.vendor.domain.models.VerificationStatus;
 import com.danasea.backend.modules.vendor.infrastructure.mappers.VendorMapper;
 import com.danasea.backend.modules.vendor.infrastructure.persistence.entities.VendorJpaEntity;
 import com.danasea.backend.modules.vendor.infrastructure.persistence.repositories.JpaVendorRepository;
+import com.danasea.backend.modules.vendor.infrastructure.persistence.repositories.JpaVendorDocumentRepository;
+import com.danasea.backend.modules.vendor.domain.models.DocStatus;
+import com.danasea.backend.modules.vendor.domain.models.DocType;
+import java.util.Set;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -20,6 +25,7 @@ import lombok.RequiredArgsConstructor;
 public class VendorInternalService implements VendorInternalApi {
 
     private final JpaVendorRepository vendorRepository;
+    private final JpaVendorDocumentRepository vendorDocumentRepository;
     private final VendorMapper vendorMapper;
 
     @Override
@@ -63,5 +69,15 @@ public class VendorInternalService implements VendorInternalApi {
             return vendorRepository.findAll(pageable).map(vendorMapper::toDomain);
         }
         return vendorRepository.findByVerificationStatus(status, pageable).map(vendorMapper::toDomain);
+    }
+
+    @Override
+    public Set<DocType> getApprovedDocumentTypes(UUID vendorId) {
+        if (vendorId == null) {
+            return Set.of();
+        }
+        return vendorDocumentRepository.findByVendorIdAndStatus(vendorId, DocStatus.APPROVED).stream()
+                .map(document -> document.getDocType())
+                .collect(Collectors.toUnmodifiableSet());
     }
 }
