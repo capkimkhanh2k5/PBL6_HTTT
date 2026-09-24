@@ -131,7 +131,7 @@ class AdminUserControllerTest {
         mockMvc.perform(get("/api/admin/users/{id}", userId))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.code").value("USER_NOT_FOUND"))
-                .andExpect(jsonPath("$.message").value("User not found with id: " + userId));
+                .andExpect(jsonPath("$.message").value("User was not found."));
     }
 
     @Test
@@ -188,7 +188,7 @@ class AdminUserControllerTest {
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.code").value("USER_NOT_FOUND"))
-                .andExpect(jsonPath("$.message").value("User not found with id: " + targetUserId));
+                .andExpect(jsonPath("$.message").value("User was not found."));
     }
 
     @Test
@@ -204,7 +204,7 @@ class AdminUserControllerTest {
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isForbidden())
                 .andExpect(jsonPath("$.code").value("SELF_LOCK_NOT_ALLOWED"))
-                .andExpect(jsonPath("$.message").value("Admin cannot lock own account"));
+                .andExpect(jsonPath("$.message").value("Administrators cannot lock their own account."));
     }
 
     @Test
@@ -220,7 +220,7 @@ class AdminUserControllerTest {
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isConflict())
                 .andExpect(jsonPath("$.code").value("USER_ALREADY_LOCKED"))
-                .andExpect(jsonPath("$.message").value("User is already locked"));
+                .andExpect(jsonPath("$.message").value("This user account is already locked."));
     }
 
     @Test
@@ -235,7 +235,7 @@ class AdminUserControllerTest {
         mockMvc.perform(get("/api/admin/users"))
                 .andExpect(status().isForbidden())
                 .andExpect(jsonPath("$.code").value("ACCESS_DENIED"))
-                .andExpect(jsonPath("$.message").value("Access denied"));
+                .andExpect(jsonPath("$.message").value("Access denied."));
     }
 
     @Test
@@ -252,7 +252,7 @@ class AdminUserControllerTest {
                         .content(objectMapper.writeValueAsString(new LockUserRequest("Spam"))))
                 .andExpect(status().isForbidden())
                 .andExpect(jsonPath("$.code").value("ACCESS_DENIED"))
-                .andExpect(jsonPath("$.message").value("Access denied"));
+                .andExpect(jsonPath("$.message").value("Access denied."));
     }
 
     @Test

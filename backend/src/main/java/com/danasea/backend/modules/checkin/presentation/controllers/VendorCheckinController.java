@@ -24,7 +24,7 @@ public class VendorCheckinController {
     @PostMapping("/verify")
     @PreAuthorize("hasRole('VENDOR') or hasRole('ADMIN')")
     public ResponseEntity<VerifyCheckinResponse> verifyCheckin(@Valid @RequestBody VerifyCheckinRequest request) {
-        log.info("Vendor is verifying a check-in QR code");
+        log.info("Vendor quét mã QR xác thực check-in");
         VerifyCheckinResponse response = verifyCheckinUseCase.execute(request);
         return ResponseEntity.ok(response);
     }

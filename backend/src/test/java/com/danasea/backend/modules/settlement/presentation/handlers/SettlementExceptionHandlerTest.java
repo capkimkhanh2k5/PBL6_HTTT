@@ -9,10 +9,15 @@ import com.danasea.backend.modules.settlement.domain.exceptions.SettlementNotFou
 import com.danasea.backend.modules.settlement.domain.exceptions.UnauthorizedSettlementAccessException;
 import com.danasea.backend.modules.vendor.domain.exceptions.VendorNotFoundException;
 import com.danasea.backend.shared.presentation.ErrorResponse;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+
+import java.util.Locale;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -20,6 +25,16 @@ import static org.assertj.core.api.Assertions.assertThat;
 class SettlementExceptionHandlerTest {
 
     private final SettlementExceptionHandler handler = new SettlementExceptionHandler();
+
+    @BeforeEach
+    void setLocale() {
+        LocaleContextHolder.setLocale(Locale.ENGLISH);
+    }
+
+    @AfterEach
+    void clearLocale() {
+        LocaleContextHolder.resetLocaleContext();
+    }
 
     @Test
     @DisplayName("SettlementAlreadyFinalizedException maps to 409 CONFLICT")
@@ -30,7 +45,7 @@ class SettlementExceptionHandlerTest {
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CONFLICT);
         assertThat(response.getBody()).isNotNull();
         assertThat(response.getBody().code()).isEqualTo("SETTLEMENT_ALREADY_FINALIZED");
-        assertThat(response.getBody().message()).contains("Period already finalized");
+        assertThat(response.getBody().message()).isEqualTo("The settlement has already been finalized.");
     }
 
     @Test

@@ -12,6 +12,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import com.danasea.backend.configs.properties.RateLimitProperties;
+import com.danasea.backend.shared.i18n.LocalizedMessageService;
 import com.danasea.backend.shared.presentation.ErrorResponse;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -36,21 +37,25 @@ public class RateLimitFilter extends OncePerRequestFilter {
     private final LettuceBasedProxyManager<byte[]> proxyManager;
     private final ObjectMapper objectMapper;
     private final RateLimitProperties.Limit limit;
+    private final LocalizedMessageService messages;
 
     @Autowired
     public RateLimitFilter(
             LettuceBasedProxyManager<byte[]> proxyManager,
             ObjectMapper objectMapper,
-            RateLimitProperties properties) {
+            RateLimitProperties properties,
+            LocalizedMessageService messages) {
         this.proxyManager = proxyManager;
         this.objectMapper = objectMapper;
         this.limit = properties.loginRegistration();
+        this.messages = messages;
     }
 
     public RateLimitFilter(LettuceBasedProxyManager<byte[]> proxyManager) {
         this.proxyManager = proxyManager;
         this.objectMapper = new ObjectMapper();
         this.limit = new RateLimitProperties.Limit(50, Duration.ofMinutes(1));
+        this.messages = LocalizedMessageService.standalone();
     }
 
     @Override
@@ -78,10 +83,10 @@ public class RateLimitFilter extends OncePerRequestFilter {
             response.setHeader("Retry-After", String.valueOf(retryAfter));
             response.setHeader("X-Rate-Limit-Retry-After-Seconds", String.valueOf(retryAfter));
             writeError(response, HttpStatus.TOO_MANY_REQUESTS, "RATE_LIMIT_EXCEEDED",
-                    "Too many authentication requests. Please try again later.");
+                    messages.get("auth.rate_limit"));
         } catch (Exception exception) {
             writeError(response, HttpStatus.SERVICE_UNAVAILABLE, "RATE_LIMIT_UNAVAILABLE",
-                    "Authentication is temporarily unavailable. Please try again later.");
+                    messages.get("auth.rate_limit_unavailable"));
         }
     }
 

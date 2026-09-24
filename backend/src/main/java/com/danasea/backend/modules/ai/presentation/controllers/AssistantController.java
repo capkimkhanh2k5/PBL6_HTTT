@@ -5,26 +5,27 @@ import com.danasea.backend.modules.ai.application.usecase.ConfirmBookingUseCase;
 import com.danasea.backend.modules.ai.domain.services.AssistantAuditLogService;
 import com.danasea.backend.modules.ai.domain.services.ChatHistoryService;
 import com.danasea.backend.modules.ai.infrastructure.persistence.entities.AiConversationJpaEntity;
-import com.danasea.backend.modules.ai.presentation.dtos.ChatRequest;
-import com.danasea.backend.modules.ai.presentation.dtos.ChatResponse;
-import com.danasea.backend.modules.ai.presentation.dtos.ConfirmConversationRequest;
-import com.danasea.backend.modules.ai.presentation.dtos.ConversationResponse;
-import com.danasea.backend.modules.ai.presentation.dtos.MessageResponse;
+import com.danasea.backend.modules.ai.infrastructure.persistence.entities.AiMessageJpaEntity;
+import com.danasea.backend.modules.ai.infrastructure.persistence.repositories.JpaAiConversationRepository;
 import com.danasea.backend.security.infrastructure.SecurityUtils;
 import com.danasea.backend.modules.ai.application.port.RateLimiterPort;
 import com.danasea.backend.modules.ai.domain.TrustTier;
+import com.danasea.backend.modules.ai.domain.exceptions.AiConversationLocaleMismatchException;
+import com.danasea.backend.shared.i18n.LocalizedMessageService;
+import com.danasea.backend.shared.i18n.SupportedLanguage;
+import com.danasea.backend.shared.presentation.ErrorResponse;
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
+import org.springframework.context.i18n.LocaleContextHolder;
 
 @RestController
 @RequestMapping("/api/assistant")
@@ -39,36 +40,53 @@ public class AssistantController {
     private final ChatUseCase chatUseCase;
     private final ConfirmBookingUseCase confirmBookingUseCase;
     private final AssistantAuditLogService auditLogService;
+    private final JpaAiConversationRepository conversationRepository;
     private final RateLimiterPort rateLimiter;
+    private final LocalizedMessageService messages;
 
     @PostMapping("/chat")
-    @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<?> chat(@Valid @RequestBody ChatRequest request, HttpServletRequest httpRequest) {
+    public ResponseEntity<?> chat(@RequestBody Map<String, Object> request, HttpServletRequest httpRequest) {
         String clientIp = extractClientIp(httpRequest);
-        UUID userId = currentUserId();
-        String userIdStr = userId.toString();
-        TrustTier tier = TrustTier.VERIFIED;
+        Optional<UUID> currentUserIdOpt = SecurityUtils.getCurrentUserId();
+        UUID userId = currentUserIdOpt.orElse(null);
+        String userIdStr = userId != null ? userId.toString() : null;
+        TrustTier tier = userId != null ? TrustTier.VERIFIED : TrustTier.UNVERIFIED;
+        SupportedLanguage language = SupportedLanguage
+                .fromTag(LocaleContextHolder.getLocale().toLanguageTag())
+                .orElse(SupportedLanguage.VI);
 
         // Enforce rate limiting prior to calling chatUseCase
         if (!rateLimiter.isAllowed(userIdStr, clientIp, tier)) {
-            return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS).body(Map.of(
-                "status", "error",
-                "message", "Rate limit exceeded. Please try again later."
-            ));
+            return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS)
+                    .body(new ErrorResponse("RATE_LIMIT_EXCEEDED", messages.get("ai.rate_limit", language)));
         }
 
-        AiConversationJpaEntity conversation = chatHistoryService.getOrCreateConversation(request.conversationId(), userId);
+        UUID requestedConversationId = request.containsKey("conversationId") && request.get("conversationId") != null
+                ? UUID.fromString((String) request.get("conversationId")) : null;
+
+        AiConversationJpaEntity conversation = chatHistoryService
+                .getOrCreateConversation(requestedConversationId, userId, language);
+        SupportedLanguage conversationLanguage = SupportedLanguage
+                .fromTag(conversation.getLocale())
+                .orElse(SupportedLanguage.VI);
+        if (conversationLanguage != language) {
+            throw new AiConversationLocaleMismatchException();
+        }
         UUID conversationId = conversation.getId();
 
-        String userMessage = request.message();
+        String userMessage = (String) request.getOrDefault("message", "");
         
-        var llmResponse = chatUseCase.processMessage(conversationId, userMessage);
+        var llmResponse = chatUseCase.processMessage(conversationId, userMessage, conversationLanguage);
         String responseContent = llmResponse.getContent();
         
         // Log chat action
         auditLogService.logChatAction(conversationId, userId, userMessage, responseContent, llmResponse.getKeyMasked());
 
-        return ResponseEntity.ok(new ChatResponse("success", conversationId, responseContent));
+        return ResponseEntity.ok(Map.of(
+            "status", "success",
+            "conversationId", conversationId.toString(),
+            "message", responseContent
+        ));
     }
 
     private String extractClientIp(HttpServletRequest request) {
@@ -86,19 +104,17 @@ public class AssistantController {
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<?> confirmBooking(
             @PathVariable UUID id,
-            @Valid @RequestBody ConfirmConversationRequest request) {
-        UUID userId = currentUserId();
-        chatHistoryService.getConversationForUser(id, userId)
-                .orElseThrow(() -> new IllegalArgumentException("Conversation not found"));
-        String sessionId = request.sessionId() == null || request.sessionId().isBlank()
-                ? DEFAULT_SESSION_PREFIX + userId
-                : request.sessionId();
+            @RequestBody Map<String, Object> request) {
+        String cardId = (String) request.get("cardId");
 
-        Map<String, Object> result = confirmBookingUseCase.execute(request.cardId(), userId, sessionId, id);
+        UUID userId = SecurityUtils.getCurrentUserId().orElseThrow(() -> new IllegalStateException("User not authenticated"));
+        String sessionId = request.getOrDefault("sessionId", DEFAULT_SESSION_PREFIX + userId).toString();
+
+        Map<String, Object> result = confirmBookingUseCase.execute(cardId, userId, sessionId);
         
         // Log confirmation action as tool call/chat action
-        auditLogService.logToolCall(id, userId, "confirm_booking", 
-                "cardId=" + request.cardId(),
+        auditLogService.logToolCall(id, userId, "confirm_booking",
+                "cardId=" + cardId,
                 result.toString());
 
         return ResponseEntity.ok(result);
@@ -106,31 +122,19 @@ public class AssistantController {
 
     @GetMapping("/conversations/{id}")
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<ConversationResponse> getConversation(@PathVariable UUID id) {
-        UUID userId = currentUserId();
-        return chatHistoryService.getConversationForUser(id, userId)
-                .map(ConversationResponse::from)
+    public ResponseEntity<AiConversationJpaEntity> getConversation(@PathVariable UUID id) {
+        return conversationRepository.findById(id)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
 
     @GetMapping("/conversations/{id}/history")
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<List<MessageResponse>> getConversationHistory(
+    public ResponseEntity<List<AiMessageJpaEntity>> getConversationHistory(
             @PathVariable UUID id,
             @RequestParam(defaultValue = "20") int limit) {
-        if (limit < 1 || limit > 100) {
-            throw new IllegalArgumentException("limit must be between 1 and 100");
-        }
-        UUID userId = currentUserId();
-        return chatHistoryService.getRecentMessagesForUser(id, userId, limit)
-                .map(messages -> messages.stream().map(MessageResponse::from).toList())
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
-    }
 
-    private UUID currentUserId() {
-        return SecurityUtils.getCurrentUserId()
-                .orElseThrow(() -> new AccessDeniedException("User is not authenticated"));
+        List<AiMessageJpaEntity> history = chatHistoryService.getRecentMessages(id, limit);
+        return ResponseEntity.ok(history);
     }
 }

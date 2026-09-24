@@ -3,6 +3,8 @@ package com.danasea.backend.modules.ai.application.tool;
 import com.danasea.backend.modules.weather.application.dtos.WeatherInfoDto;
 import com.danasea.backend.modules.weather.application.ports.output.WeatherProviderPort;
 import com.danasea.backend.modules.weather.application.usecases.GetWeatherInfoUseCase;
+import com.danasea.backend.shared.i18n.LocalizedMessageService;
+import com.danasea.backend.shared.i18n.SupportedLanguage;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
@@ -22,16 +24,22 @@ import java.util.Map;
 @Component
 public class GetWeatherForecastTool implements ToolExecutor {
 
+    private static final String CACHE_PREFIX = "ai:weather:forecast:";
+    private static final Duration TTL = Duration.ofMinutes(10);
+    private static final Duration UNAVAILABLE_TTL = Duration.ofMinutes(1);
+    private static final String DEFAULT_LOCATION = "Da Nang";
+    private static final String DEFAULT_DATE = "today";
+
     private final GetWeatherInfoUseCase weatherInfoUseCase;
     private final StringRedisTemplate redisTemplate;
     private final ObjectMapper objectMapper;
     private final WeatherProviderPort weatherProviderPort;
+    private LocalizedMessageService messages = LocalizedMessageService.standalone();
 
-    private static final String CACHE_PREFIX = "ai:weather:forecast:";
-    private static final Duration TTL = Duration.ofMinutes(10); // 5-15 min TTL
-    private static final String DEFAULT_LOCATION = "Da Nang";
-    private static final String DEFAULT_DATE = "today";
-    private static final Duration UNAVAILABLE_TTL = Duration.ofMinutes(1);
+    @Autowired
+    void setLocalizedMessageService(LocalizedMessageService messages) {
+        this.messages = messages;
+    }
 
     @Autowired
     public GetWeatherForecastTool(@Autowired(required = false) GetWeatherInfoUseCase weatherInfoUseCase,
@@ -61,6 +69,15 @@ public class GetWeatherForecastTool implements ToolExecutor {
 
     @Override
     public String execute(String argumentsJson) {
+        return executeInternal(argumentsJson, null);
+    }
+
+    @Override
+    public String execute(String argumentsJson, ToolExecutionContext context) {
+        return executeInternal(argumentsJson, context == null ? null : context.language());
+    }
+
+    private String executeInternal(String argumentsJson, SupportedLanguage language) {
         String location = DEFAULT_LOCATION;
         String date = DEFAULT_DATE;
         Double latitude = null;
@@ -82,8 +99,8 @@ public class GetWeatherForecastTool implements ToolExecutor {
                     longitude = node.get("longitude").asDouble();
                 }
             }
-        } catch (Exception e) {
-            log.warn("Failed to parse get_weather_forecast arguments: {}", argumentsJson, e);
+        } catch (Exception exception) {
+            log.warn("Failed to parse get_weather_forecast arguments", exception);
         }
 
         location = location == null ? "" : location.trim();
@@ -107,15 +124,18 @@ public class GetWeatherForecastTool implements ToolExecutor {
         }
 
         String cacheKey = CACHE_PREFIX + location + ":" + date
-                + (explicitCoordinates ? String.format(Locale.ROOT, ":%.4f:%.4f", coordinates[0], coordinates[1]) : "");
+                + (explicitCoordinates
+                        ? String.format(Locale.ROOT, ":%.4f:%.4f", coordinates[0], coordinates[1])
+                        : "")
+                + (language == null ? "" : ":" + language.code());
         if (redisTemplate != null) {
             try {
                 String cached = redisTemplate.opsForValue().get(cacheKey);
                 if (cached != null && !cached.isBlank()) {
                     return cached;
                 }
-            } catch (Exception e) {
-                log.warn("Failed to read weather forecast from Redis", e);
+            } catch (Exception exception) {
+                log.warn("Failed to read weather forecast from Redis", exception);
             }
         }
 
@@ -139,7 +159,7 @@ public class GetWeatherForecastTool implements ToolExecutor {
                     result.put("weatherCode", forecast.getSevereWeatherCode());
                     result.put("totalPrecipitation", forecast.getTotalPrecipitation());
                 } else {
-                    markUnavailable(result);
+                    markUnavailable(result, language);
                     cacheTtl = UNAVAILABLE_TTL;
                 }
             } else {
@@ -162,31 +182,30 @@ public class GetWeatherForecastTool implements ToolExecutor {
                         result.put("waveHeight", weatherInfo.getMarine().getWaveHeight());
                     }
                 } else {
-                    markUnavailable(result);
+                    markUnavailable(result, language);
                     cacheTtl = UNAVAILABLE_TTL;
                 }
             }
-        } catch (Exception e) {
-            log.warn("Weather provider query failed; returning an explicit unavailable result", e);
-            markUnavailable(result);
+        } catch (Exception exception) {
+            log.warn("Weather provider query failed; returning an explicit unavailable result", exception);
+            markUnavailable(result, language);
             cacheTtl = UNAVAILABLE_TTL;
         }
 
         String jsonResult;
         try {
             jsonResult = objectMapper.writeValueAsString(result);
-        } catch (Exception e) {
-            jsonResult = "{\"available\":false,\"message\":\"Weather forecast data is temporarily unavailable.\"}";
+        } catch (Exception exception) {
+            jsonResult = "{\"available\":false}";
         }
 
         if (redisTemplate != null) {
             try {
                 redisTemplate.opsForValue().set(cacheKey, jsonResult, cacheTtl);
-            } catch (Exception e) {
-                log.warn("Failed to cache weather forecast in Redis", e);
+            } catch (Exception exception) {
+                log.warn("Failed to cache weather forecast in Redis", exception);
             }
         }
-
         return jsonResult;
     }
 
@@ -258,8 +277,10 @@ public class GetWeatherForecastTool implements ToolExecutor {
         }
     }
 
-    private void markUnavailable(Map<String, Object> result) {
+    private void markUnavailable(Map<String, Object> result, SupportedLanguage language) {
         result.put("available", false);
-        result.put("message", "Weather forecast data is temporarily unavailable. Check an official source before making safety decisions.");
+        result.put("message", language == null
+                ? "Weather forecast data is temporarily unavailable. Check an official source before making safety decisions."
+                : messages.get("ai.weather.unavailable", language));
     }
 }

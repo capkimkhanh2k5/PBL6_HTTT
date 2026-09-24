@@ -11,6 +11,7 @@ import com.danasea.backend.modules.checkin.domain.exceptions.UnauthorizedCheckin
 import com.danasea.backend.modules.checkin.domain.exceptions.UnauthorizedVendorCheckinException;
 import com.danasea.backend.modules.order.domain.exceptions.OrderNotFoundException;
 import com.danasea.backend.shared.presentation.ErrorResponse;
+import com.danasea.backend.shared.presentation.LocalizedExceptionHandlerSupport;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpStatus;
@@ -22,11 +23,10 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import java.time.OffsetDateTime;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 @Order(Ordered.HIGHEST_PRECEDENCE)
 @RestControllerAdvice(basePackages = "com.danasea.backend.modules.checkin")
-public class CheckinExceptionHandler {
+public class CheckinExceptionHandler extends LocalizedExceptionHandlerSupport {
 
     public record CheckinAlreadyUsedErrorResponse(
             String code,
@@ -38,37 +38,37 @@ public class CheckinExceptionHandler {
     @ExceptionHandler(InvalidQrSignatureException.class)
     public ResponseEntity<ErrorResponse> handleInvalidQrSignature(InvalidQrSignatureException ex) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                .body(new ErrorResponse("INVALID_QR_SIGNATURE", ex.getMessage()));
+                .body(error("INVALID_QR_SIGNATURE"));
     }
 
     @ExceptionHandler(InvalidQrTokenException.class)
     public ResponseEntity<ErrorResponse> handleInvalidQrToken(InvalidQrTokenException ex) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                .body(new ErrorResponse("INVALID_QR_TOKEN", ex.getMessage()));
+                .body(error("INVALID_QR_TOKEN"));
     }
 
     @ExceptionHandler(InvalidSubOrderStateException.class)
     public ResponseEntity<ErrorResponse> handleInvalidSubOrderState(InvalidSubOrderStateException ex) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                .body(new ErrorResponse("INVALID_SUB_ORDER_STATE", ex.getMessage()));
+                .body(error("INVALID_SUB_ORDER_STATE"));
     }
 
     @ExceptionHandler(InvalidCheckinStateException.class)
     public ResponseEntity<ErrorResponse> handleInvalidCheckinState(InvalidCheckinStateException ex) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                .body(new ErrorResponse("SLOT_ALREADY_CONCLUDED", ex.getMessage()));
+                .body(error("SLOT_ALREADY_CONCLUDED"));
     }
 
     @ExceptionHandler(UnauthorizedCheckinAccessException.class)
     public ResponseEntity<ErrorResponse> handleUnauthorizedCheckinAccess(UnauthorizedCheckinAccessException ex) {
         return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                .body(new ErrorResponse("ACCESS_DENIED", ex.getMessage()));
+                .body(error("ACCESS_DENIED"));
     }
 
     @ExceptionHandler(UnauthorizedVendorCheckinException.class)
     public ResponseEntity<ErrorResponse> handleUnauthorizedVendorCheckin(UnauthorizedVendorCheckinException ex) {
         return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                .body(new ErrorResponse("VENDOR_MISMATCH", ex.getMessage()));
+                .body(error("VENDOR_MISMATCH"));
     }
 
     @ExceptionHandler(CheckinAlreadyUsedException.class)
@@ -76,7 +76,7 @@ public class CheckinExceptionHandler {
         return ResponseEntity.status(HttpStatus.CONFLICT)
                 .body(new CheckinAlreadyUsedErrorResponse(
                         "QR_TOKEN_ALREADY_USED",
-                        ex.getMessage(),
+                        message("error.qr_token_already_used"),
                         ex.getUsedAt(),
                         ex.getUsedByVendorStaffId()
                 ));
@@ -85,33 +85,30 @@ public class CheckinExceptionHandler {
     @ExceptionHandler(QrTokenExpiredException.class)
     public ResponseEntity<ErrorResponse> handleQrTokenExpired(QrTokenExpiredException ex) {
         return ResponseEntity.status(HttpStatus.GONE)
-                .body(new ErrorResponse("QR_TOKEN_EXPIRED", ex.getMessage()));
+                .body(error("QR_TOKEN_EXPIRED"));
     }
 
     @ExceptionHandler(CheckinTokenNotFoundException.class)
     public ResponseEntity<ErrorResponse> handleCheckinTokenNotFound(CheckinTokenNotFoundException ex) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                .body(new ErrorResponse("CHECKIN_TOKEN_NOT_FOUND", ex.getMessage()));
+                .body(error("CHECKIN_TOKEN_NOT_FOUND"));
     }
 
     @ExceptionHandler(OrderNotFoundException.class)
     public ResponseEntity<ErrorResponse> handleOrderNotFound(OrderNotFoundException ex) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                .body(new ErrorResponse("ORDER_NOT_FOUND", ex.getMessage()));
+                .body(error("ORDER_NOT_FOUND"));
     }
 
     @ExceptionHandler(AccessDeniedException.class)
     public ResponseEntity<ErrorResponse> handleAccessDenied(AccessDeniedException ex) {
         return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                .body(new ErrorResponse("ACCESS_DENIED", ex.getMessage()));
+                .body(error("ACCESS_DENIED"));
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ErrorResponse> handleValidationErrors(MethodArgumentNotValidException ex) {
-        String msg = ex.getBindingResult().getFieldErrors().stream()
-                .map(err -> err.getField() + ": " + err.getDefaultMessage())
-                .collect(Collectors.joining(", "));
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                .body(new ErrorResponse("INVALID_INPUT", msg));
+                .body(validationError(ex));
     }
 }

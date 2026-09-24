@@ -20,4 +20,7 @@ public class AiConversationJpaEntity extends BaseJpaEntity {
 
     private OffsetDateTime endedAt;
 
+    @Column(nullable = false, length = 2)
+    private String locale = "vi";
+
 }

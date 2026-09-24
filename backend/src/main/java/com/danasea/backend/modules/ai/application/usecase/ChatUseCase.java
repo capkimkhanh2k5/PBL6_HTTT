@@ -7,7 +7,7 @@ import com.danasea.backend.modules.ai.domain.models.LlmResponse;
 import com.danasea.backend.modules.ai.domain.models.ToolCall;
 import com.danasea.backend.modules.ai.domain.services.ChatHistoryService;
 import com.danasea.backend.modules.ai.application.tool.ToolExecutor;
-import com.danasea.backend.modules.ai.application.tool.ConversationAwareToolExecutor;
+import com.danasea.backend.modules.ai.application.tool.ToolExecutionContext;
 import com.danasea.backend.modules.ai.infrastructure.persistence.entities.AiMessageJpaEntity;
 import com.danasea.backend.modules.ai.domain.models.AiMessage;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -16,6 +16,9 @@ import com.danasea.backend.modules.ai.domain.services.AssistantAuditLogService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import com.danasea.backend.shared.i18n.LocalizedException;
+import com.danasea.backend.shared.i18n.LocalizedMessageService;
+import com.danasea.backend.shared.i18n.SupportedLanguage;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -47,6 +50,12 @@ public class ChatUseCase {
     private final Map<String, ToolExecutor> toolExecutors;
     private final ObjectMapper objectMapper;
     private final AssistantAuditLogService auditLogService;
+    private LocalizedMessageService messages = LocalizedMessageService.standalone();
+
+    @Autowired
+    void setLocalizedMessageService(LocalizedMessageService messages) {
+        this.messages = messages;
+    }
 
     @Autowired
     public ChatUseCase(LlmClientPort llmClientPort, 
@@ -72,6 +81,17 @@ public class ChatUseCase {
     }
 
     public LlmResponse processMessage(UUID conversationId, String userMessageContent) {
+        return processMessageInternal(conversationId, userMessageContent, null);
+    }
+
+    public LlmResponse processMessage(
+            UUID conversationId, String userMessageContent, SupportedLanguage language) {
+        return processMessageInternal(conversationId, userMessageContent,
+                language == null ? SupportedLanguage.VI : language);
+    }
+
+    private LlmResponse processMessageInternal(
+            UUID conversationId, String userMessageContent, SupportedLanguage language) {
         String effectiveContent = userMessageContent;
         if (effectiveContent != null && effectiveContent.length() > MAX_USER_MESSAGE_CHARS) {
             int maxChars = MAX_USER_MESSAGE_CHARS;
@@ -89,15 +109,18 @@ public class ChatUseCase {
                     log.error("Failed to log moderation blocked event", e);
                 }
             }
-            throw new IllegalArgumentException("Message violates safety policies or contains prompt injections.");
+            if (language != null) {
+                throw new LocalizedException("AI_MODERATION_BLOCKED", "ai.moderation.blocked");
+            }
+            throw new IllegalArgumentException(messages.get("ai.moderation.blocked", SupportedLanguage.EN));
         }
 
         chatHistoryService.appendMessage(conversationId, AiMessageRole.USER, effectiveContent, null);
 
-        return executeChatLoop(conversationId);
+        return executeChatLoop(conversationId, language);
     }
 
-    private LlmResponse executeChatLoop(UUID conversationId) {
+    private LlmResponse executeChatLoop(UUID conversationId, SupportedLanguage language) {
         LlmResponse lastResponse = null;
         boolean policyToolCalled = false;
 
@@ -105,7 +128,9 @@ public class ChatUseCase {
             List<AiMessageJpaEntity> recentJpa = chatHistoryService.getRecentMessages(conversationId, DEFAULT_HISTORY_LIMIT);
             List<AiMessage> history = mapToDomain(recentJpa);
 
-            LlmResponse response = llmClientPort.generateResponse(history);
+            LlmResponse response = language == null
+                    ? llmClientPort.generateResponse(history)
+                    : llmClientPort.generateResponse(history, language);
             lastResponse = response;
 
             if (response.getToolCalls() != null && !response.getToolCalls().isEmpty()) {
@@ -123,11 +148,11 @@ public class ChatUseCase {
                     ToolExecutor executor = toolExecutors.get(tc.getName());
                     String result;
                     if (executor != null) {
-                        result = executor instanceof ConversationAwareToolExecutor conversationAwareTool
-                                ? conversationAwareTool.execute(tc.getArguments(), conversationId)
-                                : executor.execute(tc.getArguments());
+                        result = language == null
+                                ? executor.execute(tc.getArguments())
+                                : executor.execute(tc.getArguments(), new ToolExecutionContext(language, conversationId));
                     } else {
-                        result = "{\"error\": \"Unknown tool\"}";
+                        result = "{\"errorCode\":\"AI_TOOL_UNKNOWN\"}";
                     }
                     // Append tool response
                     chatHistoryService.appendMessage(conversationId, AiMessageRole.TOOL, result, tc.getId());
@@ -135,7 +160,9 @@ public class ChatUseCase {
             } else {
                 // If response mentions policy keywords but get_policy was never called, reject hallucinated policy
                 if (!policyToolCalled && containsPolicyKeywords(response.getContent())) {
-                    String rejectionMessage = "I cannot provide cancellation or refund policy details without consulting the official policy source. Please ask me to check a specific policy.";
+                    String rejectionMessage = language == null
+                            ? messages.get("ai.policy.lookup_required", SupportedLanguage.EN)
+                            : messages.get("ai.policy.lookup_required", language);
                     response.setContent(rejectionMessage);
                 }
 
@@ -144,7 +171,9 @@ public class ChatUseCase {
             }
         }
         LlmResponse timeoutResponse = new LlmResponse();
-        timeoutResponse.setContent("Sorry, I am taking too long to process your request.");
+        timeoutResponse.setContent(language == null
+                ? messages.get("ai.timeout", SupportedLanguage.EN)
+                : messages.get("ai.timeout", language));
         timeoutResponse.setKeyMasked(lastResponse != null ? lastResponse.getKeyMasked() : null);
         return timeoutResponse;
     }

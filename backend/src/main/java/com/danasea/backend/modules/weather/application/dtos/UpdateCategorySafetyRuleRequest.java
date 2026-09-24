@@ -16,25 +16,25 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class UpdateCategorySafetyRuleRequest {
 
-    @PositiveOrZero(message = "Caution wave threshold must not be negative")
+    @PositiveOrZero(message = "{validation.weather.non_negative}")
     private Double cautionWaveHeightM;
 
-    @PositiveOrZero(message = "Danger wave threshold must not be negative")
+    @PositiveOrZero(message = "{validation.weather.non_negative}")
     private Double maxWaveHeightM;
 
-    @PositiveOrZero(message = "Caution sustained-wind threshold must not be negative")
+    @PositiveOrZero(message = "{validation.weather.non_negative}")
     private Double cautionWindSpeedKmh;
 
-    @PositiveOrZero(message = "Danger sustained-wind threshold must not be negative")
+    @PositiveOrZero(message = "{validation.weather.non_negative}")
     private Double maxWindSpeedKmh;
 
-    @PositiveOrZero(message = "Danger wind-gust threshold must not be negative")
+    @PositiveOrZero(message = "{validation.weather.non_negative}")
     private Double maxWindGustKmh;
 
-    @PositiveOrZero(message = "Danger ocean-current threshold must not be negative")
+    @PositiveOrZero(message = "{validation.weather.non_negative}")
     private Double maxOceanCurrentMs;
 
-    @PositiveOrZero(message = "Minimum visibility must not be negative")
+    @PositiveOrZero(message = "{validation.weather.non_negative}")
     private Double minVisibilityM;
 
     private String fatalThunderstormCodes;

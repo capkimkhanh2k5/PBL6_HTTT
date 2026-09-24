@@ -3,6 +3,9 @@ package com.danasea.backend.shared.presentation;
 import com.danasea.backend.security.authorization.domain.exceptions.AccessDeniedException;
 import com.danasea.backend.security.authentication.domain.exceptions.InvalidCredentialsException;
 import com.danasea.backend.security.authentication.infrastructure.security.CookieUtils;
+import com.danasea.backend.shared.i18n.LocalizedException;
+import com.danasea.backend.shared.i18n.LocalizedMessageService;
+import com.danasea.backend.modules.ai.domain.exceptions.AiConversationLocaleMismatchException;
 
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.http.HttpStatus;
@@ -18,6 +21,29 @@ import java.util.stream.Collectors;
 @Slf4j
 public class GlobalExceptionHandler {
 
+    private final LocalizedMessageService messages;
+
+    public GlobalExceptionHandler(LocalizedMessageService messages) {
+        this.messages = messages;
+    }
+
+    public GlobalExceptionHandler() {
+        this(LocalizedMessageService.standalone());
+    }
+
+    @ExceptionHandler(LocalizedException.class)
+    public ResponseEntity<ErrorResponse> handleLocalizedException(LocalizedException exception) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(new ErrorResponse(exception.getErrorCode(), messages.get(exception.getMessageRef())));
+    }
+
+    @ExceptionHandler(AiConversationLocaleMismatchException.class)
+    public ResponseEntity<ErrorResponse> handleAiConversationLocaleMismatch(
+            AiConversationLocaleMismatchException exception) {
+        return ResponseEntity.status(HttpStatus.CONFLICT)
+                .body(new ErrorResponse(exception.getErrorCode(), messages.get(exception.getMessageRef())));
+    }
+
     @ExceptionHandler(InvalidCredentialsException.class)
     public ResponseEntity<ErrorResponse> handleInvalidCredentials(
             InvalidCredentialsException exception,
@@ -26,26 +52,26 @@ public class GlobalExceptionHandler {
         CookieUtils.clearRefreshTokenCookie(response);
 
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                .body(new ErrorResponse("INVALID_CREDENTIALS", exception.getMessage() != null ? exception.getMessage() : "Invalid credentials"));
+                .body(new ErrorResponse("INVALID_CREDENTIALS", messages.get("error.invalid_credentials")));
     }
 
     @ExceptionHandler(AccessDeniedException.class)
     public ResponseEntity<ErrorResponse> handleAccessDeniedException(AccessDeniedException ex) {
         return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                .body(new ErrorResponse("ACCESS_DENIED", "Access denied"));
+                .body(new ErrorResponse("ACCESS_DENIED", messages.get("error.access_denied")));
     }
 
     @ExceptionHandler(org.springframework.security.access.AccessDeniedException.class)
     public ResponseEntity<ErrorResponse> handleSpringAccessDeniedException(
             org.springframework.security.access.AccessDeniedException ex) {
         return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                .body(new ErrorResponse("ACCESS_DENIED", "Access denied"));
+                .body(new ErrorResponse("ACCESS_DENIED", messages.get("error.access_denied")));
     }
 
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<ErrorResponse> handleIllegalArgumentException(IllegalArgumentException ex) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                .body(new ErrorResponse("INVALID_INPUT", ex.getMessage()));
+                .body(new ErrorResponse("INVALID_INPUT", messages.get("error.invalid_input")));
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
@@ -62,6 +88,6 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponse> handleUnexpectedException(Exception exception) {
         log.error("Unhandled request failure", exception);
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(new ErrorResponse("INTERNAL_ERROR", "An unexpected error occurred."));
+                .body(new ErrorResponse("INTERNAL_ERROR", messages.get("error.internal")));
     }
 }

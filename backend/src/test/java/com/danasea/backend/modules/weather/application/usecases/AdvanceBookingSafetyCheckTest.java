@@ -451,7 +451,7 @@ public class AdvanceBookingSafetyCheckTest {
         @Test
         @DisplayName("TC12: checkSafety with Beyond 16 Days -> Throws IllegalArgumentException")
         void testAdvanceCheck_Beyond16Days_ThrowsIllegalArgumentException() {
-            LocalDate distantDate = today.plusDays(18);
+            LocalDate distantDate = LocalDate.now().plusDays(18);
 
             assertThrows(IllegalArgumentException.class, () -> useCase.checkSafety(
                     UUID.randomUUID(), UUID.randomUUID(), "cheo-sup-kayak",

@@ -22,6 +22,7 @@ import com.danasea.backend.security.authentication.presentation.filter.RateLimit
 import com.danasea.backend.security.authentication.infrastructure.security.CustomAuthenticationEntryPoint;
 import com.danasea.backend.security.authentication.infrastructure.security.JwtAuthenticationFilter;
 import com.danasea.backend.security.authorization.infrastructure.security.CustomAccessDeniedHandler;
+import com.danasea.backend.shared.i18n.LocaleContextFilter;
 import com.danasea.backend.shared.infrastructure.web.RequestIdFilter;
 
 @Configuration
@@ -39,6 +40,7 @@ public class SecurityConfig {
 	SecurityFilterChain applicationSecurityFilterChain(
 			HttpSecurity http,
 			JwtAuthenticationFilter jwtAuthenticationFilter,
+			LocaleContextFilter localeContextFilter,
 			RateLimitFilter rateLimitFilter,
 			OtpRateLimitFilter otpRateLimitFilter,
 			CookieOriginValidationFilter cookieOriginValidationFilter,
@@ -83,6 +85,7 @@ public class SecurityConfig {
 				.addFilterBefore(requestIdFilter, UsernamePasswordAuthenticationFilter.class)
 				.addFilterBefore(cookieOriginValidationFilter, UsernamePasswordAuthenticationFilter.class)
 				.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
+				.addFilterAfter(localeContextFilter, JwtAuthenticationFilter.class)
 				.addFilterBefore(rateLimitFilter, JwtAuthenticationFilter.class)
 				.addFilterAfter(otpRateLimitFilter, JwtAuthenticationFilter.class)
 				.build();
@@ -95,8 +98,10 @@ public class SecurityConfig {
 		configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
 		configuration.setAllowedHeaders(Arrays.asList(
 				"Authorization", "Content-Type", "X-Requested-With", "X-Session-Id", "X-Request-ID",
+				"Accept-Language",
 				"Idempotency-Key", "X-Payment-Signature"));
-		configuration.setExposedHeaders(Arrays.asList("Authorization", "X-Session-Id", "X-Request-ID"));
+		configuration.setExposedHeaders(Arrays.asList(
+				"Authorization", "X-Session-Id", "X-Request-ID", "Content-Language", "Vary"));
 		configuration.setAllowCredentials(true);
 
 		UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();

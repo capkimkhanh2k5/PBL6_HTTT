@@ -34,6 +34,7 @@ public record UpdateServiceRequest(
         BigDecimal longitude,
         @Size(max = 10000)
         String waiverContent,
+        String waiverContentEn,
         Boolean weatherSensitive,
         @DecimalMin("0.0")
         BigDecimal minWindKmh,

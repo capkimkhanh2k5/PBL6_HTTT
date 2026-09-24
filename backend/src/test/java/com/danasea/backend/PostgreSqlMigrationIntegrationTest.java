@@ -38,7 +38,7 @@ class PostgreSqlMigrationIntegrationTest {
         var migrationResult = flyway.migrate();
         assertTrue(migrationResult.success);
         assertNotNull(flyway.info().current());
-        assertEquals("10", flyway.info().current().getVersion().getVersion());
+        assertEquals("11", flyway.info().current().getVersion().getVersion());
         assertTrue(flyway.validateWithResult().validationSuccessful);
 
         try (var connection = DriverManager.getConnection(jdbcUrl, "migration_user", "migration_password");

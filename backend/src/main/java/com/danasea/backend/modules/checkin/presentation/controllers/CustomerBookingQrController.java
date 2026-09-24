@@ -24,7 +24,7 @@ public class CustomerBookingQrController {
     @PostMapping("/{id}/qr-code")
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<QrCodeResponse> getQrCode(@PathVariable("id") UUID id) {
-        log.info("Received check-in QR request for booking/sub-order: {}", id);
+        log.info("Nhận yêu cầu xuất mã QR check-in cho booking/subOrder: {}", id);
         QrCodeResponse response = generateCheckinQrUseCase.execute(id);
         return ResponseEntity.ok(response);
     }

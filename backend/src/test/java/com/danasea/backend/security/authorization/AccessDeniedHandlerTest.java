@@ -183,7 +183,7 @@ public class AccessDeniedHandlerTest extends BaseSecurityIntegrationTest {
 
             ErrorResponse errorResponse = objectMapper.readValue(response.getContentAsString(), ErrorResponse.class);
             assertThat(errorResponse.code()).isEqualTo("UNAUTHORIZED");
-            assertThat(errorResponse.message()).isEqualTo("Authentication is required to access this resource.");
+            assertThat(errorResponse.message()).isEqualTo("Authentication is required.");
         }
 
         @Test
@@ -198,7 +198,7 @@ public class AccessDeniedHandlerTest extends BaseSecurityIntegrationTest {
             assertThat(response.getStatus()).isEqualTo(401);
             ErrorResponse errorResponse = objectMapper.readValue(response.getContentAsString(), ErrorResponse.class);
             assertThat(errorResponse.code()).isEqualTo("UNAUTHORIZED");
-            assertThat(errorResponse.message()).isEqualTo("Authentication is required to access this resource.");
+            assertThat(errorResponse.message()).isEqualTo("Authentication is required.");
         }
     }
 }

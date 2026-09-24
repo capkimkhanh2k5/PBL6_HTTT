@@ -1,6 +1,10 @@
 spring:
   application:
     name: backend
+  messages:
+    basename: i18n/common,i18n/validation,i18n/auth,i18n/booking,i18n/weather,i18n/notification,i18n/ai,i18n/policy
+    encoding: UTF-8
+    fallback-to-system-locale: false
   servlet:
     multipart:
       enabled: true

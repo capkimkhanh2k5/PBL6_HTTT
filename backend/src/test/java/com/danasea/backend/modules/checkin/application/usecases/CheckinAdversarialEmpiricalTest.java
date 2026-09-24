@@ -36,6 +36,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.context.i18n.LocaleContextHolder;
 
 import java.lang.reflect.Field;
 import java.time.LocalDate;
@@ -294,17 +295,21 @@ class CheckinAdversarialEmpiricalTest {
             OffsetDateTime expiredBy1s = OffsetDateTime.now(ZoneOffset.UTC).minusSeconds(1);
             String expiredToken = qrTokenSigner.generateToken(subOrderId, expiredBy1s);
 
-            assertThatThrownBy(() -> verifyCheckinUseCase.execute(new VerifyCheckinRequest(expiredToken), staffId))
-                    .isInstanceOf(QrTokenExpiredException.class)
-                    .satisfies(ex -> {
-                        QrTokenExpiredException expiredEx = (QrTokenExpiredException) ex;
-                        // Kiểm tra exception handler chuyển đổi thành HTTP 410 GONE
-                        ResponseEntity<ErrorResponse> response = exceptionHandler.handleQrTokenExpired(expiredEx);
-                        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.GONE);
-                        assertThat(response.getBody()).isNotNull();
-                        assertThat(response.getBody().code()).isEqualTo("QR_TOKEN_EXPIRED");
-                        assertThat(response.getBody().message()).contains("expired");
-                    });
+            LocaleContextHolder.setLocale(java.util.Locale.ENGLISH);
+            try {
+                assertThatThrownBy(() -> verifyCheckinUseCase.execute(new VerifyCheckinRequest(expiredToken), staffId))
+                        .isInstanceOf(QrTokenExpiredException.class)
+                        .satisfies(ex -> {
+                            QrTokenExpiredException expiredEx = (QrTokenExpiredException) ex;
+                            ResponseEntity<ErrorResponse> response = exceptionHandler.handleQrTokenExpired(expiredEx);
+                            assertThat(response.getStatusCode()).isEqualTo(HttpStatus.GONE);
+                            assertThat(response.getBody()).isNotNull();
+                            assertThat(response.getBody().code()).isEqualTo("QR_TOKEN_EXPIRED");
+                            assertThat(response.getBody().message()).isEqualTo("The QR token has expired.");
+                        });
+            } finally {
+                LocaleContextHolder.resetLocaleContext();
+            }
 
             verify(checkinTokenRepository, never()).findByQrTokenHash(any());
         }

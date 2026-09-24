@@ -2,9 +2,8 @@ package com.danasea.backend.modules.weather.infrastructure.api;
 
 import com.danasea.backend.modules.weather.infrastructure.api.dto.OpenMeteoMarineResponse;
 import com.danasea.backend.modules.weather.infrastructure.api.dto.OpenMeteoWeatherResponse;
-import com.danasea.backend.configs.properties.HttpClientProperties;
-import com.danasea.backend.configs.properties.OpenMeteoProperties;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.HttpStatusCode;
@@ -30,20 +29,8 @@ public class OpenMeteoApiClient {
     @Autowired
     public OpenMeteoApiClient(
             RestClient.Builder restClientBuilder,
-            OpenMeteoProperties openMeteoProperties,
-            HttpClientProperties httpClientProperties) {
-        SimpleClientHttpRequestFactory requestFactory = new SimpleClientHttpRequestFactory();
-        requestFactory.setConnectTimeout(httpClientProperties.connectTimeout());
-        requestFactory.setReadTimeout(httpClientProperties.readTimeout());
-        this.restClient = restClientBuilder.requestFactory(requestFactory).build();
-        this.weatherBaseUrl = openMeteoProperties.baseUrl().toString();
-        this.marineBaseUrl = openMeteoProperties.marineUrl().toString();
-    }
-
-    public OpenMeteoApiClient(
-            RestClient.Builder restClientBuilder,
-            String weatherBaseUrl,
-            String marineBaseUrl) {
+            @Value("${open-meteo.base-url:https://api.open-meteo.com}") String weatherBaseUrl,
+            @Value("${open-meteo.marine-url:https://marine-api.open-meteo.com}") String marineBaseUrl) {
         this(restClientBuilder, weatherBaseUrl, marineBaseUrl, true);
     }
 

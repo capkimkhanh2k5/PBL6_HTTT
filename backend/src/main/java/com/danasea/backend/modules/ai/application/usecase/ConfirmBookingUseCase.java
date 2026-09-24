@@ -11,6 +11,8 @@ import com.danasea.backend.modules.booking.application.usecases.CreateBookingHol
 import com.danasea.backend.modules.service.application.dtos.ServiceDetailResult;
 import com.danasea.backend.modules.service.application.usecases.GetPublicServiceDetailUseCase;
 import com.danasea.backend.modules.service.domain.ports.ServiceAvailabilityPort;
+import com.danasea.backend.shared.i18n.LocalizedMessageService;
+import com.danasea.backend.shared.i18n.SupportedLanguage;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
@@ -34,6 +36,12 @@ public class ConfirmBookingUseCase {
     private final CreateBookingHoldUseCase createBookingHoldUseCase;
     private final CancelBookingHoldUseCase cancelBookingHoldUseCase;
     private final ServiceAvailabilityPort serviceAvailabilityPort;
+    private LocalizedMessageService messages = LocalizedMessageService.standalone();
+
+    @Autowired
+    void setLocalizedMessageService(LocalizedMessageService messages) {
+        this.messages = messages;
+    }
 
     private static final String RETRY_KEY_PREFIX = "ai:booking:retries:";
     private static final Duration HOLD_TTL = Duration.ofMinutes(15);
@@ -106,6 +114,7 @@ public class ConfirmBookingUseCase {
         if (!ConfirmationCard.STATUS_PENDING.equals(card.getStatus())) {
             throw new IllegalStateException("Card is not in PENDING state");
         }
+        SupportedLanguage language = SupportedLanguage.fromTag(card.getLocale()).orElse(null);
 
         // Re-validate price and slot via get_service_detail
         ServiceDetailResult serviceDetail = getServiceDetailUseCase.execute(card.getServiceId(), userId, sessionId);
@@ -130,7 +139,9 @@ public class ConfirmBookingUseCase {
             cardStorePort.save(card);
             Map<String, Object> outOfStockResponse = new HashMap<>();
             outOfStockResponse.put("status", "out_of_stock");
-            outOfStockResponse.put("message", "The selected slot or service is no longer available. Please choose another date.");
+            outOfStockResponse.put("message", localizedOrLegacy(
+                    "ai.booking.out_of_stock",
+                    "The selected slot or service is no longer available. Please choose another date.", language));
             outOfStockResponse.put("cardId", cardId);
             return outOfStockResponse;
         }
@@ -144,7 +155,9 @@ public class ConfirmBookingUseCase {
                 cardStorePort.save(card);
                 Map<String, Object> errorResponse = new HashMap<>();
                 errorResponse.put("status", "error");
-                errorResponse.put("message", "Service details have changed too many times. Please start over.");
+                errorResponse.put("message", localizedOrLegacy(
+                        "ai.booking.too_many_changes",
+                        "Service details have changed too many times. Please start over.", language));
                 return errorResponse;
             }
 
@@ -176,13 +189,16 @@ public class ConfirmBookingUseCase {
                     .createdAt(LocalDateTime.now())
                     .retryCount(nextRetry)
                     .reason(reason)
+                    .locale(card.getLocale())
                     .build();
 
             cardStorePort.save(newCard);
 
             Map<String, Object> response = new HashMap<>();
             response.put("status", "alternative_needed");
-            response.put("message", "The price or slot has changed. Please confirm the new details.");
+            response.put("message", localizedOrLegacy(
+                    "ai.booking.changed",
+                    "The price or slot has changed. Please confirm the new details.", language));
             response.put("oldCardId", cardId);
             response.put("newCard", newCard);
             response.put("reason", reason);
@@ -218,9 +234,11 @@ public class ConfirmBookingUseCase {
 
         Map<String, Object> response = new HashMap<>();
         response.put("status", "success");
-        response.put("message", hold == null
-                ? "Booking confirmation accepted."
-                : "Booking inventory is held. Complete payment before the hold expires.");
+        response.put("message", localizedOrLegacy("ai.booking.success",
+                hold == null
+                        ? "Booking confirmation accepted."
+                        : "Booking inventory is held. Complete payment before the hold expires.",
+                language));
         response.put("cardId", cardId);
         if (hold != null) {
             response.put("bookingId", hold.bookingId());
@@ -253,5 +271,9 @@ public class ConfirmBookingUseCase {
                 log.warn("Failed to record retry count in Redis", e);
             }
         }
+    }
+
+    private String localizedOrLegacy(String key, String legacy, SupportedLanguage language) {
+        return language == null ? legacy : messages.get(key, language);
     }
 }

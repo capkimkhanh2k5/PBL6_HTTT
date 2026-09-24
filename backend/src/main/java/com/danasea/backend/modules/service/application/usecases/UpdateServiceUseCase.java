@@ -60,6 +60,7 @@ public class UpdateServiceUseCase {
         if (cmd.latitude() != null) service.setLatitude(cmd.latitude());
         if (cmd.longitude() != null) service.setLongitude(cmd.longitude());
         if (cmd.waiverContent() != null) service.setWaiverContent(cmd.waiverContent());
+        if (cmd.waiverContentEn() != null) service.setWaiverContentEn(cmd.waiverContentEn());
         if (cmd.weatherSensitive() != null) service.setWeatherSensitive(cmd.weatherSensitive());
         if (cmd.minWindKmh() != null) service.setMinWindKmh(cmd.minWindKmh());
         if (cmd.maxWaveM() != null) service.setMaxWaveM(cmd.maxWaveM());

@@ -64,10 +64,12 @@ class QrTokenSignerTest {
         assertThat(signer.verifySignature(tamperedPayload)).isFalse();
 
         // Case B: Sửa đổi signature byte
-        int lastCharIdx = token.length() - 1;
-        char lastChar = token.charAt(lastCharIdx);
-        char replacedChar = (lastChar == 'a') ? 'b' : 'a';
-        String tamperedSig = token.substring(0, lastCharIdx) + replacedChar;
+        int signatureStart = token.lastIndexOf('.') + 1;
+        char firstSignatureChar = token.charAt(signatureStart);
+        char replacedChar = firstSignatureChar == 'A' ? 'B' : 'A';
+        String tamperedSig = token.substring(0, signatureStart)
+                + replacedChar
+                + token.substring(signatureStart + 1);
         assertThat(signer.verifySignature(tamperedSig)).isFalse();
     }
 

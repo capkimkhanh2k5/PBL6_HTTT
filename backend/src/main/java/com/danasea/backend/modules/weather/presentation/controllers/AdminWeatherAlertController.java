@@ -30,8 +30,8 @@ import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import java.util.stream.Collectors;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Slf4j
 @RestController
@@ -196,7 +196,6 @@ public class AdminWeatherAlertController {
                     "evaluationId", evaluationId,
                     "message", "Weather alert was already resolved."));
         }
-
         int refundedCount = 0;
 
         if ("CANCEL_AND_REFUND".equals(action)) {

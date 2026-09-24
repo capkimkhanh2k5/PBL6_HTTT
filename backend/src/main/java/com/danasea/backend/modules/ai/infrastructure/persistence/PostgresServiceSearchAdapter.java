@@ -11,6 +11,7 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import com.danasea.backend.shared.i18n.SupportedLanguage;
 
 @Component
 @RequiredArgsConstructor
@@ -24,36 +25,40 @@ public class PostgresServiceSearchAdapter implements ServiceSearchPort {
     @Override
     public List<ServiceSearchResultDto> exactAndFilterSearch(String keyword, String category, BigDecimal minPrice,
             BigDecimal maxPrice) {
+        return exactAndFilterSearch(keyword, category, minPrice, maxPrice, SupportedLanguage.VI);
+    }
+
+    @Override
+    public List<ServiceSearchResultDto> exactAndFilterSearch(
+            String keyword, String category, BigDecimal minPrice, BigDecimal maxPrice,
+            SupportedLanguage language) {
         StringBuilder sql = new StringBuilder();
-        sql.append("SELECT id, name, price, avg_rating ");
+        sql.append("SELECT id, CASE WHEN ? = 'en' THEN COALESCE(NULLIF(name_en, ''), name) ELSE name END, price, avg_rating ");
         sql.append("FROM services ");
         sql.append("WHERE status = 'PUBLISHED' ");
 
         List<Object> params = new ArrayList<>();
-        int paramIndex = 1;
+        params.add((language == null ? SupportedLanguage.VI : language).code());
 
         if (keyword != null && !keyword.trim().isEmpty()) {
             sql.append("AND search_vector @@ plainto_tsquery('simple', ?) ");
             params.add(keyword.trim());
-            paramIndex++;
         }
 
         if (minPrice != null) {
             sql.append("AND price >= ? ");
             params.add(minPrice);
-            paramIndex++;
         }
 
         if (maxPrice != null) {
             sql.append("AND price <= ? ");
             params.add(maxPrice);
-            paramIndex++;
         }
 
         if (category != null && !category.trim().isEmpty()) {
-            sql.append("AND category_id IN (SELECT id FROM categories WHERE name ILIKE ?) ");
+            sql.append("AND category_id IN (SELECT id FROM categories WHERE name ILIKE ? OR name_en ILIKE ?) ");
             params.add("%" + category.trim() + "%");
-            paramIndex++;
+            params.add("%" + category.trim() + "%");
         }
 
         sql.append("ORDER BY avg_rating DESC NULLS LAST LIMIT ").append(DEFAULT_SEARCH_LIMIT);

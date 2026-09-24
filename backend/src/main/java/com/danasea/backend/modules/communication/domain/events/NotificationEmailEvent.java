@@ -6,5 +6,10 @@ public record NotificationEmailEvent(
         UUID notificationId,
         String toEmail,
         String subject,
-        String content
-) {}
+        String content,
+        String locale
+) {
+    public NotificationEmailEvent(UUID notificationId, String toEmail, String subject, String content) {
+        this(notificationId, toEmail, subject, content, "vi");
+    }
+}

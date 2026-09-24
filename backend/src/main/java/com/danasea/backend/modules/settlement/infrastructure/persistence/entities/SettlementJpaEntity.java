@@ -7,7 +7,6 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.Table;
-import jakarta.persistence.Version;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -27,10 +26,6 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 public class SettlementJpaEntity extends BaseJpaEntity {
-
-    @Version
-    @Column(name = "version", nullable = false)
-    private long version;
 
     @Column(name = "vendor_id")
     private UUID vendorId;

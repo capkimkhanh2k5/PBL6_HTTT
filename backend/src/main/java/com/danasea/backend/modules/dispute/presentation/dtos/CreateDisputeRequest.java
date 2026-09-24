@@ -9,14 +9,14 @@ import java.util.List;
 import java.util.UUID;
 
 public record CreateDisputeRequest(
-        @NotNull(message = "SubOrder ID is required")
+        @NotNull(message = "{validation.dispute.sub_order.required}")
         UUID subOrderId,
 
-        @NotNull(message = "Dispute reason is required")
+        @NotNull(message = "{validation.dispute.reason.required}")
         DisputeReason reason,
 
-        @NotBlank(message = "Description cannot be blank")
-        @Size(max = 2000, message = "Description must not exceed 2000 characters")
+        @NotBlank(message = "{validation.dispute.description.required}")
+        @Size(max = 2000, message = "{validation.dispute.description.max}")
         String description,
 
         List<String> evidenceUrls

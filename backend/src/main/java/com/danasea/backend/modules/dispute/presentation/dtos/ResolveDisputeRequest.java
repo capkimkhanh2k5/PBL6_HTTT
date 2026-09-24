@@ -6,7 +6,7 @@ import jakarta.validation.constraints.NotNull;
 import java.math.BigDecimal;
 
 public record ResolveDisputeRequest(
-        @NotNull(message = "Resolution is required")
+        @NotNull(message = "{validation.dispute.resolution.required}")
         DisputeStatus resolution,
 
         BigDecimal refundPercentage,

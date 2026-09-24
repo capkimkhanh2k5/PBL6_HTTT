@@ -51,6 +51,9 @@ public class ServiceJpaEntity extends BaseJpaEntity {
 
     private String waiverContent;
 
+    @Column(columnDefinition = "TEXT")
+    private String waiverContentEn;
+
     private Boolean weatherSensitive;
 
     private BigDecimal minWindKmh;

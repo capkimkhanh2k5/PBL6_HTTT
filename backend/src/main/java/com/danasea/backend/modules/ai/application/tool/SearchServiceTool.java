@@ -30,6 +30,11 @@ public class SearchServiceTool implements ToolExecutor {
 
     @Override
     public String execute(String argumentsJson) {
+        return execute(argumentsJson, null);
+    }
+
+    @Override
+    public String execute(String argumentsJson, ToolExecutionContext context) {
         try {
             JsonNode args = argumentsJson == null || argumentsJson.isBlank()
                     ? objectMapper.createObjectNode()
@@ -37,7 +42,7 @@ public class SearchServiceTool implements ToolExecutor {
             if (args == null || !args.isObject()) {
                 return error("INVALID_ARGUMENTS", "arguments must be a JSON object");
             }
-            
+
             String query = optionalText(args, "query");
             String category = optionalText(args, "category");
             if (query != null && query.length() > MAX_QUERY_LENGTH) {
@@ -46,7 +51,7 @@ public class SearchServiceTool implements ToolExecutor {
             if (category != null && category.length() > MAX_CATEGORY_LENGTH) {
                 return error("INVALID_ARGUMENTS", "category must not exceed 100 characters");
             }
-            
+
             BigDecimal minPrice = optionalDecimal(args, "min_price");
             BigDecimal maxPrice = optionalDecimal(args, "max_price");
             if ((minPrice != null && minPrice.signum() < 0) || (maxPrice != null && maxPrice.signum() < 0)) {
@@ -56,13 +61,16 @@ public class SearchServiceTool implements ToolExecutor {
                 return error("INVALID_ARGUMENTS", "min_price must not exceed max_price");
             }
 
-            List<ServiceSearchResultDto> results = serviceSearchPort.exactAndFilterSearch(query, category, minPrice, maxPrice);
+            List<ServiceSearchResultDto> results = context == null
+                    ? serviceSearchPort.exactAndFilterSearch(query, category, minPrice, maxPrice)
+                    : serviceSearchPort.exactAndFilterSearch(
+                            query, category, minPrice, maxPrice, context.language());
 
             return objectMapper.writeValueAsString(Map.of("results", results == null ? List.of() : results));
-        } catch (IllegalArgumentException e) {
-            return error("INVALID_ARGUMENTS", e.getMessage());
-        } catch (Exception e) {
-            log.warn("Service search tool execution failed", e);
+        } catch (IllegalArgumentException exception) {
+            return error("INVALID_ARGUMENTS", exception.getMessage());
+        } catch (Exception exception) {
+            log.warn("Service search tool execution failed", exception);
             return error("SEARCH_UNAVAILABLE", "Service search is temporarily unavailable");
         }
     }

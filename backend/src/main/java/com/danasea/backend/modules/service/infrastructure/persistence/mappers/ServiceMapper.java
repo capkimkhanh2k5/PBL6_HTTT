@@ -39,6 +39,7 @@ public class ServiceMapper {
         domain.setStatus(entity.getStatus());
         domain.setRejectionReason(entity.getRejectionReason());
         domain.setWaiverContent(entity.getWaiverContent());
+        domain.setWaiverContentEn(entity.getWaiverContentEn());
         domain.setWeatherSensitive(entity.getWeatherSensitive());
         domain.setMinWindKmh(entity.getMinWindKmh());
         domain.setMaxWaveM(entity.getMaxWaveM());
@@ -73,6 +74,7 @@ public class ServiceMapper {
         entity.setStatus(domain.getStatus() != null ? domain.getStatus() : ServiceStatus.DRAFT);
         entity.setRejectionReason(domain.getRejectionReason());
         entity.setWaiverContent(domain.getWaiverContent());
+        entity.setWaiverContentEn(domain.getWaiverContentEn());
         entity.setWeatherSensitive(domain.getWeatherSensitive() != null ? domain.getWeatherSensitive() : Boolean.FALSE);
         entity.setMinWindKmh(domain.getMinWindKmh());
         entity.setMaxWaveM(domain.getMaxWaveM());

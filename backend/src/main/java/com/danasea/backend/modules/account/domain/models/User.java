@@ -15,5 +15,5 @@ public class User extends BaseDomainModel {
     private String avatarUrl;
     private Boolean isEmailVerified;
     private Boolean isLocked;
-    private String locale;
+    private String locale = "vi";
 }

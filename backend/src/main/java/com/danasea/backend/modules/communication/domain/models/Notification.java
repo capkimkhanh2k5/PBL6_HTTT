@@ -15,6 +15,7 @@ public class Notification extends BaseDomainModel {
     private NotificationChannel channel;
     private String title;
     private String body;
+    private String locale;
     private String relatedEntityType;
     private UUID relatedEntityId;
     private NotificationStatus status;

@@ -10,6 +10,7 @@ import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import com.danasea.backend.configs.properties.CorsProperties;
+import com.danasea.backend.shared.i18n.LocalizedMessageService;
 import com.danasea.backend.shared.presentation.ErrorResponse;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -25,14 +26,17 @@ public class CookieOriginValidationFilter extends OncePerRequestFilter {
 
     private final Set<String> allowedOrigins;
     private final ObjectMapper objectMapper;
+    private final LocalizedMessageService messages;
 
     public CookieOriginValidationFilter(
             ObjectProvider<CorsProperties> corsPropertiesProvider,
-            ObjectProvider<ObjectMapper> objectMapperProvider) {
+            ObjectProvider<ObjectMapper> objectMapperProvider,
+            ObjectProvider<LocalizedMessageService> messagesProvider) {
         CorsProperties corsProperties = corsPropertiesProvider.getIfAvailable(
                 () -> new CorsProperties(java.util.List.of()));
         this.allowedOrigins = Set.copyOf(corsProperties.allowedOrigins());
         this.objectMapper = objectMapperProvider.getIfAvailable(ObjectMapper::new);
+        this.messages = messagesProvider.getIfAvailable(LocalizedMessageService::standalone);
     }
 
     @Override
@@ -52,6 +56,6 @@ public class CookieOriginValidationFilter extends OncePerRequestFilter {
         response.setStatus(HttpStatus.FORBIDDEN.value());
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
         objectMapper.writeValue(response.getOutputStream(),
-                new ErrorResponse("INVALID_ORIGIN", "The request origin is not allowed."));
+                new ErrorResponse("INVALID_ORIGIN", messages.get("error.invalid_origin")));
     }
 }

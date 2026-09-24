@@ -22,18 +22,18 @@ public class QrTokenPayload {
     private OffsetDateTime expiresAt;
 
     public String serialize() {
-        Objects.requireNonNull(subOrderId, "subOrderId must not be null");
-        Objects.requireNonNull(expiresAt, "expiresAt must not be null");
+        Objects.requireNonNull(subOrderId, "subOrderId không được null");
+        Objects.requireNonNull(expiresAt, "expiresAt không được null");
         return subOrderId.toString() + ":" + expiresAt.toString();
     }
 
     public static QrTokenPayload deserialize(String payloadStr) {
         if (payloadStr == null || payloadStr.isBlank()) {
-            throw new IllegalArgumentException("Payload string must not be blank");
+            throw new IllegalArgumentException("Payload string không được để trống");
         }
         int colonIdx = payloadStr.indexOf(':');
         if (colonIdx <= 0 || colonIdx >= payloadStr.length() - 1) {
-            throw new IllegalArgumentException("Invalid payload structure: " + payloadStr);
+            throw new IllegalArgumentException("Cấu trúc payload không hợp lệ: " + payloadStr);
         }
         UUID subOrderId = UUID.fromString(payloadStr.substring(0, colonIdx));
         OffsetDateTime expiresAt = OffsetDateTime.parse(payloadStr.substring(colonIdx + 1));

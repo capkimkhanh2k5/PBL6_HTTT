@@ -188,11 +188,12 @@ class AdminCategorySafetyRuleControllerTest {
                     .thenThrow(new InvalidSafetyRuleThresholdException("Ngưỡng sóng vàng (1.50m) không được vượt quá ngưỡng sóng đỏ (0.80m)"));
 
             mockMvc.perform(patch("/api/admin/category-safety-rules/{categoryId}", categoryId)
+                            .header("Accept-Language", "vi")
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(request)))
                     .andExpect(status().isBadRequest())
                     .andExpect(jsonPath("$.code", is("INVALID_SAFETY_RULE_THRESHOLD")))
-                    .andExpect(jsonPath("$.message", org.hamcrest.Matchers.containsString("không được vượt quá ngưỡng sóng đỏ")));
+                    .andExpect(jsonPath("$.message", is("Ngưỡng quy tắc an toàn không hợp lệ.")));
         }
 
         @Test
@@ -221,11 +222,12 @@ class AdminCategorySafetyRuleControllerTest {
                     .thenThrow(new CategorySafetyRuleNotFoundException("Không tìm thấy quy chuẩn an toàn cho danh mục với ID: " + unknownId));
 
             mockMvc.perform(patch("/api/admin/category-safety-rules/{categoryId}", unknownId)
+                            .header("Accept-Language", "vi")
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(request)))
                     .andExpect(status().isNotFound())
                     .andExpect(jsonPath("$.code", is("CATEGORY_SAFETY_RULE_NOT_FOUND")))
-                    .andExpect(jsonPath("$.message", org.hamcrest.Matchers.containsString("Không tìm thấy")));
+                    .andExpect(jsonPath("$.message", is("Không tìm thấy quy tắc an toàn của danh mục.")));
         }
     }
 }

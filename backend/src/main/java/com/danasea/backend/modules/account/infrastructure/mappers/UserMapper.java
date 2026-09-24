@@ -37,7 +37,7 @@ public class UserMapper {
         entity.setAvatarUrl(domain.getAvatarUrl());
         entity.setIsEmailVerified(domain.getIsEmailVerified());
         entity.setIsLocked(domain.getIsLocked());
-        entity.setLocale(domain.getLocale());
+        entity.setLocale(domain.getLocale() == null ? "vi" : domain.getLocale());
         return entity;
     }
 }

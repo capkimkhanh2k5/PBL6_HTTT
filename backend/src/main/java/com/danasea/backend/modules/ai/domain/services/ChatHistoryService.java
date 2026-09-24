@@ -16,6 +16,7 @@ import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import com.danasea.backend.shared.i18n.SupportedLanguage;
 
 @Service
 @RequiredArgsConstructor
@@ -26,12 +27,18 @@ public class ChatHistoryService {
 
     @Transactional
     public AiConversationJpaEntity getOrCreateConversation(UUID conversationId, UUID userId) {
+        return getOrCreateConversation(conversationId, userId, SupportedLanguage.VI);
+    }
+
+    @Transactional
+    public AiConversationJpaEntity getOrCreateConversation(
+            UUID conversationId, UUID userId, SupportedLanguage language) {
         if (conversationId != null) {
             return conversationRepository.findById(conversationId)
                     .map(conversation -> requireOwnership(conversation, userId))
-                    .orElseGet(() -> createNewConversation(userId));
+                    .orElseGet(() -> createNewConversation(userId, language));
         }
-        return createNewConversation(userId);
+        return createNewConversation(userId, language);
     }
 
     @Transactional(readOnly = true)
@@ -40,9 +47,10 @@ public class ChatHistoryService {
                 .map(conversation -> requireOwnership(conversation, userId));
     }
 
-    private AiConversationJpaEntity createNewConversation(UUID userId) {
+    private AiConversationJpaEntity createNewConversation(UUID userId, SupportedLanguage language) {
         AiConversationJpaEntity conversation = new AiConversationJpaEntity();
         conversation.setUserId(userId);
+        conversation.setLocale((language == null ? SupportedLanguage.VI : language).code());
         conversation.setStartedAt(OffsetDateTime.now());
         return conversationRepository.save(conversation);
     }

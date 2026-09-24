@@ -17,13 +17,17 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.Clock;
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.time.Clock;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import org.springframework.context.i18n.LocaleContextHolder;
+import com.danasea.backend.modules.weather.application.services.WeatherSafetyMessageRenderer;
+import com.danasea.backend.shared.i18n.LocalizedMessageService;
+import com.danasea.backend.shared.i18n.SupportedLanguage;
 
 /**
  * UseCase assessing marine safety for reservations 7 to 14 days (up to 16 days) in advance.
@@ -41,6 +45,12 @@ public class CheckAdvanceBookingSafetyUseCase {
     private final WeatherProviderPort weatherProviderPort;
     private final WeatherRuleEngine weatherRuleEngine;
     private final Clock clock;
+    private WeatherSafetyMessageRenderer weatherMessages = new WeatherSafetyMessageRenderer();
+
+    @Autowired
+    void setLocalizedMessageService(LocalizedMessageService messages) {
+        this.weatherMessages = new WeatherSafetyMessageRenderer(messages);
+    }
 
     @Autowired(required = false)
     private JpaServiceSlotRepository slotRepository;
@@ -177,7 +187,7 @@ public class CheckAdvanceBookingSafetyUseCase {
 
         // Resolve Category Safety Rule
         CategorySafetyRule rule;
-        if (request.getCategoryId() != null) {
+        if (request.getCategoryId() != null && (request.getCategorySlug() == null || request.getCategorySlug().isBlank())) {
             try {
                 rule = categorySafetyRuleService.getRuleByCategoryId(request.getCategoryId());
             } catch (Exception e) {
@@ -277,26 +287,45 @@ public class CheckAdvanceBookingSafetyUseCase {
                 severeWeatherCode
         );
 
-        List<String> details = new ArrayList<>(evalResult.getDetails() != null ? evalResult.getDetails() : List.of());
+        SupportedLanguage language = LocaleContextHolder.getLocaleContext() == null
+                ? SupportedLanguage.EN
+                : SupportedLanguage.fromTag(LocaleContextHolder.getLocale().toLanguageTag())
+                        .orElse(SupportedLanguage.VI);
+        List<String> details = new ArrayList<>(weatherMessages.renderDetails(evalResult, language));
         if (estimatedMarine) {
-            details.add(String.format("For this booking %d days ahead, wave data is model-estimated. The system will reassess at T-24h and T-2h.", daysInAdvance));
+            details.add(language == SupportedLanguage.EN
+                    ? String.format("For this booking %d days ahead, wave data is model-estimated. The system will reassess at T-24h and T-2h.", daysInAdvance)
+                    : String.format("Lưu ý đặt trước %d ngày: Dữ liệu sóng biển là ước tính mô hình khí tượng. Hệ thống sẽ tự động đối soát hải văn thực tế tại mốc T-24h và T-2h.", daysInAdvance));
         }
         if (daysInAdvance >= 7 && daysInAdvance <= 14) {
-            details.add(String.format("This booking is %d days ahead. Review updated forecasts before departure.", daysInAdvance));
+            details.add(language == SupportedLanguage.EN
+                    ? String.format("This booking is %d days ahead. Review updated forecasts before departure.", daysInAdvance)
+                    : String.format("Khung thời gian đặt trước %d ngày: Khuyến nghị theo dõi diễn biến thời tiết cập nhật định kỳ trước ngày khởi hành.", daysInAdvance));
         }
 
         List<String> advisoryNotes = new ArrayList<>();
         if (marineCutoffExceeded) {
-            advisoryNotes.add("LONG-RANGE NOTICE (9-14 days): the safety assessment uses weather data; detailed waves and currents are unavailable beyond the 8-day marine forecast window.");
-            advisoryNotes.add("Detailed wave forecasting will begin automatically 8 days before departure.");
+            advisoryNotes.add(language == SupportedLanguage.EN
+                    ? "LONG-RANGE NOTICE (9-14 days): the safety assessment uses weather data; detailed waves and currents are unavailable beyond the 8-day marine forecast window."
+                    : "LƯU Ý DỰ BÁO DÀI HẠN (9-14 ngày): Đánh giá an toàn dựa trên mô hình khí tượng (gió, dông bão, tầm nhìn). Dữ liệu sóng biển và dòng hải lưu chưa khả dụng do mô hình hải văn quốc tế giới hạn 8 ngày.");
+            advisoryNotes.add(language == SupportedLanguage.EN
+                    ? "Detailed wave forecasting will begin automatically 8 days before departure."
+                    : "Dự báo sóng biển chi tiết sẽ được tự động kích hoạt 8 ngày trước giờ khởi hành.");
         } else {
-            advisoryNotes.add("Full weather and marine forecast data is available within 8 days.");
+            advisoryNotes.add(language == SupportedLanguage.EN
+                    ? "Full weather and marine forecast data is available within 8 days."
+                    : "Dữ liệu khí tượng và hải văn đầy đủ (độ chính xác cao trong vòng 8 ngày).");
         }
-        advisoryNotes.add("The system will continue monitoring at T-24h and T-2h before departure.");
+        advisoryNotes.add(language == SupportedLanguage.EN
+                ? "The system will continue monitoring at T-24h and T-2h before departure."
+                : "Hệ thống sẽ tiếp tục giám sát tự động qua Sliding Window tại mốc T-24h và T-2h trước giờ khởi hành.");
 
-        String summary = evalResult.getWarningMessage();
+        String localizedWarning = weatherMessages.render(evalResult, language);
+        String summary = localizedWarning;
         if (isProvisional && evalResult.isSafe()) {
-            summary = "PROVISIONALLY SAFE FORECAST: " + summary;
+            summary = (language == SupportedLanguage.EN
+                    ? "PROVISIONALLY SAFE FORECAST: "
+                    : "DỰ BÁO SƠ BỘ AN TOÀN: ") + summary;
         }
 
         return AdvanceBookingSafetyResponse.builder()
@@ -326,7 +355,7 @@ public class CheckAdvanceBookingSafetyUseCase {
                 .maxWindGustKmh(rule.getMaxWindGustKmh())
                 .maxOceanCurrentMs(rule.getMaxOceanCurrentMs())
                 .ruleMinVisibilityM(rule.getMinVisibilityM())
-                .warningMessage(evalResult.getWarningMessage())
+                .warningMessage(localizedWarning)
                 .summaryMessage(summary)
                 .advisoryDetails(details)
                 .details(details)

@@ -31,7 +31,7 @@ import java.util.UUID;
 @Slf4j
 @RestController
 @RequestMapping("/api/vendor/settlements")
-@PreAuthorize("hasRole('VENDOR')")
+@PreAuthorize("hasRole('VENDOR') or hasRole('ADMIN')")
 public class VendorSettlementController {
 
     private final GetSettlementsUseCase getSettlementsUseCase;

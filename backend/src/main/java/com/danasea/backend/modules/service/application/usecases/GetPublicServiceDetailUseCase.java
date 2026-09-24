@@ -4,10 +4,11 @@ import com.danasea.backend.modules.service.application.dtos.ServiceDetailResult;
 import com.danasea.backend.modules.service.domain.exceptions.ServiceNotFoundException;
 import com.danasea.backend.modules.service.domain.models.Service;
 import com.danasea.backend.modules.service.domain.models.ServiceStatus;
-import com.danasea.backend.modules.service.domain.ports.ServiceRepositoryPort;
 import com.danasea.backend.modules.service.domain.ports.CategoryRepositoryPort;
 import com.danasea.backend.modules.service.domain.ports.ServiceAvailabilityPort;
 import com.danasea.backend.modules.service.domain.ports.ServiceImageRepositoryPort;
+import com.danasea.backend.modules.service.domain.ports.ServiceRepositoryPort;
+import com.danasea.backend.shared.i18n.LocalizedContentSelector;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -21,6 +22,7 @@ public class GetPublicServiceDetailUseCase {
     private final CategoryRepositoryPort categoryRepositoryPort;
     private final ServiceImageRepositoryPort serviceImageRepositoryPort;
     private final ServiceAvailabilityPort serviceAvailabilityPort;
+    private final LocalizedContentSelector localizedContentSelector;
 
     public ServiceDetailResult execute(UUID id, UUID userId, String sessionId) {
         Service service = serviceRepositoryPort.findPublishedById(id)
@@ -37,8 +39,8 @@ public class GetPublicServiceDetailUseCase {
                         .orElse(null);
         return ServiceDetailResult.builder()
                 .id(service.getId())
-                .name(service.getName())
-                .description(service.getDescription())
+                .name(localize(service.getName(), service.getNameEn()))
+                .description(localize(service.getDescription(), service.getDescriptionEn()))
                 .price(service.getPrice())
                 .address(service.getAddress())
                 .latitude(service.getLatitude())
@@ -53,5 +55,9 @@ public class GetPublicServiceDetailUseCase {
                         .toList())
                 .availableSlots(serviceAvailabilityPort.findAvailableSlots(id))
                 .build();
+    }
+
+    private String localize(String vietnamese, String english) {
+        return localizedContentSelector == null ? vietnamese : localizedContentSelector.select(vietnamese, english);
     }
 }

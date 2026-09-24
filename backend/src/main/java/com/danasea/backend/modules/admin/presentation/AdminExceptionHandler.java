@@ -2,6 +2,7 @@ package com.danasea.backend.modules.admin.presentation;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authorization.AuthorizationDeniedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -14,51 +15,58 @@ import com.danasea.backend.modules.admin.domain.exceptions.UserNotFoundException
 import com.danasea.backend.modules.admin.domain.exceptions.AuditLogNotFoundException;
 import com.danasea.backend.modules.admin.domain.exceptions.VendorDocumentsIncompleteException;
 import com.danasea.backend.security.authorization.domain.exceptions.AccessDeniedException;
+import com.danasea.backend.shared.i18n.LocalizedMessageService;
 import com.danasea.backend.shared.presentation.ErrorResponse;
 
 @RestControllerAdvice
 public class AdminExceptionHandler {
+    private LocalizedMessageService messages = LocalizedMessageService.standalone();
+
+    @Autowired(required = false)
+    void setLocalizedMessageService(LocalizedMessageService messages) {
+        this.messages = messages;
+    }
 
     @ExceptionHandler(UserNotFoundException.class)
     public ResponseEntity<ErrorResponse> handleUserNotFound(UserNotFoundException ex) {
         return ResponseEntity
                 .status(HttpStatus.NOT_FOUND)
-                .body(new ErrorResponse("USER_NOT_FOUND", ex.getMessage()));
+                .body(error("USER_NOT_FOUND"));
     }
 
     @ExceptionHandler(AuditLogNotFoundException.class)
     public ResponseEntity<ErrorResponse> handleAuditLogNotFound(AuditLogNotFoundException ex) {
         return ResponseEntity
                 .status(HttpStatus.NOT_FOUND)
-                .body(new ErrorResponse("AUDIT_LOG_NOT_FOUND", ex.getMessage()));
+                .body(error("AUDIT_LOG_NOT_FOUND"));
     }
 
     @ExceptionHandler(VendorDocumentsIncompleteException.class)
     public ResponseEntity<ErrorResponse> handleVendorDocumentsIncomplete(VendorDocumentsIncompleteException ex) {
         return ResponseEntity
                 .status(HttpStatus.UNPROCESSABLE_ENTITY)
-                .body(new ErrorResponse("VENDOR_DOCUMENTS_INCOMPLETE", ex.getMessage()));
+                .body(error("VENDOR_DOCUMENTS_INCOMPLETE"));
     }
 
     @ExceptionHandler(SelfLockNotAllowedException.class)
     public ResponseEntity<ErrorResponse> handleSelfLockNotAllowed(SelfLockNotAllowedException ex) {
         return ResponseEntity
                 .status(HttpStatus.FORBIDDEN)
-                .body(new ErrorResponse("SELF_LOCK_NOT_ALLOWED", ex.getMessage()));
+                .body(error("SELF_LOCK_NOT_ALLOWED"));
     }
 
     @ExceptionHandler(UserAlreadyLockedException.class)
     public ResponseEntity<ErrorResponse> handleUserAlreadyLocked(UserAlreadyLockedException ex) {
         return ResponseEntity
                 .status(HttpStatus.CONFLICT)
-                .body(new ErrorResponse("USER_ALREADY_LOCKED", ex.getMessage()));
+                .body(error("USER_ALREADY_LOCKED"));
     }
 
     @ExceptionHandler(UserAlreadyUnlockedException.class)
     public ResponseEntity<ErrorResponse> handleUserAlreadyUnlocked(UserAlreadyUnlockedException ex) {
         return ResponseEntity
                 .status(HttpStatus.CONFLICT)
-                .body(new ErrorResponse("USER_ALREADY_UNLOCKED", ex.getMessage()));
+                .body(error("USER_ALREADY_UNLOCKED"));
     }
 
     @ExceptionHandler({
@@ -69,7 +77,7 @@ public class AdminExceptionHandler {
     public ResponseEntity<ErrorResponse> handleAccessDenied(Exception ex) {
         return ResponseEntity
                 .status(HttpStatus.FORBIDDEN)
-                .body(new ErrorResponse("ACCESS_DENIED", "Access denied"));
+                .body(error("ACCESS_DENIED"));
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
@@ -79,7 +87,7 @@ public class AdminExceptionHandler {
                 .stream()
                 .map(error -> error.getField() + ": " + error.getDefaultMessage())
                 .findFirst()
-                .orElse("Invalid request");
+                .orElse(messages.get("error.invalid_input"));
 
         return ResponseEntity
                 .status(HttpStatus.BAD_REQUEST)
@@ -90,6 +98,11 @@ public class AdminExceptionHandler {
     public ResponseEntity<ErrorResponse> handleIllegalArgument(IllegalArgumentException ex) {
         return ResponseEntity
                 .status(HttpStatus.BAD_REQUEST)
-                .body(new ErrorResponse("BAD_REQUEST", ex.getMessage()));
+                .body(error("BAD_REQUEST"));
+    }
+
+    private ErrorResponse error(String code) {
+        String key = "error." + code.toLowerCase(java.util.Locale.ROOT);
+        return new ErrorResponse(code, messages.getOrDefault(key, messages.get("error.internal")));
     }
 }

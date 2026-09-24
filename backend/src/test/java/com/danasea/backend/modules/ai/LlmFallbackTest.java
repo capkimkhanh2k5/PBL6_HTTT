@@ -6,11 +6,13 @@ import com.danasea.backend.modules.ai.domain.models.AiMessageRole;
 import com.danasea.backend.modules.ai.domain.models.LlmResponse;
 import com.danasea.backend.modules.ai.domain.services.AIToolRegistry;
 import com.danasea.backend.modules.ai.infrastructure.groq.GroqLlmClient;
+import com.danasea.backend.shared.i18n.SupportedLanguage;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
+import org.mockito.ArgumentCaptor;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.web.client.ResourceAccessException;
@@ -84,6 +86,25 @@ public class LlmFallbackTest {
     // =========================================================================
     // TIER 1: FEATURE COVERAGE (>=5 test cases across R5 core requirements)
     // =========================================================================
+
+    @Test
+    @DisplayName("i18n: Groq request includes the conversation language system prompt")
+    void localizedRequest_includesLanguageRuleInSystemPrompt() {
+        when(keyRotator.getActiveKey()).thenReturn("gsk_locale_test_1234");
+        GroqLlmClient.GroqMessage responseMessage = new GroqLlmClient.GroqMessage("assistant", "Hello");
+        when(responseSpec.body(eq(GroqLlmClient.GroqResponse.class)))
+                .thenReturn(new GroqLlmClient.GroqResponse(List.of(
+                        new GroqLlmClient.GroqResponse.Choice(responseMessage))));
+
+        groqLlmClient.generateResponse(List.of(), SupportedLanguage.EN);
+
+        ArgumentCaptor<Object> requestCaptor = ArgumentCaptor.forClass(Object.class);
+        verify(requestBodySpec).body(requestCaptor.capture());
+        GroqLlmClient.GroqRequest request = (GroqLlmClient.GroqRequest) requestCaptor.getValue();
+        assertEquals("system", request.messages().getFirst().role());
+        assertTrue(request.messages().getFirst().content()
+                .contains("Answer every user-facing response in English."));
+    }
 
     @Test
     @DisplayName("Tier 1 - F5.1: Primary model succeeds on first attempt with key_masked populated")
@@ -227,7 +248,7 @@ public class LlmFallbackTest {
         LlmResponse response = groqLlmClient.generateResponse(List.of(userMsg));
 
         assertNotNull(response);
-        assertTrue(response.getContent().contains("API key exhaustion"));
+        assertTrue(response.getContent().contains("temporarily unavailable"));
         verifyNoInteractions(restClient);
     }
 
@@ -254,7 +275,7 @@ public class LlmFallbackTest {
         LlmResponse response = groqLlmClient.generateResponse(List.of(userMsg));
 
         assertNotNull(response);
-        assertTrue(response.getContent().contains("Max retry attempts reached"));
+        assertTrue(response.getContent().contains("temporarily unavailable"));
         // Verify attempts 0, 1, 2, 3 were made (4 requests total), then attempt 4 terminates
         verify(restClient, times(4)).post();
     }
@@ -277,7 +298,7 @@ public class LlmFallbackTest {
         LlmResponse response = groqLlmClient.generateResponse(List.of(userMsg));
 
         assertNotNull(response);
-        assertTrue(response.getContent().contains("upstream server errors"));
+        assertTrue(response.getContent().contains("temporarily unavailable"));
         // 1st call on defaultModel, 2nd call on fallbackModel -> terminates
         verify(restClient, times(2)).post();
     }

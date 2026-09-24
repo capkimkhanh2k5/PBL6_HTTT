@@ -6,19 +6,16 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import com.danasea.backend.shared.presentation.ErrorResponse;
+import com.danasea.backend.shared.presentation.LocalizedExceptionHandlerSupport;
 import com.danasea.backend.security.authorization.domain.exceptions.AccessDeniedException;
 
 @RestControllerAdvice
-public class AuthorizationHandler {
-    
+public class AuthorizationHandler extends LocalizedExceptionHandlerSupport {
+
     @ExceptionHandler(AccessDeniedException.class)
     public ResponseEntity<ErrorResponse> handleAccessDeniedException(AccessDeniedException exception) {
         return ResponseEntity
                 .status(HttpStatus.FORBIDDEN)
-                .body(new ErrorResponse(
-                            "ACCESS_DENIED", 
-                            exception.getMessage()
-                ));
+                .body(error("ACCESS_DENIED"));
     }
 }
-    

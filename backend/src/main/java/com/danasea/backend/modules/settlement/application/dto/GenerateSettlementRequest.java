@@ -5,12 +5,12 @@ import java.time.LocalDate;
 import java.util.UUID;
 
 public record GenerateSettlementRequest(
-    @NotNull(message = "vendorId is required")
+    @NotNull(message = "{validation.settlement.vendor.required}")
     UUID vendorId,
 
-    @NotNull(message = "periodStart is required")
+    @NotNull(message = "{validation.settlement.period_start.required}")
     LocalDate periodStart,
 
-    @NotNull(message = "periodEnd is required")
+    @NotNull(message = "{validation.settlement.period_end.required}")
     LocalDate periodEnd
 ) {}

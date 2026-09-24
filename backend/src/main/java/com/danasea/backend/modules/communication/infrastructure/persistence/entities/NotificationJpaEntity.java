@@ -25,7 +25,11 @@ public class NotificationJpaEntity extends BaseJpaEntity {
 
     private String title;
 
+    @Column(columnDefinition = "TEXT")
     private String body;
+
+    @Column(nullable = false, length = 2)
+    private String locale = "vi";
 
     private String relatedEntityType;
 

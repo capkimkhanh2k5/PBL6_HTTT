@@ -9,6 +9,7 @@ import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.stereotype.Component;
 
 import com.danasea.backend.shared.presentation.ErrorResponse;
+import com.danasea.backend.shared.i18n.LocalizedMessageService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import jakarta.servlet.ServletException;
@@ -19,9 +20,11 @@ import jakarta.servlet.http.HttpServletResponse;
 public class CustomAccessDeniedHandler implements AccessDeniedHandler {
 
     private final ObjectMapper objectMapper;
+    private final LocalizedMessageService messages;
 
-    public CustomAccessDeniedHandler(ObjectMapper objectMapper) {
+    public CustomAccessDeniedHandler(ObjectMapper objectMapper, LocalizedMessageService messages) {
         this.objectMapper = objectMapper;
+        this.messages = messages;
     }
 
     @Override
@@ -34,7 +37,7 @@ public class CustomAccessDeniedHandler implements AccessDeniedHandler {
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
         response.setCharacterEncoding(StandardCharsets.UTF_8.name());
 
-        ErrorResponse errorResponse = new ErrorResponse("ACCESS_DENIED", "Access denied.");
+        ErrorResponse errorResponse = new ErrorResponse("ACCESS_DENIED", messages.get("error.access_denied"));
 
         response.getWriter().write(objectMapper.writeValueAsString(errorResponse));
         response.getWriter().flush();

@@ -1,7 +1,7 @@
 package com.danasea.backend.modules.weather;
 
 import com.danasea.backend.modules.communication.application.usecases.SendNotificationUseCase;
-import com.danasea.backend.modules.communication.domain.models.NotificationChannel;
+import com.danasea.backend.modules.communication.application.dtos.NotificationCommand;
 import com.danasea.backend.modules.order.domain.models.RefundReason;
 import com.danasea.backend.modules.order.domain.models.RefundStatus;
 import com.danasea.backend.modules.order.domain.models.SubOrderStatus;
@@ -55,6 +55,14 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 @DisplayName("Adversarial Stress Test: Marine Weather Monitoring System")
 class WeatherAdversarialStressTest {
+
+    private static NotificationCommand notification(UUID recipientId, String type, String entityType, UUID entityId) {
+        return argThat(command -> command != null
+                && Objects.equals(recipientId, command.recipientId())
+                && type.equals(command.type())
+                && entityType.equals(command.relatedEntityType())
+                && entityId.equals(command.relatedEntityId()));
+    }
 
     @Mock
     private JpaServiceSlotRepository slotRepository;
@@ -316,7 +324,7 @@ class WeatherAdversarialStressTest {
             assertEquals(SubOrderStatus.CONFIRMED, subOrder.getStatus());
             verify(subOrderRepository, never()).save(any());
             verify(refundRepository, never()).save(any());
-            verify(sendNotificationUseCase, never()).execute(any(), any(), any(), any(), any(), any(), any(), any());
+            verify(sendNotificationUseCase, never()).execute(any(NotificationCommand.class));
         }
 
         @Test
@@ -352,18 +360,9 @@ class WeatherAdversarialStressTest {
             verify(evaluationRepository, times(1)).save(redAlert);
 
             // Verify tri-party notifications (Admin, Vendor, Customer)
-            verify(sendNotificationUseCase, times(1)).execute(
-                    isNull(), eq("AUTO_CANCELLED_FOR_SAFETY"), eq(NotificationChannel.IN_APP),
-                    contains("Automatic safety intervention"), anyString(), eq("SERVICE_SLOT"), eq(slotId), isNull()
-            );
-            verify(sendNotificationUseCase, times(1)).execute(
-                    eq(vendorId), eq("AUTO_CANCELLED_FOR_SAFETY"), eq(NotificationChannel.IN_APP),
-                    contains("Trip automatically cancelled"), anyString(), eq("SERVICE_SLOT"), eq(slotId), isNull()
-            );
-            verify(sendNotificationUseCase, times(1)).execute(
-                    eq(customerId), eq("AUTO_CANCELLED_FOR_SAFETY"), eq(NotificationChannel.IN_APP),
-                    contains("full refund requested"), anyString(), eq("SUB_ORDER"), eq(subOrder.getId()), isNull()
-            );
+            verify(sendNotificationUseCase).execute(notification(null, "AUTO_CANCELLED_FOR_SAFETY", "SERVICE_SLOT", slotId));
+            verify(sendNotificationUseCase).execute(notification(vendorId, "AUTO_CANCELLED_FOR_SAFETY", "SERVICE_SLOT", slotId));
+            verify(sendNotificationUseCase).execute(notification(customerId, "AUTO_CANCELLED_FOR_SAFETY", "SUB_ORDER", subOrder.getId()));
         }
 
         @Test
@@ -466,12 +465,8 @@ class WeatherAdversarialStressTest {
             assertEquals(1.2, stored.getPeakWaveHeightM());
 
             // Initial notifications: 1 to vendor, 1 to customer
-            verify(sendNotificationUseCase, times(1)).execute(
-                    eq(vendorId), eq("WEATHER_ALERT"), any(), anyString(), anyString(), eq("SERVICE_SLOT"), eq(slotId), isNull()
-            );
-            verify(sendNotificationUseCase, times(1)).execute(
-                    isNull(), eq("WEATHER_WARNING"), any(), anyString(), anyString(), eq("SUB_ORDER"), eq(subOrder.getId()), isNull()
-            );
+            verify(sendNotificationUseCase).execute(notification(vendorId, "WEATHER_ALERT", "SERVICE_SLOT", slotId));
+            verify(sendNotificationUseCase).execute(notification(null, "WEATHER_WARNING", "SUB_ORDER", subOrder.getId()));
 
             // RUN 2: Rapid repeat scan 1 minute later with worsening metrics
             when(weatherProviderPort.getTimeWindowForecast(anyDouble(), anyDouble(), any(), any(), any()))
@@ -490,12 +485,8 @@ class WeatherAdversarialStressTest {
             assertEquals(1, dbStore.size(), "Must NOT create duplicate record in Run 3!");
 
             // VERIFY: Notifications were NOT duplicated! Still exactly 1 call each!
-            verify(sendNotificationUseCase, times(1)).execute(
-                    eq(vendorId), eq("WEATHER_ALERT"), any(), anyString(), anyString(), eq("SERVICE_SLOT"), eq(slotId), isNull()
-            );
-            verify(sendNotificationUseCase, times(1)).execute(
-                    isNull(), eq("WEATHER_WARNING"), any(), anyString(), anyString(), eq("SUB_ORDER"), eq(subOrder.getId()), isNull()
-            );
+            verify(sendNotificationUseCase).execute(notification(vendorId, "WEATHER_ALERT", "SERVICE_SLOT", slotId));
+            verify(sendNotificationUseCase).execute(notification(null, "WEATHER_WARNING", "SUB_ORDER", subOrder.getId()));
         }
 
         @Test
@@ -555,9 +546,7 @@ class WeatherAdversarialStressTest {
             assertEquals(0.6, stored.getPeakWaveHeightM());
 
             // 1 notification each to vendor & customer
-            verify(sendNotificationUseCase, times(1)).execute(
-                    eq(vendorId), eq("WEATHER_EARLY_WARNING"), any(), anyString(), anyString(), eq("SERVICE_SLOT"), eq(slotId), isNull()
-            );
+            verify(sendNotificationUseCase).execute(notification(vendorId, "WEATHER_EARLY_WARNING", "SERVICE_SLOT", slotId));
 
             // RUN 2: Second scan with updated metrics
             when(weatherProviderPort.getTimeWindowForecast(anyDouble(), anyDouble(), any(), any(), any()))
@@ -569,9 +558,7 @@ class WeatherAdversarialStressTest {
             assertEquals(0.7, stored.getPeakWaveHeightM(), "Must update metrics in-place!");
 
             // ZERO duplicate early warnings
-            verify(sendNotificationUseCase, times(1)).execute(
-                    eq(vendorId), eq("WEATHER_EARLY_WARNING"), any(), anyString(), anyString(), eq("SERVICE_SLOT"), eq(slotId), isNull()
-            );
+            verify(sendNotificationUseCase).execute(notification(vendorId, "WEATHER_EARLY_WARNING", "SERVICE_SLOT", slotId));
         }
     }
 
@@ -636,16 +623,10 @@ class WeatherAdversarialStressTest {
             assertTrue(alert.getIsSafe());
 
             // Early warnings sent
-            verify(sendNotificationUseCase, times(1)).execute(
-                    eq(vendorId), eq("WEATHER_EARLY_WARNING"), any(), anyString(), anyString(), eq("SERVICE_SLOT"), eq(slotId), isNull()
-            );
-            verify(sendNotificationUseCase, times(1)).execute(
-                    eq(customerId), eq("WEATHER_EARLY_WARNING"), any(), anyString(), anyString(), eq("SUB_ORDER"), eq(subOrder.getId()), isNull()
-            );
+            verify(sendNotificationUseCase).execute(notification(vendorId, "WEATHER_EARLY_WARNING", "SERVICE_SLOT", slotId));
+            verify(sendNotificationUseCase).execute(notification(customerId, "WEATHER_EARLY_WARNING", "SUB_ORDER", subOrder.getId()));
             // Admin NOT notified on yellow
-            verify(sendNotificationUseCase, never()).execute(
-                    isNull(), eq("WEATHER_ALERT"), any(), anyString(), anyString(), any(), any(), any()
-            );
+            verify(sendNotificationUseCase, never()).execute(notification(null, "WEATHER_ALERT", "SERVICE_SLOT", slotId));
 
             // STEP 2: Scan at T-2h -> Sudden Squall / Severe Weather (RED)
             WeatherInfoDto.TimeWindowForecast stormForecast = WeatherInfoDto.TimeWindowForecast.builder()
@@ -673,26 +654,18 @@ class WeatherAdversarialStressTest {
 
             // Escalation notifications sent:
             // 1. Vendor with [LEO THANG NGUY HIỂM]
-            verify(sendNotificationUseCase, times(1)).execute(
-                    eq(vendorId), eq("WEATHER_ALERT"), any(), contains("ESCALATED ALERT"), anyString(), eq("SERVICE_SLOT"), eq(slotId), isNull()
-            );
+            verify(sendNotificationUseCase).execute(notification(vendorId, "WEATHER_ALERT", "SERVICE_SLOT", slotId));
             // 2. Customer with [LEO THANG NGUY HIỂM]
-            verify(sendNotificationUseCase, times(1)).execute(
-                    eq(customerId), eq("WEATHER_WARNING"), any(), contains("ESCALATED ALERT"), anyString(), eq("SUB_ORDER"), eq(subOrder.getId()), isNull()
-            );
+            verify(sendNotificationUseCase).execute(notification(customerId, "WEATHER_WARNING", "SUB_ORDER", subOrder.getId()));
             // 3. Admin urgent alert
-            verify(sendNotificationUseCase, times(1)).execute(
-                    isNull(), eq("WEATHER_ALERT"), any(), contains("escalated to RED"), anyString(), eq("SERVICE_SLOT"), eq(slotId), isNull()
-            );
+            verify(sendNotificationUseCase).execute(notification(null, "WEATHER_ALERT", "SERVICE_SLOT", slotId));
 
             // STEP 3: Repeat run after escalation -> Stays at RED, in-place update, NO extra alerts
             boolean t2RepeatAlert = job.evaluateAndAlertSlot(slot);
             assertTrue(t2RepeatAlert);
             assertEquals(1, dbStore.size());
             // Notifications counts remain unchanged
-            verify(sendNotificationUseCase, times(1)).execute(
-                    eq(vendorId), eq("WEATHER_ALERT"), any(), contains("ESCALATED ALERT"), anyString(), eq("SERVICE_SLOT"), eq(slotId), isNull()
-            );
+            verify(sendNotificationUseCase).execute(notification(vendorId, "WEATHER_ALERT", "SERVICE_SLOT", slotId));
         }
     }
 }

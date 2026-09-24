@@ -30,13 +30,13 @@ public class RefundPolicyEngine {
     ) {
         if (reason == null) {
             BigDecimal percentage = BigDecimal.valueOf(0.0);
-            return new RefundEvaluationResult(percentage, calculateAmount(totalAmount, percentage));
+            return result(reason, percentage, totalAmount);
         }
 
         // 1. Force majeure and vendor fault: always 100.0% refund, ignoring time
         if (reason == RefundReason.WEATHER || reason == RefundReason.VENDOR_FAULT) {
             BigDecimal percentage = BigDecimal.valueOf(100.0);
-            return new RefundEvaluationResult(percentage, calculateAmount(totalAmount, percentage));
+            return result(reason, percentage, totalAmount);
         }
 
         // 2. Admin override, dispute, compensation: use custom percentage if provided, otherwise default to 100.0%
@@ -44,14 +44,14 @@ public class RefundPolicyEngine {
             BigDecimal percentage = customPercentage != null
                     ? customPercentage.setScale(1, RoundingMode.HALF_UP)
                     : BigDecimal.valueOf(100.0);
-            return new RefundEvaluationResult(percentage, calculateAmount(totalAmount, percentage));
+            return result(reason, percentage, totalAmount);
         }
 
         // 3. Customer-initiated cancellation: time-based tiered policy
         if (reason == RefundReason.CUSTOMER_REQUEST || reason == RefundReason.CUSTOMER_CANCEL) {
             if (departureTime == null || cancelTime == null || cancelTime.isAfter(departureTime)) {
                 BigDecimal percentage = BigDecimal.valueOf(0.0);
-                return new RefundEvaluationResult(percentage, calculateAmount(totalAmount, percentage));
+                return result(reason, percentage, totalAmount);
             }
 
             long minutesUntilDeparture = Duration.between(cancelTime, departureTime).toMinutes();
@@ -71,12 +71,28 @@ public class RefundPolicyEngine {
                 percentage = BigDecimal.valueOf(0.0);
             }
 
-            return new RefundEvaluationResult(percentage, calculateAmount(totalAmount, percentage));
+            return result(reason, percentage, totalAmount);
         }
 
         // Default fallback
         BigDecimal percentage = BigDecimal.valueOf(0.0);
-        return new RefundEvaluationResult(percentage, calculateAmount(totalAmount, percentage));
+        return result(reason, percentage, totalAmount);
+    }
+
+    private RefundEvaluationResult result(RefundReason reason, BigDecimal percentage, BigDecimal totalAmount) {
+        String code;
+        if (reason == RefundReason.WEATHER) {
+            code = "WEATHER";
+        } else if (reason == RefundReason.VENDOR_FAULT) {
+            code = "VENDOR_FAULT";
+        } else if (reason == RefundReason.ADMIN_OVERRIDE
+                || reason == RefundReason.COMPENSATION
+                || reason == RefundReason.DISPUTE) {
+            code = "ADMIN_OVERRIDE";
+        } else {
+            code = percentage == null ? "0" : percentage.stripTrailingZeros().toPlainString();
+        }
+        return new RefundEvaluationResult(percentage, calculateAmount(totalAmount, percentage), code);
     }
 
     private BigDecimal calculateAmount(BigDecimal totalAmount, BigDecimal percentage) {
@@ -106,8 +122,7 @@ public class RefundPolicyEngine {
             return getRefundPolicySummary();
         }
         return switch (policyType.toUpperCase()) {
-            case "REFUND" -> getRefundPolicySummary();
-            case "CANCELLATION" -> getRefundPolicySummary();
+            case "REFUND", "CANCELLATION" -> getRefundPolicySummary();
             default -> getRefundPolicySummary();
         };
     }

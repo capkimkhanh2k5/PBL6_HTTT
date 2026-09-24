@@ -26,6 +26,7 @@ public record ServiceResult(
         ServiceStatus status,
         String rejectionReason,
         String waiverContent,
+        String waiverContentEn,
         Boolean weatherSensitive,
         BigDecimal minWindKmh,
         BigDecimal maxWaveM,

@@ -9,42 +9,36 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import com.danasea.backend.modules.weather.domain.exceptions.CategorySafetyRuleNotFoundException;
 import com.danasea.backend.modules.weather.domain.exceptions.InvalidSafetyRuleThresholdException;
 import com.danasea.backend.shared.presentation.ErrorResponse;
+import com.danasea.backend.shared.presentation.LocalizedExceptionHandlerSupport;
 
 @RestControllerAdvice
-public class WeatherExceptionHandler {
+public class WeatherExceptionHandler extends LocalizedExceptionHandlerSupport {
 
     @ExceptionHandler(CategorySafetyRuleNotFoundException.class)
     public ResponseEntity<ErrorResponse> handleRuleNotFound(CategorySafetyRuleNotFoundException ex) {
         return ResponseEntity
                 .status(HttpStatus.NOT_FOUND)
-                .body(new ErrorResponse("CATEGORY_SAFETY_RULE_NOT_FOUND", ex.getMessage()));
+                .body(error("CATEGORY_SAFETY_RULE_NOT_FOUND"));
     }
 
     @ExceptionHandler(InvalidSafetyRuleThresholdException.class)
     public ResponseEntity<ErrorResponse> handleInvalidThreshold(InvalidSafetyRuleThresholdException ex) {
         return ResponseEntity
                 .status(HttpStatus.BAD_REQUEST)
-                .body(new ErrorResponse("INVALID_SAFETY_RULE_THRESHOLD", ex.getMessage()));
+                .body(error("INVALID_SAFETY_RULE_THRESHOLD"));
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ErrorResponse> handleValidationException(MethodArgumentNotValidException ex) {
-        String message = ex.getBindingResult()
-                .getFieldErrors()
-                .stream()
-                .map(error -> error.getField() + ": " + error.getDefaultMessage())
-                .findFirst()
-                .orElse("Invalid input data");
-
         return ResponseEntity
                 .status(HttpStatus.BAD_REQUEST)
-                .body(new ErrorResponse("INVALID_INPUT", message));
+                .body(validationError(ex));
     }
 
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<ErrorResponse> handleIllegalArgument(IllegalArgumentException ex) {
         return ResponseEntity
                 .status(HttpStatus.BAD_REQUEST)
-                .body(new ErrorResponse("BAD_REQUEST", ex.getMessage()));
+                .body(error("BAD_REQUEST"));
     }
 }

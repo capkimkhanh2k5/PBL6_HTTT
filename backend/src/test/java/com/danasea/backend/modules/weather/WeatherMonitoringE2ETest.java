@@ -1,7 +1,7 @@
 package com.danasea.backend.modules.weather;
 
 import com.danasea.backend.modules.communication.application.usecases.SendNotificationUseCase;
-import com.danasea.backend.modules.communication.domain.models.NotificationChannel;
+import com.danasea.backend.modules.communication.application.dtos.NotificationCommand;
 import com.danasea.backend.modules.order.domain.models.RefundReason;
 import com.danasea.backend.modules.order.domain.models.RefundStatus;
 import com.danasea.backend.modules.order.domain.models.SubOrderStatus;
@@ -62,6 +62,14 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 @DisplayName("DANASEA Marine Weather Monitoring System - Comprehensive E2E Test Suite")
 class WeatherMonitoringE2ETest {
+
+    private static NotificationCommand notification(UUID recipientId, String type, String entityType, UUID entityId) {
+        return argThat(command -> command != null
+                && Objects.equals(recipientId, command.recipientId())
+                && type.equals(command.type())
+                && entityType.equals(command.relatedEntityType())
+                && entityId.equals(command.relatedEntityId()));
+    }
 
     @Mock
     private JpaServiceSlotRepository slotRepository;
@@ -352,7 +360,7 @@ class WeatherMonitoringE2ETest {
             assertFalse(alertRun1);
             assertFalse(alertRun2);
             verify(evaluationRepository, never()).save(any());
-            verify(sendNotificationUseCase, never()).execute(any(), any(), any(), any(), any(), any(), any(), any());
+            verify(sendNotificationUseCase, never()).execute(any(NotificationCommand.class));
         }
 
         @Test
@@ -641,15 +649,9 @@ class WeatherMonitoringE2ETest {
 
             verify(evaluationRepository, times(1)).save(any(SafetyRuleEvaluationJpaEntity.class));
             // Gửi thông báo cho Vendor
-            verify(sendNotificationUseCase, times(1)).execute(
-                    eq(vendorId), eq("WEATHER_ALERT"), eq(NotificationChannel.IN_APP),
-                    anyString(), anyString(), eq("SERVICE_SLOT"), eq(slotId), isNull()
-            );
+            verify(sendNotificationUseCase).execute(notification(vendorId, "WEATHER_ALERT", "SERVICE_SLOT", slotId));
             // Gửi thông báo cho Khách hàng
-            verify(sendNotificationUseCase, times(1)).execute(
-                    isNull(), eq("WEATHER_WARNING"), eq(NotificationChannel.IN_APP),
-                    anyString(), anyString(), eq("SUB_ORDER"), eq(subOrder.getId()), isNull()
-            );
+            verify(sendNotificationUseCase).execute(notification(null, "WEATHER_WARNING", "SUB_ORDER", subOrder.getId()));
         }
 
         @Test

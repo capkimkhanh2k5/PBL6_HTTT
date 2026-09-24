@@ -8,6 +8,7 @@ import com.danasea.backend.security.authentication.infrastructure.security.JwtAu
 import com.danasea.backend.security.authentication.presentation.filter.CookieOriginValidationFilter;
 import com.danasea.backend.security.authentication.presentation.filter.OtpRateLimitFilter;
 import com.danasea.backend.security.authentication.presentation.filter.RateLimitFilter;
+import com.danasea.backend.shared.i18n.LocaleContextFilter;
 import com.danasea.backend.shared.infrastructure.web.RequestIdFilter;
 
 import jakarta.servlet.Filter;
@@ -38,6 +39,11 @@ public class SecurityFilterRegistrationConfig {
 
     @Bean
     FilterRegistrationBean<RequestIdFilter> requestIdFilterRegistration(RequestIdFilter filter) {
+        return disabled(filter);
+    }
+
+    @Bean
+    FilterRegistrationBean<LocaleContextFilter> localeContextFilterRegistration(LocaleContextFilter filter) {
         return disabled(filter);
     }
 

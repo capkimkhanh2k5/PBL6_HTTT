@@ -8,10 +8,13 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.AmqpRejectAndDontRequeueException;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
-import org.springframework.boot.mail.autoconfigure.MailProperties;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Component;
+import org.springframework.beans.factory.annotation.Autowired;
+import com.danasea.backend.shared.i18n.LocalizedMessageService;
+import com.danasea.backend.shared.i18n.SupportedLanguage;
 
 import java.time.OffsetDateTime;
 
@@ -22,20 +25,26 @@ public class NotificationEmailConsumer {
 
     private final JavaMailSender mailSender;
     private final JpaNotificationRepository notificationRepository;
-    private final MailProperties mailProperties;
+
+    @Autowired
+    private LocalizedMessageService messages = LocalizedMessageService.standalone();
+
+    @Value("${spring.mail.username:noreply@danasea.com}")
+    private String fromEmail;
 
     @RabbitListener(queues = RabbitMQConfig.NOTIFICATION_EMAIL_QUEUE)
     public void handleNotificationEmail(NotificationEmailEvent event) {
-        log.info("Processing notification email with subject: {}", event.subject());
+        log.info("Processing NotificationEmailEvent for: {} (Subject: {})", event.toEmail(), event.subject());
         try {
             SimpleMailMessage message = new SimpleMailMessage();
-            message.setFrom(mailProperties.getUsername());
+            message.setFrom(fromEmail);
             message.setTo(event.toEmail());
             message.setSubject("[DANASEA] " + event.subject());
-            message.setText(event.content() + "\n\n---\nDANASEA Marine Tourism Platform\nDa Nang, Vietnam");
+            SupportedLanguage language = SupportedLanguage.fromTag(event.locale()).orElse(SupportedLanguage.VI);
+            message.setText(event.content() + "\n\n---\n" + messages.get("email.brand.footer", language));
 
             mailSender.send(message);
-            log.info("Notification email sent successfully");
+            log.info("Successfully sent notification email to: {}", event.toEmail());
 
             if (event.notificationId() != null) {
                 notificationRepository.findById(event.notificationId()).ifPresent(entity -> {
@@ -45,7 +54,7 @@ public class NotificationEmailConsumer {
                 });
             }
         } catch (Exception e) {
-            log.error("Notification email delivery failed", e);
+            log.error("Failed to send notification email to: {}", event.toEmail(), e);
             if (event.notificationId() != null) {
                 notificationRepository.findById(event.notificationId()).ifPresent(entity -> {
                     entity.setStatus(NotificationStatus.FAILED);
