@@ -62,6 +62,7 @@ public class CreateServiceUseCase {
                 .latitude(cmd.latitude())
                 .longitude(cmd.longitude())
                 .waiverContent(cmd.waiverContent())
+                .waiverContentEn(cmd.waiverContentEn())
                 .weatherSensitive(cmd.weatherSensitive())
                 .minWindKmh(cmd.minWindKmh())
                 .maxWaveM(cmd.maxWaveM())

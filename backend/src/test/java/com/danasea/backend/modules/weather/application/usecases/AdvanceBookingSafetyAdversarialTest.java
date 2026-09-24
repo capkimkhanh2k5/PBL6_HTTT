@@ -65,7 +65,7 @@ public class AdvanceBookingSafetyAdversarialTest {
     private WeatherRuleEngine weatherRuleEngine;
     private CheckAdvanceBookingSafetyUseCase useCase;
 
-    private final LocalDate today = LocalDate.of(2026, 9, 20);
+    private final LocalDate today = LocalDate.now();
     private CategorySafetyRule supRule;
     private CategorySafetyRule parasailingRule;
 

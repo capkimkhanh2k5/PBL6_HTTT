@@ -1,6 +1,10 @@
 spring:
   application:
     name: backend
+  messages:
+    basename: i18n/common,i18n/validation,i18n/auth,i18n/booking,i18n/weather,i18n/notification,i18n/ai,i18n/policy
+    encoding: UTF-8
+    fallback-to-system-locale: false
   config:
 
   servlet:
@@ -68,6 +72,8 @@ app:
     refresh-token-days: ${APP_JWT_REFRESH_TOKEN_DAYS:7}
   weather:
     monitoring-cron: ${APP_WEATHER_MONITORING_CRON:0 */30 * * * *}
+  checkin:
+    qr-secret: ${APP_CHECKIN_QR_SECRET:danasea-secure-qr-checkin-hmac-sha256-default-key-32bytes-min!}
 
 cloudinary:
   cloud-name: ${CLOUDINARY_CLOUD_NAME:}

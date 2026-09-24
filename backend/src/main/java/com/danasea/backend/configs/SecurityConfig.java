@@ -10,6 +10,7 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.boot.web.servlet.FilterRegistrationBean;
 
 import java.util.Arrays;
 import java.util.List;
@@ -22,6 +23,8 @@ import org.springframework.beans.factory.annotation.Value;
 import com.danasea.backend.security.authentication.infrastructure.security.CustomAuthenticationEntryPoint;
 import com.danasea.backend.security.authentication.infrastructure.security.JwtAuthenticationFilter;
 import com.danasea.backend.security.authorization.infrastructure.security.CustomAccessDeniedHandler;
+import com.danasea.backend.security.authentication.presentation.filter.RateLimitFilter;
+import com.danasea.backend.shared.i18n.LocaleContextFilter;
 
 @Configuration
 @EnableWebSecurity
@@ -35,6 +38,8 @@ public class SecurityConfig {
 	SecurityFilterChain applicationSecurityFilterChain(
 			HttpSecurity http,
 			JwtAuthenticationFilter jwtAuthenticationFilter,
+			LocaleContextFilter localeContextFilter,
+			RateLimitFilter rateLimitFilter,
 			CustomAccessDeniedHandler accessDeniedHandler,
 			CustomAuthenticationEntryPoint authenticationEntryPoint
 	) throws Exception {
@@ -71,6 +76,8 @@ public class SecurityConfig {
 						jwtAuthenticationFilter,
 						UsernamePasswordAuthenticationFilter.class
 				)
+				.addFilterAfter(localeContextFilter, JwtAuthenticationFilter.class)
+				.addFilterAfter(rateLimitFilter, LocaleContextFilter.class)
 				.build();
 	}
 
@@ -79,13 +86,27 @@ public class SecurityConfig {
 		CorsConfiguration configuration = new CorsConfiguration();
 		configuration.setAllowedOrigins(allowedOrigins);
 		configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
-		configuration.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type", "X-Requested-With", "X-Session-Id"));
-		configuration.setExposedHeaders(Arrays.asList("Authorization", "X-Session-Id"));
+		configuration.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type", "X-Requested-With", "X-Session-Id", "Accept-Language"));
+		configuration.setExposedHeaders(Arrays.asList("Authorization", "X-Session-Id", "Content-Language", "Vary"));
 		configuration.setAllowCredentials(true);
 
 		UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
 		source.registerCorsConfiguration("/**", configuration);
 		return source;
+	}
+
+	@Bean
+	FilterRegistrationBean<LocaleContextFilter> disableLocaleFilterAutoRegistration(LocaleContextFilter filter) {
+		FilterRegistrationBean<LocaleContextFilter> registration = new FilterRegistrationBean<>(filter);
+		registration.setEnabled(false);
+		return registration;
+	}
+
+	@Bean
+	FilterRegistrationBean<RateLimitFilter> disableRateLimitFilterAutoRegistration(RateLimitFilter filter) {
+		FilterRegistrationBean<RateLimitFilter> registration = new FilterRegistrationBean<>(filter);
+		registration.setEnabled(false);
+		return registration;
 	}
 
 }

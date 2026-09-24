@@ -22,6 +22,7 @@ import com.danasea.backend.modules.account.application.api.AccountInternalApi;
 import com.danasea.backend.modules.account.domain.models.RefreshToken;
 import com.danasea.backend.security.authentication.infrastructure.security.HashUtils;
 import com.danasea.backend.security.authentication.infrastructure.security.JwtProperties;
+import com.danasea.backend.shared.i18n.SupportedLanguage;
 
 @RequiredArgsConstructor
 public class RegisterUseCase {
@@ -35,6 +36,11 @@ public class RegisterUseCase {
 
     @Transactional
     public LoginResult execute(String email, String password) {
+        return execute(email, password, SupportedLanguage.DEFAULT);
+    }
+
+    @Transactional
+    public LoginResult execute(String email, String password, SupportedLanguage language) {
         String normalizedEmail = email.trim()
                 .toLowerCase(Locale.ROOT);
 
@@ -50,7 +56,8 @@ public class RegisterUseCase {
                 hashedPassword,
                 "CUSTOMER",
                 true, // enabled
-                false // emailVerified
+                false, // emailVerified
+                (language == null ? SupportedLanguage.DEFAULT : language).code()
         );
 
         Authentication savedUser = userAccountPort.save(user);

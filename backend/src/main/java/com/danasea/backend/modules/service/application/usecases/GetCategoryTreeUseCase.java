@@ -12,14 +12,27 @@ import java.util.UUID;
 import com.danasea.backend.modules.service.application.ports.output.CategoryRepositoryPort;
 import com.danasea.backend.modules.service.domain.models.Category;
 import com.danasea.backend.modules.service.presentation.dtos.CategoryTreeResponse;
-import lombok.RequiredArgsConstructor;
+import com.danasea.backend.shared.i18n.LocalizedContentSelector;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
-@RequiredArgsConstructor
 public class GetCategoryTreeUseCase {
 
     private final CategoryRepositoryPort categoryRepositoryPort;
+    private final LocalizedContentSelector localizedContentSelector;
+
+    public GetCategoryTreeUseCase(CategoryRepositoryPort categoryRepositoryPort) {
+        this(categoryRepositoryPort, null);
+    }
+
+    @Autowired
+    public GetCategoryTreeUseCase(
+            CategoryRepositoryPort categoryRepositoryPort,
+            LocalizedContentSelector localizedContentSelector) {
+        this.categoryRepositoryPort = categoryRepositoryPort;
+        this.localizedContentSelector = localizedContentSelector;
+    }
 
     public List<CategoryTreeResponse> execute() {
         return execute(false);
@@ -47,10 +60,10 @@ public class GetCategoryTreeUseCase {
             }
         }
 
-        return buildTree(categories);
+        return buildTree(categories, !includeInactive);
     }
 
-    private List<CategoryTreeResponse> buildTree(List<Category> categories) {
+    private List<CategoryTreeResponse> buildTree(List<Category> categories, boolean localize) {
         if (categories == null || categories.isEmpty()) {
             return new ArrayList<>();
         }
@@ -62,7 +75,9 @@ public class GetCategoryTreeUseCase {
             if (cat.getId() != null) {
                 nodeMap.put(cat.getId(), new CategoryTreeResponse(
                         cat.getId(),
-                        cat.getName(),
+                        localize && localizedContentSelector != null
+                                ? localizedContentSelector.select(cat.getName(), cat.getNameEn())
+                                : cat.getName(),
                         cat.getNameEn(),
                         cat.getSlug(),
                         cat.getParentId(),

@@ -25,6 +25,12 @@ public class SearchServiceTool implements ToolExecutor {
 
     @Override
     public String execute(String argumentsJson) {
+        return execute(argumentsJson, new ToolExecutionContext(
+                com.danasea.backend.shared.i18n.SupportedLanguage.VI, null));
+    }
+
+    @Override
+    public String execute(String argumentsJson, ToolExecutionContext context) {
         try {
             JsonNode args = objectMapper.readTree(argumentsJson);
             
@@ -41,11 +47,12 @@ public class SearchServiceTool implements ToolExecutor {
                 maxPrice = new BigDecimal(args.get("max_price").asText());
             }
 
-            List<ServiceSearchResultDto> results = serviceSearchPort.exactAndFilterSearch(query, category, minPrice, maxPrice);
+            List<ServiceSearchResultDto> results = serviceSearchPort.exactAndFilterSearch(
+                    query, category, minPrice, maxPrice, context.language());
 
             return objectMapper.writeValueAsString(Map.of("results", results));
         } catch (Exception e) {
-            return "{\"error\": \"Failed to execute search_services: " + e.getMessage() + "\"}";
+            return "{\"errorCode\":\"AI_SERVICE_SEARCH_FAILED\"}";
         }
     }
 }

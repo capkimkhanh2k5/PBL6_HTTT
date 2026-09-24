@@ -4,6 +4,7 @@ import com.danasea.backend.modules.weather.infrastructure.api.dto.OpenMeteoMarin
 import com.danasea.backend.modules.weather.infrastructure.api.dto.OpenMeteoWeatherResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.client.SimpleClientHttpRequestFactory;
@@ -25,6 +26,7 @@ public class OpenMeteoApiClient {
     private final String weatherBaseUrl;
     private final String marineBaseUrl;
 
+    @Autowired
     public OpenMeteoApiClient(
             RestClient.Builder restClientBuilder,
             @Value("${open-meteo.base-url:https://api.open-meteo.com}") String weatherBaseUrl,

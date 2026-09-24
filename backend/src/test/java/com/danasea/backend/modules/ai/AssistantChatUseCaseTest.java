@@ -3,11 +3,13 @@ package com.danasea.backend.modules.ai;
 import com.danasea.backend.modules.ai.application.port.LlmClientPort;
 import com.danasea.backend.modules.ai.application.port.ModerationPort;
 import com.danasea.backend.modules.ai.application.tool.ToolExecutor;
+import com.danasea.backend.modules.ai.application.tool.ToolExecutionContext;
 import com.danasea.backend.modules.ai.application.usecase.ChatUseCase;
 import com.danasea.backend.modules.ai.domain.models.AiMessageRole;
 import com.danasea.backend.modules.ai.domain.models.LlmResponse;
 import com.danasea.backend.modules.ai.domain.models.ToolCall;
 import com.danasea.backend.modules.ai.domain.services.ChatHistoryService;
+import com.danasea.backend.shared.i18n.SupportedLanguage;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -87,6 +89,30 @@ public class AssistantChatUseCaseTest {
     // =========================================================================
     // TIER 1: FEATURE COVERAGE (>=5 test cases across R2 & R6 core tools)
     // =========================================================================
+
+    @Test
+    @DisplayName("i18n: conversation locale is propagated to the LLM and tool execution context")
+    void localizedConversation_propagatesLocaleToLlmAndTools() {
+        String arguments = "{\"keyword\":\"kayak\"}";
+        LlmResponse toolCallResponse = new LlmResponse();
+        toolCallResponse.setToolCalls(List.of(new ToolCall("tc-i18n", "search_service", arguments)));
+        LlmResponse finalResponse = new LlmResponse();
+        finalResponse.setContent("I found a kayak tour.");
+
+        when(llmClientPort.generateResponse(any(), eq(SupportedLanguage.EN)))
+                .thenReturn(toolCallResponse)
+                .thenReturn(finalResponse);
+        when(searchTool.execute(eq(arguments), any(ToolExecutionContext.class)))
+                .thenReturn("{\"results\":[]}");
+
+        LlmResponse result = chatUseCase.processMessage(conversationId, "Find a kayak tour", SupportedLanguage.EN);
+
+        assertEquals("I found a kayak tour.", result.getContent());
+        verify(llmClientPort, times(2)).generateResponse(any(), eq(SupportedLanguage.EN));
+        verify(searchTool).execute(eq(arguments), argThat(context ->
+                context.language() == SupportedLanguage.EN
+                        && conversationId.equals(context.conversationId())));
+    }
 
     @Test
     @DisplayName("Tier 1 - F2.1: search_service is called in tourism service discovery context")
@@ -230,7 +256,8 @@ public class AssistantChatUseCaseTest {
 
         assertEquals("Xin lỗi, tôi không thể thực hiện công cụ này.", result.getContent());
         // Verify unknown tool error was appended to chat history
-        verify(chatHistoryService).appendMessage(eq(conversationId), eq(AiMessageRole.TOOL), eq("{\"error\": \"Unknown tool\"}"), eq("tc-unk-1"));
+        verify(chatHistoryService).appendMessage(eq(conversationId), eq(AiMessageRole.TOOL),
+                eq("{\"errorCode\":\"AI_TOOL_UNKNOWN\"}"), eq("tc-unk-1"));
     }
 
     @Test

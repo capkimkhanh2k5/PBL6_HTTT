@@ -11,56 +11,50 @@ import com.danasea.backend.modules.vendor.domain.exceptions.UserLockedException;
 import com.danasea.backend.modules.vendor.domain.exceptions.VendorAlreadyExistsException;
 import com.danasea.backend.modules.vendor.domain.exceptions.VendorNotFoundException;
 import com.danasea.backend.shared.presentation.ErrorResponse;
+import com.danasea.backend.shared.presentation.LocalizedExceptionHandlerSupport;
 
 @RestControllerAdvice(basePackages = "com.danasea.backend.modules.vendor")
-public class VendorExceptionHandler {
+public class VendorExceptionHandler extends LocalizedExceptionHandlerSupport {
 
     @ExceptionHandler(VendorAlreadyExistsException.class)
     public ResponseEntity<ErrorResponse> handleVendorAlreadyExists(VendorAlreadyExistsException ex) {
         return ResponseEntity
                 .status(HttpStatus.CONFLICT)
-                .body(new ErrorResponse("VENDOR_ALREADY_EXISTS", ex.getMessage()));
+                .body(error("VENDOR_ALREADY_EXISTS"));
     }
 
     @ExceptionHandler(VendorNotFoundException.class)
     public ResponseEntity<ErrorResponse> handleVendorNotFound(VendorNotFoundException ex) {
         return ResponseEntity
                 .status(HttpStatus.NOT_FOUND)
-                .body(new ErrorResponse("VENDOR_NOT_FOUND", ex.getMessage()));
+                .body(error("VENDOR_NOT_FOUND"));
     }
 
     @ExceptionHandler(UserLockedException.class)
     public ResponseEntity<ErrorResponse> handleUserLocked(UserLockedException ex) {
         return ResponseEntity
                 .status(HttpStatus.FORBIDDEN)
-                .body(new ErrorResponse("USER_LOCKED", ex.getMessage()));
+                .body(error("USER_LOCKED"));
     }
 
     @ExceptionHandler(InvalidDocTypeException.class)
     public ResponseEntity<ErrorResponse> handleInvalidDocType(InvalidDocTypeException ex) {
         return ResponseEntity
                 .status(HttpStatus.BAD_REQUEST)
-                .body(new ErrorResponse("INVALID_DOC_TYPE", ex.getMessage()));
+                .body(error("INVALID_DOC_TYPE"));
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ErrorResponse> handleMethodArgumentNotValid(MethodArgumentNotValidException ex) {
-        String message = ex.getBindingResult()
-                .getFieldErrors()
-                .stream()
-                .map(error -> error.getField() + ": " + error.getDefaultMessage())
-                .findFirst()
-                .orElse("Invalid request input");
-
         return ResponseEntity
                 .status(HttpStatus.BAD_REQUEST)
-                .body(new ErrorResponse("INVALID_INPUT", message));
+                .body(validationError(ex));
     }
 
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<ErrorResponse> handleIllegalArgument(IllegalArgumentException ex) {
         return ResponseEntity
                 .status(HttpStatus.BAD_REQUEST)
-                .body(new ErrorResponse("INVALID_INPUT", ex.getMessage()));
+                .body(error("INVALID_INPUT"));
     }
 }

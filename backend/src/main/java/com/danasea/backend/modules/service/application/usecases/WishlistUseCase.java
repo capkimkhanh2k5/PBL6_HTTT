@@ -6,6 +6,7 @@ import com.danasea.backend.modules.service.domain.models.Service;
 import com.danasea.backend.modules.service.domain.models.Wishlist;
 import com.danasea.backend.modules.service.domain.ports.ServiceRepositoryPort;
 import com.danasea.backend.modules.service.domain.ports.WishlistRepositoryPort;
+import com.danasea.backend.shared.i18n.LocalizedContentSelector;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -20,6 +21,7 @@ import java.util.stream.Collectors;
 public class WishlistUseCase {
     private final WishlistRepositoryPort wishlistRepositoryPort;
     private final ServiceRepositoryPort serviceRepositoryPort;
+    private final LocalizedContentSelector localizedContentSelector;
 
     public void addWishlist(UUID userId, UUID serviceId) {
         if (!serviceRepositoryPort.existsById(serviceId)) {
@@ -50,7 +52,8 @@ public class WishlistUseCase {
             return WishlistItemResult.builder()
                 .id(w.getId())
                 .serviceId(w.getServiceId())
-                .serviceName(service.getName())
+                .serviceName(localizedContentSelector == null ? service.getName()
+                        : localizedContentSelector.select(service.getName(), service.getNameEn()))
                 .addedAt(added)
                 .build();
         }).collect(Collectors.toList());

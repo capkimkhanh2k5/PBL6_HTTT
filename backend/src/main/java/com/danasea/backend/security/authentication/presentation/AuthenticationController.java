@@ -30,6 +30,8 @@ import com.danasea.backend.security.authentication.application.usecases.RefreshT
 import com.danasea.backend.security.authentication.application.usecases.LogoutUseCase;
 import com.danasea.backend.security.authentication.infrastructure.security.CookieUtils;
 import io.swagger.v3.oas.annotations.security.SecurityRequirements;
+import com.danasea.backend.shared.i18n.SupportedLanguage;
+import org.springframework.context.i18n.LocaleContextHolder;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -65,7 +67,9 @@ public class AuthenticationController {
 
         LoginResult result = registerUseCase.execute(
                 request.email(),
-                request.password());
+                request.password(),
+                SupportedLanguage.fromTag(LocaleContextHolder.getLocale().toLanguageTag())
+                        .orElse(SupportedLanguage.DEFAULT));
 
         CookieUtils.addRefreshTokenCookie(response, result.refreshToken());
 

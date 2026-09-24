@@ -224,7 +224,7 @@ class VendorProfileControllerTest {
         mockMvc.perform(get("/api/vendor/profile"))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.code").value("VENDOR_NOT_FOUND"))
-                .andExpect(jsonPath("$.message").value("Vendor profile not found"));
+                .andExpect(jsonPath("$.message").value("Vendor was not found."));
     }
 
     // ==========================================

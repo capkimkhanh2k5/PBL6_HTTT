@@ -13,4 +13,5 @@ public class AiConversation extends BaseDomainModel {
     private UUID userId;
     private OffsetDateTime startedAt;
     private OffsetDateTime endedAt;
+    private String locale;
 }

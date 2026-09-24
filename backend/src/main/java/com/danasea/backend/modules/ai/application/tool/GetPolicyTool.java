@@ -1,5 +1,6 @@
 package com.danasea.backend.modules.ai.application.tool;
 
+import com.danasea.backend.modules.order.domain.services.RefundPolicyEngine;
 import com.danasea.backend.modules.systemconfig.infrastructure.persistence.entities.SystemConfigJpaEntity;
 import com.danasea.backend.modules.systemconfig.infrastructure.persistence.repositories.JpaSystemConfigRepository;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -11,6 +12,8 @@ import org.springframework.stereotype.Component;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import com.danasea.backend.shared.i18n.LocalizedMessageService;
+import com.danasea.backend.shared.i18n.SupportedLanguage;
 
 @Slf4j
 @Component
@@ -18,16 +21,30 @@ public class GetPolicyTool implements ToolExecutor {
 
     private final JpaSystemConfigRepository systemConfigRepository;
     private final ObjectMapper objectMapper;
+    private final RefundPolicyEngine refundPolicyEngine;
+    private LocalizedMessageService messages = LocalizedMessageService.standalone();
 
     @Autowired
-    public GetPolicyTool(@Autowired(required = false) JpaSystemConfigRepository systemConfigRepository,
-                         ObjectMapper objectMapper) {
+    void setLocalizedMessageService(LocalizedMessageService messages) {
+        this.messages = messages;
+    }
+
+    @Autowired
+    public GetPolicyTool(
+            @Autowired(required = false) JpaSystemConfigRepository systemConfigRepository,
+            ObjectMapper objectMapper,
+            @Autowired(required = false) RefundPolicyEngine refundPolicyEngine) {
         this.systemConfigRepository = systemConfigRepository;
         this.objectMapper = objectMapper;
+        this.refundPolicyEngine = refundPolicyEngine != null ? refundPolicyEngine : new RefundPolicyEngine();
+    }
+
+    public GetPolicyTool(JpaSystemConfigRepository systemConfigRepository, ObjectMapper objectMapper) {
+        this(systemConfigRepository, objectMapper, new RefundPolicyEngine());
     }
 
     public GetPolicyTool() {
-        this(null, new ObjectMapper());
+        this(null, new ObjectMapper(), new RefundPolicyEngine());
     }
 
     @Override
@@ -37,6 +54,16 @@ public class GetPolicyTool implements ToolExecutor {
 
     @Override
     public String execute(String argumentsJson) {
+        return executeInternal(argumentsJson, null);
+    }
+
+    @Override
+    public String execute(String argumentsJson, ToolExecutionContext context) {
+        return executeInternal(argumentsJson,
+                context == null || context.language() == null ? SupportedLanguage.VI : context.language());
+    }
+
+    private String executeInternal(String argumentsJson, SupportedLanguage requestedLanguage) {
         String policyType = "GENERAL";
         try {
             if (argumentsJson != null && !argumentsJson.isBlank()) {
@@ -51,7 +78,7 @@ public class GetPolicyTool implements ToolExecutor {
             log.warn("Failed to parse arguments for get_policy: {}", argumentsJson, e);
         }
 
-        String policyText = fetchPolicyText(policyType);
+        String policyText = fetchPolicyText(policyType, requestedLanguage);
 
         Map<String, Object> response = new HashMap<>();
         response.put("policy_type", policyType);
@@ -65,10 +92,22 @@ public class GetPolicyTool implements ToolExecutor {
         }
     }
 
-    private String fetchPolicyText(String policyType) {
+    private String fetchPolicyText(String policyType, SupportedLanguage language) {
         if (systemConfigRepository != null) {
             try {
-                Optional<SystemConfigJpaEntity> entity = systemConfigRepository.findByKey("POLICY_" + policyType.toUpperCase());
+                String canonicalKey = "POLICY_" + policyType.toUpperCase();
+                Optional<SystemConfigJpaEntity> entity;
+                if (language == null) {
+                    entity = systemConfigRepository.findByKey(canonicalKey);
+                } else {
+                    entity = systemConfigRepository.findByKey(canonicalKey + "." + language.code());
+                    if (entity.isEmpty() && language == SupportedLanguage.EN) {
+                        entity = systemConfigRepository.findByKey(canonicalKey + ".vi");
+                    }
+                    if (entity.isEmpty()) {
+                        entity = systemConfigRepository.findByKey(canonicalKey);
+                    }
+                }
                 if (entity.isEmpty()) {
                     entity = systemConfigRepository.findByKey("policy_" + policyType.toLowerCase());
                 }
@@ -83,17 +122,30 @@ public class GetPolicyTool implements ToolExecutor {
             }
         }
 
-        return getDefaultPolicyText(policyType);
+        if (language == null) {
+            return getLegacyDefaultPolicyText(policyType);
+        }
+        return getDefaultPolicyText(policyType, language);
     }
 
-    private String getDefaultPolicyText(String policyType) {
+    private String getLegacyDefaultPolicyText(String policyType) {
         return switch (policyType.toUpperCase()) {
-            case "CANCELLATION" -> "Hoàn tiền 100% khi hủy trước 24h. Hoàn 50% trước 12h. Không hoàn tiền trong vòng 12h trước giờ khởi hành.";
-            case "REFUND" -> "Chính sách hoàn tiền: Hoàn 100% tiền cọc nếu huỷ đúng hạn hoặc thời tiết xấu không thể tổ chức tour.";
+            case "CANCELLATION" -> refundPolicyEngine.getCancellationPolicySummary();
+            case "REFUND" -> refundPolicyEngine.getRefundPolicySummary("REFUND");
             case "WEATHER_CANCELLATION" -> "Chính sách hủy do thời tiết: Trường hợp điều kiện hàng hải nguy hiểm hoặc thiên tai, tour sẽ được hoàn tiền 100% hoặc đổi ngày miễn phí.";
             case "SAFETY" -> "Chính sách an toàn: Khách hàng bắt buộc mặc áo phao và tuân theo chỉ dẫn an toàn hàng hải của ban quản lý và hướng dẫn viên.";
             default -> "Chính sách chung DanaSea: Cam kết bảo vệ quyền lợi khách hàng, an toàn hàng hải và minh bạch dịch vụ du lịch biển Đà Nẵng.";
         };
     }
-}
 
+    private String getDefaultPolicyText(String policyType, SupportedLanguage language) {
+        String suffix = switch (policyType.toUpperCase()) {
+            case "CANCELLATION" -> "cancellation";
+            case "REFUND" -> "refund";
+            case "WEATHER_CANCELLATION" -> "weather_cancellation";
+            case "SAFETY" -> "safety";
+            default -> "general";
+        };
+        return messages.get("policy." + suffix, language);
+    }
+}

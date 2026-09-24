@@ -22,6 +22,7 @@ public record CreateServiceRequest(
         BigDecimal latitude,
         BigDecimal longitude,
         String waiverContent,
+        String waiverContentEn,
         Boolean weatherSensitive,
         BigDecimal minWindKmh,
         BigDecimal maxWaveM

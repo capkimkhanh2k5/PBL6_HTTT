@@ -5,17 +5,15 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-
-import java.util.Map;
+import com.danasea.backend.shared.presentation.ErrorResponse;
+import com.danasea.backend.shared.presentation.LocalizedExceptionHandlerSupport;
 
 @RestControllerAdvice
-public class CatalogExceptionHandler {
+public class CatalogExceptionHandler extends LocalizedExceptionHandlerSupport {
 
     @ExceptionHandler(ServiceNotFoundException.class)
-    public ResponseEntity<Map<String, String>> handleServiceNotFound(ServiceNotFoundException ex) {
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of(
-                "code", "SERVICE_NOT_FOUND",
-                "message", ex.getMessage()
-        ));
+    public ResponseEntity<ErrorResponse> handleServiceNotFound(ServiceNotFoundException ex) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(error("SERVICE_NOT_FOUND"));
     }
 }

@@ -68,7 +68,7 @@ public class AdvanceBookingSafetyChallengerTest {
     private WeatherRuleEngine weatherRuleEngine;
     private CheckAdvanceBookingSafetyUseCase useCase;
 
-    private final LocalDate today = LocalDate.of(2026, 9, 20);
+    private final LocalDate today = LocalDate.now();
     private CategorySafetyRule supRule;
     private CategorySafetyRule divingRule;
     private CategorySafetyRule parasailingRule;
@@ -634,9 +634,10 @@ public class AdvanceBookingSafetyChallengerTest {
         void testMarineFailsWeatherSucceeds_EstimatesWaveFromWind() {
             when(categorySafetyRuleService.getRuleByCategorySlug("cheo-sup-kayak")).thenReturn(supRule);
 
+            LocalDate day4 = today.plusDays(4);
             OpenMeteoWeatherResponse weatherResp = new OpenMeteoWeatherResponse();
             OpenMeteoWeatherResponse.HourlyData hourly = new OpenMeteoWeatherResponse.HourlyData();
-            hourly.setTime(List.of("2026-09-24T08:00", "2026-09-24T09:00"));
+            hourly.setTime(List.of(day4.atTime(8, 0).toString(), day4.atTime(9, 0).toString()));
             hourly.setWindSpeed10m(List.of(20.0, 22.0));
             hourly.setWindGusts10m(List.of(25.0, 27.0));
             hourly.setVisibility(List.of(9000.0, 9000.0));
@@ -654,7 +655,6 @@ public class AdvanceBookingSafetyChallengerTest {
                     weatherRuleEngine
             );
 
-            LocalDate day4 = today.plusDays(4);
             AdvanceBookingSafetyResponse res = robustUseCase.execute(AdvanceBookingSafetyRequest.builder()
                     .categorySlug("cheo-sup-kayak")
                     .bookingDate(day4)

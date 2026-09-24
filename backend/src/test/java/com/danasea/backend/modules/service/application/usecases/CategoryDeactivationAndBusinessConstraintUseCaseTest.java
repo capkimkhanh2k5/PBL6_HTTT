@@ -1,6 +1,7 @@
 package com.danasea.backend.modules.service.application.usecases;
 
 import java.util.List;
+import java.util.Locale;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -25,6 +26,7 @@ import com.danasea.backend.modules.service.presentation.dtos.UpdateCategoryReque
 import com.danasea.backend.modules.service.presentation.handlers.CategoryExceptionHandler;
 import com.danasea.backend.shared.presentation.ErrorResponse;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -32,6 +34,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.context.i18n.LocaleContextHolder;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -380,6 +383,16 @@ class CategoryDeactivationAndBusinessConstraintUseCaseTest {
 
         private final CategoryExceptionHandler handler = new CategoryExceptionHandler();
 
+        @BeforeEach
+        void setLocale() {
+            LocaleContextHolder.setLocale(Locale.ENGLISH);
+        }
+
+        @AfterEach
+        void clearLocale() {
+            LocaleContextHolder.resetLocaleContext();
+        }
+
         @Test
         @DisplayName("CategoryNotFoundException maps to 404 NOT_FOUND with CATEGORY_NOT_FOUND code")
         void handleCategoryNotFound_ShouldReturn404() {
@@ -389,7 +402,7 @@ class CategoryDeactivationAndBusinessConstraintUseCaseTest {
             assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
             assertNotNull(response.getBody());
             assertEquals("CATEGORY_NOT_FOUND", response.getBody().code());
-            assertTrue(response.getBody().message().contains(id.toString()));
+            assertEquals("Category was not found.", response.getBody().message());
         }
 
         @Test
@@ -401,7 +414,7 @@ class CategoryDeactivationAndBusinessConstraintUseCaseTest {
             assertEquals(HttpStatus.CONFLICT, response.getStatusCode());
             assertNotNull(response.getBody());
             assertEquals("SLUG_ALREADY_EXISTS", response.getBody().code());
-            assertTrue(response.getBody().message().contains(slug));
+            assertEquals("Slug already exists.", response.getBody().message());
         }
 
         @Test
@@ -413,7 +426,7 @@ class CategoryDeactivationAndBusinessConstraintUseCaseTest {
             assertEquals(HttpStatus.CONFLICT, response.getStatusCode());
             assertNotNull(response.getBody());
             assertEquals("CATEGORY_HAS_ACTIVE_SERVICES", response.getBody().code());
-            assertTrue(response.getBody().message().contains(id.toString()));
+            assertEquals("Category still contains active services.", response.getBody().message());
         }
 
         @Test
@@ -424,7 +437,7 @@ class CategoryDeactivationAndBusinessConstraintUseCaseTest {
             assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
             assertNotNull(response.getBody());
             assertEquals("CATEGORY_HIERARCHY_LOOP", response.getBody().code());
-            assertEquals("Loop detected", response.getBody().message());
+            assertEquals("Category hierarchy cannot contain a loop.", response.getBody().message());
         }
     }
 

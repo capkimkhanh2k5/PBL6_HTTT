@@ -49,7 +49,8 @@ public class UserAccountAdapter implements UserAccountPort {
                 user.getPasswordHash(),
                 (user.getRole() != null ? user.getRole().name() : "CUSTOMER"),
                 !Boolean.TRUE.equals(user.getIsLocked()),
-                Boolean.TRUE.equals(user.getIsEmailVerified()));
+                Boolean.TRUE.equals(user.getIsEmailVerified()),
+                user.getLocale());
     }
 
     private User toUser(Authentication auth) {
@@ -59,6 +60,7 @@ public class UserAccountAdapter implements UserAccountPort {
         user.setPasswordHash(auth.passwordHash());
         user.setIsLocked(!auth.enabled());
         user.setIsEmailVerified(auth.emailVerified());
+        user.setLocale(auth.locale());
         try {
             user.setRole(Role.valueOf(auth.role()));
         } catch (Exception e) {

@@ -23,6 +23,10 @@ import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import org.springframework.context.i18n.LocaleContextHolder;
+import com.danasea.backend.modules.weather.application.services.WeatherSafetyMessageRenderer;
+import com.danasea.backend.shared.i18n.LocalizedMessageService;
+import com.danasea.backend.shared.i18n.SupportedLanguage;
 
 /**
  * UseCase assessing marine safety for reservations 7 to 14 days (up to 16 days) in advance.
@@ -39,6 +43,12 @@ public class CheckAdvanceBookingSafetyUseCase {
     private final CategorySafetyRuleService categorySafetyRuleService;
     private final WeatherProviderPort weatherProviderPort;
     private final WeatherRuleEngine weatherRuleEngine;
+    private WeatherSafetyMessageRenderer weatherMessages = new WeatherSafetyMessageRenderer();
+
+    @Autowired
+    void setLocalizedMessageService(LocalizedMessageService messages) {
+        this.weatherMessages = new WeatherSafetyMessageRenderer(messages);
+    }
 
     @Autowired(required = false)
     private JpaServiceSlotRepository slotRepository;
@@ -56,18 +66,17 @@ public class CheckAdvanceBookingSafetyUseCase {
             CategorySafetyRuleService categorySafetyRuleService,
             WeatherProviderPort weatherProviderPort,
             WeatherRuleEngine weatherRuleEngine) {
-        this.categorySafetyRuleService = categorySafetyRuleService;
-        this.weatherProviderPort = weatherProviderPort;
-        this.weatherRuleEngine = weatherRuleEngine;
+        this(categorySafetyRuleService, weatherProviderPort, weatherRuleEngine, null, null, null);
     }
 
+    @Autowired
     public CheckAdvanceBookingSafetyUseCase(
             CategorySafetyRuleService categorySafetyRuleService,
             WeatherProviderPort weatherProviderPort,
             WeatherRuleEngine weatherRuleEngine,
-            JpaServiceSlotRepository slotRepository,
-            JpaServiceRepository serviceRepository,
-            JpaCategoryRepository categoryRepository) {
+            @Autowired(required = false) JpaServiceSlotRepository slotRepository,
+            @Autowired(required = false) JpaServiceRepository serviceRepository,
+            @Autowired(required = false) JpaCategoryRepository categoryRepository) {
         this.categorySafetyRuleService = categorySafetyRuleService;
         this.weatherProviderPort = weatherProviderPort;
         this.weatherRuleEngine = weatherRuleEngine;
@@ -256,7 +265,11 @@ public class CheckAdvanceBookingSafetyUseCase {
                 severeWeatherCode
         );
 
-        List<String> details = new ArrayList<>(evalResult.getDetails() != null ? evalResult.getDetails() : List.of());
+        SupportedLanguage language = LocaleContextHolder.getLocaleContext() == null
+                ? SupportedLanguage.VI
+                : SupportedLanguage.fromTag(LocaleContextHolder.getLocale().toLanguageTag())
+                        .orElse(SupportedLanguage.VI);
+        List<String> details = new ArrayList<>(weatherMessages.renderDetails(evalResult, language));
         if (estimatedMarine) {
             details.add(String.format("Lưu ý đặt trước %d ngày: Dữ liệu sóng biển là ước tính mô hình khí tượng. Hệ thống sẽ tự động đối soát hải văn thực tế tại mốc T-24h và T-2h.", daysInAdvance));
         }
@@ -273,7 +286,8 @@ public class CheckAdvanceBookingSafetyUseCase {
         }
         advisoryNotes.add("Hệ thống sẽ tiếp tục giám sát tự động qua Sliding Window tại mốc T-24h và T-2h trước giờ khởi hành.");
 
-        String summary = evalResult.getWarningMessage();
+        String localizedWarning = weatherMessages.render(evalResult, language);
+        String summary = localizedWarning;
         if (isProvisional && evalResult.isSafe()) {
             summary = "DỰ BÁO SƠ BỘ AN TOÀN: " + summary;
         }
@@ -305,7 +319,7 @@ public class CheckAdvanceBookingSafetyUseCase {
                 .maxWindGustKmh(rule.getMaxWindGustKmh())
                 .maxOceanCurrentMs(rule.getMaxOceanCurrentMs())
                 .ruleMinVisibilityM(rule.getMinVisibilityM())
-                .warningMessage(evalResult.getWarningMessage())
+                .warningMessage(localizedWarning)
                 .summaryMessage(summary)
                 .advisoryDetails(details)
                 .details(details)

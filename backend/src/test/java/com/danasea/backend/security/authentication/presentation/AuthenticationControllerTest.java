@@ -1,5 +1,6 @@
 package com.danasea.backend.security.authentication.presentation;
 import com.danasea.backend.shared.presentation.GlobalExceptionHandler;
+import com.danasea.backend.shared.i18n.SupportedLanguage;
 
 import com.danasea.backend.security.authentication.domain.exceptions.InvalidCredentialsException;
 import com.danasea.backend.security.authentication.domain.exceptions.OtpInvalidException;
@@ -87,7 +88,7 @@ class AuthenticationControllerTest {
         LoginResult result = new LoginResult("access-token", "refresh-token", UUID.randomUUID(), "test@example.com",
                 "CUSTOMER");
 
-        when(registerUseCase.execute(anyString(), anyString())).thenReturn(result);
+        when(registerUseCase.execute(anyString(), anyString(), any(SupportedLanguage.class))).thenReturn(result);
 
         mockMvc.perform(post("/api/auth/register")
                 .contentType(MediaType.APPLICATION_JSON)

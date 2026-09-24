@@ -71,6 +71,7 @@ public class VendorServiceController {
                 request.latitude(),
                 request.longitude(),
                 request.waiverContent(),
+                request.waiverContentEn(),
                 request.weatherSensitive(),
                 request.minWindKmh(),
                 request.maxWaveM());
@@ -104,7 +105,7 @@ public class VendorServiceController {
                 request.description(), request.descriptionEn(),
                 request.price(), request.durationMinutes(), request.capacityPerSlot(),
                 request.locationName(), request.address(), request.latitude(), request.longitude(),
-                request.waiverContent(), request.weatherSensitive(), request.minWindKmh(), request.maxWaveM());
+                request.waiverContent(), request.waiverContentEn(), request.weatherSensitive(), request.minWindKmh(), request.maxWaveM());
         return ResponseEntity.ok(updateServiceUseCase.execute(cmd));
     }
 

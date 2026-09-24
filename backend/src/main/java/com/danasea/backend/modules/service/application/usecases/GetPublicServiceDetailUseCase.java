@@ -5,6 +5,7 @@ import com.danasea.backend.modules.service.domain.exceptions.ServiceNotFoundExce
 import com.danasea.backend.modules.service.domain.models.Service;
 import com.danasea.backend.modules.service.domain.models.ServiceStatus;
 import com.danasea.backend.modules.service.domain.ports.ServiceRepositoryPort;
+import com.danasea.backend.shared.i18n.LocalizedContentSelector;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -15,6 +16,7 @@ import java.util.UUID;
 public class GetPublicServiceDetailUseCase {
     private final ServiceRepositoryPort serviceRepositoryPort;
     private final RecordRecentlyViewedUseCase recordRecentlyViewedUseCase;
+    private final LocalizedContentSelector localizedContentSelector;
 
     public ServiceDetailResult execute(UUID id, UUID userId, String sessionId) {
         Service service = serviceRepositoryPort.findPublishedById(id)
@@ -27,8 +29,8 @@ public class GetPublicServiceDetailUseCase {
         int viewCount = service.getViewCount() != null ? service.getViewCount() : 0;
         return ServiceDetailResult.builder()
                 .id(service.getId())
-                .name(service.getName())
-                .description(service.getDescription())
+                .name(localize(service.getName(), service.getNameEn()))
+                .description(localize(service.getDescription(), service.getDescriptionEn()))
                 .price(service.getPrice())
                 .address(service.getAddress())
                 .latitude(service.getLatitude())
@@ -38,5 +40,9 @@ public class GetPublicServiceDetailUseCase {
                 .viewCount(viewCount + 1)
                 .categoryId(service.getCategoryId())
                 .build();
+    }
+
+    private String localize(String vietnamese, String english) {
+        return localizedContentSelector == null ? vietnamese : localizedContentSelector.select(vietnamese, english);
     }
 }

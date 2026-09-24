@@ -5,6 +5,6 @@ import java.util.List;
 import java.util.UUID;
 
 public record ReorderImagesRequest(
-        @NotEmpty(message = "imageIds must not be empty")
+        @NotEmpty(message = "{validation.image_ids.not_empty}")
         List<UUID> imageIds
 ) {}

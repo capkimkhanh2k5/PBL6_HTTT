@@ -9,6 +9,7 @@ import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.stereotype.Component;
 
 import com.danasea.backend.shared.presentation.ErrorResponse;
+import com.danasea.backend.shared.i18n.LocalizedMessageService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import jakarta.servlet.ServletException;
@@ -19,13 +20,11 @@ import jakarta.servlet.http.HttpServletResponse;
 public class CustomAuthenticationEntryPoint implements AuthenticationEntryPoint {
 
     private final ObjectMapper objectMapper;
+    private final LocalizedMessageService messages;
 
-    public CustomAuthenticationEntryPoint(ObjectMapper objectMapper) {
+    public CustomAuthenticationEntryPoint(ObjectMapper objectMapper, LocalizedMessageService messages) {
         this.objectMapper = objectMapper;
-    }
-
-    public CustomAuthenticationEntryPoint() {
-        this(new ObjectMapper());
+        this.messages = messages;
     }
 
     @Override
@@ -38,10 +37,7 @@ public class CustomAuthenticationEntryPoint implements AuthenticationEntryPoint 
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
         response.setCharacterEncoding(StandardCharsets.UTF_8.name());
 
-        String message = (authException != null && authException.getMessage() != null && !authException.getMessage().isBlank())
-                ? authException.getMessage()
-                : "Full authentication is required to access this resource";
-        ErrorResponse errorResponse = new ErrorResponse("UNAUTHORIZED", message);
+        ErrorResponse errorResponse = new ErrorResponse("UNAUTHORIZED", messages.get("error.unauthorized"));
 
         response.getWriter().write(objectMapper.writeValueAsString(errorResponse));
         response.getWriter().flush();

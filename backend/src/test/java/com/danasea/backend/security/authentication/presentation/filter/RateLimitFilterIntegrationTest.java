@@ -16,7 +16,8 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.utility.DockerImageName;
 
 import java.time.Duration;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.*;
@@ -69,7 +70,6 @@ public class RateLimitFilterIntegrationTest {
 
             // Verify request was passed down the chain
             verify(filterChain, times(1)).doFilter(request, response);
-            verify(response, never()).sendError(anyInt(), anyString());
         }
 
         // The 6th request should be blocked
@@ -79,13 +79,13 @@ public class RateLimitFilterIntegrationTest {
 
         when(request.getRequestURI()).thenReturn("/api/auth/login");
         when(request.getRemoteAddr()).thenReturn(ip);
+        when(response.getWriter()).thenReturn(new PrintWriter(new StringWriter()));
 
         rateLimitFilter.doFilterInternal(request, response, filterChain);
 
         // Verify request was blocked
         verify(filterChain, never()).doFilter(request, response);
-        verify(response, times(1)).sendError(HttpStatus.TOO_MANY_REQUESTS.value(),
-                "You have exhausted your API Request Quota");
+        verify(response).setStatus(HttpStatus.TOO_MANY_REQUESTS.value());
     }
 
     @Test
@@ -112,10 +112,10 @@ public class RateLimitFilterIntegrationTest {
 
         when(request1.getRequestURI()).thenReturn("/api/auth/login");
         when(request1.getRemoteAddr()).thenReturn(ip1);
+        when(response1.getWriter()).thenReturn(new PrintWriter(new StringWriter()));
 
         rateLimitFilter.doFilterInternal(request1, response1, filterChain1);
-        verify(response1, times(1)).sendError(HttpStatus.TOO_MANY_REQUESTS.value(),
-                "You have exhausted your API Request Quota");
+        verify(response1).setStatus(HttpStatus.TOO_MANY_REQUESTS.value());
 
         // 1st request from IP2 should be allowed
         HttpServletRequest request2 = mock(HttpServletRequest.class);
@@ -155,12 +155,12 @@ public class RateLimitFilterIntegrationTest {
         when(request.getRequestURI()).thenReturn("/api/auth/login");
         when(request.getRemoteAddr()).thenReturn(spoofedRemoteAddr);
         when(request.getHeader("X-Forwarded-For")).thenReturn(xForwardedFor);
+        when(response.getWriter()).thenReturn(new PrintWriter(new StringWriter()));
 
         rateLimitFilter.doFilterInternal(request, response, filterChain);
 
         verify(filterChain, never()).doFilter(request, response);
-        verify(response, times(1)).sendError(HttpStatus.TOO_MANY_REQUESTS.value(),
-                "You have exhausted your API Request Quota");
+        verify(response).setStatus(HttpStatus.TOO_MANY_REQUESTS.value());
 
         // Verify that a request from a DIFFERENT X-Forwarded-For but SAME remote address is allowed
         HttpServletRequest diffRequest = mock(HttpServletRequest.class);

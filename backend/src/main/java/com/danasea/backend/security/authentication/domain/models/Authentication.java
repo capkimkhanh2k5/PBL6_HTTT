@@ -8,6 +8,10 @@ public record Authentication(
 	String passwordHash,
 	String role,
 	boolean enabled,
-	boolean emailVerified
+	boolean emailVerified,
+	String locale
 ) {
+	public Authentication(UUID id, String email, String passwordHash, String role, boolean enabled, boolean emailVerified) {
+		this(id, email, passwordHash, role, enabled, emailVerified, "vi");
+	}
 }

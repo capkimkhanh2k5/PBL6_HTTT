@@ -5,26 +5,26 @@ import com.fasterxml.jackson.annotation.JsonAlias;
 import jakarta.validation.constraints.NotBlank;
 
 public record RegisterVendorProfileRequest(
-        @NotBlank(message = "Business name is required")
+        @NotBlank(message = "{validation.vendor.business_name.required}")
         @JsonAlias("business_name")
         String businessName,
 
-        @NotBlank(message = "Tax code is required")
+        @NotBlank(message = "{validation.vendor.tax_code.required}")
         @JsonAlias("tax_code")
         String taxCode,
 
-        @NotBlank(message = "Address is required")
+        @NotBlank(message = "{validation.vendor.address.required}")
         String address,
 
-        @NotBlank(message = "Bank account number is required")
+        @NotBlank(message = "{validation.vendor.bank_account.required}")
         @JsonAlias("bank_account_number")
         String bankAccountNumber,
 
-        @NotBlank(message = "Bank name is required")
+        @NotBlank(message = "{validation.vendor.bank_name.required}")
         @JsonAlias("bank_name")
         String bankName,
 
-        @NotBlank(message = "Bank account holder is required")
+        @NotBlank(message = "{validation.vendor.bank_holder.required}")
         @JsonAlias("bank_account_holder")
         String bankAccountHolder
 ) {

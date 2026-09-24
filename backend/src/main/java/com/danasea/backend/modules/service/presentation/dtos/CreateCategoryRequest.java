@@ -4,10 +4,10 @@ import java.util.UUID;
 import jakarta.validation.constraints.NotBlank;
 
 public record CreateCategoryRequest(
-    @NotBlank(message = "Category name must not be blank")
+    @NotBlank(message = "{validation.category.name.required}")
     String name,
     String nameEn,
-    @NotBlank(message = "Category slug must not be blank")
+    @NotBlank(message = "{validation.category.slug.required}")
     String slug,
     UUID parentId,
     String iconUrl

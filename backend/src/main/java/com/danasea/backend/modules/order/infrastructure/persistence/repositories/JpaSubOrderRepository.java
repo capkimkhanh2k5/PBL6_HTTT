@@ -13,4 +13,8 @@ import java.util.UUID;
 public interface JpaSubOrderRepository extends JpaRepository<SubOrderJpaEntity, UUID> {
     List<SubOrderJpaEntity> findBySlotId(UUID slotId);
     List<SubOrderJpaEntity> findBySlotIdAndStatus(UUID slotId, com.danasea.backend.modules.order.domain.models.SubOrderStatus status);
+    List<SubOrderJpaEntity> findByMasterOrderId(UUID masterOrderId);
+    List<SubOrderJpaEntity> findByVendorId(UUID vendorId);
+    List<SubOrderJpaEntity> findByVendorIdAndStatusIn(UUID vendorId, java.util.Collection<com.danasea.backend.modules.order.domain.models.SubOrderStatus> statuses);
+    List<SubOrderJpaEntity> findByVendorIdAndCreatedAtBetween(UUID vendorId, java.time.OffsetDateTime startDateTime, java.time.OffsetDateTime endDateTime);
 }

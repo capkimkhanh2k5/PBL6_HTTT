@@ -29,6 +29,7 @@ public class ConfirmationCard {
     private String status; // PENDING, CONFIRMED, EXPIRED, CANCELLED
     private LocalDateTime createdAt;
     private String reason;
+    private String locale;
 
     @Builder.Default
     private int retryCount = 0; // Number of times this card has been re-generated

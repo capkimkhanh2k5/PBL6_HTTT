@@ -5,6 +5,7 @@ import com.danasea.backend.modules.service.domain.models.RecentlyViewed;
 import com.danasea.backend.modules.service.domain.models.Service;
 import com.danasea.backend.modules.service.domain.ports.RecentlyViewedRepositoryPort;
 import com.danasea.backend.modules.service.domain.ports.ServiceRepositoryPort;
+import com.danasea.backend.shared.i18n.LocalizedContentSelector;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -17,6 +18,7 @@ import java.util.stream.Collectors;
 public class GetRecentlyViewedUseCase {
     private final RecentlyViewedRepositoryPort recentlyViewedRepositoryPort;
     private final ServiceRepositoryPort serviceRepositoryPort;
+    private final LocalizedContentSelector localizedContentSelector;
 
     public List<RecentlyViewedResult> execute(UUID userId, String sessionId) {
         List<RecentlyViewed> entities;
@@ -33,7 +35,8 @@ public class GetRecentlyViewedUseCase {
             return RecentlyViewedResult.builder()
                 .id(rv.getId())
                 .serviceId(rv.getServiceId())
-                .serviceName(service.getName())
+                .serviceName(localizedContentSelector == null ? service.getName()
+                        : localizedContentSelector.select(service.getName(), service.getNameEn()))
                 .viewedAt(rv.getViewedAt() != null ? rv.getViewedAt().toLocalDateTime() : null)
                 .build();
         }).collect(Collectors.toList());

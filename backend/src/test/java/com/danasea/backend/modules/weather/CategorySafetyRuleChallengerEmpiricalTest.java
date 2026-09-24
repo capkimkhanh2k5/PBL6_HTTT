@@ -26,7 +26,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.flywaydb.core.Flyway;
-import org.flywaydb.core.api.FlywayException;
 import org.flywaydb.core.api.configuration.FluentConfiguration;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -37,8 +36,8 @@ import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.cache.concurrent.ConcurrentMapCacheManager;
+import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 
@@ -53,7 +52,7 @@ import com.danasea.backend.modules.weather.infrastructure.persistence.repositori
 @DisplayName("CategorySafetyRuleChallengerEmpiricalTest — Adversarial Verification Suite")
 public class CategorySafetyRuleChallengerEmpiricalTest {
 
-    @Configuration
+    @TestConfiguration
     @EnableCaching
     @Import(CategorySafetyRuleService.class)
     static class TestCachingConfig {
@@ -498,8 +497,8 @@ public class CategorySafetyRuleChallengerEmpiricalTest {
     class FlywayVersionCollisionTests {
 
         @Test
-        @DisplayName("Kiểm tra sự trùng lặp phiên bản V3 trong thư mục db/migration (Finding)")
-        void checkFlywayMigrationFiles_detectVersion3Collision() throws IOException {
+        @DisplayName("Không còn migration trùng phiên bản V3 trong thư mục db/migration")
+        void checkFlywayMigrationFiles_haveUniqueVersion3() throws IOException {
             Path migrationDir = Paths.get("src/main/resources/db/migration");
             assertTrue(Files.exists(migrationDir));
 
@@ -521,14 +520,12 @@ public class CategorySafetyRuleChallengerEmpiricalTest {
                 }
             }
 
-            // Ghi nhận hiện tượng: Có 2 file cùng prefix V3__ từ các sprint trước
-            // V3__add_booking_hold_columns.sql và V3__ai_assistant_schema.sql
-            assertEquals(2, v3Count, "Phát hiện 2 file migration trùng phiên bản V3");
+            assertEquals(1, v3Count, "Mỗi phiên bản Flyway chỉ được có một migration");
         }
 
         @Test
-        @DisplayName("Thực nghiệm kiểm tra Flyway API: Khi quét migration có trùng phiên bản 3, Flyway ném FlywayException")
-        void empiricalFlywayScanner_throwsDuplicateVersionException() {
+        @DisplayName("Flyway API resolve toàn bộ migration mà không gặp version collision")
+        void empiricalFlywayScanner_resolvesMigrationsWithoutCollision() {
             // Khi cấu hình Flyway quét classpath db/migration với DataSource giả định
             FluentConfiguration config = Flyway.configure()
                     .locations("classpath:db/migration")
@@ -536,17 +533,7 @@ public class CategorySafetyRuleChallengerEmpiricalTest {
 
             Flyway flyway = config.load();
 
-            // Flyway sẽ cố gắng resolve migration scripts
-            // Nếu có 2 file cùng version 3 (V3__add_booking_hold_columns.sql và V3__ai_assistant_schema.sql)
-            // flyway.info() hoặc flyway.migrate() sẽ ném FlywayException!
-            FlywayException ex = assertThrows(FlywayException.class, () -> {
-                flyway.info().all();
-            });
-
-            System.out.println("Flyway Exception confirmed empirically: " + ex.getMessage());
-            assertTrue(ex.getMessage().contains("Found more than one migration with version 3")
-                    || ex.getMessage().contains("version 3"),
-                    "Flyway bắt buộc phải ném lỗi duplicate version 3");
+            assertDoesNotThrow(() -> flyway.info().all());
         }
     }
 }

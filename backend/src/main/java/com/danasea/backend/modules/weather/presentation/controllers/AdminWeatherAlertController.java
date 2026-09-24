@@ -1,10 +1,11 @@
 package com.danasea.backend.modules.weather.presentation.controllers;
 
 import com.danasea.backend.modules.communication.application.usecases.SendNotificationUseCase;
-import com.danasea.backend.modules.communication.domain.models.NotificationChannel;
+import com.danasea.backend.modules.order.domain.models.RefundEvaluationResult;
 import com.danasea.backend.modules.order.domain.models.RefundReason;
 import com.danasea.backend.modules.order.domain.models.RefundStatus;
 import com.danasea.backend.modules.order.domain.models.SubOrderStatus;
+import com.danasea.backend.modules.order.domain.services.RefundPolicyEngine;
 import com.danasea.backend.modules.order.infrastructure.persistence.entities.RefundJpaEntity;
 import com.danasea.backend.modules.order.infrastructure.persistence.entities.SubOrderJpaEntity;
 import com.danasea.backend.modules.order.infrastructure.persistence.repositories.JpaRefundRepository;
@@ -15,14 +16,15 @@ import com.danasea.backend.modules.weather.infrastructure.persistence.entities.S
 import com.danasea.backend.modules.weather.infrastructure.persistence.repositories.JpaSafetyRuleEvaluationRepository;
 import lombok.Builder;
 import lombok.Data;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Map;
@@ -32,7 +34,6 @@ import java.util.stream.Collectors;
 @Slf4j
 @RestController
 @RequestMapping("/api/admin/weather-alerts")
-@RequiredArgsConstructor
 @PreAuthorize("hasRole('ADMIN')")
 public class AdminWeatherAlertController {
 
@@ -42,6 +43,38 @@ public class AdminWeatherAlertController {
     private final JpaServiceSlotRepository slotRepository;
     private final JpaServiceRepository serviceRepository;
     private final SendNotificationUseCase sendNotificationUseCase;
+    private final RefundPolicyEngine refundPolicyEngine;
+
+    @Autowired
+    public AdminWeatherAlertController(
+            JpaSafetyRuleEvaluationRepository evaluationRepository,
+            JpaSubOrderRepository subOrderRepository,
+            JpaRefundRepository refundRepository,
+            JpaServiceSlotRepository slotRepository,
+            JpaServiceRepository serviceRepository,
+            SendNotificationUseCase sendNotificationUseCase,
+            @Autowired(required = false) RefundPolicyEngine refundPolicyEngine
+    ) {
+        this.evaluationRepository = evaluationRepository;
+        this.subOrderRepository = subOrderRepository;
+        this.refundRepository = refundRepository;
+        this.slotRepository = slotRepository;
+        this.serviceRepository = serviceRepository;
+        this.sendNotificationUseCase = sendNotificationUseCase;
+        this.refundPolicyEngine = refundPolicyEngine != null ? refundPolicyEngine : new RefundPolicyEngine();
+    }
+
+    public AdminWeatherAlertController(
+            JpaSafetyRuleEvaluationRepository evaluationRepository,
+            JpaSubOrderRepository subOrderRepository,
+            JpaRefundRepository refundRepository,
+            JpaServiceSlotRepository slotRepository,
+            JpaServiceRepository serviceRepository,
+            SendNotificationUseCase sendNotificationUseCase
+    ) {
+        this(evaluationRepository, subOrderRepository, refundRepository, slotRepository,
+             serviceRepository, sendNotificationUseCase, null);
+    }
 
     @Data
     @Builder
@@ -135,6 +168,15 @@ public class AdminWeatherAlertController {
         int refundedCount = 0;
 
         if ("CANCEL_AND_REFUND".equals(action)) {
+            LocalDateTime now = LocalDateTime.now();
+            LocalDateTime slotStart = now;
+            if (alert.getSlotId() != null) {
+                var slotOpt = slotRepository.findById(alert.getSlotId());
+                if (slotOpt.isPresent() && slotOpt.get().getDate() != null && slotOpt.get().getStartTime() != null) {
+                    slotStart = LocalDateTime.of(slotOpt.get().getDate(), slotOpt.get().getStartTime());
+                }
+            }
+
             // Cancel all sub-orders for this slot and trigger 100% refund
             if (alert.getSlotId() != null) {
                 List<SubOrderJpaEntity> subOrders = subOrderRepository.findBySlotId(alert.getSlotId());
@@ -144,11 +186,18 @@ public class AdminWeatherAlertController {
                         subOrder.setStatus(SubOrderStatus.CANCELLED);
                         subOrderRepository.save(subOrder);
 
+                        RefundEvaluationResult evalResult = refundPolicyEngine.evaluate(
+                                RefundReason.WEATHER,
+                                slotStart,
+                                now,
+                                subOrder.getSubtotalAmount()
+                        );
+
                         // Create 100% refund record
                         RefundJpaEntity refund = new RefundJpaEntity();
                         refund.setSubOrderId(subOrder.getId());
-                        refund.setAmount(subOrder.getSubtotalAmount());
-                        refund.setRefundPercentage(BigDecimal.valueOf(100.0));
+                        refund.setAmount(evalResult.refundAmount());
+                        refund.setRefundPercentage(evalResult.refundPercentage());
                         refund.setReason(RefundReason.WEATHER);
                         refund.setStatus(RefundStatus.PROCESSED);
                         refund.setProcessedAt(OffsetDateTime.now());

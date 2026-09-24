@@ -18,85 +18,86 @@ import com.danasea.backend.modules.service.domain.exceptions.UnauthorizedService
 import com.danasea.backend.modules.service.domain.exceptions.VendorNotApprovedException;
 import com.danasea.backend.modules.service.domain.exceptions.WeatherRequirementsMissingException;
 import com.danasea.backend.shared.presentation.ErrorResponse;
+import com.danasea.backend.shared.presentation.LocalizedExceptionHandlerSupport;
 
 @RestControllerAdvice
-public class ServiceExceptionHandler {
+public class ServiceExceptionHandler extends LocalizedExceptionHandlerSupport {
 
     @ExceptionHandler(ServiceNotFoundException.class)
     public ResponseEntity<ErrorResponse> handleServiceNotFound(ServiceNotFoundException ex) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                .body(new ErrorResponse("SERVICE_NOT_FOUND", ex.getMessage()));
+                .body(error("SERVICE_NOT_FOUND"));
     }
 
     @ExceptionHandler(CategoryNotFoundException.class)
     public ResponseEntity<ErrorResponse> handleCategoryNotFound(CategoryNotFoundException ex) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                .body(new ErrorResponse("CATEGORY_NOT_FOUND", ex.getMessage()));
+                .body(error("CATEGORY_NOT_FOUND"));
     }
 
     @ExceptionHandler(CategoryInactiveException.class)
     public ResponseEntity<ErrorResponse> handleCategoryInactive(CategoryInactiveException ex) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                .body(new ErrorResponse("CATEGORY_INACTIVE", ex.getMessage()));
+                .body(error("CATEGORY_INACTIVE"));
     }
 
     @ExceptionHandler(VendorNotApprovedException.class)
     public ResponseEntity<ErrorResponse> handleVendorNotApproved(VendorNotApprovedException ex) {
         return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                .body(new ErrorResponse("VENDOR_NOT_APPROVED", ex.getMessage()));
+                .body(error("VENDOR_NOT_APPROVED"));
     }
 
     @ExceptionHandler(UnauthorizedServiceAccessException.class)
     public ResponseEntity<ErrorResponse> handleUnauthorizedAccess(UnauthorizedServiceAccessException ex) {
         return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                .body(new ErrorResponse("UNAUTHORIZED_SERVICE_ACCESS", ex.getMessage()));
+                .body(error("UNAUTHORIZED_SERVICE_ACCESS"));
     }
 
     @ExceptionHandler(InvalidServiceStateException.class)
     public ResponseEntity<ErrorResponse> handleInvalidState(InvalidServiceStateException ex) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                .body(new ErrorResponse("INVALID_SERVICE_STATE", ex.getMessage()));
+                .body(error("INVALID_SERVICE_STATE"));
     }
 
     @ExceptionHandler(ServiceImagesRequiredException.class)
     public ResponseEntity<ErrorResponse> handleImagesRequired(ServiceImagesRequiredException ex) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                .body(new ErrorResponse("SERVICE_IMAGES_REQUIRED", ex.getMessage()));
+                .body(error("SERVICE_IMAGES_REQUIRED"));
     }
 
     @ExceptionHandler(WeatherRequirementsMissingException.class)
     public ResponseEntity<ErrorResponse> handleWeatherMissing(WeatherRequirementsMissingException ex) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                .body(new ErrorResponse("WEATHER_REQUIREMENTS_MISSING", ex.getMessage()));
+                .body(error("WEATHER_REQUIREMENTS_MISSING"));
     }
 
     @ExceptionHandler(ImageNotFoundException.class)
     public ResponseEntity<ErrorResponse> handleImageNotFound(ImageNotFoundException ex) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                .body(new ErrorResponse("IMAGE_NOT_FOUND", ex.getMessage()));
+                .body(error("IMAGE_NOT_FOUND"));
     }
 
     @ExceptionHandler(MaxImagesExceededException.class)
     public ResponseEntity<ErrorResponse> handleMaxImagesExceeded(MaxImagesExceededException ex) {
         return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY)
-                .body(new ErrorResponse("MAX_IMAGES_EXCEEDED", ex.getMessage()));
+                .body(error("MAX_IMAGES_EXCEEDED"));
     }
 
     @ExceptionHandler(InvalidFileTypeException.class)
     public ResponseEntity<ErrorResponse> handleInvalidFileType(InvalidFileTypeException ex) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                .body(new ErrorResponse("INVALID_FILE_TYPE", ex.getMessage()));
+                .body(error("INVALID_FILE_TYPE"));
     }
 
     @ExceptionHandler(SafetyDocumentRequiredException.class)
     public ResponseEntity<ErrorResponse> handleSafetyDocumentRequired(SafetyDocumentRequiredException ex) {
         return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY)
-                .body(new ErrorResponse("SAFETY_DOCUMENT_REQUIRED", ex.getMessage()));
+                .body(error("SAFETY_DOCUMENT_REQUIRED"));
     }
 
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<ErrorResponse> handleIllegalArgument(IllegalArgumentException ex) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                .body(new ErrorResponse("BAD_REQUEST", ex.getMessage()));
+                .body(error("BAD_REQUEST"));
     }
 }

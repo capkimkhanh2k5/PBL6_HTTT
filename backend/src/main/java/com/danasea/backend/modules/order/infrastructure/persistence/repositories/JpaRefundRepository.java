@@ -9,4 +9,6 @@ import java.util.UUID;
 
 @Repository
 public interface JpaRefundRepository extends JpaRepository<RefundJpaEntity, UUID> {
+    java.util.List<RefundJpaEntity> findBySubOrderId(UUID subOrderId);
+    java.util.List<RefundJpaEntity> findBySubOrderIdIn(java.util.Collection<UUID> subOrderIds);
 }

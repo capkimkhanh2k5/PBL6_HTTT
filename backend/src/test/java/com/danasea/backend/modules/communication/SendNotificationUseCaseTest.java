@@ -1,21 +1,28 @@
 package com.danasea.backend.modules.communication;
 
 import com.danasea.backend.configs.RabbitMQConfig;
+import com.danasea.backend.modules.account.application.api.AccountInternalApi;
+import com.danasea.backend.modules.account.domain.models.User;
+import com.danasea.backend.modules.communication.application.dtos.NotificationCommand;
 import com.danasea.backend.modules.communication.application.usecases.SendNotificationUseCase;
 import com.danasea.backend.modules.communication.domain.events.NotificationEmailEvent;
 import com.danasea.backend.modules.communication.domain.models.NotificationChannel;
 import com.danasea.backend.modules.communication.domain.models.NotificationStatus;
 import com.danasea.backend.modules.communication.infrastructure.persistence.entities.NotificationJpaEntity;
 import com.danasea.backend.modules.communication.infrastructure.persistence.repositories.JpaNotificationRepository;
+import com.danasea.backend.shared.i18n.LocalizedMessageRef;
+import com.danasea.backend.shared.i18n.LocalizedMessageService;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 
+import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -33,8 +40,19 @@ class SendNotificationUseCaseTest {
     @Mock
     private RabbitTemplate rabbitTemplate;
 
-    @InjectMocks
+    @Mock
+    private AccountInternalApi accountInternalApi;
+
     private SendNotificationUseCase sendNotificationUseCase;
+
+    @BeforeEach
+    void setUp() {
+        sendNotificationUseCase = new SendNotificationUseCase(
+                notificationRepository,
+                rabbitTemplate,
+                accountInternalApi,
+                LocalizedMessageService.standalone());
+    }
 
     @Test
     @DisplayName("Gửi thông báo IN_APP: Lưu DB với trạng thái SENT")
@@ -93,5 +111,49 @@ class SendNotificationUseCaseTest {
         assertEquals(notifId, event.notificationId());
         assertEquals("customer@example.com", event.toEmail());
         assertEquals("Xác nhận hoàn tiền 100%", event.subject());
+    }
+
+    @Test
+    @DisplayName("Snapshots notification and email text independently for English and Vietnamese recipients")
+    void sendLocalizedNotifications_snapshotsEachRecipientLocale() {
+        UUID englishUserId = UUID.randomUUID();
+        UUID vietnameseUserId = UUID.randomUUID();
+        User englishUser = new User();
+        englishUser.setLocale("en-US");
+        User vietnameseUser = new User();
+        vietnameseUser.setLocale("vi-VN");
+        when(accountInternalApi.findUserById(englishUserId)).thenReturn(Optional.of(englishUser));
+        when(accountInternalApi.findUserById(vietnameseUserId)).thenReturn(Optional.of(vietnameseUser));
+        when(notificationRepository.save(any(NotificationJpaEntity.class))).thenAnswer(invocation -> {
+            NotificationJpaEntity entity = invocation.getArgument(0);
+            entity.setId(UUID.randomUUID());
+            return entity;
+        });
+
+        LocalizedMessageRef title = new LocalizedMessageRef(
+                "notification.weather.red.vendor.title", new Object[]{"Ocean Tour"});
+        LocalizedMessageRef body = new LocalizedMessageRef(
+                "notification.weather.red.vendor.body", new Object[]{"high waves"});
+
+        NotificationJpaEntity english = sendNotificationUseCase.execute(new NotificationCommand(
+                englishUserId, "WEATHER_WARNING", NotificationChannel.EMAIL, title, body,
+                "SERVICE_SLOT", UUID.randomUUID(), "english@example.com"));
+        NotificationJpaEntity vietnamese = sendNotificationUseCase.execute(new NotificationCommand(
+                vietnameseUserId, "WEATHER_WARNING", NotificationChannel.EMAIL, title, body,
+                "SERVICE_SLOT", UUID.randomUUID(), "vietnamese@example.com"));
+
+        assertEquals("en", english.getLocale());
+        assertEquals("Dangerous weather alert for service: Ocean Tour", english.getTitle());
+        assertEquals("vi", vietnamese.getLocale());
+        assertEquals("Cảnh báo thời tiết nguy hiểm cho dịch vụ: Ocean Tour", vietnamese.getTitle());
+
+        ArgumentCaptor<NotificationEmailEvent> eventCaptor = ArgumentCaptor.forClass(NotificationEmailEvent.class);
+        verify(rabbitTemplate, times(2))
+                .convertAndSend(eq(RabbitMQConfig.NOTIFICATION_EMAIL_QUEUE), eventCaptor.capture());
+        List<NotificationEmailEvent> events = eventCaptor.getAllValues();
+        assertEquals("en", events.get(0).locale());
+        assertEquals(english.getTitle(), events.get(0).subject());
+        assertEquals("vi", events.get(1).locale());
+        assertEquals(vietnamese.getTitle(), events.get(1).subject());
     }
 }

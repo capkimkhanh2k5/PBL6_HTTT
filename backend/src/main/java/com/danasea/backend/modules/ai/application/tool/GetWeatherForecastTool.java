@@ -12,6 +12,8 @@ import org.springframework.stereotype.Component;
 import java.time.Duration;
 import java.util.HashMap;
 import java.util.Map;
+import com.danasea.backend.shared.i18n.LocalizedMessageService;
+import com.danasea.backend.shared.i18n.SupportedLanguage;
 
 @Slf4j
 @Component
@@ -20,6 +22,12 @@ public class GetWeatherForecastTool implements ToolExecutor {
     private final GetWeatherInfoUseCase weatherInfoUseCase;
     private final StringRedisTemplate redisTemplate;
     private final ObjectMapper objectMapper;
+    private LocalizedMessageService messages = LocalizedMessageService.standalone();
+
+    @Autowired
+    void setLocalizedMessageService(LocalizedMessageService messages) {
+        this.messages = messages;
+    }
 
     private static final String CACHE_PREFIX = "ai:weather:forecast:";
     private static final Duration TTL = Duration.ofMinutes(10); // 5-15 min TTL
@@ -50,6 +58,15 @@ public class GetWeatherForecastTool implements ToolExecutor {
 
     @Override
     public String execute(String argumentsJson) {
+        return executeInternal(argumentsJson, null);
+    }
+
+    @Override
+    public String execute(String argumentsJson, ToolExecutionContext context) {
+        return executeInternal(argumentsJson, context == null ? SupportedLanguage.VI : context.language());
+    }
+
+    private String executeInternal(String argumentsJson, SupportedLanguage language) {
         String location = DEFAULT_LOCATION;
         String date = DEFAULT_DATE;
 
@@ -67,7 +84,8 @@ public class GetWeatherForecastTool implements ToolExecutor {
             log.warn("Failed to parse get_weather_forecast arguments: {}", argumentsJson, e);
         }
 
-        String cacheKey = CACHE_PREFIX + location + ":" + date;
+        String cacheKey = CACHE_PREFIX + location + ":" + date
+                + (language == null ? "" : ":" + language.code());
         if (redisTemplate != null) {
             try {
                 String cached = redisTemplate.opsForValue().get(cacheKey);
@@ -88,20 +106,23 @@ public class GetWeatherForecastTool implements ToolExecutor {
             if (weatherInfo != null && weatherInfo.getWeather() != null) {
                 result.put("temperature", weatherInfo.getWeather().getTemperature());
                 result.put("windSpeed", weatherInfo.getWeather().getWindSpeed());
-                result.put("condition", FALLBACK_CONDITION);
+                result.put("condition", language == null ? FALLBACK_CONDITION
+                        : messages.get("weather.condition.sunny", language));
                 if (weatherInfo.getMarine() != null) {
                     result.put("waveHeight", weatherInfo.getMarine().getWaveHeight());
                 }
             } else {
                 result.put("temperature", FALLBACK_TEMPERATURE);
-                result.put("condition", FALLBACK_CONDITION);
+                result.put("condition", language == null ? FALLBACK_CONDITION
+                        : messages.get("weather.condition.sunny", language));
                 result.put("waveHeight", FALLBACK_WAVE_HEIGHT);
                 result.put("windSpeed", FALLBACK_WIND_SPEED);
             }
         } catch (Exception e) {
             log.warn("Weather provider query failed, using fallback summary", e);
             result.put("temperature", FALLBACK_TEMPERATURE);
-            result.put("condition", "Fair");
+            result.put("condition", language == null ? "Fair"
+                    : messages.get("weather.condition.fair", language));
             result.put("waveHeight", FALLBACK_WAVE_HEIGHT);
         }
 

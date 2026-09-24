@@ -12,6 +12,9 @@ import org.springframework.stereotype.Component;
 import java.time.Duration;
 import java.util.HashMap;
 import java.util.Map;
+import com.danasea.backend.shared.i18n.LocalizedMessageService;
+import com.danasea.backend.shared.i18n.SupportedLanguage;
+import com.danasea.backend.modules.weather.application.services.WeatherSafetyMessageRenderer;
 
 @Slf4j
 @Component
@@ -21,6 +24,14 @@ public class GetSafetyAlertTool implements ToolExecutor {
     private final StringRedisTemplate redisTemplate;
     private final ObjectMapper objectMapper;
     private final com.danasea.backend.modules.weather.domain.services.WeatherRuleEngine weatherRuleEngine;
+    private LocalizedMessageService messages = LocalizedMessageService.standalone();
+    private WeatherSafetyMessageRenderer weatherMessages = new WeatherSafetyMessageRenderer();
+
+    @Autowired
+    void setLocalizedMessageService(LocalizedMessageService messages) {
+        this.messages = messages;
+        this.weatherMessages = new WeatherSafetyMessageRenderer(messages);
+    }
 
     private static final String CACHE_PREFIX = "ai:weather:safety:";
     private static final Duration TTL = Duration.ofMinutes(10); // 5-15 min TTL
@@ -57,6 +68,15 @@ public class GetSafetyAlertTool implements ToolExecutor {
 
     @Override
     public String execute(String argumentsJson) {
+        return executeInternal(argumentsJson, null);
+    }
+
+    @Override
+    public String execute(String argumentsJson, ToolExecutionContext context) {
+        return executeInternal(argumentsJson, context == null ? SupportedLanguage.VI : context.language());
+    }
+
+    private String executeInternal(String argumentsJson, SupportedLanguage language) {
         String location = DEFAULT_LOCATION;
         String categorySlug = "default";
 
@@ -81,6 +101,9 @@ public class GetSafetyAlertTool implements ToolExecutor {
         String cacheKey = "default".equalsIgnoreCase(categorySlug)
                 ? CACHE_PREFIX + location
                 : CACHE_PREFIX + location + ":" + categorySlug;
+        if (language != null) {
+            cacheKey += ":" + language.code();
+        }
         if (redisTemplate != null) {
             try {
                 String cached = redisTemplate.opsForValue().get(cacheKey);
@@ -98,7 +121,9 @@ public class GetSafetyAlertTool implements ToolExecutor {
 
         boolean isSafe = true;
         String alertLevel = ALERT_GREEN;
-        String message = "Điều kiện an toàn hàng hải và thời tiết tốt, các hoạt động vui chơi trên biển diễn ra bình thường.";
+        String message = language == null
+                ? "Điều kiện an toàn hàng hải và thời tiết tốt, các hoạt động vui chơi trên biển diễn ra bình thường."
+                : messages.get("weather.safety.safe", language);
 
         try {
             WeatherInfoDto weatherInfo = weatherInfoUseCase != null ? weatherInfoUseCase.execute() : null;
@@ -115,7 +140,9 @@ public class GetSafetyAlertTool implements ToolExecutor {
 
                 isSafe = eval.isSafe();
                 alertLevel = eval.getAlertLevel();
-                message = eval.getWarningMessage();
+                message = language == null
+                        ? eval.getWarningMessage()
+                        : weatherMessages.render(eval, language);
             }
         } catch (Exception e) {
             log.warn("Safety rule evaluation failed, using default safe status", e);

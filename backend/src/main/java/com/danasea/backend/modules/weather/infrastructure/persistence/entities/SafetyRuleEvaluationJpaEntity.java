@@ -7,6 +7,8 @@ import com.danasea.backend.shared.core.infrastructure.persistence.entities.BaseJ
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 @Entity
 @Getter
@@ -47,5 +49,9 @@ public class SafetyRuleEvaluationJpaEntity extends BaseJpaEntity {
 
     @Column(name = "severe_weather_code")
     private Integer severeWeatherCode;
+
+    @JdbcTypeCode(SqlTypes.JSON)
+    @Column(name = "findings_json", nullable = false)
+    private String findingsJson = "[]";
 
 }

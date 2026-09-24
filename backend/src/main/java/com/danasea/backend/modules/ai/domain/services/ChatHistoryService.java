@@ -14,6 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.UUID;
+import com.danasea.backend.shared.i18n.SupportedLanguage;
 
 @Service
 @RequiredArgsConstructor
@@ -24,16 +25,23 @@ public class ChatHistoryService {
 
     @Transactional
     public AiConversationJpaEntity getOrCreateConversation(UUID conversationId, UUID userId) {
-        if (conversationId != null) {
-            return conversationRepository.findById(conversationId)
-                    .orElseGet(() -> createNewConversation(userId));
-        }
-        return createNewConversation(userId);
+        return getOrCreateConversation(conversationId, userId, SupportedLanguage.VI);
     }
 
-    private AiConversationJpaEntity createNewConversation(UUID userId) {
+    @Transactional
+    public AiConversationJpaEntity getOrCreateConversation(
+            UUID conversationId, UUID userId, SupportedLanguage language) {
+        if (conversationId != null) {
+            return conversationRepository.findById(conversationId)
+                    .orElseGet(() -> createNewConversation(userId, language));
+        }
+        return createNewConversation(userId, language);
+    }
+
+    private AiConversationJpaEntity createNewConversation(UUID userId, SupportedLanguage language) {
         AiConversationJpaEntity conversation = new AiConversationJpaEntity();
         conversation.setUserId(userId);
+        conversation.setLocale((language == null ? SupportedLanguage.VI : language).code());
         conversation.setStartedAt(OffsetDateTime.now());
         return conversationRepository.save(conversation);
     }
