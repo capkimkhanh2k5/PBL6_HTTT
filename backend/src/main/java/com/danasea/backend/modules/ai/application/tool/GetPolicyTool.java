@@ -1,5 +1,6 @@
 package com.danasea.backend.modules.ai.application.tool;
 
+import com.danasea.backend.modules.order.domain.services.RefundPolicyEngine;
 import com.danasea.backend.modules.systemconfig.infrastructure.persistence.entities.SystemConfigJpaEntity;
 import com.danasea.backend.modules.systemconfig.infrastructure.persistence.repositories.JpaSystemConfigRepository;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -18,16 +19,24 @@ public class GetPolicyTool implements ToolExecutor {
 
     private final JpaSystemConfigRepository systemConfigRepository;
     private final ObjectMapper objectMapper;
+    private final RefundPolicyEngine refundPolicyEngine;
 
     @Autowired
-    public GetPolicyTool(@Autowired(required = false) JpaSystemConfigRepository systemConfigRepository,
-                         ObjectMapper objectMapper) {
+    public GetPolicyTool(
+            @Autowired(required = false) JpaSystemConfigRepository systemConfigRepository,
+            ObjectMapper objectMapper,
+            @Autowired(required = false) RefundPolicyEngine refundPolicyEngine) {
         this.systemConfigRepository = systemConfigRepository;
         this.objectMapper = objectMapper;
+        this.refundPolicyEngine = refundPolicyEngine != null ? refundPolicyEngine : new RefundPolicyEngine();
+    }
+
+    public GetPolicyTool(JpaSystemConfigRepository systemConfigRepository, ObjectMapper objectMapper) {
+        this(systemConfigRepository, objectMapper, new RefundPolicyEngine());
     }
 
     public GetPolicyTool() {
-        this(null, new ObjectMapper());
+        this(null, new ObjectMapper(), new RefundPolicyEngine());
     }
 
     @Override
@@ -88,12 +97,15 @@ public class GetPolicyTool implements ToolExecutor {
 
     private String getDefaultPolicyText(String policyType) {
         return switch (policyType.toUpperCase()) {
-            case "CANCELLATION" -> "Hoàn tiền 100% khi hủy trước 24h. Hoàn 50% trước 12h. Không hoàn tiền trong vòng 12h trước giờ khởi hành.";
-            case "REFUND" -> "Chính sách hoàn tiền: Hoàn 100% tiền cọc nếu huỷ đúng hạn hoặc thời tiết xấu không thể tổ chức tour.";
-            case "WEATHER_CANCELLATION" -> "Chính sách hủy do thời tiết: Trường hợp điều kiện hàng hải nguy hiểm hoặc thiên tai, tour sẽ được hoàn tiền 100% hoặc đổi ngày miễn phí.";
-            case "SAFETY" -> "Chính sách an toàn: Khách hàng bắt buộc mặc áo phao và tuân theo chỉ dẫn an toàn hàng hải của ban quản lý và hướng dẫn viên.";
-            default -> "Chính sách chung DanaSea: Cam kết bảo vệ quyền lợi khách hàng, an toàn hàng hải và minh bạch dịch vụ du lịch biển Đà Nẵng.";
+            case "CANCELLATION" -> refundPolicyEngine != null
+                    ? refundPolicyEngine.getCancellationPolicySummary()
+                    : "Refunds are 100% more than 48 hours before departure, 70% from 24 to 48 hours, 30% from 2 to 24 hours, and 0% within 2 hours. Dangerous weather and vendor fault receive a full refund.";
+            case "REFUND" -> refundPolicyEngine != null
+                    ? refundPolicyEngine.getRefundPolicySummary("REFUND")
+                    : "Refund policy: eligible on-time cancellations and tours cancelled for dangerous weather receive the applicable refund.";
+            case "WEATHER_CANCELLATION" -> "Weather cancellation policy: dangerous marine weather or natural disasters qualify for a full refund or free rescheduling.";
+            case "SAFETY" -> "Safety policy: customers must wear life jackets and follow all instructions from staff and guides.";
+            default -> "DanaSea policy: protect customers, enforce marine safety, and provide transparent services.";
         };
     }
 }
-

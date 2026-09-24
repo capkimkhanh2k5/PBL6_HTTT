@@ -387,14 +387,14 @@ public class AiAssistantAdversarialStressTest {
         }
 
         @Test
-        @DisplayName("ADV-MOD-5: Fail-Open Verification - When Moderation API throws, isSafe() defaults to true (fails open)")
-        void testModerationApiFailure_FailsOpen() {
+        @DisplayName("ADV-MOD-5: Fail-Closed Verification - API errors reject unmoderated input")
+        void testModerationApiFailure_FailsClosed() {
             when(keyRotator.getActiveKey()).thenReturn("gsk_key_1");
             when(restTemplate.postForEntity(anyString(), any(HttpEntity.class), eq(String.class)))
                     .thenThrow(new RuntimeException("503 Service Unavailable from Groq"));
 
             boolean safe = moderationClient.isSafe("Any test input");
-            assertTrue(safe, "GroqModerationClient is designed to fail open (returns true) upon API errors");
+            assertFalse(safe, "Moderation API errors must fail closed");
         }
     }
 
@@ -573,8 +573,8 @@ public class AiAssistantAdversarialStressTest {
             LlmResponse response = chatUseCase.processMessage(conversationId, "Quy định hoàn tiền thế nào?");
 
             // Must be overridden with standard rejection message
-            assertTrue(response.getContent().contains("Tôi không thể cung cấp thông tin về chính sách hoàn hủy"));
-            assertTrue(response.getContent().contains("chưa tra cứu hệ thống chính thức"));
+            assertTrue(response.getContent().contains("I cannot provide cancellation or refund policy details"));
+            assertTrue(response.getContent().contains("official policy source"));
         }
 
         @Test

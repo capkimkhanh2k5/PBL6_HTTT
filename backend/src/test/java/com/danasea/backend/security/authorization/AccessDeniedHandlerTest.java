@@ -150,7 +150,7 @@ public class AccessDeniedHandlerTest extends BaseSecurityIntegrationTest {
 
             ErrorResponse errorResponse = objectMapper.readValue(response.getContentAsString(), ErrorResponse.class);
             assertThat(errorResponse.code()).isEqualTo("ACCESS_DENIED");
-            assertThat(errorResponse.message()).isEqualTo("Access denied: insufficient permissions");
+            assertThat(errorResponse.message()).isEqualTo("Access denied.");
         }
 
         @Test
@@ -165,7 +165,7 @@ public class AccessDeniedHandlerTest extends BaseSecurityIntegrationTest {
             assertThat(response.getStatus()).isEqualTo(403);
             ErrorResponse errorResponse = objectMapper.readValue(response.getContentAsString(), ErrorResponse.class);
             assertThat(errorResponse.code()).isEqualTo("ACCESS_DENIED");
-            assertThat(errorResponse.message()).isEqualTo("Access denied");
+            assertThat(errorResponse.message()).isEqualTo("Access denied.");
         }
 
         @Test
@@ -183,7 +183,7 @@ public class AccessDeniedHandlerTest extends BaseSecurityIntegrationTest {
 
             ErrorResponse errorResponse = objectMapper.readValue(response.getContentAsString(), ErrorResponse.class);
             assertThat(errorResponse.code()).isEqualTo("UNAUTHORIZED");
-            assertThat(errorResponse.message()).isEqualTo("Full authentication is required");
+            assertThat(errorResponse.message()).isEqualTo("Authentication is required to access this resource.");
         }
 
         @Test
@@ -198,7 +198,7 @@ public class AccessDeniedHandlerTest extends BaseSecurityIntegrationTest {
             assertThat(response.getStatus()).isEqualTo(401);
             ErrorResponse errorResponse = objectMapper.readValue(response.getContentAsString(), ErrorResponse.class);
             assertThat(errorResponse.code()).isEqualTo("UNAUTHORIZED");
-            assertThat(errorResponse.message()).isEqualTo("Full authentication is required to access this resource");
+            assertThat(errorResponse.message()).isEqualTo("Authentication is required to access this resource.");
         }
     }
 }

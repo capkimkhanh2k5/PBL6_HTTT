@@ -214,7 +214,7 @@ class CategorySafetyRuleServiceTest {
                     InvalidSafetyRuleThresholdException.class,
                     () -> service.updateRule(categoryId, request)
             );
-            assertTrue(ex.getMessage().contains("không được vượt quá ngưỡng sóng đỏ"));
+            assertTrue(ex.getMessage().contains("caution wave threshold"));
             verify(repository, never()).save(any());
         }
 
@@ -232,7 +232,7 @@ class CategorySafetyRuleServiceTest {
                     InvalidSafetyRuleThresholdException.class,
                     () -> service.updateRule(categoryId, request)
             );
-            assertTrue(ex.getMessage().contains("không được vượt quá ngưỡng sóng đỏ"));
+            assertTrue(ex.getMessage().contains("caution wave threshold"));
         }
 
         @Test
@@ -249,7 +249,7 @@ class CategorySafetyRuleServiceTest {
                     InvalidSafetyRuleThresholdException.class,
                     () -> service.updateRule(categoryId, request)
             );
-            assertTrue(ex.getMessage().contains("không được vượt quá ngưỡng gió đỏ"));
+            assertTrue(ex.getMessage().contains("caution sustained-wind threshold"));
             verify(repository, never()).save(any());
         }
 
@@ -266,7 +266,7 @@ class CategorySafetyRuleServiceTest {
                     InvalidSafetyRuleThresholdException.class,
                     () -> service.updateRule(categoryId, request)
             );
-            assertTrue(ex.getMessage().contains("không được là số âm"));
+            assertTrue(ex.getMessage().contains("must not be negative"));
             verify(repository, never()).save(any());
         }
 

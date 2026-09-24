@@ -16,6 +16,9 @@ import lombok.Setter;
 @Table(name = "sub_orders")
 public class SubOrderJpaEntity extends BaseJpaEntity {
 
+    @Column(name = "booking_item_id")
+    private UUID bookingItemId;
+
     private UUID masterOrderId;
 
     private UUID vendorId;

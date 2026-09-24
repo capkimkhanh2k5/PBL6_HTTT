@@ -24,10 +24,6 @@ public class CustomAuthenticationEntryPoint implements AuthenticationEntryPoint 
         this.objectMapper = objectMapper;
     }
 
-    public CustomAuthenticationEntryPoint() {
-        this(new ObjectMapper());
-    }
-
     @Override
     public void commence(
             HttpServletRequest request,
@@ -38,10 +34,8 @@ public class CustomAuthenticationEntryPoint implements AuthenticationEntryPoint 
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
         response.setCharacterEncoding(StandardCharsets.UTF_8.name());
 
-        String message = (authException != null && authException.getMessage() != null && !authException.getMessage().isBlank())
-                ? authException.getMessage()
-                : "Full authentication is required to access this resource";
-        ErrorResponse errorResponse = new ErrorResponse("UNAUTHORIZED", message);
+        ErrorResponse errorResponse = new ErrorResponse(
+                "UNAUTHORIZED", "Authentication is required to access this resource.");
 
         response.getWriter().write(objectMapper.writeValueAsString(errorResponse));
         response.getWriter().flush();

@@ -130,6 +130,12 @@ public class AccountInternalService implements AccountInternalApi {
     }
 
     @Override
+    public Optional<RefreshToken> findRefreshTokenByHashForUpdate(String tokenHash) {
+        return refreshTokenRepository.findForUpdateByTokenHash(tokenHash)
+                .map(refreshTokenMapper::toDomain);
+    }
+
+    @Override
     @Transactional
     public void revokeRefreshTokenFamily(UUID familyId) {
         List<RefreshTokenJpaEntity> tokens = refreshTokenRepository.findAllByFamilyId(familyId);

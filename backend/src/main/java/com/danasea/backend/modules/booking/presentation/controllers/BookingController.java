@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.danasea.backend.modules.booking.application.dtos.BookingCancelResult;
@@ -134,7 +135,8 @@ public class BookingController {
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<BookingCancelResponse> cancelBooking(
             @PathVariable("id") UUID id,
-            @RequestBody(required = false) CancelBookingRequest request) {
+            @RequestBody(required = false) CancelBookingRequest request,
+            @RequestHeader(name = "Idempotency-Key", required = false) String idempotencyKey) {
 
         UUID currentUserId = SecurityUtils.getCurrentUserId()
                 .orElseThrow(() -> new AccessDeniedException("User is not authenticated"));
@@ -144,7 +146,11 @@ public class BookingController {
                 .anyMatch(a -> "ROLE_ADMIN".equals(a.getAuthority()));
 
         String reason = request != null ? request.reason() : null;
-        CancelBookingCommand command = new CancelBookingCommand(id, currentUserId, isAdmin, reason);
+        String effectiveKey = idempotencyKey == null || idempotencyKey.isBlank()
+                ? "cancel-" + id
+                : idempotencyKey;
+        CancelBookingCommand command = new CancelBookingCommand(
+                id, currentUserId, isAdmin, reason, effectiveKey);
         BookingCancelResult result = cancelBookingUseCase.execute(command);
 
         BookingCancelResponse response = new BookingCancelResponse(

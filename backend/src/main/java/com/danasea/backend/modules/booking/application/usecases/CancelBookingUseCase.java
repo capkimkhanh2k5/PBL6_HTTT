@@ -11,25 +11,42 @@ import com.danasea.backend.modules.booking.domain.exceptions.BookingNotFoundExce
 import com.danasea.backend.modules.booking.domain.exceptions.InvalidBookingStateException;
 import com.danasea.backend.modules.booking.domain.models.Booking;
 import com.danasea.backend.modules.booking.domain.models.BookingStatus;
+import com.danasea.backend.modules.booking.domain.models.CancellationFinancialResult;
 import com.danasea.backend.modules.booking.domain.models.InventoryLockItem;
 import com.danasea.backend.modules.booking.domain.ports.BookingRepositoryPort;
+import com.danasea.backend.modules.booking.domain.ports.BookingCancellationFinancialPort;
 import com.danasea.backend.modules.booking.domain.ports.InventoryLockPort;
 import com.danasea.backend.modules.booking.domain.ports.ServiceSlotPort;
 import lombok.RequiredArgsConstructor;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
-@RequiredArgsConstructor
 public class CancelBookingUseCase {
 
     private final BookingRepositoryPort bookingRepository;
     private final ServiceSlotPort serviceSlotPort;
     private final InventoryLockPort inventoryLockPort;
+    private final BookingCancellationFinancialPort financialPort;
 
+    public CancelBookingUseCase(
+            BookingRepositoryPort bookingRepository,
+            ServiceSlotPort serviceSlotPort,
+            InventoryLockPort inventoryLockPort,
+            BookingCancellationFinancialPort financialPort) {
+        this.bookingRepository = bookingRepository;
+        this.serviceSlotPort = serviceSlotPort;
+        this.inventoryLockPort = inventoryLockPort;
+        this.financialPort = financialPort;
+    }
+
+    @Transactional
     public BookingCancelResult execute(CancelBookingCommand command) {
         if (command == null || command.bookingId() == null) {
             throw new IllegalArgumentException("Booking ID cannot be null");
         }
 
-        Booking booking = bookingRepository.findByIdWithItems(command.bookingId())
+        Booking booking = bookingRepository.findByIdWithItemsForUpdate(command.bookingId())
                 .orElseThrow(() -> new BookingNotFoundException(command.bookingId()));
 
         // Chống IDOR: Khách hàng chỉ được hủy booking của chính mình (ngoại trừ ADMIN)
@@ -62,28 +79,34 @@ public class CancelBookingUseCase {
         String message;
 
         if (BookingStatus.CONFIRMED.equals(booking.getStatus())) {
-            // Tính toán chính sách hoàn tiền 24h đối với Booking đã thanh toán xác nhận
-            refundEligible = booking.isEligibleForFullRefund(now);
-            refundPercentage = refundEligible ? 100 : 0;
-            refundAmount = refundEligible ? booking.getTotalAmount() : BigDecimal.ZERO;
+            CancellationFinancialResult financialResult = financialPort.requestRefund(
+                    booking.getId(),
+                    command.customerId(),
+                    command.idempotencyKey(),
+                    now);
+            refundEligible = financialResult.refundEligible();
+            refundPercentage = financialResult.refundPercentage();
+            refundAmount = financialResult.refundAmount();
             message = refundEligible
-                    ? "Hủy thành công. Bạn đủ điều kiện hoàn 100% tiền theo chính sách trước 24h."
-                    : "Hủy thành công. Theo chính sách hủy trễ dưới 24h, bạn không được hoàn tiền.";
+                    ? "Cancellation accepted. The refund request is pending provider processing."
+                    : "Cancellation accepted. The cancellation policy does not provide a refund.";
 
-            // Hoàn trả số lượng đã đặt vào các slot dịch vụ trong PostgreSQL
             serviceSlotPort.releaseCapacityBatch(booking.getItems());
         } else {
-            // Trạng thái HOLD hoặc PENDING_PAYMENT: Chưa trừ tiền nên không hoàn tiền, giải phóng Redis lock
             refundEligible = false;
             refundPercentage = 0;
             refundAmount = BigDecimal.ZERO;
-            message = "Hủy giữ chỗ thành công.";
+            message = "Booking hold cancelled successfully.";
+
+            if (BookingStatus.PENDING_PAYMENT.equals(booking.getStatus())) {
+                financialPort.cancelUnpaidOrder(booking.getId());
+            }
 
             if (booking.getItems() != null && !booking.getItems().isEmpty()) {
                 List<InventoryLockItem> lockItems = booking.getItems().stream()
                         .map(item -> InventoryLockItem.of(item.getSlotId(), item.getQuantity(), 0))
                         .toList();
-                inventoryLockPort.releaseHolds(booking.getId(), lockItems);
+                releaseHoldsAfterCommit(booking.getId(), lockItems);
             }
         }
 
@@ -102,5 +125,18 @@ public class CancelBookingUseCase {
                 reason,
                 message
         );
+    }
+
+    private void releaseHoldsAfterCommit(java.util.UUID bookingId, List<InventoryLockItem> lockItems) {
+        if (!TransactionSynchronizationManager.isSynchronizationActive()) {
+            inventoryLockPort.releaseHolds(bookingId, lockItems);
+            return;
+        }
+        TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+            @Override
+            public void afterCommit() {
+                inventoryLockPort.releaseHolds(bookingId, lockItems);
+            }
+        });
     }
 }

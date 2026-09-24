@@ -36,7 +36,7 @@ class WeatherRuleEngineTest {
 
         assertTrue(result.isSafe());
         assertEquals(WeatherRuleEngine.ALERT_YELLOW, result.getAlertLevel());
-        assertTrue(result.getWarningMessage().contains("thận trọng"));
+        assertTrue(result.getWarningMessage().contains("CAUTION ALERT"));
     }
 
     @Test
@@ -47,7 +47,7 @@ class WeatherRuleEngineTest {
 
         assertFalse(result.isSafe());
         assertEquals(WeatherRuleEngine.ALERT_RED, result.getAlertLevel());
-        assertTrue(result.getWarningMessage().contains("vượt ngưỡng an toàn tối đa"));
+        assertTrue(result.getWarningMessage().contains("exceeds the maximum safe threshold"));
     }
 
     @Test
@@ -68,7 +68,7 @@ class WeatherRuleEngineTest {
 
         assertFalse(result.isSafe());
         assertEquals(WeatherRuleEngine.ALERT_RED, result.getAlertLevel());
-        assertTrue(result.getWarningMessage().contains("dòng hải lưu"));
+        assertTrue(result.getWarningMessage().contains("Ocean-current speed"));
     }
 
     @Test
@@ -89,7 +89,7 @@ class WeatherRuleEngineTest {
 
         assertFalse(result.isSafe());
         assertEquals(WeatherRuleEngine.ALERT_RED, result.getAlertLevel());
-        assertTrue(result.getWarningMessage().contains("Gió giật"));
+        assertTrue(result.getWarningMessage().contains("Peak wind gust"));
     }
 
     @Test

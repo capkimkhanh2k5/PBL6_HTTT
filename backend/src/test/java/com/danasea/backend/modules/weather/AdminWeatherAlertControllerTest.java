@@ -20,7 +20,6 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.ResponseEntity;
@@ -59,7 +58,6 @@ class AdminWeatherAlertControllerTest {
     @Mock
     private SendNotificationUseCase sendNotificationUseCase;
 
-    @InjectMocks
     private AdminWeatherAlertController controller;
 
     private UUID evaluationId;
@@ -69,6 +67,14 @@ class AdminWeatherAlertControllerTest {
 
     @BeforeEach
     void setUp() {
+        controller = new AdminWeatherAlertController(
+                evaluationRepository,
+                subOrderRepository,
+                refundRepository,
+                slotRepository,
+                serviceRepository,
+                sendNotificationUseCase,
+                new com.danasea.backend.modules.order.domain.services.RefundPolicyEngine());
         evaluationId = UUID.randomUUID();
         serviceId = UUID.randomUUID();
         slotId = UUID.randomUUID();
@@ -100,8 +106,8 @@ class AdminWeatherAlertControllerTest {
         slot.setBookedCount(5);
 
         when(evaluationRepository.findByStatusIn(anyList())).thenReturn(List.of(alertEntity));
-        when(serviceRepository.findById(serviceId)).thenReturn(Optional.of(service));
-        when(slotRepository.findById(slotId)).thenReturn(Optional.of(slot));
+        when(serviceRepository.findAllById(any())).thenReturn(List.of(service));
+        when(slotRepository.findAllById(any())).thenReturn(List.of(slot));
 
         ResponseEntity<List<AdminWeatherAlertController.WeatherAlertResponse>> response = controller.getActiveWeatherAlerts();
 
@@ -142,8 +148,8 @@ class AdminWeatherAlertControllerTest {
         slot.setBookedCount(3);
 
         when(evaluationRepository.findByStatusIn(anyList())).thenReturn(List.of(alertEntity, yellowAlert));
-        when(serviceRepository.findById(serviceId)).thenReturn(Optional.of(service));
-        when(slotRepository.findById(slotId)).thenReturn(Optional.of(slot));
+        when(serviceRepository.findAllById(any())).thenReturn(List.of(service));
+        when(slotRepository.findAllById(any())).thenReturn(List.of(slot));
 
         ResponseEntity<List<AdminWeatherAlertController.WeatherAlertResponse>> response = controller.getActiveWeatherAlerts();
 
@@ -165,7 +171,7 @@ class AdminWeatherAlertControllerTest {
         subOrder.setStatus(SubOrderStatus.CONFIRMED);
         subOrder.setSubtotalAmount(BigDecimal.valueOf(1500000));
 
-        when(evaluationRepository.findById(evaluationId)).thenReturn(Optional.of(alertEntity));
+        when(evaluationRepository.findByIdForUpdate(evaluationId)).thenReturn(Optional.of(alertEntity));
         when(subOrderRepository.findBySlotId(slotId)).thenReturn(List.of(subOrder));
 
         AdminWeatherAlertController.ResolveAlertRequest request =
@@ -188,7 +194,8 @@ class AdminWeatherAlertControllerTest {
         assertEquals(BigDecimal.valueOf(1500000), capturedRefund.getAmount());
         assertEquals(BigDecimal.valueOf(100.0), capturedRefund.getRefundPercentage());
         assertEquals(RefundReason.WEATHER, capturedRefund.getReason());
-        assertEquals(RefundStatus.PROCESSED, capturedRefund.getStatus());
+        assertEquals(RefundStatus.PENDING, capturedRefund.getStatus());
+        assertNull(capturedRefund.getProcessedAt());
 
         // Kiểm tra cập nhật alertEntity
         assertTrue(alertEntity.getIsSafe());
@@ -199,7 +206,7 @@ class AdminWeatherAlertControllerTest {
     @Test
     @DisplayName("Admin duyệt MIỄN TRỪ / DỜI LỊCH (DISMISSED)")
     void resolveAlert_dismiss_success() {
-        when(evaluationRepository.findById(evaluationId)).thenReturn(Optional.of(alertEntity));
+        when(evaluationRepository.findByIdForUpdate(evaluationId)).thenReturn(Optional.of(alertEntity));
 
         AdminWeatherAlertController.ResolveAlertRequest request =
                 new AdminWeatherAlertController.ResolveAlertRequest("DISMISSED", "Đã thỏa thuận dời sang buổi chiều an toàn");

@@ -65,6 +65,24 @@ class CatalogControllerTest {
     }
 
     @Test
+    void searchServices_CanonicalRoute_ShouldReturn200() throws Exception {
+        when(searchServicesUseCase.execute(any())).thenReturn(List.of());
+        when(searchServicesUseCase.count(any())).thenReturn(0L);
+
+        mockMvc.perform(get("/api/services"))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    void searchServices_ShouldRejectInvalidBounds() throws Exception {
+        mockMvc.perform(get("/api/services")
+                .param("minPrice", "100")
+                .param("maxPrice", "50")
+                .param("size", "500"))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
     void getServiceDetail_ShouldReturn200() throws Exception {
         UUID id = UUID.randomUUID();
         ServiceDetailResult result = ServiceDetailResult.builder()

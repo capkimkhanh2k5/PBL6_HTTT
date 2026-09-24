@@ -29,6 +29,7 @@ import org.springframework.http.ResponseEntity;
 import com.danasea.backend.security.authentication.application.usecases.RefreshTokenUseCase;
 import com.danasea.backend.security.authentication.application.usecases.LogoutUseCase;
 import com.danasea.backend.security.authentication.infrastructure.security.CookieUtils;
+import com.danasea.backend.security.authentication.infrastructure.security.JwtProperties;
 import io.swagger.v3.oas.annotations.security.SecurityRequirements;
 
 @RestController
@@ -42,6 +43,7 @@ public class AuthenticationController {
     private final LogoutUseCase logoutUseCase;
     private final SendVerificationOtpUseCase sendVerificationOtpUseCase;
     private final VerifyOtpUseCase verifyOtpUseCase;
+    private final JwtProperties jwtProperties;
 
     @PostMapping("/login")
     @SecurityRequirements()
@@ -50,7 +52,7 @@ public class AuthenticationController {
                 request.email(),
                 request.password());
 
-        CookieUtils.addRefreshTokenCookie(response, result.refreshToken());
+        CookieUtils.addRefreshTokenCookie(response, result.refreshToken(), jwtProperties.refreshTokenMaxAgeSeconds());
 
         return new AuthenticationResponse(
                 result.accessToken(),
@@ -67,7 +69,7 @@ public class AuthenticationController {
                 request.email(),
                 request.password());
 
-        CookieUtils.addRefreshTokenCookie(response, result.refreshToken());
+        CookieUtils.addRefreshTokenCookie(response, result.refreshToken(), jwtProperties.refreshTokenMaxAgeSeconds());
 
         return new AuthenticationResponse(
                 result.accessToken(),
@@ -88,7 +90,8 @@ public class AuthenticationController {
 
         LoginResult authResponse = refreshTokenUseCase.execute(refreshToken);
 
-        CookieUtils.addRefreshTokenCookie(response, authResponse.refreshToken());
+        CookieUtils.addRefreshTokenCookie(
+                response, authResponse.refreshToken(), jwtProperties.refreshTokenMaxAgeSeconds());
 
         return ResponseEntity.ok(new RefreshResponse(authResponse.accessToken()));
     }

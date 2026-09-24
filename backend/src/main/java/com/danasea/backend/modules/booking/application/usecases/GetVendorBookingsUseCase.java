@@ -2,6 +2,7 @@ package com.danasea.backend.modules.booking.application.usecases;
 
 import java.util.List;
 import java.util.UUID;
+import java.util.Set;
 
 import com.danasea.backend.modules.booking.application.dtos.GetVendorBookingsQuery;
 import com.danasea.backend.modules.booking.application.dtos.VendorBookingItemResult;
@@ -23,13 +24,22 @@ public class GetVendorBookingsUseCase {
             throw new IllegalArgumentException("User ID cannot be null");
         }
 
-        UUID vendorId = vendorLookupPort.findVendorIdByUserId(query.userId())
-                .orElseThrow(() -> new UnauthorizedBookingAccessException("Vendor profile not found for user: " + query.userId()));
-
-        int page = Math.max(0, query.page());
-        int size = query.size() > 0 ? query.size() : 10;
+        if (query.page() < 0 || query.size() < 1 || query.size() > 100) {
+            throw new IllegalArgumentException("page must be non-negative and size must be between 1 and 100");
+        }
+        int page = query.page();
+        int size = query.size();
         String sortBy = (query.sortBy() != null && !query.sortBy().isBlank()) ? query.sortBy() : "createdAt";
         String sortDir = (query.sortDirection() != null && !query.sortDirection().isBlank()) ? query.sortDirection() : "desc";
+        if (!Set.of("createdAt", "updatedAt", "bookingDate", "bookingTime", "price").contains(sortBy)) {
+            throw new IllegalArgumentException("Unsupported sort field: " + sortBy);
+        }
+        if (!sortDir.equalsIgnoreCase("asc") && !sortDir.equalsIgnoreCase("desc")) {
+            throw new IllegalArgumentException("sortDir must be either asc or desc");
+        }
+
+        UUID vendorId = vendorLookupPort.findVendorIdByUserId(query.userId())
+                .orElseThrow(() -> new UnauthorizedBookingAccessException("Vendor profile not found for user: " + query.userId()));
 
         PagedResult<BookingItem> pagedItems = bookingRepository.findVendorBookingItems(
                 vendorId,

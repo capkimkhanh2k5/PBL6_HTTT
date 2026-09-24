@@ -4,6 +4,7 @@ import com.danasea.backend.modules.service.application.dtos.SearchServicesCriter
 import com.danasea.backend.modules.service.application.dtos.ServiceSummaryResult;
 import com.danasea.backend.modules.service.domain.models.Service;
 import com.danasea.backend.modules.service.domain.ports.ServiceRepositoryPort;
+import com.danasea.backend.modules.service.domain.ports.ServiceImageRepositoryPort;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -26,6 +27,9 @@ class SearchServicesUseCaseTest {
     @Mock
     private ServiceRepositoryPort serviceRepositoryPort;
 
+    @Mock
+    private ServiceImageRepositoryPort serviceImageRepositoryPort;
+
     @InjectMocks
     private SearchServicesUseCase searchServicesUseCase;
 
@@ -37,6 +41,7 @@ class SearchServicesUseCaseTest {
         service.setId(UUID.randomUUID());
         service.setName("Test Service");
         service.setPrice(BigDecimal.valueOf(100));
+        service.setDescription("A concise public description");
     }
 
     @Test
@@ -51,5 +56,6 @@ class SearchServicesUseCaseTest {
 
         assertThat(results).hasSize(1);
         assertThat(results.get(0).getName()).isEqualTo("Test Service");
+        assertThat(results.get(0).getShortDescription()).isEqualTo("A concise public description");
     }
 }

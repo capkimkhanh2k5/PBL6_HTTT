@@ -428,7 +428,7 @@ public class EmpiricalPaddingAndAdversarialVerificationTest {
 
             LlmResponse response = chatUseCase.processMessage(conversationId, "Hỏi về " + keyword);
 
-            assertTrue(response.getContent().contains("Tôi không thể cung cấp thông tin về chính sách hoàn hủy khi chưa tra cứu hệ thống chính thức"),
+            assertTrue(response.getContent().contains("I cannot provide cancellation or refund policy details"),
                     "Response containing '" + keyword + "' must be rejected when get_policy was not called");
             verify(policyTool, never()).execute(anyString());
         }
@@ -452,7 +452,7 @@ public class EmpiricalPaddingAndAdversarialVerificationTest {
 
             LlmResponse result = chatUseCase.processMessage(conversationId, "Thời tiết và chính sách hoàn tiền");
 
-            assertTrue(result.getContent().contains("Tôi không thể cung cấp thông tin về chính sách hoàn hủy"),
+            assertTrue(result.getContent().contains("I cannot provide cancellation or refund policy details"),
                     "Sneaking policy keyword after non-policy tool must be intercepted");
             verify(weatherTool, times(1)).execute(anyString());
             verify(policyTool, never()).execute(anyString());

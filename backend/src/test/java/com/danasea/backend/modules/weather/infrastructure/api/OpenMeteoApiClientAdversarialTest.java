@@ -36,11 +36,14 @@ import static org.springframework.test.web.client.response.MockRestResponseCreat
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withStatus;
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess;
 
+import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.context.annotation.Bean;
+
 @SpringJUnitConfig(OpenMeteoApiClientAdversarialTest.AdversarialCachingConfig.class)
 @DisplayName("OpenMeteoApiClient Adversarial Stress & Resilience Verification Suite")
 public class OpenMeteoApiClientAdversarialTest {
 
-    @Configuration
+    @TestConfiguration
     @EnableCaching
     static class AdversarialCachingConfig {
 

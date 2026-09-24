@@ -11,13 +11,12 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
+import org.springframework.mock.web.MockHttpServletResponse;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.utility.DockerImageName;
 
 import java.time.Duration;
-import java.util.concurrent.atomic.AtomicInteger;
-
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.*;
 
@@ -74,7 +73,7 @@ public class RateLimitFilterIntegrationTest {
 
         // The 6th request should be blocked
         HttpServletRequest request = mock(HttpServletRequest.class);
-        HttpServletResponse response = mock(HttpServletResponse.class);
+        MockHttpServletResponse response = new MockHttpServletResponse();
         FilterChain filterChain = mock(FilterChain.class);
 
         when(request.getRequestURI()).thenReturn("/api/auth/login");
@@ -84,8 +83,7 @@ public class RateLimitFilterIntegrationTest {
 
         // Verify request was blocked
         verify(filterChain, never()).doFilter(request, response);
-        verify(response, times(1)).sendError(HttpStatus.TOO_MANY_REQUESTS.value(),
-                "You have exhausted your API Request Quota");
+        assertEquals(HttpStatus.TOO_MANY_REQUESTS.value(), response.getStatus());
     }
 
     @Test
@@ -107,15 +105,14 @@ public class RateLimitFilterIntegrationTest {
 
         // 6th request from IP1 blocked
         HttpServletRequest request1 = mock(HttpServletRequest.class);
-        HttpServletResponse response1 = mock(HttpServletResponse.class);
+        MockHttpServletResponse response1 = new MockHttpServletResponse();
         FilterChain filterChain1 = mock(FilterChain.class);
 
         when(request1.getRequestURI()).thenReturn("/api/auth/login");
         when(request1.getRemoteAddr()).thenReturn(ip1);
 
         rateLimitFilter.doFilterInternal(request1, response1, filterChain1);
-        verify(response1, times(1)).sendError(HttpStatus.TOO_MANY_REQUESTS.value(),
-                "You have exhausted your API Request Quota");
+        assertEquals(HttpStatus.TOO_MANY_REQUESTS.value(), response1.getStatus());
 
         // 1st request from IP2 should be allowed
         HttpServletRequest request2 = mock(HttpServletRequest.class);
@@ -130,7 +127,7 @@ public class RateLimitFilterIntegrationTest {
     }
 
     @Test
-    void shouldExtractRealIpFromXForwardedFor() throws Exception {
+    void shouldNotTrustClientSuppliedXForwardedFor() throws Exception {
         String spoofedRemoteAddr = "10.0.0.99";
         String realIp = "192.168.1.200";
         String xForwardedFor = realIp + ", 10.0.0.1, 10.0.0.2";
@@ -149,7 +146,7 @@ public class RateLimitFilterIntegrationTest {
 
         // The 51st request should be blocked based on the realIp extracted
         HttpServletRequest request = mock(HttpServletRequest.class);
-        HttpServletResponse response = mock(HttpServletResponse.class);
+        MockHttpServletResponse response = new MockHttpServletResponse();
         FilterChain filterChain = mock(FilterChain.class);
 
         when(request.getRequestURI()).thenReturn("/api/auth/login");
@@ -159,12 +156,11 @@ public class RateLimitFilterIntegrationTest {
         rateLimitFilter.doFilterInternal(request, response, filterChain);
 
         verify(filterChain, never()).doFilter(request, response);
-        verify(response, times(1)).sendError(HttpStatus.TOO_MANY_REQUESTS.value(),
-                "You have exhausted your API Request Quota");
+        assertEquals(HttpStatus.TOO_MANY_REQUESTS.value(), response.getStatus());
 
-        // Verify that a request from a DIFFERENT X-Forwarded-For but SAME remote address is allowed
+        // A client-controlled forwarding header must not bypass the remote-address limit.
         HttpServletRequest diffRequest = mock(HttpServletRequest.class);
-        HttpServletResponse diffResponse = mock(HttpServletResponse.class);
+        MockHttpServletResponse diffResponse = new MockHttpServletResponse();
         FilterChain diffFilterChain = mock(FilterChain.class);
 
         when(diffRequest.getRequestURI()).thenReturn("/api/auth/login");
@@ -173,6 +169,7 @@ public class RateLimitFilterIntegrationTest {
 
         rateLimitFilter.doFilterInternal(diffRequest, diffResponse, diffFilterChain);
 
-        verify(diffFilterChain, times(1)).doFilter(diffRequest, diffResponse);
+        verify(diffFilterChain, never()).doFilter(diffRequest, diffResponse);
+        assertEquals(HttpStatus.TOO_MANY_REQUESTS.value(), diffResponse.getStatus());
     }
 }

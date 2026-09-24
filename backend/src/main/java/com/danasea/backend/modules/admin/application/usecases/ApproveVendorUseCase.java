@@ -14,6 +14,10 @@ import com.danasea.backend.modules.vendor.domain.models.VerificationStatus;
 import com.danasea.backend.modules.account.domain.models.Role;
 import com.danasea.backend.modules.account.domain.models.User;
 import com.danasea.backend.modules.vendor.domain.exceptions.VendorNotFoundException;
+import com.danasea.backend.modules.vendor.domain.models.DocType;
+import com.danasea.backend.modules.admin.domain.exceptions.VendorDocumentsIncompleteException;
+import java.util.EnumSet;
+import java.util.Set;
 
 import lombok.RequiredArgsConstructor;
 
@@ -32,6 +36,14 @@ public class ApproveVendorUseCase {
 
         if (vendor.getVerificationStatus() != VerificationStatus.PENDING) {
             throw new IllegalArgumentException("Vendor is not in PENDING status");
+        }
+
+        Set<DocType> requiredDocuments = EnumSet.allOf(DocType.class);
+        Set<DocType> approvedDocuments = vendorInternalApi.getApprovedDocumentTypes(vendorId);
+        if (!approvedDocuments.containsAll(requiredDocuments)) {
+            requiredDocuments.removeAll(approvedDocuments);
+            throw new VendorDocumentsIncompleteException(
+                    "Vendor approval requires approved documents: " + requiredDocuments);
         }
 
         vendor.setVerificationStatus(VerificationStatus.APPROVED);

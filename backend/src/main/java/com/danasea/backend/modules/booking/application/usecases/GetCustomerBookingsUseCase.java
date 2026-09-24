@@ -1,6 +1,7 @@
 package com.danasea.backend.modules.booking.application.usecases;
 
 import java.util.List;
+import java.util.Set;
 
 import com.danasea.backend.modules.booking.application.dtos.BookingSummaryResult;
 import com.danasea.backend.modules.booking.application.dtos.GetCustomerBookingsQuery;
@@ -19,10 +20,19 @@ public class GetCustomerBookingsUseCase {
             throw new IllegalArgumentException("Customer ID cannot be null");
         }
 
-        int page = Math.max(0, query.page());
-        int size = query.size() > 0 ? query.size() : 10;
+        if (query.page() < 0 || query.size() < 1 || query.size() > 100) {
+            throw new IllegalArgumentException("page must be non-negative and size must be between 1 and 100");
+        }
+        int page = query.page();
+        int size = query.size();
         String sortBy = (query.sortBy() != null && !query.sortBy().isBlank()) ? query.sortBy() : "createdAt";
         String sortDir = (query.sortDirection() != null && !query.sortDirection().isBlank()) ? query.sortDirection() : "desc";
+        if (!Set.of("createdAt", "updatedAt", "holdExpiresAt", "totalAmount", "status").contains(sortBy)) {
+            throw new IllegalArgumentException("Unsupported sort field: " + sortBy);
+        }
+        if (!sortDir.equalsIgnoreCase("asc") && !sortDir.equalsIgnoreCase("desc")) {
+            throw new IllegalArgumentException("sortDir must be either asc or desc");
+        }
 
         PagedResult<Booking> pagedBookings = bookingRepository.findCustomerBookings(
                 query.customerId(),

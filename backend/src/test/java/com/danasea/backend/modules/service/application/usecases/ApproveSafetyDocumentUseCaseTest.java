@@ -78,17 +78,18 @@ class ApproveSafetyDocumentUseCaseTest {
     @Test
     @DisplayName("AC4.1: Admin phê duyệt chứng chỉ an toàn thành công với Audit Trail")
     void shouldApproveDocumentSuccessfullyWithAuditTrail() {
-        when(safetyDocumentRepository.findById(documentId)).thenReturn(Optional.of(documentEntity));
+        when(safetyDocumentRepository.findByIdAndServiceId(documentId, serviceId))
+                .thenReturn(Optional.of(documentEntity));
         when(safetyDocumentRepository.save(any(ServiceSafetyDocumentJpaEntity.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
-        ServiceSafetyDocumentJpaEntity result = useCase.approve(documentId, adminId);
+        ServiceSafetyDocumentJpaEntity result = useCase.approve(serviceId, documentId, adminId);
 
         assertNotNull(result);
         assertEquals(DocStatus.APPROVED, result.getStatus());
         assertEquals(adminId, result.getReviewedBy());
         assertNotNull(result.getReviewedAt());
 
-        verify(safetyDocumentRepository).findById(documentId);
+        verify(safetyDocumentRepository).findByIdAndServiceId(documentId, serviceId);
         verify(safetyDocumentRepository).save(documentEntity);
     }
 
@@ -97,10 +98,12 @@ class ApproveSafetyDocumentUseCaseTest {
     void shouldRejectDocumentSuccessfullyWithReason() {
         String rejectionReason = "Giấy phép đã hết hạn hiệu lực từ ngày 01/01/2026";
 
-        when(safetyDocumentRepository.findById(documentId)).thenReturn(Optional.of(documentEntity));
+        when(safetyDocumentRepository.findByIdAndServiceId(documentId, serviceId))
+                .thenReturn(Optional.of(documentEntity));
         when(safetyDocumentRepository.save(any(ServiceSafetyDocumentJpaEntity.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
-        ServiceSafetyDocumentJpaEntity result = useCase.reject(documentId, adminId, rejectionReason);
+        ServiceSafetyDocumentJpaEntity result = useCase.reject(
+                serviceId, documentId, adminId, rejectionReason);
 
         assertNotNull(result);
         assertEquals(DocStatus.REJECTED, result.getStatus());
@@ -108,17 +111,18 @@ class ApproveSafetyDocumentUseCaseTest {
         assertNotNull(result.getReviewedAt());
         assertEquals(rejectionReason, result.getRejectionReason());
 
-        verify(safetyDocumentRepository).findById(documentId);
+        verify(safetyDocumentRepository).findByIdAndServiceId(documentId, serviceId);
         verify(safetyDocumentRepository).save(documentEntity);
     }
 
     @Test
     @DisplayName("AC4.3: Ném ngoại lệ khi duyệt tài liệu không tồn tại trong hệ thống")
     void shouldThrowWhenDocumentNotFoundOnApprove() {
-        when(safetyDocumentRepository.findById(documentId)).thenReturn(Optional.empty());
+        when(safetyDocumentRepository.findByIdAndServiceId(documentId, serviceId))
+                .thenReturn(Optional.empty());
 
         assertThrows(RuntimeException.class, () ->
-                useCase.approve(documentId, adminId)
+                useCase.approve(serviceId, documentId, adminId)
         );
 
         verify(safetyDocumentRepository, never()).save(any());

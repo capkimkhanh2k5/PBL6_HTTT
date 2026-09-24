@@ -24,6 +24,8 @@ import com.danasea.backend.modules.booking.domain.exceptions.UnauthorizedBooking
 import com.danasea.backend.modules.booking.domain.models.Booking;
 import com.danasea.backend.modules.booking.domain.models.BookingItem;
 import com.danasea.backend.modules.booking.domain.models.BookingStatus;
+import com.danasea.backend.modules.booking.domain.models.CancellationFinancialResult;
+import com.danasea.backend.modules.booking.domain.ports.BookingCancellationFinancialPort;
 import com.danasea.backend.modules.booking.domain.ports.BookingRepositoryPort;
 import com.danasea.backend.modules.booking.domain.ports.InventoryLockPort;
 import com.danasea.backend.modules.booking.domain.ports.ServiceSlotPort;
@@ -48,6 +50,9 @@ class CancelBookingUseCaseTest {
     @Mock
     private InventoryLockPort inventoryLockPort;
 
+    @Mock
+    private BookingCancellationFinancialPort financialPort;
+
     private CancelBookingUseCase useCase;
 
     private final UUID bookingId = UUID.randomUUID();
@@ -57,7 +62,8 @@ class CancelBookingUseCaseTest {
 
     @BeforeEach
     void setUp() {
-        useCase = new CancelBookingUseCase(bookingRepository, serviceSlotPort, inventoryLockPort);
+        useCase = new CancelBookingUseCase(
+                bookingRepository, serviceSlotPort, inventoryLockPort, financialPort);
     }
 
     private Booking createBooking(BookingStatus status, LocalDate itemDate, LocalTime itemTime, BigDecimal totalAmount) {
@@ -94,8 +100,10 @@ class CancelBookingUseCaseTest {
         BigDecimal totalAmount = BigDecimal.valueOf(500000);
 
         Booking booking = createBooking(BookingStatus.CONFIRMED, serviceDate, serviceTime, totalAmount);
-        when(bookingRepository.findByIdWithItems(bookingId)).thenReturn(Optional.of(booking));
+        when(bookingRepository.findByIdWithItemsForUpdate(bookingId)).thenReturn(Optional.of(booking));
         when(bookingRepository.save(any(Booking.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        when(financialPort.requestRefund(eq(bookingId), eq(customerId), any(), any()))
+                .thenReturn(new CancellationFinancialResult(true, 100, totalAmount));
 
         CancelBookingCommand command = new CancelBookingCommand(bookingId, customerId, false, "Kế hoạch thay đổi");
         BookingCancelResult result = useCase.execute(command);
@@ -107,7 +115,7 @@ class CancelBookingUseCaseTest {
         assertThat(result.refundPercentage()).isEqualTo(100);
         assertThat(result.refundAmount()).isEqualByComparingTo(totalAmount);
         assertThat(result.cancellationReason()).isEqualTo("Kế hoạch thay đổi");
-        assertThat(result.message()).contains("hoàn 100% tiền");
+        assertThat(result.message()).contains("refund request is pending");
 
         // Xác nhận hoàn trả sức chứa slot trong PostgreSQL
         verify(serviceSlotPort).releaseCapacityBatch(booking.getItems());
@@ -125,8 +133,10 @@ class CancelBookingUseCaseTest {
         BigDecimal totalAmount = BigDecimal.valueOf(500000);
 
         Booking booking = createBooking(BookingStatus.CONFIRMED, serviceDate, serviceTime, totalAmount);
-        when(bookingRepository.findByIdWithItems(bookingId)).thenReturn(Optional.of(booking));
+        when(bookingRepository.findByIdWithItemsForUpdate(bookingId)).thenReturn(Optional.of(booking));
         when(bookingRepository.save(any(Booking.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        when(financialPort.requestRefund(eq(bookingId), eq(customerId), any(), any()))
+                .thenReturn(CancellationFinancialResult.noRefund());
 
         CancelBookingCommand command = new CancelBookingCommand(bookingId, customerId, false, null);
         BookingCancelResult result = useCase.execute(command);
@@ -139,7 +149,7 @@ class CancelBookingUseCaseTest {
         assertThat(result.refundAmount()).isEqualByComparingTo(BigDecimal.ZERO);
         // Fallback lý do mặc định
         assertThat(result.cancellationReason()).isEqualTo("Customer requested cancellation");
-        assertThat(result.message()).contains("không được hoàn tiền");
+        assertThat(result.message()).contains("does not provide a refund");
 
         // Vẫn phải nhả slot cho người khác đặt
         verify(serviceSlotPort).releaseCapacityBatch(booking.getItems());
@@ -155,7 +165,7 @@ class CancelBookingUseCaseTest {
         BigDecimal totalAmount = BigDecimal.valueOf(300000);
 
         Booking booking = createBooking(BookingStatus.HOLD, serviceDate, serviceTime, totalAmount);
-        when(bookingRepository.findByIdWithItems(bookingId)).thenReturn(Optional.of(booking));
+        when(bookingRepository.findByIdWithItemsForUpdate(bookingId)).thenReturn(Optional.of(booking));
         when(bookingRepository.save(any(Booking.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
         CancelBookingCommand command = new CancelBookingCommand(bookingId, customerId, false, "Đổi ý không đặt nữa");
@@ -177,7 +187,7 @@ class CancelBookingUseCaseTest {
     @DisplayName("Chống IDOR: Khách hàng khác cố hủy booking của người khác -> ném UnauthorizedBookingAccessException")
     void execute_WhenCallerNotOwnerAndNotAdmin_ShouldThrowUnauthorizedBookingAccessException() {
         Booking booking = createBooking(BookingStatus.CONFIRMED, LocalDate.now().plusDays(2), LocalTime.of(10, 0), BigDecimal.valueOf(300000));
-        when(bookingRepository.findByIdWithItems(bookingId)).thenReturn(Optional.of(booking));
+        when(bookingRepository.findByIdWithItemsForUpdate(bookingId)).thenReturn(Optional.of(booking));
 
         CancelBookingCommand command = new CancelBookingCommand(bookingId, otherUserId, false, "Hủy trộm");
 
@@ -192,8 +202,10 @@ class CancelBookingUseCaseTest {
     @DisplayName("Admin bypass IDOR: Admin có thể hủy booking của bất kỳ khách hàng nào")
     void execute_WhenCallerIsAdmin_ShouldBypassOwnershipCheckAndCancel() {
         Booking booking = createBooking(BookingStatus.CONFIRMED, LocalDate.now().plusDays(2), LocalTime.of(10, 0), BigDecimal.valueOf(300000));
-        when(bookingRepository.findByIdWithItems(bookingId)).thenReturn(Optional.of(booking));
+        when(bookingRepository.findByIdWithItemsForUpdate(bookingId)).thenReturn(Optional.of(booking));
         when(bookingRepository.save(any(Booking.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        when(financialPort.requestRefund(eq(bookingId), eq(otherUserId), any(), any()))
+                .thenReturn(new CancellationFinancialResult(true, 100, BigDecimal.valueOf(300000)));
 
         // otherUserId nhưng isAdmin = true
         CancelBookingCommand command = new CancelBookingCommand(bookingId, otherUserId, true, "Admin can thiệp theo yêu cầu khách");
@@ -208,7 +220,7 @@ class CancelBookingUseCaseTest {
     @DisplayName("Hủy booking đã bị CANCELLED từ trước: ném InvalidBookingStateException")
     void execute_WhenBookingAlreadyCancelled_ShouldThrowInvalidBookingStateException() {
         Booking booking = createBooking(BookingStatus.CANCELLED, LocalDate.now().plusDays(2), LocalTime.of(10, 0), BigDecimal.valueOf(300000));
-        when(bookingRepository.findByIdWithItems(bookingId)).thenReturn(Optional.of(booking));
+        when(bookingRepository.findByIdWithItemsForUpdate(bookingId)).thenReturn(Optional.of(booking));
 
         CancelBookingCommand command = new CancelBookingCommand(bookingId, customerId, false, "Hủy tiếp");
 
@@ -222,7 +234,7 @@ class CancelBookingUseCaseTest {
     @Test
     @DisplayName("Booking không tồn tại: ném BookingNotFoundException")
     void execute_WhenBookingNotFound_ShouldThrowBookingNotFoundException() {
-        when(bookingRepository.findByIdWithItems(bookingId)).thenReturn(Optional.empty());
+        when(bookingRepository.findByIdWithItemsForUpdate(bookingId)).thenReturn(Optional.empty());
 
         CancelBookingCommand command = new CancelBookingCommand(bookingId, customerId, false, "Hủy");
 

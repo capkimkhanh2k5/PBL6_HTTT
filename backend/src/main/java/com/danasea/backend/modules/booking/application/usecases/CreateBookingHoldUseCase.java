@@ -29,6 +29,8 @@ import lombok.RequiredArgsConstructor;
 public class CreateBookingHoldUseCase {
 
     public static final Duration HOLD_DURATION = Duration.ofMinutes(15);
+    private static final int MAX_REQUEST_ITEMS = 20;
+    private static final int MAX_TOTAL_QUANTITY = 100;
 
     private final BookingRepositoryPort bookingRepository;
     private final InventoryLockPort inventoryLockPort;
@@ -45,9 +47,13 @@ public class CreateBookingHoldUseCase {
         if (command.items() == null || command.items().isEmpty()) {
             throw new IllegalArgumentException("Booking must contain at least one item");
         }
+        if (command.items().size() > MAX_REQUEST_ITEMS) {
+            throw new IllegalArgumentException("Booking must contain at most " + MAX_REQUEST_ITEMS + " items");
+        }
 
         // 2. Aggregate quantities by slotId to avoid duplicate entries in lock requests
         Map<UUID, Integer> aggregatedSlotQuantities = new LinkedHashMap<>();
+        int totalQuantity = 0;
         for (BookingHoldItemDto item : command.items()) {
             if (item.slotId() == null) {
                 throw new IllegalArgumentException("slotId cannot be null");
@@ -55,7 +61,16 @@ public class CreateBookingHoldUseCase {
             if (item.quantity() == null || item.quantity() <= 0) {
                 throw new IllegalArgumentException("quantity must be positive");
             }
-            aggregatedSlotQuantities.merge(item.slotId(), item.quantity(), Integer::sum);
+            try {
+                totalQuantity = Math.addExact(totalQuantity, item.quantity());
+                aggregatedSlotQuantities.merge(item.slotId(), item.quantity(), Math::addExact);
+            } catch (ArithmeticException exception) {
+                throw new IllegalArgumentException("Total booking quantity is too large", exception);
+            }
+            if (totalQuantity > MAX_TOTAL_QUANTITY) {
+                throw new IllegalArgumentException(
+                        "Total booking quantity must not exceed " + MAX_TOTAL_QUANTITY);
+            }
         }
 
         // 3. Query slot and service details to validate business rules

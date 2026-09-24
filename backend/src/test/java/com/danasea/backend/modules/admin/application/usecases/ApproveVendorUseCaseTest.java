@@ -9,6 +9,8 @@ import com.danasea.backend.modules.vendor.application.api.VendorInternalApi;
 import com.danasea.backend.modules.vendor.domain.exceptions.VendorNotFoundException;
 import com.danasea.backend.modules.vendor.domain.models.Vendor;
 import com.danasea.backend.modules.vendor.domain.models.VerificationStatus;
+import com.danasea.backend.modules.vendor.domain.models.DocType;
+import com.danasea.backend.modules.admin.domain.exceptions.VendorDocumentsIncompleteException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -18,6 +20,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.time.OffsetDateTime;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.EnumSet;
+import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -84,6 +88,8 @@ class ApproveVendorUseCaseTest {
         vendor.setVerificationStatus(VerificationStatus.PENDING);
 
         when(vendorInternalApi.findById(vendorId)).thenReturn(Optional.of(vendor));
+        when(vendorInternalApi.getApprovedDocumentTypes(vendorId))
+                .thenReturn(EnumSet.allOf(DocType.class));
         when(vendorInternalApi.saveVendor(any(Vendor.class))).thenAnswer(i -> i.getArgument(0));
 
         User user = new User();
@@ -117,5 +123,23 @@ class ApproveVendorUseCaseTest {
                 eq(vendorId),
                 anyString()
         );
+    }
+
+    @Test
+    void execute_WhenRequiredDocumentsAreNotApproved_RejectsApproval() {
+        Vendor vendor = new Vendor();
+        vendor.setId(vendorId);
+        vendor.setUserId(userId);
+        vendor.setVerificationStatus(VerificationStatus.PENDING);
+        when(vendorInternalApi.findById(vendorId)).thenReturn(Optional.of(vendor));
+        when(vendorInternalApi.getApprovedDocumentTypes(vendorId))
+                .thenReturn(Set.of(DocType.BUSINESS_LICENSE));
+
+        assertThatThrownBy(() -> approveVendorUseCase.execute(vendorId, adminId))
+                .isInstanceOf(VendorDocumentsIncompleteException.class)
+                .hasMessageContaining("SAFETY_CERT");
+
+        verify(vendorInternalApi, never()).saveVendor(any());
+        verify(accountInternalApi, never()).saveUser(any());
     }
 }

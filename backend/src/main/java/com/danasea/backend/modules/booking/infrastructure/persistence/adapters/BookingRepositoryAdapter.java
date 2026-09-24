@@ -59,6 +59,12 @@ public class BookingRepositoryAdapter implements BookingRepositoryPort {
     }
 
     @Override
+    @Transactional
+    public Optional<Booking> findByIdWithItemsForUpdate(UUID id) {
+        return jpaBookingRepository.findByIdWithItemsForUpdate(id).map(bookingMapper::toDomain);
+    }
+
+    @Override
     @Transactional(readOnly = true)
     public PagedResult<Booking> findCustomerBookings(
             UUID customerId,

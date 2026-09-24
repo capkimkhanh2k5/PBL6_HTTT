@@ -19,7 +19,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping("/api/v1/catalog")
+@RequestMapping({"/api/services", "/api/v1/catalog"})
 @RequiredArgsConstructor
 public class CatalogController {
 
@@ -38,6 +38,7 @@ public class CatalogController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size
     ) {
+        validateSearchParameters(keyword, minPrice, maxPrice, lat, lng, radiusKm, page, size);
         SearchServicesCriteria criteria = SearchServicesCriteria.builder()
                 .categoryId(categoryId)
                 .keyword(keyword)
@@ -97,5 +98,46 @@ public class CatalogController {
                 .build();
 
         return ResponseEntity.ok(response);
+    }
+
+    private void validateSearchParameters(
+            String keyword,
+            BigDecimal minPrice,
+            BigDecimal maxPrice,
+            BigDecimal lat,
+            BigDecimal lng,
+            Double radiusKm,
+            int page,
+            int size) {
+        if (page < 0) {
+            throw new IllegalArgumentException("page must be greater than or equal to 0");
+        }
+        if (size < 1 || size > 100) {
+            throw new IllegalArgumentException("size must be between 1 and 100");
+        }
+        if (keyword != null && keyword.length() > 100) {
+            throw new IllegalArgumentException("keyword must not exceed 100 characters");
+        }
+        if (minPrice != null && minPrice.signum() < 0
+                || maxPrice != null && maxPrice.signum() < 0) {
+            throw new IllegalArgumentException("price filters must not be negative");
+        }
+        if (minPrice != null && maxPrice != null && minPrice.compareTo(maxPrice) > 0) {
+            throw new IllegalArgumentException("minPrice must not exceed maxPrice");
+        }
+        if ((lat == null) != (lng == null)) {
+            throw new IllegalArgumentException("lat and lng must be provided together");
+        }
+        if (lat != null && (lat.compareTo(BigDecimal.valueOf(-90)) < 0
+                || lat.compareTo(BigDecimal.valueOf(90)) > 0)) {
+            throw new IllegalArgumentException("lat must be between -90 and 90");
+        }
+        if (lng != null && (lng.compareTo(BigDecimal.valueOf(-180)) < 0
+                || lng.compareTo(BigDecimal.valueOf(180)) > 0)) {
+            throw new IllegalArgumentException("lng must be between -180 and 180");
+        }
+        if (radiusKm != null && (lat == null || radiusKm <= 0 || radiusKm > 200)) {
+            throw new IllegalArgumentException("radiusKm requires coordinates and must be between 0 and 200");
+        }
     }
 }

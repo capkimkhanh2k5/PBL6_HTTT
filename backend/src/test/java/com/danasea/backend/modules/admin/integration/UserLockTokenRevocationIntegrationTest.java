@@ -139,8 +139,8 @@ class UserLockTokenRevocationIntegrationTest {
         when(refreshTokenRepository.findAllByUserId(targetUserId))
                 .thenAnswer(inv -> tokenStore.stream().filter(t -> t.getUserId().equals(targetUserId)).toList());
 
-        // Mock findByTokenHash for both tokens
-        when(refreshTokenRepository.findByTokenHash(anyString())).thenAnswer(inv -> {
+        // Refresh flow acquires a pessimistic lock before rotating a token.
+        when(refreshTokenRepository.findForUpdateByTokenHash(anyString())).thenAnswer(inv -> {
             String hash = inv.getArgument(0);
             return tokenStore.stream().filter(t -> t.getTokenHash().equals(hash)).findFirst();
         });

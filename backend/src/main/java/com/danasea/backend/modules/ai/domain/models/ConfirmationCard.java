@@ -23,6 +23,7 @@ public class ConfirmationCard {
     private String id;
     private UUID conversationId;
     private UUID serviceId;
+    private UUID slotId;
     private BigDecimal price; // The price when the card was generated
     private String date; // Booking date/slot
     private Integer quantity;

@@ -167,6 +167,24 @@ class CreateBookingHoldUseCaseTest {
     }
 
     @Test
+    @DisplayName("Should reject a request whose total quantity exceeds the bounded limit")
+    void testRejectsExcessiveTotalQuantity() {
+        UUID slotId = UUID.randomUUID();
+        CreateBookingHoldCommand command = new CreateBookingHoldCommand(
+                UUID.randomUUID(),
+                List.of(
+                        new BookingHoldItemDto(slotId, 60),
+                        new BookingHoldItemDto(slotId, 41)));
+
+        assertThatThrownBy(() -> useCase.execute(command))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("must not exceed 100");
+
+        verify(inventoryLockPort, never()).acquireHolds(any(), any(), any());
+        verify(serviceSlotPort, never()).findSlotDetailsBatch(any());
+    }
+
+    @Test
     @DisplayName("Should throw SlotNotAvailableException when slot does not exist")
     void testSlotNotFound() {
         UUID customerId = UUID.randomUUID();
