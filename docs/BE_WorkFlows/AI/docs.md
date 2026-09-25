@@ -14,41 +14,43 @@
 
 ## 1. AI_Chat.png — Luồng tổng quan AI Chat
 
-**Thành phần:** `User (Frontend)` → `AssistantController` → `RedisRateLimiter` → `ModerationPort (LlamaGuard)` → `ChatUseCase` → `GroqLlmClient` → `PostgreSQL`
+**Thành phần:** `User (Frontend)` → `LocaleContextFilter` → `AssistantController` → `RedisRateLimiter` → `ModerationPort (LlamaGuard)` → `SystemPromptBuilder` → `ChatUseCase` → `GroqLlmClient` → `PostgreSQL`
 
 **Luồng:**
-1. Khách gọi `POST /api/assistant/chat` gửi tin nhắn
-2. `RedisRateLimiter` kiểm tra tần suất theo **Token Bucket + TrustTier**:
-   - Vượt quota → HTTP 429
-   - Cho phép → tiếp tục
-3. `ModerationPort (LlamaGuard)` quét `isSafe(message)` — phát hiện Prompt Injection / Jailbreak:
-   - Độc hại → HTTP 400 từ chối
-   - An toàn → tiếp tục
-4. `ChatUseCase`:
-   - Load/Tạo Conversation History từ PostgreSQL
-   - Gọi `GroqLlmClient.generateResponse(History + Tools + Message)`
-   - LLM trả văn bản hoặc **Lệnh gọi Tool**
-5. Lưu `AiMessage` & `AuditLog` → trả HTTP 200 cho User
+1. Khách gửi tin nhắn qua `POST /api/assistant/chat` kèm header `Accept-Language: vi`.
+2. `LocaleContextFilter` trích xuất và thiết lập ngữ cảnh ngôn ngữ (`SupportedLanguage.VI`).
+3. `RedisRateLimiter` kiểm tra tần suất theo **Token Bucket + TrustTier**:
+   - Vượt quota → HTTP 429 Too Many Requests.
+   - Cho phép → tiếp tục.
+4. `ModerationPort (LlamaGuard)` quét `isSafe(truncatedContent)` — phát hiện Prompt Injection / Jailbreak:
+   - Độc hại → Ném `LocalizedException("ai.moderation.blocked")` trả về HTTP 400 với thông báo chuẩn hóa theo ngôn ngữ người dùng.
+   - An toàn → tiếp tục.
+5. `SystemPromptBuilder.buildBasePrompt(language)` nạp System Prompt tương ứng với ngôn ngữ đã phân giải.
+6. `ChatUseCase`:
+   - Load/Tạo Conversation History từ PostgreSQL theo ngôn ngữ.
+   - Gọi `GroqLlmClient.generateResponse(history, language)`.
+   - LLM trả văn bản hoặc **Lệnh gọi Tool**.
+7. Lưu `AiMessage` & `AuditLog` → trả HTTP 200 cho User.
 
 ---
 
 ## 2. Chat_ModerationFlow.png — Chi tiết Moderation + Tool Calling
 
-**Thành phần:** `Khách Hàng` → `AssistantController` → `RedisRateLimiter (2-Layer)` → `ChatUseCase` → `GroqModerationClient (Prompt Guard)` → `GroqLlmClient (Rotator 5 Keys)` → `GetPolicyTool / ServiceTools` → `Postgres & Redis`
+**Thành phần:** `Khách Hàng` → `AssistantController` → `RedisRateLimiter (2-Layer)` → `ChatUseCase` → `GroqModerationClient (Prompt Guard)` → `GroqLlmClient (Rotator 5 Keys)` → `ToolExecutor [ConversationAware]` → `Postgres & Redis`
 
 **Luồng chi tiết:**
 1. Kiểm tra hạn mức `IP + TrustTier` (2 tầng):
-   - Bị từ chối / RESTRICTED → 429
-   - Cho phép → tiếp tục
-2. **Cắt chuỗi max 1800 ký tự** — chống Padding Attack
+   - Bị từ chối / RESTRICTED → HTTP 429 Rate Limited.
+   - Cho phép → tiếp tục.
+2. **Cắt chuỗi max 1800 ký tự** — chống Padding Attack làm cạn kiệt tài nguyên xử lý ngữ cảnh.
 3. `isSafe(truncatedContent)`:
-   - **Unsafe:** Ghi Audit Log vi phạm → quăng ngoại lệ → *"Vi phạm chính sách an toàn"*
-   - **Benign:** Lưu User message → tiếp tục
+   - **Unsafe:** Ghi Audit Log vi phạm → Ném `LocalizedException` trả về thông báo lỗi đa ngôn ngữ.
+   - **Benign:** Lưu User message vào DB → tiếp tục.
 4. **Vòng lặp Tool Calling (tối đa 5 lượt):**
-   - LLM trả `ToolCall` (vd: `get_policy`) → Backend thực thi Tool → truy vấn DB → trả JSON
-   - **Policy Guard:** Nếu LLM trả lời về chính sách mà chưa gọi `get_policy` → **THU HỒI & THAY THẾ** bằng thông báo chuẩn
-   - LLM trả văn bản → lưu Assistant message & Audit Log
-5. Trả 200 OK + nội dung trả lời
+   - LLM trả `ToolCall` → Backend thực thi Tool thông qua `ToolExecutor.execute(args, ToolExecutionContext{language, convId})` để đảm bảo kết quả truy vấn hoặc thông báo được chuẩn hóa đúng ngôn ngữ người dùng.
+   - **Policy Guard:** Nếu LLM trả lời về chính sách mà chưa gọi `get_policy` → **THU HỒI & THAY THẾ** bằng thông báo chuẩn từ hệ thống.
+   - LLM trả văn bản → lưu Assistant message & Audit Log.
+5. Trả HTTP 200 OK + nội dung phản hồi hoàn chỉnh.
 
 ---
 
