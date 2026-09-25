@@ -1,0 +1,21 @@
+spring:
+  config:
+    import: optional:configtree:/run/secrets/
+  rabbitmq:
+    username: ${SPRING_RABBITMQ_USERNAME}
+    virtual-host: ${SPRING_RABBITMQ_VIRTUAL_HOST}
+
+app:
+  cors:
+    allowed-origins: ${APP_CORS_ALLOWED_ORIGINS}
+
+springdoc:
+  api-docs:
+    enabled: false
+  swagger-ui:
+    enabled: false
+
+logging:
+  structured:
+    format:
+      console: ecs

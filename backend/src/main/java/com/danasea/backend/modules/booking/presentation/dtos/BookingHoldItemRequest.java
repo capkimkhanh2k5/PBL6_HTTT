@@ -6,10 +6,10 @@ import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 
 public record BookingHoldItemRequest(
-        @NotNull(message = "slotId is required")
+        @NotNull(message = "{validation.booking.slot.required}")
         UUID slotId,
 
-        @NotNull(message = "quantity is required")
-        @Min(value = 1, message = "quantity must be at least 1")
+        @NotNull(message = "{validation.booking.quantity.required}")
+        @Min(value = 1, message = "{validation.booking.quantity.min}")
         Integer quantity
 ) {}

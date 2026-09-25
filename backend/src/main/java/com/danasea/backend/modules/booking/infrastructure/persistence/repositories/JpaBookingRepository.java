@@ -9,9 +9,12 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+
+import jakarta.persistence.LockModeType;
 
 import com.danasea.backend.modules.booking.domain.models.BookingStatus;
 import com.danasea.backend.modules.booking.infrastructure.persistence.entities.BookingJpaEntity;
@@ -23,6 +26,10 @@ public interface JpaBookingRepository extends JpaRepository<BookingJpaEntity, UU
 
     @Query("SELECT DISTINCT b FROM BookingJpaEntity b LEFT JOIN FETCH b.items WHERE b.id = :id")
     Optional<BookingJpaEntity> findByIdWithItems(@Param("id") UUID id);
+
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("SELECT DISTINCT b FROM BookingJpaEntity b LEFT JOIN FETCH b.items WHERE b.id = :id")
+    Optional<BookingJpaEntity> findByIdWithItemsForUpdate(@Param("id") UUID id);
 
     @EntityGraph(attributePaths = {"items"})
     @Query("SELECT b FROM BookingJpaEntity b WHERE b.customerId = :customerId AND (:status IS NULL OR b.status = :status)")

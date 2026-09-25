@@ -1,5 +1,6 @@
 package com.danasea.backend.security.authentication.presentation;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -10,10 +11,18 @@ import com.danasea.backend.security.authentication.domain.exceptions.OtpExpiredE
 import com.danasea.backend.security.authentication.domain.exceptions.OtpInvalidException;
 import com.danasea.backend.security.authentication.domain.exceptions.OtpMaxAttemptsExceededException;
 import com.danasea.backend.security.authentication.domain.exceptions.OtpRequestTooFrequentException;
+import com.danasea.backend.shared.i18n.LocalizedMessageService;
 import com.danasea.backend.shared.presentation.ErrorResponse;
 
 @RestControllerAdvice(basePackageClasses = AuthenticationController.class)
 public class AuthenticationExceptionHandler {
+
+        private LocalizedMessageService messages = LocalizedMessageService.standalone();
+
+        @Autowired(required = false)
+        void setLocalizedMessageService(LocalizedMessageService messages) {
+                this.messages = messages;
+        }
 
         @ExceptionHandler(EmailAlreadyUsedException.class)
         public ResponseEntity<ErrorResponse> handleEmailAlreadyUsed(
@@ -22,7 +31,7 @@ public class AuthenticationExceptionHandler {
                                 .status(HttpStatus.CONFLICT)
                                 .body(new ErrorResponse(
                                                 "EMAIL_ALREADY_USED",
-                                                exception.getMessage()));
+                                                messages.get("error.email_already_used")));
         }
 
         @ExceptionHandler({OtpInvalidException.class, OtpExpiredException.class, OtpMaxAttemptsExceededException.class})
@@ -31,7 +40,7 @@ public class AuthenticationExceptionHandler {
                                 .status(HttpStatus.BAD_REQUEST)
                                 .body(new ErrorResponse(
                                                 "INVALID_OTP",
-                                                "The OTP provided is invalid, expired, or has exceeded maximum attempts."));
+                                                messages.get("error.invalid_otp")));
         }
 
         @ExceptionHandler(OtpRequestTooFrequentException.class)
@@ -40,6 +49,6 @@ public class AuthenticationExceptionHandler {
                                 .status(HttpStatus.TOO_MANY_REQUESTS)
                                 .body(new ErrorResponse(
                                                 "OTP_REQUEST_TOO_FREQUENT",
-                                                exception.getMessage()));
+                                                messages.get("error.otp_request_too_frequent")));
         }
 }

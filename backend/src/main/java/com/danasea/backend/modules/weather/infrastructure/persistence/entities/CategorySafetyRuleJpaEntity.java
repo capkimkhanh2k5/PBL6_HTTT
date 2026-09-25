@@ -34,25 +34,25 @@ public class CategorySafetyRuleJpaEntity extends BaseJpaEntity {
     @Column(name = "category_name", nullable = false, length = 255)
     private String categoryName;
 
-    @Column(name = "caution_wave_height_m")
+    @Column(name = "caution_wave_height_m", columnDefinition = "NUMERIC(5,2)")
     private Double cautionWaveHeightM;
 
-    @Column(name = "max_wave_height_m", nullable = false)
+    @Column(name = "max_wave_height_m", nullable = false, columnDefinition = "NUMERIC(5,2)")
     private Double maxWaveHeightM;
 
-    @Column(name = "caution_wind_speed_kmh")
+    @Column(name = "caution_wind_speed_kmh", columnDefinition = "NUMERIC(5,2)")
     private Double cautionWindSpeedKmh;
 
-    @Column(name = "max_wind_speed_kmh", nullable = false)
+    @Column(name = "max_wind_speed_kmh", nullable = false, columnDefinition = "NUMERIC(5,2)")
     private Double maxWindSpeedKmh;
 
-    @Column(name = "max_wind_gust_kmh")
+    @Column(name = "max_wind_gust_kmh", columnDefinition = "NUMERIC(5,2)")
     private Double maxWindGustKmh;
 
-    @Column(name = "max_ocean_current_ms")
+    @Column(name = "max_ocean_current_ms", columnDefinition = "NUMERIC(5,2)")
     private Double maxOceanCurrentMs;
 
-    @Column(name = "min_visibility_m")
+    @Column(name = "min_visibility_m", columnDefinition = "NUMERIC(7,2)")
     private Double minVisibilityM;
 
     @Column(name = "fatal_thunderstorm_codes", length = 255)

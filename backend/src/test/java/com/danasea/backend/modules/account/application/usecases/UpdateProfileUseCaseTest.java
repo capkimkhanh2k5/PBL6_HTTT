@@ -40,7 +40,7 @@ class UpdateProfileUseCaseTest {
         assertNotNull(result);
         assertEquals("New Name", result.getFullName());
         assertEquals("http://avatar.com", result.getAvatarUrl());
-        assertEquals("vi-VN", result.getLocale());
+        assertEquals("vi", result.getLocale());
         assertEquals(Role.CUSTOMER, result.getRole()); // Unchanged
 
         verify(accountInternalApi, times(1)).saveUser(user);

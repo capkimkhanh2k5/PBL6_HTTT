@@ -53,7 +53,8 @@ public class SendVerificationOtpUseCase {
         authEventPublisher.publishOtpRequestedEvent(new OtpEmailRequestedEvent(
                 user.id(),
                 user.email(),
-                rawOtp
+                rawOtp,
+                user.locale()
         ));
     }
 }

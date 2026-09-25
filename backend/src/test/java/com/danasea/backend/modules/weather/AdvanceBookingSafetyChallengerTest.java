@@ -68,7 +68,7 @@ public class AdvanceBookingSafetyChallengerTest {
     private WeatherRuleEngine weatherRuleEngine;
     private CheckAdvanceBookingSafetyUseCase useCase;
 
-    private final LocalDate today = LocalDate.of(2026, 9, 20);
+    private final LocalDate today = LocalDate.now();
     private CategorySafetyRule supRule;
     private CategorySafetyRule divingRule;
     private CategorySafetyRule parasailingRule;
@@ -111,10 +111,10 @@ public class AdvanceBookingSafetyChallengerTest {
                     .build();
 
             IllegalArgumentException ex1 = assertThrows(IllegalArgumentException.class, () -> useCase.execute(req1, today));
-            assertTrue(ex1.getMessage().contains("quá khứ"), "Exception message must state date is in the past");
+            assertTrue(ex1.getMessage().contains("past"), "Exception message must state date is in the past");
 
             IllegalArgumentException ex2 = assertThrows(IllegalArgumentException.class, () -> useCase.execute(req2, today));
-            assertTrue(ex2.getMessage().contains("quá khứ"));
+            assertTrue(ex2.getMessage().contains("past"));
 
             assertThrows(IllegalArgumentException.class, () -> useCase.checkSafety(
                     UUID.randomUUID(), UUID.randomUUID(), "cheo-sup-kayak",
@@ -224,7 +224,7 @@ public class AdvanceBookingSafetyChallengerTest {
 
             assertFalse(resA.isSafe());
             assertEquals("RED", resA.getSafetyStatus());
-            assertTrue(resA.getWarningMessage().contains("1.2m vượt ngưỡng an toàn tối đa"));
+            assertTrue(resA.getWarningMessage().contains("Wave height 1.2m exceeds the maximum safe threshold"));
 
             // Scenario B: Wave 0.6m (caution: 0.5m, max: 0.8m) -> YELLOW
             WeatherInfoDto.TimeWindowForecast cautionWaveForecast = WeatherInfoDto.TimeWindowForecast.builder()
@@ -242,7 +242,7 @@ public class AdvanceBookingSafetyChallengerTest {
 
             assertTrue(resB.isSafe());
             assertEquals("YELLOW", resB.getSafetyStatus());
-            assertTrue(resB.getWarningMessage().contains("CẢNH BÁO THẬN TRỌNG"));
+            assertTrue(resB.getWarningMessage().contains("CAUTION ALERT"));
         }
 
         @Test
@@ -363,7 +363,7 @@ public class AdvanceBookingSafetyChallengerTest {
             assertTrue(res17.isProvisional());
             assertTrue(res17.isMarineCutoffExceeded());
             assertNull(res17.getForecast());
-            assertTrue(res17.getWarningMessage().contains("vượt quá giới hạn mô hình dự báo thời tiết 16 ngày"));
+            assertTrue(res17.getWarningMessage().contains("exceeds Open-Meteo's 16-day forecast window"));
 
             // Day 17 in checkSafety(): throws IllegalArgumentException
             assertThrows(IllegalArgumentException.class, () -> useCase.checkSafety(
@@ -634,9 +634,10 @@ public class AdvanceBookingSafetyChallengerTest {
         void testMarineFailsWeatherSucceeds_EstimatesWaveFromWind() {
             when(categorySafetyRuleService.getRuleByCategorySlug("cheo-sup-kayak")).thenReturn(supRule);
 
+            LocalDate day4 = today.plusDays(4);
             OpenMeteoWeatherResponse weatherResp = new OpenMeteoWeatherResponse();
             OpenMeteoWeatherResponse.HourlyData hourly = new OpenMeteoWeatherResponse.HourlyData();
-            hourly.setTime(List.of("2026-09-24T08:00", "2026-09-24T09:00"));
+            hourly.setTime(List.of(day4.atTime(8, 0).toString(), day4.atTime(9, 0).toString()));
             hourly.setWindSpeed10m(List.of(20.0, 22.0));
             hourly.setWindGusts10m(List.of(25.0, 27.0));
             hourly.setVisibility(List.of(9000.0, 9000.0));
@@ -654,7 +655,6 @@ public class AdvanceBookingSafetyChallengerTest {
                     weatherRuleEngine
             );
 
-            LocalDate day4 = today.plusDays(4);
             AdvanceBookingSafetyResponse res = robustUseCase.execute(AdvanceBookingSafetyRequest.builder()
                     .categorySlug("cheo-sup-kayak")
                     .bookingDate(day4)
@@ -701,7 +701,7 @@ public class AdvanceBookingSafetyChallengerTest {
             when(slotRepository.findById(randomSlotId)).thenReturn(Optional.empty());
 
             IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () -> useCase.checkBySlotId(randomSlotId));
-            assertTrue(ex.getMessage().contains("Slot không tồn tại"));
+            assertTrue(ex.getMessage().contains("Service slot not found"));
         }
 
         @Test

@@ -8,12 +8,15 @@ import com.danasea.backend.modules.ai.infrastructure.persistence.repositories.Jp
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.OffsetDateTime;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
+import com.danasea.backend.shared.i18n.SupportedLanguage;
 
 @Service
 @RequiredArgsConstructor
@@ -24,16 +27,30 @@ public class ChatHistoryService {
 
     @Transactional
     public AiConversationJpaEntity getOrCreateConversation(UUID conversationId, UUID userId) {
-        if (conversationId != null) {
-            return conversationRepository.findById(conversationId)
-                    .orElseGet(() -> createNewConversation(userId));
-        }
-        return createNewConversation(userId);
+        return getOrCreateConversation(conversationId, userId, SupportedLanguage.VI);
     }
 
-    private AiConversationJpaEntity createNewConversation(UUID userId) {
+    @Transactional
+    public AiConversationJpaEntity getOrCreateConversation(
+            UUID conversationId, UUID userId, SupportedLanguage language) {
+        if (conversationId != null) {
+            return conversationRepository.findById(conversationId)
+                    .map(conversation -> requireOwnership(conversation, userId))
+                    .orElseGet(() -> createNewConversation(userId, language));
+        }
+        return createNewConversation(userId, language);
+    }
+
+    @Transactional(readOnly = true)
+    public Optional<AiConversationJpaEntity> getConversationForUser(UUID conversationId, UUID userId) {
+        return conversationRepository.findById(conversationId)
+                .map(conversation -> requireOwnership(conversation, userId));
+    }
+
+    private AiConversationJpaEntity createNewConversation(UUID userId, SupportedLanguage language) {
         AiConversationJpaEntity conversation = new AiConversationJpaEntity();
         conversation.setUserId(userId);
+        conversation.setLocale((language == null ? SupportedLanguage.VI : language).code());
         conversation.setStartedAt(OffsetDateTime.now());
         return conversationRepository.save(conversation);
     }
@@ -55,5 +72,22 @@ public class ChatHistoryService {
                 conversationId,
                 PageRequest.of(0, limit, Sort.by("createdAt").descending())
         );
+    }
+
+    @Transactional(readOnly = true)
+    public Optional<List<AiMessageJpaEntity>> getRecentMessagesForUser(
+            UUID conversationId,
+            UUID userId,
+            int limit) {
+        int boundedLimit = Math.max(1, Math.min(limit, 100));
+        return getConversationForUser(conversationId, userId)
+                .map(conversation -> getRecentMessages(conversation.getId(), boundedLimit));
+    }
+
+    private AiConversationJpaEntity requireOwnership(AiConversationJpaEntity conversation, UUID userId) {
+        if (userId == null || !userId.equals(conversation.getUserId())) {
+            throw new AccessDeniedException("Conversation does not belong to the authenticated user");
+        }
+        return conversation;
     }
 }

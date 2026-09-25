@@ -27,15 +27,9 @@ import com.danasea.backend.modules.admin.application.usecases.GetUsersUseCase;
 import com.danasea.backend.modules.admin.application.usecases.LockUserUseCase;
 import com.danasea.backend.modules.admin.application.usecases.UnlockUserUseCase;
 import com.danasea.backend.modules.audit.application.api.AuditLogInternalApi;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 @Configuration
 public class ApplicationBeans {
-
-    @Bean
-    public ObjectMapper objectMapper() {
-        return new ObjectMapper();
-    }
 
     @Bean
     LoginUseCase loginUseCase(

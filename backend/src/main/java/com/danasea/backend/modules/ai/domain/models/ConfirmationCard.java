@@ -23,12 +23,14 @@ public class ConfirmationCard {
     private String id;
     private UUID conversationId;
     private UUID serviceId;
+    private UUID slotId;
     private BigDecimal price; // The price when the card was generated
     private String date; // Booking date/slot
     private Integer quantity;
     private String status; // PENDING, CONFIRMED, EXPIRED, CANCELLED
     private LocalDateTime createdAt;
     private String reason;
+    private String locale;
 
     @Builder.Default
     private int retryCount = 0; // Number of times this card has been re-generated

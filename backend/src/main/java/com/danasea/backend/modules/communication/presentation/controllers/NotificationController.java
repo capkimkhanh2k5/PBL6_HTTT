@@ -11,6 +11,8 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.data.domain.Page;
 
 import java.util.List;
 import java.util.UUID;
@@ -24,9 +26,11 @@ public class NotificationController {
 
     @GetMapping
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<List<NotificationResponse>> getMyNotifications() {
+    public ResponseEntity<Page<NotificationResponse>> getMyNotifications(
+            @RequestParam(name = "page", defaultValue = "0") int page,
+            @RequestParam(name = "size", defaultValue = "20") int size) {
         UUID userId = SecurityUtils.getCurrentUserId()
                 .orElseThrow(() -> new AccessDeniedException("User not authenticated"));
-        return ResponseEntity.ok(getNotificationsUseCase.execute(userId));
+        return ResponseEntity.ok(getNotificationsUseCase.execute(userId, page, size));
     }
 }

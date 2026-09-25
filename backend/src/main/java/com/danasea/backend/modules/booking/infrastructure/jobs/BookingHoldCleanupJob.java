@@ -21,7 +21,7 @@ public class BookingHoldCleanupJob {
     private final BookingRepositoryPort bookingRepository;
     private final InventoryLockPort inventoryLockPort;
 
-    @Scheduled(fixedDelay = 60000)
+    @Scheduled(fixedDelayString = "${app.scheduler.booking-cleanup-delay:1m}")
     public void cleanExpiredHolds() {
         OffsetDateTime now = OffsetDateTime.now();
         List<Booking> expiredHolds = bookingRepository.findExpiredHolds(now);

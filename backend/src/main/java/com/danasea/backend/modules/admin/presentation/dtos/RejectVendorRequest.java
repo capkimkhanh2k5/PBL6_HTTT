@@ -5,6 +5,6 @@ import lombok.Data;
 
 @Data
 public class RejectVendorRequest {
-    @NotBlank(message = "Reason for rejection is required")
+    @NotBlank(message = "{validation.rejection_reason.required}")
     private String reason;
 }

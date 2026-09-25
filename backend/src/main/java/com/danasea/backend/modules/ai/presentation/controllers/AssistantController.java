@@ -10,6 +10,10 @@ import com.danasea.backend.modules.ai.infrastructure.persistence.repositories.Jp
 import com.danasea.backend.security.infrastructure.SecurityUtils;
 import com.danasea.backend.modules.ai.application.port.RateLimiterPort;
 import com.danasea.backend.modules.ai.domain.TrustTier;
+import com.danasea.backend.modules.ai.domain.exceptions.AiConversationLocaleMismatchException;
+import com.danasea.backend.shared.i18n.LocalizedMessageService;
+import com.danasea.backend.shared.i18n.SupportedLanguage;
+import com.danasea.backend.shared.presentation.ErrorResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -21,6 +25,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+import org.springframework.context.i18n.LocaleContextHolder;
 
 @RestController
 @RequestMapping("/api/assistant")
@@ -37,6 +42,7 @@ public class AssistantController {
     private final AssistantAuditLogService auditLogService;
     private final JpaAiConversationRepository conversationRepository;
     private final RateLimiterPort rateLimiter;
+    private final LocalizedMessageService messages;
 
     @PostMapping("/chat")
     public ResponseEntity<?> chat(@RequestBody Map<String, Object> request, HttpServletRequest httpRequest) {
@@ -45,24 +51,32 @@ public class AssistantController {
         UUID userId = currentUserIdOpt.orElse(null);
         String userIdStr = userId != null ? userId.toString() : null;
         TrustTier tier = userId != null ? TrustTier.VERIFIED : TrustTier.UNVERIFIED;
+        SupportedLanguage language = SupportedLanguage
+                .fromTag(LocaleContextHolder.getLocale().toLanguageTag())
+                .orElse(SupportedLanguage.VI);
 
         // Enforce rate limiting prior to calling chatUseCase
         if (!rateLimiter.isAllowed(userIdStr, clientIp, tier)) {
-            return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS).body(Map.of(
-                "status", "error",
-                "message", "Rate limit exceeded. Please try again later."
-            ));
+            return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS)
+                    .body(new ErrorResponse("RATE_LIMIT_EXCEEDED", messages.get("ai.rate_limit", language)));
         }
 
         UUID requestedConversationId = request.containsKey("conversationId") && request.get("conversationId") != null
                 ? UUID.fromString((String) request.get("conversationId")) : null;
-        
-        AiConversationJpaEntity conversation = chatHistoryService.getOrCreateConversation(requestedConversationId, userId);
+
+        AiConversationJpaEntity conversation = chatHistoryService
+                .getOrCreateConversation(requestedConversationId, userId, language);
+        SupportedLanguage conversationLanguage = SupportedLanguage
+                .fromTag(conversation.getLocale())
+                .orElse(SupportedLanguage.VI);
+        if (conversationLanguage != language) {
+            throw new AiConversationLocaleMismatchException();
+        }
         UUID conversationId = conversation.getId();
-        
+
         String userMessage = (String) request.getOrDefault("message", "");
         
-        var llmResponse = chatUseCase.processMessage(conversationId, userMessage);
+        var llmResponse = chatUseCase.processMessage(conversationId, userMessage, conversationLanguage);
         String responseContent = llmResponse.getContent();
         
         // Log chat action
@@ -89,18 +103,18 @@ public class AssistantController {
     @PostMapping("/conversations/{id}/confirm")
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<?> confirmBooking(
-            @PathVariable UUID id, 
+            @PathVariable UUID id,
             @RequestBody Map<String, Object> request) {
         String cardId = (String) request.get("cardId");
-        
+
         UUID userId = SecurityUtils.getCurrentUserId().orElseThrow(() -> new IllegalStateException("User not authenticated"));
         String sessionId = request.getOrDefault("sessionId", DEFAULT_SESSION_PREFIX + userId).toString();
 
         Map<String, Object> result = confirmBookingUseCase.execute(cardId, userId, sessionId);
         
         // Log confirmation action as tool call/chat action
-        auditLogService.logToolCall(id, userId, "confirm_booking", 
-                "cardId=" + cardId, 
+        auditLogService.logToolCall(id, userId, "confirm_booking",
+                "cardId=" + cardId,
                 result.toString());
 
         return ResponseEntity.ok(result);
@@ -119,7 +133,7 @@ public class AssistantController {
     public ResponseEntity<List<AiMessageJpaEntity>> getConversationHistory(
             @PathVariable UUID id,
             @RequestParam(defaultValue = "20") int limit) {
-        
+
         List<AiMessageJpaEntity> history = chatHistoryService.getRecentMessages(id, limit);
         return ResponseEntity.ok(history);
     }

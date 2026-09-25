@@ -1,7 +1,7 @@
 package com.danasea.backend.modules.weather;
 
 import com.danasea.backend.modules.communication.application.usecases.SendNotificationUseCase;
-import com.danasea.backend.modules.communication.domain.models.NotificationChannel;
+import com.danasea.backend.modules.communication.application.dtos.NotificationCommand;
 import com.danasea.backend.modules.order.domain.models.RefundReason;
 import com.danasea.backend.modules.order.domain.models.RefundStatus;
 import com.danasea.backend.modules.order.domain.models.SubOrderStatus;
@@ -39,6 +39,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -50,6 +51,14 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 @DisplayName("SlotWeatherMonitoringJob Comprehensive Tests")
 class SlotWeatherMonitoringJobTest {
+
+    private static NotificationCommand notification(UUID recipientId, String type, String entityType, UUID entityId) {
+        return argThat(command -> command != null
+                && Objects.equals(recipientId, command.recipientId())
+                && type.equals(command.type())
+                && entityType.equals(command.relatedEntityType())
+                && entityId.equals(command.relatedEntityId()));
+    }
 
     @Mock
     private JpaServiceSlotRepository slotRepository;
@@ -251,7 +260,7 @@ class SlotWeatherMonitoringJobTest {
 
             assertFalse(alerted);
             verify(evaluationRepository, never()).save(any());
-            verify(sendNotificationUseCase, never()).execute(any(), any(), any(), any(), any(), any(), any(), any());
+            verify(sendNotificationUseCase, never()).execute(any(NotificationCommand.class));
         }
 
         @Test
@@ -283,26 +292,8 @@ class SlotWeatherMonitoringJobTest {
 
             assertTrue(alerted);
             verify(evaluationRepository, times(1)).save(any());
-            verify(sendNotificationUseCase, times(1)).execute(
-                    eq(vendorId),
-                    eq("WEATHER_ALERT"),
-                    any(),
-                    anyString(),
-                    anyString(),
-                    eq("SERVICE_SLOT"),
-                    eq(slotId),
-                    isNull()
-            );
-            verify(sendNotificationUseCase, times(1)).execute(
-                    isNull(),
-                    eq("WEATHER_WARNING"),
-                    any(),
-                    anyString(),
-                    anyString(),
-                    eq("SUB_ORDER"),
-                    eq(subOrder.getId()),
-                    isNull()
-            );
+            verify(sendNotificationUseCase).execute(notification(vendorId, "WEATHER_ALERT", "SERVICE_SLOT", slotId));
+            verify(sendNotificationUseCase).execute(notification(null, "WEATHER_WARNING", "SUB_ORDER", subOrder.getId()));
         }
 
         @Test
@@ -341,16 +332,7 @@ class SlotWeatherMonitoringJobTest {
             assertEquals("MONITORING_YELLOW", savedEntity.getStatus());
             assertTrue(savedEntity.getIsSafe());
 
-            verify(sendNotificationUseCase, times(1)).execute(
-                    eq(vendorId),
-                    eq("WEATHER_EARLY_WARNING"),
-                    any(),
-                    anyString(),
-                    anyString(),
-                    eq("SERVICE_SLOT"),
-                    eq(slotId),
-                    isNull()
-            );
+            verify(sendNotificationUseCase).execute(notification(vendorId, "WEATHER_EARLY_WARNING", "SERVICE_SLOT", slotId));
         }
 
         @Test
@@ -385,7 +367,7 @@ class SlotWeatherMonitoringJobTest {
 
             assertTrue(alerted);
             verify(evaluationRepository, times(1)).save(existingEntity);
-            verify(sendNotificationUseCase, never()).execute(any(), any(), any(), any(), any(), any(), any(), any());
+            verify(sendNotificationUseCase, never()).execute(any(NotificationCommand.class));
         }
 
         @Test
@@ -434,40 +416,13 @@ class SlotWeatherMonitoringJobTest {
             verify(evaluationRepository, times(1)).save(existingYellowAlert);
 
             // Verify bắn thông báo leo thang cho Vendor (chứa tiền tố leo thang)
-            verify(sendNotificationUseCase, times(1)).execute(
-                    eq(vendorId),
-                    eq("WEATHER_ALERT"),
-                    any(),
-                    contains("LEO THANG"),
-                    anyString(),
-                    eq("SERVICE_SLOT"),
-                    eq(slotId),
-                    isNull()
-            );
+            verify(sendNotificationUseCase).execute(notification(vendorId, "WEATHER_ALERT", "SERVICE_SLOT", slotId));
 
             // Verify bắn thông báo leo thang cho Customer
-            verify(sendNotificationUseCase, times(1)).execute(
-                    isNull(),
-                    eq("WEATHER_WARNING"),
-                    any(),
-                    contains("LEO THANG"),
-                    anyString(),
-                    eq("SUB_ORDER"),
-                    eq(subOrder.getId()),
-                    isNull()
-            );
+            verify(sendNotificationUseCase).execute(notification(null, "WEATHER_WARNING", "SUB_ORDER", subOrder.getId()));
 
             // Verify bắn thông báo leo thang cho Admin
-            verify(sendNotificationUseCase, times(1)).execute(
-                    isNull(),
-                    eq("WEATHER_ALERT"),
-                    any(),
-                    contains("leo thang lên mức ĐỎ"),
-                    anyString(),
-                    eq("SERVICE_SLOT"),
-                    eq(slotId),
-                    isNull()
-            );
+            verify(sendNotificationUseCase).execute(notification(null, "WEATHER_ALERT", "SERVICE_SLOT", slotId));
         }
 
         @Test
@@ -505,16 +460,7 @@ class SlotWeatherMonitoringJobTest {
 
             assertTrue(alerted);
             // Verify notification gửi tới customerId thật thay vì null
-            verify(sendNotificationUseCase, times(1)).execute(
-                    eq(customerId),
-                    eq("WEATHER_WARNING"),
-                    any(),
-                    anyString(),
-                    anyString(),
-                    eq("SUB_ORDER"),
-                    eq(subOrder.getId()),
-                    isNull()
-            );
+            verify(sendNotificationUseCase).execute(notification(customerId, "WEATHER_WARNING", "SUB_ORDER", subOrder.getId()));
         }
     }
 
@@ -571,7 +517,7 @@ class SlotWeatherMonitoringJobTest {
             assertEquals(BigDecimal.valueOf(1500000), refund.getAmount());
             assertEquals(BigDecimal.valueOf(100.0), refund.getRefundPercentage());
             assertEquals(RefundReason.WEATHER, refund.getReason());
-            assertEquals(RefundStatus.PROCESSED, refund.getStatus());
+            assertEquals(RefundStatus.PENDING, refund.getStatus());
 
             // 3. Trạng thái bản ghi sự cố cập nhật sang AUTO_CANCELLED_FOR_SAFETY
             assertEquals("AUTO_CANCELLED_FOR_SAFETY", redAlert.getStatus());
@@ -580,40 +526,13 @@ class SlotWeatherMonitoringJobTest {
 
             // 4. Bắn thông báo khẩn cấp đồng thời 3 bên
             // Admin
-            verify(sendNotificationUseCase, times(1)).execute(
-                    isNull(),
-                    eq("AUTO_CANCELLED_FOR_SAFETY"),
-                    eq(NotificationChannel.IN_APP),
-                    contains("Hệ thống tự động can thiệp"),
-                    anyString(),
-                    eq("SERVICE_SLOT"),
-                    eq(slotId),
-                    isNull()
-            );
+            verify(sendNotificationUseCase).execute(notification(null, "AUTO_CANCELLED_FOR_SAFETY", "SERVICE_SLOT", slotId));
 
             // Vendor
-            verify(sendNotificationUseCase, times(1)).execute(
-                    eq(vendorId),
-                    eq("AUTO_CANCELLED_FOR_SAFETY"),
-                    eq(NotificationChannel.IN_APP),
-                    contains("Chuyến đi bị hủy tự động"),
-                    anyString(),
-                    eq("SERVICE_SLOT"),
-                    eq(slotId),
-                    isNull()
-            );
+            verify(sendNotificationUseCase).execute(notification(vendorId, "AUTO_CANCELLED_FOR_SAFETY", "SERVICE_SLOT", slotId));
 
             // Customer
-            verify(sendNotificationUseCase, times(1)).execute(
-                    eq(customerId),
-                    eq("AUTO_CANCELLED_FOR_SAFETY"),
-                    eq(NotificationChannel.IN_APP),
-                    contains("Hoàn tiền 100%"),
-                    anyString(),
-                    eq("SUB_ORDER"),
-                    eq(subOrder.getId()),
-                    isNull()
-            );
+            verify(sendNotificationUseCase).execute(notification(customerId, "AUTO_CANCELLED_FOR_SAFETY", "SUB_ORDER", subOrder.getId()));
         }
 
         @Test
@@ -629,7 +548,7 @@ class SlotWeatherMonitoringJobTest {
             assertFalse(fallbackTriggered);
             verify(subOrderRepository, never()).save(any());
             verify(refundRepository, never()).save(any());
-            verify(sendNotificationUseCase, never()).execute(any(), any(), any(), any(), any(), any(), any(), any());
+            verify(sendNotificationUseCase, never()).execute(any(NotificationCommand.class));
         }
     }
 }

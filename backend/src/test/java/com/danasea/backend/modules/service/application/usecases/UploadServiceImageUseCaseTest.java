@@ -62,11 +62,11 @@ class UploadServiceImageUseCaseTest {
     @DisplayName("AC1.1: Upload thành công ảnh đầu tiên với sort_order = 1")
     void shouldUploadSuccessfullyAsFirstImage() throws Exception {
         MockMultipartFile file = new MockMultipartFile(
-                "file", "cover.jpg", "image/jpeg", "image-bytes".getBytes()
+                "file", "cover.jpg", "image/jpeg", jpegBytes()
         );
         String uploadedUrl = "https://res.cloudinary.com/danasea/image/upload/v1/services/cover.jpg";
 
-        when(serviceRepository.findById(serviceId)).thenReturn(Optional.of(serviceEntity));
+        when(serviceRepository.findByIdForUpdate(serviceId)).thenReturn(Optional.of(serviceEntity));
         when(serviceImageRepository.countByServiceId(serviceId)).thenReturn(0L);
         when(serviceImageRepository.findMaxSortOrderByServiceId(serviceId)).thenReturn(Optional.empty());
         when(fileStoragePort.uploadFile(any(), eq("cover.jpg"), anyString())).thenReturn(uploadedUrl);
@@ -83,7 +83,7 @@ class UploadServiceImageUseCaseTest {
         assertEquals(uploadedUrl, result.getUrl());
         assertEquals((short) 1, result.getSortOrder());
 
-        verify(serviceRepository).findById(serviceId);
+        verify(serviceRepository).findByIdForUpdate(serviceId);
         verify(serviceImageRepository).countByServiceId(serviceId);
         verify(fileStoragePort).uploadFile(file.getBytes(), "cover.jpg", "services/" + serviceId + "/images");
         verify(serviceImageRepository).save(any(ServiceImageJpaEntity.class));
@@ -93,11 +93,11 @@ class UploadServiceImageUseCaseTest {
     @DisplayName("AC1.2: Upload thành công và tự động tăng sort_order khi đã có ảnh trước đó")
     void shouldUploadSuccessfullyAndAutoIncrementSortOrder() {
         MockMultipartFile file = new MockMultipartFile(
-                "file", "gallery_photo.png", "image/png", "valid-png-content".getBytes()
+                "file", "gallery_photo.png", "image/png", pngBytes()
         );
         String uploadedUrl = "https://res.cloudinary.com/danasea/image/upload/v1/services/gallery_photo.png";
 
-        when(serviceRepository.findById(serviceId)).thenReturn(Optional.of(serviceEntity));
+        when(serviceRepository.findByIdForUpdate(serviceId)).thenReturn(Optional.of(serviceEntity));
         when(serviceImageRepository.countByServiceId(serviceId)).thenReturn(3L);
         when(serviceImageRepository.findMaxSortOrderByServiceId(serviceId)).thenReturn(Optional.of((short) 3));
         when(fileStoragePort.uploadFile(any(), eq("gallery_photo.png"), anyString())).thenReturn(uploadedUrl);
@@ -121,10 +121,10 @@ class UploadServiceImageUseCaseTest {
     @DisplayName("AC1.3: Chặn upload khi vượt quá số lượng 10 ảnh tối đa")
     void shouldThrowWhenExceedsMaxImagesLimit() {
         MockMultipartFile file = new MockMultipartFile(
-                "file", "extra.webp", "image/webp", "image-content".getBytes()
+                "file", "extra.webp", "image/webp", webpBytes()
         );
 
-        when(serviceRepository.findById(serviceId)).thenReturn(Optional.of(serviceEntity));
+        when(serviceRepository.findByIdForUpdate(serviceId)).thenReturn(Optional.of(serviceEntity));
         when(serviceImageRepository.countByServiceId(serviceId)).thenReturn(10L);
 
         assertThrows(MaxImagesExceededException.class, () ->
@@ -142,7 +142,7 @@ class UploadServiceImageUseCaseTest {
                 "file", "contract.pdf", "application/pdf", "pdf-content".getBytes()
         );
 
-        when(serviceRepository.findById(serviceId)).thenReturn(Optional.of(serviceEntity));
+        when(serviceRepository.findByIdForUpdate(serviceId)).thenReturn(Optional.of(serviceEntity));
 
         assertThrows(InvalidFileTypeException.class, () ->
                 useCase.execute(serviceId, vendorId, invalidFile)
@@ -159,7 +159,7 @@ class UploadServiceImageUseCaseTest {
                 "file", "empty.jpg", "image/jpeg", new byte[0]
         );
 
-        when(serviceRepository.findById(serviceId)).thenReturn(Optional.of(serviceEntity));
+        when(serviceRepository.findByIdForUpdate(serviceId)).thenReturn(Optional.of(serviceEntity));
 
         assertThrows(InvalidFileTypeException.class, () ->
                 useCase.execute(serviceId, vendorId, emptyFile)
@@ -176,7 +176,7 @@ class UploadServiceImageUseCaseTest {
                 "file", "test.jpg", "image/jpeg", "content".getBytes()
         );
 
-        when(serviceRepository.findById(serviceId)).thenReturn(Optional.empty());
+        when(serviceRepository.findByIdForUpdate(serviceId)).thenReturn(Optional.empty());
 
         assertThrows(ServiceNotFoundException.class, () ->
                 useCase.execute(serviceId, vendorId, file)
@@ -194,7 +194,7 @@ class UploadServiceImageUseCaseTest {
                 "file", "test.jpg", "image/jpeg", "content".getBytes()
         );
 
-        when(serviceRepository.findById(serviceId)).thenReturn(Optional.of(serviceEntity));
+        when(serviceRepository.findByIdForUpdate(serviceId)).thenReturn(Optional.of(serviceEntity));
 
         assertThrows(UnauthorizedServiceAccessException.class, () ->
                 useCase.execute(serviceId, otherVendorId, file)
@@ -202,5 +202,17 @@ class UploadServiceImageUseCaseTest {
 
         verifyNoInteractions(fileStoragePort);
         verify(serviceImageRepository, never()).save(any());
+    }
+
+    private byte[] jpegBytes() {
+        return new byte[] {(byte) 0xFF, (byte) 0xD8, (byte) 0xFF, 0x01};
+    }
+
+    private byte[] pngBytes() {
+        return new byte[] {(byte) 0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A};
+    }
+
+    private byte[] webpBytes() {
+        return new byte[] {'R', 'I', 'F', 'F', 0, 0, 0, 0, 'W', 'E', 'B', 'P'};
     }
 }

@@ -10,6 +10,10 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 
 import com.danasea.backend.modules.booking.application.dtos.GetVendorBookingsQuery;
 import com.danasea.backend.modules.booking.application.dtos.VendorBookingItemResult;
@@ -19,6 +23,10 @@ import com.danasea.backend.modules.booking.domain.models.PagedResult;
 import com.danasea.backend.modules.booking.presentation.dtos.PageResponse;
 import com.danasea.backend.modules.booking.presentation.dtos.VendorBookingItemResponse;
 import com.danasea.backend.security.infrastructure.SecurityUtils;
+import com.danasea.backend.modules.order.application.OrderPaymentService;
+import com.danasea.backend.modules.order.presentation.dtos.SubOrderResponse;
+import com.danasea.backend.modules.booking.presentation.dtos.VendorRejectBookingRequest;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 @RestController
@@ -28,6 +36,21 @@ import lombok.RequiredArgsConstructor;
 public class VendorBookingController {
 
     private final GetVendorBookingsUseCase getVendorBookingsUseCase;
+    private final OrderPaymentService orderPaymentService;
+
+    @PatchMapping("/{id}/reject")
+    public ResponseEntity<SubOrderResponse> rejectBooking(
+            @PathVariable("id") UUID bookingItemId,
+            @Valid @RequestBody VendorRejectBookingRequest request,
+            @RequestHeader(name = "Idempotency-Key", required = false) String idempotencyKey) {
+        UUID userId = SecurityUtils.getCurrentUserId()
+                .orElseThrow(() -> new AccessDeniedException("User is not authenticated"));
+        String effectiveKey = idempotencyKey == null || idempotencyKey.isBlank()
+                ? "vendor-reject-" + bookingItemId
+                : idempotencyKey;
+        return ResponseEntity.ok(orderPaymentService.rejectVendorBooking(
+                userId, bookingItemId, request.reason(), effectiveKey));
+    }
 
     @GetMapping
     public ResponseEntity<PageResponse<VendorBookingItemResponse>> getVendorBookings(

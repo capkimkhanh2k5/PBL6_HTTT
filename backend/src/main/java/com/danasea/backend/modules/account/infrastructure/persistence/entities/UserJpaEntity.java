@@ -30,6 +30,7 @@ public class UserJpaEntity extends BaseJpaEntity {
 
     private Boolean isLocked;
 
-    private String locale;
+    @Column(nullable = false, length = 2)
+    private String locale = "vi";
 
 }

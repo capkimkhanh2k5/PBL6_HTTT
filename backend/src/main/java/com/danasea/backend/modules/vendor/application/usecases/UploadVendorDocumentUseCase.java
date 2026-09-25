@@ -1,5 +1,6 @@
 package com.danasea.backend.modules.vendor.application.usecases;
 
+import java.util.Set;
 import java.util.UUID;
 
 import org.springframework.stereotype.Service;
@@ -17,12 +18,19 @@ import com.danasea.backend.modules.vendor.infrastructure.persistence.entities.Ve
 import com.danasea.backend.modules.vendor.infrastructure.persistence.entities.VendorJpaEntity;
 import com.danasea.backend.modules.vendor.infrastructure.persistence.repositories.JpaVendorDocumentRepository;
 import com.danasea.backend.modules.vendor.infrastructure.persistence.repositories.JpaVendorRepository;
+import com.danasea.backend.modules.service.application.usecases.helpers.FileSignatureValidator;
 
 import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
 public class UploadVendorDocumentUseCase {
+
+    private static final long MAX_DOCUMENT_BYTES = 20L * 1024 * 1024;
+    private static final Set<String> ALLOWED_CONTENT_TYPES = Set.of(
+            "application/pdf",
+            "image/jpeg", "image/jpg", "image/png", "image/webp"
+    );
 
     private final JpaVendorRepository jpaVendorRepository;
     private final JpaVendorDocumentRepository jpaVendorDocumentRepository;
@@ -41,9 +49,7 @@ public class UploadVendorDocumentUseCase {
             throw new InvalidDocTypeException("Document type cannot be null");
         }
 
-        if (file == null || file.isEmpty()) {
-            throw new IllegalArgumentException("File cannot be null or empty");
-        }
+        FileSignatureValidator.readAndValidate(file, ALLOWED_CONTENT_TYPES, MAX_DOCUMENT_BYTES);
 
         VendorJpaEntity vendor = jpaVendorRepository.findByUserId(userId)
                 .orElseThrow(VendorNotFoundException::new);

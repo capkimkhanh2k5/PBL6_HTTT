@@ -6,7 +6,11 @@ import com.danasea.backend.modules.ai.domain.models.AiMessage;
 import com.danasea.backend.modules.ai.domain.models.LlmResponse;
 import com.danasea.backend.modules.ai.domain.models.ToolCall;
 import com.danasea.backend.modules.ai.domain.services.AIToolRegistry;
+import com.danasea.backend.modules.ai.domain.services.SystemPromptBuilder;
+import com.danasea.backend.shared.i18n.LocalizedMessageService;
+import com.danasea.backend.shared.i18n.SupportedLanguage;
 import com.danasea.backend.modules.ai.infrastructure.groq.config.GroqProperties;
+import com.danasea.backend.configs.properties.HttpClientProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -15,11 +19,13 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestClientResponseException;
 
 import java.util.List;
+import java.util.ArrayList;
 import java.util.Map;
 
 @Slf4j
@@ -35,19 +41,32 @@ public class GroqLlmClient implements LlmClientPort {
     private final AIToolRegistry aiToolRegistry;
     private final String defaultModel;
     private final String fallbackModel;
+    private SystemPromptBuilder systemPromptBuilder = new SystemPromptBuilder();
+    private LocalizedMessageService localizedMessages = LocalizedMessageService.standalone();
+
+    @Autowired
+    void configureI18n(SystemPromptBuilder systemPromptBuilder, LocalizedMessageService messages) {
+        this.systemPromptBuilder = systemPromptBuilder;
+        this.localizedMessages = messages;
+    }
 
     @Autowired
     public GroqLlmClient(RestClient.Builder restClientBuilder,
             KeyRotatorPort keyRotator,
             AIToolRegistry aiToolRegistry,
-            GroqProperties properties) {
-        this(restClientBuilder.baseUrl(properties != null && properties.baseUrl() != null && !properties.baseUrl().isBlank()
+            GroqProperties properties,
+            HttpClientProperties httpClientProperties) {
+        SimpleClientHttpRequestFactory requestFactory = new SimpleClientHttpRequestFactory();
+        requestFactory.setConnectTimeout(httpClientProperties.connectTimeout());
+        requestFactory.setReadTimeout(httpClientProperties.readTimeout());
+        this.restClient = restClientBuilder.requestFactory(requestFactory)
+                .baseUrl(properties != null && properties.baseUrl() != null && !properties.baseUrl().isBlank()
                 ? properties.baseUrl()
-                : DEFAULT_BASE_URL).build(),
-                keyRotator,
-                aiToolRegistry,
-                properties != null ? properties.model() : null,
-                properties != null ? properties.fallbackModel() : null);
+                : DEFAULT_BASE_URL).build();
+        this.keyRotator = keyRotator;
+        this.aiToolRegistry = aiToolRegistry;
+        this.defaultModel = properties != null ? properties.model() : null;
+        this.fallbackModel = properties != null ? properties.fallbackModel() : null;
     }
 
     public GroqLlmClient(RestClient.Builder restClientBuilder,
@@ -80,14 +99,22 @@ public class GroqLlmClient implements LlmClientPort {
 
     @Override
     public LlmResponse generateResponse(List<AiMessage> messages) {
-        return attemptRequest(messages, defaultModel, 0);
+        return attemptRequest(messages, defaultModel, 0, null);
     }
 
-    private LlmResponse attemptRequest(List<AiMessage> messages, String model, int attempt) {
+    @Override
+    public LlmResponse generateResponse(List<AiMessage> messages, SupportedLanguage language) {
+        return attemptRequest(messages, defaultModel, 0,
+                language == null ? SupportedLanguage.VI : language);
+    }
+
+    private LlmResponse attemptRequest(
+            List<AiMessage> messages, String model, int attempt, SupportedLanguage language) {
         if (attempt > MAX_RETRY_ATTEMPTS) {
             log.warn("Max retry attempts reached for Groq API");
             LlmResponse fallbackResponse = new LlmResponse();
-            fallbackResponse.setContent("The AI service is temporarily unavailable. Max retry attempts reached.");
+            fallbackResponse.setContent(localizedMessages.get(
+                    "ai.unavailable", language == null ? SupportedLanguage.EN : language));
             return fallbackResponse;
         }
 
@@ -97,13 +124,16 @@ public class GroqLlmClient implements LlmClientPort {
         } catch (RuntimeException ex) {
             log.error("Failed to obtain active Groq API key (keys exhausted): {}", ex.getMessage());
             LlmResponse fallbackResponse = new LlmResponse();
-            fallbackResponse.setContent(
-                    "The AI service is temporarily unavailable due to API key exhaustion. Please try again later.");
+            fallbackResponse.setContent(localizedMessages.get(
+                    "ai.unavailable", language == null ? SupportedLanguage.EN : language));
             return fallbackResponse;
         }
 
-        List<GroqMessage> groqMessages = (messages == null) ? List.of()
-                : messages.stream()
+        List<GroqMessage> groqMessages = new ArrayList<>();
+        SupportedLanguage promptLanguage = language == null ? SupportedLanguage.EN : language;
+        groqMessages.add(new GroqMessage("system", systemPromptBuilder.buildBasePrompt(promptLanguage)));
+        if (messages != null) {
+            groqMessages.addAll(messages.stream()
                         .map(m -> {
                             String role = m.getRole() != null ? m.getRole().name().toLowerCase() : "user";
                             String content = m.getContent();
@@ -127,7 +157,8 @@ public class GroqLlmClient implements LlmClientPort {
 
                             return new GroqMessage(role, content, null, null);
                         })
-                        .toList();
+                        .toList());
+        }
 
         List<Map<String, Object>> tools = (aiToolRegistry != null && aiToolRegistry.getToolDefinitions() != null)
                 ? aiToolRegistry.getToolDefinitions().stream()
@@ -164,10 +195,11 @@ public class GroqLlmClient implements LlmClientPort {
             log.warn("Groq request timed out for model {}: {}", model, ex.getMessage());
             if (!model.equals(fallbackModel)) {
                 log.info("Falling back to secondary model {} due to timeout", fallbackModel);
-                return attemptRequest(messages, fallbackModel, attempt + 1);
+                return attemptRequest(messages, fallbackModel, attempt + 1, language);
             }
             LlmResponse timeoutResponse = new LlmResponse();
-            timeoutResponse.setContent("The AI service timed out. Please try again later.");
+            timeoutResponse.setContent(localizedMessages.get(
+                    "ai.timeout", language == null ? SupportedLanguage.EN : language));
             return timeoutResponse;
         } catch (RestClientResponseException ex) {
             int status = ex.getStatusCode().value();
@@ -176,19 +208,19 @@ public class GroqLlmClient implements LlmClientPort {
             if (status == 429) {
                 log.warn("Rate limited (429) by Groq on key, marking cooldown and rotating");
                 keyRotator.markKeyCooldown(key);
-                return attemptRequest(messages, model, attempt + 1);
+                return attemptRequest(messages, model, attempt + 1, language);
             } else if (status == 401 || status == 403) {
                 log.error("Authentication failure ({}) on Groq key, marking disabled", status);
                 keyRotator.markKeyDisabled(key);
-                return attemptRequest(messages, model, attempt + 1);
+                return attemptRequest(messages, model, attempt + 1, language);
             } else if (status >= 500 && status < 600) {
                 if (!model.equals(fallbackModel)) {
                     log.info("Falling back to secondary model {} due to 5xx error", fallbackModel);
-                    return attemptRequest(messages, fallbackModel, attempt + 1);
+                    return attemptRequest(messages, fallbackModel, attempt + 1, language);
                 }
                 LlmResponse serverErrorResponse = new LlmResponse();
-                serverErrorResponse.setContent(
-                        "The AI service is temporarily unavailable due to upstream server errors. Please try again later.");
+                serverErrorResponse.setContent(localizedMessages.get(
+                        "ai.unavailable", language == null ? SupportedLanguage.EN : language));
                 return serverErrorResponse;
             }
             throw ex;

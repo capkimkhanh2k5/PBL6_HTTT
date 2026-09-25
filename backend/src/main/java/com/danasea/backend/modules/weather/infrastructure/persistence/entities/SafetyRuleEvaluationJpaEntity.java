@@ -7,6 +7,8 @@ import com.danasea.backend.shared.core.infrastructure.persistence.entities.BaseJ
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 @Entity
 @Getter
@@ -30,22 +32,26 @@ public class SafetyRuleEvaluationJpaEntity extends BaseJpaEntity {
     @Column(name = "alert_level", length = 20)
     private String alertLevel;
 
-    @Column(name = "peak_wave_height_m")
+    @Column(name = "peak_wave_height_m", columnDefinition = "NUMERIC(5,2)")
     private Double peakWaveHeightM;
 
-    @Column(name = "peak_wind_speed_kmh")
+    @Column(name = "peak_wind_speed_kmh", columnDefinition = "NUMERIC(5,2)")
     private Double peakWindSpeedKmh;
 
-    @Column(name = "peak_wind_gust_kmh")
+    @Column(name = "peak_wind_gust_kmh", columnDefinition = "NUMERIC(5,2)")
     private Double peakWindGustKmh;
 
-    @Column(name = "peak_ocean_current_ms")
+    @Column(name = "peak_ocean_current_ms", columnDefinition = "NUMERIC(5,2)")
     private Double peakOceanCurrentMs;
 
-    @Column(name = "min_visibility_m")
+    @Column(name = "min_visibility_m", columnDefinition = "NUMERIC(7,2)")
     private Double minVisibilityM;
 
     @Column(name = "severe_weather_code")
     private Integer severeWeatherCode;
+
+    @JdbcTypeCode(SqlTypes.JSON)
+    @Column(name = "findings_json", nullable = false)
+    private String findingsJson = "[]";
 
 }

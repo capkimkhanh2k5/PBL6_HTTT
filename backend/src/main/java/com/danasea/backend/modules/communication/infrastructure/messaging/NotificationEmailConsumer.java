@@ -12,6 +12,9 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Component;
+import org.springframework.beans.factory.annotation.Autowired;
+import com.danasea.backend.shared.i18n.LocalizedMessageService;
+import com.danasea.backend.shared.i18n.SupportedLanguage;
 
 import java.time.OffsetDateTime;
 
@@ -22,6 +25,9 @@ public class NotificationEmailConsumer {
 
     private final JavaMailSender mailSender;
     private final JpaNotificationRepository notificationRepository;
+
+    @Autowired
+    private LocalizedMessageService messages = LocalizedMessageService.standalone();
 
     @Value("${spring.mail.username:noreply@danasea.com}")
     private String fromEmail;
@@ -34,7 +40,8 @@ public class NotificationEmailConsumer {
             message.setFrom(fromEmail);
             message.setTo(event.toEmail());
             message.setSubject("[DANASEA] " + event.subject());
-            message.setText(event.content() + "\n\n---\nDANASEA Marine Tourism Platform\nĐà Nẵng, Việt Nam");
+            SupportedLanguage language = SupportedLanguage.fromTag(event.locale()).orElse(SupportedLanguage.VI);
+            message.setText(event.content() + "\n\n---\n" + messages.get("email.brand.footer", language));
 
             mailSender.send(message);
             log.info("Successfully sent notification email to: {}", event.toEmail());

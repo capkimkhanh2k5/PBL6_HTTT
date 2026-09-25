@@ -47,7 +47,7 @@ public class AdminSafetyDocumentController {
 
         UUID adminId = SecurityUtils.getCurrentUserId()
                 .orElseThrow(() -> new AccessDeniedException("User ID not found"));
-        var updated = approveSafetyDocumentUseCase.approve(docId, adminId);
+        var updated = approveSafetyDocumentUseCase.approve(serviceId, docId, adminId);
         return ResponseEntity.ok(SafetyDocumentResponse.from(updated));
     }
 
@@ -64,7 +64,8 @@ public class AdminSafetyDocumentController {
 
         UUID adminId = SecurityUtils.getCurrentUserId()
                 .orElseThrow(() -> new AccessDeniedException("User ID not found"));
-        var updated = approveSafetyDocumentUseCase.reject(docId, adminId, request.rejectionReason());
+        var updated = approveSafetyDocumentUseCase.reject(
+                serviceId, docId, adminId, request.rejectionReason());
         return ResponseEntity.ok(SafetyDocumentResponse.from(updated));
     }
 }

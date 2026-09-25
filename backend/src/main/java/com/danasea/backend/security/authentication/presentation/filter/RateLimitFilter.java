@@ -1,17 +1,20 @@
 package com.danasea.backend.security.authentication.presentation.filter;
 
 import java.io.IOException;
-import java.security.Principal;
+import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 
-import jakarta.servlet.FilterChain;
-import jakarta.servlet.ServletException;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.web.filter.OncePerRequestFilter;
+
+import com.danasea.backend.configs.properties.RateLimitProperties;
+import com.danasea.backend.shared.i18n.LocalizedMessageService;
+import com.danasea.backend.shared.presentation.ErrorResponse;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.github.bucket4j.Bandwidth;
 import io.github.bucket4j.Bucket;
@@ -19,88 +22,91 @@ import io.github.bucket4j.BucketConfiguration;
 import io.github.bucket4j.ConsumptionProbe;
 import io.github.bucket4j.Refill;
 import io.github.bucket4j.redis.lettuce.cas.LettuceBasedProxyManager;
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 @Component
+@ConditionalOnBean(LettuceBasedProxyManager.class)
 public class RateLimitFilter extends OncePerRequestFilter {
 
+    private static final String LOGIN_PATH = "/api/auth/login";
+    private static final String REGISTER_PATH = "/api/auth/register";
+
     private final LettuceBasedProxyManager<byte[]> proxyManager;
+    private final ObjectMapper objectMapper;
+    private final RateLimitProperties.Limit limit;
+    private final LocalizedMessageService messages;
+
+    @Autowired
+    public RateLimitFilter(
+            LettuceBasedProxyManager<byte[]> proxyManager,
+            ObjectMapper objectMapper,
+            RateLimitProperties properties,
+            LocalizedMessageService messages) {
+        this.proxyManager = proxyManager;
+        this.objectMapper = objectMapper;
+        this.limit = properties.loginRegistration();
+        this.messages = messages;
+    }
 
     public RateLimitFilter(LettuceBasedProxyManager<byte[]> proxyManager) {
         this.proxyManager = proxyManager;
+        this.objectMapper = new ObjectMapper();
+        this.limit = new RateLimitProperties.Limit(50, Duration.ofMinutes(1));
+        this.messages = LocalizedMessageService.standalone();
     }
 
     @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
-            throws ServletException, IOException {
-
-        String path = request.getRequestURI();
-        if (path.startsWith("/api/auth/login") || path.startsWith("/api/auth/register")) {
-            String ip = getClientIP(request);
-            Bucket bucket = proxyManager.builder().build(ip.getBytes(), this::getConfig);
-
-            try {
-                ConsumptionProbe probe = bucket.tryConsumeAndReturnRemaining(1);
-                if (probe.isConsumed()) {
-                    response.addHeader("X-Rate-Limit-Remaining", String.valueOf(probe.getRemainingTokens()));
-                    filterChain.doFilter(request, response);
-                } else {
-                    long waitForRefill = probe.getNanosToWaitForRefill() / 1_000_000_000;
-                    response.addHeader("X-Rate-Limit-Retry-After-Seconds", String.valueOf(waitForRefill));
-                    response.sendError(HttpStatus.TOO_MANY_REQUESTS.value(), "You have exhausted your API Request Quota");
-                }
-            } catch (Exception e) {
-                // Fail-open if Redis is down
-                filterChain.doFilter(request, response);
-            }
-        } else if (path.equals("/api/auth/otp/send")) {
-            Principal principal = request.getUserPrincipal();
-            if (principal != null && principal.getName() != null) {
-                String email = principal.getName();
-                String key = "otp-send:" + email;
-                Bucket bucket = proxyManager.builder().build(key.getBytes(), this::getOtpConfig);
-
-                try {
-                    ConsumptionProbe probe = bucket.tryConsumeAndReturnRemaining(1);
-                    if (probe.isConsumed()) {
-                        response.addHeader("X-Rate-Limit-Remaining", String.valueOf(probe.getRemainingTokens()));
-                        filterChain.doFilter(request, response);
-                    } else {
-                        long waitForRefill = probe.getNanosToWaitForRefill() / 1_000_000_000;
-                        response.addHeader("X-Rate-Limit-Retry-After-Seconds", String.valueOf(waitForRefill));
-                        response.sendError(HttpStatus.TOO_MANY_REQUESTS.value(),
-                                "OTP request is too frequent. Please wait.");
-                    }
-                } catch (Exception e) {
-                    // Fail-open if Redis is down
-                    filterChain.doFilter(request, response);
-                }
-            } else {
-                filterChain.doFilter(request, response);
-            }
-        } else {
+    protected void doFilterInternal(
+            HttpServletRequest request,
+            HttpServletResponse response,
+            FilterChain filterChain) throws ServletException, IOException {
+        if (!isRateLimitedPath(request.getRequestURI())) {
             filterChain.doFilter(request, response);
+            return;
+        }
+
+        try {
+            Bucket bucket = proxyManager.builder().build(
+                    request.getRemoteAddr().getBytes(StandardCharsets.UTF_8),
+                    this::configuration);
+            ConsumptionProbe probe = bucket.tryConsumeAndReturnRemaining(1);
+            if (probe.isConsumed()) {
+                response.setHeader("X-Rate-Limit-Remaining", String.valueOf(probe.getRemainingTokens()));
+                filterChain.doFilter(request, response);
+                return;
+            }
+
+            long retryAfter = Math.max(1, (long) Math.ceil(probe.getNanosToWaitForRefill() / 1_000_000_000.0));
+            response.setHeader("Retry-After", String.valueOf(retryAfter));
+            response.setHeader("X-Rate-Limit-Retry-After-Seconds", String.valueOf(retryAfter));
+            writeError(response, HttpStatus.TOO_MANY_REQUESTS, "RATE_LIMIT_EXCEEDED",
+                    messages.get("auth.rate_limit"));
+        } catch (Exception exception) {
+            writeError(response, HttpStatus.SERVICE_UNAVAILABLE, "RATE_LIMIT_UNAVAILABLE",
+                    messages.get("auth.rate_limit_unavailable"));
         }
     }
 
-    private BucketConfiguration getConfig() {
-        // limit 50 requests per 1 minute per IP
+    private boolean isRateLimitedPath(String path) {
+        return LOGIN_PATH.equals(path) || REGISTER_PATH.equals(path);
+    }
+
+    private BucketConfiguration configuration() {
         return BucketConfiguration.builder()
-                .addLimit(Bandwidth.classic(50, Refill.intervally(50, Duration.ofMinutes(1))))
+                .addLimit(Bandwidth.classic(limit.capacity(), Refill.intervally(limit.capacity(), limit.refillPeriod())))
                 .build();
     }
 
-    private BucketConfiguration getOtpConfig() {
-        // limit 1 request per 1 minute per email
-        return BucketConfiguration.builder()
-                .addLimit(Bandwidth.classic(1, Refill.intervally(1, Duration.ofMinutes(1))))
-                .build();
-    }
-
-    private String getClientIP(HttpServletRequest request) {
-        String xfHeader = request.getHeader("X-Forwarded-For");
-        if (xfHeader != null && !xfHeader.isEmpty()) {
-            return xfHeader.split(",")[0].trim();
-        }
-        return request.getRemoteAddr();
+    private void writeError(
+            HttpServletResponse response,
+            HttpStatus status,
+            String code,
+            String message) throws IOException {
+        response.setStatus(status.value());
+        response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+        objectMapper.writeValue(response.getOutputStream(), new ErrorResponse(code, message));
     }
 }

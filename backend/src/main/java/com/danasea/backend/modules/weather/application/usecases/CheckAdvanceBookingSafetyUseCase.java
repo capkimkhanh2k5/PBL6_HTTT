@@ -17,12 +17,17 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.Clock;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import org.springframework.context.i18n.LocaleContextHolder;
+import com.danasea.backend.modules.weather.application.services.WeatherSafetyMessageRenderer;
+import com.danasea.backend.shared.i18n.LocalizedMessageService;
+import com.danasea.backend.shared.i18n.SupportedLanguage;
 
 /**
  * UseCase assessing marine safety for reservations 7 to 14 days (up to 16 days) in advance.
@@ -39,6 +44,13 @@ public class CheckAdvanceBookingSafetyUseCase {
     private final CategorySafetyRuleService categorySafetyRuleService;
     private final WeatherProviderPort weatherProviderPort;
     private final WeatherRuleEngine weatherRuleEngine;
+    private final Clock clock;
+    private WeatherSafetyMessageRenderer weatherMessages = new WeatherSafetyMessageRenderer();
+
+    @Autowired
+    void setLocalizedMessageService(LocalizedMessageService messages) {
+        this.weatherMessages = new WeatherSafetyMessageRenderer(messages);
+    }
 
     @Autowired(required = false)
     private JpaServiceSlotRepository slotRepository;
@@ -56,9 +68,8 @@ public class CheckAdvanceBookingSafetyUseCase {
             CategorySafetyRuleService categorySafetyRuleService,
             WeatherProviderPort weatherProviderPort,
             WeatherRuleEngine weatherRuleEngine) {
-        this.categorySafetyRuleService = categorySafetyRuleService;
-        this.weatherProviderPort = weatherProviderPort;
-        this.weatherRuleEngine = weatherRuleEngine;
+        this(categorySafetyRuleService, weatherProviderPort, weatherRuleEngine, null, null, null,
+                Clock.systemDefaultZone());
     }
 
     public CheckAdvanceBookingSafetyUseCase(
@@ -68,12 +79,26 @@ public class CheckAdvanceBookingSafetyUseCase {
             JpaServiceSlotRepository slotRepository,
             JpaServiceRepository serviceRepository,
             JpaCategoryRepository categoryRepository) {
+        this(categorySafetyRuleService, weatherProviderPort, weatherRuleEngine,
+                slotRepository, serviceRepository, categoryRepository, Clock.systemDefaultZone());
+    }
+
+    @Autowired
+    public CheckAdvanceBookingSafetyUseCase(
+            CategorySafetyRuleService categorySafetyRuleService,
+            WeatherProviderPort weatherProviderPort,
+            WeatherRuleEngine weatherRuleEngine,
+            @Autowired(required = false) JpaServiceSlotRepository slotRepository,
+            @Autowired(required = false) JpaServiceRepository serviceRepository,
+            @Autowired(required = false) JpaCategoryRepository categoryRepository,
+            Clock clock) {
         this.categorySafetyRuleService = categorySafetyRuleService;
         this.weatherProviderPort = weatherProviderPort;
         this.weatherRuleEngine = weatherRuleEngine;
         this.slotRepository = slotRepository;
         this.serviceRepository = serviceRepository;
         this.categoryRepository = categoryRepository;
+        this.clock = clock;
     }
 
     /**
@@ -84,10 +109,10 @@ public class CheckAdvanceBookingSafetyUseCase {
             throw new IllegalStateException("Slot and Service repositories are not available");
         }
         ServiceSlotJpaEntity slot = slotRepository.findById(slotId)
-                .orElseThrow(() -> new IllegalArgumentException("Slot không tồn tại: " + slotId));
+                .orElseThrow(() -> new IllegalArgumentException("Service slot not found: " + slotId));
 
         ServiceJpaEntity service = serviceRepository.findById(slot.getServiceId())
-                .orElseThrow(() -> new IllegalArgumentException("Dịch vụ không tồn tại: " + slot.getServiceId()));
+                .orElseThrow(() -> new IllegalArgumentException("Service not found: " + slot.getServiceId()));
 
         String categorySlug = "default";
         if (service.getCategoryId() != null && categoryRepository != null) {
@@ -108,14 +133,14 @@ public class CheckAdvanceBookingSafetyUseCase {
     public AdvanceBookingSafetyResponse checkSafety(UUID slotId, UUID serviceId, String categorySlug,
                                                    LocalDate targetDate, LocalTime startTime, LocalTime endTime,
                                                    double latitude, double longitude) {
-        LocalDate today = LocalDate.now();
+        LocalDate today = LocalDate.now(clock);
         if (targetDate.isBefore(today)) {
-            throw new IllegalArgumentException("Không thể kiểm tra an toàn cho ngày trong quá khứ: " + targetDate);
+            throw new IllegalArgumentException("Safety cannot be checked for a past date: " + targetDate);
         }
 
         long daysAhead = ChronoUnit.DAYS.between(today, targetDate);
         if (daysAhead > 16) {
-            throw new IllegalArgumentException("Vượt quá phạm vi dự báo tối đa của Open-Meteo (16 ngày): " + daysAhead + " ngày");
+            throw new IllegalArgumentException("The date exceeds the 16-day Open-Meteo forecast range: " + daysAhead + " days");
         }
 
         AdvanceBookingSafetyRequest req = AdvanceBookingSafetyRequest.builder()
@@ -134,23 +159,29 @@ public class CheckAdvanceBookingSafetyUseCase {
     }
 
     public AdvanceBookingSafetyResponse execute(AdvanceBookingSafetyRequest request) {
-        return execute(request, LocalDate.now());
+        return execute(request, LocalDate.now(clock));
     }
 
     public AdvanceBookingSafetyResponse execute(AdvanceBookingSafetyRequest request, LocalDate referenceDate) {
         if (request == null || request.getBookingDate() == null) {
-            throw new IllegalArgumentException("Ngày đặt chỗ (bookingDate) không được để trống");
+            throw new IllegalArgumentException("bookingDate is required");
         }
 
-        LocalDate today = referenceDate != null ? referenceDate : LocalDate.now();
+        LocalDate today = referenceDate != null ? referenceDate : LocalDate.now(clock);
         long daysInAdvance = ChronoUnit.DAYS.between(today, request.getBookingDate());
 
         if (daysInAdvance < 0) {
-            throw new IllegalArgumentException("Ngày đặt chỗ không thể là ngày trong quá khứ");
+            throw new IllegalArgumentException("bookingDate cannot be in the past");
         }
 
         double lat = request.getLatitude() != null ? request.getLatitude() : DEFAULT_LATITUDE;
         double lon = request.getLongitude() != null ? request.getLongitude() : DEFAULT_LONGITUDE;
+        if (!Double.isFinite(lat) || lat < -90 || lat > 90) {
+            throw new IllegalArgumentException("latitude must be between -90 and 90");
+        }
+        if (!Double.isFinite(lon) || lon < -180 || lon > 180) {
+            throw new IllegalArgumentException("longitude must be between -180 and 180");
+        }
         LocalTime startTime = request.getStartTime() != null ? request.getStartTime() : LocalTime.of(8, 0);
         LocalTime endTime = request.getEndTime() != null ? request.getEndTime() : LocalTime.of(17, 0);
 
@@ -174,8 +205,8 @@ public class CheckAdvanceBookingSafetyUseCase {
         // Boundary check: beyond 16 days returns OUT_OF_RANGE
         if (daysInAdvance > 16) {
             List<String> outOfRangeNotes = List.of(
-                    "Chưa có số liệu khí tượng hải văn chi tiết ngoài 16 ngày.",
-                    "Hệ thống sẽ tự động cập nhật và gửi cảnh báo khi đơn hàng bước vào cửa sổ dự báo 16 ngày và các mốc T-24h, T-2h."
+                    "Detailed marine and weather data is unavailable beyond 16 days.",
+                    "The system will update the assessment when the booking enters the 16-day window and at T-24h and T-2h."
             );
             return AdvanceBookingSafetyResponse.builder()
                     .categorySlug(rule.getCategorySlug())
@@ -190,13 +221,13 @@ public class CheckAdvanceBookingSafetyUseCase {
                     .safetyStatus(WeatherRuleEngine.ALERT_YELLOW)
                     .isProvisional(true)
                     .marineCutoffExceeded(true)
-                    .warningMessage("LƯU Ý: Thời điểm đặt chỗ (" + daysInAdvance + " ngày tới) vượt quá giới hạn mô hình dự báo thời tiết 16 ngày của Open-Meteo.")
-                    .summaryMessage("LƯU Ý: Thời điểm đặt chỗ (" + daysInAdvance + " ngày tới) vượt quá giới hạn mô hình dự báo thời tiết 16 ngày của Open-Meteo.")
+                    .warningMessage("NOTICE: The booking date (" + daysInAdvance + " days ahead) exceeds Open-Meteo's 16-day forecast window.")
+                    .summaryMessage("NOTICE: The booking date (" + daysInAdvance + " days ahead) exceeds Open-Meteo's 16-day forecast window.")
                     .advisoryDetails(outOfRangeNotes)
                     .details(outOfRangeNotes)
                     .advisoryNotes(outOfRangeNotes)
                     .dataCoverage("OUT_OF_RANGE")
-                    .dataCoverageNote("Dự báo thời tiết Open-Meteo hiện chỉ hỗ trợ tối đa 16 ngày. Đơn đặt trước " + daysInAdvance + " ngày nằm ngoài phạm vi mô hình dự báo trực tiếp.")
+                    .dataCoverageNote("Open-Meteo currently provides forecasts for up to 16 days. This booking is outside the direct forecast window.")
                     .estimatedMarine(true)
                     .confidenceLevel("LOW")
                     .forecast(null)
@@ -228,7 +259,7 @@ public class CheckAdvanceBookingSafetyUseCase {
 
         if (!marineCutoffExceeded && peakWave != null) {
             dataCoverage = "FULL_MARINE_AND_METEOROLOGY";
-            dataCoverageNote = "Dữ liệu quan trắc kết hợp đầy đủ khí tượng (16 ngày) và hải văn (8 ngày) từ Open-Meteo.";
+            dataCoverageNote = "Full Open-Meteo weather (16 days) and marine (8 days) forecast coverage is available.";
             confidenceLevel = daysInAdvance <= 3 ? "HIGH" : "MEDIUM";
         } else {
             // Marine API limit is 8 days; safely estimate wave height based on wind speed
@@ -242,7 +273,7 @@ public class CheckAdvanceBookingSafetyUseCase {
                 forecast.setPeakWaveHeight(peakWave);
             }
 
-            dataCoverageNote = "Dự báo vượt mốc 8 ngày: Dữ liệu hải văn (sóng biển) được ước tính an toàn từ mô hình khí tượng 16 ngày của Open-Meteo kết hợp đánh giá các thông số gió, gió giật, mưa và dông sét.";
+            dataCoverageNote = "Beyond 8 days, marine conditions are conservatively estimated from Open-Meteo weather data, including wind, gusts, rain, and thunderstorms.";
         }
 
         // Evaluate using rule engine
@@ -256,26 +287,45 @@ public class CheckAdvanceBookingSafetyUseCase {
                 severeWeatherCode
         );
 
-        List<String> details = new ArrayList<>(evalResult.getDetails() != null ? evalResult.getDetails() : List.of());
+        SupportedLanguage language = LocaleContextHolder.getLocaleContext() == null
+                ? SupportedLanguage.EN
+                : SupportedLanguage.fromTag(LocaleContextHolder.getLocale().toLanguageTag())
+                        .orElse(SupportedLanguage.VI);
+        List<String> details = new ArrayList<>(weatherMessages.renderDetails(evalResult, language));
         if (estimatedMarine) {
-            details.add(String.format("Lưu ý đặt trước %d ngày: Dữ liệu sóng biển là ước tính mô hình khí tượng. Hệ thống sẽ tự động đối soát hải văn thực tế tại mốc T-24h và T-2h.", daysInAdvance));
+            details.add(language == SupportedLanguage.EN
+                    ? String.format("For this booking %d days ahead, wave data is model-estimated. The system will reassess at T-24h and T-2h.", daysInAdvance)
+                    : String.format("Lưu ý đặt trước %d ngày: Dữ liệu sóng biển là ước tính mô hình khí tượng. Hệ thống sẽ tự động đối soát hải văn thực tế tại mốc T-24h và T-2h.", daysInAdvance));
         }
         if (daysInAdvance >= 7 && daysInAdvance <= 14) {
-            details.add(String.format("Khung thời gian đặt trước %d ngày: Khuyến nghị theo dõi diễn biến thời tiết cập nhật định kỳ trước ngày khởi hành.", daysInAdvance));
+            details.add(language == SupportedLanguage.EN
+                    ? String.format("This booking is %d days ahead. Review updated forecasts before departure.", daysInAdvance)
+                    : String.format("Khung thời gian đặt trước %d ngày: Khuyến nghị theo dõi diễn biến thời tiết cập nhật định kỳ trước ngày khởi hành.", daysInAdvance));
         }
 
         List<String> advisoryNotes = new ArrayList<>();
         if (marineCutoffExceeded) {
-            advisoryNotes.add("LƯU Ý DỰ BÁO DÀI HẠN (9-14 ngày): Đánh giá an toàn dựa trên mô hình khí tượng (gió, dông bão, tầm nhìn). Dữ liệu sóng biển và dòng hải lưu chưa khả dụng do mô hình hải văn quốc tế giới hạn 8 ngày.");
-            advisoryNotes.add("Dự báo sóng biển chi tiết sẽ được tự động kích hoạt 8 ngày trước giờ khởi hành.");
+            advisoryNotes.add(language == SupportedLanguage.EN
+                    ? "LONG-RANGE NOTICE (9-14 days): the safety assessment uses weather data; detailed waves and currents are unavailable beyond the 8-day marine forecast window."
+                    : "LƯU Ý DỰ BÁO DÀI HẠN (9-14 ngày): Đánh giá an toàn dựa trên mô hình khí tượng (gió, dông bão, tầm nhìn). Dữ liệu sóng biển và dòng hải lưu chưa khả dụng do mô hình hải văn quốc tế giới hạn 8 ngày.");
+            advisoryNotes.add(language == SupportedLanguage.EN
+                    ? "Detailed wave forecasting will begin automatically 8 days before departure."
+                    : "Dự báo sóng biển chi tiết sẽ được tự động kích hoạt 8 ngày trước giờ khởi hành.");
         } else {
-            advisoryNotes.add("Dữ liệu khí tượng và hải văn đầy đủ (độ chính xác cao trong vòng 8 ngày).");
+            advisoryNotes.add(language == SupportedLanguage.EN
+                    ? "Full weather and marine forecast data is available within 8 days."
+                    : "Dữ liệu khí tượng và hải văn đầy đủ (độ chính xác cao trong vòng 8 ngày).");
         }
-        advisoryNotes.add("Hệ thống sẽ tiếp tục giám sát tự động qua Sliding Window tại mốc T-24h và T-2h trước giờ khởi hành.");
+        advisoryNotes.add(language == SupportedLanguage.EN
+                ? "The system will continue monitoring at T-24h and T-2h before departure."
+                : "Hệ thống sẽ tiếp tục giám sát tự động qua Sliding Window tại mốc T-24h và T-2h trước giờ khởi hành.");
 
-        String summary = evalResult.getWarningMessage();
+        String localizedWarning = weatherMessages.render(evalResult, language);
+        String summary = localizedWarning;
         if (isProvisional && evalResult.isSafe()) {
-            summary = "DỰ BÁO SƠ BỘ AN TOÀN: " + summary;
+            summary = (language == SupportedLanguage.EN
+                    ? "PROVISIONALLY SAFE FORECAST: "
+                    : "DỰ BÁO SƠ BỘ AN TOÀN: ") + summary;
         }
 
         return AdvanceBookingSafetyResponse.builder()
@@ -305,7 +355,7 @@ public class CheckAdvanceBookingSafetyUseCase {
                 .maxWindGustKmh(rule.getMaxWindGustKmh())
                 .maxOceanCurrentMs(rule.getMaxOceanCurrentMs())
                 .ruleMinVisibilityM(rule.getMinVisibilityM())
-                .warningMessage(evalResult.getWarningMessage())
+                .warningMessage(localizedWarning)
                 .summaryMessage(summary)
                 .advisoryDetails(details)
                 .details(details)

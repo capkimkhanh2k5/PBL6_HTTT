@@ -37,6 +37,7 @@ public class Service extends BaseDomainModel {
     private ServiceStatus status;
     private String rejectionReason;
     private String waiverContent;
+    private String waiverContentEn;
     private Boolean weatherSensitive;
     private BigDecimal minWindKmh;
     private BigDecimal maxWaveM;

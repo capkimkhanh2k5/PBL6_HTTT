@@ -2,16 +2,16 @@ package com.danasea.backend.security.authentication.infrastructure.messaging;
 
 import com.danasea.backend.security.authentication.domain.events.OtpEmailRequestedEvent;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.amqp.AmqpRejectAndDontRequeueException;
 import org.springframework.mail.MailSendException;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.boot.mail.autoconfigure.MailProperties;
 
-import java.lang.reflect.Field;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -24,17 +24,17 @@ class OtpEmailConsumerTest {
     @Mock
     private JavaMailSender mailSender;
 
-    @InjectMocks
     private OtpEmailConsumer otpEmailConsumer;
 
-    @Test
-    void handleOtpEmailRequestedEvent_whenMailSenderFails_throwsAmqpRejectAndDontRequeueException() throws Exception {
-        // Arrange
-        // We use reflection to set the @Value field
-        Field fromEmailField = OtpEmailConsumer.class.getDeclaredField("fromEmail");
-        fromEmailField.setAccessible(true);
-        fromEmailField.set(otpEmailConsumer, "noreply@test.com");
+    @BeforeEach
+    void setUp() {
+        MailProperties mailProperties = new MailProperties();
+        mailProperties.setUsername("noreply@test.com");
+        otpEmailConsumer = new OtpEmailConsumer(mailSender, mailProperties);
+    }
 
+    @Test
+    void handleOtpEmailRequestedEvent_whenMailSenderFails_throwsAmqpRejectAndDontRequeueException() {
         OtpEmailRequestedEvent event = new OtpEmailRequestedEvent(UUID.randomUUID(), "user@test.com", "123456");
 
         doThrow(new MailSendException("SMTP error")).when(mailSender).send(any(SimpleMailMessage.class));
@@ -48,12 +48,7 @@ class OtpEmailConsumerTest {
     }
 
     @Test
-    void handleOtpEmailRequestedEvent_whenSuccess_doesNotThrow() throws Exception {
-        // Arrange
-        Field fromEmailField = OtpEmailConsumer.class.getDeclaredField("fromEmail");
-        fromEmailField.setAccessible(true);
-        fromEmailField.set(otpEmailConsumer, "noreply@test.com");
-
+    void handleOtpEmailRequestedEvent_whenSuccess_doesNotThrow() {
         OtpEmailRequestedEvent event = new OtpEmailRequestedEvent(UUID.randomUUID(), "user@test.com", "123456");
 
         // Act

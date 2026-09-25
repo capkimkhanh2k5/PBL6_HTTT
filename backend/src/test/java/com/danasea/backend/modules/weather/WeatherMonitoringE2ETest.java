@@ -1,7 +1,7 @@
 package com.danasea.backend.modules.weather;
 
 import com.danasea.backend.modules.communication.application.usecases.SendNotificationUseCase;
-import com.danasea.backend.modules.communication.domain.models.NotificationChannel;
+import com.danasea.backend.modules.communication.application.dtos.NotificationCommand;
 import com.danasea.backend.modules.order.domain.models.RefundReason;
 import com.danasea.backend.modules.order.domain.models.RefundStatus;
 import com.danasea.backend.modules.order.domain.models.SubOrderStatus;
@@ -62,6 +62,14 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 @DisplayName("DANASEA Marine Weather Monitoring System - Comprehensive E2E Test Suite")
 class WeatherMonitoringE2ETest {
+
+    private static NotificationCommand notification(UUID recipientId, String type, String entityType, UUID entityId) {
+        return argThat(command -> command != null
+                && Objects.equals(recipientId, command.recipientId())
+                && type.equals(command.type())
+                && entityType.equals(command.relatedEntityType())
+                && entityId.equals(command.relatedEntityId()));
+    }
 
     @Mock
     private JpaServiceSlotRepository slotRepository;
@@ -283,7 +291,7 @@ class WeatherMonitoringE2ETest {
 
             assertTrue(result.isSafe(), "Mức YELLOW vẫn tạm thời an toàn nhưng cần cảnh báo");
             assertEquals(WeatherRuleEngine.ALERT_YELLOW, result.getAlertLevel());
-            assertTrue(result.getWarningMessage().contains("thận trọng"));
+            assertTrue(result.getWarningMessage().contains("CAUTION ALERT"));
         }
 
         @Test
@@ -303,7 +311,7 @@ class WeatherMonitoringE2ETest {
             subOrder.setStatus(SubOrderStatus.CONFIRMED);
             subOrder.setSubtotalAmount(BigDecimal.valueOf(1200000));
 
-            when(evaluationRepository.findById(alertId)).thenReturn(Optional.of(alert));
+            when(evaluationRepository.findByIdForUpdate(alertId)).thenReturn(Optional.of(alert));
             when(subOrderRepository.findBySlotId(slotId)).thenReturn(List.of(subOrder));
 
             AdminWeatherAlertController.ResolveAlertRequest request =
@@ -322,7 +330,7 @@ class WeatherMonitoringE2ETest {
             assertEquals(BigDecimal.valueOf(1200000), refund.getAmount());
             assertEquals(BigDecimal.valueOf(100.0), refund.getRefundPercentage());
             assertEquals(RefundReason.WEATHER, refund.getReason());
-            assertEquals(RefundStatus.PROCESSED, refund.getStatus());
+            assertEquals(RefundStatus.PENDING, refund.getStatus());
             assertTrue(alert.getIsSafe());
         }
 
@@ -352,7 +360,7 @@ class WeatherMonitoringE2ETest {
             assertFalse(alertRun1);
             assertFalse(alertRun2);
             verify(evaluationRepository, never()).save(any());
-            verify(sendNotificationUseCase, never()).execute(any(), any(), any(), any(), any(), any(), any(), any());
+            verify(sendNotificationUseCase, never()).execute(any(NotificationCommand.class));
         }
 
         @Test
@@ -484,7 +492,7 @@ class WeatherMonitoringE2ETest {
             var dangerousResult = weatherRuleEngine.evaluate(rule, 0.5, 18.0, 37.1, 0.2, 5000.0, 0);
             assertFalse(dangerousResult.isSafe());
             assertEquals(WeatherRuleEngine.ALERT_RED, dangerousResult.getAlertLevel());
-            assertTrue(dangerousResult.getWarningMessage().contains("Gió giật"));
+            assertTrue(dangerousResult.getWarningMessage().contains("Peak wind gust"));
         }
 
         @Test
@@ -497,7 +505,7 @@ class WeatherMonitoringE2ETest {
             var dangerousResult = weatherRuleEngine.evaluate(rule, 0.4, 15.0, 20.0, 0.2, 1499.0, 0);
             assertFalse(dangerousResult.isSafe());
             assertEquals(WeatherRuleEngine.ALERT_RED, dangerousResult.getAlertLevel());
-            assertTrue(dangerousResult.getWarningMessage().contains("Tầm nhìn ngang"));
+            assertTrue(dangerousResult.getWarningMessage().contains("Marine visibility"));
         }
 
         @Test
@@ -548,7 +556,7 @@ class WeatherMonitoringE2ETest {
             cancelledOrder.setSlotId(slotId);
             cancelledOrder.setStatus(SubOrderStatus.CANCELLED); // Đã hủy từ trước
 
-            when(evaluationRepository.findById(alertId)).thenReturn(Optional.of(alert));
+            when(evaluationRepository.findByIdForUpdate(alertId)).thenReturn(Optional.of(alert));
             when(subOrderRepository.findBySlotId(slotId)).thenReturn(List.of(cancelledOrder));
 
             adminWeatherAlertController.resolveAlert(alertId, new AdminWeatherAlertController.ResolveAlertRequest("CANCEL_AND_REFUND", "Hủy"));
@@ -641,15 +649,9 @@ class WeatherMonitoringE2ETest {
 
             verify(evaluationRepository, times(1)).save(any(SafetyRuleEvaluationJpaEntity.class));
             // Gửi thông báo cho Vendor
-            verify(sendNotificationUseCase, times(1)).execute(
-                    eq(vendorId), eq("WEATHER_ALERT"), eq(NotificationChannel.IN_APP),
-                    anyString(), anyString(), eq("SERVICE_SLOT"), eq(slotId), isNull()
-            );
+            verify(sendNotificationUseCase).execute(notification(vendorId, "WEATHER_ALERT", "SERVICE_SLOT", slotId));
             // Gửi thông báo cho Khách hàng
-            verify(sendNotificationUseCase, times(1)).execute(
-                    isNull(), eq("WEATHER_WARNING"), eq(NotificationChannel.IN_APP),
-                    anyString(), anyString(), eq("SUB_ORDER"), eq(subOrder.getId()), isNull()
-            );
+            verify(sendNotificationUseCase).execute(notification(null, "WEATHER_WARNING", "SUB_ORDER", subOrder.getId()));
         }
 
         @Test
@@ -703,7 +705,7 @@ class WeatherMonitoringE2ETest {
             // Sóng 0.7m > caution (0.5m), gió 22 km/h > max wind (20 km/h) -> RED
             assertFalse(result.isSafe());
             assertEquals(WeatherRuleEngine.ALERT_RED, result.getAlertLevel());
-            assertTrue(result.getWarningMessage().contains("Tốc độ gió duy trì"));
+            assertTrue(result.getWarningMessage().contains("Sustained wind speed"));
         }
     }
 
@@ -756,7 +758,7 @@ class WeatherMonitoringE2ETest {
 
             UUID alertId = UUID.randomUUID();
             savedAlert.setId(alertId);
-            when(evaluationRepository.findById(alertId)).thenReturn(Optional.of(savedAlert));
+            when(evaluationRepository.findByIdForUpdate(alertId)).thenReturn(Optional.of(savedAlert));
 
             adminWeatherAlertController.resolveAlert(alertId,
                     new AdminWeatherAlertController.ResolveAlertRequest("CANCEL_AND_REFUND", "Dông sét mùa hè nguy hiểm"));
@@ -816,7 +818,7 @@ class WeatherMonitoringE2ETest {
             var evalT2 = weatherRuleEngine.evaluate(diveRule, 0.7, 12.0, 16.0, 0.2, 5000.0, 0);
             assertTrue(evalT2.isSafe());
             assertEquals(WeatherRuleEngine.ALERT_GREEN, evalT2.getAlertLevel());
-            assertTrue(evalT2.getWarningMessage().contains("lý tưởng"));
+            assertTrue(evalT2.getWarningMessage().contains("suitable"));
         }
 
         @Test

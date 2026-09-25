@@ -58,7 +58,7 @@ public class AdminCategoryController {
     @PatchMapping("/{id}")
     public ResponseEntity<CategoryResponse> updateCategory(
             @PathVariable UUID id,
-            @RequestBody UpdateCategoryRequest request) {
+            @Valid @RequestBody UpdateCategoryRequest request) {
         Category category = updateCategoryUseCase.execute(
                 id,
                 request.name(),

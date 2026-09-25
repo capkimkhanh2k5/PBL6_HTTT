@@ -6,6 +6,6 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotEmpty;
 
 public record BookingHoldRequest(
-        @NotEmpty(message = "items cannot be empty")
+        @NotEmpty(message = "{validation.booking.items.not_empty}")
         List<@Valid BookingHoldItemRequest> items
 ) {}

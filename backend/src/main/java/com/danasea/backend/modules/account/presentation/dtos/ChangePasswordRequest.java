@@ -5,11 +5,11 @@ import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 
 public record ChangePasswordRequest(
-        @NotBlank String currentPassword,
+        @NotBlank(message = "{validation.password.required}") String currentPassword,
         
-        @NotBlank 
-        @Size(min = 8, max = 100) 
+        @NotBlank(message = "{validation.password.required}")
+        @Size(min = 8, max = 100, message = "{validation.password.size}")
         @Pattern(regexp = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]{8,}$", 
-                 message = "Password must contain at least one uppercase letter, one lowercase letter, one number and one special character")
+                 message = "{validation.password.strong}")
         String newPassword
 ) {}

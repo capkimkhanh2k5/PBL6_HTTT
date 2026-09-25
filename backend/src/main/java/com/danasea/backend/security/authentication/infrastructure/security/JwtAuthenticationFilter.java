@@ -50,7 +50,8 @@ public class JwtAuthenticationFilter
 
             tokenProvider.getEmail(token)
                 .flatMap(userAccountPort::findByEmail)
-                .filter(user -> user.enabled())
+                .filter(user -> user.enabled()
+                        && (user.emailVerified() || isOtpEndpoint(request)))
                 .map(user -> authorizationPort.findSubjectByEmail(user.email()))
                 .filter(subject -> !subject.roles().isEmpty())
                 .ifPresent(this::authenticate);
@@ -59,7 +60,12 @@ public class JwtAuthenticationFilter
         filterChain.doFilter(request, response);
     }
 
-        private void authenticate(AuthorizationSubject subject) {
+    private boolean isOtpEndpoint(HttpServletRequest request) {
+        String requestUri = request.getRequestURI();
+        return requestUri != null && requestUri.startsWith("/api/auth/otp/");
+    }
+
+    private void authenticate(AuthorizationSubject subject) {
         List<SimpleGrantedAuthority> authorities = subject.roles()
             .stream()
             .map(role -> new SimpleGrantedAuthority("ROLE_" + role))

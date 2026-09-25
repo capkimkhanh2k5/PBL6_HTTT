@@ -6,6 +6,8 @@ import com.danasea.backend.security.authorization.domain.exceptions.AccessDenied
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.transaction.annotation.Transactional;
+import com.danasea.backend.shared.i18n.SupportedLanguage;
+import com.danasea.backend.shared.i18n.UnsupportedLanguageException;
 
 @RequiredArgsConstructor
 public class UpdateProfileUseCase {
@@ -23,7 +25,9 @@ public class UpdateProfileUseCase {
             user.setAvatarUrl(avatarUrl);
         }
         if (locale != null) {
-            user.setLocale(locale);
+            user.setLocale(SupportedLanguage.fromTag(locale)
+                    .orElseThrow(() -> new UnsupportedLanguageException(locale))
+                    .code());
         }
         
         return accountInternalApi.saveUser(user);

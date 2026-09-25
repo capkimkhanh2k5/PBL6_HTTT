@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import com.danasea.backend.modules.vendor.infrastructure.persistence.entities.VendorDocumentJpaEntity;
+import com.danasea.backend.modules.vendor.domain.models.DocStatus;
 
 @Repository
 public interface JpaVendorDocumentRepository extends JpaRepository<VendorDocumentJpaEntity, UUID> {
@@ -14,4 +15,6 @@ public interface JpaVendorDocumentRepository extends JpaRepository<VendorDocumen
     List<VendorDocumentJpaEntity> findByVendorId(UUID vendorId);
 
     List<VendorDocumentJpaEntity> findAllByVendorId(UUID vendorId);
+
+    List<VendorDocumentJpaEntity> findByVendorIdAndStatus(UUID vendorId, DocStatus status);
 }

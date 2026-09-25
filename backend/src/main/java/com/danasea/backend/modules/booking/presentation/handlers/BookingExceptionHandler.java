@@ -13,49 +13,50 @@ import com.danasea.backend.modules.booking.domain.exceptions.InvalidBookingState
 import com.danasea.backend.modules.booking.domain.exceptions.SlotNotAvailableException;
 import com.danasea.backend.modules.booking.domain.exceptions.UnauthorizedBookingAccessException;
 import com.danasea.backend.shared.presentation.ErrorResponse;
+import com.danasea.backend.shared.presentation.LocalizedExceptionHandlerSupport;
 
 @RestControllerAdvice
-public class BookingExceptionHandler {
+public class BookingExceptionHandler extends LocalizedExceptionHandlerSupport {
 
     @ExceptionHandler(InsufficientInventoryException.class)
     public ResponseEntity<ErrorResponse> handleInsufficientInventory(InsufficientInventoryException ex) {
         return ResponseEntity.status(HttpStatus.CONFLICT)
-                .body(new ErrorResponse("INSUFFICIENT_INVENTORY", ex.getMessage()));
+                .body(error("INSUFFICIENT_INVENTORY"));
     }
 
     @ExceptionHandler(SlotNotAvailableException.class)
     public ResponseEntity<ErrorResponse> handleSlotNotAvailable(SlotNotAvailableException ex) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                .body(new ErrorResponse("SLOT_NOT_AVAILABLE", ex.getMessage()));
+                .body(error("SLOT_NOT_AVAILABLE"));
     }
 
     @ExceptionHandler(BookingNotFoundException.class)
     public ResponseEntity<ErrorResponse> handleBookingNotFound(BookingNotFoundException ex) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                .body(new ErrorResponse("BOOKING_NOT_FOUND", ex.getMessage()));
+                .body(error("BOOKING_NOT_FOUND"));
     }
 
     @ExceptionHandler(BookingHoldExpiredException.class)
     public ResponseEntity<ErrorResponse> handleBookingHoldExpired(BookingHoldExpiredException ex) {
         return ResponseEntity.status(HttpStatus.GONE)
-                .body(new ErrorResponse("BOOKING_HOLD_EXPIRED", ex.getMessage()));
+                .body(error("BOOKING_HOLD_EXPIRED"));
     }
 
     @ExceptionHandler(InvalidBookingStateException.class)
     public ResponseEntity<ErrorResponse> handleInvalidBookingState(InvalidBookingStateException ex) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                .body(new ErrorResponse("INVALID_BOOKING_STATE", ex.getMessage()));
+                .body(error("INVALID_BOOKING_STATE"));
     }
 
     @ExceptionHandler(UnauthorizedBookingAccessException.class)
     public ResponseEntity<ErrorResponse> handleUnauthorizedAccess(UnauthorizedBookingAccessException ex) {
         return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                .body(new ErrorResponse("UNAUTHORIZED_BOOKING_ACCESS", ex.getMessage()));
+                .body(error("UNAUTHORIZED_BOOKING_ACCESS"));
     }
 
     @ExceptionHandler(BookingDomainException.class)
     public ResponseEntity<ErrorResponse> handleBookingDomainException(BookingDomainException ex) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                .body(new ErrorResponse("BOOKING_ERROR", ex.getMessage()));
+                .body(error("BOOKING_ERROR"));
     }
 }

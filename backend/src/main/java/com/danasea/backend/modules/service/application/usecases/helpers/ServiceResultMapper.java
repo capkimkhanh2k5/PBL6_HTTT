@@ -36,6 +36,7 @@ public final class ServiceResultMapper {
                 service.getStatus(),
                 service.getRejectionReason(),
                 service.getWaiverContent(),
+                service.getWaiverContentEn(),
                 service.getWeatherSensitive(),
                 service.getMinWindKmh(),
                 service.getMaxWaveM(),

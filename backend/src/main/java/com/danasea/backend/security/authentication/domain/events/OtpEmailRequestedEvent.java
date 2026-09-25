@@ -6,5 +6,10 @@ import lombok.Value;
 public record OtpEmailRequestedEvent(
     UUID userId,
     String email,
-    String otpCode
-) {}
+    String otpCode,
+    String locale
+) {
+    public OtpEmailRequestedEvent(UUID userId, String email, String otpCode) {
+        this(userId, email, otpCode, "vi");
+    }
+}

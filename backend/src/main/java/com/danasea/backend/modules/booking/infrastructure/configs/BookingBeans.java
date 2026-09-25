@@ -7,6 +7,8 @@ import com.danasea.backend.modules.booking.application.usecases.CancelBookingHol
 import com.danasea.backend.modules.booking.application.usecases.ConfirmBookingUseCase;
 import com.danasea.backend.modules.booking.application.usecases.CreateBookingHoldUseCase;
 import com.danasea.backend.modules.booking.domain.ports.BookingRepositoryPort;
+import com.danasea.backend.modules.booking.domain.ports.BookingPaymentStatusPort;
+import com.danasea.backend.modules.booking.domain.ports.BookingCancellationFinancialPort;
 import com.danasea.backend.modules.booking.domain.ports.InventoryLockPort;
 import com.danasea.backend.modules.booking.domain.ports.ServiceSlotPort;
 
@@ -25,8 +27,10 @@ public class BookingBeans {
     public ConfirmBookingUseCase confirmBookingUseCase(
             BookingRepositoryPort bookingRepository,
             InventoryLockPort inventoryLockPort,
-            ServiceSlotPort serviceSlotPort) {
-        return new ConfirmBookingUseCase(bookingRepository, inventoryLockPort, serviceSlotPort);
+            ServiceSlotPort serviceSlotPort,
+            BookingPaymentStatusPort bookingPaymentStatusPort) {
+        return new ConfirmBookingUseCase(
+                bookingRepository, inventoryLockPort, serviceSlotPort, bookingPaymentStatusPort);
     }
 
     @Bean
@@ -59,12 +63,13 @@ public class BookingBeans {
     public com.danasea.backend.modules.booking.application.usecases.CancelBookingUseCase cancelBookingUseCase(
             BookingRepositoryPort bookingRepository,
             ServiceSlotPort serviceSlotPort,
-            InventoryLockPort inventoryLockPort) {
+            InventoryLockPort inventoryLockPort,
+            BookingCancellationFinancialPort financialPort) {
         return new com.danasea.backend.modules.booking.application.usecases.CancelBookingUseCase(
                 bookingRepository,
                 serviceSlotPort,
-                inventoryLockPort
+                inventoryLockPort,
+                financialPort
         );
     }
 }
-

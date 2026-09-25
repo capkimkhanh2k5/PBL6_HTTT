@@ -8,11 +8,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.AmqpRejectAndDontRequeueException;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.mail.autoconfigure.MailProperties;
 import org.springframework.mail.MailException;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Component;
+import org.springframework.beans.factory.annotation.Autowired;
+import com.danasea.backend.shared.i18n.LocalizedMessageService;
+import com.danasea.backend.shared.i18n.SupportedLanguage;
 import lombok.RequiredArgsConstructor;
 
 @Component
@@ -22,20 +25,21 @@ public class OtpEmailConsumer {
     private static final Logger log = LoggerFactory.getLogger(OtpEmailConsumer.class);
 
     private final JavaMailSender mailSender;
+    private final MailProperties mailProperties;
 
-    @Value("${spring.mail.username:noreply@danasea.com}")
-    private String fromEmail;
+    @Autowired
+    private LocalizedMessageService messages = LocalizedMessageService.standalone();
 
     @RabbitListener(queues = RabbitMQConfig.NOTIFICATION_OTP_EMAIL_QUEUE)
     public void handleOtpEmailRequestedEvent(OtpEmailRequestedEvent event) {
         log.info("Received OtpEmailRequestedEvent for email: {}. OTP code is: {}", event.email(), event.otpCode());
         try {
             SimpleMailMessage message = new SimpleMailMessage();
-            message.setFrom(fromEmail);
+            message.setFrom(mailProperties.getUsername());
             message.setTo(event.email());
-            message.setSubject("Verify your email address - Danasea");
-            message.setText("Your OTP code is: " + event.otpCode()
-                    + "\n\nThis code will expire in 5 minutes.\nDo not share this code with anyone.");
+            SupportedLanguage language = SupportedLanguage.fromTag(event.locale()).orElse(SupportedLanguage.VI);
+            message.setSubject(messages.get("email.otp.subject", language));
+            message.setText(messages.get("email.otp.body", language, event.otpCode()));
 
             mailSender.send(message);
             log.info("OTP email sent successfully to: {}", event.email());

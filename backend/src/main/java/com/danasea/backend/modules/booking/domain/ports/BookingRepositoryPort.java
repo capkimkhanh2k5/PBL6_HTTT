@@ -20,6 +20,8 @@ public interface BookingRepositoryPort {
 
     Optional<Booking> findByIdWithItems(UUID id);
 
+    Optional<Booking> findByIdWithItemsForUpdate(UUID id);
+
     PagedResult<Booking> findCustomerBookings(
             UUID customerId,
             BookingStatus status,

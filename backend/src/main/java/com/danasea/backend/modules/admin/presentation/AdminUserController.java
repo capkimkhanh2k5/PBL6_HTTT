@@ -54,9 +54,16 @@ public class AdminUserController {
             @RequestParam(required = false) String search,
             Principal principal) {
         checkAdminAccess(principal);
+        validatePage(page, size);
         Pageable pageable = PageRequest.of(page, size);
         Page<UserSummaryResponse> response = getUsersUseCase.execute(pageable, role, isLocked, search);
         return ResponseEntity.ok(response);
+    }
+
+    private void validatePage(int page, int size) {
+        if (page < 0 || size < 1 || size > 100) {
+            throw new IllegalArgumentException("page must be non-negative and size must be between 1 and 100");
+        }
     }
 
     @GetMapping("/{id}")

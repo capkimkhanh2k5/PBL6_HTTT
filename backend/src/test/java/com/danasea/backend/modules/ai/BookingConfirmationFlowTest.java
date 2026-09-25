@@ -12,6 +12,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.access.AccessDeniedException;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -201,6 +202,19 @@ public class BookingConfirmationFlowTest {
 
         assertEquals("Confirmation card not found or expired", ex.getMessage());
         verifyNoInteractions(getServiceDetailUseCase);
+    }
+
+    @Test
+    @DisplayName("Tier 2 - Card from another conversation is rejected before re-validation")
+    void testRevalidateBooking_ForeignConversation_ThrowsAccessDeniedException() {
+        when(cardStorePort.findById("card-pending-1")).thenReturn(Optional.of(pendingCard));
+
+        UUID foreignConversationId = UUID.randomUUID();
+
+        assertThrows(AccessDeniedException.class, () ->
+                confirmBookingUseCase.execute("card-pending-1", userId, sessionId, foreignConversationId));
+        verifyNoInteractions(getServiceDetailUseCase);
+        verify(cardStorePort, never()).save(any());
     }
 
     @Test

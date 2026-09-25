@@ -55,8 +55,10 @@ public class AIToolRegistry {
                 "parameters", Map.of(
                     "type", "object",
                     "properties", Map.of(
-                        "location", Map.of("type", "string", "description", "Location in Da Nang (e.g., Sơn Trà, Mỹ Khê, Man Thái)"),
-                        "date", Map.of("type", "string", "description", "Date in YYYY-MM-DD format")
+                        "location", Map.of("type", "string", "description", "Location in Da Nang (for example, Son Tra, My Khe, or Man Thai)"),
+                        "date", Map.of("type", "string", "description", "Date in YYYY-MM-DD format, from today through 16 days ahead"),
+                        "latitude", Map.of("type", List.of("number", "null"), "description", "Optional latitude; provide together with longitude"),
+                        "longitude", Map.of("type", List.of("number", "null"), "description", "Optional longitude; provide together with latitude")
                     ),
                     "required", List.of("location", "date")
                 )
@@ -67,7 +69,10 @@ public class AIToolRegistry {
                 "parameters", Map.of(
                     "type", "object",
                     "properties", Map.of(
-                        "location", Map.of("type", "string", "description", "Location in Da Nang (e.g., Bán đảo Sơn Trà, Bãi biển Mỹ Khê)")
+                        "location", Map.of("type", "string", "description", "Location in Da Nang (for example, Son Tra Peninsula or My Khe Beach)"),
+                        "category", Map.of("type", List.of("string", "null"), "description", "Optional activity category slug used for its safety thresholds"),
+                        "latitude", Map.of("type", List.of("number", "null"), "description", "Optional latitude; provide together with longitude"),
+                        "longitude", Map.of("type", List.of("number", "null"), "description", "Optional longitude; provide together with latitude")
                     ),
                     "required", List.of("location")
                 )

@@ -3,6 +3,7 @@ package com.danasea.backend.modules.service.application.usecases;
 import java.util.UUID;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.danasea.backend.modules.service.application.ports.FileStoragePort;
 import com.danasea.backend.modules.service.domain.exceptions.ImageNotFoundException;
@@ -20,6 +21,7 @@ public class DeleteServiceImageUseCase {
     private final JpaServiceImageRepository serviceImageRepository;
     private final FileStoragePort fileStoragePort;
 
+    @Transactional
     public void execute(UUID serviceId, UUID imageId, UUID vendorId) {
         // 1. Validate service exists
         var serviceEntity = serviceRepository.findById(serviceId)
@@ -35,10 +37,9 @@ public class DeleteServiceImageUseCase {
                 .orElseThrow(() -> new ImageNotFoundException(
                         "Image " + imageId + " not found in service " + serviceId));
 
-        // 4. Delete from Cloudinary
-        fileStoragePort.deleteFile(imageEntity.getUrl());
-
-        // 5. Delete from DB
+        // Delete the database row first so a storage failure rolls the transaction back.
         serviceImageRepository.deleteByIdAndServiceId(imageId, serviceId);
+
+        fileStoragePort.deleteFile(imageEntity.getUrl());
     }
 }

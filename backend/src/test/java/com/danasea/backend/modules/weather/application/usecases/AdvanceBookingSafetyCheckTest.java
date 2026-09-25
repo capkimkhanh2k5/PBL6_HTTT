@@ -29,6 +29,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.time.Clock;
+import java.time.ZoneId;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -72,7 +74,9 @@ public class AdvanceBookingSafetyCheckTest {
                 weatherRuleEngine,
                 slotRepository,
                 serviceRepository,
-                categoryRepository
+                categoryRepository,
+                Clock.fixed(today.atStartOfDay(ZoneId.of("Asia/Ho_Chi_Minh")).toInstant(),
+                        ZoneId.of("Asia/Ho_Chi_Minh"))
         );
 
         supRule = CategorySafetyRule.getBySlug("cheo-sup-kayak");
@@ -154,7 +158,7 @@ public class AdvanceBookingSafetyCheckTest {
             assertFalse(response.isProvisional());
             assertFalse(response.isMarineCutoffExceeded());
             assertEquals(1.30, response.getPeakWaveHeightM());
-            assertTrue(response.getWarningMessage().contains("1.3m vượt ngưỡng an toàn tối đa"));
+            assertTrue(response.getWarningMessage().contains("Wave height 1.3m exceeds the maximum safe threshold"));
         }
 
         @Test
@@ -188,7 +192,7 @@ public class AdvanceBookingSafetyCheckTest {
             assertEquals(WeatherRuleEngine.ALERT_YELLOW, response.getAlertLevel());
             assertFalse(response.isProvisional());
             assertFalse(response.isMarineCutoffExceeded());
-            assertTrue(response.getWarningMessage().contains("CẢNH BÁO THẬN TRỌNG"));
+            assertTrue(response.getWarningMessage().contains("CAUTION ALERT"));
         }
 
         @Test
@@ -224,8 +228,8 @@ public class AdvanceBookingSafetyCheckTest {
             assertTrue(response.isProvisional(), "Beyond day 8, isProvisional must be true");
             assertTrue(response.isMarineCutoffExceeded(), "Beyond day 8, marineCutoffExceeded must be true");
             assertNull(response.getPeakWaveHeightM(), "Marine cutoff exceeded, peakWaveHeightM must be null");
-            assertTrue(response.getAdvisoryNotes().stream().anyMatch(n -> n.contains("8 ngày trước giờ khởi hành")));
-            assertTrue(response.getSummaryMessage().contains("DỰ BÁO SƠ BỘ AN TOÀN"));
+            assertTrue(response.getAdvisoryNotes().stream().anyMatch(n -> n.contains("8 days before departure")));
+            assertTrue(response.getSummaryMessage().contains("PROVISIONALLY SAFE FORECAST"));
         }
 
         @Test
@@ -257,7 +261,7 @@ public class AdvanceBookingSafetyCheckTest {
             assertEquals("RED", response.getSafetyStatus());
             assertTrue(response.isProvisional());
             assertTrue(response.isMarineCutoffExceeded());
-            assertTrue(response.getDetails().stream().anyMatch(d -> d.contains("45.0 km/h vượt trần khí động học")));
+            assertTrue(response.getDetails().stream().anyMatch(d -> d.contains("Peak wind gust 45.0 km/h exceeds the aerodynamic safety limit")));
         }
 
         @Test
@@ -290,7 +294,7 @@ public class AdvanceBookingSafetyCheckTest {
             assertEquals("RED", response.getSafetyStatus());
             assertTrue(response.isProvisional());
             assertTrue(response.isMarineCutoffExceeded());
-            assertTrue(response.getWarningMessage().contains("dông sét"));
+            assertTrue(response.getWarningMessage().contains("thunderstorm"));
         }
 
         @Test
@@ -322,7 +326,7 @@ public class AdvanceBookingSafetyCheckTest {
             assertEquals("YELLOW", response.getSafetyStatus());
             assertTrue(response.isProvisional());
             assertTrue(response.isMarineCutoffExceeded());
-            assertTrue(response.getWarningMessage().contains("CẢNH BÁO THẬN TRỌNG"));
+            assertTrue(response.getWarningMessage().contains("CAUTION ALERT"));
         }
 
         @Test
@@ -447,7 +451,7 @@ public class AdvanceBookingSafetyCheckTest {
         @Test
         @DisplayName("TC12: checkSafety with Beyond 16 Days -> Throws IllegalArgumentException")
         void testAdvanceCheck_Beyond16Days_ThrowsIllegalArgumentException() {
-            LocalDate distantDate = today.plusDays(18);
+            LocalDate distantDate = LocalDate.now().plusDays(18);
 
             assertThrows(IllegalArgumentException.class, () -> useCase.checkSafety(
                     UUID.randomUUID(), UUID.randomUUID(), "cheo-sup-kayak",

@@ -5,6 +5,8 @@ import java.util.UUID;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
@@ -40,7 +42,18 @@ public class AdminVendorController {
     public ResponseEntity<Page<AdminVendorResponse>> getVendors(
             @RequestParam(required = false) VerificationStatus status,
             Pageable pageable) {
-        return ResponseEntity.ok(getVendorsUseCase.execute(status, pageable));
+        if (pageable.getPageNumber() < 0 || pageable.getPageSize() < 1 || pageable.getPageSize() > 100) {
+            throw new IllegalArgumentException("page must be non-negative and size must be between 1 and 100");
+        }
+        for (Sort.Order order : pageable.getSort()) {
+            if (!java.util.Set.of("createdAt", "updatedAt", "businessName", "verificationStatus")
+                    .contains(order.getProperty())) {
+                throw new IllegalArgumentException("Unsupported sort field: " + order.getProperty());
+            }
+        }
+        Pageable validatedPageable = PageRequest.of(
+                pageable.getPageNumber(), pageable.getPageSize(), pageable.getSort());
+        return ResponseEntity.ok(getVendorsUseCase.execute(status, validatedPageable));
     }
 
     @GetMapping("/{id}")

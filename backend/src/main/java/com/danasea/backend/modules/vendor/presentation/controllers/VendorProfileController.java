@@ -68,7 +68,7 @@ public class VendorProfileController {
     @PatchMapping("/profile")
     @PreAuthorize("hasRole('VENDOR')")
     public ResponseEntity<VendorProfileResponse> updateProfile(
-            @RequestBody UpdateVendorProfileRequest request,
+            @Valid @RequestBody UpdateVendorProfileRequest request,
             Principal principal) {
         UUID userId = resolveUserId(principal);
         Vendor vendor = updateVendorProfileUseCase.execute(userId, request.toCommand());

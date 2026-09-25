@@ -1,5 +1,6 @@
 package com.danasea.backend.security.authentication.presentation;
 import com.danasea.backend.shared.presentation.GlobalExceptionHandler;
+import com.danasea.backend.shared.i18n.SupportedLanguage;
 
 import com.danasea.backend.security.authentication.domain.exceptions.InvalidCredentialsException;
 import com.danasea.backend.security.authentication.domain.exceptions.OtpInvalidException;
@@ -8,6 +9,7 @@ import com.danasea.backend.security.authentication.application.usecases.LoginUse
 import com.danasea.backend.security.authentication.application.usecases.LogoutUseCase;
 import com.danasea.backend.security.authentication.application.usecases.RefreshTokenUseCase;
 import com.danasea.backend.security.authentication.application.usecases.RegisterUseCase;
+import com.danasea.backend.security.authentication.application.usecases.SendVerificationOtpUseCase;
 import com.danasea.backend.security.authentication.application.usecases.VerifyOtpUseCase;
 import com.danasea.backend.security.authentication.presentation.dtos.LoginRequest;
 import com.danasea.backend.security.authentication.presentation.dtos.RegisterRequest;
@@ -17,7 +19,6 @@ import jakarta.servlet.http.Cookie;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.MediaType;
@@ -26,6 +27,7 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import java.security.Principal;
 import java.util.UUID;
+import com.danasea.backend.security.authentication.infrastructure.security.JwtProperties;
 
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
@@ -52,13 +54,25 @@ class AuthenticationControllerTest {
     @Mock
     private VerifyOtpUseCase verifyOtpUseCase;
 
-    @InjectMocks
+    @Mock
+    private SendVerificationOtpUseCase sendVerificationOtpUseCase;
+
     private AuthenticationController authenticationController;
 
     private ObjectMapper objectMapper = new ObjectMapper();
 
     @BeforeEach
     void setUp() {
+        JwtProperties jwtProperties = new JwtProperties(
+                "test-secret-key-for-unit-tests-minimum-256-bits-long-enough", 60, 1);
+        authenticationController = new AuthenticationController(
+                loginUseCase,
+                registerUseCase,
+                refreshTokenUseCase,
+                logoutUseCase,
+                sendVerificationOtpUseCase,
+                verifyOtpUseCase,
+                jwtProperties);
         mockMvc = MockMvcBuilders.standaloneSetup(authenticationController)
                 .setControllerAdvice(new AuthenticationExceptionHandler(), new GlobalExceptionHandler())
                 .build();
@@ -87,7 +101,7 @@ class AuthenticationControllerTest {
         LoginResult result = new LoginResult("access-token", "refresh-token", UUID.randomUUID(), "test@example.com",
                 "CUSTOMER");
 
-        when(registerUseCase.execute(anyString(), anyString())).thenReturn(result);
+        when(registerUseCase.execute(anyString(), anyString(), any(SupportedLanguage.class))).thenReturn(result);
 
         mockMvc.perform(post("/api/auth/register")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -157,5 +171,20 @@ class AuthenticationControllerTest {
                 .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.code").value("INVALID_OTP"));
+    }
+
+    @Test
+    void shouldRejectMissingOtpCode() throws Exception {
+        Principal principal = mock(Principal.class);
+        when(principal.getName()).thenReturn("test@example.com");
+
+        mockMvc.perform(post("/api/auth/otp/verify")
+                .principal(principal)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{}"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("INVALID_INPUT"));
+
+        verifyNoInteractions(verifyOtpUseCase);
     }
 }

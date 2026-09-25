@@ -4,8 +4,10 @@ import com.danasea.backend.modules.service.application.dtos.WishlistItemResult;
 import com.danasea.backend.modules.service.domain.exceptions.ServiceNotFoundException;
 import com.danasea.backend.modules.service.domain.models.Service;
 import com.danasea.backend.modules.service.domain.models.Wishlist;
+import com.danasea.backend.modules.service.domain.ports.ServiceImageRepositoryPort;
 import com.danasea.backend.modules.service.domain.ports.ServiceRepositoryPort;
 import com.danasea.backend.modules.service.domain.ports.WishlistRepositoryPort;
+import com.danasea.backend.shared.i18n.LocalizedContentSelector;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -20,11 +22,13 @@ import java.util.stream.Collectors;
 public class WishlistUseCase {
     private final WishlistRepositoryPort wishlistRepositoryPort;
     private final ServiceRepositoryPort serviceRepositoryPort;
+    private final ServiceImageRepositoryPort serviceImageRepositoryPort;
+    private final LocalizedContentSelector localizedContentSelector;
 
     public void addWishlist(UUID userId, UUID serviceId) {
-        if (!serviceRepositoryPort.existsById(serviceId)) {
-            throw new ServiceNotFoundException("Service not found: " + serviceId);
-        }
+        serviceRepositoryPort.findPublishedById(serviceId)
+                .orElseThrow(() -> new ServiceNotFoundException(
+                        "Service not found or not published: " + serviceId));
 
         if (wishlistRepositoryPort.existsByUserIdAndServiceId(userId, serviceId)) {
             return; // Idempotent
@@ -44,15 +48,24 @@ public class WishlistUseCase {
     }
 
     public List<WishlistItemResult> getWishlists(UUID userId) {
-        return wishlistRepositoryPort.findAllByUserId(userId).stream().map(w -> {
-            Service service = serviceRepositoryPort.findById(w.getServiceId()).orElse(new Service());
+        return wishlistRepositoryPort.findAllByUserId(userId).stream().flatMap(w ->
+                serviceRepositoryPort.findPublishedById(w.getServiceId()).stream().map(service -> {
             LocalDateTime added = w.getCreatedAt() != null ? w.getCreatedAt().toLocalDateTime() : null;
             return WishlistItemResult.builder()
                 .id(w.getId())
                 .serviceId(w.getServiceId())
-                .serviceName(service.getName())
+                .serviceName(localizedContentSelector == null ? service.getName()
+                        : localizedContentSelector.select(service.getName(), service.getNameEn()))
+                .primaryImageUrl(primaryImageUrl(service.getId()))
                 .addedAt(added)
                 .build();
-        }).collect(Collectors.toList());
+        })).collect(Collectors.toList());
+    }
+
+    private String primaryImageUrl(UUID serviceId) {
+        return serviceImageRepositoryPort.findByServiceId(serviceId).stream()
+                .findFirst()
+                .map(image -> image.getUrl())
+                .orElse(null);
     }
 }
