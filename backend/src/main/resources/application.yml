@@ -106,6 +106,14 @@ app:
     closes-after: ${APP_CHECKIN_CLOSES_AFTER:30m}
   payment:
     webhook-secret: ${APP_PAYMENT_WEBHOOK_SECRET:local-development-payment-webhook-secret-change-me}
+    paypal:
+      mode: ${APP_PAYPAL_MODE:sandbox}
+      client-id: ${APP_PAYPAL_CLIENT_ID:BAAcyzDuInaGyvEGc-QvrX15iuHLHwtMy8kaHy3HT7edLoksPIsXxaXEvm920NAwNzFzirWf7MQ-Q3e_7g}
+      client-secret: ${APP_PAYPAL_CLIENT_SECRET:ELGW-cx_uqbcNh_kTfTsKjR-YzSYSX47Lth7lj36YoqZAPES2Ol4fVO73lqX6nIO_YWTsI3XXhCmmKlJ}
+      webhook-id: ${APP_PAYPAL_WEBHOOK_ID:}
+      base-url: ${APP_PAYPAL_BASE_URL:https://api-m.sandbox.paypal.com}
+      return-url: ${APP_PAYPAL_RETURN_URL:http://localhost:3000/payment/success}
+      cancel-url: ${APP_PAYPAL_CANCEL_URL:http://localhost:3000/payment/cancel}
   http:
     connect-timeout: ${APP_HTTP_CONNECT_TIMEOUT:5s}
     read-timeout: ${APP_HTTP_READ_TIMEOUT:10s}

@@ -194,26 +194,28 @@
 - [x] Không hỗ trợ đặt cọc — bắt buộc thanh toán toàn bộ
 - [x] Thanh toán 1 lần cho toàn bộ Master Order (không thanh toán riêng từng Sub-Order)
 - [x] Hoàn tiền tự động (không cần Admin duyệt thủ công)
+- [x] Cổng thanh toán: Trong nước (VNPay, MoMo) & Quốc tế (PayPal Sandbox). Bỏ SePay, thay bằng PayPal.
 
 ### API
-- [ ] POST /api/orders (tạo Master Order từ booking, chờ thanh toán)
-- [ ] GET /api/orders/{id}
-- [ ] GET /api/orders
-- [ ] GET /api/vendor/orders
-- [ ] POST /api/payments/{orderId}/create-intent (thanh toán toàn bộ Master Order 1 lần)
-- [ ] POST /api/payments/webhook/vnpay
-- [ ] POST /api/payments/webhook/momo
-- [ ] POST /api/payments/webhook/sepay
-- [ ] POST /api/orders/{id}/refund-request (trigger hoàn tiền tự động theo policy)
+- [x] POST /api/orders (tạo Master Order từ booking, chờ thanh toán)
+- [x] GET /api/orders/{id}
+- [x] GET /api/orders
+- [x] GET /api/vendor/orders
+- [x] POST /api/payments/{orderId}/create-intent (thanh toán toàn bộ Master Order 1 lần)
+- [x] POST /api/payments/webhook/vnpay
+- [x] POST /api/payments/webhook/momo
+- [x] POST /api/payments/webhook/paypal (Webhook IPN từ PayPal REST API)
+- [x] POST /api/orders/{id}/refund-request (trigger hoàn tiền tự động theo policy)
 
 ### Test
-- [ ] CreateOrderUseCaseTest (split đúng Sub-Order theo vendor, chờ thanh toán toàn bộ)
+- [x] CreateOrderUseCaseTest (split đúng Sub-Order theo vendor, chờ thanh toán toàn bộ)
 - [ ] OrderSplittingTest (RabbitMQ message đúng số lượng vendor)
-- [ ] PaymentWebhookHmacTest (chữ ký sai → từ chối)
-- [ ] PaymentWebhookIdempotencyTest (trùng transactionId → xử lý 1 lần)
-- [ ] PaymentWebhookTest (thành công → confirm Master Order + mọi Sub-Order cùng lúc; thất bại → rollback inventory toàn bộ)
-- [ ] RefundRequestUseCaseTest (tự động hoàn tiền đúng số tiền, đúng cổng thanh toán gốc)
-- [ ] OrderControllerTest (IDOR customer/vendor)
+- [x] PaymentWebhookHmacTest (chữ ký sai → từ chối)
+- [x] PaymentWebhookIdempotencyTest (trùng transactionId → xử lý 1 lần)
+- [x] PaymentWebhookTest (thành công → confirm Master Order + mọi Sub-Order cùng lúc; thất bại → rollback inventory toàn bộ)
+- [x] PayPalWebhookVerificationTest (Xác thực Webhook signature từ PayPal)
+- [x] RefundRequestUseCaseTest (tự động hoàn tiền đúng số tiền, đúng cổng thanh toán gốc)
+- [x] OrderControllerTest (IDOR customer/vendor)
 
 ---
 

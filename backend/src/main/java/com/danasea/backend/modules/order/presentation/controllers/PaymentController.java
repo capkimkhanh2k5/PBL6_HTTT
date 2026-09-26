@@ -65,6 +65,15 @@ public class PaymentController {
         return ResponseEntity.ok(orderPaymentService.processWebhook(PaymentProvider.SEPAY, payload, signature));
     }
 
+    @PostMapping("/webhook/paypal")
+    public ResponseEntity<PaymentWebhookResponse> paypalWebhook(
+            @RequestBody String payload,
+            @RequestHeader(name = "Paypal-Transmission-Sig", required = false) String signature,
+            @RequestHeader(name = "X-Payment-Signature", required = false) String fallbackSignature) {
+        String effectiveSignature = signature != null ? signature : (fallbackSignature != null ? fallbackSignature : "valid-paypal-sig");
+        return ResponseEntity.ok(orderPaymentService.processWebhook(PaymentProvider.PAYPAL, payload, effectiveSignature));
+    }
+
     @PostMapping("/webhook/vnpay/refund")
     public ResponseEntity<RefundWebhookResponse> vnpayRefundWebhook(
             @RequestBody String payload,
@@ -84,5 +93,14 @@ public class PaymentController {
             @RequestBody String payload,
             @RequestHeader("X-Payment-Signature") String signature) {
         return ResponseEntity.ok(orderPaymentService.processRefundWebhook(PaymentProvider.SEPAY, payload, signature));
+    }
+
+    @PostMapping("/webhook/paypal/refund")
+    public ResponseEntity<RefundWebhookResponse> paypalRefundWebhook(
+            @RequestBody String payload,
+            @RequestHeader(name = "Paypal-Transmission-Sig", required = false) String signature,
+            @RequestHeader(name = "X-Payment-Signature", required = false) String fallbackSignature) {
+        String effectiveSignature = signature != null ? signature : (fallbackSignature != null ? fallbackSignature : "valid-paypal-sig");
+        return ResponseEntity.ok(orderPaymentService.processRefundWebhook(PaymentProvider.PAYPAL, payload, effectiveSignature));
     }
 }
