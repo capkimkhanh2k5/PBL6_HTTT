@@ -203,13 +203,13 @@
 - [x] GET /api/vendor/orders
 - [x] POST /api/payments/{orderId}/create-intent (thanh toán toàn bộ Master Order 1 lần)
 - [x] POST /api/payments/webhook/vnpay
-- [x] POST /api/payments/webhook/momo
+- [x] POST /api/payments/webhook/momo  (có vấn đề về api, phải dùng giả lập trên đt mới test được)
 - [x] POST /api/payments/webhook/paypal (Webhook IPN từ PayPal REST API)
 - [x] POST /api/orders/{id}/refund-request (trigger hoàn tiền tự động theo policy)
 
 ### Test
 - [x] CreateOrderUseCaseTest (split đúng Sub-Order theo vendor, chờ thanh toán toàn bộ)
-- [ ] OrderSplittingTest (RabbitMQ message đúng số lượng vendor)
+- [x] OrderSplittingTest (RabbitMQ message đúng số lượng vendor)
 - [x] PaymentWebhookHmacTest (chữ ký sai → từ chối)
 - [x] PaymentWebhookIdempotencyTest (trùng transactionId → xử lý 1 lần)
 - [x] PaymentWebhookTest (thành công → confirm Master Order + mọi Sub-Order cùng lúc; thất bại → rollback inventory toàn bộ)

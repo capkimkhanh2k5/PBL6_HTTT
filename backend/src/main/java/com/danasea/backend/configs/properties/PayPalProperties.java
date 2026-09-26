@@ -2,6 +2,16 @@ package com.danasea.backend.configs.properties;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
+/**
+ * Cấu hình tham số cổng thanh toán PayPal REST API v2 Sandbox.
+ * <p>
+ * Luồng cấu hình (Traceability Map):
+ * <ul>
+ *   <li>Biến môi trường: {@code APP_PAYPAL_MODE}, {@code APP_PAYPAL_CLIENT_ID}, {@code APP_PAYPAL_CLIENT_SECRET}, {@code APP_PAYPAL_WEBHOOK_ID} (trong {@code .env})</li>
+ *   <li>File cấu hình: {@code backend/src/main/resources/application.yml} (mục {@code app.payment.paypal})</li>
+ *   <li>Sử dụng tại: {@code PayPalPaymentAdapter.java} để xác thực OAuth2 Bearer token, tạo đơn hàng v2/checkout/orders, hoàn tiền và xác thực webhook</li>
+ * </ul>
+ */
 @ConfigurationProperties(prefix = "app.payment.paypal")
 public record PayPalProperties(
         String mode,

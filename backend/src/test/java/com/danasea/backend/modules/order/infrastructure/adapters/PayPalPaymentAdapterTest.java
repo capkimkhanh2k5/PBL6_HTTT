@@ -26,6 +26,9 @@ class PayPalPaymentAdapterTest {
     @Mock
     private SePayPaymentAdapter sePayPaymentAdapter;
 
+    @Mock
+    private VNPayPaymentAdapter vnPayPaymentAdapter;
+
     private PayPalProperties payPalProperties;
     private ObjectMapper objectMapper;
     private PayPalPaymentAdapter adapter;
@@ -34,8 +37,8 @@ class PayPalPaymentAdapterTest {
     void setUp() {
         payPalProperties = new PayPalProperties(
                 "sandbox",
-                "BAAcyzDuInaGyvEGc-QvrX15iuHLHwtMy8kaHy3HT7edLoksPIsXxaXEvm920NAwNzFzirWf7MQ-Q3e_7g",
-                "ELGW-cx_uqbcNh_kTfTsKjR-YzSYSX47Lth7lj36YoqZAPES2Ol4fVO73lqX6nIO_YWTsI3XXhCmmKlJ",
+                "test-sandbox-client-id",
+                "test-sandbox-client-secret",
                 "MOCK-WEBHOOK-ID",
                 "https://api-m.sandbox.paypal.com",
                 "http://localhost:3000/payment/success",
@@ -46,7 +49,8 @@ class PayPalPaymentAdapterTest {
                 RestClient.builder(),
                 payPalProperties,
                 objectMapper,
-                sePayPaymentAdapter
+                sePayPaymentAdapter,
+                vnPayPaymentAdapter
         );
     }
 
