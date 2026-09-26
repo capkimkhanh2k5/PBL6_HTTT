@@ -32,4 +32,10 @@ public class MasterOrderJpaEntity extends BaseJpaEntity {
     @Column(name = "idempotency_key", length = 100)
     private String idempotencyKey;
 
+    @Column(name = "payment_deadline")
+    private java.time.OffsetDateTime paymentDeadline;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "payment_status", length = 50)
+    private com.danasea.backend.modules.order.domain.models.PaymentOrderStatus paymentStatus = com.danasea.backend.modules.order.domain.models.PaymentOrderStatus.UNPAID;
 }
