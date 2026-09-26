@@ -39,6 +39,6 @@ public interface JpaBookingRepository extends JpaRepository<BookingJpaEntity, UU
             Pageable pageable
     );
 
-    @Query("SELECT b FROM BookingJpaEntity b WHERE b.status = com.danasea.backend.modules.booking.domain.models.BookingStatus.HOLD AND b.holdExpiresAt < :threshold")
+    @Query("SELECT b FROM BookingJpaEntity b WHERE b.status IN (com.danasea.backend.modules.booking.domain.models.BookingStatus.HOLD, com.danasea.backend.modules.booking.domain.models.BookingStatus.PENDING_PAYMENT) AND b.holdExpiresAt < :threshold")
     List<BookingJpaEntity> findExpiredHolds(@Param("threshold") OffsetDateTime threshold);
 }

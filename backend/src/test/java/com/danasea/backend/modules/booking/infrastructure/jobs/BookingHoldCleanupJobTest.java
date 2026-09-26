@@ -15,6 +15,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.danasea.backend.modules.booking.domain.events.BookingHoldExpiredEvent;
 import com.danasea.backend.modules.booking.domain.models.Booking;
 import com.danasea.backend.modules.booking.domain.models.BookingItem;
 import com.danasea.backend.modules.booking.domain.models.BookingStatus;
@@ -27,6 +28,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import org.springframework.context.ApplicationEventPublisher;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -38,11 +40,14 @@ class BookingHoldCleanupJobTest {
     @Mock
     private InventoryLockPort inventoryLockPort;
 
+    @Mock
+    private ApplicationEventPublisher eventPublisher;
+
     private BookingHoldCleanupJob cleanupJob;
 
     @BeforeEach
     void setUp() {
-        cleanupJob = new BookingHoldCleanupJob(bookingRepository, inventoryLockPort);
+        cleanupJob = new BookingHoldCleanupJob(bookingRepository, inventoryLockPort, eventPublisher);
     }
 
     private Booking createExpiredBooking(UUID bookingId) {
@@ -84,6 +89,7 @@ class BookingHoldCleanupJobTest {
         verify(inventoryLockPort, times(1)).releaseHolds(eq(b1.getId()), any());
         verify(inventoryLockPort, times(1)).releaseHolds(eq(b2.getId()), any());
         verify(bookingRepository, times(2)).save(any(Booking.class));
+        verify(eventPublisher, times(2)).publishEvent(any(BookingHoldExpiredEvent.class));
     }
 
     @Test
@@ -95,6 +101,7 @@ class BookingHoldCleanupJobTest {
 
         verify(inventoryLockPort, never()).releaseHolds(any(), any());
         verify(bookingRepository, never()).save(any());
+        verify(eventPublisher, never()).publishEvent(any(BookingHoldExpiredEvent.class));
     }
 
     @Test
