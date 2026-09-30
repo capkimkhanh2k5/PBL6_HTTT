@@ -7,8 +7,8 @@ import java.util.UUID;
 import com.danasea.backend.modules.order.domain.models.PaymentProvider;
 
 /**
- * Domain Port giao tiếp với các cổng thanh toán bên ngoài (SePay, VNPay, MoMo).
- * Tuân thủ quy chuẩn Mục 9.2.14.
+ * Domain Port giao tiếp với các cổng thanh toán bên ngoài (PayPal, VNPay, MoMo).
+ * Hỗ trợ tạo Payment Intent, xác thực webhook signature và gửi yêu cầu hoàn tiền.
  */
 public interface PaymentGatewayPort {
 

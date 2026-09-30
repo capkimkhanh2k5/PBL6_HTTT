@@ -48,7 +48,7 @@ public class HandleWebhookUseCase {
             throw new IllegalArgumentException("Webhook command and provider are required.");
         }
 
-        // 1. Xác thực chữ ký số HMAC-SHA512 (Mục 9.2.4 & 9.2.14)
+        // 1. Xác thực chữ ký số webhook thông qua PaymentGatewayPort
         boolean validSignature = paymentGatewayPort.verifyWebhookSignature(command.rawParams(), command.signature());
         if (!validSignature) {
             throw new PaymentVerificationException("Invalid webhook signature for provider: " + command.provider());

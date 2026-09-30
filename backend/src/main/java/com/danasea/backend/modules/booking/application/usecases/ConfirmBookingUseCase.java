@@ -7,6 +7,7 @@ import com.danasea.backend.modules.booking.application.dtos.BookingHoldItemResul
 import com.danasea.backend.modules.booking.application.dtos.BookingHoldResult;
 import com.danasea.backend.modules.booking.application.dtos.ConfirmBookingCommand;
 import com.danasea.backend.modules.booking.domain.exceptions.BookingNotFoundException;
+import com.danasea.backend.modules.booking.domain.exceptions.InvalidBookingStateException;
 import com.danasea.backend.modules.booking.domain.models.Booking;
 import com.danasea.backend.modules.booking.domain.models.InventoryLockItem;
 import com.danasea.backend.modules.booking.domain.ports.BookingRepositoryPort;
@@ -58,7 +59,7 @@ public class ConfirmBookingUseCase {
         booking.validateOwner(command.customerId());
 
         if (!bookingPaymentStatusPort.hasSuccessfulPayment(booking.getId())) {
-            throw new com.danasea.backend.modules.booking.domain.exceptions.InvalidBookingStateException(
+            throw new InvalidBookingStateException(
                     "Booking confirmation requires a successful payment webhook.");
         }
 

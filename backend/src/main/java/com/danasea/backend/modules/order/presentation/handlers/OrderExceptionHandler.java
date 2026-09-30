@@ -1,6 +1,8 @@
 package com.danasea.backend.modules.order.presentation.handlers;
 
+import com.danasea.backend.modules.order.domain.exceptions.InvalidWebhookException;
 import com.danasea.backend.modules.order.domain.exceptions.OrderNotFoundException;
+import com.danasea.backend.modules.order.domain.exceptions.PaymentVerificationException;
 import com.danasea.backend.shared.presentation.ErrorResponse;
 import com.danasea.backend.shared.presentation.LocalizedExceptionHandlerSupport;
 import org.springframework.http.HttpStatus;
@@ -22,5 +24,17 @@ public class OrderExceptionHandler extends LocalizedExceptionHandlerSupport {
     public ResponseEntity<ErrorResponse> handleAccessDenied(AccessDeniedException ex) {
         return ResponseEntity.status(HttpStatus.FORBIDDEN)
                 .body(error("ACCESS_DENIED"));
+    }
+
+    @ExceptionHandler(PaymentVerificationException.class)
+    public ResponseEntity<ErrorResponse> handlePaymentVerification(PaymentVerificationException ex) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(error("PAYMENT_SIGNATURE_INVALID"));
+    }
+
+    @ExceptionHandler(InvalidWebhookException.class)
+    public ResponseEntity<ErrorResponse> handleInvalidWebhook(InvalidWebhookException ex) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(error("INVALID_WEBHOOK"));
     }
 }

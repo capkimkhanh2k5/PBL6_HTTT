@@ -48,7 +48,7 @@ class VNPayPaymentAdapterTest {
         assertThat(result.paymentUrl()).contains("vnp_TmnCode=FOS9BJWS");
         assertThat(result.paymentUrl()).contains("vnp_Amount=50000000");
         assertThat(result.paymentUrl()).contains("vnp_SecureHash=");
-        assertThat(result.qrCodeUrl()).contains("api.qrserver.com");
+        assertThat(result.qrCodeUrl()).isEqualTo(result.paymentUrl());
     }
 
     @Test

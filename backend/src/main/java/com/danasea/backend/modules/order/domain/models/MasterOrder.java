@@ -54,7 +54,9 @@ public class MasterOrder extends BaseDomainModel {
     }
 
     /**
-     * Tự kiểm tra tính hợp lệ của state transition (Mục 2.6).
+     * Kiểm tra tính hợp lệ của việc chuyển đổi trạng thái đơn hàng.
+     * Đơn hàng ở trạng thái kết thúc (COMPLETED, CANCELLED) không thể chuyển đổi tiếp.
+     * Đơn hàng ở PENDING_PAYMENT chỉ có thể chuyển sang PAID khi thanh toán thành công hoặc CANCELLED khi hết hạn.
      */
     public void assertValidTransition(MasterOrderStatus newStatus) {
         if (this.status == newStatus) {
@@ -108,8 +110,9 @@ public class MasterOrder extends BaseDomainModel {
     }
 
     /**
-     * Tự bảo vệ khi nhận sự kiện timeout hết hạn thanh toán (Mục 9.2.10).
-     * Chỉ hủy nếu trạng thái hiện tại vẫn là PENDING_PAYMENT để tránh ghi đè PAID khi có race condition.
+     * Hủy đơn hàng khi hết hạn thời gian thanh toán.
+     * Chỉ thực hiện hủy nếu đơn hàng đang ở PENDING_PAYMENT nhằm bảo vệ trạng thái,
+     * tránh race condition ghi đè lên đơn hàng đã được webhook xác nhận PAID trước đó.
      */
     public void cancelDueToExpiry() {
         if (this.status == MasterOrderStatus.PENDING_PAYMENT) {

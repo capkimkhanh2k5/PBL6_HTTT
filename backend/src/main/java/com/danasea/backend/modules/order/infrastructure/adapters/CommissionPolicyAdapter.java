@@ -19,7 +19,7 @@ public class CommissionPolicyAdapter implements CommissionPolicyPort {
 
     @Override
     public BigDecimal getCommissionRate(UUID vendorId) {
-        // Ưu tiên fallback về cấu hình hệ thống mặc định 10% (0.10) per Mục 9.2.6
+        // Mặc định áp dụng tỷ lệ hoa hồng chuẩn của hệ thống (10%)
         return CommissionPolicyPort.DEFAULT_COMMISSION_RATE;
     }
 }

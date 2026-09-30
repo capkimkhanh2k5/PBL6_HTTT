@@ -29,15 +29,8 @@ import com.danasea.backend.modules.order.domain.ports.RefundResult;
 import lombok.extern.slf4j.Slf4j;
 
 /**
- * Adapter triển khai cổng thanh toán nội địa VNPay Sandbox (Mục 9.2.3 & 9.2.14).
+ * Adapter triển khai cổng thanh toán nội địa VNPay.
  * Hỗ trợ tạo URL thanh toán VNPay-QR / ATM nội địa và xác thực chữ ký HMAC-SHA512.
- * <p>
- * Nguồn cấu hình (Configuration Source):
- * <ul>
- *   <li>{@code .env} : {@code VNPAY_TMN_CODE}, {@code VNPAY_HASH_SECRET}, {@code VNPAY_PAY_URL}, {@code VNPAY_RETURN_URL}</li>
- *   <li>{@code application.yml} : {@code app.payment.vnpay.*}</li>
- *   <li>{@link VNPayProperties} : record chứa các thuộc tính cấu hình inject trực tiếp vào adapter này</li>
- * </ul>
  */
 @Component
 @Slf4j
@@ -104,9 +97,7 @@ public class VNPayPaymentAdapter implements PaymentGatewayPort {
 
         String secureHash = hmacSHA512(vnpayProperties.hashSecret(), hashData.toString());
         String paymentUrl = vnpayProperties.payUrl() + "?" + query + "&vnp_SecureHash=" + secureHash;
-
-        String qrCodeUrl = "https://api.qrserver.com/v1/create-qr-code/?size=300x300&data="
-                + URLEncoder.encode(paymentUrl, StandardCharsets.UTF_8);
+        String qrCodeUrl = paymentUrl;
 
         return new PaymentIntentResult(
                 paymentId,

@@ -27,39 +27,29 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 
 /**
- * Adapter triển khai cổng thanh toán quốc tế PayPal REST API v2 (Mục 9.2.3 & 9.2.14).
- * Hỗ trợ PayPal Sandbox với OAuth2 Bearer Token, Order Capture URL, Webhook verification và Refund.
- * <p>
- * Nguồn cấu hình (Configuration Source):
- * <ul>
- *   <li>{@code .env} : {@code APP_PAYPAL_MODE}, {@code APP_PAYPAL_CLIENT_ID}, {@code APP_PAYPAL_CLIENT_SECRET}, {@code APP_PAYPAL_WEBHOOK_ID}</li>
- *   <li>{@code application.yml} : {@code app.payment.paypal.*}</li>
- *   <li>{@link PayPalProperties} : record chứa các thuộc tính cấu hình inject trực tiếp vào adapter này</li>
- * </ul>
+ * Adapter triển khai cổng thanh toán quốc tế PayPal REST API v2.
+ * Hỗ trợ OAuth2 Bearer Token, Order Capture URL, Webhook verification và Refund.
  */
 @Component
 @Primary
 @Slf4j
 public class PayPalPaymentAdapter implements PaymentGatewayPort {
 
-    private static final BigDecimal DEFAULT_VND_TO_USD_RATE = new BigDecimal("25400");
+    private static final BigDecimal DEFAULT_VND_TO_USD_RATE = new BigDecimal("25900");
     private static final BigDecimal MIN_USD_AMOUNT = new BigDecimal("1.00");
 
     private final RestClient restClient;
     private final PayPalProperties payPalProperties;
     private final ObjectMapper objectMapper;
-    private final SePayPaymentAdapter sePayPaymentAdapter;
     private final VNPayPaymentAdapter vnPayPaymentAdapter;
 
     public PayPalPaymentAdapter(
             RestClient.Builder restClientBuilder,
             PayPalProperties payPalProperties,
             ObjectMapper objectMapper,
-            SePayPaymentAdapter sePayPaymentAdapter,
             VNPayPaymentAdapter vnPayPaymentAdapter) {
         this.payPalProperties = payPalProperties;
         this.objectMapper = objectMapper;
-        this.sePayPaymentAdapter = sePayPaymentAdapter;
         this.vnPayPaymentAdapter = vnPayPaymentAdapter;
         this.restClient = restClientBuilder
                 .baseUrl(payPalProperties.baseUrl())
@@ -96,9 +86,6 @@ public class PayPalPaymentAdapter implements PaymentGatewayPort {
     public PaymentIntentResult createPaymentIntent(UUID orderId, BigDecimal amount, PaymentProvider provider) {
         if (provider != null && provider == PaymentProvider.VNPAY) {
             return vnPayPaymentAdapter.createPaymentIntent(orderId, amount, provider);
-        }
-        if (provider != null && provider == PaymentProvider.SEPAY) {
-            return sePayPaymentAdapter.createPaymentIntent(orderId, amount, provider);
         }
 
         UUID paymentId = UUID.randomUUID();
@@ -164,11 +151,14 @@ public class PayPalPaymentAdapter implements PaymentGatewayPort {
         }
 
         if (approveUrl == null) {
-            approveUrl = "https://www.sandbox.paypal.com/checkoutnow?token=" + paypalOrderId;
+            String checkoutHost = "sandbox".equalsIgnoreCase(payPalProperties.mode())
+                    ? "https://www.sandbox.paypal.com"
+                    : "https://www.paypal.com";
+            approveUrl = checkoutHost + "/checkoutnow?token=" + paypalOrderId;
         }
 
-        String qrCodeUrl = "https://api.qrserver.com/v1/create-qr-code/?size=300x300&data="
-                + URLEncoder.encode(approveUrl, StandardCharsets.UTF_8);
+        // qrCodeUrl trả về chính approveUrl để Client-side (Frontend) tự render mã QR an toàn
+        String qrCodeUrl = approveUrl;
 
         return new PaymentIntentResult(
                 paymentId,
@@ -237,9 +227,6 @@ public class PayPalPaymentAdapter implements PaymentGatewayPort {
     public RefundResult requestRefund(String providerTransactionId, BigDecimal amount) {
         if (providerTransactionId != null && providerTransactionId.startsWith("VNPAY")) {
             return vnPayPaymentAdapter.requestRefund(providerTransactionId, amount);
-        }
-        if (providerTransactionId != null && providerTransactionId.startsWith("SEPAY")) {
-            return sePayPaymentAdapter.requestRefund(providerTransactionId, amount);
         }
         BigDecimal usdAmount = (amount != null && amount.compareTo(BigDecimal.ZERO) > 0)
                 ? amount.divide(DEFAULT_VND_TO_USD_RATE, 2, RoundingMode.HALF_UP)

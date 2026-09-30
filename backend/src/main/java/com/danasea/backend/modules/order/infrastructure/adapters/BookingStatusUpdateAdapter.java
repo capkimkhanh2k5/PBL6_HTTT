@@ -26,7 +26,8 @@ public class BookingStatusUpdateAdapter implements BookingStatusUpdatePort {
     }
 
     /**
-     * Tham gia cùng transaction hiện tại (Mục 2.5 — cấm REQUIRES_NEW).
+     * Cập nhật trạng thái đặt chỗ sang PENDING_PAYMENT, tham gia cùng transaction hiện tại.
+     * Sử dụng Propagation.REQUIRED để đảm bảo tính nguyên tử cùng với nghiệp vụ tạo Order.
      */
     @Override
     @Transactional(propagation = Propagation.REQUIRED)

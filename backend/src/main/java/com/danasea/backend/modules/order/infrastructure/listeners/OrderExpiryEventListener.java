@@ -18,7 +18,7 @@ import lombok.extern.slf4j.Slf4j;
 
 /**
  * Listener nhận sự kiện hết hạn giữ chỗ (BookingHoldExpiredEvent) từ module Booking,
- * đóng vai trò Single Source of Truth cho Payment Timeout (Mục 9.2.10).
+ * đóng vai trò Single Source of Truth cho cơ chế xử lý Payment Timeout đồng bộ giữa Booking và Order.
  */
 @Component
 @RequiredArgsConstructor

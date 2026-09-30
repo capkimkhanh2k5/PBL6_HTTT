@@ -1,7 +1,9 @@
 package com.danasea.backend.modules.order.infrastructure.persistence.entities;
 
 import com.danasea.backend.modules.order.domain.models.MasterOrderStatus;
+import com.danasea.backend.modules.order.domain.models.PaymentOrderStatus;
 import java.math.BigDecimal;
+import java.time.OffsetDateTime;
 import java.util.UUID;
 
 import com.danasea.backend.shared.core.infrastructure.persistence.entities.BaseJpaEntity;
@@ -33,9 +35,9 @@ public class MasterOrderJpaEntity extends BaseJpaEntity {
     private String idempotencyKey;
 
     @Column(name = "payment_deadline")
-    private java.time.OffsetDateTime paymentDeadline;
+    private OffsetDateTime paymentDeadline;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "payment_status", length = 50)
-    private com.danasea.backend.modules.order.domain.models.PaymentOrderStatus paymentStatus = com.danasea.backend.modules.order.domain.models.PaymentOrderStatus.UNPAID;
+    private PaymentOrderStatus paymentStatus = PaymentOrderStatus.UNPAID;
 }

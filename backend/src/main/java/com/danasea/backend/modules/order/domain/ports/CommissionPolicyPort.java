@@ -4,7 +4,7 @@ import java.math.BigDecimal;
 import java.util.UUID;
 
 /**
- * Domain Port xác định tỷ lệ hoa hồng cho vendor (Mục 9.2.6).
+ * Domain Port xác định tỷ lệ hoa hồng cho vendor.
  * Mặc định fallback là 10% (0.10).
  */
 public interface CommissionPolicyPort {

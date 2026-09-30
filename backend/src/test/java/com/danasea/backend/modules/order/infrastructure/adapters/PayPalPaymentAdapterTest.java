@@ -24,9 +24,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 class PayPalPaymentAdapterTest {
 
     @Mock
-    private SePayPaymentAdapter sePayPaymentAdapter;
-
-    @Mock
     private VNPayPaymentAdapter vnPayPaymentAdapter;
 
     private PayPalProperties payPalProperties;
@@ -49,7 +46,6 @@ class PayPalPaymentAdapterTest {
                 RestClient.builder(),
                 payPalProperties,
                 objectMapper,
-                sePayPaymentAdapter,
                 vnPayPaymentAdapter
         );
     }
@@ -67,7 +63,7 @@ class PayPalPaymentAdapterTest {
         assertThat(result.provider()).isEqualTo(PaymentProvider.PAYPAL);
         assertThat(result.amount()).isEqualTo(vndAmount);
         assertThat(result.paymentUrl()).contains("sandbox.paypal.com");
-        assertThat(result.qrCodeUrl()).contains("api.qrserver.com");
+        assertThat(result.qrCodeUrl()).isEqualTo(result.paymentUrl());
         assertThat(result.expiresAt()).isNotNull();
     }
 

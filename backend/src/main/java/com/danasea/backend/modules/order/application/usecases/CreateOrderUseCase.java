@@ -118,7 +118,7 @@ public class CreateOrderUseCase {
         );
         order = masterOrderRepository.save(order);
 
-        // 9. Tách Sub-Orders theo quy tắc 1 SubOrder = 1 BookingItem (Mục 9.2.1)
+        // 9. Tách Sub-Orders theo quy tắc 1 SubOrder tương ứng với 1 BookingItem
         List<SubOrder> subOrders = new ArrayList<>();
         for (BookingOrderView.BookingItemOrderView item : booking.items()) {
             BigDecimal rate = commissionPolicyPort.getCommissionRate(item.vendorId());
