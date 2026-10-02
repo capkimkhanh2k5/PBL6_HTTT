@@ -9,6 +9,7 @@
 ### Auth Module — API
 - [x] POST /api/auth/register
 - [x] POST /api/auth/login
+- [x] POST /api/auth/oauth2/google
 - [x] POST /api/auth/refresh
 - [x] POST /api/auth/logout
 - [x] POST /api/auth/otp/send
@@ -17,6 +18,7 @@
 ### Auth Module — Test
 - [x] RegisterUseCaseTest (thành công, email trùng, publish event)
 - [x] LoginUseCaseTest (thành công, sai mật khẩu, user locked, email chưa verify)
+- [x] GoogleOAuth2LoginUseCaseTest (login user cũ, auto register user mới, user locked, token invalid)
 - [x] RefreshTokenUseCaseTest (rotation, family revocation, hết hạn, user locked)
 - [x] LogoutUseCaseTest
 - [x] SendVerificationOtpUseCaseTest

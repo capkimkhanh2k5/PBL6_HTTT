@@ -64,6 +64,7 @@ public class SecurityConfig {
 								"/api/auth/register",
 								"/api/auth/refresh",
 								"/api/auth/logout",
+								"/api/auth/oauth2/**",
 								"/api/payments/webhook/**",
 								"/api/v1/weather/**",
 								"/api/weather/**",

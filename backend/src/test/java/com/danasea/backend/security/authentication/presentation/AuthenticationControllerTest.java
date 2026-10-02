@@ -11,6 +11,8 @@ import com.danasea.backend.security.authentication.application.usecases.RefreshT
 import com.danasea.backend.security.authentication.application.usecases.RegisterUseCase;
 import com.danasea.backend.security.authentication.application.usecases.SendVerificationOtpUseCase;
 import com.danasea.backend.security.authentication.application.usecases.VerifyOtpUseCase;
+import com.danasea.backend.security.authentication.application.usecases.GoogleOAuth2LoginUseCase;
+import com.danasea.backend.security.authentication.presentation.dtos.GoogleOAuth2Request;
 import com.danasea.backend.security.authentication.presentation.dtos.LoginRequest;
 import com.danasea.backend.security.authentication.presentation.dtos.RegisterRequest;
 import com.danasea.backend.security.authentication.presentation.dtos.VerifyOtpRequest;
@@ -57,6 +59,9 @@ class AuthenticationControllerTest {
     @Mock
     private SendVerificationOtpUseCase sendVerificationOtpUseCase;
 
+    @Mock
+    private GoogleOAuth2LoginUseCase googleOAuth2LoginUseCase;
+
     private AuthenticationController authenticationController;
 
     private ObjectMapper objectMapper = new ObjectMapper();
@@ -72,6 +77,7 @@ class AuthenticationControllerTest {
                 logoutUseCase,
                 sendVerificationOtpUseCase,
                 verifyOtpUseCase,
+                googleOAuth2LoginUseCase,
                 jwtProperties);
         mockMvc = MockMvcBuilders.standaloneSetup(authenticationController)
                 .setControllerAdvice(new AuthenticationExceptionHandler(), new GlobalExceptionHandler())
@@ -91,6 +97,24 @@ class AuthenticationControllerTest {
                 .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.accessToken").value("access-token"))
+                .andExpect(cookie().exists("refresh_token"))
+                .andExpect(cookie().httpOnly("refresh_token", true));
+    }
+
+    @Test
+    void shouldGoogleLoginAndReturnCookies() throws Exception {
+        GoogleOAuth2Request request = new GoogleOAuth2Request("google-id-token-abc", null);
+        LoginResult result = new LoginResult("google-access-token", "google-refresh-token", UUID.randomUUID(), "google@example.com",
+                "CUSTOMER");
+
+        when(googleOAuth2LoginUseCase.execute("google-id-token-abc")).thenReturn(result);
+
+        mockMvc.perform(post("/api/auth/oauth2/google")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.accessToken").value("google-access-token"))
+                .andExpect(jsonPath("$.email").value("google@example.com"))
                 .andExpect(cookie().exists("refresh_token"))
                 .andExpect(cookie().httpOnly("refresh_token", true));
     }

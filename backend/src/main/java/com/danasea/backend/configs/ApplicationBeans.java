@@ -19,6 +19,8 @@ import com.danasea.backend.modules.account.application.usecases.UpdateProfileUse
 
 import org.springframework.context.ApplicationEventPublisher;
 
+import com.danasea.backend.security.authentication.application.ports.GoogleTokenVerifierPort;
+import com.danasea.backend.security.authentication.application.usecases.GoogleOAuth2LoginUseCase;
 import com.danasea.backend.security.authentication.infrastructure.security.JwtProperties;
 import com.danasea.backend.security.authentication.application.usecases.RefreshTokenUseCase;
 import com.danasea.backend.security.authentication.application.usecases.LogoutUseCase;
@@ -129,5 +131,14 @@ public class ApplicationBeans {
             PasswordHasher passwordHasher,
             AuditLogInternalApi auditLogInternalApi) {
         return new ChangePasswordUseCase(accountInternalApi, passwordHasher, auditLogInternalApi);
+    }
+
+    @Bean
+    GoogleOAuth2LoginUseCase googleOAuth2LoginUseCase(
+            GoogleTokenVerifierPort tokenVerifier,
+            AccountInternalApi accountInternalApi,
+            TokenProvider tokenProvider,
+            JwtProperties jwtProperties) {
+        return new GoogleOAuth2LoginUseCase(tokenVerifier, accountInternalApi, tokenProvider, jwtProperties);
     }
 }
