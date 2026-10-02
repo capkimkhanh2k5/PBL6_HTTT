@@ -7,4 +7,7 @@ public record GoogleUserInfo(
         String name,
         String picture
 ) {
+    public String sub() {
+        return googleId;
+    }
 }

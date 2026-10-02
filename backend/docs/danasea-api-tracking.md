@@ -19,6 +19,9 @@
 - [x] RegisterUseCaseTest (thành công, email trùng, publish event)
 - [x] LoginUseCaseTest (thành công, sai mật khẩu, user locked, email chưa verify)
 - [x] GoogleOAuth2LoginUseCaseTest (login user cũ, auto register user mới, user locked, token invalid)
+- [x] GoogleTokenVerifierAdapterTest (verify thành công, token rỗng, Google error, audience mismatch, email chưa verify, server 500)
+- [x] GoogleOAuth2RequestTest (token fallback, priority, whitespace trim, null handling)
+- [x] GoogleUserInfoTest (record mapping, optional fields)
 - [x] RefreshTokenUseCaseTest (rotation, family revocation, hết hạn, user locked)
 - [x] LogoutUseCaseTest
 - [x] SendVerificationOtpUseCaseTest
