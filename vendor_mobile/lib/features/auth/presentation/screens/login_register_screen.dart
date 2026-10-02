@@ -1,0 +1,723 @@
+import 'package:flutter/material.dart';
+import '../../../../core/theme/app_colors.dart';
+import '../../../../core/theme/app_shapes.dart';
+import '../../../../core/theme/app_typography.dart';
+import '../../../../core/widgets/vendor_button.dart';
+import '../../../../core/widgets/vendor_text_field.dart';
+import '../../../../core/widgets/toast_notification.dart';
+import '../../../../core/data/vendor_mock_repositories.dart';
+import 'forgot_password_screen.dart';
+import '../../../navigation/presentation/screens/main_navigation_screen.dart';
+
+class LoginRegisterScreen extends StatefulWidget {
+  const LoginRegisterScreen({super.key});
+
+  @override
+  State<LoginRegisterScreen> createState() => _LoginRegisterScreenState();
+}
+
+class _LoginRegisterScreenState extends State<LoginRegisterScreen> {
+  final _authRepo = VendorAuthRepository();
+  bool _isLoginTab = true;
+
+  // Login form
+  final _loginFormKey = GlobalKey<FormState>();
+  final _loginEmailController = TextEditingController(text: 'partner@danangoceanclub.com');
+  final _loginPasswordController = TextEditingController(text: '12345678');
+  bool _rememberMe = true;
+  bool _hideLoginPassword = true;
+  bool _isLoadingLogin = false;
+
+  // Register form
+  final _registerFormKey = GlobalKey<FormState>();
+  final _regNameController = TextEditingController();
+  final _regEmailController = TextEditingController();
+  final _regPhoneController = TextEditingController();
+  final _regPasswordController = TextEditingController();
+  final _regConfirmPasswordController = TextEditingController();
+  bool _termsAgreed = false;
+  bool _hideRegPassword = true;
+  bool _hideRegConfirmPassword = true;
+  bool _isLoadingRegister = false;
+
+  // Demo state banner simulation
+  String? _statusBannerMessage;
+
+  @override
+  void dispose() {
+    _loginEmailController.dispose();
+    _loginPasswordController.dispose();
+    _regNameController.dispose();
+    _regEmailController.dispose();
+    _regPhoneController.dispose();
+    _regPasswordController.dispose();
+    _regConfirmPasswordController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _handleLogin() async {
+    if (!_loginFormKey.currentState!.validate()) return;
+    setState(() => _isLoadingLogin = true);
+    try {
+      await _authRepo.login(
+        _loginEmailController.text,
+        _loginPasswordController.text,
+      );
+      if (mounted) {
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(builder: (_) => const MainNavigationScreen()),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        showVendorToast(context, message: e.toString().replaceAll('Exception: ', ''), isError: true);
+      }
+    } finally {
+      if (mounted) setState(() => _isLoadingLogin = false);
+    }
+  }
+
+  Future<void> _handleRegister() async {
+    if (!_registerFormKey.currentState!.validate()) return;
+    if (!_termsAgreed) {
+      showVendorToast(context, message: 'Vui lòng đồng ý với điều khoản hợp tác đối tác.', isError: true);
+      return;
+    }
+    setState(() => _isLoadingRegister = true);
+    try {
+      await _authRepo.register(
+        fullName: _regNameController.text,
+        email: _regEmailController.text,
+        phone: _regPhoneController.text.isNotEmpty ? _regPhoneController.text : null,
+        password: _regPasswordController.text,
+      );
+      if (mounted) {
+        showVendorToast(context, message: 'Đăng ký thành công! Vui lòng xác minh email để bắt đầu.');
+        setState(() {
+          _isLoginTab = true;
+          _loginEmailController.text = _regEmailController.text;
+          _statusBannerMessage = 'Vui lòng xác minh địa chỉ email ${_regEmailController.text} để tiếp tục.';
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        showVendorToast(context, message: e.toString().replaceAll('Exception: ', ''), isError: true);
+      }
+    } finally {
+      if (mounted) setState(() => _isLoadingRegister = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: AppColors.surface,
+      body: SafeArea(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          child: Center(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 440),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  // Top portal header
+                  _buildHeaderCard(),
+                  const SizedBox(height: 16),
+
+                  // Tab switcher
+                  _buildTabSwitcher(),
+                  const SizedBox(height: 16),
+
+                  // Status warning banner if any
+                  if (_statusBannerMessage != null) ...[
+                    Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: AppColors.secondaryContainer.withAlpha(120),
+                        borderRadius: BorderRadius.circular(14),
+                        border: Border.all(color: AppColors.secondary.withAlpha(80)),
+                      ),
+                      child: Row(
+                        children: [
+                          const Icon(Icons.info_outline, color: AppColors.secondary, size: 20),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              _statusBannerMessage!,
+                              style: AppTypography.bodySm(color: AppColors.onSecondaryContainer),
+                            ),
+                          ),
+                          InkWell(
+                            onTap: () => setState(() => _statusBannerMessage = null),
+                            child: const Icon(Icons.close, size: 18, color: AppColors.secondary),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 14),
+                  ],
+
+                  // Form Container
+                  if (_isLoginTab) _buildLoginForm() else _buildRegisterForm(),
+
+                  const SizedBox(height: 20),
+
+                  // Security note footer
+                  _buildSecurityFooter(),
+                  const SizedBox(height: 24),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildHeaderCard() {
+    return Container(
+      decoration: BoxDecoration(
+        color: AppColors.surfaceContainerLow,
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: AppShapes.shadowLevel1,
+      ),
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        children: [
+          Wrap(
+            alignment: WrapAlignment.spaceBetween,
+            crossAxisAlignment: WrapCrossAlignment.center,
+            spacing: 8,
+            runSpacing: 6,
+            children: [
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Container(
+                    width: 40,
+                    height: 40,
+                    decoration: const BoxDecoration(
+                      color: AppColors.secondary,
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(Icons.sailing_rounded, color: AppColors.onSecondary, size: 22),
+                  ),
+                  const SizedBox(width: 10),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text('DANASEA', style: AppTypography.headlineSm(color: AppColors.secondary)),
+                      Text('VENDOR PORTAL', style: AppTypography.labelSm(color: AppColors.tertiary)),
+                    ],
+                  ),
+                ],
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                decoration: BoxDecoration(
+                  color: AppColors.secondaryContainer,
+                  borderRadius: BorderRadius.circular(9999),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Container(
+                      width: 6,
+                      height: 6,
+                      decoration: const BoxDecoration(
+                        color: AppColors.secondary,
+                        shape: BoxShape.circle,
+                      ),
+                    ),
+                    const SizedBox(width: 6),
+                    Text(
+                      'Hệ thống trực tuyến',
+                      style: AppTypography.labelSm(color: AppColors.onSecondaryContainer),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 14),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(14),
+            child: SizedBox(
+              height: 120,
+              width: double.infinity,
+              child: Stack(
+                fit: StackFit.expand,
+                children: [
+                  Image.network(
+                    'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=800&auto=format&fit=crop&q=80',
+                    height: 120,
+                    width: double.infinity,
+                    fit: BoxFit.cover,
+                    errorBuilder: (_, __, ___) => Container(
+                      height: 120,
+                      width: double.infinity,
+                      color: AppColors.secondary.withAlpha(30),
+                      child: const Icon(Icons.beach_access, size: 40, color: AppColors.secondary),
+                    ),
+                  ),
+                Positioned.fill(
+                  child: Container(
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        colors: [
+                          Colors.transparent,
+                          AppColors.onSurface.withAlpha(180),
+                        ],
+                      ),
+                    ),
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                    alignment: Alignment.bottomLeft,
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'CỔNG KẾT NỐI DỊCH VỤ BIỂN',
+                          style: AppTypography.labelSm(color: AppColors.secondaryContainer),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        Text(
+                          'Đồng hành phát triển du lịch biển Đà Nẵng',
+                          style: AppTypography.headlineSm(color: Colors.white).copyWith(fontSize: 15),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTabSwitcher() {
+    return Container(
+      padding: const EdgeInsets.all(4),
+      decoration: BoxDecoration(
+        color: AppColors.surfaceContainerLowest,
+        borderRadius: BorderRadius.circular(9999),
+        boxShadow: AppShapes.shadowLevel1,
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: InkWell(
+              onTap: () => setState(() => _isLoginTab = true),
+              borderRadius: BorderRadius.circular(9999),
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 200),
+                padding: const EdgeInsets.symmetric(vertical: 10),
+                decoration: BoxDecoration(
+                  color: _isLoginTab ? AppColors.secondary : Colors.transparent,
+                  borderRadius: BorderRadius.circular(9999),
+                ),
+                alignment: Alignment.center,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      Icons.lock_open_rounded,
+                      size: 16,
+                      color: _isLoginTab ? AppColors.onSecondary : AppColors.tertiary,
+                    ),
+                    const SizedBox(width: 6),
+                    Flexible(
+                      child: Text(
+                        'Đăng nhập',
+                        style: AppTypography.labelLg(
+                          color: _isLoginTab ? AppColors.onSecondary : AppColors.tertiary,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+          Expanded(
+            child: InkWell(
+              onTap: () => setState(() => _isLoginTab = false),
+              borderRadius: BorderRadius.circular(9999),
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 200),
+                padding: const EdgeInsets.symmetric(vertical: 10),
+                decoration: BoxDecoration(
+                  color: !_isLoginTab ? AppColors.secondary : Colors.transparent,
+                  borderRadius: BorderRadius.circular(9999),
+                ),
+                alignment: Alignment.center,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      Icons.storefront_rounded,
+                      size: 16,
+                      color: !_isLoginTab ? AppColors.onSecondary : AppColors.tertiary,
+                    ),
+                    const SizedBox(width: 6),
+                    Flexible(
+                      child: Text(
+                        'Đăng ký đối tác',
+                        style: AppTypography.labelLg(
+                          color: !_isLoginTab ? AppColors.onSecondary : AppColors.tertiary,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildLoginForm() {
+    return Container(
+      decoration: BoxDecoration(
+        color: AppColors.surfaceContainerLowest,
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: AppShapes.shadowLevel1,
+      ),
+      padding: const EdgeInsets.all(20),
+      child: Form(
+        key: _loginFormKey,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('Chào mừng trở lại!', style: AppTypography.headlineSm(color: AppColors.onSurface)),
+            const SizedBox(height: 4),
+            Text(
+              'Truy cập trung tâm điều hành & quản trị đơn dịch vụ biển DANASEA.',
+              style: AppTypography.bodySm(color: AppColors.tertiary),
+            ),
+            const SizedBox(height: 18),
+            VendorTextField(
+              label: 'Email tài khoản đối tác',
+              controller: _loginEmailController,
+              hint: 'vendor@danasea.vn',
+              prefixIcon: Icons.mail_outline_rounded,
+              keyboardType: TextInputType.emailAddress,
+              isRequired: true,
+              validator: (v) {
+                if (v == null || v.trim().isEmpty) return 'Vui lòng nhập email.';
+                if (!v.contains('@')) return 'Email không hợp lệ.';
+                return null;
+              },
+            ),
+            const SizedBox(height: 14),
+            VendorTextField(
+              label: 'Mật khẩu quản trị',
+              controller: _loginPasswordController,
+              hint: 'Nhập mật khẩu',
+              prefixIcon: Icons.key_rounded,
+              obscureText: _hideLoginPassword,
+              isRequired: true,
+              suffixIcon: IconButton(
+                icon: Icon(
+                  _hideLoginPassword ? Icons.visibility_outlined : Icons.visibility_off_outlined,
+                  color: AppColors.tertiary,
+                  size: 20,
+                ),
+                onPressed: () => setState(() => _hideLoginPassword = !_hideLoginPassword),
+              ),
+              validator: (v) {
+                if (v == null || v.isEmpty) return 'Vui lòng nhập mật khẩu.';
+                return null;
+              },
+            ),
+            const SizedBox(height: 10),
+            Wrap(
+              alignment: WrapAlignment.spaceBetween,
+              crossAxisAlignment: WrapCrossAlignment.center,
+              spacing: 8,
+              runSpacing: 4,
+              children: [
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    SizedBox(
+                      width: 24,
+                      height: 24,
+                      child: Checkbox(
+                        value: _rememberMe,
+                        onChanged: (v) => setState(() => _rememberMe = v ?? true),
+                        activeColor: AppColors.secondary,
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Text('Ghi nhớ đăng nhập', style: AppTypography.bodySm(color: AppColors.tertiary)),
+                  ],
+                ),
+                InkWell(
+                  onTap: () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(builder: (_) => const ForgotPasswordScreen()),
+                    );
+                  },
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 4),
+                    child: Text(
+                      'Quên mật khẩu?',
+                      style: AppTypography.labelMd(color: AppColors.secondary),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 20),
+            VendorButton(
+              label: 'Đăng nhập quản trị',
+              icon: Icons.arrow_forward_rounded,
+              isLoading: _isLoadingLogin,
+              onPressed: _handleLogin,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildRegisterForm() {
+    return Container(
+      decoration: BoxDecoration(
+        color: AppColors.surfaceContainerLowest,
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: AppShapes.shadowLevel1,
+      ),
+      padding: const EdgeInsets.all(20),
+      child: Form(
+        key: _registerFormKey,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('Gia nhập Mạng lưới Đối tác', style: AppTypography.headlineSm(color: AppColors.onSurface)),
+            const SizedBox(height: 4),
+            Text(
+              'Mở rộng kinh doanh tour ca nô, lướt sóng, lặn ngắm san hô & thuyền buồm.',
+              style: AppTypography.bodySm(color: AppColors.tertiary),
+            ),
+            const SizedBox(height: 12),
+            Container(
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: AppColors.surfaceContainerLow,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Row(
+                children: [
+                  Container(
+                    width: 28,
+                    height: 28,
+                    decoration: BoxDecoration(
+                      color: AppColors.secondaryContainer,
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(Icons.verified_rounded, size: 16, color: AppColors.secondary),
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      'Hồ sơ đối tác cần được quản trị viên xét duyệt trước khi hoạt động.',
+                      style: AppTypography.bodySm(color: AppColors.tertiary),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 16),
+            VendorTextField(
+              label: 'Họ và tên người đại diện',
+              controller: _regNameController,
+              hint: 'Nguyễn Văn A',
+              prefixIcon: Icons.badge_outlined,
+              isRequired: true,
+              validator: (v) => (v == null || v.trim().isEmpty) ? 'Vui lòng nhập họ tên.' : null,
+            ),
+            const SizedBox(height: 14),
+            VendorTextField(
+              label: 'Email doanh nghiệp / Hộ kinh doanh',
+              controller: _regEmailController,
+              hint: 'contact@expedition-danang.com',
+              prefixIcon: Icons.corporate_fare_rounded,
+              keyboardType: TextInputType.emailAddress,
+              isRequired: true,
+              validator: (v) {
+                if (v == null || v.trim().isEmpty) return 'Vui lòng nhập email.';
+                if (!v.contains('@')) return 'Email không đúng định dạng.';
+                return null;
+              },
+            ),
+            const SizedBox(height: 14),
+            VendorTextField(
+              label: 'Số điện thoại liên hệ (tùy chọn)',
+              controller: _regPhoneController,
+              hint: '+84 905 xxx xxx',
+              prefixIcon: Icons.call_outlined,
+              keyboardType: TextInputType.phone,
+              isRequired: false,
+            ),
+            const SizedBox(height: 14),
+            VendorTextField(
+              label: 'Mật khẩu',
+              controller: _regPasswordController,
+              hint: 'Tối thiểu 8 ký tự',
+              prefixIcon: Icons.lock_outline_rounded,
+              obscureText: _hideRegPassword,
+              isRequired: true,
+              suffixIcon: IconButton(
+                icon: Icon(
+                  _hideRegPassword ? Icons.visibility_outlined : Icons.visibility_off_outlined,
+                  color: AppColors.tertiary,
+                  size: 20,
+                ),
+                onPressed: () => setState(() => _hideRegPassword = !_hideRegPassword),
+              ),
+              validator: (v) {
+                if (v == null || v.isEmpty) return 'Vui lòng nhập mật khẩu.';
+                if (v.length < 8) return 'Mật khẩu phải từ 8 ký tự trở lên.';
+                return null;
+              },
+            ),
+            const SizedBox(height: 14),
+            VendorTextField(
+              label: 'Xác nhận mật khẩu',
+              controller: _regConfirmPasswordController,
+              hint: 'Nhập lại mật khẩu',
+              prefixIcon: Icons.check_circle_outline_rounded,
+              obscureText: _hideRegConfirmPassword,
+              isRequired: true,
+              suffixIcon: IconButton(
+                icon: Icon(
+                  _hideRegConfirmPassword ? Icons.visibility_outlined : Icons.visibility_off_outlined,
+                  color: AppColors.tertiary,
+                  size: 20,
+                ),
+                onPressed: () => setState(() => _hideRegConfirmPassword = !_hideRegConfirmPassword),
+              ),
+              validator: (v) {
+                if (v != _regPasswordController.text) return 'Mật khẩu xác nhận không khớp.';
+                return null;
+              },
+            ),
+            const SizedBox(height: 14),
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                SizedBox(
+                  width: 24,
+                  height: 24,
+                  child: Checkbox(
+                    value: _termsAgreed,
+                    onChanged: (v) => setState(() => _termsAgreed = v ?? false),
+                    activeColor: AppColors.secondary,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    'Tôi đồng ý với Điều khoản hợp tác nhà cung cấp và quy chuẩn an toàn hàng hải của DANASEA.',
+                    style: AppTypography.bodySm(color: AppColors.onSurface),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 20),
+            VendorButton(
+              label: 'Đăng ký trở thành đối tác',
+              icon: Icons.check_rounded,
+              variant: VendorButtonVariant.coral,
+              isLoading: _isLoadingRegister,
+              onPressed: _handleRegister,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSecurityFooter() {
+    return Container(
+      decoration: BoxDecoration(
+        color: AppColors.surfaceContainerLow,
+        borderRadius: BorderRadius.circular(16),
+      ),
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const Icon(Icons.security_rounded, color: AppColors.secondary, size: 20),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  'Hệ thống bảo mật đối tác DANASEA',
+                  style: AppTypography.labelLg(color: AppColors.secondary),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 6),
+          Text(
+            'Nền tảng xác thực chuyên dụng được mã hóa đầu cuối, tuân thủ an toàn dữ liệu hàng hải và quản lý thông tin đối soát theo từng kỳ.',
+            style: AppTypography.bodySm(color: AppColors.tertiary),
+          ),
+          const SizedBox(height: 12),
+          Wrap(
+            alignment: WrapAlignment.spaceBetween,
+            crossAxisAlignment: WrapCrossAlignment.center,
+            spacing: 8,
+            runSpacing: 6,
+            children: [
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Icon(Icons.support_agent_rounded, size: 18, color: AppColors.secondary),
+                  const SizedBox(width: 6),
+                  Text('Hotline: 1900 8899', style: AppTypography.labelMd(color: AppColors.onSurface)),
+                ],
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                decoration: BoxDecoration(
+                  color: AppColors.secondaryContainer,
+                  borderRadius: BorderRadius.circular(9999),
+                ),
+                child: Text(
+                  'Trợ giúp 24/7',
+                  style: AppTypography.labelSm(color: AppColors.onSecondaryContainer),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
