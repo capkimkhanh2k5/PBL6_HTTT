@@ -4,13 +4,18 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import com.danasea.backend.modules.booking.application.usecases.CancelBookingHoldUseCase;
+import com.danasea.backend.modules.booking.application.usecases.CancelBookingUseCase;
 import com.danasea.backend.modules.booking.application.usecases.ConfirmBookingUseCase;
 import com.danasea.backend.modules.booking.application.usecases.CreateBookingHoldUseCase;
-import com.danasea.backend.modules.booking.domain.ports.BookingRepositoryPort;
-import com.danasea.backend.modules.booking.domain.ports.BookingPaymentStatusPort;
+import com.danasea.backend.modules.booking.application.usecases.GetBookingDetailUseCase;
+import com.danasea.backend.modules.booking.application.usecases.GetCustomerBookingsUseCase;
+import com.danasea.backend.modules.booking.application.usecases.GetVendorBookingsUseCase;
 import com.danasea.backend.modules.booking.domain.ports.BookingCancellationFinancialPort;
+import com.danasea.backend.modules.booking.domain.ports.BookingPaymentStatusPort;
+import com.danasea.backend.modules.booking.domain.ports.BookingRepositoryPort;
 import com.danasea.backend.modules.booking.domain.ports.InventoryLockPort;
 import com.danasea.backend.modules.booking.domain.ports.ServiceSlotPort;
+import com.danasea.backend.modules.booking.domain.ports.VendorLookupPort;
 
 @Configuration
 public class BookingBeans {
@@ -41,31 +46,31 @@ public class BookingBeans {
     }
 
     @Bean
-    public com.danasea.backend.modules.booking.application.usecases.GetBookingDetailUseCase getBookingDetailUseCase(
+    public GetBookingDetailUseCase getBookingDetailUseCase(
             BookingRepositoryPort bookingRepository) {
-        return new com.danasea.backend.modules.booking.application.usecases.GetBookingDetailUseCase(bookingRepository);
+        return new GetBookingDetailUseCase(bookingRepository);
     }
 
     @Bean
-    public com.danasea.backend.modules.booking.application.usecases.GetCustomerBookingsUseCase getCustomerBookingsUseCase(
+    public GetCustomerBookingsUseCase getCustomerBookingsUseCase(
             BookingRepositoryPort bookingRepository) {
-        return new com.danasea.backend.modules.booking.application.usecases.GetCustomerBookingsUseCase(bookingRepository);
+        return new GetCustomerBookingsUseCase(bookingRepository);
     }
 
     @Bean
-    public com.danasea.backend.modules.booking.application.usecases.GetVendorBookingsUseCase getVendorBookingsUseCase(
+    public GetVendorBookingsUseCase getVendorBookingsUseCase(
             BookingRepositoryPort bookingRepository,
-            com.danasea.backend.modules.booking.domain.ports.VendorLookupPort vendorLookupPort) {
-        return new com.danasea.backend.modules.booking.application.usecases.GetVendorBookingsUseCase(bookingRepository, vendorLookupPort);
+            VendorLookupPort vendorLookupPort) {
+        return new GetVendorBookingsUseCase(bookingRepository, vendorLookupPort);
     }
 
     @Bean
-    public com.danasea.backend.modules.booking.application.usecases.CancelBookingUseCase cancelBookingUseCase(
+    public CancelBookingUseCase cancelBookingUseCase(
             BookingRepositoryPort bookingRepository,
             ServiceSlotPort serviceSlotPort,
             InventoryLockPort inventoryLockPort,
             BookingCancellationFinancialPort financialPort) {
-        return new com.danasea.backend.modules.booking.application.usecases.CancelBookingUseCase(
+        return new CancelBookingUseCase(
                 bookingRepository,
                 serviceSlotPort,
                 inventoryLockPort,

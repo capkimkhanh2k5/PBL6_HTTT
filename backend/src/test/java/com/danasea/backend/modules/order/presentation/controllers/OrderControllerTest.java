@@ -52,6 +52,15 @@ class OrderControllerTest {
     @Spy
     private RefundPolicyEngine refundPolicyEngine = new RefundPolicyEngine();
 
+    @Mock
+    private com.danasea.backend.modules.order.application.usecases.CreateOrderUseCase createOrderUseCase;
+
+    @Mock
+    private com.danasea.backend.modules.order.application.usecases.GetOrderDetailUseCase getOrderDetailUseCase;
+
+    @Mock
+    private com.danasea.backend.modules.order.application.usecases.GetCustomerOrdersUseCase getCustomerOrdersUseCase;
+
     @InjectMocks
     private OrderController orderController;
 
@@ -229,5 +238,116 @@ class OrderControllerTest {
         assertNotNull(body);
         assertEquals(BigDecimal.valueOf(0.0), body.refundPercentage());
         assertEquals(0, BigDecimal.ZERO.compareTo(body.refundAmount()));
+    }
+
+    @Test
+    @DisplayName("Customer creates order -> delegates to CreateOrderUseCase and returns 201 Created")
+    void createOrder_CallsUseCase_Returns201Created() {
+        mockSecurityUser(customerId, "ROLE_CUSTOMER");
+        UUID bookingId = UUID.randomUUID();
+        com.danasea.backend.modules.order.presentation.dtos.CreateOrderRequest request =
+                new com.danasea.backend.modules.order.presentation.dtos.CreateOrderRequest(bookingId);
+        String idempotencyKey = "order-create-idemp-12345";
+
+        com.danasea.backend.modules.order.application.dtos.MasterOrderDetailResult detailResult =
+                new com.danasea.backend.modules.order.application.dtos.MasterOrderDetailResult(
+                        masterOrderId,
+                        bookingId,
+                        customerId,
+                        com.danasea.backend.modules.order.domain.models.MasterOrderStatus.PENDING_PAYMENT,
+                        com.danasea.backend.modules.order.domain.models.PaymentOrderStatus.UNPAID,
+                        new BigDecimal("1000000"),
+                        BigDecimal.ZERO,
+                        null,
+                        null,
+                        idempotencyKey,
+                        null,
+                        List.of()
+                );
+
+        when(createOrderUseCase.execute(any(com.danasea.backend.modules.order.application.dtos.CreateOrderCommand.class)))
+                .thenReturn(detailResult);
+
+        ResponseEntity<com.danasea.backend.modules.order.presentation.dtos.OrderResponse> response =
+                orderController.createOrder(request, idempotencyKey);
+
+        assertNotNull(response);
+        assertEquals(201, response.getStatusCode().value());
+        assertNotNull(response.getBody());
+        assertEquals(masterOrderId, response.getBody().id());
+        assertEquals(com.danasea.backend.modules.order.domain.models.MasterOrderStatus.PENDING_PAYMENT, response.getBody().status());
+    }
+
+    @Test
+    @DisplayName("Customer gets order list -> delegates to GetCustomerOrdersUseCase and returns 200 OK")
+    void getMyOrders_CallsUseCase_Returns200Ok() {
+        mockSecurityUser(customerId, "ROLE_CUSTOMER");
+
+        com.danasea.backend.modules.order.application.dtos.MasterOrderDetailResult item =
+                new com.danasea.backend.modules.order.application.dtos.MasterOrderDetailResult(
+                        masterOrderId,
+                        UUID.randomUUID(),
+                        customerId,
+                        com.danasea.backend.modules.order.domain.models.MasterOrderStatus.PENDING_PAYMENT,
+                        com.danasea.backend.modules.order.domain.models.PaymentOrderStatus.UNPAID,
+                        new BigDecimal("500000"),
+                        BigDecimal.ZERO,
+                        null,
+                        null,
+                        "key",
+                        null,
+                        List.of()
+                );
+
+        com.danasea.backend.modules.order.domain.models.OrderPagedResult<com.danasea.backend.modules.order.application.dtos.MasterOrderDetailResult> paged =
+                new com.danasea.backend.modules.order.domain.models.OrderPagedResult<>(
+                        List.of(item), 0, 20, 1L, 1
+                );
+
+        when(getCustomerOrdersUseCase.execute(any(com.danasea.backend.modules.order.application.dtos.GetCustomerOrdersQuery.class)))
+                .thenReturn(paged);
+
+        ResponseEntity<com.danasea.backend.modules.order.presentation.dtos.OrderPageResponse<com.danasea.backend.modules.order.presentation.dtos.OrderResponse>> response =
+                orderController.getMyOrders(0, 20);
+
+        assertNotNull(response);
+        assertEquals(200, response.getStatusCode().value());
+        assertNotNull(response.getBody());
+        assertEquals(1, response.getBody().totalElements());
+        assertEquals(masterOrderId, response.getBody().content().get(0).id());
+    }
+
+    @Test
+    @DisplayName("User gets order detail -> delegates to GetOrderDetailUseCase and returns 200 OK")
+    void getOrder_CallsUseCase_Returns200Ok() {
+        mockSecurityUser(customerId, "ROLE_CUSTOMER");
+
+        com.danasea.backend.modules.order.application.dtos.MasterOrderDetailResult detailResult =
+                new com.danasea.backend.modules.order.application.dtos.MasterOrderDetailResult(
+                        masterOrderId,
+                        UUID.randomUUID(),
+                        customerId,
+                        com.danasea.backend.modules.order.domain.models.MasterOrderStatus.PAID,
+                        com.danasea.backend.modules.order.domain.models.PaymentOrderStatus.PAID,
+                        new BigDecimal("1000000"),
+                        BigDecimal.ZERO,
+                        null,
+                        null,
+                        "key",
+                        null,
+                        List.of()
+                );
+
+        when(getOrderDetailUseCase.execute(any(com.danasea.backend.modules.order.application.dtos.GetOrderDetailQuery.class)))
+                .thenReturn(detailResult);
+
+        ResponseEntity<com.danasea.backend.modules.order.presentation.dtos.OrderResponse> response =
+                orderController.getOrder(masterOrderId);
+
+        assertNotNull(response);
+        assertEquals(200, response.getStatusCode().value());
+        assertNotNull(response.getBody());
+        assertEquals(masterOrderId, response.getBody().id());
+        assertEquals(com.danasea.backend.modules.order.domain.models.MasterOrderStatus.PAID, response.getBody().status());
     }
 }

@@ -1,6 +1,7 @@
 package com.danasea.backend.modules.booking.infrastructure.persistence.repositories;
 
 import java.time.OffsetDateTime;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -39,6 +40,14 @@ public interface JpaBookingRepository extends JpaRepository<BookingJpaEntity, UU
             Pageable pageable
     );
 
-    @Query("SELECT b FROM BookingJpaEntity b WHERE b.status = com.danasea.backend.modules.booking.domain.models.BookingStatus.HOLD AND b.holdExpiresAt < :threshold")
-    List<BookingJpaEntity> findExpiredHolds(@Param("threshold") OffsetDateTime threshold);
+    @Query("SELECT b FROM BookingJpaEntity b WHERE b.status IN :statuses AND b.holdExpiresAt < :threshold")
+    List<BookingJpaEntity> findExpiredHolds(
+            @Param("statuses") Collection<BookingStatus> statuses,
+            @Param("threshold") OffsetDateTime threshold
+    );
+
+    default List<BookingJpaEntity> findExpiredHolds(OffsetDateTime threshold) {
+        return findExpiredHolds(List.of(BookingStatus.HOLD, BookingStatus.PENDING_PAYMENT), threshold);
+    }
 }
+

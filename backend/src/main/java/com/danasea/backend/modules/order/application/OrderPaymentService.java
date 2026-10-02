@@ -56,6 +56,7 @@ import com.danasea.backend.modules.order.presentation.dtos.SubOrderResponse;
 import com.danasea.backend.modules.service.infrastructure.persistence.entities.ServiceSlotJpaEntity;
 import com.danasea.backend.modules.service.infrastructure.persistence.repositories.JpaServiceSlotRepository;
 import com.danasea.backend.modules.vendor.application.api.VendorInternalApi;
+import com.danasea.backend.modules.order.domain.ports.CommissionPolicyPort;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -63,7 +64,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 public class OrderPaymentService {
 
     private static final Pattern IDEMPOTENCY_KEY = Pattern.compile("[A-Za-z0-9._:-]{8,100}");
-    private static final BigDecimal DEFAULT_COMMISSION_RATE = new BigDecimal("0.15");
+    private static final BigDecimal DEFAULT_COMMISSION_RATE = CommissionPolicyPort.DEFAULT_COMMISSION_RATE;
 
     private final JpaBookingRepository bookingRepository;
     private final JpaMasterOrderRepository masterOrderRepository;

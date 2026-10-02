@@ -50,4 +50,7 @@ public class SubOrderJpaEntity extends BaseJpaEntity {
 
     private OffsetDateTime checkedInAt;
 
+    @Column(name = "vendor_notified_at")
+    private OffsetDateTime vendorNotifiedAt;
+
 }
