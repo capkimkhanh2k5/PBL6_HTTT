@@ -34,16 +34,32 @@
 
 ---
 
-## 2. RefundPolicy_CancellationFlow.png — Luồng Hủy Đơn & Tạo Hoàn Tiền
+## 2. RefundPolicy_CancellationFlow.png — Luồng Xem Trước Mức Hoàn Tiền & Thực Thi Hủy Đơn
 
-**Thành phần tham gia:** `Customer` -> `OrderPaymentService` -> `RefundPolicyEngine` -> `JpaSubOrderRepository` -> `JpaRefundRepository`
+**Kiến trúc phân tách Use Case:**
+- **Query (Idempotent Preview):** `GetCancellationPreviewUseCase` (không làm biến đổi trạng thái hệ thống).
+- **Command (Execute Mutation):** `RequestRefundUseCase` (tạo bản ghi hoàn tiền bất biến với Idempotency Key & cập nhật trạng thái đơn).
 
-**Quy trình xử lý:**
-1. Khách hàng gửi yêu cầu hủy qua `POST /api/orders/{id}/cancel` kèm `{reason, subOrderId}`.
-2. `OrderPaymentService` nạp thông tin đơn phụ, thực hiện **IDOR check** để xác nhận quyền sở hữu của khách hàng.
-3. Gọi `RefundPolicyEngine.evaluate(...)` với thông tin khung giờ dịch vụ và thời điểm hủy để tính toán số tiền hoàn hợp lệ.
+**Thành phần tham gia:** `Customer` -> `OrderCancellationController` -> `GetCancellationPreviewUseCase` / `RequestRefundUseCase` -> `RefundPolicyEngine` -> `SubOrderRepositoryPort` -> `RefundRepositoryPort` -> `OrderEventPublisherPort`
+
+**Quy trình xử lý 2 giai đoạn:**
+
+### Giai đoạn 1: Xem trước mức hoàn tiền (Cancel Preview)
+1. Khách hàng gọi `GET /api/orders/sub-orders/{id}/cancel-preview`.
+2. `GetCancellationPreviewUseCase` nạp thông tin đơn phụ, thực hiện **IDOR check** xác thực quyền sở hữu.
+3. Gọi `RefundPolicyEngine.evaluate(CUSTOMER_REQUEST, startTime, now, subtotal)` để tính toán mức hoàn:
+   - **> 48 giờ:** Hoàn lại 100%.
+   - **24 đến 48 giờ:** Hoàn lại 70%.
+   - **2 đến 24 giờ:** Hoàn lại 30%.
+   - **< 2 giờ:** Hoàn lại 0%.
+4. Trả về `CancellationPreviewResult` với tỷ lệ và số tiền dự kiến hoàn để khách hàng cân nhắc (không thay đổi dữ liệu DB).
+
+### Giai đoạn 2: Thực thi hủy đơn & Khởi tạo hoàn tiền (Execute Cancellation & Refund)
+1. Khách hàng gửi yêu cầu qua `POST /api/orders/sub-orders/{id}/cancel` kèm `{reason}` và `Idempotency-Key`.
+2. `RequestRefundUseCase` kiểm tra IDOR và trạng thái đơn hàng (chỉ cho phép đơn `CONFIRMED`).
+3. Đánh giá lại chính sách hoàn tiền qua `RefundPolicyEngine.evaluate(...)`.
 4. Nếu số tiền hoàn `refundAmount > 0`:
-   - Tạo bản ghi `Refund` ở trạng thái `PENDING` kèm lý do và số tiền đã được tính.
-   - Đính kèm **Idempotency Key** để tránh lặp giao dịch hoàn tiền trên cổng thanh toán.
-5. Cập nhật trạng thái đơn phụ: `SubOrder.status = CANCELLED`.
-6. Trả về chi tiết kết quả hủy kèm tỷ lệ và số tiền hoàn cho khách hàng.
+   - Tạo bản ghi `Refund` ở trạng thái `PENDING` kèm lý do, số tiền và **Idempotency Key** bảo vệ chống tạo lặp giao dịch.
+5. Cập nhật trạng thái đơn phụ: `SubOrder.status = CANCELLED` và hoàn trả số lượng slot tồn kho.
+6. Phát sự kiện `SubOrderCancelledEvent` qua `OrderEventPublisherPort` để các module liên quan đồng bộ.
+7. Trả về chi tiết kết quả hủy kèm mã giao dịch hoàn tiền cho khách hàng.

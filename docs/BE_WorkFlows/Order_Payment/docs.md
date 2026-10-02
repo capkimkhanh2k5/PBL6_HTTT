@@ -8,6 +8,7 @@
 | 2 | `Payment_Intent_DualGateways` | Sequence Diagram | Khởi tạo Payment Intent đa cổng: phân luồng linh hoạt giữa VNPay (cổng nội địa, định dạng số tiền x100, chữ ký HMAC-SHA512) và PayPal (cổng quốc tế, chuẩn hóa quy đổi VND-USD, gọi REST API v2 Checkout) |
 | 3 | `Payment_Webhook_And_Fulfillment` | Sequence Diagram | Xử lý Webhook IPN từ cổng thanh toán: xác thực chữ ký số bảo mật, cơ chế chống lặp giao dịch (Idempotency Guard), chuyển trạng thái đơn hàng sang `PAID`, xác nhận đơn phụ `CONFIRMED` và kích hoạt hoàn tất Booking |
 | 4 | `Order_Payment_Lifecycle_StateMachine` | State Machine | Vòng đời trạng thái phân tách 2 trục độc lập giữa Vòng đời đơn hàng (`OrderStatus`), Trục dòng tiền thực thu (`PaymentStatus`) và Vòng đời đơn phụ của Vendor (`SubOrderStatus`) |
+| 5 | `EPIC04_Architecture_And_UseCases` | Flowchart | Kiến trúc phân lớp Clean Architecture tách biệt các Use Cases: Tạo đơn, Đa cổng thanh toán, Webhook, Xem trước mức hoàn tiền và Khởi tạo hoàn tiền |
 
 ---
 
@@ -118,3 +119,28 @@ Sơ đồ biểu diễn mô hình máy trạng thái phân tách 2 trục độc
 - **Vòng Đời Đơn Phụ Của Vendor (`SubOrderStatus`):**
   - `PENDING` -> `CONFIRMED` (Khi Master Order chuyển sang `PAID`) -> `CHECKED_IN` (Quét QR tại thực địa) -> `COMPLETED` (Kết thúc phục vụ).
   - Phân nhánh hủy: `CONFIRMED` -> `CANCELLED` hoặc `REFUNDED` nếu phát sinh hủy chuyến hoặc bồi hoàn.
+
+---
+
+## 5. EPIC04_Architecture_And_UseCases.png — Kiến Trúc Clean Architecture Phân Tách Use Cases
+
+Sơ đồ tổng quan toàn bộ kiến trúc phân tầng chuẩn Clean Architecture của EPIC-04:
+
+1. **Client Tier:** React Web, Mobile App và Portal Quản trị.
+2. **REST Controllers (Interface Adapters):**
+   - `OrderController`: Tiếp nhận tạo đơn hàng từ Booking.
+   - `PaymentController`: Khởi tạo Intent và đón nhận Webhook IPN từ cổng thanh toán.
+   - `OrderCancellationController`: Tiếp nhận yêu cầu xem trước và thực thi hủy đơn.
+3. **Application Use Cases (Phân tách trách nhiệm đơn nhất - Single Responsibility):**
+   - `CreateOrderUseCase` (Command): Tách Sub-Orders 1:1 và tính hoa hồng nền tảng.
+   - `CreatePaymentIntentUseCase` (Command): Phân luồng tạo link thanh toán VNPay / PayPal.
+   - `HandleWebhookUseCase` (Command): Khớp Webhook, xác thực chữ ký và kích hoạt hoàn tất đơn.
+   - `GetCancellationPreviewUseCase` (Query): Tra cứu % và số tiền hoàn tiền, đảm bảo tính Idempotent và không biến đổi dữ liệu.
+   - `RequestRefundUseCase` (Command): Tạo bản ghi Refund PENDING với Idempotency Key, cập nhật trạng thái đơn sang CANCELLED và nhả slot tồn kho.
+   - `OrderExpiryEventListener`: Lắng nghe sự kiện quá hạn giữ chỗ 15 phút để tự động hủy đơn.
+4. **Domain Core & Policy Engines:**
+   - `RefundPolicyEngine`: Tính toán tỷ lệ hoàn tiền tự động theo nhóm lý do và mốc giờ.
+   - `CommissionPolicyEngine`: Tính toán hoa hồng và đối soát cho từng Vendor.
+5. **Infrastructure Ports & Adapters:**
+   - `PaymentGatewayPort` -> `VNPayPaymentAdapter` (Sandbox API) & `PayPalPaymentAdapter` (REST API v2).
+   - `MasterOrderRepositoryPort`, `SubOrderRepositoryPort`, `RefundRepositoryPort`, `OrderEventPublisherPort`.
