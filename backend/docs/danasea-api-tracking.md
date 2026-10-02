@@ -1,6 +1,6 @@
 # DANASEA — Master API & Test Checklist (EPIC-01 → EPIC-08)
 
-**Cập nhật:** 11/09/2026 — `[x]` đã xong · `[ ]` chưa xong/chưa xác nhận
+**Cập nhật:** 02/10/2026 — `[x]` đã xong · `[ ]` chưa xong/chưa xác nhận
 
 ---
 
@@ -206,6 +206,7 @@
 - [x] POST /api/payments/webhook/momo  (có vấn đề về api, phải dùng giả lập trên đt mới test được)
 - [x] POST /api/payments/webhook/paypal (Webhook IPN từ PayPal REST API)
 - [x] POST /api/orders/{id}/refund-request (trigger hoàn tiền tự động theo policy)
+- [x] GET /api/orders/{id}/cancellation-preview (preview hoàn tiền trước khi hủy)
 
 ### Test
 - [x] CreateOrderUseCaseTest (split đúng Sub-Order theo vendor, chờ thanh toán toàn bộ)
@@ -215,6 +216,8 @@
 - [x] PaymentWebhookTest (thành công → confirm Master Order + mọi Sub-Order cùng lúc; thất bại → rollback inventory toàn bộ)
 - [x] PayPalWebhookVerificationTest (Xác thực Webhook signature từ PayPal)
 - [x] RefundRequestUseCaseTest (tự động hoàn tiền đúng số tiền, đúng cổng thanh toán gốc)
+- [x] GetCustomerOrdersUseCaseTest (phân trang, IDOR boundary, mapping SubOrders)
+- [x] GetCancellationPreviewUseCaseTest (tính toán preview hoàn tiền, chính sách phân tầng theo giờ)
 - [x] OrderControllerTest (IDOR customer/vendor)
 
 ---

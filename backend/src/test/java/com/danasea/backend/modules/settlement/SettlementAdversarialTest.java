@@ -226,14 +226,14 @@ public class SettlementAdversarialTest {
             o1.setVendorId(vendorAId);
             o1.setStatus(SubOrderStatus.COMPLETED);
             o1.setSubtotalAmount(new BigDecimal("2000000.00"));
-            o1.setCreatedAt(OffsetDateTime.now());
+            o1.setCreatedAt(periodStart.atTime(12, 0).atOffset(OffsetDateTime.now().getOffset()));
 
             SubOrderJpaEntity o2 = new SubOrderJpaEntity();
             o2.setId(UUID.randomUUID());
             o2.setVendorId(vendorAId);
             o2.setStatus(SubOrderStatus.COMPLETED);
             o2.setSubtotalAmount(new BigDecimal("1000000.00"));
-            o2.setCreatedAt(OffsetDateTime.now());
+            o2.setCreatedAt(periodStart.atTime(12, 0).atOffset(OffsetDateTime.now().getOffset()));
 
             when(subOrderRepository.findByVendorIdAndStatusIn(eq(vendorAId), anyCollection()))
                     .thenReturn(List.of(o1, o2));

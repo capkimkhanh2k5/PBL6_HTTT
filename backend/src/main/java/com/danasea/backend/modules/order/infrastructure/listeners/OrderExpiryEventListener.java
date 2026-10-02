@@ -3,9 +3,11 @@ package com.danasea.backend.modules.order.infrastructure.listeners;
 import java.util.List;
 import java.util.UUID;
 
-import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.event.TransactionPhase;
+import org.springframework.transaction.event.TransactionalEventListener;
 
 import com.danasea.backend.modules.booking.domain.events.BookingHoldExpiredEvent;
 import com.danasea.backend.modules.order.domain.models.MasterOrderStatus;
@@ -29,8 +31,8 @@ public class OrderExpiryEventListener {
     private final SubOrderRepositoryPort subOrderRepository;
     private final OrderEventPublisherPort orderEventPublisher;
 
-    @EventListener
-    @Transactional
+    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void handleBookingHoldExpired(BookingHoldExpiredEvent event) {
         if (event == null || event.bookingId() == null) {
             return;

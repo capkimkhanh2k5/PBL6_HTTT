@@ -164,7 +164,7 @@ class SettlementUseCaseTest {
             subOrder1.setSubtotalAmount(new BigDecimal("1000000.00"));
             subOrder1.setCommissionRate(new BigDecimal("0.1000"));
             subOrder1.setStatus(SubOrderStatus.COMPLETED);
-            subOrder1.setCreatedAt(OffsetDateTime.now());
+            subOrder1.setCreatedAt(periodStart.atTime(12, 0).atOffset(OffsetDateTime.now().getOffset()));
 
             UUID subOrder2Id = UUID.randomUUID();
             SubOrderJpaEntity subOrder2 = new SubOrderJpaEntity();
@@ -173,7 +173,7 @@ class SettlementUseCaseTest {
             subOrder2.setSubtotalAmount(new BigDecimal("2000000.00"));
             subOrder2.setCommissionRate(new BigDecimal("0.1000"));
             subOrder2.setStatus(SubOrderStatus.PARTIALLY_REFUNDED);
-            subOrder2.setCreatedAt(OffsetDateTime.now());
+            subOrder2.setCreatedAt(periodStart.atTime(12, 0).atOffset(OffsetDateTime.now().getOffset()));
 
             RefundJpaEntity refund = new RefundJpaEntity();
             refund.setSubOrderId(subOrder2Id);
