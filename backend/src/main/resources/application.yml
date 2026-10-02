@@ -105,7 +105,7 @@ app:
       client-id: ${GOOGLE_CLIENT_ID:}
       client-secret: ${GOOGLE_CLIENT_SECRET:}
   checkin:
-    qr-secret: ${APP_CHECKIN_QR_SECRET}
+    qr-secret: ${APP_CHECKIN_QR_SECRET:danasea-secure-qr-checkin-hmac-sha256-default-key-32bytes-min!}
     opens-before: ${APP_CHECKIN_OPENS_BEFORE:2h}
     closes-after: ${APP_CHECKIN_CLOSES_AFTER:30m}
   payment:
