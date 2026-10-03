@@ -19,7 +19,6 @@ public class GroqKeyRotator implements KeyRotatorPort {
     private static final String REDIS_KEY_PREFIX = "groq:key:";
     private static final String STATE_COOLDOWN = "COOLDOWN";
     private static final String STATE_DISABLED = "DISABLED";
-    private static final int EXPECTED_KEY_COUNT = 5;
 
     private final StringRedisTemplate redisTemplate;
     private final List<String> apiKeys;
@@ -56,11 +55,6 @@ public class GroqKeyRotator implements KeyRotatorPort {
             this.apiKeys = List.of();
             log.warn("GroqKeyRotator initialized with 0 Groq API keys");
             return;
-        }
-
-        if (cleaned.size() != EXPECTED_KEY_COUNT) {
-            throw new IllegalStateException("GroqKeyRotator requires exactly " + EXPECTED_KEY_COUNT
-                    + " API keys, but found: " + cleaned.size());
         }
 
         this.apiKeys = List.copyOf(cleaned);

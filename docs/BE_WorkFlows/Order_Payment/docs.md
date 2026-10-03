@@ -14,15 +14,6 @@
 
 ## 1. Order_Creation_And_Splitting.png — Tạo Master Order & Tách Sub-Orders 1:1
 
-**Lớp xử lý chính:**
-- `com.danasea.backend.modules.order.presentation.controllers.OrderController`
-- `com.danasea.backend.modules.order.application.usecases.CreateOrderUseCase`
-- `com.danasea.backend.modules.order.domain.ports.BookingLookupPort`
-- `com.danasea.backend.modules.order.domain.ports.CommissionPolicyPort`
-- `com.danasea.backend.modules.order.domain.ports.MasterOrderRepositoryPort`
-- `com.danasea.backend.modules.order.domain.ports.SubOrderRepositoryPort`
-- `com.danasea.backend.modules.order.domain.ports.BookingStatusUpdatePort`
-
 **Luồng nghiệp vụ chi tiết:**
 1. Khách hàng gửi yêu cầu tạo đơn qua `POST /api/orders` với `{bookingId}` và header `Idempotency-Key`.
 2. **Kiểm tra Idempotency:** Tra cứu qua `MasterOrderRepositoryPort.findByBookingId(bookingId)`. Nếu đơn hàng cho Booking này đã tồn tại, lập tức trả về kết quả `MasterOrder` hiện có (Idempotent response) để tránh tạo trùng lặp.
@@ -45,12 +36,6 @@
 
 ## 2. Payment_Intent_DualGateways.png — Tạo Payment Intent Đa Cổng (VNPay / PayPal)
 
-**Lớp xử lý chính:**
-- `com.danasea.backend.modules.order.presentation.controllers.PaymentController`
-- `com.danasea.backend.modules.order.application.usecases.CreatePaymentIntentUseCase`
-- `com.danasea.backend.modules.order.infrastructure.adapters.PayPalPaymentAdapter` (@Primary)
-- `com.danasea.backend.modules.order.infrastructure.adapters.VNPayPaymentAdapter`
-
 **Luồng nghiệp vụ chi tiết:**
 1. Khách hàng gửi yêu cầu thanh toán qua `POST /api/payments/{orderId}/create-intent` kèm nhà cung cấp `{provider: "VNPAY" | "PAYPAL"}`.
 2. **Kiểm tra quyền sở hữu & trạng thái đơn:**
@@ -72,14 +57,6 @@
 ---
 
 ## 3. Payment_Webhook_And_Fulfillment.png — Xử Lý Webhook IPN & Xác Nhận Đơn Hàng
-
-**Lớp xử lý chính:**
-- `com.danasea.backend.modules.order.presentation.controllers.PaymentController`
-- `com.danasea.backend.modules.order.application.usecases.HandleWebhookUseCase`
-- `com.danasea.backend.modules.order.domain.ports.PaymentGatewayPort`
-- `com.danasea.backend.modules.order.domain.ports.MasterOrderRepositoryPort`
-- `com.danasea.backend.modules.order.domain.ports.SubOrderRepositoryPort`
-- `com.danasea.backend.modules.order.domain.ports.BookingStatusUpdatePort`
 
 **Luồng nghiệp vụ chi tiết:**
 1. Cổng thanh toán (VNPay hoặc PayPal) gửi HTTP POST Webhook IPN đến `/api/payments/webhook/{provider}` kèm payload giao dịch và chữ ký số.

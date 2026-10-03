@@ -270,20 +270,18 @@ public class AiAssistantAdversarialStressTest {
         }
 
         @Test
-        @DisplayName("ADV-GKR-3: Exact Key Count Boundary - Strict validation enforces exactly 5 keys")
-        void testKeyCountBoundary_StrictFiveKeys() {
-            // Exactly 5 keys works
+        @DisplayName("ADV-GKR-3: Dynamic Key Count - Flexible validation supports variable key counts")
+        void testKeyCountBoundary_DynamicKeys() {
+            // 5 keys works
             assertDoesNotThrow(() -> new GroqKeyRotator(redisTemplate, fiveKeys));
 
-            // 4 keys throws IllegalStateException
-            IllegalStateException ex4 = assertThrows(IllegalStateException.class,
-                    () -> new GroqKeyRotator(redisTemplate, List.of("k1", "k2", "k3", "k4")));
-            assertTrue(ex4.getMessage().contains("requires exactly 5 API keys, but found: 4"));
+            // 4 keys works without fixed count constraint
+            GroqKeyRotator rotator4 = new GroqKeyRotator(redisTemplate, List.of("k1", "k2", "k3", "k4"));
+            assertEquals(4, rotator4.getKeyCount());
 
-            // 6 keys throws IllegalStateException
-            IllegalStateException ex6 = assertThrows(IllegalStateException.class,
-                    () -> new GroqKeyRotator(redisTemplate, List.of("k1", "k2", "k3", "k4", "k5", "k6")));
-            assertTrue(ex6.getMessage().contains("requires exactly 5 API keys, but found: 6"));
+            // 6 keys works without fixed count constraint
+            GroqKeyRotator rotator6 = new GroqKeyRotator(redisTemplate, List.of("k1", "k2", "k3", "k4", "k5", "k6"));
+            assertEquals(6, rotator6.getKeyCount());
         }
 
         @Test
