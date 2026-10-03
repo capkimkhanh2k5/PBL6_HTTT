@@ -1,3 +1,4 @@
+import 'package:vendor_mobile/core/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_shapes.dart';
@@ -73,7 +74,7 @@ class _ServiceSafetyCertScreenState extends State<ServiceSafetyCertScreen> {
           icon: const Icon(Icons.arrow_back_ios_new, color: AppColors.secondary, size: 20),
           onPressed: () => Navigator.of(context).maybePop(),
         ),
-        title: const Text('An toàn & Chứng chỉ', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.secondary)),
+        title: const LocalizedText('An toàn & Chứng chỉ', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.secondary)),
       ),
       body: SafeArea(
         child: SingleChildScrollView(
@@ -96,12 +97,12 @@ class _ServiceSafetyCertScreenState extends State<ServiceSafetyCertScreen> {
                             color: AppColors.secondaryFixed,
                           ),
                           child: const Center(
-                            child: Text('3', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: AppColors.onSecondaryFixed)),
+                            child: LocalizedText('3', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: AppColors.onSecondaryFixed)),
                           ),
                         ),
                         const SizedBox(width: 8),
                         const Expanded(
-                          child: Text(
+                          child: LocalizedText(
                             'Bước cuối: An toàn & Xem trước',
                             style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: AppColors.secondary),
                             maxLines: 1,
@@ -120,7 +121,7 @@ class _ServiceSafetyCertScreenState extends State<ServiceSafetyCertScreen> {
                       children: [
                         Container(width: 6, height: 6, decoration: const BoxDecoration(shape: BoxShape.circle, color: AppColors.secondary)),
                         const SizedBox(width: 4),
-                        Text(widget.service.status.labelVi, style: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: AppColors.onSurfaceVariant)),
+                        LocalizedText(widget.service.status.labelVi, style: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: AppColors.onSurfaceVariant)),
                       ],
                     ),
                   ),
@@ -152,11 +153,11 @@ class _ServiceSafetyCertScreenState extends State<ServiceSafetyCertScreen> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text('Giới hạn Khí tượng & Biển',
+                              LocalizedText('Giới hạn Khí tượng & Biển',
                                   style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: AppColors.onSurface),
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis),
-                              Text('Tự động khóa lịch đặt nếu vượt ngưỡng',
+                              LocalizedText('Tự động khóa lịch đặt nếu vượt ngưỡng',
                                   style: TextStyle(fontSize: 11, color: AppColors.tertiary),
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis),
@@ -181,8 +182,8 @@ class _ServiceSafetyCertScreenState extends State<ServiceSafetyCertScreen> {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text('Độ nhạy thời tiết biển', style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: AppColors.onSurface)),
-                                Text('Dịch vụ phụ thuộc điều kiện thời tiết biển', style: TextStyle(fontSize: 11, color: AppColors.tertiary)),
+                                LocalizedText('Độ nhạy thời tiết biển', style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: AppColors.onSurface)),
+                                LocalizedText('Dịch vụ phụ thuộc điều kiện thời tiết biển', style: TextStyle(fontSize: 11, color: AppColors.tertiary)),
                               ],
                             ),
                           ),
@@ -203,7 +204,7 @@ class _ServiceSafetyCertScreenState extends State<ServiceSafetyCertScreen> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              const Text('Ngưỡng gió tối thiểu (km/h)', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: AppColors.onSurface)),
+                              const LocalizedText('Ngưỡng gió tối thiểu (km/h)', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: AppColors.onSurface)),
                               const SizedBox(height: 4),
                               TextField(
                                 controller: _minWindController,
@@ -224,7 +225,7 @@ class _ServiceSafetyCertScreenState extends State<ServiceSafetyCertScreen> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              const Text('Chiều cao sóng tối đa (m)', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: AppColors.onSurface)),
+                              const LocalizedText('Chiều cao sóng tối đa (m)', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: AppColors.onSurface)),
                               const SizedBox(height: 4),
                               TextField(
                                 controller: _maxWaveController,
@@ -263,7 +264,7 @@ class _ServiceSafetyCertScreenState extends State<ServiceSafetyCertScreen> {
                         Icon(Icons.assignment_turned_in, size: 20, color: AppColors.secondary),
                         SizedBox(width: 8),
                         Expanded(
-                          child: Text(
+                          child: LocalizedText(
                             'Cam kết miễn trừ trách nhiệm',
                             style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: AppColors.onSurface),
                             maxLines: 1,
@@ -273,7 +274,7 @@ class _ServiceSafetyCertScreenState extends State<ServiceSafetyCertScreen> {
                       ],
                     ),
                     const SizedBox(height: 4),
-                    const Text('Khách hàng buộc phải ký điện tử trước giờ lên ván SUP', style: TextStyle(fontSize: 11, color: AppColors.tertiary)),
+                    const LocalizedText('Khách hàng buộc phải ký điện tử trước giờ lên ván SUP', style: TextStyle(fontSize: 11, color: AppColors.tertiary)),
                     const SizedBox(height: 12),
                     Container(
                       padding: const EdgeInsets.all(12),
@@ -288,7 +289,7 @@ class _ServiceSafetyCertScreenState extends State<ServiceSafetyCertScreen> {
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               Expanded(
-                                child: Text(
+                                child: LocalizedText(
                                   'NỘI DUNG XÁC THỰC BẮT BUỘC',
                                   style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: AppColors.secondary, letterSpacing: 0.5),
                                   overflow: TextOverflow.ellipsis,
@@ -333,7 +334,7 @@ class _ServiceSafetyCertScreenState extends State<ServiceSafetyCertScreen> {
                               Icon(Icons.verified_outlined, size: 20, color: AppColors.secondary),
                               SizedBox(width: 8),
                               Expanded(
-                                child: Text(
+                                child: LocalizedText(
                                   'Chứng chỉ an toàn dịch vụ',
                                   style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: AppColors.onSurface),
                                   maxLines: 1,
@@ -354,7 +355,7 @@ class _ServiceSafetyCertScreenState extends State<ServiceSafetyCertScreen> {
                             ToastNotification.showSuccess(context, 'Đã tải lên chứng chỉ mới (Đang chờ duyệt)');
                           },
                           icon: const Icon(Icons.upload_file, size: 14),
-                          label: const Text('Tải lên', style: TextStyle(fontSize: 11)),
+                          label: const LocalizedText('Tải lên', style: TextStyle(fontSize: 11)),
                           style: OutlinedButton.styleFrom(
                             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                             side: const BorderSide(color: AppColors.secondary),
@@ -365,7 +366,7 @@ class _ServiceSafetyCertScreenState extends State<ServiceSafetyCertScreen> {
                       ],
                     ),
                     const SizedBox(height: 8),
-                    const Text('Các chứng chỉ an toàn, phao cứu sinh và sơ cấp cứu gắn riêng cho dịch vụ này.',
+                    const LocalizedText('Các chứng chỉ an toàn, phao cứu sinh và sơ cấp cứu gắn riêng cho dịch vụ này.',
                         style: TextStyle(fontSize: 11, color: AppColors.tertiary)),
                     const SizedBox(height: 12),
                     if (safetyDocs.isEmpty)
@@ -376,7 +377,7 @@ class _ServiceSafetyCertScreenState extends State<ServiceSafetyCertScreen> {
                           borderRadius: BorderRadius.circular(8),
                         ),
                         child: const Center(
-                          child: Text('Chưa có chứng chỉ an toàn riêng cho dịch vụ này', style: TextStyle(fontSize: 12, color: AppColors.tertiary)),
+                          child: LocalizedText('Chưa có chứng chỉ an toàn riêng cho dịch vụ này', style: TextStyle(fontSize: 12, color: AppColors.tertiary)),
                         ),
                       )
                     else
@@ -401,8 +402,8 @@ class _ServiceSafetyCertScreenState extends State<ServiceSafetyCertScreen> {
                                   child: Column(
                                     crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
-                                      Text(doc.documentName, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: AppColors.onSurface)),
-                                      Text('ID: ${doc.docId} • Cập nhật: ${doc.uploadedAt.day}/${doc.uploadedAt.month}',
+                                      LocalizedText(doc.documentName, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: AppColors.onSurface)),
+                                      LocalizedText('ID: ${doc.docId} • Cập nhật: ${doc.uploadedAt.day}/${doc.uploadedAt.month}',
                                           style: const TextStyle(fontSize: 10, color: AppColors.tertiary)),
                                     ],
                                   ),
@@ -424,7 +425,7 @@ class _ServiceSafetyCertScreenState extends State<ServiceSafetyCertScreen> {
                   Icon(Icons.visibility, size: 18, color: AppColors.primary),
                   SizedBox(width: 6),
                   Expanded(
-                    child: Text(
+                    child: LocalizedText(
                       'Xem trước hiển thị khách hàng',
                       style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: AppColors.onSurface),
                       maxLines: 1,
@@ -484,7 +485,7 @@ class _ServiceSafetyCertScreenState extends State<ServiceSafetyCertScreen> {
                                         const Icon(Icons.waves, size: 13, color: AppColors.secondaryContainer),
                                         const SizedBox(width: 4),
                                         Flexible(
-                                          child: Text('Sóng: ${_maxWaveController.text}m',
+                                          child: LocalizedText('Sóng: ${_maxWaveController.text}m',
                                             style: const TextStyle(fontSize: 10, color: Colors.white),
                                             overflow: TextOverflow.ellipsis,
                                           ),
@@ -500,7 +501,7 @@ class _ServiceSafetyCertScreenState extends State<ServiceSafetyCertScreen> {
                                         const Icon(Icons.air, size: 13, color: AppColors.primaryFixed),
                                         const SizedBox(width: 4),
                                         Flexible(
-                                          child: Text('Gió: ${_minWindController.text} km/h',
+                                          child: LocalizedText('Gió: ${_minWindController.text} km/h',
                                             style: const TextStyle(fontSize: 10, color: Colors.white),
                                             overflow: TextOverflow.ellipsis,
                                           ),
@@ -525,16 +526,16 @@ class _ServiceSafetyCertScreenState extends State<ServiceSafetyCertScreen> {
                               Container(
                                 padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                                 decoration: BoxDecoration(color: AppColors.secondaryFixed, borderRadius: BorderRadius.circular(8)),
-                                child: const Text('BÃI BIỂN MỸ KHÊ', style: TextStyle(fontSize: 9, fontWeight: FontWeight.bold, color: AppColors.onSecondaryFixed)),
+                                child: const LocalizedText('BÃI BIỂN MỸ KHÊ', style: TextStyle(fontSize: 9, fontWeight: FontWeight.bold, color: AppColors.onSecondaryFixed)),
                               ),
                               const SizedBox(width: 6),
-                              Text('${widget.service.durationMinutes} phút', style: const TextStyle(fontSize: 11, color: AppColors.tertiary)),
+                              LocalizedText('${widget.service.durationMinutes} phút', style: const TextStyle(fontSize: 11, color: AppColors.tertiary)),
                             ],
                           ),
                           const SizedBox(height: 6),
-                          Text(widget.service.nameVi, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: AppColors.onSurface)),
+                          LocalizedText(widget.service.nameVi, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: AppColors.onSurface)),
                           const SizedBox(height: 4),
-                          Text(widget.service.descriptionVi, style: const TextStyle(fontSize: 11, color: AppColors.tertiary), maxLines: 2, overflow: TextOverflow.ellipsis),
+                          LocalizedText(widget.service.descriptionVi, style: const TextStyle(fontSize: 11, color: AppColors.tertiary), maxLines: 2, overflow: TextOverflow.ellipsis),
                           const SizedBox(height: 10),
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -543,8 +544,8 @@ class _ServiceSafetyCertScreenState extends State<ServiceSafetyCertScreen> {
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    const Text('Giá niêm yết', style: TextStyle(fontSize: 10, color: AppColors.tertiary)),
-                                    Text(
+                                    const LocalizedText('Giá niêm yết', style: TextStyle(fontSize: 10, color: AppColors.tertiary)),
+                                    LocalizedText(
                                       '${widget.service.price.toStringAsFixed(0).replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]}.')} đ',
                                       style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: AppColors.primary),
                                       maxLines: 1,
@@ -557,7 +558,7 @@ class _ServiceSafetyCertScreenState extends State<ServiceSafetyCertScreen> {
                               Container(
                                 padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                                 decoration: BoxDecoration(color: AppColors.secondary, borderRadius: BorderRadius.circular(16)),
-                                child: const Text('Đặt ngay', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Colors.white)),
+                                child: const LocalizedText('Đặt ngay', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Colors.white)),
                               ),
                             ],
                           ),
@@ -582,7 +583,7 @@ class _ServiceSafetyCertScreenState extends State<ServiceSafetyCertScreen> {
                     Icon(Icons.policy, size: 18, color: AppColors.primary),
                     SizedBox(width: 8),
                     Expanded(
-                      child: Text(
+                      child: LocalizedText(
                         'Dịch vụ sau khi gửi sẽ được Ban kiểm duyệt DANASEA xem xét hồ sơ theo quy định trước khi mở bán chính thức.',
                         style: TextStyle(fontSize: 11, color: AppColors.onSurfaceVariant),
                       ),
@@ -605,7 +606,7 @@ class _ServiceSafetyCertScreenState extends State<ServiceSafetyCertScreen> {
                     child: OutlinedButton.icon(
                       onPressed: () => _save(ServiceStatus.draft, 'Đã lưu dịch vụ dưới dạng bản nháp'),
                       icon: const Icon(Icons.bookmark_border, size: 16),
-                      label: const Text('Lưu bản nháp', style: TextStyle(fontSize: 12)),
+                      label: const LocalizedText('Lưu bản nháp', style: TextStyle(fontSize: 12)),
                       style: OutlinedButton.styleFrom(
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
                         padding: const EdgeInsets.symmetric(vertical: 12),
@@ -617,7 +618,7 @@ class _ServiceSafetyCertScreenState extends State<ServiceSafetyCertScreen> {
                     child: OutlinedButton.icon(
                       onPressed: () => _save(ServiceStatus.paused, 'Đã tạm dừng nhận khách cho dịch vụ'),
                       icon: const Icon(Icons.pause_circle_outline, size: 16, color: AppColors.primary),
-                      label: const Text('Tạm dừng', style: TextStyle(fontSize: 12, color: AppColors.primary)),
+                      label: const LocalizedText('Tạm dừng', style: TextStyle(fontSize: 12, color: AppColors.primary)),
                       style: OutlinedButton.styleFrom(
                         side: const BorderSide(color: AppColors.primary),
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),

@@ -1,3 +1,4 @@
+import 'package:vendor_mobile/core/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_shapes.dart';
@@ -96,7 +97,7 @@ class VendorButton extends StatelessWidget {
                     const SizedBox(width: 8),
                   ],
                   Flexible(
-                    child: Text(
+                    child: LocalizedText(
                       label,
                       style: AppTypography.labelLg(color: fg),
                       maxLines: 1,

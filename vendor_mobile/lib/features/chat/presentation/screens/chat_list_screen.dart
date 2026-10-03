@@ -1,3 +1,4 @@
+import 'package:vendor_mobile/core/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_shapes.dart';
@@ -91,7 +92,7 @@ class _ChatListScreenState extends State<ChatListScreen> {
           children: [
             Row(
               children: [
-                Text('DANASEA',
+                LocalizedText('DANASEA',
                     style: Theme.of(context).textTheme.titleSmall?.copyWith(
                           fontWeight: FontWeight.bold,
                           color: AppColors.secondary,
@@ -100,11 +101,11 @@ class _ChatListScreenState extends State<ChatListScreen> {
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                   decoration: BoxDecoration(color: AppColors.primaryContainer, borderRadius: BorderRadius.circular(10)),
-                  child: const Text('VENDOR', style: TextStyle(fontSize: 9, fontWeight: FontWeight.bold, color: AppColors.onPrimary)),
+                  child: const LocalizedText('VENDOR', style: TextStyle(fontSize: 9, fontWeight: FontWeight.bold, color: AppColors.onPrimary)),
                 ),
               ],
             ),
-            const Text('Tin nhắn khách hàng', style: TextStyle(fontSize: 12, color: AppColors.tertiary)),
+            const LocalizedText('Tin nhắn khách hàng', style: TextStyle(fontSize: 12, color: AppColors.tertiary)),
           ],
         ),
         actions: [
@@ -136,7 +137,7 @@ class _ChatListScreenState extends State<ChatListScreen> {
                             Icon(Icons.forum, size: 22, color: AppColors.primary),
                             SizedBox(width: 8),
                             Expanded(
-                              child: Text(
+                              child: LocalizedText(
                                 'Tin nhắn khách hàng',
                                 style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.onSurface),
                                 overflow: TextOverflow.ellipsis,
@@ -149,13 +150,13 @@ class _ChatListScreenState extends State<ChatListScreen> {
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                         decoration: BoxDecoration(color: AppColors.secondaryContainer, borderRadius: BorderRadius.circular(12)),
-                        child: Text('${_db.conversations.length} hội thoại',
+                        child: LocalizedText('${_db.conversations.length} hội thoại',
                             style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: AppColors.onSecondaryContainer)),
                       ),
                     ],
                   ),
                   const SizedBox(height: 2),
-                  const Text('Tương tác trực tiếp & hỗ trợ khách trải nghiệm thể thao biển', style: TextStyle(fontSize: 12, color: AppColors.tertiary)),
+                  const LocalizedText('Tương tác trực tiếp & hỗ trợ khách trải nghiệm thể thao biển', style: TextStyle(fontSize: 12, color: AppColors.tertiary)),
                   const SizedBox(height: 10),
 
                   // Search input
@@ -173,8 +174,8 @@ class _ChatListScreenState extends State<ChatListScreen> {
                         Expanded(
                           child: TextField(
                             onChanged: (val) => setState(() => _searchQuery = val.trim()),
-                            decoration: const InputDecoration(
-                              hintText: 'Tìm cuộc hội thoại, mã đơn, khách hàng...',
+                            decoration:  InputDecoration(
+                              hintText: tr(context, 'Tìm cuộc hội thoại, mã đơn, khách hàng...'),
                               hintStyle: TextStyle(fontSize: 12, color: AppColors.outline),
                               border: InputBorder.none,
                             ),
@@ -212,7 +213,7 @@ class _ChatListScreenState extends State<ChatListScreen> {
                         children: [
                           const Icon(Icons.chat_bubble_outline, size: 48, color: AppColors.tertiary),
                           const SizedBox(height: 8),
-                          const Text('Không tìm thấy cuộc trò chuyện nào', style: TextStyle(fontSize: 13, color: AppColors.tertiary)),
+                          const LocalizedText('Không tìm thấy cuộc trò chuyện nào', style: TextStyle(fontSize: 13, color: AppColors.tertiary)),
                         ],
                       ),
                     )
@@ -245,7 +246,7 @@ class _ChatListScreenState extends State<ChatListScreen> {
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text(
+            LocalizedText(
               label,
               style: TextStyle(
                 fontSize: 12,
@@ -260,7 +261,7 @@ class _ChatListScreenState extends State<ChatListScreen> {
                 color: active ? Colors.white.withOpacity(0.25) : AppColors.surfaceContainerHighest,
                 borderRadius: BorderRadius.circular(8),
               ),
-              child: Text(
+              child: LocalizedText(
                 '$count',
                 style: TextStyle(
                   fontSize: 10,
@@ -312,7 +313,7 @@ class _ChatListScreenState extends State<ChatListScreen> {
                   color: AppColors.secondaryContainer,
                 ),
                 child: Center(
-                  child: Text(
+                  child: LocalizedText(
                     conv.customerName.isNotEmpty ? conv.customerName[0].toUpperCase() : 'K',
                     style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.onSecondaryContainer),
                   ),
@@ -332,7 +333,7 @@ class _ChatListScreenState extends State<ChatListScreen> {
                           child: Row(
                             children: [
                               Flexible(
-                                child: Text(
+                                child: LocalizedText(
                                   conv.customerName,
                                   style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: AppColors.onSurface),
                                   overflow: TextOverflow.ellipsis,
@@ -342,13 +343,13 @@ class _ChatListScreenState extends State<ChatListScreen> {
                               Container(
                                 padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
                                 decoration: BoxDecoration(color: AppColors.surfaceContainer, borderRadius: BorderRadius.circular(6)),
-                                child: Text('#${conv.subOrderCode}', style: const TextStyle(fontSize: 9, fontWeight: FontWeight.bold, color: AppColors.secondary)),
+                                child: LocalizedText('#${conv.subOrderCode}', style: const TextStyle(fontSize: 9, fontWeight: FontWeight.bold, color: AppColors.secondary)),
                               ),
                             ],
                           ),
                         ),
                         const SizedBox(width: 6),
-                        Text(
+                        LocalizedText(
                           '${conv.lastMessageTime.hour}:${conv.lastMessageTime.minute.toString().padLeft(2, '0')}',
                           style: TextStyle(
                             fontSize: 11,
@@ -359,7 +360,7 @@ class _ChatListScreenState extends State<ChatListScreen> {
                       ],
                     ),
                     const SizedBox(height: 4),
-                    Text(
+                    LocalizedText(
                       conv.lastMessage,
                       style: TextStyle(
                         fontSize: 12,
@@ -379,7 +380,7 @@ class _ChatListScreenState extends State<ChatListScreen> {
                               const Icon(Icons.surfing, size: 12, color: AppColors.secondary),
                               const SizedBox(width: 4),
                               Expanded(
-                                child: Text(
+                                child: LocalizedText(
                                   '${conv.serviceName} • 28/10',
                                   style: const TextStyle(fontSize: 10, color: AppColors.tertiary),
                                   overflow: TextOverflow.ellipsis,
@@ -393,7 +394,7 @@ class _ChatListScreenState extends State<ChatListScreen> {
                           Container(
                             padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
                             decoration: BoxDecoration(color: AppColors.primaryContainer, borderRadius: BorderRadius.circular(10)),
-                            child: Text('${conv.unreadCount} tin mới', style: const TextStyle(fontSize: 9, fontWeight: FontWeight.bold, color: AppColors.onPrimary)),
+                            child: LocalizedText('${conv.unreadCount} tin mới', style: const TextStyle(fontSize: 9, fontWeight: FontWeight.bold, color: AppColors.onPrimary)),
                           )
                         else
                           const Icon(Icons.done_all, size: 14, color: AppColors.secondary),

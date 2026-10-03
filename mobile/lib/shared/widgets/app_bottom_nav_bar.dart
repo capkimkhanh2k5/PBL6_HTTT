@@ -1,3 +1,4 @@
+import 'package:mobile/core/l10n/app_localizations.dart';
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import '../../core/theme/app_colors.dart';
@@ -99,7 +100,7 @@ class AppBottomNavBar extends StatelessWidget {
                 size: 24,
               ),
               const SizedBox(height: 3),
-              Text(
+              LocalizedText(
                 label,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,

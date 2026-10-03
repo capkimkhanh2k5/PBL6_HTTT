@@ -1,3 +1,4 @@
+import 'package:vendor_mobile/core/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_shapes.dart';
@@ -44,7 +45,7 @@ class RefundDetailScreen extends StatelessWidget {
           icon: const Icon(Icons.arrow_back, color: AppColors.secondary),
           onPressed: () => Navigator.of(context).maybePop(),
         ),
-        title: const Text('Chi tiết hoàn tiền', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.onSurface)),
+        title: const LocalizedText('Chi tiết hoàn tiền', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.onSurface)),
       ),
       body: SafeArea(
         child: SingleChildScrollView(
@@ -77,7 +78,7 @@ class RefundDetailScreen extends StatelessWidget {
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               const Flexible(
-                                child: Text(
+                                child: LocalizedText(
                                   'THÔNG BÁO TỪ HỆ THỐNG',
                                   style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: AppColors.onSecondaryContainer, letterSpacing: 0.5),
                                   overflow: TextOverflow.ellipsis,
@@ -87,12 +88,12 @@ class RefundDetailScreen extends StatelessWidget {
                               Container(
                                 padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                                 decoration: BoxDecoration(color: Colors.white.withOpacity(0.8), borderRadius: BorderRadius.circular(8)),
-                                child: const Text('Bất khả kháng', style: TextStyle(fontSize: 9, fontWeight: FontWeight.bold, color: AppColors.primary)),
+                                child: const LocalizedText('Bất khả kháng', style: TextStyle(fontSize: 9, fontWeight: FontWeight.bold, color: AppColors.primary)),
                               ),
                             ],
                           ),
                           const SizedBox(height: 4),
-                          Text(
+                          LocalizedText(
                             'Khoản hoàn tiền được xử lý theo quy định bảo vệ khách hàng do điều kiện thời tiết biển bất khả kháng (Đơn #${subOrder.subOrderCode}).',
                             style: const TextStyle(fontSize: 11, color: AppColors.onSecondaryFixedVariant),
                           ),
@@ -136,7 +137,7 @@ class RefundDetailScreen extends StatelessWidget {
                                   const Icon(Icons.receipt_long, size: 16, color: AppColors.secondary),
                                   const SizedBox(width: 6),
                                   Expanded(
-                                    child: Text(
+                                    child: LocalizedText(
                                       'Đơn con: #${subOrder.subOrderCode}',
                                       style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: AppColors.secondary),
                                       overflow: TextOverflow.ellipsis,
@@ -152,7 +153,7 @@ class RefundDetailScreen extends StatelessWidget {
                                 Container(
                                   padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                                   decoration: BoxDecoration(color: AppColors.surfaceContainerHigh, borderRadius: BorderRadius.circular(8)),
-                                  child: Text('Slot ${subOrder.slotTime}', style: const TextStyle(fontSize: 10, color: AppColors.tertiary)),
+                                  child: LocalizedText('Slot ${subOrder.slotTime}', style: const TextStyle(fontSize: 10, color: AppColors.tertiary)),
                                 ),
                                 const SizedBox(width: 4),
                                 const Icon(Icons.chevron_right, size: 16, color: AppColors.tertiary),
@@ -161,9 +162,9 @@ class RefundDetailScreen extends StatelessWidget {
                           ],
                         ),
                         const SizedBox(height: 12),
-                        Text(subOrder.serviceName, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: AppColors.onSurface)),
+                        LocalizedText(subOrder.serviceName, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: AppColors.onSurface)),
                         const SizedBox(height: 2),
-                        Text('Nhà cung cấp: Danang Ocean Club', style: const TextStyle(fontSize: 11, color: AppColors.tertiary)),
+                        LocalizedText('Nhà cung cấp: Danang Ocean Club', style: const TextStyle(fontSize: 11, color: AppColors.tertiary)),
                         const SizedBox(height: 12),
                         Row(
                           children: [
@@ -174,10 +175,10 @@ class RefundDetailScreen extends StatelessWidget {
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    const Text('KHÁCH HÀNG', style: TextStyle(fontSize: 9, fontWeight: FontWeight.bold, color: AppColors.tertiary)),
+                                    const LocalizedText('KHÁCH HÀNG', style: TextStyle(fontSize: 9, fontWeight: FontWeight.bold, color: AppColors.tertiary)),
                                     const SizedBox(height: 4),
-                                    Text(subOrder.customerName, style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: AppColors.onSurface)),
-                                    Text('Ngày: ${subOrder.slotDate}', style: const TextStyle(fontSize: 10, color: AppColors.tertiary)),
+                                    LocalizedText(subOrder.customerName, style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: AppColors.onSurface)),
+                                    LocalizedText('Ngày: ${subOrder.slotDate}', style: const TextStyle(fontSize: 10, color: AppColors.tertiary)),
                                   ],
                                 ),
                               ),
@@ -190,9 +191,9 @@ class RefundDetailScreen extends StatelessWidget {
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    const Text('TIỀN ĐƠN BAN ĐẦU', style: TextStyle(fontSize: 9, fontWeight: FontWeight.bold, color: AppColors.tertiary)),
+                                    const LocalizedText('TIỀN ĐƠN BAN ĐẦU', style: TextStyle(fontSize: 9, fontWeight: FontWeight.bold, color: AppColors.tertiary)),
                                     const SizedBox(height: 4),
-                                    Text(
+                                    LocalizedText(
                                       '${subOrder.totalPrice.toStringAsFixed(0).replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]}.')} đ',
                                       style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: AppColors.onSurface),
                                     ),
@@ -201,7 +202,7 @@ class RefundDetailScreen extends StatelessWidget {
                                         Icon(Icons.check_circle, size: 10, color: AppColors.secondary),
                                         SizedBox(width: 2),
                                         Flexible(
-                                          child: Text(
+                                          child: LocalizedText(
                                             'Đã thanh toán',
                                             style: TextStyle(fontSize: 10, color: AppColors.secondary, fontWeight: FontWeight.bold),
                                             overflow: TextOverflow.ellipsis,
@@ -246,7 +247,7 @@ class RefundDetailScreen extends StatelessWidget {
                               ),
                               const SizedBox(width: 8),
                               const Expanded(
-                                child: Text(
+                                child: LocalizedText(
                                   'Khoản hoàn tiền dịch vụ',
                                   style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: AppColors.onSurface),
                                   overflow: TextOverflow.ellipsis,
@@ -259,7 +260,7 @@ class RefundDetailScreen extends StatelessWidget {
                         Container(
                           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
                           decoration: BoxDecoration(color: AppColors.primary, borderRadius: BorderRadius.circular(12)),
-                          child: Text(
+                          child: LocalizedText(
                             'Hoàn ${(refund.percentage * 100).toStringAsFixed(0)}%',
                             style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Colors.white),
                           ),
@@ -281,7 +282,7 @@ class RefundDetailScreen extends StatelessWidget {
                       ),
                       child: Column(
                         children: [
-                          const Text('SỐ TIỀN HOÀN TRẢ CHO KHÁCH (AMOUNT)',
+                          const LocalizedText('SỐ TIỀN HOÀN TRẢ CHO KHÁCH (AMOUNT)',
                               style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: AppColors.onPrimaryFixedVariant, letterSpacing: 0.5)),
                           const SizedBox(height: 6),
                           Row(
@@ -290,18 +291,18 @@ class RefundDetailScreen extends StatelessWidget {
                             textBaseline: TextBaseline.alphabetic,
                             children: [
                               Flexible(
-                                child: Text(
+                                child: LocalizedText(
                                   refund.amount.toStringAsFixed(0).replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]}.'),
                                   style: const TextStyle(fontSize: 32, fontWeight: FontWeight.bold, color: AppColors.primary),
                                   overflow: TextOverflow.ellipsis,
                                 ),
                               ),
                               const SizedBox(width: 4),
-                              const Text('VNĐ', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: AppColors.primary)),
+                              const LocalizedText('VNĐ', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: AppColors.primary)),
                             ],
                           ),
                           const SizedBox(height: 4),
-                          const Text('Tự động trả về phương thức thanh toán ban đầu của khách hàng.',
+                          const LocalizedText('Tự động trả về phương thức thanh toán ban đầu của khách hàng.',
                               style: TextStyle(fontSize: 11, color: AppColors.onPrimaryFixedVariant), textAlign: TextAlign.center),
                         ],
                       ),
@@ -319,7 +320,7 @@ class RefundDetailScreen extends StatelessWidget {
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               const Expanded(
-                                child: Text(
+                                child: LocalizedText(
                                   'Lý do hoàn tiền:',
                                   style: TextStyle(fontSize: 12, color: AppColors.onSurfaceVariant),
                                   overflow: TextOverflow.ellipsis,
@@ -330,7 +331,7 @@ class RefundDetailScreen extends StatelessWidget {
                                 child: Container(
                                   padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                                   decoration: BoxDecoration(color: AppColors.primaryFixed, borderRadius: BorderRadius.circular(8)),
-                                  child: Text(
+                                  child: LocalizedText(
                                     refund.reason.labelVi,
                                     style: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: AppColors.onPrimaryFixedVariant),
                                     maxLines: 1,
@@ -347,7 +348,7 @@ class RefundDetailScreen extends StatelessWidget {
                               Icon(Icons.storm, size: 18, color: AppColors.primary),
                               SizedBox(width: 8),
                               Expanded(
-                                child: Text(
+                                child: LocalizedText(
                                   'Điều kiện thời tiết biển không đảm bảo an toàn hoạt động theo khuyến cáo của cơ quan quản lý vịnh Đà Nẵng.',
                                   style: TextStyle(fontSize: 11, color: AppColors.onSurfaceVariant, height: 1.4),
                                 ),
@@ -382,7 +383,7 @@ class RefundDetailScreen extends StatelessWidget {
                                 Row(
                                   children: [
                                     const Flexible(
-                                      child: Text(
+                                      child: LocalizedText(
                                         'Đã xử lý thành công',
                                         style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: AppColors.onSecondaryFixedVariant),
                                         overflow: TextOverflow.ellipsis,
@@ -392,12 +393,12 @@ class RefundDetailScreen extends StatelessWidget {
                                     Container(
                                       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
                                       decoration: BoxDecoration(color: AppColors.secondary, borderRadius: BorderRadius.circular(6)),
-                                      child: const Text('PROCESSED', style: TextStyle(fontSize: 9, fontWeight: FontWeight.bold, color: Colors.white)),
+                                      child: const LocalizedText('PROCESSED', style: TextStyle(fontSize: 9, fontWeight: FontWeight.bold, color: Colors.white)),
                                     ),
                                   ],
                                 ),
                                 const SizedBox(height: 2),
-                                Text(
+                                LocalizedText(
                                   'Thời gian hoàn tất: ${refund.createdAt.hour}:${refund.createdAt.minute.toString().padLeft(2, '0')} • ${refund.createdAt.day}/${refund.createdAt.month}/${refund.createdAt.year}',
                                   style: const TextStyle(fontSize: 10, color: AppColors.onSecondaryContainer),
                                 ),
@@ -423,7 +424,7 @@ class RefundDetailScreen extends StatelessWidget {
                     Icon(Icons.info_outline, size: 16, color: AppColors.tertiary),
                     SizedBox(width: 8),
                     Expanded(
-                      child: Text(
+                      child: LocalizedText(
                         'Khoản hoàn tiền được hệ thống DANASEA tự động hạch toán giảm trừ vào kỳ đối soát tương ứng. Đối tác không cần thao tác tài chính thủ công.',
                         style: TextStyle(fontSize: 11, color: AppColors.onSurfaceVariant),
                       ),

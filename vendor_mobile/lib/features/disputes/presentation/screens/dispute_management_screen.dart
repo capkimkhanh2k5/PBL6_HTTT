@@ -1,3 +1,4 @@
+import 'package:vendor_mobile/core/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_shapes.dart';
@@ -50,7 +51,7 @@ class _DisputeManagementScreenState extends State<DisputeManagementScreen> {
             const Icon(Icons.upload_file, color: AppColors.secondary, size: 22),
             const SizedBox(width: 8),
             Expanded(
-              child: Text(
+              child: LocalizedText(
                 'Nộp minh chứng giải trình',
                 style: AppTypography.headlineSm.copyWith(color: AppColors.onSurface),
               ),
@@ -61,12 +62,12 @@ class _DisputeManagementScreenState extends State<DisputeManagementScreen> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
+            LocalizedText(
               'Khiếu nại #${dispute.id} (Đơn #${dispute.subOrderId})',
               style: AppTypography.labelMd.copyWith(color: AppColors.secondary),
             ),
             const SizedBox(height: 12),
-            Text(
+            LocalizedText(
               'Nội dung biên bản / giải trình:',
               style: AppTypography.labelSm.copyWith(color: AppColors.tertiary),
             ),
@@ -75,7 +76,7 @@ class _DisputeManagementScreenState extends State<DisputeManagementScreen> {
               controller: noteController,
               maxLines: 3,
               decoration: InputDecoration(
-                hintText: 'Nhập thông tin xác nhận bến bãi, camera an ninh...',
+                hintText: tr(context, 'Nhập thông tin xác nhận bến bãi, camera an ninh...'),
                 hintStyle: AppTypography.bodySm.copyWith(color: AppColors.outline),
                 filled: true,
                 fillColor: AppColors.surfaceContainerLow,
@@ -95,7 +96,7 @@ class _DisputeManagementScreenState extends State<DisputeManagementScreen> {
                 );
               },
               icon: const Icon(Icons.add_photo_alternate, size: 16),
-              label: const Text('Đính kèm ảnh hiện trường (Tùy chọn)'),
+              label: const LocalizedText('Đính kèm ảnh hiện trường (Tùy chọn)'),
               style: OutlinedButton.styleFrom(
                 foregroundColor: AppColors.secondary,
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppShapes.rFull)),
@@ -106,7 +107,7 @@ class _DisputeManagementScreenState extends State<DisputeManagementScreen> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: const Text('Hủy'),
+            child: const LocalizedText('Hủy'),
           ),
           ElevatedButton(
             onPressed: () async {
@@ -132,7 +133,7 @@ class _DisputeManagementScreenState extends State<DisputeManagementScreen> {
               foregroundColor: Colors.white,
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppShapes.rFull)),
             ),
-            child: const Text('Gửi giải trình'),
+            child: const LocalizedText('Gửi giải trình'),
           ),
         ],
       ),
@@ -157,7 +158,7 @@ class _DisputeManagementScreenState extends State<DisputeManagementScreen> {
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
-        title: const Text('Khiếu nại dịch vụ'),
+        title: const LocalizedText('Khiếu nại dịch vụ'),
         backgroundColor: AppColors.surface,
         elevation: 0,
         leading: IconButton(
@@ -198,7 +199,7 @@ class _DisputeManagementScreenState extends State<DisputeManagementScreen> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text(
+                              LocalizedText(
                                 'ĐỐI TÁC CHÍNH THỨC',
                                 style: AppTypography.labelSm.copyWith(
                                   color: AppColors.secondary,
@@ -207,7 +208,7 @@ class _DisputeManagementScreenState extends State<DisputeManagementScreen> {
                                 ),
                                 overflow: TextOverflow.ellipsis,
                               ),
-                              Text(
+                              LocalizedText(
                                 _db.currentVendor.businessName,
                                 style: AppTypography.labelLg.copyWith(color: AppColors.onSurface),
                                 overflow: TextOverflow.ellipsis,
@@ -225,7 +226,7 @@ class _DisputeManagementScreenState extends State<DisputeManagementScreen> {
                       color: AppColors.secondaryFixed,
                       borderRadius: BorderRadius.circular(AppShapes.rFull),
                     ),
-                    child: Text(
+                    child: LocalizedText(
                       'Cổng đối tác',
                       style: AppTypography.labelSm.copyWith(
                         color: AppColors.onSecondaryFixedVariant,
@@ -254,7 +255,7 @@ class _DisputeManagementScreenState extends State<DisputeManagementScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
+                        LocalizedText(
                           'Cơ chế trọng tài độc lập DANASEA',
                           style: AppTypography.labelLg.copyWith(
                             color: AppColors.onSurface,
@@ -262,7 +263,7 @@ class _DisputeManagementScreenState extends State<DisputeManagementScreen> {
                           ),
                         ),
                         const SizedBox(height: 3),
-                        Text(
+                        LocalizedText(
                           'Toàn bộ quyền phán quyết và xử lý bồi hoàn do Ban quản trị DANASEA trực tiếp thực hiện. Đối tác theo dõi tiến độ và nộp tài liệu giải trình bổ sung tại đây.',
                           style: AppTypography.bodySm.copyWith(color: AppColors.onSurfaceVariant),
                         ),
@@ -306,7 +307,7 @@ class _DisputeManagementScreenState extends State<DisputeManagementScreen> {
                   children: [
                     const Icon(Icons.check_circle_outline, size: 48, color: AppColors.secondary),
                     const SizedBox(height: 12),
-                    Text(
+                    LocalizedText(
                       'Không có khiếu nại nào trong mục này.',
                       style: AppTypography.bodyMd.copyWith(color: AppColors.tertiary),
                     ),
@@ -345,7 +346,7 @@ class _DisputeManagementScreenState extends State<DisputeManagementScreen> {
               ? const [BoxShadow(color: Color(0x14000000), blurRadius: 4, offset: Offset(0, 1))]
               : null,
         ),
-        child: Text(
+        child: LocalizedText(
           label,
           style: AppTypography.labelMd.copyWith(
             color: isSelected ? AppColors.onPrimaryContainer : AppColors.onSurfaceVariant,
@@ -384,7 +385,7 @@ class _DisputeManagementScreenState extends State<DisputeManagementScreen> {
                       crossAxisAlignment: WrapCrossAlignment.center,
                       spacing: 6,
                       children: [
-                        Text(
+                        LocalizedText(
                           '#${dispute.id}',
                           style: AppTypography.labelLg.copyWith(
                             color: AppColors.onSurface,
@@ -397,7 +398,7 @@ class _DisputeManagementScreenState extends State<DisputeManagementScreen> {
                             color: AppColors.secondaryFixed.withAlpha(80),
                             borderRadius: BorderRadius.circular(AppShapes.rFull),
                           ),
-                          child: Text(
+                          child: LocalizedText(
                             'Đơn #${dispute.subOrderId}',
                             style: AppTypography.labelSm.copyWith(
                               color: AppColors.secondary,
@@ -408,7 +409,7 @@ class _DisputeManagementScreenState extends State<DisputeManagementScreen> {
                       ],
                     ),
                     const SizedBox(height: 4),
-                    Text(
+                    LocalizedText(
                       dispute.serviceName,
                       style: AppTypography.headlineSm.copyWith(color: AppColors.onSurface),
                       maxLines: 1,
@@ -435,14 +436,14 @@ class _DisputeManagementScreenState extends State<DisputeManagementScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('Khách hàng khiếu nại', style: AppTypography.labelSm.copyWith(color: AppColors.tertiary)),
+                      LocalizedText('Khách hàng khiếu nại', style: AppTypography.labelSm.copyWith(color: AppColors.tertiary)),
                       const SizedBox(height: 2),
                       Row(
                         children: [
                           const Icon(Icons.person_outline, size: 14, color: AppColors.secondary),
                           const SizedBox(width: 4),
                           Expanded(
-                            child: Text(
+                            child: LocalizedText(
                               dispute.customerName,
                               style: AppTypography.labelMd.copyWith(color: AppColors.onSurface, fontWeight: FontWeight.bold),
                               maxLines: 1,
@@ -459,9 +460,9 @@ class _DisputeManagementScreenState extends State<DisputeManagementScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('Phân loại tranh chấp', style: AppTypography.labelSm.copyWith(color: AppColors.tertiary)),
+                      LocalizedText('Phân loại tranh chấp', style: AppTypography.labelSm.copyWith(color: AppColors.tertiary)),
                       const SizedBox(height: 2),
-                      Text(
+                      LocalizedText(
                         dispute.category,
                         style: AppTypography.labelMd.copyWith(color: AppColors.primary, fontWeight: FontWeight.bold),
                         maxLines: 1,
@@ -476,7 +477,7 @@ class _DisputeManagementScreenState extends State<DisputeManagementScreen> {
           const SizedBox(height: 12),
 
           // Customer Description Block
-          Text('Nội dung khiếu nại từ khách:', style: AppTypography.labelSm.copyWith(color: AppColors.tertiary)),
+          LocalizedText('Nội dung khiếu nại từ khách:', style: AppTypography.labelSm.copyWith(color: AppColors.tertiary)),
           const SizedBox(height: 4),
           Container(
             width: double.infinity,
@@ -485,7 +486,7 @@ class _DisputeManagementScreenState extends State<DisputeManagementScreen> {
               color: AppColors.surfaceContainerLow.withAlpha(160),
               borderRadius: BorderRadius.circular(AppShapes.rMd),
             ),
-            child: Text(
+            child: LocalizedText(
               '“${dispute.description}”',
               style: AppTypography.bodySm.copyWith(
                 color: AppColors.onSurface,
@@ -497,7 +498,7 @@ class _DisputeManagementScreenState extends State<DisputeManagementScreen> {
 
           // Customer Evidence Images
           if (dispute.customerAttachments.isNotEmpty) ...[
-            Text('Minh chứng khách hàng gửi:', style: AppTypography.labelSm.copyWith(color: AppColors.tertiary)),
+            LocalizedText('Minh chứng khách hàng gửi:', style: AppTypography.labelSm.copyWith(color: AppColors.tertiary)),
             const SizedBox(height: 6),
             SizedBox(
               height: 100,
@@ -544,7 +545,7 @@ class _DisputeManagementScreenState extends State<DisputeManagementScreen> {
                       const Icon(Icons.verified, size: 16, color: AppColors.secondary),
                       const SizedBox(width: 6),
                       Expanded(
-                        child: Text(
+                        child: LocalizedText(
                           'Kết luận từ ${dispute.resolvedBy ?? "Ban Quản Trị DANASEA"}',
                           style: AppTypography.labelSm.copyWith(
                             color: AppColors.secondary,
@@ -556,7 +557,7 @@ class _DisputeManagementScreenState extends State<DisputeManagementScreen> {
                     ],
                   ),
                   const SizedBox(height: 4),
-                  Text(
+                  LocalizedText(
                     dispute.resolutionNote!,
                     style: AppTypography.bodySm.copyWith(color: AppColors.onSurface),
                   ),
@@ -578,7 +579,7 @@ class _DisputeManagementScreenState extends State<DisputeManagementScreen> {
                 const Icon(Icons.lock, size: 14, color: AppColors.secondary),
                 const SizedBox(width: 6),
                 Expanded(
-                  child: Text(
+                  child: LocalizedText(
                     'Quyền phán quyết thuộc Admin DANASEA. Đối tác không có thẩm quyền tự hoàn tiền hay đơn phương đóng khiếu nại.',
                     style: AppTypography.bodySm.copyWith(color: AppColors.tertiary, fontSize: 11),
                   ),
@@ -605,7 +606,7 @@ class _DisputeManagementScreenState extends State<DisputeManagementScreen> {
                     );
                   },
                   icon: const Icon(Icons.receipt_long, size: 15),
-                  label: const Text('Xem đơn liên quan', style: TextStyle(fontSize: 12)),
+                  label: const LocalizedText('Xem đơn liên quan', style: TextStyle(fontSize: 12)),
                   style: OutlinedButton.styleFrom(
                     foregroundColor: AppColors.secondary,
                     side: const BorderSide(color: AppColors.secondary),
@@ -620,7 +621,7 @@ class _DisputeManagementScreenState extends State<DisputeManagementScreen> {
                   child: ElevatedButton.icon(
                     onPressed: () => _showAddEvidenceDialog(dispute),
                     icon: const Icon(Icons.upload_file, size: 15),
-                    label: const Text('Gửi minh chứng', style: TextStyle(fontSize: 12)),
+                    label: const LocalizedText('Gửi minh chứng', style: TextStyle(fontSize: 12)),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppColors.secondaryFixed,
                       foregroundColor: AppColors.onSecondaryFixed,

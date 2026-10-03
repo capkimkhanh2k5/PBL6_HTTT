@@ -1,3 +1,4 @@
+import 'package:mobile/core/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import '../../../../core/data/mock_database_data.dart';
 import '../../../../core/models/danasea_models.dart';
@@ -46,11 +47,11 @@ class OrderDetailScreen extends StatelessWidget {
         ),
         title: Column(
           children: [
-            Text(
+            LocalizedText(
               'Chi tiết đơn #${masterOrder.id}',
               style: AppTypography.headlineSm(color: AppColors.onSurface),
             ),
-            Text(
+            LocalizedText(
               'Đặt chỗ trực tuyến',
               style: AppTypography.labelSm(
                 color: AppColors.secondary,
@@ -64,7 +65,7 @@ class OrderDetailScreen extends StatelessWidget {
             icon: const Icon(Icons.share, color: AppColors.onSurface),
             onPressed: () {
               ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Đã sao chép mã đơn hàng!')),
+                const SnackBar(content: LocalizedText('Đã sao chép mã đơn hàng!')),
               );
             },
           ),
@@ -107,13 +108,13 @@ class OrderDetailScreen extends StatelessWidget {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(
+                            LocalizedText(
                               'Đã thanh toán thành công',
                               style: AppTypography.headlineSm(
                                 color: AppColors.secondary,
                               ),
                             ),
-                            Text(
+                            LocalizedText(
                               '${masterOrder.createdAt.hour.toString().padLeft(2, '0')}:${masterOrder.createdAt.minute.toString().padLeft(2, '0')} • ${masterOrder.createdAt.day}/${masterOrder.createdAt.month}/${masterOrder.createdAt.year}',
                               style: AppTypography.bodySm(
                                 color: AppColors.onSurfaceVariant,
@@ -129,7 +130,7 @@ class OrderDetailScreen extends StatelessWidget {
                           color: AppColors.surfaceContainerHigh,
                           borderRadius: BorderRadius.circular(10),
                         ),
-                        child: Text(
+                        child: LocalizedText(
                           '${masterOrder.subOrders.length} dịch vụ',
                           style: AppTypography.labelSm(
                             color: AppColors.onSurfaceVariant,
@@ -153,7 +154,7 @@ class OrderDetailScreen extends StatelessWidget {
                             size: 14, color: AppColors.secondary),
                         const SizedBox(width: 6),
                         Expanded(
-                          child: Text(
+                          child: LocalizedText(
                             'Biển Mỹ Khê & Bãi Bụt sáng êm, gió nhẹ 8km/h, sóng 0.4m trong lành.',
                             style: AppTypography.bodySm(
                               color: AppColors.onSecondaryFixedVariant,
@@ -175,7 +176,7 @@ class OrderDetailScreen extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Expanded(
-                  child: Text(
+                  child: LocalizedText(
                     'Hành trình trải nghiệm',
                     overflow: TextOverflow.ellipsis,
                     style: AppTypography.headlineSm(
@@ -184,7 +185,7 @@ class OrderDetailScreen extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(width: 8),
-                Text(
+                LocalizedText(
                   'Độc lập từng chặng',
                   style: AppTypography.labelSm(
                     color: AppColors.secondary,
@@ -210,7 +211,7 @@ class OrderDetailScreen extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
+                  LocalizedText(
                     'Hóa đơn & Thanh toán',
                     style: AppTypography.headlineSm(color: AppColors.onSurface),
                   ),
@@ -232,7 +233,7 @@ class OrderDetailScreen extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Expanded(
-                        child: Text(
+                        child: LocalizedText(
                           'Tổng thực thu:',
                           style: AppTypography.labelLg(
                             color: AppColors.onSurface,
@@ -240,7 +241,7 @@ class OrderDetailScreen extends StatelessWidget {
                         ),
                       ),
                       const SizedBox(width: 8),
-                      Text(
+                      LocalizedText(
                         _formatPrice(masterOrder.totalAmount),
                         style: AppTypography.headlineSm(
                           color: AppColors.primary,
@@ -264,16 +265,16 @@ class OrderDetailScreen extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
+                  LocalizedText(
                     'Thông tin liên lạc',
                     style: AppTypography.labelLg(
                       color: AppColors.onSurface,
                     ),
                   ),
                   const SizedBox(height: 8),
-                  Text('${user.fullName} • ${user.phone ?? '0905 123 456'}',
+                  LocalizedText('${user.fullName} • ${user.phone ?? '0905 123 456'}',
                       style: AppTypography.bodySm(color: AppColors.onSurface)),
-                  Text(user.email,
+                  LocalizedText(user.email,
                       style: AppTypography.bodySm(color: AppColors.outline)),
                 ],
               ),
@@ -290,14 +291,14 @@ class OrderDetailScreen extends StatelessWidget {
                 minimumSize: const Size(double.infinity, 44),
               ),
               icon: const Icon(Icons.receipt_long, color: AppColors.secondary),
-              label: Text(
+              label: LocalizedText(
                 'Tải hóa đơn điện tử VAT (PDF)',
                 style: AppTypography.labelMd(color: AppColors.secondary),
               ),
               onPressed: () {
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(
-                    content: Text('Đang tải hóa đơn điện tử PDF...'),
+                    content: LocalizedText('Đang tải hóa đơn điện tử PDF...'),
                     backgroundColor: AppColors.secondary,
                   ),
                 );
@@ -335,7 +336,7 @@ class OrderDetailScreen extends StatelessWidget {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Flexible(
-                      child: Text(
+                      child: LocalizedText(
                         sub.vendorName,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
@@ -353,7 +354,7 @@ class OrderDetailScreen extends StatelessWidget {
                           color: AppColors.surfaceContainerHigh,
                           borderRadius: BorderRadius.circular(6),
                         ),
-                        child: Text(
+                        child: LocalizedText(
                           '#${sub.id}',
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
@@ -375,7 +376,7 @@ class OrderDetailScreen extends StatelessWidget {
                       : AppColors.surfaceContainerHigh,
                   borderRadius: BorderRadius.circular(10),
                 ),
-                child: Text(
+                child: LocalizedText(
                   isConfirmed ? 'Đã xác nhận' : 'Đang xử lý',
                   style: AppTypography.labelSm(
                     color: isConfirmed
@@ -388,7 +389,7 @@ class OrderDetailScreen extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 6),
-          Text(
+          LocalizedText(
             sub.serviceName,
             style: AppTypography.headlineSm(
               color: AppColors.onSurface,
@@ -400,7 +401,7 @@ class OrderDetailScreen extends StatelessWidget {
               const Icon(Icons.schedule, size: 14, color: AppColors.tertiary),
               const SizedBox(width: 4),
               Expanded(
-                child: Text(
+                child: LocalizedText(
                   '${sub.slotTime} • ${sub.slotDate.day}/${sub.slotDate.month}/${sub.slotDate.year}',
                   overflow: TextOverflow.ellipsis,
                   style: AppTypography.bodySm(
@@ -409,7 +410,7 @@ class OrderDetailScreen extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: 8),
-              Text(
+              LocalizedText(
                 _formatPrice(sub.subtotalAmount),
                 style: AppTypography.labelLg(
                   color: AppColors.primary,
@@ -447,7 +448,7 @@ class OrderDetailScreen extends StatelessWidget {
                   },
                   icon: const Icon(Icons.qr_code_2,
                       size: 16, color: Colors.white),
-                  label: const Text('Xem vé QR',
+                  label: const LocalizedText('Xem vé QR',
                       style: TextStyle(color: Colors.white, fontSize: 11)),
                 ),
               OutlinedButton.icon(
@@ -469,7 +470,7 @@ class OrderDetailScreen extends StatelessWidget {
                 },
                 icon: const Icon(Icons.cancel_outlined,
                     size: 14, color: AppColors.onSurfaceVariant),
-                label: Text('Yêu cầu hủy',
+                label: LocalizedText('Yêu cầu hủy',
                     style: AppTypography.labelSm(
                         color: AppColors.onSurfaceVariant)),
               ),
@@ -492,7 +493,7 @@ class OrderDetailScreen extends StatelessWidget {
                 },
                 icon: const Icon(Icons.report_problem_outlined,
                     size: 14, color: AppColors.onSurfaceVariant),
-                label: Text('Khiếu nại',
+                label: LocalizedText('Khiếu nại',
                     style: AppTypography.labelSm(
                         color: AppColors.onSurfaceVariant)),
               ),
@@ -515,7 +516,7 @@ class OrderDetailScreen extends StatelessWidget {
                     );
                   },
                   icon: const Icon(Icons.star, size: 14, color: Colors.white),
-                  label: const Text('Đánh giá',
+                  label: const LocalizedText('Đánh giá',
                       style: TextStyle(color: Colors.white, fontSize: 11)),
                 ),
             ],
@@ -530,11 +531,11 @@ class OrderDetailScreen extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Expanded(
-          child: Text(label,
+          child: LocalizedText(label,
               style: AppTypography.bodySm(color: AppColors.onSurfaceVariant)),
         ),
         const SizedBox(width: 8),
-        Text(
+        LocalizedText(
           value,
           style: AppTypography.labelMd(
             color: valueColor ?? AppColors.onSurface,

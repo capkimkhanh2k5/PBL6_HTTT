@@ -1,3 +1,4 @@
+import 'package:mobile/core/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../../../../core/data/mock_database_data.dart';
@@ -112,11 +113,11 @@ class _MyOrdersScreenState extends State<MyOrdersScreen> {
         title: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
+            LocalizedText(
               'Đơn hàng của tôi',
               style: AppTypography.headlineSm(color: AppColors.onSurface),
             ),
-            Text(
+            LocalizedText(
               'Quản lý vé & lịch trình trải nghiệm biển',
               style: AppTypography.bodySm(color: AppColors.onSurfaceVariant)
                   .copyWith(fontSize: 11),
@@ -152,7 +153,7 @@ class _MyOrdersScreenState extends State<MyOrdersScreen> {
                       boxShadow: isSel ? AppShapes.shadowLevel1 : null,
                     ),
                     child: Center(
-                      child: Text(
+                      child: LocalizedText(
                         _filters[index],
                         style: AppTypography.labelSm(
                           color: isSel ? Colors.white : AppColors.onSurfaceVariant,
@@ -215,7 +216,7 @@ class _MyOrdersScreenState extends State<MyOrdersScreen> {
                 child: Row(
                   children: [
                     Flexible(
-                      child: Text(
+                      child: LocalizedText(
                         '#${order.id}',
                         overflow: TextOverflow.ellipsis,
                         style: AppTypography.headlineSm(
@@ -229,7 +230,7 @@ class _MyOrdersScreenState extends State<MyOrdersScreen> {
                         Clipboard.setData(ClipboardData(text: order.id));
                         ScaffoldMessenger.of(context).showSnackBar(
                           const SnackBar(
-                            content: Text('Đã sao chép mã đơn hàng!'),
+                            content: LocalizedText('Đã sao chép mã đơn hàng!'),
                             duration: Duration(seconds: 1),
                           ),
                         );
@@ -248,7 +249,7 @@ class _MyOrdersScreenState extends State<MyOrdersScreen> {
                   color: statusColor.withValues(alpha: 0.15),
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: Text(
+                child: LocalizedText(
                   _getStatusName(order.status),
                   style: AppTypography.labelSm(
                     color: statusColor,
@@ -258,7 +259,7 @@ class _MyOrdersScreenState extends State<MyOrdersScreen> {
               ),
             ],
           ),
-          Text(
+          LocalizedText(
             'Ngày đặt: ${order.createdAt.day}/${order.createdAt.month}/${order.createdAt.year}',
             style: AppTypography.bodySm(color: AppColors.outline)
                 .copyWith(fontSize: 11),
@@ -279,7 +280,7 @@ class _MyOrdersScreenState extends State<MyOrdersScreen> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Expanded(
-                      child: Text(
+                      child: LocalizedText(
                         'TIẾN TRÌNH KÍCH HOẠT',
                         overflow: TextOverflow.ellipsis,
                         style: AppTypography.labelSm(
@@ -289,7 +290,7 @@ class _MyOrdersScreenState extends State<MyOrdersScreen> {
                       ),
                     ),
                     const SizedBox(width: 8),
-                    Text(
+                    LocalizedText(
                       '$confirmedCount / ${order.subOrders.length} sẵn sàng',
                       style: AppTypography.labelSm(
                         color: AppColors.onSurface,
@@ -346,7 +347,7 @@ class _MyOrdersScreenState extends State<MyOrdersScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
+                        LocalizedText(
                           sub.serviceName,
                           style: AppTypography.labelMd(
                             color: AppColors.onSurface,
@@ -355,7 +356,7 @@ class _MyOrdersScreenState extends State<MyOrdersScreen> {
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                         ),
-                        Text(
+                        LocalizedText(
                           '${sub.vendorName} • ${sub.quantity} khách • ${sub.slotTime}',
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
@@ -378,7 +379,7 @@ class _MyOrdersScreenState extends State<MyOrdersScreen> {
                             ),
                             const SizedBox(width: 4),
                             Flexible(
-                              child: Text(
+                              child: LocalizedText(
                                 isConfirmed
                                     ? 'Đã xác nhận'
                                     : 'Chờ đối tác duyệt',
@@ -400,7 +401,7 @@ class _MyOrdersScreenState extends State<MyOrdersScreen> {
                     IconButton(
                       icon: const Icon(Icons.qr_code_2,
                           color: AppColors.primary, size: 28),
-                      tooltip: 'Xem vé QR',
+                      tooltip: tr(context, 'Xem vé QR'),
                       onPressed: () {
                         Navigator.push(
                           context,
@@ -425,7 +426,7 @@ class _MyOrdersScreenState extends State<MyOrdersScreen> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Expanded(
-                child: Text(
+                child: LocalizedText(
                   'Tổng thanh toán:',
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
@@ -435,7 +436,7 @@ class _MyOrdersScreenState extends State<MyOrdersScreen> {
                 ),
               ),
               const SizedBox(width: 8),
-              Text(
+              LocalizedText(
                 _formatPrice(order.totalAmount),
                 style: AppTypography.headlineSm(
                   color: AppColors.primary,
@@ -470,7 +471,7 @@ class _MyOrdersScreenState extends State<MyOrdersScreen> {
                       ),
                     );
                   },
-                  child: Text(
+                  child: LocalizedText(
                     'Chi tiết đơn',
                     style: AppTypography.labelSm(color: AppColors.onSurface),
                   ),
@@ -498,7 +499,7 @@ class _MyOrdersScreenState extends State<MyOrdersScreen> {
                     },
                     icon: const Icon(Icons.qr_code_2,
                         size: 16, color: Colors.white),
-                    label: Text(
+                    label: LocalizedText(
                       'Vé QR & Kích hoạt',
                       style: AppTypography.labelSm(color: Colors.white),
                     ),
@@ -529,12 +530,12 @@ class _MyOrdersScreenState extends State<MyOrdersScreen> {
                   size: 36, color: AppColors.outline),
             ),
             const SizedBox(height: 14),
-            Text(
+            LocalizedText(
               'Chưa có đơn hàng trong mục này',
               style: AppTypography.headlineSm(color: AppColors.onSurface),
             ),
             const SizedBox(height: 6),
-            Text(
+            LocalizedText(
               'Các đơn đặt chỗ trải nghiệm biển của bạn sẽ được hiển thị và cập nhật theo trạng thái tại đây.',
               textAlign: TextAlign.center,
               style: AppTypography.bodySm(color: AppColors.onSurfaceVariant),
@@ -549,7 +550,7 @@ class _MyOrdersScreenState extends State<MyOrdersScreen> {
                   ),
                 ),
                 onPressed: widget.onExplore,
-                child: const Text('Khám phá trải nghiệm biển'),
+                child: const LocalizedText('Khám phá trải nghiệm biển'),
               ),
           ],
         ),

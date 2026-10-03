@@ -1,3 +1,4 @@
+import 'package:vendor_mobile/core/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_shapes.dart';
@@ -68,9 +69,9 @@ class _SubOrderDetailScreenState extends State<SubOrderDetailScreen> {
         title: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('ĐƠN CON #${_order.subOrderCode}',
+            LocalizedText('ĐƠN CON #${_order.subOrderCode}',
                 style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: AppColors.secondary, letterSpacing: 0.5)),
-            Text('Mã gốc: ${_order.masterOrderCode}', style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: AppColors.onSurface)),
+            LocalizedText('Mã gốc: ${_order.masterOrderCode}', style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: AppColors.onSurface)),
           ],
         ),
       ),
@@ -97,7 +98,7 @@ class _SubOrderDetailScreenState extends State<SubOrderDetailScreen> {
                           Container(width: 8, height: 8, decoration: const BoxDecoration(shape: BoxShape.circle, color: AppColors.secondary)),
                           const SizedBox(width: 6),
                           const Flexible(
-                            child: Text(
+                            child: LocalizedText(
                               'TRẠNG THÁI ĐƠN CON',
                               style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: AppColors.onSecondaryContainer, letterSpacing: 0.5),
                               overflow: TextOverflow.ellipsis,
@@ -134,7 +135,7 @@ class _SubOrderDetailScreenState extends State<SubOrderDetailScreen> {
                                 height: 44,
                                 decoration: const BoxDecoration(shape: BoxShape.circle, color: AppColors.primaryFixed),
                                 child: Center(
-                                  child: Text(
+                                  child: LocalizedText(
                                     _order.customerName.isNotEmpty ? _order.customerName[0].toUpperCase() : 'K',
                                     style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.onPrimaryFixed),
                                   ),
@@ -145,9 +146,9 @@ class _SubOrderDetailScreenState extends State<SubOrderDetailScreen> {
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    const Text('KHÁCH HÀNG CHÍNH', style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: AppColors.tertiary)),
-                                    Text(_order.customerName, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: AppColors.onSurface), maxLines: 1, overflow: TextOverflow.ellipsis),
-                                    Text(_order.customerPhone, style: const TextStyle(fontSize: 12, color: AppColors.onSurfaceVariant), maxLines: 1, overflow: TextOverflow.ellipsis),
+                                    const LocalizedText('KHÁCH HÀNG CHÍNH', style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: AppColors.tertiary)),
+                                    LocalizedText(_order.customerName, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: AppColors.onSurface), maxLines: 1, overflow: TextOverflow.ellipsis),
+                                    LocalizedText(_order.customerPhone, style: const TextStyle(fontSize: 12, color: AppColors.onSurfaceVariant), maxLines: 1, overflow: TextOverflow.ellipsis),
                                   ],
                                 ),
                               ),
@@ -158,7 +159,7 @@ class _SubOrderDetailScreenState extends State<SubOrderDetailScreen> {
                         Container(
                           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                           decoration: BoxDecoration(color: AppColors.surfaceContainer, borderRadius: BorderRadius.circular(12)),
-                          child: Text('${_order.quantity} khách', style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: AppColors.onSurfaceVariant)),
+                          child: LocalizedText('${_order.quantity} khách', style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: AppColors.onSurfaceVariant)),
                         ),
                       ],
                     ),
@@ -179,7 +180,7 @@ class _SubOrderDetailScreenState extends State<SubOrderDetailScreen> {
                               );
                             },
                             icon: const Icon(Icons.chat_bubble_outline, size: 15),
-                            label: const Text('Nhắn tin khách', style: TextStyle(fontSize: 12)),
+                            label: const LocalizedText('Nhắn tin khách', style: TextStyle(fontSize: 12)),
                             style: ElevatedButton.styleFrom(
                               backgroundColor: AppColors.primary,
                               foregroundColor: AppColors.onPrimary,
@@ -200,7 +201,7 @@ class _SubOrderDetailScreenState extends State<SubOrderDetailScreen> {
                               );
                             },
                             icon: const Icon(Icons.qr_code_scanner, size: 15),
-                            label: const Text('Quét vé QR', style: TextStyle(fontSize: 12)),
+                            label: const LocalizedText('Quét vé QR', style: TextStyle(fontSize: 12)),
                             style: OutlinedButton.styleFrom(
                               foregroundColor: AppColors.secondary,
                               side: const BorderSide(color: AppColors.secondary),
@@ -231,13 +232,13 @@ class _SubOrderDetailScreenState extends State<SubOrderDetailScreen> {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Expanded(
-                          child: Text(_order.serviceName, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: AppColors.onSurface), overflow: TextOverflow.ellipsis),
+                          child: LocalizedText(_order.serviceName, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: AppColors.onSurface), overflow: TextOverflow.ellipsis),
                         ),
                         const SizedBox(width: 8),
                         Container(
                           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                           decoration: BoxDecoration(color: AppColors.secondaryFixed, borderRadius: BorderRadius.circular(8)),
-                          child: const Text('Mỹ Khê Ocean', style: TextStyle(fontSize: 9, fontWeight: FontWeight.bold, color: AppColors.onSecondaryFixed)),
+                          child: const LocalizedText('Mỹ Khê Ocean', style: TextStyle(fontSize: 9, fontWeight: FontWeight.bold, color: AppColors.onSecondaryFixed)),
                         ),
                       ],
                     ),
@@ -247,7 +248,7 @@ class _SubOrderDetailScreenState extends State<SubOrderDetailScreen> {
                         const Icon(Icons.schedule, size: 16, color: AppColors.secondary),
                         const SizedBox(width: 6),
                         Expanded(
-                          child: Text('${_order.slotDate} • ${_order.slotTime}', style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: AppColors.onSurface), overflow: TextOverflow.ellipsis),
+                          child: LocalizedText('${_order.slotDate} • ${_order.slotTime}', style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: AppColors.onSurface), overflow: TextOverflow.ellipsis),
                         ),
                       ],
                     ),
@@ -257,7 +258,7 @@ class _SubOrderDetailScreenState extends State<SubOrderDetailScreen> {
                         Icon(Icons.storefront, size: 16, color: AppColors.tertiary),
                         SizedBox(width: 6),
                         Expanded(
-                          child: Text('Nhà cung cấp: Danang Ocean Club', style: TextStyle(fontSize: 12, color: AppColors.tertiary), overflow: TextOverflow.ellipsis),
+                          child: LocalizedText('Nhà cung cấp: Danang Ocean Club', style: TextStyle(fontSize: 12, color: AppColors.tertiary), overflow: TextOverflow.ellipsis),
                         ),
                       ],
                     ),
@@ -286,7 +287,7 @@ class _SubOrderDetailScreenState extends State<SubOrderDetailScreen> {
                               Icon(Icons.receipt_long, size: 18, color: AppColors.primary),
                               SizedBox(width: 6),
                               Expanded(
-                                child: Text(
+                                child: LocalizedText(
                                   'Chi tiết tài chính',
                                   style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: AppColors.onSurface),
                                   overflow: TextOverflow.ellipsis,
@@ -299,7 +300,7 @@ class _SubOrderDetailScreenState extends State<SubOrderDetailScreen> {
                         Container(
                           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                           decoration: BoxDecoration(color: AppColors.surfaceContainer, borderRadius: BorderRadius.circular(8)),
-                          child: const Text('Snapshot', style: TextStyle(fontSize: 10, color: AppColors.tertiary)),
+                          child: const LocalizedText('Snapshot', style: TextStyle(fontSize: 10, color: AppColors.tertiary)),
                         ),
                       ],
                     ),
@@ -308,14 +309,14 @@ class _SubOrderDetailScreenState extends State<SubOrderDetailScreen> {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Expanded(
-                          child: Text(
+                          child: LocalizedText(
                             'Đơn giá ${_order.quantity} khách (${_order.quantity} × ${_order.unitPrice.toStringAsFixed(0)} đ)',
                             style: const TextStyle(fontSize: 12, color: AppColors.onSurfaceVariant),
                             overflow: TextOverflow.ellipsis,
                           ),
                         ),
                         const SizedBox(width: 8),
-                        Text('${_order.totalPrice.toStringAsFixed(0)} đ', style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.onSurface)),
+                        LocalizedText('${_order.totalPrice.toStringAsFixed(0)} đ', style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.onSurface)),
                       ],
                     ),
                     const SizedBox(height: 6),
@@ -323,14 +324,14 @@ class _SubOrderDetailScreenState extends State<SubOrderDetailScreen> {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Expanded(
-                          child: Text(
+                          child: LocalizedText(
                             'Hoa hồng sàn DANASEA (${(_order.commissionRate * 100).toStringAsFixed(0)}%)',
                             style: const TextStyle(fontSize: 12, color: AppColors.onSurfaceVariant),
                             overflow: TextOverflow.ellipsis,
                           ),
                         ),
                         const SizedBox(width: 8),
-                        Text('-${_order.commissionAmount.toStringAsFixed(0)} đ', style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.error)),
+                        LocalizedText('-${_order.commissionAmount.toStringAsFixed(0)} đ', style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.error)),
                       ],
                     ),
                     const SizedBox(height: 10),
@@ -347,13 +348,13 @@ class _SubOrderDetailScreenState extends State<SubOrderDetailScreen> {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text('THỰC NHẬN ĐỐI TÁC', style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: AppColors.onPrimaryFixedVariant, letterSpacing: 0.5), maxLines: 1, overflow: TextOverflow.ellipsis),
-                                Text('Tự động quyết toán theo kỳ', style: TextStyle(fontSize: 10, color: AppColors.tertiary), maxLines: 1, overflow: TextOverflow.ellipsis),
+                                LocalizedText('THỰC NHẬN ĐỐI TÁC', style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: AppColors.onPrimaryFixedVariant, letterSpacing: 0.5), maxLines: 1, overflow: TextOverflow.ellipsis),
+                                LocalizedText('Tự động quyết toán theo kỳ', style: TextStyle(fontSize: 10, color: AppColors.tertiary), maxLines: 1, overflow: TextOverflow.ellipsis),
                               ],
                             ),
                           ),
                           const SizedBox(width: 8),
-                          Text(
+                          LocalizedText(
                             '${_order.payoutAmount.toStringAsFixed(0).replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]}.')} đ',
                             style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: AppColors.primary),
                           ),
@@ -381,7 +382,7 @@ class _SubOrderDetailScreenState extends State<SubOrderDetailScreen> {
                         Icon(Icons.verified_user, size: 18, color: AppColors.secondary),
                         SizedBox(width: 6),
                         Expanded(
-                          child: Text('Kiểm tra an toàn & Check-in', style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: AppColors.onSurface), maxLines: 1, overflow: TextOverflow.ellipsis),
+                          child: LocalizedText('Kiểm tra an toàn & Check-in', style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: AppColors.onSurface), maxLines: 1, overflow: TextOverflow.ellipsis),
                         ),
                       ],
                     ),
@@ -397,7 +398,7 @@ class _SubOrderDetailScreenState extends State<SubOrderDetailScreen> {
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               const Expanded(
-                                child: Text('Cam kết miễn trừ trách nhiệm', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: AppColors.onSurface), maxLines: 1, overflow: TextOverflow.ellipsis),
+                                child: LocalizedText('Cam kết miễn trừ trách nhiệm', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: AppColors.onSurface), maxLines: 1, overflow: TextOverflow.ellipsis),
                               ),
                               const SizedBox(width: 6),
                               Row(
@@ -405,7 +406,7 @@ class _SubOrderDetailScreenState extends State<SubOrderDetailScreen> {
                                 children: [
                                   Icon(Icons.draw, size: 13, color: _order.waiverSignedAt != null ? AppColors.secondary : AppColors.tertiary),
                                   const SizedBox(width: 3),
-                                  Text(
+                                  LocalizedText(
                                     _order.waiverSignedAt != null ? 'ĐÃ KÝ ĐIỆN TỬ' : 'CHƯA KÝ',
                                     style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: _order.waiverSignedAt != null ? AppColors.secondary : AppColors.tertiary),
                                   ),
@@ -415,7 +416,7 @@ class _SubOrderDetailScreenState extends State<SubOrderDetailScreen> {
                           ),
                           if (_order.waiverSignedAt != null) ...[
                             const SizedBox(height: 4),
-                            Text('Thời gian ký: ${_order.waiverSignedAt!.day}/${_order.waiverSignedAt!.month} lúc ${_order.waiverSignedAt!.hour}:${_order.waiverSignedAt!.minute.toString().padLeft(2, '0')}',
+                            LocalizedText('Thời gian ký: ${_order.waiverSignedAt!.day}/${_order.waiverSignedAt!.month} lúc ${_order.waiverSignedAt!.hour}:${_order.waiverSignedAt!.minute.toString().padLeft(2, '0')}',
                                 style: const TextStyle(fontSize: 10, color: AppColors.tertiary)),
                           ],
                         ],
@@ -433,7 +434,7 @@ class _SubOrderDetailScreenState extends State<SubOrderDetailScreen> {
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               const Expanded(
-                                child: Text('Trạng thái vào bãi (Check-in)', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: AppColors.onSurface), maxLines: 1, overflow: TextOverflow.ellipsis),
+                                child: LocalizedText('Trạng thái vào bãi (Check-in)', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: AppColors.onSurface), maxLines: 1, overflow: TextOverflow.ellipsis),
                               ),
                               const SizedBox(width: 6),
                               Container(
@@ -442,7 +443,7 @@ class _SubOrderDetailScreenState extends State<SubOrderDetailScreen> {
                                   color: _order.checkedInAt != null ? AppColors.secondaryContainer : AppColors.surfaceContainer,
                                   borderRadius: BorderRadius.circular(10),
                                 ),
-                                child: Text(
+                                child: LocalizedText(
                                   _order.checkedInAt != null ? 'ĐÃ CHECK-IN' : 'Chưa check-in',
                                   style: TextStyle(
                                     fontSize: 10,
@@ -454,7 +455,7 @@ class _SubOrderDetailScreenState extends State<SubOrderDetailScreen> {
                             ],
                           ),
                           const SizedBox(height: 4),
-                          Text(
+                          LocalizedText(
                             _order.checkedInAt != null
                                 ? 'Thời gian vào bãi: ${_order.checkedInAt!.day}/${_order.checkedInAt!.month} lúc ${_order.checkedInAt!.hour}:${_order.checkedInAt!.minute.toString().padLeft(2, '0')}'
                                 : 'Sẵn sàng quét mã QR khi khách tập trung tại bãi cát Mỹ Khê.',
@@ -485,8 +486,8 @@ class _SubOrderDetailScreenState extends State<SubOrderDetailScreen> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const Text('Đơn có khoản hoàn tiền', style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: AppColors.onErrorContainer)),
-                            Text('Lý do: ${refund.reason.labelVi}', style: const TextStyle(fontSize: 11, color: AppColors.onErrorContainer)),
+                            const LocalizedText('Đơn có khoản hoàn tiền', style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: AppColors.onErrorContainer)),
+                            LocalizedText('Lý do: ${refund.reason.labelVi}', style: const TextStyle(fontSize: 11, color: AppColors.onErrorContainer)),
                           ],
                         ),
                       ),
@@ -498,7 +499,7 @@ class _SubOrderDetailScreenState extends State<SubOrderDetailScreen> {
                             ),
                           );
                         },
-                        child: const Text('Xem chi tiết', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: AppColors.primary)),
+                        child: const LocalizedText('Xem chi tiết', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: AppColors.primary)),
                       ),
                     ],
                   ),
@@ -556,7 +557,7 @@ class _SubOrderDetailScreenState extends State<SubOrderDetailScreen> {
                     Icon(Icons.policy, size: 16, color: AppColors.tertiary),
                     SizedBox(width: 8),
                     Expanded(
-                      child: Text(
+                      child: LocalizedText(
                         'Chính sách hoàn hủy và giải quyết khiếu nại áp dụng theo quy chế bảo vệ khách hàng DANASEA. Đối tác phối hợp xử lý theo chuẩn dịch vụ bờ biển.',
                         style: TextStyle(fontSize: 10, color: AppColors.onSurfaceVariant),
                       ),

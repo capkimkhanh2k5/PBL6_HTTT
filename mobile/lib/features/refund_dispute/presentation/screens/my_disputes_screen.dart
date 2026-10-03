@@ -1,3 +1,4 @@
+import 'package:mobile/core/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import '../../../../core/data/mock_database_data.dart';
 import '../../../../core/models/danasea_models.dart';
@@ -78,7 +79,7 @@ class _MyDisputesScreenState extends State<MyDisputesScreen> {
           icon: const Icon(Icons.arrow_back, color: AppColors.onSurface),
           onPressed: () => Navigator.pop(context),
         ),
-        title: Text(
+        title: LocalizedText(
           'Khiếu nại của tôi',
           style: AppTypography.headlineSm(color: AppColors.onSurface),
         ),
@@ -87,7 +88,7 @@ class _MyDisputesScreenState extends State<MyDisputesScreen> {
           IconButton(
             icon: const Icon(Icons.add_circle_outline,
                 color: AppColors.secondary),
-            tooltip: 'Gửi khiếu nại',
+            tooltip: tr(context, 'Gửi khiếu nại'),
             onPressed: () {
               Navigator.push(
                 context,
@@ -121,14 +122,14 @@ class _MyDisputesScreenState extends State<MyDisputesScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
+                        LocalizedText(
                           'Bảo vệ quyền lợi hành trình biển',
                           style: AppTypography.labelMd(
                             color: AppColors.onSecondaryContainer,
                             fontWeight: FontWeight.w700,
                           ),
                         ),
-                        Text(
+                        LocalizedText(
                           'Tất cả khiếu nại được tiếp nhận và giải quyết căn cứ theo chứng từ và thỏa thuận bảo vệ khách hàng của DANASEA.',
                           style: AppTypography.bodySm(
                             color: AppColors.onSurfaceVariant,
@@ -167,7 +168,7 @@ class _MyDisputesScreenState extends State<MyDisputesScreen> {
                       borderRadius: BorderRadius.circular(18),
                     ),
                     child: Center(
-                      child: Text(
+                      child: LocalizedText(
                         _filters[index],
                         style: AppTypography.labelSm(
                           color: isSel ? Colors.white : AppColors.onSurfaceVariant,
@@ -185,7 +186,7 @@ class _MyDisputesScreenState extends State<MyDisputesScreen> {
           Expanded(
             child: disputes.isEmpty
                 ? Center(
-                    child: Text(
+                    child: LocalizedText(
                       'Không có khiếu nại nào trong mục này',
                       style: AppTypography.bodySm(
                           color: AppColors.onSurfaceVariant),
@@ -218,7 +219,7 @@ class _MyDisputesScreenState extends State<MyDisputesScreen> {
                                     crossAxisAlignment: CrossAxisAlignment.start,
                                     mainAxisSize: MainAxisSize.min,
                                     children: [
-                                      Text(
+                                      LocalizedText(
                                         '#${disp.id}',
                                         maxLines: 1,
                                         overflow: TextOverflow.ellipsis,
@@ -226,7 +227,7 @@ class _MyDisputesScreenState extends State<MyDisputesScreen> {
                                           color: AppColors.secondary,
                                         ),
                                       ),
-                                      Text(
+                                      LocalizedText(
                                         '${disp.createdAt.day}/${disp.createdAt.month}/${disp.createdAt.year}',
                                         style: AppTypography.bodySm(
                                                 color: AppColors.outline)
@@ -243,7 +244,7 @@ class _MyDisputesScreenState extends State<MyDisputesScreen> {
                                     color: statusColor.withValues(alpha: 0.15),
                                     borderRadius: BorderRadius.circular(10),
                                   ),
-                                  child: Text(
+                                  child: LocalizedText(
                                     _getStatusName(disp.status),
                                     style: AppTypography.labelSm(
                                       color: statusColor,
@@ -269,21 +270,21 @@ class _MyDisputesScreenState extends State<MyDisputesScreen> {
                                       crossAxisAlignment:
                                           CrossAxisAlignment.start,
                                       children: [
-                                        Text(
+                                        LocalizedText(
                                           'Đơn con #${disp.subOrderCode}',
                                           style: AppTypography.labelSm(
                                             color: AppColors.secondary,
                                             fontWeight: FontWeight.w700,
                                           ).copyWith(fontSize: 10),
                                         ),
-                                        Text(
+                                        LocalizedText(
                                           disp.serviceName,
                                           style: AppTypography.labelMd(
                                             color: AppColors.onSurface,
                                             fontWeight: FontWeight.w700,
                                           ),
                                         ),
-                                        Text(
+                                        LocalizedText(
                                           disp.vendorName,
                                           style: AppTypography.bodySm(
                                             color: AppColors.onSurfaceVariant,
@@ -297,7 +298,7 @@ class _MyDisputesScreenState extends State<MyDisputesScreen> {
                             ),
                             const SizedBox(height: 8),
 
-                            Text(
+                            LocalizedText(
                               'Phân loại: ${disp.category}',
                               style: AppTypography.labelSm(
                                 color: AppColors.primary,
@@ -305,7 +306,7 @@ class _MyDisputesScreenState extends State<MyDisputesScreen> {
                               ),
                             ),
                             const SizedBox(height: 4),
-                            Text(
+                            LocalizedText(
                               disp.description,
                               style: AppTypography.bodySm(
                                 color: AppColors.onSurface,
@@ -342,7 +343,7 @@ class _MyDisputesScreenState extends State<MyDisputesScreen> {
                                         crossAxisAlignment:
                                             CrossAxisAlignment.start,
                                         children: [
-                                          Text(
+                                          LocalizedText(
                                             disp.status == DisputeStatus.rejected
                                                 ? 'Lý do từ chối từ Admin:'
                                                 : 'Kết luận xử lý từ Admin:',
@@ -354,7 +355,7 @@ class _MyDisputesScreenState extends State<MyDisputesScreen> {
                                               fontWeight: FontWeight.w700,
                                             ),
                                           ),
-                                          Text(
+                                          LocalizedText(
                                             disp.resolutionNote!,
                                             style: AppTypography.bodySm(
                                               color: AppColors.onSurface,
@@ -386,7 +387,7 @@ class _MyDisputesScreenState extends State<MyDisputesScreen> {
           );
         },
         icon: const Icon(Icons.add, color: Colors.white),
-        label: const Text('Gửi khiếu nại', style: TextStyle(color: Colors.white)),
+        label: const LocalizedText('Gửi khiếu nại', style: TextStyle(color: Colors.white)),
       ),
     );
   }

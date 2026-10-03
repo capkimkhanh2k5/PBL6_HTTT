@@ -1,3 +1,4 @@
+import 'package:vendor_mobile/core/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_shapes.dart';
@@ -91,7 +92,7 @@ class _ChatConversationScreenState extends State<ChatConversationScreen> {
                 color: AppColors.secondaryContainer,
               ),
               child: Center(
-                child: Text(
+                child: LocalizedText(
                   widget.customerName.isNotEmpty ? widget.customerName[0].toUpperCase() : 'K',
                   style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: AppColors.onSecondaryContainer),
                 ),
@@ -103,7 +104,7 @@ class _ChatConversationScreenState extends State<ChatConversationScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Text(
+                  LocalizedText(
                     widget.customerName,
                     style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: AppColors.onSurface),
                     maxLines: 1,
@@ -115,7 +116,7 @@ class _ChatConversationScreenState extends State<ChatConversationScreen> {
                       Container(width: 6, height: 6, decoration: const BoxDecoration(shape: BoxShape.circle, color: AppColors.secondary)),
                       const SizedBox(width: 4),
                       const Flexible(
-                        child: Text(
+                        child: LocalizedText(
                           'Đang trực tuyến',
                           style: TextStyle(fontSize: 10, color: AppColors.secondary),
                           overflow: TextOverflow.ellipsis,
@@ -166,18 +167,18 @@ class _ChatConversationScreenState extends State<ChatConversationScreen> {
                         Row(
                           children: [
                             Flexible(
-                              child: Text(
+                              child: LocalizedText(
                                 '#${subOrder.subOrderCode}',
                                 style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: AppColors.secondary),
                                 overflow: TextOverflow.ellipsis,
                               ),
                             ),
                             const SizedBox(width: 4),
-                            Text('• ${subOrder.quantity} khách', style: const TextStyle(fontSize: 10, color: AppColors.tertiary)),
+                            LocalizedText('• ${subOrder.quantity} khách', style: const TextStyle(fontSize: 10, color: AppColors.tertiary)),
                           ],
                         ),
-                        Text(subOrder.serviceName, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: AppColors.onSurface), maxLines: 1, overflow: TextOverflow.ellipsis),
-                        Text('${subOrder.slotDate} • ${subOrder.slotTime}', style: const TextStyle(fontSize: 10, color: AppColors.tertiary), maxLines: 1, overflow: TextOverflow.ellipsis),
+                        LocalizedText(subOrder.serviceName, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: AppColors.onSurface), maxLines: 1, overflow: TextOverflow.ellipsis),
+                        LocalizedText('${subOrder.slotDate} • ${subOrder.slotTime}', style: const TextStyle(fontSize: 10, color: AppColors.tertiary), maxLines: 1, overflow: TextOverflow.ellipsis),
                       ],
                     ),
                   ),
@@ -197,7 +198,7 @@ class _ChatConversationScreenState extends State<ChatConversationScreen> {
                     child: const Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Text('Xem đơn', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: AppColors.onSecondaryContainer)),
+                        LocalizedText('Xem đơn', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: AppColors.onSecondaryContainer)),
                         Icon(Icons.chevron_right, size: 14, color: AppColors.onSecondaryContainer),
                       ],
                     ),
@@ -265,8 +266,8 @@ class _ChatConversationScreenState extends State<ChatConversationScreen> {
                       child: TextField(
                         controller: _msgController,
                         style: const TextStyle(fontSize: 13),
-                        decoration: const InputDecoration(
-                          hintText: 'Nhập tin nhắn cho khách...',
+                        decoration:  InputDecoration(
+                          hintText: tr(context, 'Nhập tin nhắn cho khách...'),
                           hintStyle: TextStyle(fontSize: 12, color: AppColors.outline),
                           border: InputBorder.none,
                         ),
@@ -322,9 +323,9 @@ class _ChatConversationScreenState extends State<ChatConversationScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text('Khách đã thanh toán', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: AppColors.onSurface)),
+                  const LocalizedText('Khách đã thanh toán', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: AppColors.onSurface)),
                   const SizedBox(height: 2),
-                  Text(
+                  LocalizedText(
                     '${order.customerName} đã đặt dịch vụ #${order.subOrderCode} • Tổng ${order.totalPrice.toStringAsFixed(0)} đ',
                     style: const TextStyle(fontSize: 11, color: AppColors.onSurfaceVariant),
                   ),
@@ -369,7 +370,7 @@ class _ChatConversationScreenState extends State<ChatConversationScreen> {
                 crossAxisAlignment: isMe ? CrossAxisAlignment.end : CrossAxisAlignment.start,
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Text(
+                  LocalizedText(
                     msg.content,
                     style: TextStyle(
                       fontSize: 13,
@@ -381,7 +382,7 @@ class _ChatConversationScreenState extends State<ChatConversationScreen> {
                   Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Text(
+                      LocalizedText(
                         '${msg.sentAt.hour}:${msg.sentAt.minute.toString().padLeft(2, '0')}',
                         style: TextStyle(
                           fontSize: 10,
@@ -405,7 +406,7 @@ class _ChatConversationScreenState extends State<ChatConversationScreen> {
               margin: const EdgeInsets.only(left: 6, bottom: 2),
               decoration: const BoxDecoration(shape: BoxShape.circle, color: AppColors.secondary),
               child: const Center(
-                child: Text('DO', style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Colors.white)),
+                child: LocalizedText('DO', style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Colors.white)),
               ),
             ),
         ],
@@ -429,7 +430,7 @@ class _ChatConversationScreenState extends State<ChatConversationScreen> {
           children: [
             const Icon(Icons.flash_on, size: 13, color: AppColors.secondary),
             const SizedBox(width: 4),
-            Text(title, style: const TextStyle(fontSize: 11, color: AppColors.onSurface)),
+            LocalizedText(title, style: const TextStyle(fontSize: 11, color: AppColors.onSurface)),
           ],
         ),
       ),

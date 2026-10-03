@@ -1,3 +1,4 @@
+import 'package:vendor_mobile/core/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_shapes.dart';
@@ -27,12 +28,11 @@ class PartnerAccountScreen extends StatefulWidget {
 class _PartnerAccountScreenState extends State<PartnerAccountScreen> {
   final VendorMockDatabase _db = VendorMockDatabase.instance;
   final VendorAuthRepository _authRepo = VendorAuthRepository();
-  String _currentLocale = 'vi';
+  String get _currentLocale => AppLanguage.instance.code;
 
   @override
   void initState() {
     super.initState();
-    _currentLocale = _db.currentUser.locale;
     _db.addListener(_onDbChanged);
   }
 
@@ -51,12 +51,12 @@ class _PartnerAccountScreenState extends State<PartnerAccountScreen> {
       context: context,
       builder: (ctx) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppShapes.rXl)),
-        title: const Text('Đăng xuất tài khoản'),
-        content: const Text('Bạn có chắc chắn muốn đăng xuất khỏi ứng dụng DANASEA Vendor?'),
+        title: const LocalizedText('Đăng xuất tài khoản'),
+        content: const LocalizedText('Bạn có chắc chắn muốn đăng xuất khỏi ứng dụng DANASEA Vendor?'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
-            child: const Text('Hủy'),
+            child: const LocalizedText('Hủy'),
           ),
           ElevatedButton(
             onPressed: () => Navigator.pop(ctx, true),
@@ -64,7 +64,7 @@ class _PartnerAccountScreenState extends State<PartnerAccountScreen> {
               backgroundColor: AppColors.error,
               foregroundColor: Colors.white,
             ),
-            child: const Text('Đăng xuất'),
+            child: const LocalizedText('Đăng xuất'),
           ),
         ],
       ),
@@ -83,6 +83,7 @@ class _PartnerAccountScreenState extends State<PartnerAccountScreen> {
 
   @override
   Widget build(BuildContext context) {
+    Localizations.localeOf(context);
     final user = _db.currentUser;
     final vendor = _db.currentVendor;
 
@@ -107,7 +108,7 @@ class _PartnerAccountScreenState extends State<PartnerAccountScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Text(
+                  LocalizedText(
                     'DANASEA',
                     style: AppTypography.headlineSm.copyWith(
                       color: AppColors.secondary,
@@ -116,7 +117,7 @@ class _PartnerAccountScreenState extends State<PartnerAccountScreen> {
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
-                  Text(
+                  LocalizedText(
                     'ĐỐI TÁC',
                     style: AppTypography.labelSm.copyWith(
                       color: AppColors.secondary,
@@ -152,7 +153,7 @@ class _PartnerAccountScreenState extends State<PartnerAccountScreen> {
                   ),
                 ),
                 const SizedBox(width: 6),
-                Text(
+                LocalizedText(
                   'Sẵn sàng',
                   style: AppTypography.labelSm.copyWith(
                     color: AppColors.onSecondaryFixedVariant,
@@ -217,7 +218,7 @@ class _PartnerAccountScreenState extends State<PartnerAccountScreen> {
                     ],
                   ),
                   const SizedBox(height: 12),
-                  Text(
+                  LocalizedText(
                     user.fullName,
                     style: AppTypography.headlineSm.copyWith(
                       color: AppColors.onSurface,
@@ -225,7 +226,7 @@ class _PartnerAccountScreenState extends State<PartnerAccountScreen> {
                     ),
                   ),
                   const SizedBox(height: 2),
-                  Text(
+                  LocalizedText(
                     vendor.businessName,
                     style: AppTypography.labelLg.copyWith(
                       color: AppColors.secondary,
@@ -245,7 +246,7 @@ class _PartnerAccountScreenState extends State<PartnerAccountScreen> {
                         const Icon(Icons.verified_user, size: 14, color: AppColors.secondary),
                         const SizedBox(width: 4),
                         Flexible(
-                          child: Text(
+                          child: LocalizedText(
                             'Đối tác biển đã xác thực',
                             style: AppTypography.labelSm.copyWith(
                               color: AppColors.secondary,
@@ -278,7 +279,7 @@ class _PartnerAccountScreenState extends State<PartnerAccountScreen> {
                             const Icon(Icons.mail_outline, size: 14, color: AppColors.tertiary),
                             const SizedBox(width: 4),
                             Flexible(
-                              child: Text(
+                              child: LocalizedText(
                                 user.email,
                                 style: AppTypography.bodySm.copyWith(color: AppColors.onSurfaceVariant, fontSize: 12),
                                 overflow: TextOverflow.ellipsis,
@@ -301,7 +302,7 @@ class _PartnerAccountScreenState extends State<PartnerAccountScreen> {
                               const Icon(Icons.phone_iphone, size: 14, color: AppColors.tertiary),
                               const SizedBox(width: 4),
                               Flexible(
-                                child: Text(
+                                child: LocalizedText(
                                   user.phone!,
                                   style: AppTypography.bodySm.copyWith(color: AppColors.onSurfaceVariant, fontSize: 12),
                                   overflow: TextOverflow.ellipsis,
@@ -327,9 +328,9 @@ class _PartnerAccountScreenState extends State<PartnerAccountScreen> {
                           ),
                           child: Column(
                             children: [
-                              Text('Điểm đánh giá', style: AppTypography.labelSm.copyWith(color: AppColors.tertiary)),
+                              LocalizedText('Điểm đánh giá', style: AppTypography.labelSm.copyWith(color: AppColors.tertiary)),
                               const SizedBox(height: 2),
-                              Text('4.9 / 5.0', style: AppTypography.labelLg.copyWith(color: AppColors.secondary, fontWeight: FontWeight.bold)),
+                              LocalizedText('4.9 / 5.0', style: AppTypography.labelLg.copyWith(color: AppColors.secondary, fontWeight: FontWeight.bold)),
                             ],
                           ),
                         ),
@@ -344,9 +345,9 @@ class _PartnerAccountScreenState extends State<PartnerAccountScreen> {
                           ),
                           child: Column(
                             children: [
-                              Text('Tỉ lệ check-in', style: AppTypography.labelSm.copyWith(color: AppColors.tertiary)),
+                              LocalizedText('Tỉ lệ check-in', style: AppTypography.labelSm.copyWith(color: AppColors.tertiary)),
                               const SizedBox(height: 2),
-                              Text('98.5%', style: AppTypography.labelLg.copyWith(color: AppColors.secondary, fontWeight: FontWeight.bold)),
+                              LocalizedText('98.5%', style: AppTypography.labelLg.copyWith(color: AppColors.secondary, fontWeight: FontWeight.bold)),
                             ],
                           ),
                         ),
@@ -376,7 +377,7 @@ class _PartnerAccountScreenState extends State<PartnerAccountScreen> {
                     children: [
                       const Icon(Icons.translate, size: 18, color: AppColors.tertiary),
                       const SizedBox(width: 8),
-                      Text(
+                      LocalizedText(
                         'Ngôn ngữ ứng dụng',
                         style: AppTypography.labelMd.copyWith(color: AppColors.onSurface, fontWeight: FontWeight.bold),
                       ),
@@ -386,14 +387,14 @@ class _PartnerAccountScreenState extends State<PartnerAccountScreen> {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       GestureDetector(
-                        onTap: () => setState(() => _currentLocale = 'vi'),
+                        onTap: () => AppLanguage.instance.setLanguage('vi'),
                         child: Container(
                           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                           decoration: BoxDecoration(
                             color: _currentLocale == 'vi' ? AppColors.secondary : Colors.transparent,
                             borderRadius: BorderRadius.circular(AppShapes.rFull),
                           ),
-                          child: Text(
+                          child: LocalizedText(
                             'Tiếng Việt',
                             style: AppTypography.labelSm.copyWith(
                               color: _currentLocale == 'vi' ? Colors.white : AppColors.onSurfaceVariant,
@@ -404,14 +405,14 @@ class _PartnerAccountScreenState extends State<PartnerAccountScreen> {
                       ),
                       const SizedBox(width: 4),
                       GestureDetector(
-                        onTap: () => setState(() => _currentLocale = 'en'),
+                        onTap: () => AppLanguage.instance.setLanguage('en'),
                         child: Container(
                           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                           decoration: BoxDecoration(
                             color: _currentLocale == 'en' ? AppColors.secondary : Colors.transparent,
                             borderRadius: BorderRadius.circular(AppShapes.rFull),
                           ),
-                          child: Text(
+                          child: LocalizedText(
                             'English',
                             style: AppTypography.labelSm.copyWith(
                               color: _currentLocale == 'en' ? Colors.white : AppColors.onSurfaceVariant,
@@ -625,7 +626,7 @@ class _PartnerAccountScreenState extends State<PartnerAccountScreen> {
           Icon(icon, size: 18, color: AppColors.secondary),
           const SizedBox(width: 8),
           Expanded(
-            child: Text(
+            child: LocalizedText(
               title,
               style: AppTypography.labelLg.copyWith(
                 color: AppColors.onSurface,
@@ -673,7 +674,7 @@ class _PartnerAccountScreenState extends State<PartnerAccountScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
+                    LocalizedText(
                       title,
                       style: AppTypography.labelLg.copyWith(
                         color: AppColors.onSurface,
@@ -683,7 +684,7 @@ class _PartnerAccountScreenState extends State<PartnerAccountScreen> {
                       overflow: TextOverflow.ellipsis,
                     ),
                     const SizedBox(height: 2),
-                    Text(
+                    LocalizedText(
                       subtitle,
                       style: AppTypography.bodySm.copyWith(color: AppColors.tertiary),
                       maxLines: 1,
@@ -701,7 +702,7 @@ class _PartnerAccountScreenState extends State<PartnerAccountScreen> {
                         : AppColors.secondaryFixed.withAlpha(80),
                     borderRadius: BorderRadius.circular(AppShapes.rFull),
                   ),
-                  child: Text(
+                  child: LocalizedText(
                     badgeText,
                     style: AppTypography.labelSm.copyWith(
                       color: badgeIsDestructive

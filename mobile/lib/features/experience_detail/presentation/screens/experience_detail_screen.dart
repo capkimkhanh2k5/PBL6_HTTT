@@ -1,3 +1,4 @@
+import 'package:mobile/core/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import '../../../../core/data/mock_database_data.dart';
 import '../../../../core/models/danasea_models.dart';
@@ -67,7 +68,7 @@ class _ExperienceDetailScreenState extends State<ExperienceDetailScreen> {
               } else {
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
-                    content: Text(
+                    content: LocalizedText(
                       'Đặt ${widget.service.name} ($guests khách, ${slot.startTime} - ${slot.endTime}) thành công!',
                     ),
                     backgroundColor: AppColors.secondary,
@@ -80,7 +81,7 @@ class _ExperienceDetailScreenState extends State<ExperienceDetailScreen> {
               }
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
-                  content: Text(
+                  content: LocalizedText(
                     'Đã thêm ${widget.service.name} vào giỏ hàng!',
                   ),
                   backgroundColor: AppColors.secondary,
@@ -168,7 +169,7 @@ class _ExperienceDetailScreenState extends State<ExperienceDetailScreen> {
                           color: Colors.black.withValues(alpha: 0.5),
                           borderRadius: AppShapes.radiusFull,
                         ),
-                        child: Text(
+                        child: LocalizedText(
                           '${_currentImageIndex + 1} / ${images.length}',
                           style: AppTypography.labelSm(color: Colors.white),
                         ),
@@ -202,7 +203,7 @@ class _ExperienceDetailScreenState extends State<ExperienceDetailScreen> {
                                 const Icon(Icons.verified,
                                     size: 13, color: AppColors.onSecondary),
                                 const SizedBox(width: 4),
-                                Text(
+                                LocalizedText(
                                   service.vendorName,
                                   style: AppTypography.labelSm(
                                     color: AppColors.onSecondary,
@@ -219,7 +220,7 @@ class _ExperienceDetailScreenState extends State<ExperienceDetailScreen> {
                               color: AppColors.surfaceContainerHigh,
                               borderRadius: AppShapes.radiusFull,
                             ),
-                            child: Text(
+                            child: LocalizedText(
                               service.categoryName,
                               style: AppTypography.labelSm(
                                 color: AppColors.secondary,
@@ -232,7 +233,7 @@ class _ExperienceDetailScreenState extends State<ExperienceDetailScreen> {
                       const SizedBox(height: 10),
 
                       // Title
-                      Text(
+                      LocalizedText(
                         service.name,
                         style: AppTypography.headlineLgMobile(
                           color: AppColors.onSurface,
@@ -249,7 +250,7 @@ class _ExperienceDetailScreenState extends State<ExperienceDetailScreen> {
                             size: 18,
                           ),
                           const SizedBox(width: 4),
-                          Text(
+                          LocalizedText(
                             service.avgRating.toStringAsFixed(1),
                             style: AppTypography.labelLg(
                               color: AppColors.onSurface,
@@ -257,7 +258,7 @@ class _ExperienceDetailScreenState extends State<ExperienceDetailScreen> {
                           ),
                           const SizedBox(width: 4),
                           Expanded(
-                            child: Text(
+                            child: LocalizedText(
                               '(${service.ratingCount} đánh giá)',
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
@@ -273,7 +274,7 @@ class _ExperienceDetailScreenState extends State<ExperienceDetailScreen> {
                               const Icon(Icons.schedule,
                                   size: 16, color: AppColors.tertiary),
                               const SizedBox(width: 4),
-                              Text(
+                              LocalizedText(
                                 '${service.durationMinutes} phút',
                                 style: AppTypography.labelMd(
                                   color: AppColors.onSurface,
@@ -292,7 +293,7 @@ class _ExperienceDetailScreenState extends State<ExperienceDetailScreen> {
                               size: 16, color: AppColors.tertiary),
                           const SizedBox(width: 4),
                           Expanded(
-                            child: Text(
+                            child: LocalizedText(
                               '${service.locationName} • ${service.address}',
                               style: AppTypography.bodySm(
                                 color: AppColors.onSurfaceVariant,
@@ -334,14 +335,14 @@ class _ExperienceDetailScreenState extends State<ExperienceDetailScreen> {
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Text(
+                                  LocalizedText(
                                     'Điều kiện biển hôm nay: Rất tốt',
                                     style: AppTypography.labelMd(
                                       color: AppColors.onSecondaryContainer,
                                       fontWeight: FontWeight.w700,
                                     ),
                                   ),
-                                  Text(
+                                  LocalizedText(
                                     'Sóng 0.4m • Gió 8 km/h • Đủ điều kiện an toàn xuất bến',
                                     style: AppTypography.bodySm(
                                       color: AppColors.onSurfaceVariant,
@@ -356,7 +357,7 @@ class _ExperienceDetailScreenState extends State<ExperienceDetailScreen> {
                       const SizedBox(height: 20),
 
                       // 4. HIGHLIGHTS & INCLUSIONS
-                      Text(
+                      LocalizedText(
                         'Điểm nổi bật của trải nghiệm',
                         style: AppTypography.headlineSm(
                           color: AppColors.onSurface,
@@ -381,14 +382,14 @@ class _ExperienceDetailScreenState extends State<ExperienceDetailScreen> {
                       const SizedBox(height: 16),
 
                       // 5. DESCRIPTION
-                      Text(
+                      LocalizedText(
                         'Mô tả chi tiết',
                         style: AppTypography.headlineSm(
                           color: AppColors.onSurface,
                         ),
                       ),
                       const SizedBox(height: 8),
-                      Text(
+                      LocalizedText(
                         service.description,
                         style: AppTypography.bodyMd(
                           color: AppColors.onSurface,
@@ -406,7 +407,7 @@ class _ExperienceDetailScreenState extends State<ExperienceDetailScreen> {
                         },
                         child: Padding(
                           padding: const EdgeInsets.symmetric(vertical: 4),
-                          child: Text(
+                          child: LocalizedText(
                             _isDescriptionExpanded ? 'Thu gọn' : 'Xem thêm',
                             style: AppTypography.labelMd(
                               color: AppColors.secondary,
@@ -433,7 +434,7 @@ class _ExperienceDetailScreenState extends State<ExperienceDetailScreen> {
                                     size: 16, color: AppColors.primary),
                                 const SizedBox(width: 6),
                                 Expanded(
-                                  child: Text(
+                                  child: LocalizedText(
                                     'Cam kết miễn trừ trách nhiệm',
                                     style: AppTypography.labelMd(
                                       color: AppColors.onSurface,
@@ -444,7 +445,7 @@ class _ExperienceDetailScreenState extends State<ExperienceDetailScreen> {
                               ],
                             ),
                             const SizedBox(height: 6),
-                            Text(
+                            LocalizedText(
                               service.waiverContent,
                               style: AppTypography.bodySm(
                                 color: AppColors.onSurfaceVariant,
@@ -460,7 +461,7 @@ class _ExperienceDetailScreenState extends State<ExperienceDetailScreen> {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Expanded(
-                            child: Text(
+                            child: LocalizedText(
                               'Đánh giá từ khách hàng (${MockDatabaseData.reviews.length})',
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
@@ -476,7 +477,7 @@ class _ExperienceDetailScreenState extends State<ExperienceDetailScreen> {
                               const Icon(Icons.star,
                                   color: AppColors.starRating, size: 16),
                               const SizedBox(width: 4),
-                              Text(
+                              LocalizedText(
                                 service.avgRating.toStringAsFixed(1),
                                 style: AppTypography.labelMd(
                                   color: AppColors.onSurface,
@@ -507,7 +508,7 @@ class _ExperienceDetailScreenState extends State<ExperienceDetailScreen> {
                                     radius: 16,
                                     backgroundColor:
                                         AppColors.secondaryContainer,
-                                    child: Text(
+                                    child: LocalizedText(
                                       rev.customerName[0],
                                       style: AppTypography.labelSm(
                                         color: AppColors.onSecondaryContainer,
@@ -520,14 +521,14 @@ class _ExperienceDetailScreenState extends State<ExperienceDetailScreen> {
                                       crossAxisAlignment:
                                           CrossAxisAlignment.start,
                                       children: [
-                                        Text(
+                                        LocalizedText(
                                           rev.customerName,
                                           style: AppTypography.labelMd(
                                             color: AppColors.onSurface,
                                             fontWeight: FontWeight.w700,
                                           ),
                                         ),
-                                        Text(
+                                        LocalizedText(
                                           'Tháng 10/2024',
                                           style: AppTypography.bodySm(
                                             color: AppColors.outline,
@@ -549,7 +550,7 @@ class _ExperienceDetailScreenState extends State<ExperienceDetailScreen> {
                                 ],
                               ),
                               const SizedBox(height: 8),
-                              Text(
+                              LocalizedText(
                                 rev.comment,
                                 style: AppTypography.bodySm(
                                   color: AppColors.onSurface,
@@ -598,7 +599,7 @@ class _ExperienceDetailScreenState extends State<ExperienceDetailScreen> {
                             onPressed: () {
                               ScaffoldMessenger.of(context).showSnackBar(
                                 const SnackBar(
-                                    content: Text('Đã sao chép liên kết chia sẻ!')),
+                                    content: LocalizedText('Đã sao chép liên kết chia sẻ!')),
                               );
                             },
                           ),
@@ -658,7 +659,7 @@ class _ExperienceDetailScreenState extends State<ExperienceDetailScreen> {
                       mainAxisSize: MainAxisSize.min,
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
+                        LocalizedText(
                           'Giá trọn gói',
                           style: AppTypography.bodySm(
                             color: AppColors.onSurfaceVariant,
@@ -670,13 +671,13 @@ class _ExperienceDetailScreenState extends State<ExperienceDetailScreen> {
                           text: TextSpan(
                             children: [
                               TextSpan(
-                                text: _formatPrice(service.price),
+                                text: tr(context, _formatPrice(service.price)),
                                 style: AppTypography.headlineMd(
                                   color: AppColors.primary,
                                 ),
                               ),
                               TextSpan(
-                                text: ' / khách',
+                                text: tr(context, ' / khách'),
                                 style: AppTypography.bodySm(
                                   color: AppColors.onSurfaceVariant,
                                 ),
@@ -722,14 +723,14 @@ class _ExperienceDetailScreenState extends State<ExperienceDetailScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
+                LocalizedText(
                   title,
                   style: AppTypography.labelMd(
                     color: AppColors.onSurface,
                     fontWeight: FontWeight.w700,
                   ),
                 ),
-                Text(
+                LocalizedText(
                   subtitle,
                   style: AppTypography.bodySm(
                     color: AppColors.onSurfaceVariant,

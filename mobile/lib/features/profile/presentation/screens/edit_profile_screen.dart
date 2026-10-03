@@ -1,3 +1,4 @@
+import 'package:mobile/core/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import '../../../../core/data/mock_database_data.dart';
 import '../../../../core/theme/app_colors.dart';
@@ -37,7 +38,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   void _saveProfile() {
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
-        content: Text('Đã cập nhật thông tin hồ sơ thành công!'),
+        content: LocalizedText('Đã cập nhật thông tin hồ sơ thành công!'),
         backgroundColor: AppColors.secondary,
       ),
     );
@@ -55,7 +56,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
           icon: const Icon(Icons.arrow_back, color: AppColors.onSurface),
           onPressed: () => Navigator.pop(context),
         ),
-        title: Text(
+        title: LocalizedText(
           'Chỉnh sửa hồ sơ',
           style: AppTypography.headlineSm(color: AppColors.onSurface),
         ),
@@ -143,7 +144,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
+        LocalizedText(
           label,
           style: AppTypography.labelMd(color: AppColors.onSurface),
         ),

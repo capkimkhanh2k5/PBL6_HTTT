@@ -1,3 +1,4 @@
+import 'package:mobile/core/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_shapes.dart';
@@ -86,7 +87,7 @@ class HeroSearchWidget extends StatelessWidget {
                         const Icon(Icons.waves, size: 14, color: AppColors.onSecondary),
                         const SizedBox(width: 6),
                         Flexible(
-                          child: Text(
+                          child: LocalizedText(
                             'TRẢI NGHIỆM BIỂN ĐÀ NẴNG',
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
@@ -103,7 +104,7 @@ class HeroSearchWidget extends StatelessWidget {
                   ),
                   const SizedBox(height: 12),
                   // Headline
-                  Text(
+                  LocalizedText(
                     'Chạm sóng biển,\nmở chuyến đi riêng.',
                     style: AppTypography.headlineLgMobile(
                       color: AppColors.inverseOnSurface,
@@ -114,7 +115,7 @@ class HeroSearchWidget extends StatelessWidget {
                   ),
                   const SizedBox(height: 8),
                   // Subtitle
-                  Text(
+                  LocalizedText(
                     'Khám phá những trải nghiệm biển phù hợp với bạn. Chọn hoạt động, đặt lịch và sẵn sàng tận hưởng Đà Nẵng.',
                     style: AppTypography.bodyMd(
                       color: AppColors.surfaceVariant,
@@ -191,14 +192,14 @@ class HeroSearchWidget extends StatelessWidget {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text(
+                              LocalizedText(
                                 'Khu vực biển',
                                 style: AppTypography.labelSm(
                                   color: AppColors.onSurfaceVariant,
                                   fontWeight: FontWeight.w500,
                                 ),
                               ),
-                              Text(
+                              LocalizedText(
                                 'Mỹ Khê, Sơn Trà, Non Nước',
                                 style: AppTypography.labelLg(
                                   color: AppColors.onSurface,
@@ -251,13 +252,13 @@ class HeroSearchWidget extends StatelessWidget {
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    Text(
+                                    LocalizedText(
                                       'Thời gian',
                                       style: AppTypography.labelSm(
                                         color: AppColors.onSurfaceVariant,
                                       ),
                                     ),
-                                    Text(
+                                    LocalizedText(
                                       'Ngày mai',
                                       style: AppTypography.labelMd(
                                         color: AppColors.onSurface,
@@ -302,13 +303,13 @@ class HeroSearchWidget extends StatelessWidget {
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    Text(
+                                    LocalizedText(
                                       'Số lượng',
                                       style: AppTypography.labelSm(
                                         color: AppColors.onSurfaceVariant,
                                       ),
                                     ),
-                                    Text(
+                                    LocalizedText(
                                       '2 khách',
                                       style: AppTypography.labelMd(
                                         color: AppColors.onSurface,

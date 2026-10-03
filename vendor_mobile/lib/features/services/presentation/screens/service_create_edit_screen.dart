@@ -1,3 +1,4 @@
+import 'package:vendor_mobile/core/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_shapes.dart';
@@ -167,7 +168,7 @@ class _ServiceCreateEditScreenState extends State<ServiceCreateEditScreen> {
           icon: const Icon(Icons.arrow_back_ios_new, color: AppColors.secondary, size: 20),
           onPressed: () => Navigator.of(context).maybePop(),
         ),
-        title: Text(
+        title: LocalizedText(
           _isEdit ? 'Sửa dịch vụ' : 'Tạo mới dịch vụ',
           style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18, color: AppColors.secondary),
         ),
@@ -206,8 +207,8 @@ class _ServiceCreateEditScreenState extends State<ServiceCreateEditScreen> {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text('NHÀ CUNG CẤP', style: TextStyle(fontSize: 9, fontWeight: FontWeight.bold, color: AppColors.secondary)),
-                                Text('Danang Ocean Club', style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: AppColors.onSurface), overflow: TextOverflow.ellipsis),
+                                LocalizedText('NHÀ CUNG CẤP', style: TextStyle(fontSize: 9, fontWeight: FontWeight.bold, color: AppColors.secondary)),
+                                LocalizedText('Danang Ocean Club', style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: AppColors.onSurface), overflow: TextOverflow.ellipsis),
                               ],
                             ),
                           ),
@@ -221,7 +222,7 @@ class _ServiceCreateEditScreenState extends State<ServiceCreateEditScreen> {
                         color: AppColors.surfaceContainerHigh,
                         borderRadius: BorderRadius.circular(12),
                       ),
-                      child: const Text('Bước 1/3', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: AppColors.onSurfaceVariant)),
+                      child: const LocalizedText('Bước 1/3', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: AppColors.onSurfaceVariant)),
                     ),
                   ],
                 ),
@@ -248,7 +249,7 @@ class _ServiceCreateEditScreenState extends State<ServiceCreateEditScreen> {
               const Row(
                 children: [
                   Expanded(
-                    child: Text('1. Trải nghiệm',
+                    child: LocalizedText('1. Trải nghiệm',
                       style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: AppColors.primary),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
@@ -256,7 +257,7 @@ class _ServiceCreateEditScreenState extends State<ServiceCreateEditScreen> {
                   ),
                   SizedBox(width: 4),
                   Expanded(
-                    child: Text('2. An toàn',
+                    child: LocalizedText('2. An toàn',
                       textAlign: TextAlign.center,
                       style: TextStyle(fontSize: 11, color: AppColors.tertiary),
                       maxLines: 1,
@@ -265,7 +266,7 @@ class _ServiceCreateEditScreenState extends State<ServiceCreateEditScreen> {
                   ),
                   SizedBox(width: 4),
                   Expanded(
-                    child: Text('3. Lịch trình',
+                    child: LocalizedText('3. Lịch trình',
                       textAlign: TextAlign.end,
                       style: TextStyle(fontSize: 11, color: AppColors.tertiary),
                       maxLines: 1,
@@ -298,7 +299,7 @@ class _ServiceCreateEditScreenState extends State<ServiceCreateEditScreen> {
                       hint: 'Nhập tên dịch vụ tiếng Anh',
                     ),
                     const SizedBox(height: 12),
-                    const Text('Đường dẫn định danh (Slug)', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: AppColors.onSurface)),
+                    const LocalizedText('Đường dẫn định danh (Slug)', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: AppColors.onSurface)),
                     const SizedBox(height: 6),
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 2),
@@ -308,7 +309,7 @@ class _ServiceCreateEditScreenState extends State<ServiceCreateEditScreen> {
                       ),
                       child: Row(
                         children: [
-                          const Text('danasea.vn/tours/', style: TextStyle(fontSize: 11, color: AppColors.secondary, fontWeight: FontWeight.bold)),
+                          const LocalizedText('danasea.vn/tours/', style: TextStyle(fontSize: 11, color: AppColors.secondary, fontWeight: FontWeight.bold)),
                           Expanded(
                             child: TextField(
                               controller: _slugController,
@@ -320,7 +321,7 @@ class _ServiceCreateEditScreenState extends State<ServiceCreateEditScreen> {
                       ),
                     ),
                     const SizedBox(height: 12),
-                    const Text('Danh mục trải nghiệm', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: AppColors.onSurface)),
+                    const LocalizedText('Danh mục trải nghiệm', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: AppColors.onSurface)),
                     const SizedBox(height: 6),
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 14),
@@ -333,10 +334,10 @@ class _ServiceCreateEditScreenState extends State<ServiceCreateEditScreen> {
                           value: _category,
                           isExpanded: true,
                           items: const [
-                            DropdownMenuItem(value: 'WATER_SPORTS', child: Text('Thể thao nước (Chèo SUP / Kayak)', style: TextStyle(fontSize: 13))),
-                            DropdownMenuItem(value: 'DIVING', child: Text('Lặn ngắm san hô (Snorkeling & Diving)', style: TextStyle(fontSize: 13))),
-                            DropdownMenuItem(value: 'SURFING', child: Text('Lướt ván diều & Lướt sóng (Surfing)', style: TextStyle(fontSize: 13))),
-                            DropdownMenuItem(value: 'BOAT_CRUISE', child: Text('Du thuyền khám phá bán đảo Sơn Trà', style: TextStyle(fontSize: 13))),
+                            DropdownMenuItem(value: 'WATER_SPORTS', child: LocalizedText('Thể thao nước (Chèo SUP / Kayak)', style: TextStyle(fontSize: 13))),
+                            DropdownMenuItem(value: 'DIVING', child: LocalizedText('Lặn ngắm san hô (Snorkeling & Diving)', style: TextStyle(fontSize: 13))),
+                            DropdownMenuItem(value: 'SURFING', child: LocalizedText('Lướt ván diều & Lướt sóng (Surfing)', style: TextStyle(fontSize: 13))),
+                            DropdownMenuItem(value: 'BOAT_CRUISE', child: LocalizedText('Du thuyền khám phá bán đảo Sơn Trà', style: TextStyle(fontSize: 13))),
                           ],
                           onChanged: (val) {
                             if (val != null) setState(() => _category = val);
@@ -351,7 +352,7 @@ class _ServiceCreateEditScreenState extends State<ServiceCreateEditScreen> {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         const Expanded(
-                          child: Text(
+                          child: LocalizedText(
                             'Mô tả chi tiết lịch trình',
                             style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: AppColors.onSurface),
                             maxLines: 1,
@@ -380,7 +381,7 @@ class _ServiceCreateEditScreenState extends State<ServiceCreateEditScreen> {
                         filled: true,
                         fillColor: AppColors.surfaceContainerLow,
                         border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
-                        hintText: _descTab == 'vi' ? 'Mô tả hành trình bằng tiếng Việt...' : 'Tour itinerary in English...',
+                        hintText: tr(context, _descTab == 'vi' ? 'Mô tả hành trình bằng tiếng Việt...' : 'Tour itinerary in English...'),
                       ),
                     ),
                   ],
@@ -408,7 +409,7 @@ class _ServiceCreateEditScreenState extends State<ServiceCreateEditScreen> {
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               const Expanded(
-                                child: Text(
+                                child: LocalizedText(
                                   'Đơn giá duy nhất',
                                   style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: AppColors.onSurface),
                                   overflow: TextOverflow.ellipsis,
@@ -418,7 +419,7 @@ class _ServiceCreateEditScreenState extends State<ServiceCreateEditScreen> {
                               Container(
                                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                                 decoration: BoxDecoration(color: AppColors.secondary, borderRadius: BorderRadius.circular(10)),
-                                child: const Text('1 mức giá cố định', style: TextStyle(fontSize: 10, color: Colors.white, fontWeight: FontWeight.bold)),
+                                child: const LocalizedText('1 mức giá cố định', style: TextStyle(fontSize: 10, color: Colors.white, fontWeight: FontWeight.bold)),
                               ),
                             ],
                           ),
@@ -439,9 +440,9 @@ class _ServiceCreateEditScreenState extends State<ServiceCreateEditScreen> {
                                     decoration: const InputDecoration(border: InputBorder.none, contentPadding: EdgeInsets.zero),
                                   ),
                                 ),
-                                const Text('VNĐ', style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: AppColors.primary)),
+                                const LocalizedText('VNĐ', style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: AppColors.primary)),
                                 const SizedBox(width: 4),
-                                const Text('/ khách', style: TextStyle(fontSize: 11, color: AppColors.tertiary)),
+                                const LocalizedText('/ khách', style: TextStyle(fontSize: 11, color: AppColors.tertiary)),
                               ],
                             ),
                           ),
@@ -451,7 +452,7 @@ class _ServiceCreateEditScreenState extends State<ServiceCreateEditScreen> {
                               Icon(Icons.info_outline, size: 12, color: AppColors.secondary),
                               SizedBox(width: 4),
                               Expanded(
-                                child: Text('Giá trọn gói đã bao gồm thiết bị chèo, áo phao và hướng dẫn viên.',
+                                child: LocalizedText('Giá trọn gói đã bao gồm thiết bị chèo, áo phao và hướng dẫn viên.',
                                     style: TextStyle(fontSize: 10, color: AppColors.tertiary)),
                               ),
                             ],
@@ -540,7 +541,7 @@ class _ServiceCreateEditScreenState extends State<ServiceCreateEditScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     if (_images.isEmpty)
-                      const Text('Chưa có hình ảnh nào', style: TextStyle(fontSize: 12, color: AppColors.tertiary))
+                      const LocalizedText('Chưa có hình ảnh nào', style: TextStyle(fontSize: 12, color: AppColors.tertiary))
                     else
                       ListView.separated(
                         shrinkWrap: true,
@@ -567,7 +568,7 @@ class _ServiceCreateEditScreenState extends State<ServiceCreateEditScreen> {
                                 ),
                                 const SizedBox(width: 10),
                                 Expanded(
-                                  child: Text(i == 0 ? 'Ảnh bìa đại diện' : 'Ảnh ${i + 1}',
+                                  child: LocalizedText(i == 0 ? 'Ảnh bìa đại diện' : 'Ảnh ${i + 1}',
                                       style: TextStyle(
                                         fontSize: 12,
                                         fontWeight: i == 0 ? FontWeight.bold : FontWeight.normal,
@@ -618,7 +619,7 @@ class _ServiceCreateEditScreenState extends State<ServiceCreateEditScreen> {
                         ToastNotification.showInfo(context, 'Đã thêm ảnh mới');
                       },
                       icon: const Icon(Icons.add_photo_alternate, size: 16),
-                      label: const Text('Thêm ảnh trải nghiệm', style: TextStyle(fontSize: 12)),
+                      label: const LocalizedText('Thêm ảnh trải nghiệm', style: TextStyle(fontSize: 12)),
                       style: OutlinedButton.styleFrom(
                         foregroundColor: AppColors.secondary,
                         side: const BorderSide(color: AppColors.secondary),
@@ -626,7 +627,7 @@ class _ServiceCreateEditScreenState extends State<ServiceCreateEditScreen> {
                       ),
                     ),
                     const SizedBox(height: 4),
-                    const Text('Ảnh đầu tiên là ảnh bìa. Dùng mũi tên để thay đổi thứ tự.', style: TextStyle(fontSize: 10, color: AppColors.tertiary)),
+                    const LocalizedText('Ảnh đầu tiên là ảnh bìa. Dùng mũi tên để thay đổi thứ tự.', style: TextStyle(fontSize: 10, color: AppColors.tertiary)),
                   ],
                 ),
               ),
@@ -686,7 +687,7 @@ class _ServiceCreateEditScreenState extends State<ServiceCreateEditScreen> {
                     Icon(icon, color: AppColors.secondary, size: 20),
                     const SizedBox(width: 8),
                     Expanded(
-                      child: Text(
+                      child: LocalizedText(
                         title,
                         style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: AppColors.onSurface),
                         maxLines: 1,
@@ -701,7 +702,7 @@ class _ServiceCreateEditScreenState extends State<ServiceCreateEditScreen> {
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                   decoration: BoxDecoration(color: AppColors.primaryFixed.withOpacity(0.5), borderRadius: BorderRadius.circular(10)),
-                  child: Text(badge, style: const TextStyle(fontSize: 9, fontWeight: FontWeight.bold, color: AppColors.primary)),
+                  child: LocalizedText(badge, style: const TextStyle(fontSize: 9, fontWeight: FontWeight.bold, color: AppColors.primary)),
                 ),
               ],
             ],
@@ -724,7 +725,7 @@ class _ServiceCreateEditScreenState extends State<ServiceCreateEditScreen> {
           borderRadius: BorderRadius.circular(14),
           boxShadow: active ? AppShapes.shadowSm : null,
         ),
-        child: Text(
+        child: LocalizedText(
           label,
           style: TextStyle(
             fontSize: 10,

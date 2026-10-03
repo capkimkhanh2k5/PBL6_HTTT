@@ -1,3 +1,4 @@
+import 'package:vendor_mobile/core/l10n/app_localizations.dart';
 import 'dart:async';
 import 'package:flutter/material.dart';
 import '../../../../core/theme/app_colors.dart';
@@ -104,7 +105,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Text(
+                  LocalizedText(
                     'DANASEA',
                     style: Theme.of(context).textTheme.titleSmall?.copyWith(
                           fontWeight: FontWeight.bold,
@@ -113,7 +114,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
-                  Text(
+                  LocalizedText(
                     'VENDOR PORTAL',
                     style: Theme.of(context).textTheme.labelSmall?.copyWith(
                           color: AppColors.secondary,
@@ -141,7 +142,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
               children: [
                 Icon(Icons.verified_user, size: 14, color: AppColors.secondary),
                 SizedBox(width: 4),
-                Text(
+                LocalizedText(
                   'Bảo mật đối tác',
                   style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.tertiary),
                 ),
@@ -168,7 +169,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                   children: [
                     Icon(Icons.shield_outlined, size: 14, color: AppColors.onSecondaryContainer),
                     SizedBox(width: 4),
-                    Text(
+                    LocalizedText(
                       'Xác thực & Khôi phục',
                       style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.onSecondaryContainer),
                     ),
@@ -182,14 +183,14 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                         fontWeight: FontWeight.bold,
                         color: AppColors.onSurface,
                       ),
-                  children: const [
-                    TextSpan(text: 'Bảo vệ tài khoản\n'),
-                    TextSpan(text: 'đối tác bãi biển', style: TextStyle(color: AppColors.primary)),
+                  children:  [
+                    TextSpan(text: tr(context, 'Bảo vệ tài khoản\n')),
+                    TextSpan(text: tr(context, 'đối tác bãi biển'), style: TextStyle(color: AppColors.primary)),
                   ],
                 ),
               ),
               const SizedBox(height: 6),
-              Text(
+              LocalizedText(
                 'Hệ thống xác minh độc quyền dành cho các đơn vị lướt ván, chèo SUP và lặn biển tại bờ biển Đà Nẵng.',
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(color: AppColors.tertiary),
               ),
@@ -200,14 +201,14 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   const Expanded(
-                    child: Text(
+                    child: LocalizedText(
                       'BƯỚC QUY TRÌNH (MÔ PHỎNG)',
                       style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: AppColors.tertiary, letterSpacing: 0.5),
                       overflow: TextOverflow.ellipsis,
                     ),
                   ),
                   const SizedBox(width: 8),
-                  Text('Bước ${_currentStep + 1}/4',
+                  LocalizedText('Bước ${_currentStep + 1}/4',
                       style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: AppColors.secondary)),
                 ],
               ),
@@ -249,12 +250,12 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(
+                          LocalizedText(
                             'BẢO MẬT TÀI KHOẢN BẾN BÃI',
                             style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: AppColors.secondaryContainer, letterSpacing: 0.5),
                           ),
                           SizedBox(height: 2),
-                          Text(
+                          LocalizedText(
                             'Liên kết đặt lại mật khẩu chỉ dùng cho tài khoản đã yêu cầu.',
                             style: TextStyle(fontSize: 12, color: Colors.white),
                           ),
@@ -296,8 +297,8 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text('Trung tâm hỗ trợ vận hành', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: AppColors.onSurface)),
-                          Text('Bán đảo Sơn Trà & Mỹ Khê', style: TextStyle(fontSize: 12, color: AppColors.tertiary)),
+                          LocalizedText('Trung tâm hỗ trợ vận hành', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: AppColors.onSurface)),
+                          LocalizedText('Bán đảo Sơn Trà & Mỹ Khê', style: TextStyle(fontSize: 12, color: AppColors.tertiary)),
                         ],
                       ),
                     ),
@@ -310,7 +311,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                           borderRadius: BorderRadius.circular(20),
                           boxShadow: AppShapes.shadowSm,
                         ),
-                        child: const Text('Hotline 24/7', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: AppColors.secondary)),
+                        child: const LocalizedText('Hotline 24/7', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: AppColors.secondary)),
                       ),
                     ),
                   ],
@@ -336,7 +337,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
             boxShadow: active ? AppShapes.shadowSm : null,
           ),
           child: Center(
-            child: Text(
+            child: LocalizedText(
               label,
               style: TextStyle(
                 fontSize: 11,
@@ -372,9 +373,9 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
             child: const Icon(Icons.lock_reset, color: AppColors.primary, size: 24),
           ),
           const SizedBox(height: 12),
-          const Text('Khôi phục mật khẩu', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.onSurface)),
+          const LocalizedText('Khôi phục mật khẩu', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.onSurface)),
           const SizedBox(height: 4),
-          const Text(
+          const LocalizedText(
             'Nhập email đăng ký tài khoản đơn vị vận hành đối tác (Vendor). DANASEA sẽ gửi liên kết bảo mật có thời hạn sử dụng.',
             style: TextStyle(fontSize: 13, color: AppColors.tertiary),
           ),
@@ -393,7 +394,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
               Icon(Icons.info_outline, size: 14, color: AppColors.secondary),
               SizedBox(width: 4),
               Expanded(
-                child: Text('Email phải trùng khớp với hồ sơ đăng ký kinh doanh.', style: TextStyle(fontSize: 11, color: AppColors.tertiary)),
+                child: LocalizedText('Email phải trùng khớp với hồ sơ đăng ký kinh doanh.', style: TextStyle(fontSize: 11, color: AppColors.tertiary)),
               ),
             ],
           ),
@@ -426,9 +427,9 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('Hướng dẫn kiểm tra', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12, color: AppColors.onSurface)),
+                      LocalizedText('Hướng dẫn kiểm tra', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12, color: AppColors.onSurface)),
                       SizedBox(height: 2),
-                      Text('Vui lòng kiểm tra kỹ cả thư mục Quảng cáo và Hộp thư rác (Spam) nếu không nhận được email sau 1 phút.',
+                      LocalizedText('Vui lòng kiểm tra kỹ cả thư mục Quảng cáo và Hộp thư rác (Spam) nếu không nhận được email sau 1 phút.',
                           style: TextStyle(fontSize: 11, color: AppColors.tertiary)),
                     ],
                   ),
@@ -468,12 +469,12 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
               color: AppColors.secondaryFixed,
               borderRadius: BorderRadius.circular(16),
             ),
-            child: const Text('KIỂM TRA HỘP THƯ', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: AppColors.onSecondaryFixed)),
+            child: const LocalizedText('KIỂM TRA HỘP THƯ', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: AppColors.onSecondaryFixed)),
           ),
           const SizedBox(height: 10),
-          const Text('Đã gửi liên kết xác minh', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.onSurface)),
+          const LocalizedText('Đã gửi liên kết xác minh', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.onSurface)),
           const SizedBox(height: 6),
-          const Text(
+          const LocalizedText(
             'Chúng tôi đã gửi đường dẫn đặt lại mật khẩu an toàn đến hộp thư quản lý:',
             textAlign: TextAlign.center,
             style: TextStyle(fontSize: 13, color: AppColors.tertiary),
@@ -485,7 +486,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
               color: AppColors.surfaceContainerHigh,
               borderRadius: BorderRadius.circular(20),
             ),
-            child: Text(_emailController.text, style: const TextStyle(fontWeight: FontWeight.bold, color: AppColors.onSurface)),
+            child: LocalizedText(_emailController.text, style: const TextStyle(fontWeight: FontWeight.bold, color: AppColors.onSurface)),
           ),
           const SizedBox(height: 16),
           Container(
@@ -497,8 +498,8 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
             child: const Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text('Thời hạn hiệu lực', style: TextStyle(fontSize: 12, color: AppColors.tertiary)),
-                Text('15 phút kể từ lúc gửi', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: AppColors.primary)),
+                LocalizedText('Thời hạn hiệu lực', style: TextStyle(fontSize: 12, color: AppColors.tertiary)),
+                LocalizedText('15 phút kể từ lúc gửi', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: AppColors.primary)),
               ],
             ),
           ),
@@ -508,7 +509,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
             children: [
               const Icon(Icons.hourglass_top, size: 16, color: AppColors.tertiary),
               const SizedBox(width: 4),
-              Text(
+              LocalizedText(
                 _countdown > 0 ? 'Gửi lại mã sau: ${_countdown}s' : 'Có thể gửi lại liên kết',
                 style: TextStyle(
                   fontSize: 13,
@@ -538,12 +539,12 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
             children: [
               TextButton(
                 onPressed: () => _switchStep(2),
-                child: const Text('Mô phỏng: Link hết hạn', style: TextStyle(fontSize: 12, color: AppColors.error, decoration: TextDecoration.underline)),
+                child: const LocalizedText('Mô phỏng: Link hết hạn', style: TextStyle(fontSize: 12, color: AppColors.error, decoration: TextDecoration.underline)),
               ),
-              const Text('•', style: TextStyle(color: AppColors.tertiary)),
+              const LocalizedText('•', style: TextStyle(color: AppColors.tertiary)),
               TextButton(
                 onPressed: () => _switchStep(3),
-                child: const Text('Mô phỏng: Link hợp lệ', style: TextStyle(fontSize: 12, color: AppColors.secondary, decoration: TextDecoration.underline)),
+                child: const LocalizedText('Mô phỏng: Link hợp lệ', style: TextStyle(fontSize: 12, color: AppColors.secondary, decoration: TextDecoration.underline)),
               ),
             ],
           ),
@@ -585,14 +586,14 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
               children: [
                 Icon(Icons.warning, size: 14, color: AppColors.error),
                 SizedBox(width: 4),
-                Text('Không còn hiệu lực', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: AppColors.onErrorContainer)),
+                LocalizedText('Không còn hiệu lực', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: AppColors.onErrorContainer)),
               ],
             ),
           ),
           const SizedBox(height: 10),
-          const Text('Liên kết đã hết hạn', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.onSurface)),
+          const LocalizedText('Liên kết đã hết hạn', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.onSurface)),
           const SizedBox(height: 6),
-          const Text(
+          const LocalizedText(
             'Liên kết đã hết hạn hoặc không còn hiệu lực. Vui lòng yêu cầu liên kết mới để đảm bảo an toàn tài khoản đối tác.',
             style: TextStyle(fontSize: 13, color: AppColors.tertiary),
           ),
@@ -611,7 +612,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
             child: TextButton.icon(
               onPressed: () => ToastNotification.showInfo(context, 'Ban quản lý vịnh: 1900-DANA-SEA'),
               icon: const Icon(Icons.support_agent, size: 16, color: AppColors.secondary),
-              label: const Text('Cần hỗ trợ từ ban quản lý vịnh', style: TextStyle(fontSize: 12, color: AppColors.secondary)),
+              label: const LocalizedText('Cần hỗ trợ từ ban quản lý vịnh', style: TextStyle(fontSize: 12, color: AppColors.secondary)),
             ),
           ),
         ],
@@ -627,7 +628,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
         children: [
           Icon(icon, size: 16, color: AppColors.tertiary),
           const SizedBox(width: 8),
-          Expanded(child: Text(text, style: const TextStyle(fontSize: 12, color: AppColors.tertiary))),
+          Expanded(child: LocalizedText(text, style: const TextStyle(fontSize: 12, color: AppColors.tertiary))),
         ],
       ),
     );
@@ -670,14 +671,14 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
               children: [
                 Icon(Icons.domain_verification, size: 14, color: AppColors.onSecondaryFixed),
                 SizedBox(width: 4),
-                Text('Xác thực thành công', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: AppColors.onSecondaryFixed)),
+                LocalizedText('Xác thực thành công', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: AppColors.onSecondaryFixed)),
               ],
             ),
           ),
           const SizedBox(height: 10),
-          const Text('Đặt lại mật khẩu mới', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.onSurface)),
+          const LocalizedText('Đặt lại mật khẩu mới', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.onSurface)),
           const SizedBox(height: 4),
-          const Text('Thiết lập mật khẩu bảo mật cao cho tài khoản điều phối dịch vụ biển tại DANASEA.',
+          const LocalizedText('Thiết lập mật khẩu bảo mật cao cho tài khoản điều phối dịch vụ biển tại DANASEA.',
               style: TextStyle(fontSize: 13, color: AppColors.tertiary)),
           const SizedBox(height: 16),
 
@@ -701,8 +702,8 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Text('Độ mạnh mật khẩu:', style: TextStyle(fontSize: 11, color: AppColors.tertiary)),
-              Text(
+              const LocalizedText('Độ mạnh mật khẩu:', style: TextStyle(fontSize: 11, color: AppColors.tertiary)),
+              LocalizedText(
                 pass.isEmpty
                     ? 'Chưa nhập'
                     : strength <= 1
@@ -767,7 +768,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
           if (_confirmPassController.text.isNotEmpty)
             Padding(
               padding: const EdgeInsets.only(top: 4, left: 4),
-              child: Text(
+              child: LocalizedText(
                 isMatch ? 'Mật khẩu xác nhận hoàn toàn khớp.' : 'Mật khẩu xác nhận chưa khớp.',
                 style: TextStyle(
                   fontSize: 11,
@@ -826,7 +827,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
             color: passed ? AppColors.secondary : AppColors.tertiary,
           ),
           const SizedBox(width: 8),
-          Text(
+          LocalizedText(
             label,
             style: TextStyle(
               fontSize: 11,

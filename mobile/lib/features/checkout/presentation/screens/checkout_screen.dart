@@ -1,3 +1,4 @@
+import 'package:mobile/core/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import '../../../../core/data/mock_database_data.dart';
 import '../../../../core/models/danasea_models.dart';
@@ -61,14 +62,14 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
       });
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Áp dụng mã giảm giá DANASEA2024 thành công (-40.000 đ)!'),
+          content: LocalizedText('Áp dụng mã giảm giá DANASEA2024 thành công (-40.000 đ)!'),
           backgroundColor: AppColors.secondary,
         ),
       );
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Mã giảm giá không hợp lệ hoặc đã hết hạn.'),
+          content: LocalizedText('Mã giảm giá không hợp lệ hoặc đã hết hạn.'),
           backgroundColor: AppColors.error,
         ),
       );
@@ -79,7 +80,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     if (!_waiverAccepted) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text(
+          content: LocalizedText(
             'Vui lòng xác nhận Cam kết miễn trừ trách nhiệm trước khi thanh toán.',
           ),
           backgroundColor: AppColors.primary,
@@ -156,11 +157,11 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
         ),
         title: Column(
           children: [
-            Text(
+            LocalizedText(
               'Thanh toán',
               style: AppTypography.headlineSm(color: AppColors.onSurface),
             ),
-            Text(
+            LocalizedText(
               'Bước 2 / 2: Hoàn tất giữ chỗ',
               style: AppTypography.labelSm(
                 color: AppColors.secondary,
@@ -205,14 +206,14 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
+                        LocalizedText(
                           'Thời gian giữ chỗ',
                           style: AppTypography.labelSm(
                             color: AppColors.secondary,
                             fontWeight: FontWeight.w700,
                           ),
                         ),
-                        Text(
+                        LocalizedText(
                           'Chỗ được khóa tạm thời trên hệ thống',
                           style: AppTypography.bodySm(
                             color: AppColors.onSurfaceVariant,
@@ -228,7 +229,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                       color: AppColors.surfaceContainerLowest,
                       borderRadius: BorderRadius.circular(12),
                     ),
-                    child: Text(
+                    child: LocalizedText(
                       '09:42',
                       style: AppTypography.labelLg(
                         color: AppColors.secondary,
@@ -262,7 +263,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                                 size: 18, color: AppColors.secondary),
                             const SizedBox(width: 6),
                             Flexible(
-                              child: Text(
+                              child: LocalizedText(
                                 'Thông tin người đặt',
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
@@ -275,7 +276,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                         ),
                       ),
                       const SizedBox(width: 8),
-                      Text(
+                      LocalizedText(
                         'Từ hồ sơ',
                         style: AppTypography.labelSm(
                           color: AppColors.secondary,
@@ -327,7 +328,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                                 size: 18, color: AppColors.secondary),
                             const SizedBox(width: 6),
                             Flexible(
-                              child: Text(
+                              child: LocalizedText(
                                 'Tóm tắt dịch vụ biển',
                                 overflow: TextOverflow.ellipsis,
                                 style: AppTypography.labelLg(
@@ -339,7 +340,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                         ),
                       ),
                       const SizedBox(width: 8),
-                      Text(
+                      LocalizedText(
                         '${widget.selectedItems.length} dịch vụ',
                         style: AppTypography.labelSm(
                           color: AppColors.onSurfaceVariant,
@@ -376,7 +377,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text(
+                                LocalizedText(
                                   item.service.name,
                                   style: AppTypography.labelMd(
                                     color: AppColors.onSurface,
@@ -385,7 +386,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
                                 ),
-                                Text(
+                                LocalizedText(
                                   '${item.service.vendorName} • ${item.quantity} khách',
                                   style: AppTypography.bodySm(
                                     color: AppColors.onSurfaceVariant,
@@ -394,7 +395,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                               ],
                             ),
                           ),
-                          Text(
+                          LocalizedText(
                             _formatPrice(item.subtotal),
                             style: AppTypography.labelMd(
                               color: AppColors.primary,
@@ -428,7 +429,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                       controller: _discountController,
                       textCapitalization: TextCapitalization.characters,
                       decoration: InputDecoration(
-                        hintText: 'Mã giảm giá (ví dụ DANASEA2024)',
+                        hintText: tr(context, 'Mã giảm giá (ví dụ DANASEA2024)'),
                         hintStyle:
                             AppTypography.bodySm(color: AppColors.outline),
                         border: InputBorder.none,
@@ -445,7 +446,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                       ),
                     ),
                     onPressed: _applyDiscount,
-                    child: Text(
+                    child: LocalizedText(
                       'Áp dụng',
                       style: AppTypography.labelSm(color: Colors.white),
                     ),
@@ -472,7 +473,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                           size: 18, color: AppColors.secondary),
                       const SizedBox(width: 6),
                       Expanded(
-                        child: Text(
+                        child: LocalizedText(
                           'Phương thức thanh toán',
                           style: AppTypography.labelLg(
                             color: AppColors.onSurface,
@@ -530,7 +531,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                   Expanded(
                     child: Padding(
                       padding: const EdgeInsets.only(top: 8),
-                      child: Text(
+                      child: LocalizedText(
                         'Tôi xác nhận đủ điều kiện sức khỏe và đồng ý với Cam kết miễn trừ trách nhiệm khi tham gia các hoạt động thể thao biển tại Đà Nẵng.',
                         style: AppTypography.bodySm(
                           color: AppColors.onSurface,
@@ -556,10 +557,10 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text('Tạm tính:',
+                      LocalizedText('Tạm tính:',
                           style: AppTypography.bodySm(
                               color: AppColors.onSurfaceVariant)),
-                      Text(_formatPrice(_subtotal),
+                      LocalizedText(_formatPrice(_subtotal),
                           style: AppTypography.labelMd(
                               color: AppColors.onSurface)),
                     ],
@@ -569,10 +570,10 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text('Giảm giá ($_appliedCode):',
+                        LocalizedText('Giảm giá ($_appliedCode):',
                             style: AppTypography.bodySm(
                                 color: AppColors.secondary)),
-                        Text('- ${_formatPrice(_discountAmount)}',
+                        LocalizedText('- ${_formatPrice(_discountAmount)}',
                             style: AppTypography.labelMd(
                                 color: AppColors.secondary)),
                       ],
@@ -583,12 +584,12 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Expanded(
-                        child: Text('Tổng thanh toán:',
+                        child: LocalizedText('Tổng thanh toán:',
                             style: AppTypography.labelLg(
                                 color: AppColors.onSurface)),
                       ),
                       const SizedBox(width: 8),
-                      Text(
+                      LocalizedText(
                         _formatPrice(_finalTotal),
                         style: AppTypography.headlineSm(
                           color: AppColors.primary,
@@ -618,7 +619,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
         Icon(icon, size: 16, color: AppColors.tertiary),
         const SizedBox(width: 8),
         Expanded(
-          child: Text(
+          child: LocalizedText(
             text,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
@@ -689,14 +690,14 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
+                  LocalizedText(
                     title,
                     style: AppTypography.labelMd(
                       color: AppColors.onSurface,
                       fontWeight: FontWeight.w700,
                     ),
                   ),
-                  Text(
+                  LocalizedText(
                     subtitle,
                     style: AppTypography.bodySm(
                       color: AppColors.onSurfaceVariant,

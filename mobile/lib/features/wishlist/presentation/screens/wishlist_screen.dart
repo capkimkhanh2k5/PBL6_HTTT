@@ -1,3 +1,4 @@
+import 'package:mobile/core/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import '../../../../core/data/mock_database_data.dart';
 import '../../../../core/models/danasea_models.dart';
@@ -32,7 +33,7 @@ class _WishlistScreenState extends State<WishlistScreen> {
     });
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text('Đã bỏ ${item.name} khỏi danh sách yêu thích.'),
+        content: LocalizedText('Đã bỏ ${item.name} khỏi danh sách yêu thích.'),
         duration: const Duration(seconds: 1),
       ),
     );
@@ -63,11 +64,11 @@ class _WishlistScreenState extends State<WishlistScreen> {
         title: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
+            LocalizedText(
               'Yêu thích (${_wishlist.length})',
               style: AppTypography.headlineSm(color: AppColors.onSurface),
             ),
-            Text(
+            LocalizedText(
               'Trải nghiệm biển bạn quan tâm & lưu lại',
               style: AppTypography.bodySm(color: AppColors.onSurfaceVariant)
                   .copyWith(fontSize: 11),
@@ -130,7 +131,7 @@ class _WishlistScreenState extends State<WishlistScreen> {
                         const Icon(Icons.verified,
                             size: 12, color: AppColors.onSecondary),
                         const SizedBox(width: 4),
-                        Text(
+                        LocalizedText(
                           item.vendorName,
                           style: AppTypography.labelSm(
                             color: AppColors.onSecondary,
@@ -169,7 +170,7 @@ class _WishlistScreenState extends State<WishlistScreen> {
                     const Icon(Icons.star,
                         size: 15, color: AppColors.starRating),
                     const SizedBox(width: 4),
-                    Text(
+                    LocalizedText(
                       item.avgRating.toStringAsFixed(1),
                       style: AppTypography.labelMd(
                         color: AppColors.onSurface,
@@ -177,17 +178,17 @@ class _WishlistScreenState extends State<WishlistScreen> {
                       ),
                     ),
                     const SizedBox(width: 4),
-                    Text('(${item.ratingCount})',
+                    LocalizedText('(${item.ratingCount})',
                         style: AppTypography.bodySm(color: AppColors.outline)),
                     const Spacer(),
-                    Text(
+                    LocalizedText(
                       '${item.durationMinutes} phút',
                       style: AppTypography.labelSm(color: AppColors.secondary),
                     ),
                   ],
                 ),
                 const SizedBox(height: 4),
-                Text(
+                LocalizedText(
                   item.name,
                   style: AppTypography.headlineSm(color: AppColors.onSurface),
                   maxLines: 1,
@@ -200,7 +201,7 @@ class _WishlistScreenState extends State<WishlistScreen> {
                         size: 14, color: AppColors.tertiary),
                     const SizedBox(width: 4),
                     Expanded(
-                      child: Text(
+                      child: LocalizedText(
                         item.locationName,
                         style: AppTypography.bodySm(
                             color: AppColors.onSurfaceVariant),
@@ -218,10 +219,10 @@ class _WishlistScreenState extends State<WishlistScreen> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text('Giá trọn gói',
+                          LocalizedText('Giá trọn gói',
                               style: AppTypography.labelSm(
                                   color: AppColors.onSurfaceVariant)),
-                          Text(
+                          LocalizedText(
                             _formatPrice(item.price),
                             style: AppTypography.headlineSm(
                                 color: AppColors.primary),
@@ -271,12 +272,12 @@ class _WishlistScreenState extends State<WishlistScreen> {
                   size: 36, color: AppColors.primary),
             ),
             const SizedBox(height: 16),
-            Text(
+            LocalizedText(
               'Chưa có trải nghiệm yêu thích',
               style: AppTypography.headlineSm(color: AppColors.onSurface),
             ),
             const SizedBox(height: 8),
-            Text(
+            LocalizedText(
               'Khám phá các hoạt động chèo SUP, lặn biển, cano tại Đà Nẵng và nhấn biểu tượng trái tim để lưu lại.',
               textAlign: TextAlign.center,
               style: AppTypography.bodySm(color: AppColors.onSurfaceVariant),

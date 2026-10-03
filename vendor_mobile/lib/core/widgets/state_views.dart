@@ -1,3 +1,4 @@
+import 'package:vendor_mobile/core/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_typography.dart';
@@ -20,7 +21,7 @@ class VendorLoadingView extends StatelessWidget {
             ),
             if (message != null) ...[
               const SizedBox(height: 16),
-              Text(
+              LocalizedText(
                 message!,
                 style: AppTypography.bodyMd(color: AppColors.tertiary),
                 textAlign: TextAlign.center,
@@ -71,13 +72,13 @@ class VendorEmptyView extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 16),
-            Text(
+            LocalizedText(
               title,
               style: AppTypography.headlineSm(color: AppColors.onSurface),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 8),
-            Text(
+            LocalizedText(
               message,
               style: AppTypography.bodyMd(color: AppColors.onSurfaceVariant),
               textAlign: TextAlign.center,
@@ -94,7 +95,7 @@ class VendorEmptyView extends StatelessWidget {
                     borderRadius: BorderRadius.circular(9999),
                   ),
                 ),
-                child: Text(actionLabel!),
+                child: LocalizedText(actionLabel!),
               ),
             ],
           ],
@@ -136,12 +137,12 @@ class VendorErrorBanner extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
+                LocalizedText(
                   'Đã xảy ra lỗi',
                   style: AppTypography.labelMd(color: AppColors.onErrorContainer),
                 ),
                 const SizedBox(height: 2),
-                Text(
+                LocalizedText(
                   message,
                   style: AppTypography.bodySm(color: AppColors.onErrorContainer),
                 ),
@@ -149,7 +150,7 @@ class VendorErrorBanner extends StatelessWidget {
                   const SizedBox(height: 8),
                   InkWell(
                     onTap: onRetry,
-                    child: Text(
+                    child: LocalizedText(
                       'Thử lại',
                       style: AppTypography.labelMd(color: AppColors.error).copyWith(
                         decoration: TextDecoration.underline,
@@ -202,12 +203,12 @@ class VendorNoticeCard extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
+                LocalizedText(
                   title,
                   style: AppTypography.labelMd(color: AppColors.onSurface),
                 ),
                 const SizedBox(height: 2),
-                Text(
+                LocalizedText(
                   message,
                   style: AppTypography.bodySm(color: AppColors.onSurfaceVariant),
                 ),

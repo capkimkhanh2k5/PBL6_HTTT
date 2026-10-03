@@ -1,3 +1,4 @@
+import 'package:vendor_mobile/core/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_shapes.dart';
@@ -88,7 +89,7 @@ class _ReviewFeedbackScreenState extends State<ReviewFeedbackScreen> {
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
-        title: const Text('Đánh giá & Phản hồi'),
+        title: const LocalizedText('Đánh giá & Phản hồi'),
         backgroundColor: AppColors.surface,
         elevation: 0,
         leading: IconButton(
@@ -128,11 +129,11 @@ class _ReviewFeedbackScreenState extends State<ReviewFeedbackScreen> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(
+                          LocalizedText(
                             '$pendingCount phản hồi đang chờ',
                             style: AppTypography.headlineSm.copyWith(color: AppColors.onSurface),
                           ),
-                          Text(
+                          LocalizedText(
                             'Phản hồi đánh giá của khách hàng kịp thời để nâng cao uy tín',
                             style: AppTypography.bodySm.copyWith(color: AppColors.onSurfaceVariant),
                           ),
@@ -145,7 +146,7 @@ class _ReviewFeedbackScreenState extends State<ReviewFeedbackScreen> {
                         color: AppColors.primaryContainer,
                         borderRadius: BorderRadius.circular(AppShapes.rFull),
                       ),
-                      child: Text(
+                      child: LocalizedText(
                         'Ưu tiên cao',
                         style: AppTypography.labelSm.copyWith(
                           color: AppColors.onPrimary,
@@ -179,7 +180,7 @@ class _ReviewFeedbackScreenState extends State<ReviewFeedbackScreen> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(
+                            LocalizedText(
                               'DANANG OCEAN CLUB',
                               style: AppTypography.labelSm.copyWith(
                                 color: AppColors.secondary,
@@ -189,7 +190,7 @@ class _ReviewFeedbackScreenState extends State<ReviewFeedbackScreen> {
                               overflow: TextOverflow.ellipsis,
                             ),
                             const SizedBox(height: 2),
-                            Text(
+                            LocalizedText(
                               'Đánh giá dịch vụ',
                               style: AppTypography.headlineSm.copyWith(color: AppColors.onSurface),
                               overflow: TextOverflow.ellipsis,
@@ -209,7 +210,7 @@ class _ReviewFeedbackScreenState extends State<ReviewFeedbackScreen> {
                           children: [
                             const Icon(Icons.verified, size: 14, color: AppColors.onSecondaryContainer),
                             const SizedBox(width: 4),
-                            Text(
+                            LocalizedText(
                               '98% Hài lòng',
                               style: AppTypography.labelSm.copyWith(
                                 color: AppColors.onSecondaryContainer,
@@ -235,7 +236,7 @@ class _ReviewFeedbackScreenState extends State<ReviewFeedbackScreen> {
                         ),
                         child: Column(
                           children: [
-                            Text(
+                            LocalizedText(
                               '4.9',
                               style: AppTypography.headlineLgMobile.copyWith(
                                 color: AppColors.onSurface,
@@ -255,7 +256,7 @@ class _ReviewFeedbackScreenState extends State<ReviewFeedbackScreen> {
                               ),
                             ),
                             const SizedBox(height: 4),
-                            Text(
+                            LocalizedText(
                               '${allReviews.length + 139} lượt',
                               style: AppTypography.labelSm.copyWith(color: AppColors.tertiary),
                             ),
@@ -321,7 +322,7 @@ class _ReviewFeedbackScreenState extends State<ReviewFeedbackScreen> {
                   children: [
                     const Icon(Icons.rate_review_outlined, size: 48, color: AppColors.outlineVariant),
                     const SizedBox(height: 12),
-                    Text(
+                    LocalizedText(
                       'Không có đánh giá nào trong bộ lọc này.',
                       style: AppTypography.bodyMd.copyWith(color: AppColors.tertiary),
                     ),
@@ -352,7 +353,7 @@ class _ReviewFeedbackScreenState extends State<ReviewFeedbackScreen> {
       children: [
         SizedBox(
           width: 14,
-          child: Text(
+          child: LocalizedText(
             '$star',
             style: AppTypography.labelSm.copyWith(color: AppColors.onSurface),
           ),
@@ -372,7 +373,7 @@ class _ReviewFeedbackScreenState extends State<ReviewFeedbackScreen> {
         const SizedBox(width: 8),
         SizedBox(
           width: 28,
-          child: Text(
+          child: LocalizedText(
             '$count',
             textAlign: TextAlign.right,
             style: AppTypography.labelSm.copyWith(color: AppColors.onSurfaceVariant),
@@ -409,7 +410,7 @@ class _ReviewFeedbackScreenState extends State<ReviewFeedbackScreen> {
               ),
               const SizedBox(width: 4),
             ],
-            Text(
+            LocalizedText(
               label,
               style: AppTypography.labelMd.copyWith(
                 color: isSelected
@@ -426,7 +427,7 @@ class _ReviewFeedbackScreenState extends State<ReviewFeedbackScreen> {
                   color: isSelected ? Colors.white : AppColors.primaryContainer,
                   borderRadius: BorderRadius.circular(AppShapes.rFull),
                 ),
-                child: Text(
+                child: LocalizedText(
                   badge,
                   style: AppTypography.labelSm.copyWith(
                     color: isSelected ? AppColors.secondary : AppColors.onPrimary,
@@ -465,7 +466,7 @@ class _ReviewFeedbackScreenState extends State<ReviewFeedbackScreen> {
               CircleAvatar(
                 radius: 20,
                 backgroundColor: AppColors.secondaryFixed,
-                child: Text(
+                child: LocalizedText(
                   review.customerName.split(' ').last.substring(0, 1).toUpperCase(),
                   style: AppTypography.labelLg.copyWith(
                     color: AppColors.onSecondaryFixed,
@@ -478,7 +479,7 @@ class _ReviewFeedbackScreenState extends State<ReviewFeedbackScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
+                    LocalizedText(
                       review.customerName,
                       style: AppTypography.labelLg.copyWith(
                         color: AppColors.onSurface,
@@ -491,7 +492,7 @@ class _ReviewFeedbackScreenState extends State<ReviewFeedbackScreen> {
                     Row(
                       children: [
                         Flexible(
-                          child: Text(
+                          child: LocalizedText(
                             '#${review.subOrderId}',
                             style: AppTypography.labelSm.copyWith(
                               color: AppColors.secondary,
@@ -503,7 +504,7 @@ class _ReviewFeedbackScreenState extends State<ReviewFeedbackScreen> {
                         ),
                         const SizedBox(width: 4),
                         Flexible(
-                          child: Text(
+                          child: LocalizedText(
                             '• ${review.serviceName}',
                             style: AppTypography.labelSm.copyWith(color: AppColors.tertiary),
                             maxLines: 1,
@@ -521,7 +522,7 @@ class _ReviewFeedbackScreenState extends State<ReviewFeedbackScreen> {
                   color: hasReply ? AppColors.surfaceContainer : AppColors.primaryFixed,
                   borderRadius: BorderRadius.circular(AppShapes.rFull),
                 ),
-                child: Text(
+                child: LocalizedText(
                   hasReply ? 'Đã trả lời' : 'Chưa trả lời',
                   style: AppTypography.labelSm.copyWith(
                     color: hasReply ? AppColors.secondary : AppColors.onPrimaryFixedVariant,
@@ -547,7 +548,7 @@ class _ReviewFeedbackScreenState extends State<ReviewFeedbackScreen> {
           const SizedBox(height: 8),
 
           // Customer Comment (Strictly Read-only)
-          Text(
+          LocalizedText(
             review.comment,
             style: AppTypography.bodyMd.copyWith(
               color: AppColors.onSurface,
@@ -607,7 +608,7 @@ class _ReviewFeedbackScreenState extends State<ReviewFeedbackScreen> {
                             const Icon(Icons.reply, size: 14, color: AppColors.secondary),
                             const SizedBox(width: 4),
                             Expanded(
-                              child: Text(
+                              child: LocalizedText(
                                 'Phản hồi từ Danang Ocean Club',
                                 style: AppTypography.labelSm.copyWith(
                                   color: AppColors.secondary,
@@ -628,7 +629,7 @@ class _ReviewFeedbackScreenState extends State<ReviewFeedbackScreen> {
                           });
                         },
                         icon: const Icon(Icons.edit, size: 14, color: AppColors.secondary),
-                        label: Text(
+                        label: LocalizedText(
                           'Sửa',
                           style: AppTypography.labelSm.copyWith(color: AppColors.secondary),
                         ),
@@ -641,7 +642,7 @@ class _ReviewFeedbackScreenState extends State<ReviewFeedbackScreen> {
                     ],
                   ),
                   const SizedBox(height: 6),
-                  Text(
+                  LocalizedText(
                     review.vendorReply!,
                     style: AppTypography.bodySm.copyWith(color: AppColors.onSurfaceVariant),
                   ),
@@ -659,7 +660,7 @@ class _ReviewFeedbackScreenState extends State<ReviewFeedbackScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
+                  LocalizedText(
                     hasReply ? 'Chỉnh sửa phản hồi của bạn:' : 'Viết phản hồi tới khách hàng:',
                     style: AppTypography.labelSm.copyWith(
                       color: AppColors.tertiary,
@@ -671,7 +672,7 @@ class _ReviewFeedbackScreenState extends State<ReviewFeedbackScreen> {
                     controller: replyController,
                     maxLines: 3,
                     decoration: InputDecoration(
-                      hintText: 'Cảm ơn khách hàng và giải đáp thắc mắc nếu có...',
+                      hintText: tr(context, 'Cảm ơn khách hàng và giải đáp thắc mắc nếu có...'),
                       hintStyle: AppTypography.bodySm.copyWith(color: AppColors.outline),
                       filled: true,
                       fillColor: AppColors.surfaceContainerLowest,
@@ -691,14 +692,14 @@ class _ReviewFeedbackScreenState extends State<ReviewFeedbackScreen> {
                           onPressed: () {
                             setState(() => _editingReplyReviewId = null);
                           },
-                          child: const Text('Hủy'),
+                          child: const LocalizedText('Hủy'),
                         ),
                         const SizedBox(width: 8),
                       ],
                       ElevatedButton.icon(
                         onPressed: () => _submitReply(review.id),
                         icon: const Icon(Icons.send, size: 15),
-                        label: Text(hasReply ? 'Cập nhật' : 'Gửi phản hồi'),
+                        label: LocalizedText(hasReply ? 'Cập nhật' : 'Gửi phản hồi'),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: AppColors.secondary,
                           foregroundColor: Colors.white,

@@ -1,3 +1,4 @@
+import 'package:mobile/core/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import '../../../../core/data/mock_database_data.dart';
 import '../../../../core/models/danasea_models.dart';
@@ -84,7 +85,7 @@ class _VendorChatScreenState extends State<VendorChatScreen> {
                   ? NetworkImage(conv.vendorAvatar!)
                   : null,
               child: conv.vendorAvatar == null
-                  ? Text(conv.vendorName[0])
+                  ? LocalizedText(conv.vendorName[0])
                   : null,
             ),
             const SizedBox(width: 8),
@@ -95,7 +96,7 @@ class _VendorChatScreenState extends State<VendorChatScreen> {
                   Row(
                     children: [
                       Flexible(
-                        child: Text(
+                        child: LocalizedText(
                           conv.vendorName,
                           style: AppTypography.labelMd(
                             color: AppColors.onSurface,
@@ -110,7 +111,7 @@ class _VendorChatScreenState extends State<VendorChatScreen> {
                           size: 13, color: AppColors.secondary),
                     ],
                   ),
-                  Text(
+                  LocalizedText(
                     'Đang hoạt động trên biển',
                     style: AppTypography.bodySm(color: AppColors.secondary)
                         .copyWith(fontSize: 10),
@@ -126,7 +127,7 @@ class _VendorChatScreenState extends State<VendorChatScreen> {
                 color: AppColors.secondary),
             onPressed: () {
               ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Gọi hotline đối tác: 0905 888 999')),
+                const SnackBar(content: LocalizedText('Gọi hotline đối tác: 0905 888 999')),
               );
             },
           ),
@@ -144,7 +145,7 @@ class _VendorChatScreenState extends State<VendorChatScreen> {
                 const Icon(Icons.sailing, size: 16, color: AppColors.secondary),
                 const SizedBox(width: 8),
                 Expanded(
-                  child: Text(
+                  child: LocalizedText(
                     'Đơn hàng #${conv.masterOrderId ?? 'DNS-8924'} • Chèo SUP đón bình minh Mỹ Khê',
                     style: AppTypography.bodySm(
                       color: AppColors.onSurface,
@@ -193,7 +194,7 @@ class _VendorChatScreenState extends State<VendorChatScreen> {
                           ? CrossAxisAlignment.end
                           : CrossAxisAlignment.start,
                       children: [
-                        Text(
+                        LocalizedText(
                           msg.content,
                           style: AppTypography.bodyMd(
                             color: msg.isMe
@@ -202,7 +203,7 @@ class _VendorChatScreenState extends State<VendorChatScreen> {
                           ),
                         ),
                         const SizedBox(height: 4),
-                        Text(
+                        LocalizedText(
                           '${msg.createdAt.hour}:${msg.createdAt.minute.toString().padLeft(2, '0')}',
                           style: TextStyle(
                             fontSize: 10,
@@ -229,7 +230,7 @@ class _VendorChatScreenState extends State<VendorChatScreen> {
               separatorBuilder: (_, unused) => const SizedBox(width: 8),
               itemBuilder: (context, index) {
                 return ActionChip(
-                  label: Text(
+                  label: LocalizedText(
                     _quickPrompts[index],
                     style: AppTypography.labelSm(color: AppColors.secondary),
                   ),
@@ -265,7 +266,7 @@ class _VendorChatScreenState extends State<VendorChatScreen> {
                       color: AppColors.secondary),
                   onPressed: () {
                     ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Tính năng đính kèm ảnh')),
+                      const SnackBar(content: LocalizedText('Tính năng đính kèm ảnh')),
                     );
                   },
                 ),
@@ -279,7 +280,7 @@ class _VendorChatScreenState extends State<VendorChatScreen> {
                     child: TextField(
                       controller: _textController,
                       decoration: InputDecoration(
-                        hintText: 'Nhập tin nhắn cho nhà cung cấp...',
+                        hintText: tr(context, 'Nhập tin nhắn cho nhà cung cấp...'),
                         hintStyle:
                             AppTypography.bodySm(color: AppColors.outline),
                         border: InputBorder.none,

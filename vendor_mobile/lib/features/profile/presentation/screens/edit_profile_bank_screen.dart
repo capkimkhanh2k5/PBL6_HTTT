@@ -1,3 +1,4 @@
+import 'package:vendor_mobile/core/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_shapes.dart';
@@ -112,7 +113,7 @@ class _EditProfileBankScreenState extends State<EditProfileBankScreen> {
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
-        title: const Text('Hồ sơ & Ngân hàng'),
+        title: const LocalizedText('Hồ sơ & Ngân hàng'),
         backgroundColor: AppColors.surface,
         elevation: 0,
         leading: IconButton(
@@ -153,14 +154,14 @@ class _EditProfileBankScreenState extends State<EditProfileBankScreen> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(
+                          LocalizedText(
                             'Hồ sơ đối soát đã cập nhật!',
                             style: AppTypography.labelLg.copyWith(
                               color: AppColors.onSecondaryContainer,
                               fontWeight: FontWeight.bold,
                             ),
                           ),
-                          Text(
+                          LocalizedText(
                             'Thông tin ngân hàng đã được cập nhật trong bản xem trước.',
                             style: AppTypography.bodySm.copyWith(
                               color: AppColors.onSecondaryContainer.withAlpha(220),
@@ -208,7 +209,7 @@ class _EditProfileBankScreenState extends State<EditProfileBankScreen> {
                         ),
                         const SizedBox(width: 8),
                         Expanded(
-                          child: Text(
+                          child: LocalizedText(
                             'ĐỐI TÁC ${vendor.businessName.toUpperCase()}',
                             style: AppTypography.labelSm.copyWith(
                               color: AppColors.secondary,
@@ -228,7 +229,7 @@ class _EditProfileBankScreenState extends State<EditProfileBankScreen> {
                       color: AppColors.surfaceContainerLowest,
                       borderRadius: BorderRadius.circular(AppShapes.rFull),
                     ),
-                    child: Text(
+                    child: LocalizedText(
                       'Mã: ${vendor.id}',
                       style: AppTypography.labelSm.copyWith(
                         color: AppColors.secondary,
@@ -271,7 +272,7 @@ class _EditProfileBankScreenState extends State<EditProfileBankScreen> {
                             ),
                             const SizedBox(width: 10),
                             Expanded(
-                              child: Text(
+                              child: LocalizedText(
                                 'Đại diện pháp lý',
                                 style: AppTypography.headlineSm.copyWith(color: AppColors.onSurface),
                                 overflow: TextOverflow.ellipsis,
@@ -287,7 +288,7 @@ class _EditProfileBankScreenState extends State<EditProfileBankScreen> {
                           color: AppColors.surfaceContainer,
                           borderRadius: BorderRadius.circular(AppShapes.rFull),
                         ),
-                        child: Text(
+                        child: LocalizedText(
                           'Đã xác minh',
                           style: AppTypography.labelSm.copyWith(color: AppColors.secondary),
                         ),
@@ -340,7 +341,7 @@ class _EditProfileBankScreenState extends State<EditProfileBankScreen> {
                                 );
                               },
                               icon: const Icon(Icons.cloud_upload_outlined, size: 16),
-                              label: const Text('Thay đổi ảnh'),
+                              label: const LocalizedText('Thay đổi ảnh'),
                               style: OutlinedButton.styleFrom(
                                 foregroundColor: AppColors.onSurface,
                                 side: const BorderSide(color: AppColors.outlineVariant),
@@ -350,7 +351,7 @@ class _EditProfileBankScreenState extends State<EditProfileBankScreen> {
                               ),
                             ),
                             const SizedBox(height: 4),
-                            Text(
+                            LocalizedText(
                               'Định dạng JPG, PNG dưới 5MB. Khuyên dùng ảnh chân dung rõ mặt.',
                               style: AppTypography.bodySm.copyWith(color: AppColors.tertiary),
                             ),
@@ -362,7 +363,7 @@ class _EditProfileBankScreenState extends State<EditProfileBankScreen> {
                   const SizedBox(height: 20),
 
                   // Full Name
-                  Text('Họ và tên người đại diện *', style: AppTypography.labelMd.copyWith(color: AppColors.tertiary)),
+                  LocalizedText('Họ và tên người đại diện *', style: AppTypography.labelMd.copyWith(color: AppColors.tertiary)),
                   const SizedBox(height: 6),
                   TextField(
                     controller: _fullNameController,
@@ -380,7 +381,7 @@ class _EditProfileBankScreenState extends State<EditProfileBankScreen> {
                   const SizedBox(height: 16),
 
                   // Phone Number
-                  Text('Số điện thoại liên hệ (tùy chọn)', style: AppTypography.labelMd.copyWith(color: AppColors.tertiary)),
+                  LocalizedText('Số điện thoại liên hệ (tùy chọn)', style: AppTypography.labelMd.copyWith(color: AppColors.tertiary)),
                   const SizedBox(height: 6),
                   TextField(
                     controller: _phoneController,
@@ -403,7 +404,7 @@ class _EditProfileBankScreenState extends State<EditProfileBankScreen> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Expanded(
-                        child: Text(
+                        child: LocalizedText(
                           'Hộp thư nhận quyết toán',
                           style: AppTypography.labelMd.copyWith(color: AppColors.tertiary),
                           overflow: TextOverflow.ellipsis,
@@ -414,7 +415,7 @@ class _EditProfileBankScreenState extends State<EditProfileBankScreen> {
                         children: [
                           const Icon(Icons.lock, size: 13, color: AppColors.secondary),
                           const SizedBox(width: 4),
-                          Text('Được mã hóa', style: AppTypography.labelSm.copyWith(color: AppColors.secondary)),
+                          LocalizedText('Được mã hóa', style: AppTypography.labelSm.copyWith(color: AppColors.secondary)),
                         ],
                       ),
                     ],
@@ -446,7 +447,7 @@ class _EditProfileBankScreenState extends State<EditProfileBankScreen> {
                         const Icon(Icons.verified_user, color: AppColors.secondary, size: 16),
                         const SizedBox(width: 8),
                         Expanded(
-                          child: Text(
+                          child: LocalizedText(
                             'Email bảo mật xác minh không thể sửa trực tiếp. Vui lòng liên hệ Hotline quản trị nếu cần đổi.',
                             style: AppTypography.bodySm.copyWith(color: AppColors.tertiary, fontSize: 12),
                           ),
@@ -489,7 +490,7 @@ class _EditProfileBankScreenState extends State<EditProfileBankScreen> {
                             ),
                             const SizedBox(width: 10),
                             Expanded(
-                              child: Text(
+                              child: LocalizedText(
                                 'Tài khoản nhận tiền',
                                 style: AppTypography.headlineSm.copyWith(color: AppColors.onSurface),
                                 overflow: TextOverflow.ellipsis,
@@ -505,7 +506,7 @@ class _EditProfileBankScreenState extends State<EditProfileBankScreen> {
                           color: AppColors.primaryFixed,
                           borderRadius: BorderRadius.circular(AppShapes.rFull),
                         ),
-                        child: Text(
+                        child: LocalizedText(
                           'Kỳ hạn Payout',
                           style: AppTypography.labelSm.copyWith(
                             color: AppColors.primary,
@@ -544,7 +545,7 @@ class _EditProfileBankScreenState extends State<EditProfileBankScreen> {
                                   const Icon(Icons.waves, color: AppColors.secondaryFixed, size: 20),
                                   const SizedBox(width: 8),
                                   Expanded(
-                                    child: Text(
+                                    child: LocalizedText(
                                       'DANASEA VENDOR PASS',
                                       style: AppTypography.labelSm.copyWith(
                                         color: AppColors.secondaryFixed,
@@ -561,12 +562,12 @@ class _EditProfileBankScreenState extends State<EditProfileBankScreen> {
                           ],
                         ),
                         const SizedBox(height: 16),
-                        Text(
+                        LocalizedText(
                           'SỐ TÀI KHOẢN THỤ HƯỞNG',
                           style: AppTypography.labelSm.copyWith(color: AppColors.secondaryFixed),
                         ),
                         const SizedBox(height: 4),
-                        Text(
+                        LocalizedText(
                           _bankAccountController.text.isNotEmpty ? _bankAccountController.text : '•••• •••• ••••',
                           style: AppTypography.headlineSm.copyWith(
                             color: Colors.white,
@@ -585,12 +586,12 @@ class _EditProfileBankScreenState extends State<EditProfileBankScreen> {
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Text(
+                                  LocalizedText(
                                     'CHỦ TÀI KHOẢN',
                                     style: AppTypography.labelSm.copyWith(color: AppColors.secondaryFixed),
                                   ),
                                   const SizedBox(height: 2),
-                                  Text(
+                                  LocalizedText(
                                     _bankHolderController.text.isNotEmpty ? _bankHolderController.text.toUpperCase() : 'TRAN HAI DANG',
                                     style: AppTypography.labelLg.copyWith(
                                       color: Colors.white,
@@ -609,7 +610,7 @@ class _EditProfileBankScreenState extends State<EditProfileBankScreen> {
                                 color: Colors.white.withAlpha(50),
                                 borderRadius: BorderRadius.circular(AppShapes.rFull),
                               ),
-                              child: Text(
+                              child: LocalizedText(
                                 _selectedBank,
                                 style: AppTypography.labelSm.copyWith(
                                   color: Colors.white,
@@ -625,7 +626,7 @@ class _EditProfileBankScreenState extends State<EditProfileBankScreen> {
                   const SizedBox(height: 20),
 
                   // Bank selector
-                  Text('Ngân hàng thụ hưởng *', style: AppTypography.labelMd.copyWith(color: AppColors.tertiary)),
+                  LocalizedText('Ngân hàng thụ hưởng *', style: AppTypography.labelMd.copyWith(color: AppColors.tertiary)),
                   const SizedBox(height: 6),
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -644,7 +645,7 @@ class _EditProfileBankScreenState extends State<EditProfileBankScreen> {
                               children: [
                                 const Icon(Icons.account_balance, size: 18, color: AppColors.secondary),
                                 const SizedBox(width: 10),
-                                Text(bank, style: AppTypography.bodyMd.copyWith(color: AppColors.onSurface)),
+                                LocalizedText(bank, style: AppTypography.bodyMd.copyWith(color: AppColors.onSurface)),
                               ],
                             ),
                           );
@@ -658,7 +659,7 @@ class _EditProfileBankScreenState extends State<EditProfileBankScreen> {
                   const SizedBox(height: 16),
 
                   // Account Number Input
-                  Text('Số tài khoản *', style: AppTypography.labelMd.copyWith(color: AppColors.tertiary)),
+                  LocalizedText('Số tài khoản *', style: AppTypography.labelMd.copyWith(color: AppColors.tertiary)),
                   const SizedBox(height: 6),
                   TextField(
                     controller: _bankAccountController,
@@ -678,7 +679,7 @@ class _EditProfileBankScreenState extends State<EditProfileBankScreen> {
                   const SizedBox(height: 16),
 
                   // Account Holder Name Input
-                  Text('Tên chủ tài khoản (in hoa không dấu) *', style: AppTypography.labelMd.copyWith(color: AppColors.tertiary)),
+                  LocalizedText('Tên chủ tài khoản (in hoa không dấu) *', style: AppTypography.labelMd.copyWith(color: AppColors.tertiary)),
                   const SizedBox(height: 6),
                   TextField(
                     controller: _bankHolderController,
@@ -725,7 +726,7 @@ class _EditProfileBankScreenState extends State<EditProfileBankScreen> {
                           const Icon(Icons.save_outlined, size: 20),
                           const SizedBox(width: 8),
                           Flexible(
-                            child: Text(
+                            child: LocalizedText(
                               'Lưu thay đổi hồ sơ',
                               style: AppTypography.labelLg.copyWith(color: Colors.white),
                               overflow: TextOverflow.ellipsis,

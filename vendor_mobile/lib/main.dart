@@ -1,3 +1,5 @@
+import 'package:flutter_localizations/flutter_localizations.dart';
+import 'core/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'core/theme/app_theme.dart';
 import 'core/data/vendor_mock_database.dart';
@@ -26,8 +28,9 @@ import 'features/settlements/presentation/screens/payout_detail_screen.dart';
 import 'features/disputes/presentation/screens/dispute_management_screen.dart';
 import 'features/navigation/presentation/screens/main_navigation_screen.dart';
 
-void main() {
+Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await AppLanguage.instance.initialize();
   // Initialize mock database singleton
   VendorMockDatabase.instance;
   runApp(const DanaSeaVendorApp());
@@ -38,61 +41,67 @@ class DanaSeaVendorApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'DANASEA Vendor',
-      debugShowCheckedModeBanner: false,
-      theme: AppTheme.lightTheme,
-      initialRoute: '/',
-      routes: {
-        '/': (context) => const MainNavigationScreen(),
-        '/login': (context) => const LoginRegisterScreen(),
-        '/forgot-password': (context) => const ForgotPasswordScreen(),
-        '/dashboard': (context) => const DashboardScreen(),
-        '/business-profile': (context) => const BusinessProfileScreen(),
-        '/vendor-documents': (context) => const VendorDocumentsScreen(),
-        '/edit-profile-bank': (context) => const EditProfileBankScreen(),
-        '/services': (context) => const ServiceListScreen(),
-        '/service-create': (context) => const ServiceCreateEditScreen(),
-        '/slots-calendar': (context) => const SlotCalendarScreen(),
-        '/slot-config': (context) => const SlotConfigScreen(),
-        '/orders': (context) => const OrderListScreen(),
-        '/qr-checkin': (context) => const QrCheckinScreen(),
-        '/refund-detail': (context) => const RefundDetailScreen(),
-        '/chat': (context) => const ChatListScreen(),
-        '/notifications': (context) => const NotificationSafetyScreen(),
-        '/reviews': (context) => const ReviewFeedbackScreen(),
-        '/vouchers': (context) => const VoucherManagementScreen(),
-        '/settlements': (context) => const SettlementRevenueScreen(),
-        '/payout-detail': (context) => const PayoutDetailScreen(),
-        '/disputes': (context) => const DisputeManagementScreen(),
-        '/change-password': (context) => const ChangePasswordScreen(),
-        '/partner-account': (context) => const PartnerAccountScreen(),
-      },
-      onGenerateRoute: (settings) {
-        if (settings.name == '/service-edit') {
-          final serviceId = settings.arguments as String?;
-          final service = serviceId != null
-              ? VendorMockDatabase.instance.services.firstWhere(
-                  (s) => s.id == serviceId,
-                  orElse: () => VendorMockDatabase.instance.services.first,
-                )
-              : null;
-          return MaterialPageRoute(
-            builder: (context) => ServiceCreateEditScreen(service: service),
-          );
-        }
-        if (settings.name == '/order-detail') {
-          final subOrderId = settings.arguments as String? ?? 'DNS-8924-1';
-          final subOrder = VendorMockDatabase.instance.subOrders.firstWhere(
-            (o) => o.id == subOrderId,
-            orElse: () => VendorMockDatabase.instance.subOrders.first,
-          );
-          return MaterialPageRoute(
-            builder: (context) => SubOrderDetailScreen(subOrder: subOrder),
-          );
-        }
-        return null;
-      },
+    return ListenableBuilder(
+      listenable: AppLanguage.instance,
+      builder: (context, child) => MaterialApp(
+        locale: AppLanguage.instance.locale,
+        supportedLocales: const [Locale('vi'), Locale('en')],
+        localizationsDelegates: GlobalMaterialLocalizations.delegates,
+        title: 'DANASEA Vendor',
+        debugShowCheckedModeBanner: false,
+        theme: AppTheme.lightTheme,
+        initialRoute: '/',
+        routes: {
+          '/': (context) => const MainNavigationScreen(),
+          '/login': (context) => const LoginRegisterScreen(),
+          '/forgot-password': (context) => const ForgotPasswordScreen(),
+          '/dashboard': (context) => const DashboardScreen(),
+          '/business-profile': (context) => const BusinessProfileScreen(),
+          '/vendor-documents': (context) => const VendorDocumentsScreen(),
+          '/edit-profile-bank': (context) => const EditProfileBankScreen(),
+          '/services': (context) => const ServiceListScreen(),
+          '/service-create': (context) => const ServiceCreateEditScreen(),
+          '/slots-calendar': (context) => const SlotCalendarScreen(),
+          '/slot-config': (context) => const SlotConfigScreen(),
+          '/orders': (context) => const OrderListScreen(),
+          '/qr-checkin': (context) => const QrCheckinScreen(),
+          '/refund-detail': (context) => const RefundDetailScreen(),
+          '/chat': (context) => const ChatListScreen(),
+          '/notifications': (context) => const NotificationSafetyScreen(),
+          '/reviews': (context) => const ReviewFeedbackScreen(),
+          '/vouchers': (context) => const VoucherManagementScreen(),
+          '/settlements': (context) => const SettlementRevenueScreen(),
+          '/payout-detail': (context) => const PayoutDetailScreen(),
+          '/disputes': (context) => const DisputeManagementScreen(),
+          '/change-password': (context) => const ChangePasswordScreen(),
+          '/partner-account': (context) => const PartnerAccountScreen(),
+        },
+        onGenerateRoute: (settings) {
+          if (settings.name == '/service-edit') {
+            final serviceId = settings.arguments as String?;
+            final service = serviceId != null
+                ? VendorMockDatabase.instance.services.firstWhere(
+                    (s) => s.id == serviceId,
+                    orElse: () => VendorMockDatabase.instance.services.first,
+                  )
+                : null;
+            return MaterialPageRoute(
+              builder: (context) => ServiceCreateEditScreen(service: service),
+            );
+          }
+          if (settings.name == '/order-detail') {
+            final subOrderId = settings.arguments as String? ?? 'DNS-8924-1';
+            final subOrder = VendorMockDatabase.instance.subOrders.firstWhere(
+              (o) => o.id == subOrderId,
+              orElse: () => VendorMockDatabase.instance.subOrders.first,
+            );
+            return MaterialPageRoute(
+              builder: (context) => SubOrderDetailScreen(subOrder: subOrder),
+            );
+          }
+          return null;
+        },
+      ),
     );
   }
 }

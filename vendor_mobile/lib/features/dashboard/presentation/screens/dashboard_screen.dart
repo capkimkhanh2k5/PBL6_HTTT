@@ -1,3 +1,4 @@
+import 'package:vendor_mobile/core/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_shapes.dart';
@@ -168,7 +169,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(
+                            LocalizedText(
                               vendor.businessName,
                               style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: AppColors.onSurface),
                               maxLines: 1,
@@ -191,7 +192,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                       Icon(Icons.verified, size: 12, color: AppColors.onSecondaryContainer),
                                       SizedBox(width: 2),
                                       Flexible(
-                                        child: Text(
+                                        child: LocalizedText(
                                           'Đối tác xác thực',
                                           style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: AppColors.onSecondaryContainer),
                                           maxLines: 1,
@@ -201,7 +202,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                     ],
                                   ),
                                 ),
-                                const Text('• Cảng Sơn Trà', style: TextStyle(fontSize: 11, color: AppColors.tertiary)),
+                                const LocalizedText('• Cảng Sơn Trà', style: TextStyle(fontSize: 11, color: AppColors.tertiary)),
                               ],
                             ),
                           ],
@@ -251,7 +252,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                 ),
                                 const SizedBox(width: 6),
                                 Expanded(
-                                  child: Text(
+                                  child: LocalizedText(
                                     'THỜI TIẾT BIỂN ${weather.locationName.toUpperCase()}',
                                     style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: AppColors.secondary, letterSpacing: 0.5),
                                     maxLines: 1,
@@ -272,7 +273,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                               children: [
                                 Icon(Icons.check_circle, size: 12, color: AppColors.secondary),
                                 SizedBox(width: 4),
-                                Text('Ra khơi an toàn', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: AppColors.secondary)),
+                                LocalizedText('Ra khơi an toàn', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: AppColors.secondary)),
                               ],
                             ),
                           ),
@@ -366,7 +367,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Expanded(
-                      child: Text(
+                      child: LocalizedText(
                         'Vận hành hôm nay',
                         style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.onSurface),
                         maxLines: 1,
@@ -374,7 +375,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       ),
                     ),
                     SizedBox(width: 8),
-                    Text('04 TH5 2025', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: AppColors.tertiary, letterSpacing: 0.5)),
+                    LocalizedText('04 TH5 2025', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: AppColors.tertiary, letterSpacing: 0.5)),
                   ],
                 ),
                 const SizedBox(height: 10),
@@ -401,7 +402,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             const Expanded(
-                              child: Text('DOANH THU TẠM TÍNH HÔM NAY',
+                              child: LocalizedText('DOANH THU TẠM TÍNH HÔM NAY',
                                   style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: AppColors.secondaryFixed, letterSpacing: 0.5),
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis),
@@ -423,9 +424,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
                           crossAxisAlignment: CrossAxisAlignment.baseline,
                           textBaseline: TextBaseline.alphabetic,
                           children: const [
-                            Text('5.040.000', style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold, color: Colors.white)),
+                            LocalizedText('5.040.000', style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold, color: Colors.white)),
                             SizedBox(width: 4),
-                            Text('đ', style: TextStyle(fontSize: 14, color: AppColors.secondaryFixed)),
+                            LocalizedText('đ', style: TextStyle(fontSize: 14, color: AppColors.secondaryFixed)),
                           ],
                         ),
                         const SizedBox(height: 8),
@@ -434,7 +435,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                             Icon(Icons.arrow_upward, size: 14, color: AppColors.secondaryFixed),
                             SizedBox(width: 4),
                             Expanded(
-                              child: Text(
+                              child: LocalizedText(
                                 'Tăng 18.5% so với cùng kỳ thứ Bảy tuần trước',
                                 style: TextStyle(fontSize: 11, color: AppColors.secondaryFixed, fontWeight: FontWeight.w600),
                                 maxLines: 1,
@@ -471,7 +472,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                 children: [
                                   const Expanded(
-                                    child: Text(
+                                    child: LocalizedText(
                                       'Khởi hành',
                                       style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: AppColors.tertiary),
                                       maxLines: 1,
@@ -485,17 +486,17 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                       color: AppColors.secondary.withValues(alpha: 0.1),
                                       borderRadius: BorderRadius.circular(10),
                                     ),
-                                    child: Text('${slots.length} Slot',
+                                    child: LocalizedText('${slots.length} Slot',
                                         style: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: AppColors.secondary)),
                                   ),
                                 ],
                               ),
                               const SizedBox(height: 8),
                               RichText(
-                                text: const TextSpan(
+                                text:  TextSpan(
                                   children: [
-                                    TextSpan(text: '18 ', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: AppColors.onSurface)),
-                                    TextSpan(text: '/ 20 khách', style: TextStyle(fontSize: 12, color: AppColors.tertiary)),
+                                    TextSpan(text: tr(context, '18 '), style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: AppColors.onSurface)),
+                                    TextSpan(text: tr(context, '/ 20 khách'), style: TextStyle(fontSize: 12, color: AppColors.tertiary)),
                                   ],
                                 ),
                               ),
@@ -515,7 +516,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                   Icon(Icons.schedule, size: 12, color: AppColors.tertiary),
                                   SizedBox(width: 4),
                                   Expanded(
-                                    child: Text('05:00 • 07:30 • 15:30',
+                                    child: LocalizedText('05:00 • 07:30 • 15:30',
                                         style: TextStyle(fontSize: 10, color: AppColors.tertiary), maxLines: 1, overflow: TextOverflow.ellipsis),
                                   ),
                                 ],
@@ -546,7 +547,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                 children: [
                                   const Expanded(
-                                    child: Text(
+                                    child: LocalizedText(
                                       'Đơn dịch vụ',
                                       style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: AppColors.tertiary),
                                       maxLines: 1,
@@ -560,29 +561,29 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                       color: AppColors.primaryContainer,
                                       borderRadius: BorderRadius.circular(10),
                                     ),
-                                    child: Text('+$todayOrders',
+                                    child: LocalizedText('+$todayOrders',
                                         style: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: AppColors.onPrimary)),
                                   ),
                                 ],
                               ),
                               const SizedBox(height: 8),
                               RichText(
-                                text: const TextSpan(
+                                text:  TextSpan(
                                   children: [
-                                    TextSpan(text: '2 ', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: AppColors.onSurface)),
-                                    TextSpan(text: 'cần chuẩn bị SUP', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: AppColors.primary)),
+                                    TextSpan(text: tr(context, '2 '), style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: AppColors.onSurface)),
+                                    TextSpan(text: tr(context, 'cần chuẩn bị SUP'), style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: AppColors.primary)),
                                   ],
                                 ),
                               ),
                               const SizedBox(height: 4),
-                              const Text('Áo phao & mái chèo sẵn sàng', style: TextStyle(fontSize: 10, color: AppColors.tertiary), maxLines: 1, overflow: TextOverflow.ellipsis),
+                              const LocalizedText('Áo phao & mái chèo sẵn sàng', style: TextStyle(fontSize: 10, color: AppColors.tertiary), maxLines: 1, overflow: TextOverflow.ellipsis),
                               const SizedBox(height: 9),
                               Row(
                                 children: [
                                   const Icon(Icons.task_alt, size: 12, color: AppColors.secondary),
                                   const SizedBox(width: 4),
                                   Expanded(
-                                    child: Text(
+                                    child: LocalizedText(
                                       '$checkedInOrders đơn đã check-in',
                                       style: const TextStyle(fontSize: 10, color: AppColors.secondary, fontWeight: FontWeight.w600),
                                       maxLines: 1,
@@ -610,7 +611,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                           Icon(Icons.departure_board, size: 18, color: AppColors.primary),
                           SizedBox(width: 6),
                           Expanded(
-                            child: Text(
+                            child: LocalizedText(
                               'Tour xuất bến gần nhất',
                               style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: AppColors.onSurface),
                               maxLines: 1,
@@ -627,7 +628,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         color: AppColors.primaryFixed,
                         borderRadius: BorderRadius.circular(10),
                       ),
-                      child: const Text('Sắp khởi hành', style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: AppColors.onPrimaryFixedVariant)),
+                      child: const LocalizedText('Sắp khởi hành', style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: AppColors.onPrimaryFixedVariant)),
                     ),
                   ],
                 ),
@@ -669,7 +670,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                           const Icon(Icons.access_time, size: 11, color: AppColors.secondary),
                                           const SizedBox(width: 3),
                                           Flexible(
-                                            child: Text(
+                                            child: LocalizedText(
                                               '${nextSlot?.startTime.substring(0, 5) ?? '05:00'} - ${nextSlot?.endTime.substring(0, 5) ?? '07:00'}',
                                               style: const TextStyle(fontSize: 10.5, fontWeight: FontWeight.bold, color: AppColors.secondary),
                                               maxLines: 1,
@@ -686,13 +687,13 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                         color: AppColors.primaryFixed,
                                         borderRadius: BorderRadius.circular(10),
                                       ),
-                                      child: const Text('Chuẩn bị xuất bến',
+                                      child: const LocalizedText('Chuẩn bị xuất bến',
                                           style: TextStyle(fontSize: 8.5, fontWeight: FontWeight.bold, color: AppColors.primary)),
                                     ),
                                   ],
                                 ),
                                 const SizedBox(height: 4),
-                                Text(
+                                LocalizedText(
                                   nextService?.nameVi ?? 'Chèo SUP ngắm bình minh Mỹ Khê',
                                   style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: AppColors.onSurface),
                                   maxLines: 1,
@@ -704,7 +705,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                     const Icon(Icons.group, size: 14, color: AppColors.secondary),
                                     const SizedBox(width: 4),
                                     Expanded(
-                                      child: Text(
+                                      child: LocalizedText(
                                         '${nextSlot?.bookedCount ?? 8}/${nextSlot?.capacity ?? 8} khách (${(nextSlot?.bookedCount ?? 8) >= (nextSlot?.capacity ?? 8) ? 'Đầy chỗ' : 'Còn chỗ'})',
                                         style: const TextStyle(fontSize: 11, color: AppColors.tertiary),
                                         maxLines: 1,
@@ -725,7 +726,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                             child: ElevatedButton.icon(
                               onPressed: _openOrders, // Orders tab
                               icon: const Icon(Icons.checklist, size: 16),
-                              label: const Text('Xem danh sách khách', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+                              label: const LocalizedText('Xem danh sách khách', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: AppColors.primaryContainer,
                                 foregroundColor: AppColors.onPrimary,
@@ -775,8 +776,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Text('Doanh thu tuần', style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: AppColors.onSurface), maxLines: 1, overflow: TextOverflow.ellipsis),
-                                  Text('28 Th4 - 04 Th5', style: TextStyle(fontSize: 11, color: AppColors.tertiary), maxLines: 1, overflow: TextOverflow.ellipsis),
+                                  LocalizedText('Doanh thu tuần', style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: AppColors.onSurface), maxLines: 1, overflow: TextOverflow.ellipsis),
+                                  LocalizedText('28 Th4 - 04 Th5', style: TextStyle(fontSize: 11, color: AppColors.tertiary), maxLines: 1, overflow: TextOverflow.ellipsis),
                                 ],
                               ),
                             ),
@@ -784,12 +785,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
                             Column(
                               crossAxisAlignment: CrossAxisAlignment.end,
                               children: const [
-                                Text('32.8M', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: AppColors.secondary)),
+                                LocalizedText('32.8M', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: AppColors.secondary)),
                                 Row(
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
                                     Icon(Icons.north_east, size: 11, color: AppColors.secondary),
-                                    Text('+14.2%', style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: AppColors.secondary)),
+                                    LocalizedText('+14.2%', style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: AppColors.secondary)),
                                   ],
                                 ),
                               ],
@@ -839,14 +840,14 @@ class _DashboardScreenState extends State<DashboardScreen> {
               Icon(icon, size: 13, color: AppColors.tertiary),
               const SizedBox(width: 3),
               Expanded(
-                child: Text(label, style: const TextStyle(fontSize: 10, color: AppColors.tertiary), maxLines: 1, overflow: TextOverflow.ellipsis),
+                child: LocalizedText(label, style: const TextStyle(fontSize: 10, color: AppColors.tertiary), maxLines: 1, overflow: TextOverflow.ellipsis),
               ),
             ],
           ),
           const SizedBox(height: 4),
-          Text(value, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: AppColors.onSurface)),
+          LocalizedText(value, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: AppColors.onSurface)),
           const SizedBox(height: 2),
-          Text(sub, style: const TextStyle(fontSize: 9, color: AppColors.secondary), maxLines: 1, overflow: TextOverflow.ellipsis),
+          LocalizedText(sub, style: const TextStyle(fontSize: 9, color: AppColors.secondary), maxLines: 1, overflow: TextOverflow.ellipsis),
         ],
       ),
     );
@@ -900,7 +901,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
               ],
             ),
             const SizedBox(height: 6),
-            Text(
+            LocalizedText(
               label,
               style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: AppColors.onSurface),
               maxLines: 1,
@@ -930,7 +931,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
             ),
           ),
           const SizedBox(height: 6),
-          Text(
+          LocalizedText(
             day,
             style: TextStyle(
               fontSize: 10,

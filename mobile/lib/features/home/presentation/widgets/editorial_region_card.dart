@@ -1,3 +1,4 @@
+import 'package:mobile/core/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_shapes.dart';
@@ -63,7 +64,7 @@ class EditorialRegionCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 // Category Tag
-                Text(
+                LocalizedText(
                   item.tag.toUpperCase(),
                   style: AppTypography.labelSm(
                     color: AppColors.secondaryFixed,
@@ -74,7 +75,7 @@ class EditorialRegionCard extends StatelessWidget {
                 ),
                 const SizedBox(height: 2),
                 // Title
-                Text(
+                LocalizedText(
                   item.title,
                   style: AppTypography.headlineSm(
                     color: AppColors.inverseOnSurface,
@@ -83,7 +84,7 @@ class EditorialRegionCard extends StatelessWidget {
                 ),
                 const SizedBox(height: 2),
                 // Description
-                Text(
+                LocalizedText(
                   item.description,
                   style: AppTypography.bodySm(
                     color: AppColors.surfaceVariant,
@@ -99,7 +100,7 @@ class EditorialRegionCard extends StatelessWidget {
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Text(
+                      LocalizedText(
                         'Khám phá ngay',
                         style: AppTypography.labelMd(
                           color: AppColors.secondaryFixed,

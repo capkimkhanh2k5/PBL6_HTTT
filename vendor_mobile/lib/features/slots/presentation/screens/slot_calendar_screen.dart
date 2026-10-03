@@ -1,3 +1,4 @@
+import 'package:vendor_mobile/core/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_shapes.dart';
@@ -83,7 +84,7 @@ class _SlotCalendarScreenState extends State<SlotCalendarScreen> {
           children: [
             Row(
               children: [
-                Text(
+                LocalizedText(
                   'DANASEA',
                   style: Theme.of(context).textTheme.titleSmall?.copyWith(
                         fontWeight: FontWeight.bold,
@@ -97,11 +98,11 @@ class _SlotCalendarScreenState extends State<SlotCalendarScreen> {
                     color: AppColors.primaryContainer,
                     borderRadius: BorderRadius.circular(10),
                   ),
-                  child: const Text('VENDOR', style: TextStyle(fontSize: 9, fontWeight: FontWeight.bold, color: AppColors.onPrimary)),
+                  child: const LocalizedText('VENDOR', style: TextStyle(fontSize: 9, fontWeight: FontWeight.bold, color: AppColors.onPrimary)),
                 ),
               ],
             ),
-            const Text('Lịch hoạt động & Slot', style: TextStyle(fontSize: 12, color: AppColors.tertiary)),
+            const LocalizedText('Lịch hoạt động & Slot', style: TextStyle(fontSize: 12, color: AppColors.tertiary)),
           ],
         ),
         actions: [
@@ -161,7 +162,7 @@ class _SlotCalendarScreenState extends State<SlotCalendarScreen> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text('DỊCH VỤ ÁP DỤNG', style: TextStyle(fontSize: 9, fontWeight: FontWeight.bold, color: AppColors.tertiary, letterSpacing: 0.5)),
+                          const LocalizedText('DỊCH VỤ ÁP DỤNG', style: TextStyle(fontSize: 9, fontWeight: FontWeight.bold, color: AppColors.tertiary, letterSpacing: 0.5)),
                           DropdownButtonHideUnderline(
                             child: DropdownButton<String>(
                               value: _selectedServiceId,
@@ -170,7 +171,7 @@ class _SlotCalendarScreenState extends State<SlotCalendarScreen> {
                               items: services.map((s) {
                                 return DropdownMenuItem<String>(
                                   value: s.serviceId,
-                                  child: Text(s.nameVi, style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: AppColors.onSurface), overflow: TextOverflow.ellipsis),
+                                  child: LocalizedText(s.nameVi, style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: AppColors.onSurface), overflow: TextOverflow.ellipsis),
                                 );
                               }).toList(),
                               onChanged: (val) {
@@ -216,7 +217,7 @@ class _SlotCalendarScreenState extends State<SlotCalendarScreen> {
                     child: Row(
                       children: [
                         Flexible(
-                          child: Text(
+                          child: LocalizedText(
                             'Tháng ${_selectedDate.month} / ${_selectedDate.year}',
                             style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: AppColors.onSurface),
                             overflow: TextOverflow.ellipsis,
@@ -226,7 +227,7 @@ class _SlotCalendarScreenState extends State<SlotCalendarScreen> {
                         Container(
                           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                           decoration: BoxDecoration(color: AppColors.secondaryFixed, borderRadius: BorderRadius.circular(10)),
-                          child: const Text('Tuần 18', style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: AppColors.onSecondaryFixed)),
+                          child: const LocalizedText('Tuần 18', style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: AppColors.onSecondaryFixed)),
                         ),
                       ],
                     ),
@@ -238,7 +239,7 @@ class _SlotCalendarScreenState extends State<SlotCalendarScreen> {
                       });
                     },
                     icon: const Icon(Icons.calendar_today, size: 14, color: AppColors.secondary),
-                    label: const Text('Hôm nay', style: TextStyle(fontSize: 12, color: AppColors.secondary, fontWeight: FontWeight.bold)),
+                    label: const LocalizedText('Hôm nay', style: TextStyle(fontSize: 12, color: AppColors.secondary, fontWeight: FontWeight.bold)),
                   ),
                 ],
               ),
@@ -270,14 +271,14 @@ class _SlotCalendarScreenState extends State<SlotCalendarScreen> {
                         ),
                         child: Column(
                           children: [
-                            Text(dayName,
+                            LocalizedText(dayName,
                                 style: TextStyle(
                                   fontSize: 11,
                                   fontWeight: FontWeight.w600,
                                   color: isSelected ? Colors.white70 : AppColors.tertiary,
                                 )),
                             const SizedBox(height: 4),
-                            Text(
+                            LocalizedText(
                               dayDate.day.toString().padLeft(2, '0'),
                               style: TextStyle(
                                 fontSize: 18,
@@ -292,7 +293,7 @@ class _SlotCalendarScreenState extends State<SlotCalendarScreen> {
                                 color: isSelected ? Colors.white.withOpacity(0.25) : AppColors.surfaceContainerHigh,
                                 borderRadius: BorderRadius.circular(8),
                               ),
-                              child: Text(
+                              child: LocalizedText(
                                 '$daySlotsCount slot',
                                 style: TextStyle(
                                   fontSize: 9,
@@ -329,7 +330,7 @@ class _SlotCalendarScreenState extends State<SlotCalendarScreen> {
                               const Icon(Icons.tsunami, size: 18, color: AppColors.secondary),
                               const SizedBox(width: 6),
                               Expanded(
-                                child: Text(
+                                child: LocalizedText(
                                   'Tổng quan ngày ${_selectedDate.day}/${_selectedDate.month}',
                                   style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: AppColors.onSurface),
                                   overflow: TextOverflow.ellipsis,
@@ -346,7 +347,7 @@ class _SlotCalendarScreenState extends State<SlotCalendarScreen> {
                             children: [
                               Icon(Icons.waves, size: 12, color: AppColors.secondary),
                               SizedBox(width: 3),
-                              Text('Sóng êm 0.4m', style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: AppColors.secondary)),
+                              LocalizedText('Sóng êm 0.4m', style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: AppColors.secondary)),
                             ],
                           ),
                         ),
@@ -402,7 +403,7 @@ class _SlotCalendarScreenState extends State<SlotCalendarScreen> {
                       children: [
                         const Icon(Icons.event_busy, size: 40, color: AppColors.tertiary),
                         const SizedBox(height: 8),
-                        const Text('Chưa có khung giờ nào cho ngày này', style: TextStyle(fontSize: 13, color: AppColors.tertiary)),
+                        const LocalizedText('Chưa có khung giờ nào cho ngày này', style: TextStyle(fontSize: 13, color: AppColors.tertiary)),
                         const SizedBox(height: 10),
                         ElevatedButton.icon(
                           onPressed: () {
@@ -416,7 +417,7 @@ class _SlotCalendarScreenState extends State<SlotCalendarScreen> {
                             );
                           },
                           icon: const Icon(Icons.add, size: 16),
-                          label: const Text('Thêm khung giờ ngay', style: TextStyle(fontSize: 12)),
+                          label: const LocalizedText('Thêm khung giờ ngay', style: TextStyle(fontSize: 12)),
                           style: ElevatedButton.styleFrom(
                             backgroundColor: AppColors.secondary,
                             foregroundColor: AppColors.onSecondary,
@@ -456,11 +457,11 @@ class _SlotCalendarScreenState extends State<SlotCalendarScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(label, style: const TextStyle(fontSize: 10, color: AppColors.tertiary)),
+          LocalizedText(label, style: const TextStyle(fontSize: 10, color: AppColors.tertiary)),
           const SizedBox(height: 4),
-          Text(value, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: AppColors.onSurface)),
+          LocalizedText(value, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: AppColors.onSurface)),
           const SizedBox(height: 2),
-          Text(sub, style: const TextStyle(fontSize: 10, color: AppColors.secondary, fontWeight: FontWeight.w600)),
+          LocalizedText(sub, style: const TextStyle(fontSize: 10, color: AppColors.secondary, fontWeight: FontWeight.w600)),
           if (progress != null) ...[
             const SizedBox(height: 4),
             ClipRRect(
@@ -489,7 +490,7 @@ class _SlotCalendarScreenState extends State<SlotCalendarScreen> {
           color: active ? AppColors.onSurface : AppColors.surfaceContainerLow,
           borderRadius: BorderRadius.circular(20),
         ),
-        child: Text(
+        child: LocalizedText(
           label,
           style: TextStyle(
             fontSize: 12,
@@ -526,7 +527,7 @@ class _SlotCalendarScreenState extends State<SlotCalendarScreen> {
                     color: slot.isBlocked ? AppColors.tertiary : AppColors.secondary,
                   ),
                   const SizedBox(width: 6),
-                  Text(
+                  LocalizedText(
                     '${slot.startTime.substring(0, 5)} - ${slot.endTime.substring(0, 5)}',
                     style: TextStyle(
                       fontSize: 16,
@@ -547,7 +548,7 @@ class _SlotCalendarScreenState extends State<SlotCalendarScreen> {
                     children: [
                       Icon(Icons.block, size: 12, color: AppColors.error),
                       SizedBox(width: 4),
-                      Text('TẠM KHÓA', style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: AppColors.onErrorContainer)),
+                      LocalizedText('TẠM KHÓA', style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: AppColors.onErrorContainer)),
                     ],
                   ),
                 )
@@ -558,7 +559,7 @@ class _SlotCalendarScreenState extends State<SlotCalendarScreen> {
                     color: AppColors.primaryFixed,
                     borderRadius: BorderRadius.circular(10),
                   ),
-                  child: const Text('HẾT CHỖ', style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: AppColors.onPrimaryFixedVariant)),
+                  child: const LocalizedText('HẾT CHỖ', style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: AppColors.onPrimaryFixedVariant)),
                 )
               else
                 Container(
@@ -567,7 +568,7 @@ class _SlotCalendarScreenState extends State<SlotCalendarScreen> {
                     color: AppColors.secondaryContainer,
                     borderRadius: BorderRadius.circular(10),
                   ),
-                  child: const Text('CÒN CHỖ', style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: AppColors.onSecondaryContainer)),
+                  child: const LocalizedText('CÒN CHỖ', style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: AppColors.onSecondaryContainer)),
                 ),
             ],
           ),
@@ -579,16 +580,16 @@ class _SlotCalendarScreenState extends State<SlotCalendarScreen> {
             children: [
               Row(
                 children: [
-                  const Text('Khách đã đặt: ', style: TextStyle(fontSize: 12, color: AppColors.tertiary)),
-                  Text('${slot.bookedCount}', style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: AppColors.primary)),
-                  Text(' / ${slot.capacity} khách', style: const TextStyle(fontSize: 12, color: AppColors.tertiary)),
+                  const LocalizedText('Khách đã đặt: ', style: TextStyle(fontSize: 12, color: AppColors.tertiary)),
+                  LocalizedText('${slot.bookedCount}', style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: AppColors.primary)),
+                  LocalizedText(' / ${slot.capacity} khách', style: const TextStyle(fontSize: 12, color: AppColors.tertiary)),
                 ],
               ),
               if (slot.heldCount > 0)
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                   decoration: BoxDecoration(color: AppColors.surfaceContainerHigh, borderRadius: BorderRadius.circular(8)),
-                  child: Text('Tạm giữ: ${slot.heldCount}', style: const TextStyle(fontSize: 10, color: AppColors.tertiary)),
+                  child: LocalizedText('Tạm giữ: ${slot.heldCount}', style: const TextStyle(fontSize: 10, color: AppColors.tertiary)),
                 ),
             ],
           ),
@@ -618,7 +619,7 @@ class _SlotCalendarScreenState extends State<SlotCalendarScreen> {
                   );
                 },
                 icon: Icon(slot.isBlocked ? Icons.lock_open : Icons.block, size: 15, color: slot.isBlocked ? AppColors.secondary : AppColors.error),
-                label: Text(
+                label: LocalizedText(
                   slot.isBlocked ? 'Mở khóa' : 'Tạm khóa',
                   style: TextStyle(fontSize: 12, color: slot.isBlocked ? AppColors.secondary : AppColors.error),
                 ),
@@ -637,7 +638,7 @@ class _SlotCalendarScreenState extends State<SlotCalendarScreen> {
                   );
                 },
                 icon: const Icon(Icons.tune, size: 14),
-                label: const Text('Cấu hình', style: TextStyle(fontSize: 12)),
+                label: const LocalizedText('Cấu hình', style: TextStyle(fontSize: 12)),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.surfaceContainerLow,
                   foregroundColor: AppColors.secondary,

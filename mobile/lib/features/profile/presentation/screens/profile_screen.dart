@@ -1,3 +1,4 @@
+import 'package:mobile/core/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import '../../../../core/data/mock_database_data.dart';
 import '../../../../core/theme/app_colors.dart';
@@ -20,7 +21,7 @@ class ProfileScreen extends StatefulWidget {
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
-  String _locale = 'vi';
+  String get _locale => AppLanguage.instance.code;
 
   void _showLogoutDialog() {
     showDialog(
@@ -30,18 +31,18 @@ class _ProfileScreenState extends State<ProfileScreen> {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(20),
           ),
-          title: Text(
+          title: LocalizedText(
             'Đăng xuất tài khoản?',
             style: AppTypography.headlineSm(color: AppColors.onSurface),
           ),
-          content: Text(
+          content: LocalizedText(
             'Bạn có chắc chắn muốn đăng xuất khỏi ứng dụng DANASEA trên thiết bị này?',
             style: AppTypography.bodySm(color: AppColors.onSurfaceVariant),
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
-              child: const Text('Hủy'),
+              child: const LocalizedText('Hủy'),
             ),
             ElevatedButton(
               style: ElevatedButton.styleFrom(
@@ -59,7 +60,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   ),
                 );
               },
-              child: const Text('Đăng xuất', style: TextStyle(color: Colors.white)),
+              child: const LocalizedText('Đăng xuất', style: TextStyle(color: Colors.white)),
             ),
           ],
         );
@@ -69,6 +70,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
+    Localizations.localeOf(context);
     final user = MockDatabaseData.currentUser;
 
     return Scaffold(
@@ -77,7 +79,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         backgroundColor: AppColors.surface,
         elevation: 0,
         automaticallyImplyLeading: false,
-        title: Text(
+        title: LocalizedText(
           'Tài khoản',
           style: AppTypography.headlineSm(color: AppColors.onSurface),
         ),
@@ -110,7 +112,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                 ? NetworkImage(user.avatarUrl!)
                                 : null,
                             child: user.avatarUrl == null
-                                ? Text(user.fullName[0],
+                                ? LocalizedText(user.fullName[0],
                                     style: const TextStyle(fontSize: 24))
                                 : null,
                           ),
@@ -134,20 +136,20 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(
+                            LocalizedText(
                               user.fullName,
                               style: AppTypography.headlineSm(
                                 color: AppColors.onSurface,
                               ),
                             ),
                             const SizedBox(height: 2),
-                            Text(
+                            LocalizedText(
                               user.email,
                               style: AppTypography.bodySm(
                                 color: AppColors.onSurfaceVariant,
                               ),
                             ),
-                            Text(
+                            LocalizedText(
                               user.phone ?? '0905 123 456',
                               style: AppTypography.labelSm(
                                 color: AppColors.secondary,
@@ -191,7 +193,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                   size: 14, color: AppColors.secondary),
                               const SizedBox(width: 4),
                               Flexible(
-                                child: Text(
+                                child: LocalizedText(
                                   'Email đã xác minh',
                                   overflow: TextOverflow.ellipsis,
                                   style: AppTypography.labelSm(
@@ -216,7 +218,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         },
                         icon: const Icon(Icons.arrow_forward,
                             size: 14, color: AppColors.secondary),
-                        label: Text(
+                        label: LocalizedText(
                           'Hồ sơ chi tiết',
                           style: AppTypography.labelSm(
                             color: AppColors.secondary,
@@ -254,14 +256,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
+                        LocalizedText(
                           'Biển Mỹ Khê • Hôm nay',
                           style: AppTypography.labelSm(
                             color: AppColors.secondary,
                             fontWeight: FontWeight.w700,
                           ),
                         ),
-                        Text(
+                        LocalizedText(
                           'Gió 12 km/h • Sóng 0.4m • Nước 26°C',
                           style: AppTypography.bodySm(
                             color: AppColors.onSurfaceVariant,
@@ -277,7 +279,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       color: AppColors.surfaceContainerHigh,
                       borderRadius: BorderRadius.circular(8),
                     ),
-                    child: Text(
+                    child: LocalizedText(
                       'Rất tốt',
                       style: AppTypography.labelSm(
                         color: AppColors.secondary,
@@ -291,7 +293,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             const SizedBox(height: 20),
 
             // SETTINGS & SECURITY
-            Text(
+            LocalizedText(
               'CÀI ĐẶT & BẢO MẬT',
               style: AppTypography.labelSm(
                 color: AppColors.secondary,
@@ -337,14 +339,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    Text(
+                                    LocalizedText(
                                       'Ngôn ngữ ứng dụng',
                                       style: AppTypography.labelMd(
                                         color: AppColors.onSurface,
                                         fontWeight: FontWeight.w700,
                                       ),
                                     ),
-                                    Text(
+                                    LocalizedText(
                                       'Tiếng Việt / English',
                                       style: AppTypography.bodySm(
                                         color: AppColors.onSurfaceVariant,
@@ -378,7 +380,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             const SizedBox(height: 20),
 
             // UTILITIES
-            Text(
+            LocalizedText(
               'TIỆN ÍCH TRẢI NGHIỆM',
               style: AppTypography.labelSm(
                 color: AppColors.secondary,
@@ -480,7 +482,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   ),
                 ),
                 icon: const Icon(Icons.logout, color: AppColors.primary),
-                label: Text(
+                label: LocalizedText(
                   'Đăng xuất tài khoản',
                   style: AppTypography.labelMd(
                     color: AppColors.primary,
@@ -515,14 +517,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
+                  LocalizedText(
                     title,
                     style: AppTypography.labelMd(
                       color: AppColors.onSurface,
                       fontWeight: FontWeight.w700,
                     ),
                   ),
-                  Text(
+                  LocalizedText(
                     subtitle,
                     style: AppTypography.bodySm(
                       color: AppColors.onSurfaceVariant,
@@ -541,7 +543,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   Widget _buildLangButton(String text, String code) {
     final isSel = _locale == code;
     return InkWell(
-      onTap: () => setState(() => _locale = code),
+      onTap: () => AppLanguage.instance.setLanguage(code),
       borderRadius: BorderRadius.circular(16),
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
@@ -549,7 +551,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           color: isSel ? AppColors.secondary : Colors.transparent,
           borderRadius: BorderRadius.circular(16),
         ),
-        child: Text(
+        child: LocalizedText(
           text,
           style: AppTypography.labelSm(
             color: isSel ? Colors.white : AppColors.onSurfaceVariant,

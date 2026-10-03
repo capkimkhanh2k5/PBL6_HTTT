@@ -1,3 +1,4 @@
+import 'package:vendor_mobile/core/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_shapes.dart';
@@ -98,13 +99,13 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
         title: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('CÀI ĐẶT AN NINH',
+            LocalizedText('CÀI ĐẶT AN NINH',
                 style: Theme.of(context).textTheme.labelSmall?.copyWith(
                       color: AppColors.tertiary,
                       fontWeight: FontWeight.bold,
                       letterSpacing: 0.8,
                     )),
-            Text('Đổi mật khẩu',
+            LocalizedText('Đổi mật khẩu',
                 style: Theme.of(context).textTheme.titleMedium?.copyWith(
                       fontWeight: FontWeight.bold,
                       color: AppColors.onSurface,
@@ -154,7 +155,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                                       color: AppColors.secondaryContainer.withOpacity(0.6),
                                       borderRadius: BorderRadius.circular(12),
                                     ),
-                                    child: const Text('DOC-8842',
+                                    child: const LocalizedText('DOC-8842',
                                         style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: AppColors.onSecondaryContainer)),
                                   ),
                                   const SizedBox(width: 6),
@@ -165,7 +166,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                                         Icon(Icons.verified, size: 12, color: AppColors.secondary),
                                         SizedBox(width: 2),
                                         Flexible(
-                                          child: Text(
+                                          child: LocalizedText(
                                             'Bến bãi chính thức',
                                             style: TextStyle(fontSize: 11, color: AppColors.tertiary),
                                             overflow: TextOverflow.ellipsis,
@@ -177,8 +178,8 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                                 ],
                               ),
                               const SizedBox(height: 2),
-                              const Text('Trần Hải Đăng', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: AppColors.onSurface), maxLines: 1, overflow: TextOverflow.ellipsis),
-                              const Text('Danang Ocean Club • Mỹ Khê', style: TextStyle(fontSize: 12, color: AppColors.tertiary), maxLines: 1, overflow: TextOverflow.ellipsis),
+                              const LocalizedText('Trần Hải Đăng', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: AppColors.onSurface), maxLines: 1, overflow: TextOverflow.ellipsis),
+                              const LocalizedText('Danang Ocean Club • Mỹ Khê', style: TextStyle(fontSize: 12, color: AppColors.tertiary), maxLines: 1, overflow: TextOverflow.ellipsis),
                             ],
                           ),
                         ),
@@ -199,13 +200,13 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text('Email định danh đối tác', style: TextStyle(fontSize: 10, color: AppColors.tertiary)),
-                                Text('partner@danangoceanclub.com', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.onSurface), overflow: TextOverflow.ellipsis),
+                                LocalizedText('Email định danh đối tác', style: TextStyle(fontSize: 10, color: AppColors.tertiary)),
+                                LocalizedText('partner@danangoceanclub.com', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.onSurface), overflow: TextOverflow.ellipsis),
                               ],
                             ),
                           ),
                           SizedBox(width: 4),
-                          Text('Chỉ đọc', style: TextStyle(fontSize: 10, color: AppColors.tertiary, fontWeight: FontWeight.bold)),
+                          LocalizedText('Chỉ đọc', style: TextStyle(fontSize: 10, color: AppColors.tertiary, fontWeight: FontWeight.bold)),
                         ],
                       ),
                     ),
@@ -215,7 +216,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                         Icon(Icons.info_outline, size: 13, color: AppColors.tertiary),
                         SizedBox(width: 4),
                         Expanded(
-                          child: Text('Email bảo mật không thể thay đổi tại màn hình này để duy trì hợp đồng bến bãi.',
+                          child: LocalizedText('Email bảo mật không thể thay đổi tại màn hình này để duy trì hợp đồng bến bãi.',
                               style: TextStyle(fontSize: 10, color: AppColors.tertiary)),
                         ),
                       ],
@@ -238,14 +239,14 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Expanded(
-                          child: Text(
+                          child: LocalizedText(
                             'MÔ PHỎNG PHẢN HỒI HỆ THỐNG',
                             style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: AppColors.tertiary),
                             overflow: TextOverflow.ellipsis,
                           ),
                         ),
                         SizedBox(width: 6),
-                        Text('Thử nghiệm', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: AppColors.secondary)),
+                        LocalizedText('Thử nghiệm', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: AppColors.secondary)),
                       ],
                     ),
                     const SizedBox(height: 8),
@@ -272,7 +273,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                                   Icon(Icons.error_outline, size: 14, color: AppColors.primary),
                                   SizedBox(width: 4),
                                   Flexible(
-                                    child: Text(
+                                    child: LocalizedText(
                                       'Mẫu lỗi',
                                       style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: AppColors.primary),
                                       overflow: TextOverflow.ellipsis,
@@ -305,7 +306,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                                   Icon(Icons.check_circle_outline, size: 14, color: AppColors.secondary),
                                   SizedBox(width: 4),
                                   Flexible(
-                                    child: Text(
+                                    child: LocalizedText(
                                       'Thành công',
                                       style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: AppColors.secondary),
                                       overflow: TextOverflow.ellipsis,
@@ -340,9 +341,9 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const Text('Không thể cập nhật mật khẩu', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: AppColors.onErrorContainer)),
+                            const LocalizedText('Không thể cập nhật mật khẩu', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: AppColors.onErrorContainer)),
                             const SizedBox(height: 2),
-                            Text(_errorMessage!, style: const TextStyle(fontSize: 11, color: AppColors.onErrorContainer)),
+                            LocalizedText(_errorMessage!, style: const TextStyle(fontSize: 11, color: AppColors.onErrorContainer)),
                           ],
                         ),
                       ),
@@ -374,9 +375,9 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text('Đổi mật khẩu thành công!', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: AppColors.onSecondaryFixed)),
+                            LocalizedText('Đổi mật khẩu thành công!', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: AppColors.onSecondaryFixed)),
                             SizedBox(height: 2),
-                            Text('Phiên làm việc của bạn đã được cập nhật chuẩn an toàn cao cấp DANASEA Core.',
+                            LocalizedText('Phiên làm việc của bạn đã được cập nhật chuẩn an toàn cao cấp DANASEA Core.',
                                 style: TextStyle(fontSize: 11, color: AppColors.onSecondaryFixed)),
                           ],
                         ),
@@ -409,7 +410,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         const Expanded(
-                          child: Text('Mật khẩu hiện tại', style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: AppColors.onSurface), overflow: TextOverflow.ellipsis),
+                          child: LocalizedText('Mật khẩu hiện tại', style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: AppColors.onSurface), overflow: TextOverflow.ellipsis),
                         ),
                         const SizedBox(width: 8),
                         InkWell(
@@ -418,7 +419,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                               MaterialPageRoute(builder: (_) => const ForgotPasswordScreen()),
                             );
                           },
-                          child: const Text('Quên mật khẩu?', style: TextStyle(fontSize: 12, color: AppColors.primary, fontWeight: FontWeight.w600)),
+                          child: const LocalizedText('Quên mật khẩu?', style: TextStyle(fontSize: 12, color: AppColors.primary, fontWeight: FontWeight.w600)),
                         ),
                       ],
                     ),
@@ -437,7 +438,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                     const SizedBox(height: 16),
 
                     // Field 2: New password
-                    const Text('Mật khẩu mới', style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: AppColors.onSurface)),
+                    const LocalizedText('Mật khẩu mới', style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: AppColors.onSurface)),
                     const SizedBox(height: 6),
                     VendorTextField(
                       controller: _newPassController,
@@ -466,10 +467,10 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               const Expanded(
-                                child: Text('Độ mạnh mật khẩu:', style: TextStyle(fontSize: 11, color: AppColors.tertiary), overflow: TextOverflow.ellipsis),
+                                child: LocalizedText('Độ mạnh mật khẩu:', style: TextStyle(fontSize: 11, color: AppColors.tertiary), overflow: TextOverflow.ellipsis),
                               ),
                               const SizedBox(width: 6),
-                              Text(
+                              LocalizedText(
                                 newPass.isEmpty
                                     ? 'Chưa nhập'
                                     : strength == 1
@@ -532,7 +533,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                     const SizedBox(height: 16),
 
                     // Field 3: Confirm password
-                    const Text('Xác nhận mật khẩu mới', style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: AppColors.onSurface)),
+                    const LocalizedText('Xác nhận mật khẩu mới', style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: AppColors.onSurface)),
                     const SizedBox(height: 6),
                     VendorTextField(
                       controller: _confirmPassController,
@@ -554,7 +555,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                             Icon(isMatch ? Icons.check : Icons.close, size: 14, color: isMatch ? AppColors.secondary : AppColors.error),
                             const SizedBox(width: 4),
                             Expanded(
-                              child: Text(
+                              child: LocalizedText(
                                 isMatch ? 'Mật khẩu xác nhận hoàn toàn trùng khớp' : 'Mật khẩu chưa khớp',
                                 style: TextStyle(fontSize: 11, color: isMatch ? AppColors.secondary : AppColors.error, fontWeight: FontWeight.bold),
                                 overflow: TextOverflow.ellipsis,
@@ -605,7 +606,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                         ),
                         const SizedBox(width: 8),
                         const Expanded(
-                          child: Text('Khuyến nghị an ninh trạm bến DANASEA', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: AppColors.onSurface), maxLines: 1, overflow: TextOverflow.ellipsis),
+                          child: LocalizedText('Khuyến nghị an ninh trạm bến DANASEA', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: AppColors.onSurface), maxLines: 1, overflow: TextOverflow.ellipsis),
                         ),
                       ],
                     ),
@@ -617,10 +618,10 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Expanded(
-                          child: Text('Hỗ trợ kỹ thuật: 1900-6886', style: TextStyle(fontSize: 11, color: AppColors.tertiary, fontWeight: FontWeight.w600), overflow: TextOverflow.ellipsis),
+                          child: LocalizedText('Hỗ trợ kỹ thuật: 1900-6886', style: TextStyle(fontSize: 11, color: AppColors.tertiary, fontWeight: FontWeight.w600), overflow: TextOverflow.ellipsis),
                         ),
                         SizedBox(width: 8),
-                        Text('24/7 Sea Ops', style: TextStyle(fontSize: 11, color: AppColors.secondary, fontWeight: FontWeight.bold)),
+                        LocalizedText('24/7 Sea Ops', style: TextStyle(fontSize: 11, color: AppColors.secondary, fontWeight: FontWeight.bold)),
                       ],
                     ),
                   ],
@@ -639,7 +640,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
         Icon(passed ? Icons.check_circle : Icons.radio_button_unchecked, size: 13, color: passed ? AppColors.secondary : AppColors.tertiary),
         const SizedBox(width: 4),
         Expanded(
-          child: Text(text,
+          child: LocalizedText(text,
               style: TextStyle(fontSize: 10, color: passed ? AppColors.secondary : AppColors.tertiary, fontWeight: passed ? FontWeight.bold : FontWeight.normal)),
         ),
       ],
@@ -654,7 +655,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
         children: [
           Icon(icon, size: 16, color: AppColors.secondary),
           const SizedBox(width: 8),
-          Expanded(child: Text(text, style: const TextStyle(fontSize: 11, color: AppColors.tertiary))),
+          Expanded(child: LocalizedText(text, style: const TextStyle(fontSize: 11, color: AppColors.tertiary))),
         ],
       ),
     );

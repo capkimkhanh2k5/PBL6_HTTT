@@ -1,3 +1,4 @@
+import 'package:mobile/core/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import '../../../../core/data/mock_database_data.dart';
 import '../../../../core/models/danasea_models.dart';
@@ -46,7 +47,7 @@ class _CreateDisputeScreenState extends State<CreateDisputeScreen> {
     if (_descController.text.trim().isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Vui lòng mô tả chi tiết sự việc khiếu nại.'),
+          content: LocalizedText('Vui lòng mô tả chi tiết sự việc khiếu nại.'),
           backgroundColor: AppColors.primary,
         ),
       );
@@ -71,7 +72,7 @@ class _CreateDisputeScreenState extends State<CreateDisputeScreen> {
 
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
-        content: Text('Đã gửi khiếu nại thành công! Ban quản trị DANASEA sẽ phản hồi trong 24h.'),
+        content: LocalizedText('Đã gửi khiếu nại thành công! Ban quản trị DANASEA sẽ phản hồi trong 24h.'),
         backgroundColor: AppColors.secondary,
       ),
     );
@@ -90,7 +91,7 @@ class _CreateDisputeScreenState extends State<CreateDisputeScreen> {
           icon: const Icon(Icons.arrow_back, color: AppColors.onSurface),
           onPressed: () => Navigator.pop(context),
         ),
-        title: Text(
+        title: LocalizedText(
           'Gửi khiếu nại dịch vụ',
           style: AppTypography.headlineSm(color: AppColors.onSurface),
         ),
@@ -114,7 +115,7 @@ class _CreateDisputeScreenState extends State<CreateDisputeScreen> {
                       size: 20, color: AppColors.secondary),
                   const SizedBox(width: 8),
                   Expanded(
-                    child: Text(
+                    child: LocalizedText(
                       'Hồ sơ khiếu nại được gửi trực tiếp đến Bộ phận Quản trị & Đối soát DANASEA để xác minh độc lập với nhà cung cấp.',
                       style: AppTypography.bodySm(
                         color: AppColors.onSecondaryContainer,
@@ -127,7 +128,7 @@ class _CreateDisputeScreenState extends State<CreateDisputeScreen> {
             const SizedBox(height: 16),
 
             // 1. SELECT SERVICE
-            Text('1. Dịch vụ cần khiếu nại',
+            LocalizedText('1. Dịch vụ cần khiếu nại',
                 style: AppTypography.labelLg(color: AppColors.onSurface)),
             const SizedBox(height: 6),
             Container(
@@ -145,14 +146,14 @@ class _CreateDisputeScreenState extends State<CreateDisputeScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
+                        LocalizedText(
                           _selectedSubOrder.serviceName,
                           style: AppTypography.labelMd(
                             color: AppColors.onSurface,
                             fontWeight: FontWeight.w700,
                           ),
                         ),
-                        Text(
+                        LocalizedText(
                           '${_selectedSubOrder.vendorName} • Mã đơn: #${_selectedSubOrder.id}',
                           style: AppTypography.bodySm(
                             color: AppColors.onSurfaceVariant,
@@ -167,7 +168,7 @@ class _CreateDisputeScreenState extends State<CreateDisputeScreen> {
             const SizedBox(height: 16),
 
             // 2. CATEGORY DROPDOWN
-            Text('2. Phân loại vấn đề',
+            LocalizedText('2. Phân loại vấn đề',
                 style: AppTypography.labelLg(color: AppColors.onSurface)),
             const SizedBox(height: 6),
             Container(
@@ -184,7 +185,7 @@ class _CreateDisputeScreenState extends State<CreateDisputeScreen> {
                   items: _categories.map((cat) {
                     return DropdownMenuItem(
                       value: cat,
-                      child: Text(cat, style: AppTypography.bodySm(color: AppColors.onSurface)),
+                      child: LocalizedText(cat, style: AppTypography.bodySm(color: AppColors.onSurface)),
                     );
                   }).toList(),
                   onChanged: (val) {
@@ -196,7 +197,7 @@ class _CreateDisputeScreenState extends State<CreateDisputeScreen> {
             const SizedBox(height: 16),
 
             // 3. DESCRIPTION
-            Text('3. Mô tả chi tiết sự việc',
+            LocalizedText('3. Mô tả chi tiết sự việc',
                 style: AppTypography.labelLg(color: AppColors.onSurface)),
             const SizedBox(height: 6),
             Container(
@@ -210,7 +211,7 @@ class _CreateDisputeScreenState extends State<CreateDisputeScreen> {
                 maxLines: 4,
                 decoration: InputDecoration(
                   hintText:
-                      'Trình bày thời gian, diễn biến sự việc và yêu cầu xử lý...',
+                      tr(context, 'Trình bày thời gian, diễn biến sự việc và yêu cầu xử lý...'),
                   hintStyle: AppTypography.bodySm(color: AppColors.outline),
                   contentPadding: const EdgeInsets.all(12),
                   border: InputBorder.none,
@@ -220,7 +221,7 @@ class _CreateDisputeScreenState extends State<CreateDisputeScreen> {
             const SizedBox(height: 16),
 
             // 4. ATTACHMENTS
-            Text('4. Hình ảnh / Video minh chứng',
+            LocalizedText('4. Hình ảnh / Video minh chứng',
                 style: AppTypography.labelLg(color: AppColors.onSurface)),
             const SizedBox(height: 6),
             Row(
@@ -251,7 +252,7 @@ class _CreateDisputeScreenState extends State<CreateDisputeScreen> {
                         const Icon(Icons.add_a_photo_outlined,
                             size: 22, color: AppColors.secondary),
                         const SizedBox(height: 4),
-                        Text('Thêm ảnh',
+                        LocalizedText('Thêm ảnh',
                             style: AppTypography.labelSm(
                                 color: AppColors.secondary).copyWith(fontSize: 10)),
                       ],
