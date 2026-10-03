@@ -12,12 +12,6 @@
 
 ## 1. Booking_Hold_InventoryLock.png — Khởi Tạo Giữ Chỗ & Khóa Tồn Kho Redis
 
-**Lớp xử lý chính:**
-- `com.danasea.backend.modules.booking.presentation.controllers.BookingController`
-- `com.danasea.backend.modules.booking.application.usecases.CreateBookingHoldUseCase`
-- `com.danasea.backend.modules.booking.infrastructure.adapters.RedisInventoryLockAdapter`
-- `com.danasea.backend.modules.booking.infrastructure.persistence.repositories.JpaBookingRepository`
-
 **Luồng nghiệp vụ chi tiết:**
 1. Khách hàng gửi yêu cầu giữ chỗ qua API `POST /api/bookings/hold` kèm danh sách các slot `{slotId, quantity}` và tiêu đề `Idempotency-Key`.
 2. **Kiểm tra tồn kho thực tế:** `CreateBookingHoldUseCase` duyệt qua từng service slot và gọi `ServiceSlotPort.getSlotCapacity(slotId)` từ cơ sở dữ liệu PostgreSQL. Nếu số lượng yêu cầu vượt quá chỗ trống thực tế (`capacity - bookedCount`), ném ngay ngoại lệ `409 Conflict (SlotCapacityExceededException)`.
@@ -33,12 +27,6 @@
 
 ## 2. Booking_Hold_Cleanup_And_Expiry.png — Quét Hết Hạn & Giải Phóng Chỗ Tự Động
 
-**Lớp xử lý chính:**
-- `com.danasea.backend.modules.booking.infrastructure.scheduler.BookingHoldCleanupJob`
-- `com.danasea.backend.modules.booking.infrastructure.adapters.RedisInventoryLockAdapter`
-- `com.danasea.backend.modules.booking.infrastructure.persistence.repositories.JpaBookingRepository`
-- `com.danasea.backend.modules.order.infrastructure.listeners.OrderExpiryEventListener`
-
 **Luồng nghiệp vụ chi tiết:**
 1. Scheduled Background Job (`BookingHoldCleanupJob`) kích hoạt định kỳ mỗi **1 phút**.
 2. **Truy vấn danh sách quá hạn:** Gọi `JpaBookingRepository.findExpiredHolds(now, ['HOLD', 'PENDING_PAYMENT'])` để lấy danh sách các booking đã quá thời hạn 15 phút mà chưa được thanh toán thành công.
@@ -51,12 +39,6 @@
 ---
 
 ## 3. Booking_Cancel_And_Refund_Window.png — Khách Hàng Hủy Booking & Quy Tắc Mốc 24H
-
-**Lớp xử lý chính:**
-- `com.danasea.backend.modules.booking.application.usecases.CancelBookingUseCase`
-- `com.danasea.backend.modules.booking.infrastructure.persistence.repositories.JpaBookingRepository`
-- `com.danasea.backend.modules.booking.infrastructure.persistence.repositories.JpaServiceSlotRepository`
-- `com.danasea.backend.modules.booking.infrastructure.adapters.RedisInventoryLockAdapter`
 
 **Luồng nghiệp vụ chi tiết:**
 1. Khách hàng gửi yêu cầu hủy booking qua `PATCH /api/bookings/{id}/cancel` kèm lý do `{reason}`.

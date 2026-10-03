@@ -247,36 +247,37 @@ public class GroqKeyRotatorTest {
     }
 
     @Test
-    @DisplayName("Tier 2 - B5.7: Exactly 5 keys validation succeeds when 5 keys loaded")
-    void testValidateExactlyFiveKeys_Success() {
-        GroqKeyRotator rotator = new GroqKeyRotator(redisTemplate, fiveKeys);
-        assertEquals(5, rotator.getKeyCount());
-        assertEquals(5, rotator.getApiKeys().size());
-    }
+    @DisplayName("Tier 2 - B5.7: Key count matches whatever number of keys is provided")
+    void testValidateKeys_SuccessWithDynamicCount() {
+        GroqKeyRotator rotator5 = new GroqKeyRotator(redisTemplate, fiveKeys);
+        assertEquals(5, rotator5.getKeyCount());
+        assertEquals(5, rotator5.getApiKeys().size());
 
-    @Test
-    @DisplayName("Tier 2 - B5.8: Exactly 5 keys validation throws when fewer than 5 keys configured")
-    void testValidateExactlyFiveKeys_FailsWhenFewerThanFive() {
         List<String> threeKeys = List.of("key1", "key2", "key3");
-        IllegalStateException ex = assertThrows(IllegalStateException.class, () -> {
-            new GroqKeyRotator(redisTemplate, threeKeys);
-        });
-        assertTrue(ex.getMessage().contains("requires exactly 5 API keys, but found: 3"));
+        GroqKeyRotator rotator3 = new GroqKeyRotator(redisTemplate, threeKeys);
+        assertEquals(3, rotator3.getKeyCount());
+        assertEquals(3, rotator3.getApiKeys().size());
+
+        List<String> singleKey = List.of("key1");
+        GroqKeyRotator rotator1 = new GroqKeyRotator(redisTemplate, singleKey);
+        assertEquals(1, rotator1.getKeyCount());
+        assertEquals("key1", rotator1.getActiveKey());
     }
 
     @Test
-    @DisplayName("Tier 2 - B5.9: Exactly 5 keys validation throws when more than 5 keys configured")
-    void testValidateExactlyFiveKeys_FailsWhenMoreThanFive() {
-        List<String> sixKeys = List.of("k1", "k2", "k3", "k4", "k5", "k6");
-        IllegalStateException ex = assertThrows(IllegalStateException.class, () -> {
-            new GroqKeyRotator(redisTemplate, sixKeys);
-        });
-        assertTrue(ex.getMessage().contains("requires exactly 5 API keys, but found: 6"));
+    @DisplayName("Tier 2 - B5.8: Key rotation works dynamically with arbitrary key count")
+    void testDynamicKeyRotation_DifferentCounts() {
+        List<String> twoKeys = List.of("keyA", "keyB");
+        GroqKeyRotator rotator2 = new GroqKeyRotator(redisTemplate, twoKeys);
+        assertEquals(2, rotator2.getKeyCount());
+        assertEquals("keyA", rotator2.getActiveKey());
+        assertEquals("keyB", rotator2.getActiveKey());
+        assertEquals("keyA", rotator2.getActiveKey());
     }
 
     @Test
-    @DisplayName("Tier 2 - B5.10: Exactly 5 keys validation parses comma-separated keys with whitespace")
-    void testValidateExactlyFiveKeys_ParsesCommaSeparatedAndTrimsWhitespace() {
+    @DisplayName("Tier 2 - B5.10: Dynamic keys parsing parses comma-separated keys with whitespace")
+    void testValidateKeys_ParsesCommaSeparatedAndTrimsWhitespace() {
         List<String> commaSeparated = List.of("k1, k2 , k3", "k4", " k5 ");
         GroqKeyRotator rotator = new GroqKeyRotator(redisTemplate, commaSeparated);
         assertEquals(5, rotator.getKeyCount());

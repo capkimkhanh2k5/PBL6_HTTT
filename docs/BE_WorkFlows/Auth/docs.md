@@ -10,13 +10,6 @@
 
 ## 1. Google_OAuth2_Login_Flow.png — Luồng Đăng Nhập & Tự Động Đăng Ký Với Google
 
-**Lớp xử lý chính:**
-- `com.danasea.backend.security.authentication.presentation.controllers.AuthenticationController`
-- `com.danasea.backend.security.authentication.application.usecases.GoogleOAuth2LoginUseCase`
-- `com.danasea.backend.security.authentication.infrastructure.adapters.GoogleTokenVerifierAdapter`
-- `com.danasea.backend.modules.user.infrastructure.persistence.repositories.JpaUserRepository`
-- `com.danasea.backend.security.jwt.JwtTokenProvider`
-
 **Luồng nghiệp vụ chi tiết:**
 
 1. **Khách hàng thao tác trên Giao diện (Client Tier):**
