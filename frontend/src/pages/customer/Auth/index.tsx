@@ -1,16 +1,115 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuthStore } from "../../../store/useAuthStore";
 import { MOCK_TEST_ACCOUNTS } from "../../../mockData";
+import type { User } from "../../../types";
+
+const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID || "";
 
 export function Auth() {
   const [activeTab, setActiveTab] = useState("login");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [banner, setBanner] = useState<string | null>(null);
+  const [googleLoading, setGoogleLoading] = useState(false);
   
   const navigate = useNavigate();
   const login = useAuthStore(state => state.login);
+
+  useEffect(() => {
+    const handleCredentialResponse = async (response: any) => {
+      try {
+        setGoogleLoading(true);
+        setBanner(null);
+
+        const res = await fetch('/api/auth/oauth2/google', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ credential: response.credential }),
+        });
+
+        if (!res.ok) {
+          const errData = await res.json().catch(() => ({}));
+          console.error("Google Auth failed:", errData);
+          setBanner(errData.code === 'ACCOUNT_LOCKED' ? 'locked' : 'google_error');
+          return;
+        }
+
+        const data = await res.json();
+
+        let payload: any = {};
+        try {
+          payload = JSON.parse(atob(response.credential.split('.')[1]));
+        } catch {
+          // ignore parsing error
+        }
+
+        const userObj: User = {
+          id: data.userId,
+          email: data.email,
+          fullName: payload.name || data.email,
+          avatarUrl: payload.picture || '',
+          role: data.role || 'CUSTOMER',
+          isEmailVerified: true,
+          isLocked: false,
+          locale: 'vi',
+          phone: '',
+          passwordHash: ''
+        };
+
+        login(userObj, data.accessToken);
+
+        if (data.role === 'ADMIN') {
+          navigate('/admin');
+        } else if (data.role === 'VENDOR') {
+          navigate('/vendor');
+        } else {
+          navigate('/');
+        }
+      } catch (err) {
+        console.error("Google Sign-In Error:", err);
+        setBanner('google_error');
+      } finally {
+        setGoogleLoading(false);
+      }
+    };
+
+    const renderBtn = () => {
+      if (window.google?.accounts?.id) {
+        window.google.accounts.id.initialize({
+          client_id: GOOGLE_CLIENT_ID,
+          callback: handleCredentialResponse,
+        });
+
+        const btnElement = document.getElementById('googleSignInBtn');
+        if (btnElement) {
+          btnElement.innerHTML = '';
+          window.google.accounts.id.renderButton(btnElement, {
+            theme: 'outline',
+            size: 'large',
+            width: 320,
+            text: activeTab === 'login' ? 'signin_with' : 'signup_with',
+            shape: 'rectangular',
+            logo_alignment: 'left',
+          });
+        }
+      }
+    };
+
+    if (window.google?.accounts?.id) {
+      renderBtn();
+    } else {
+      const interval = setInterval(() => {
+        if (window.google?.accounts?.id) {
+          clearInterval(interval);
+          renderBtn();
+        }
+      }, 200);
+      return () => clearInterval(interval);
+    }
+  }, [activeTab]);
 
   const handleQuickLogin = (roleKey: 'customer' | 'vendor' | 'admin') => {
     const target = MOCK_TEST_ACCOUNTS[roleKey];
@@ -107,6 +206,26 @@ export function Auth() {
                     Tạo tài khoản mới
                   </button>
                 </div>
+
+                {/* Google OAuth2 Button */}
+                <div className="space-y-3 pt-2">
+                  <div className="flex flex-col items-center justify-center w-full">
+                    <div id="googleSignInBtn" className="min-h-[44px] flex items-center justify-center"></div>
+                    {googleLoading && (
+                      <div className="flex items-center gap-2 text-sm text-primary-container mt-2">
+                        <span className="material-symbols-outlined animate-spin text-base">progress_activity</span>
+                        <span>Đang xác thực Google OAuth2...</span>
+                      </div>
+                    )}
+                  </div>
+                  <div className="relative flex py-1 items-center">
+                    <div className="flex-grow border-t border-outline-variant/40"></div>
+                    <span className="flex-shrink mx-3 text-xs uppercase tracking-wider text-on-surface-variant font-medium">
+                      Hoặc {activeTab === "login" ? "đăng nhập với email" : "điền thông tin thủ công"}
+                    </span>
+                    <div className="flex-grow border-t border-outline-variant/40"></div>
+                  </div>
+                </div>
                 
                 {activeTab === "login" && (
                   <div className="space-y-space-lg block">
@@ -119,6 +238,11 @@ export function Auth() {
                       {banner === 'wrong_creds' && (
                         <div className="p-space-md rounded-2xl bg-error-container text-on-error-container">
                           <p className="font-body-sm text-body-sm font-medium">Email hoặc mật khẩu không chính xác. Vui lòng kiểm tra lại thông tin hoặc đặt lại mật khẩu.</p>
+                        </div>
+                      )}
+                      {banner === 'google_error' && (
+                        <div className="p-space-md rounded-2xl bg-error-container text-on-error-container">
+                          <p className="font-body-sm text-body-sm font-semibold">Đăng nhập bằng Google thất bại. Vui lòng thử lại sau.</p>
                         </div>
                       )}
                     </div>
@@ -220,6 +344,11 @@ export function Auth() {
                     {banner === 'register_error' && (
                       <div className="p-space-md rounded-2xl bg-error-container text-on-error-container">
                         <p className="font-body-sm text-body-sm font-semibold">Địa chỉ email này đã được đăng ký trong hệ thống DANASEA.</p>
+                      </div>
+                    )}
+                    {banner === 'google_error' && (
+                      <div className="p-space-md rounded-2xl bg-error-container text-on-error-container">
+                        <p className="font-body-sm text-body-sm font-semibold">Đăng ký bằng Google thất bại. Vui lòng thử lại sau.</p>
                       </div>
                     )}
                     <form className="space-y-space-md" onSubmit={handleRegisterSubmit}>

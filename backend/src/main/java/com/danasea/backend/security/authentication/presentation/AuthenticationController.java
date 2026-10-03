@@ -3,6 +3,8 @@ package com.danasea.backend.security.authentication.presentation;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.danasea.backend.security.authentication.application.usecases.GoogleOAuth2LoginUseCase;
+import com.danasea.backend.security.authentication.presentation.dtos.GoogleOAuth2Request;
 import com.danasea.backend.security.authentication.application.results.LoginResult;
 import com.danasea.backend.security.authentication.application.usecases.LoginUseCase;
 import com.danasea.backend.security.authentication.application.usecases.RegisterUseCase;
@@ -45,7 +47,22 @@ public class AuthenticationController {
     private final LogoutUseCase logoutUseCase;
     private final SendVerificationOtpUseCase sendVerificationOtpUseCase;
     private final VerifyOtpUseCase verifyOtpUseCase;
+    private final GoogleOAuth2LoginUseCase googleOAuth2LoginUseCase;
     private final JwtProperties jwtProperties;
+
+    @PostMapping("/oauth2/google")
+    @SecurityRequirements()
+    public AuthenticationResponse googleLogin(@Valid @RequestBody GoogleOAuth2Request request, HttpServletResponse response) {
+        LoginResult result = googleOAuth2LoginUseCase.execute(request.getEffectiveToken());
+
+        CookieUtils.addRefreshTokenCookie(response, result.refreshToken(), jwtProperties.refreshTokenMaxAgeSeconds());
+
+        return new AuthenticationResponse(
+                result.accessToken(),
+                result.userId(),
+                result.email(),
+                result.role());
+    }
 
     @PostMapping("/login")
     @SecurityRequirements()
