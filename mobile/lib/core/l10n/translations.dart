@@ -1268,5 +1268,13 @@ const englishTranslations = <String, String>{
   "• {0} khách": "• {0} guests",
   "📍 Đã gửi vị trí: Bến bãi Danang Ocean Club - Bãi biển Mỹ Khê": "📍 Location shared: Danang Ocean Club - Mỹ Khê Beach",
 
+  'Nhập email hợp lệ và mật khẩu từ 8 ký tự. Khi đăng ký, hãy nhập họ tên.': 'Enter a valid email and a password of at least 8 characters. Include your name when registering.',
 
+  "Hoặc": "Or",
+  "Chưa có tài khoản?": "Don't have an account?",
+  "Đã có tài khoản?": "Already have an account?",
+  "Đăng nhập mạng xã hội sắp ra mắt": "Social sign-in coming soon",
+  "Sắp ra mắt": "Coming soon",
+  "Hiện mật khẩu": "Show password",
+  "Ẩn mật khẩu": "Hide password",
 };
