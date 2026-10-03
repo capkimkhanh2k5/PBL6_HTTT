@@ -1,14 +1,18 @@
 package com.danasea.backend.modules.order.presentation.controllers;
 
-import com.danasea.backend.modules.order.domain.exceptions.OrderNotFoundException;
-import com.danasea.backend.modules.order.domain.services.RefundPolicyEngine;
-import com.danasea.backend.modules.order.infrastructure.persistence.entities.MasterOrderJpaEntity;
-import com.danasea.backend.modules.order.infrastructure.persistence.entities.SubOrderJpaEntity;
-import com.danasea.backend.modules.order.infrastructure.persistence.repositories.JpaMasterOrderRepository;
-import com.danasea.backend.modules.order.infrastructure.persistence.repositories.JpaSubOrderRepository;
-import com.danasea.backend.modules.order.presentation.dtos.CancellationPreviewResponse;
-import com.danasea.backend.modules.service.infrastructure.persistence.entities.ServiceSlotJpaEntity;
-import com.danasea.backend.modules.service.infrastructure.persistence.repositories.JpaServiceSlotRepository;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
+import java.util.List;
+import java.util.UUID;
+
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -16,7 +20,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
@@ -25,47 +28,56 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 
-import java.math.BigDecimal;
-import java.time.LocalDate;
-import java.time.LocalTime;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
-
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
+import com.danasea.backend.modules.order.application.dtos.CancellationPreviewResult;
+import com.danasea.backend.modules.order.application.dtos.CancellationPreviewResult.SubOrderCancellationPreviewResult;
+import com.danasea.backend.modules.order.application.dtos.CreateOrderCommand;
+import com.danasea.backend.modules.order.application.dtos.GetCancellationPreviewQuery;
+import com.danasea.backend.modules.order.application.dtos.GetCustomerOrdersQuery;
+import com.danasea.backend.modules.order.application.dtos.GetOrderDetailQuery;
+import com.danasea.backend.modules.order.application.dtos.MasterOrderDetailResult;
+import com.danasea.backend.modules.order.application.dtos.OrderRefundResult;
+import com.danasea.backend.modules.order.application.dtos.RequestRefundCommand;
+import com.danasea.backend.modules.order.application.usecases.CreateOrderUseCase;
+import com.danasea.backend.modules.order.application.usecases.GetCancellationPreviewUseCase;
+import com.danasea.backend.modules.order.application.usecases.GetCustomerOrdersUseCase;
+import com.danasea.backend.modules.order.application.usecases.GetOrderDetailUseCase;
+import com.danasea.backend.modules.order.application.usecases.RequestRefundUseCase;
+import com.danasea.backend.modules.order.domain.exceptions.OrderNotFoundException;
+import com.danasea.backend.modules.order.domain.models.MasterOrderStatus;
+import com.danasea.backend.modules.order.domain.models.OrderPagedResult;
+import com.danasea.backend.modules.order.domain.models.PaymentOrderStatus;
+import com.danasea.backend.modules.order.domain.models.RefundReason;
+import com.danasea.backend.modules.order.domain.models.RefundStatus;
+import com.danasea.backend.modules.order.presentation.dtos.CancellationPreviewResponse;
+import com.danasea.backend.modules.order.presentation.dtos.CreateOrderRequest;
+import com.danasea.backend.modules.order.presentation.dtos.OrderPageResponse;
+import com.danasea.backend.modules.order.presentation.dtos.OrderResponse;
+import com.danasea.backend.modules.order.presentation.dtos.RefundRequest;
+import com.danasea.backend.modules.order.presentation.dtos.RefundResponse;
 
 @ExtendWith(MockitoExtension.class)
 @DisplayName("OrderController Unit Tests")
 class OrderControllerTest {
 
     @Mock
-    private JpaMasterOrderRepository masterOrderRepository;
+    private CreateOrderUseCase createOrderUseCase;
 
     @Mock
-    private JpaSubOrderRepository subOrderRepository;
+    private GetOrderDetailUseCase getOrderDetailUseCase;
 
     @Mock
-    private JpaServiceSlotRepository serviceSlotRepository;
-
-    @Spy
-    private RefundPolicyEngine refundPolicyEngine = new RefundPolicyEngine();
+    private GetCustomerOrdersUseCase getCustomerOrdersUseCase;
 
     @Mock
-    private com.danasea.backend.modules.order.application.usecases.CreateOrderUseCase createOrderUseCase;
+    private RequestRefundUseCase requestRefundUseCase;
 
     @Mock
-    private com.danasea.backend.modules.order.application.usecases.GetOrderDetailUseCase getOrderDetailUseCase;
-
-    @Mock
-    private com.danasea.backend.modules.order.application.usecases.GetCustomerOrdersUseCase getCustomerOrdersUseCase;
+    private GetCancellationPreviewUseCase getCancellationPreviewUseCase;
 
     @InjectMocks
     private OrderController orderController;
 
     private UUID customerId;
-    private UUID otherCustomerId;
     private UUID masterOrderId;
     private UUID subOrderId;
     private UUID slotId;
@@ -73,7 +85,6 @@ class OrderControllerTest {
     @BeforeEach
     void setUp() {
         customerId = UUID.randomUUID();
-        otherCustomerId = UUID.randomUUID();
         masterOrderId = UUID.randomUUID();
         subOrderId = UUID.randomUUID();
         slotId = UUID.randomUUID();
@@ -99,26 +110,28 @@ class OrderControllerTest {
     void preview_ByMasterOrderId_AsOwner_Success200() {
         mockSecurityUser(customerId, "ROLE_CUSTOMER");
 
-        MasterOrderJpaEntity masterOrder = new MasterOrderJpaEntity();
-        masterOrder.setId(masterOrderId);
-        masterOrder.setCustomerId(customerId);
-        masterOrder.setTotalAmount(new BigDecimal("2000000.00"));
+        SubOrderCancellationPreviewResult itemResult = new SubOrderCancellationPreviewResult(
+                subOrderId,
+                UUID.randomUUID(),
+                slotId,
+                LocalDateTime.now().plusDays(5),
+                new BigDecimal("1000000.00"),
+                BigDecimal.valueOf(100.0),
+                new BigDecimal("1000000.00"),
+                "FULL_REFUND (>48h)"
+        );
 
-        SubOrderJpaEntity subOrder1 = new SubOrderJpaEntity();
-        subOrder1.setId(UUID.randomUUID());
-        subOrder1.setMasterOrderId(masterOrderId);
-        subOrder1.setSlotId(slotId);
-        subOrder1.setSubtotalAmount(new BigDecimal("1000000.00"));
+        CancellationPreviewResult result = new CancellationPreviewResult(
+                masterOrderId,
+                new BigDecimal("1000000.00"),
+                BigDecimal.valueOf(100.0),
+                new BigDecimal("1000000.00"),
+                "FULL_REFUND (>48h)",
+                List.of(itemResult)
+        );
 
-        LocalDate futureDate = LocalDate.now().plusDays(5); // > 48h -> 100%
-        ServiceSlotJpaEntity slot1 = new ServiceSlotJpaEntity();
-        slot1.setId(slotId);
-        slot1.setDate(futureDate);
-        slot1.setStartTime(LocalTime.of(10, 0));
-
-        when(masterOrderRepository.findById(masterOrderId)).thenReturn(Optional.of(masterOrder));
-        when(subOrderRepository.findByMasterOrderId(masterOrderId)).thenReturn(List.of(subOrder1));
-        when(serviceSlotRepository.findById(slotId)).thenReturn(Optional.of(slot1));
+        when(getCancellationPreviewUseCase.execute(any(GetCancellationPreviewQuery.class)))
+                .thenReturn(result);
 
         ResponseEntity<CancellationPreviewResponse> response = orderController.getCancellationPreview(masterOrderId);
 
@@ -131,6 +144,7 @@ class OrderControllerTest {
         assertEquals(BigDecimal.valueOf(100.0), body.refundPercentage());
         assertEquals(new BigDecimal("1000000.00"), body.refundAmount());
         assertEquals(1, body.items().size());
+        verify(getCancellationPreviewUseCase).execute(any(GetCancellationPreviewQuery.class));
     }
 
     @Test
@@ -138,26 +152,28 @@ class OrderControllerTest {
     void preview_BySubOrderId_AsOwner_Success200() {
         mockSecurityUser(customerId, "ROLE_CUSTOMER");
 
-        MasterOrderJpaEntity masterOrder = new MasterOrderJpaEntity();
-        masterOrder.setId(masterOrderId);
-        masterOrder.setCustomerId(customerId);
+        SubOrderCancellationPreviewResult itemResult = new SubOrderCancellationPreviewResult(
+                subOrderId,
+                UUID.randomUUID(),
+                slotId,
+                LocalDateTime.now().plusDays(1),
+                new BigDecimal("1000000.00"),
+                BigDecimal.valueOf(70.0),
+                new BigDecimal("700000.00"),
+                "PARTIAL_REFUND_70 (24h-48h)"
+        );
 
-        SubOrderJpaEntity subOrder = new SubOrderJpaEntity();
-        subOrder.setId(subOrderId);
-        subOrder.setMasterOrderId(masterOrderId);
-        subOrder.setSlotId(slotId);
-        subOrder.setSubtotalAmount(new BigDecimal("1000000.00"));
+        CancellationPreviewResult result = new CancellationPreviewResult(
+                subOrderId,
+                new BigDecimal("1000000.00"),
+                BigDecimal.valueOf(70.0),
+                new BigDecimal("700000.00"),
+                "PARTIAL_REFUND_70 (24h-48h)",
+                List.of(itemResult)
+        );
 
-        LocalDate tomorrow = LocalDate.now().plusDays(1); // within 24h-48h or 2h-24h
-        ServiceSlotJpaEntity slot = new ServiceSlotJpaEntity();
-        slot.setId(slotId);
-        slot.setDate(tomorrow);
-        slot.setStartTime(LocalTime.of(12, 0));
-
-        when(masterOrderRepository.findById(subOrderId)).thenReturn(Optional.empty());
-        when(subOrderRepository.findById(subOrderId)).thenReturn(Optional.of(subOrder));
-        when(masterOrderRepository.findById(masterOrderId)).thenReturn(Optional.of(masterOrder));
-        when(serviceSlotRepository.findById(slotId)).thenReturn(Optional.of(slot));
+        when(getCancellationPreviewUseCase.execute(any(GetCancellationPreviewQuery.class)))
+                .thenReturn(result);
 
         ResponseEntity<CancellationPreviewResponse> response = orderController.getCancellationPreview(subOrderId);
 
@@ -175,12 +191,17 @@ class OrderControllerTest {
     void preview_AsAdmin_Success200() {
         mockSecurityUser(UUID.randomUUID(), "ROLE_ADMIN");
 
-        MasterOrderJpaEntity masterOrder = new MasterOrderJpaEntity();
-        masterOrder.setId(masterOrderId);
-        masterOrder.setCustomerId(customerId); // different user
+        CancellationPreviewResult result = new CancellationPreviewResult(
+                masterOrderId,
+                BigDecimal.ZERO,
+                BigDecimal.ZERO,
+                BigDecimal.ZERO,
+                "STANDARD_CANCELLATION_POLICY",
+                List.of()
+        );
 
-        when(masterOrderRepository.findById(masterOrderId)).thenReturn(Optional.of(masterOrder));
-        when(subOrderRepository.findByMasterOrderId(masterOrderId)).thenReturn(List.of());
+        when(getCancellationPreviewUseCase.execute(any(GetCancellationPreviewQuery.class)))
+                .thenReturn(result);
 
         ResponseEntity<CancellationPreviewResponse> response = orderController.getCancellationPreview(masterOrderId);
 
@@ -191,13 +212,10 @@ class OrderControllerTest {
     @Test
     @DisplayName("Unauthorized customer accesses another customer's order -> 403 Forbidden")
     void preview_IdorViolation_ThrowsAccessDeniedException() {
-        mockSecurityUser(otherCustomerId, "ROLE_CUSTOMER");
+        mockSecurityUser(UUID.randomUUID(), "ROLE_CUSTOMER");
 
-        MasterOrderJpaEntity masterOrder = new MasterOrderJpaEntity();
-        masterOrder.setId(masterOrderId);
-        masterOrder.setCustomerId(customerId);
-
-        when(masterOrderRepository.findById(masterOrderId)).thenReturn(Optional.of(masterOrder));
+        when(getCancellationPreviewUseCase.execute(any(GetCancellationPreviewQuery.class)))
+                .thenThrow(new AccessDeniedException("User does not have permission to view cancellation preview for this order"));
 
         assertThrows(AccessDeniedException.class, () -> orderController.getCancellationPreview(masterOrderId));
     }
@@ -207,8 +225,8 @@ class OrderControllerTest {
     void preview_OrderNotFound_ThrowsOrderNotFoundException() {
         mockSecurityUser(customerId, "ROLE_CUSTOMER");
 
-        when(masterOrderRepository.findById(masterOrderId)).thenReturn(Optional.empty());
-        when(subOrderRepository.findById(masterOrderId)).thenReturn(Optional.empty());
+        when(getCancellationPreviewUseCase.execute(any(GetCancellationPreviewQuery.class)))
+                .thenThrow(new OrderNotFoundException(masterOrderId));
 
         assertThrows(OrderNotFoundException.class, () -> orderController.getCancellationPreview(masterOrderId));
     }
@@ -218,18 +236,17 @@ class OrderControllerTest {
     void preview_SubOrderMissingSlot_ReturnsZeroPercent() {
         mockSecurityUser(customerId, "ROLE_CUSTOMER");
 
-        MasterOrderJpaEntity masterOrder = new MasterOrderJpaEntity();
-        masterOrder.setId(masterOrderId);
-        masterOrder.setCustomerId(customerId);
+        CancellationPreviewResult result = new CancellationPreviewResult(
+                masterOrderId,
+                new BigDecimal("500000.00"),
+                BigDecimal.valueOf(0.0),
+                BigDecimal.ZERO,
+                "ZERO_REFUND_OR_EXPIRED",
+                List.of()
+        );
 
-        SubOrderJpaEntity subOrder = new SubOrderJpaEntity();
-        subOrder.setId(subOrderId);
-        subOrder.setMasterOrderId(masterOrderId);
-        subOrder.setSlotId(null);
-        subOrder.setSubtotalAmount(new BigDecimal("500000.00"));
-
-        when(masterOrderRepository.findById(masterOrderId)).thenReturn(Optional.of(masterOrder));
-        when(subOrderRepository.findByMasterOrderId(masterOrderId)).thenReturn(List.of(subOrder));
+        when(getCancellationPreviewUseCase.execute(any(GetCancellationPreviewQuery.class)))
+                .thenReturn(result);
 
         ResponseEntity<CancellationPreviewResponse> response = orderController.getCancellationPreview(masterOrderId);
 
@@ -245,37 +262,35 @@ class OrderControllerTest {
     void createOrder_CallsUseCase_Returns201Created() {
         mockSecurityUser(customerId, "ROLE_CUSTOMER");
         UUID bookingId = UUID.randomUUID();
-        com.danasea.backend.modules.order.presentation.dtos.CreateOrderRequest request =
-                new com.danasea.backend.modules.order.presentation.dtos.CreateOrderRequest(bookingId);
+        CreateOrderRequest request = new CreateOrderRequest(bookingId);
         String idempotencyKey = "order-create-idemp-12345";
 
-        com.danasea.backend.modules.order.application.dtos.MasterOrderDetailResult detailResult =
-                new com.danasea.backend.modules.order.application.dtos.MasterOrderDetailResult(
-                        masterOrderId,
-                        bookingId,
-                        customerId,
-                        com.danasea.backend.modules.order.domain.models.MasterOrderStatus.PENDING_PAYMENT,
-                        com.danasea.backend.modules.order.domain.models.PaymentOrderStatus.UNPAID,
-                        new BigDecimal("1000000"),
-                        BigDecimal.ZERO,
-                        null,
-                        null,
-                        idempotencyKey,
-                        null,
-                        List.of()
-                );
+        MasterOrderDetailResult detailResult = new MasterOrderDetailResult(
+                masterOrderId,
+                bookingId,
+                customerId,
+                MasterOrderStatus.PENDING_PAYMENT,
+                PaymentOrderStatus.UNPAID,
+                new BigDecimal("1000000"),
+                BigDecimal.ZERO,
+                null,
+                null,
+                idempotencyKey,
+                null,
+                List.of()
+        );
 
-        when(createOrderUseCase.execute(any(com.danasea.backend.modules.order.application.dtos.CreateOrderCommand.class)))
+        when(createOrderUseCase.execute(any(CreateOrderCommand.class)))
                 .thenReturn(detailResult);
 
-        ResponseEntity<com.danasea.backend.modules.order.presentation.dtos.OrderResponse> response =
+        ResponseEntity<OrderResponse> response =
                 orderController.createOrder(request, idempotencyKey);
 
         assertNotNull(response);
         assertEquals(201, response.getStatusCode().value());
         assertNotNull(response.getBody());
         assertEquals(masterOrderId, response.getBody().id());
-        assertEquals(com.danasea.backend.modules.order.domain.models.MasterOrderStatus.PENDING_PAYMENT, response.getBody().status());
+        assertEquals(MasterOrderStatus.PENDING_PAYMENT, response.getBody().status());
     }
 
     @Test
@@ -283,31 +298,29 @@ class OrderControllerTest {
     void getMyOrders_CallsUseCase_Returns200Ok() {
         mockSecurityUser(customerId, "ROLE_CUSTOMER");
 
-        com.danasea.backend.modules.order.application.dtos.MasterOrderDetailResult item =
-                new com.danasea.backend.modules.order.application.dtos.MasterOrderDetailResult(
-                        masterOrderId,
-                        UUID.randomUUID(),
-                        customerId,
-                        com.danasea.backend.modules.order.domain.models.MasterOrderStatus.PENDING_PAYMENT,
-                        com.danasea.backend.modules.order.domain.models.PaymentOrderStatus.UNPAID,
-                        new BigDecimal("500000"),
-                        BigDecimal.ZERO,
-                        null,
-                        null,
-                        "key",
-                        null,
-                        List.of()
-                );
+        MasterOrderDetailResult item = new MasterOrderDetailResult(
+                masterOrderId,
+                UUID.randomUUID(),
+                customerId,
+                MasterOrderStatus.PENDING_PAYMENT,
+                PaymentOrderStatus.UNPAID,
+                new BigDecimal("500000"),
+                BigDecimal.ZERO,
+                null,
+                null,
+                "key",
+                null,
+                List.of()
+        );
 
-        com.danasea.backend.modules.order.domain.models.OrderPagedResult<com.danasea.backend.modules.order.application.dtos.MasterOrderDetailResult> paged =
-                new com.danasea.backend.modules.order.domain.models.OrderPagedResult<>(
-                        List.of(item), 0, 20, 1L, 1
-                );
+        OrderPagedResult<MasterOrderDetailResult> paged = new OrderPagedResult<>(
+                List.of(item), 0, 20, 1L, 1
+        );
 
-        when(getCustomerOrdersUseCase.execute(any(com.danasea.backend.modules.order.application.dtos.GetCustomerOrdersQuery.class)))
+        when(getCustomerOrdersUseCase.execute(any(GetCustomerOrdersQuery.class)))
                 .thenReturn(paged);
 
-        ResponseEntity<com.danasea.backend.modules.order.presentation.dtos.OrderPageResponse<com.danasea.backend.modules.order.presentation.dtos.OrderResponse>> response =
+        ResponseEntity<OrderPageResponse<OrderResponse>> response =
                 orderController.getMyOrders(0, 20);
 
         assertNotNull(response);
@@ -322,32 +335,64 @@ class OrderControllerTest {
     void getOrder_CallsUseCase_Returns200Ok() {
         mockSecurityUser(customerId, "ROLE_CUSTOMER");
 
-        com.danasea.backend.modules.order.application.dtos.MasterOrderDetailResult detailResult =
-                new com.danasea.backend.modules.order.application.dtos.MasterOrderDetailResult(
-                        masterOrderId,
-                        UUID.randomUUID(),
-                        customerId,
-                        com.danasea.backend.modules.order.domain.models.MasterOrderStatus.PAID,
-                        com.danasea.backend.modules.order.domain.models.PaymentOrderStatus.PAID,
-                        new BigDecimal("1000000"),
-                        BigDecimal.ZERO,
-                        null,
-                        null,
-                        "key",
-                        null,
-                        List.of()
-                );
+        MasterOrderDetailResult detailResult = new MasterOrderDetailResult(
+                masterOrderId,
+                UUID.randomUUID(),
+                customerId,
+                MasterOrderStatus.PAID,
+                PaymentOrderStatus.PAID,
+                new BigDecimal("1000000"),
+                BigDecimal.ZERO,
+                null,
+                null,
+                "key",
+                null,
+                List.of()
+        );
 
-        when(getOrderDetailUseCase.execute(any(com.danasea.backend.modules.order.application.dtos.GetOrderDetailQuery.class)))
+        when(getOrderDetailUseCase.execute(any(GetOrderDetailQuery.class)))
                 .thenReturn(detailResult);
 
-        ResponseEntity<com.danasea.backend.modules.order.presentation.dtos.OrderResponse> response =
+        ResponseEntity<OrderResponse> response =
                 orderController.getOrder(masterOrderId);
 
         assertNotNull(response);
         assertEquals(200, response.getStatusCode().value());
         assertNotNull(response.getBody());
         assertEquals(masterOrderId, response.getBody().id());
-        assertEquals(com.danasea.backend.modules.order.domain.models.MasterOrderStatus.PAID, response.getBody().status());
+        assertEquals(MasterOrderStatus.PAID, response.getBody().status());
+    }
+
+    @Test
+    @DisplayName("Customer requests refund -> delegates to RequestRefundUseCase and returns 202 Accepted")
+    void requestRefund_CallsUseCase_Returns202Accepted() {
+        mockSecurityUser(customerId, "ROLE_CUSTOMER");
+        String idempotencyKey = "refund-idemp-12345";
+        RefundRequest request = new RefundRequest(RefundReason.CUSTOMER_REQUEST);
+
+        OrderRefundResult refundResult = new OrderRefundResult(
+                UUID.randomUUID(),
+                subOrderId,
+                new BigDecimal("500000.00"),
+                BigDecimal.valueOf(100.0),
+                RefundReason.CUSTOMER_REQUEST,
+                RefundStatus.PENDING,
+                "FULL_REFUND (>48h)"
+        );
+
+        when(requestRefundUseCase.execute(any(RequestRefundCommand.class)))
+                .thenReturn(List.of(refundResult));
+
+        ResponseEntity<List<RefundResponse>> response =
+                orderController.requestRefund(masterOrderId, request, idempotencyKey);
+
+        assertNotNull(response);
+        assertEquals(202, response.getStatusCode().value());
+        List<RefundResponse> body = response.getBody();
+        assertNotNull(body);
+        assertEquals(1, body.size());
+        assertEquals(subOrderId, body.get(0).subOrderId());
+        assertEquals(new BigDecimal("500000.00"), body.get(0).amount());
+        verify(requestRefundUseCase).execute(any(RequestRefundCommand.class));
     }
 }

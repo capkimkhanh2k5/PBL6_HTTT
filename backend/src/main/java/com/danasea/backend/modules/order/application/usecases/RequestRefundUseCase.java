@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -24,6 +25,7 @@ import com.danasea.backend.modules.order.domain.models.SubOrder;
 import com.danasea.backend.modules.order.domain.models.SubOrderStatus;
 import com.danasea.backend.modules.order.domain.ports.MasterOrderRepositoryPort;
 import com.danasea.backend.modules.order.domain.ports.PaymentGatewayPort;
+import com.danasea.backend.modules.order.domain.ports.ServiceSlotDepartureLookupPort;
 import com.danasea.backend.modules.order.domain.ports.SubOrderRepositoryPort;
 import com.danasea.backend.modules.order.domain.services.RefundPolicyEngine;
 
@@ -34,16 +36,33 @@ public class RequestRefundUseCase {
     private final SubOrderRepositoryPort subOrderRepository;
     private final PaymentGatewayPort paymentGatewayPort;
     private final RefundPolicyEngine refundPolicyEngine;
+    private final ServiceSlotDepartureLookupPort departureLookupPort;
+
+    @Autowired
+    public RequestRefundUseCase(
+            MasterOrderRepositoryPort masterOrderRepository,
+            SubOrderRepositoryPort subOrderRepository,
+            PaymentGatewayPort paymentGatewayPort,
+            RefundPolicyEngine refundPolicyEngine,
+            @Autowired(required = false) ServiceSlotDepartureLookupPort departureLookupPort) {
+        this.masterOrderRepository = masterOrderRepository;
+        this.subOrderRepository = subOrderRepository;
+        this.paymentGatewayPort = paymentGatewayPort;
+        this.refundPolicyEngine = refundPolicyEngine;
+        this.departureLookupPort = departureLookupPort;
+    }
 
     public RequestRefundUseCase(
             MasterOrderRepositoryPort masterOrderRepository,
             SubOrderRepositoryPort subOrderRepository,
             PaymentGatewayPort paymentGatewayPort,
             RefundPolicyEngine refundPolicyEngine) {
-        this.masterOrderRepository = masterOrderRepository;
-        this.subOrderRepository = subOrderRepository;
-        this.paymentGatewayPort = paymentGatewayPort;
-        this.refundPolicyEngine = refundPolicyEngine;
+        this(masterOrderRepository, subOrderRepository, paymentGatewayPort, refundPolicyEngine, null);
+    }
+
+    @Transactional
+    public List<OrderRefundResult> execute(RequestRefundCommand command) {
+        return execute(command, null);
     }
 
     @Transactional
@@ -100,9 +119,14 @@ public class RequestRefundUseCase {
                 throw new InvalidOrderStateException("Sub-order " + subOrder.getId() + " is already in terminal state: " + subOrder.getStatus());
             }
 
+            LocalDateTime effectiveDeparture = departureTime;
+            if (effectiveDeparture == null && subOrder.getSlotId() != null && departureLookupPort != null) {
+                effectiveDeparture = departureLookupPort.findDepartureTime(subOrder.getSlotId()).orElse(null);
+            }
+
             RefundEvaluationResult evaluation = refundPolicyEngine.evaluate(
                     reason,
-                    departureTime,
+                    effectiveDeparture,
                     cancelTime,
                     subOrder.getSubtotalAmount()
             );

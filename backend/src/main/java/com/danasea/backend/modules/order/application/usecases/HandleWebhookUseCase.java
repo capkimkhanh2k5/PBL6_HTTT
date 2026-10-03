@@ -2,9 +2,11 @@ package com.danasea.backend.modules.order.application.usecases;
 
 import java.util.List;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.danasea.backend.modules.order.application.OrderPaymentService;
 import com.danasea.backend.modules.order.application.dtos.HandleWebhookCommand;
 import com.danasea.backend.modules.order.application.dtos.WebhookProcessResult;
 import com.danasea.backend.modules.order.domain.exceptions.InvalidOrderStateException;
@@ -12,6 +14,7 @@ import com.danasea.backend.modules.order.domain.exceptions.OrderNotFoundExceptio
 import com.danasea.backend.modules.order.domain.exceptions.PaymentVerificationException;
 import com.danasea.backend.modules.order.domain.models.MasterOrder;
 import com.danasea.backend.modules.order.domain.models.MasterOrderStatus;
+import com.danasea.backend.modules.order.domain.models.PaymentProvider;
 import com.danasea.backend.modules.order.domain.models.PaymentStatus;
 import com.danasea.backend.modules.order.domain.models.SubOrder;
 import com.danasea.backend.modules.order.domain.ports.BookingStatusUpdatePort;
@@ -19,6 +22,7 @@ import com.danasea.backend.modules.order.domain.ports.MasterOrderRepositoryPort;
 import com.danasea.backend.modules.order.domain.ports.OrderEventPublisherPort;
 import com.danasea.backend.modules.order.domain.ports.PaymentGatewayPort;
 import com.danasea.backend.modules.order.domain.ports.SubOrderRepositoryPort;
+import com.danasea.backend.modules.order.presentation.dtos.PaymentWebhookResponse;
 
 @Service
 public class HandleWebhookUseCase {
@@ -28,6 +32,23 @@ public class HandleWebhookUseCase {
     private final PaymentGatewayPort paymentGatewayPort;
     private final BookingStatusUpdatePort bookingStatusUpdatePort;
     private final OrderEventPublisherPort orderEventPublisherPort;
+    private final OrderPaymentService orderPaymentService;
+
+    @Autowired
+    public HandleWebhookUseCase(
+            MasterOrderRepositoryPort masterOrderRepository,
+            SubOrderRepositoryPort subOrderRepository,
+            PaymentGatewayPort paymentGatewayPort,
+            BookingStatusUpdatePort bookingStatusUpdatePort,
+            OrderEventPublisherPort orderEventPublisherPort,
+            @Autowired(required = false) OrderPaymentService orderPaymentService) {
+        this.masterOrderRepository = masterOrderRepository;
+        this.subOrderRepository = subOrderRepository;
+        this.paymentGatewayPort = paymentGatewayPort;
+        this.bookingStatusUpdatePort = bookingStatusUpdatePort;
+        this.orderEventPublisherPort = orderEventPublisherPort;
+        this.orderPaymentService = orderPaymentService;
+    }
 
     public HandleWebhookUseCase(
             MasterOrderRepositoryPort masterOrderRepository,
@@ -35,11 +56,15 @@ public class HandleWebhookUseCase {
             PaymentGatewayPort paymentGatewayPort,
             BookingStatusUpdatePort bookingStatusUpdatePort,
             OrderEventPublisherPort orderEventPublisherPort) {
-        this.masterOrderRepository = masterOrderRepository;
-        this.subOrderRepository = subOrderRepository;
-        this.paymentGatewayPort = paymentGatewayPort;
-        this.bookingStatusUpdatePort = bookingStatusUpdatePort;
-        this.orderEventPublisherPort = orderEventPublisherPort;
+        this(masterOrderRepository, subOrderRepository, paymentGatewayPort, bookingStatusUpdatePort, orderEventPublisherPort, null);
+    }
+
+    @Transactional
+    public PaymentWebhookResponse execute(PaymentProvider provider, String rawPayload, String signature) {
+        if (orderPaymentService != null) {
+            return orderPaymentService.processWebhook(provider, rawPayload, signature);
+        }
+        throw new UnsupportedOperationException("OrderPaymentService is required to process raw webhook payloads.");
     }
 
     @Transactional

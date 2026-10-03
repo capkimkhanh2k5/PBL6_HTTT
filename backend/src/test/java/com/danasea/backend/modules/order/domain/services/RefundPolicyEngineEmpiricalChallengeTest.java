@@ -56,10 +56,7 @@ public class RefundPolicyEngineEmpiricalChallengeTest {
     @Mock
     private JpaServiceSlotRepository serviceSlotRepository;
 
-    @Spy
-    private RefundPolicyEngine spyRefundPolicyEngine = new RefundPolicyEngine();
-
-    @InjectMocks
+    private final RefundPolicyEngine spyRefundPolicyEngine = new RefundPolicyEngine();
     private OrderController orderController;
 
     @BeforeEach
@@ -493,8 +490,28 @@ public class RefundPolicyEngineEmpiricalChallengeTest {
 
         @BeforeEach
         void init() {
+            org.mockito.Mockito.reset(masterOrderRepository, subOrderRepository, serviceSlotRepository);
             customerId = UUID.randomUUID();
             masterOrderId = UUID.randomUUID();
+
+            com.danasea.backend.modules.order.infrastructure.persistence.mappers.MasterOrderMapper masterOrderMapper =
+                    new com.danasea.backend.modules.order.infrastructure.persistence.mappers.MasterOrderMapper();
+            com.danasea.backend.modules.order.infrastructure.persistence.mappers.SubOrderMapper subOrderMapper =
+                    new com.danasea.backend.modules.order.infrastructure.persistence.mappers.SubOrderMapper();
+            com.danasea.backend.modules.order.infrastructure.persistence.adapters.MasterOrderRepositoryAdapter masterOrderAdapter =
+                    new com.danasea.backend.modules.order.infrastructure.persistence.adapters.MasterOrderRepositoryAdapter(masterOrderRepository, masterOrderMapper);
+            com.danasea.backend.modules.order.infrastructure.persistence.adapters.SubOrderRepositoryAdapter subOrderAdapter =
+                    new com.danasea.backend.modules.order.infrastructure.persistence.adapters.SubOrderRepositoryAdapter(subOrderRepository, subOrderMapper);
+            com.danasea.backend.modules.order.infrastructure.adapters.ServiceSlotDepartureLookupAdapter slotAdapter =
+                    new com.danasea.backend.modules.order.infrastructure.adapters.ServiceSlotDepartureLookupAdapter(serviceSlotRepository);
+            com.danasea.backend.modules.order.application.usecases.GetCancellationPreviewUseCase previewUseCase =
+                    new com.danasea.backend.modules.order.application.usecases.GetCancellationPreviewUseCase(
+                            masterOrderAdapter,
+                            subOrderAdapter,
+                            slotAdapter,
+                            spyRefundPolicyEngine
+                    );
+            orderController = new OrderController(null, null, null, null, previewUseCase);
         }
 
         @Test

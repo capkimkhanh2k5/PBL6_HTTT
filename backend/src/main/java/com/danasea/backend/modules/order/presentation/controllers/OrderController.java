@@ -1,13 +1,12 @@
 package com.danasea.backend.modules.order.presentation.controllers;
 
-import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
+import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -22,24 +21,21 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.danasea.backend.modules.order.application.OrderPaymentService;
+import com.danasea.backend.modules.order.application.dtos.CancellationPreviewResult;
 import com.danasea.backend.modules.order.application.dtos.CreateOrderCommand;
+import com.danasea.backend.modules.order.application.dtos.GetCancellationPreviewQuery;
 import com.danasea.backend.modules.order.application.dtos.GetCustomerOrdersQuery;
 import com.danasea.backend.modules.order.application.dtos.GetOrderDetailQuery;
 import com.danasea.backend.modules.order.application.dtos.MasterOrderDetailResult;
+import com.danasea.backend.modules.order.application.dtos.OrderRefundResult;
+import com.danasea.backend.modules.order.application.dtos.RequestRefundCommand;
 import com.danasea.backend.modules.order.application.usecases.CreateOrderUseCase;
+import com.danasea.backend.modules.order.application.usecases.GetCancellationPreviewUseCase;
 import com.danasea.backend.modules.order.application.usecases.GetCustomerOrdersUseCase;
 import com.danasea.backend.modules.order.application.usecases.GetOrderDetailUseCase;
 import com.danasea.backend.modules.order.application.usecases.RequestRefundUseCase;
-import com.danasea.backend.modules.order.domain.exceptions.OrderNotFoundException;
 import com.danasea.backend.modules.order.domain.models.OrderPagedResult;
-import com.danasea.backend.modules.order.domain.models.RefundEvaluationResult;
 import com.danasea.backend.modules.order.domain.models.RefundReason;
-import com.danasea.backend.modules.order.domain.services.RefundPolicyEngine;
-import com.danasea.backend.modules.order.infrastructure.persistence.entities.MasterOrderJpaEntity;
-import com.danasea.backend.modules.order.infrastructure.persistence.entities.SubOrderJpaEntity;
-import com.danasea.backend.modules.order.infrastructure.persistence.repositories.JpaMasterOrderRepository;
-import com.danasea.backend.modules.order.infrastructure.persistence.repositories.JpaSubOrderRepository;
 import com.danasea.backend.modules.order.presentation.dtos.CancellationPreviewResponse;
 import com.danasea.backend.modules.order.presentation.dtos.CreateOrderRequest;
 import com.danasea.backend.modules.order.presentation.dtos.OrderPageResponse;
@@ -48,8 +44,6 @@ import com.danasea.backend.modules.order.presentation.dtos.RefundRequest;
 import com.danasea.backend.modules.order.presentation.dtos.RefundResponse;
 import com.danasea.backend.modules.order.presentation.dtos.SubOrderCancellationPreview;
 import com.danasea.backend.modules.order.presentation.dtos.SubOrderResponse;
-import com.danasea.backend.modules.service.infrastructure.persistence.entities.ServiceSlotJpaEntity;
-import com.danasea.backend.modules.service.infrastructure.persistence.repositories.JpaServiceSlotRepository;
 import com.danasea.backend.security.infrastructure.SecurityUtils;
 
 import jakarta.validation.Valid;
@@ -60,46 +54,24 @@ import lombok.extern.slf4j.Slf4j;
 @RequestMapping("/api/orders")
 public class OrderController {
 
-    private final JpaMasterOrderRepository masterOrderRepository;
-    private final JpaSubOrderRepository subOrderRepository;
-    private final JpaServiceSlotRepository serviceSlotRepository;
-    private final RefundPolicyEngine refundPolicyEngine;
-    private final OrderPaymentService orderPaymentService;
     private final CreateOrderUseCase createOrderUseCase;
     private final GetOrderDetailUseCase getOrderDetailUseCase;
     private final GetCustomerOrdersUseCase getCustomerOrdersUseCase;
     private final RequestRefundUseCase requestRefundUseCase;
+    private final GetCancellationPreviewUseCase getCancellationPreviewUseCase;
 
     @Autowired
     public OrderController(
-            JpaMasterOrderRepository masterOrderRepository,
-            JpaSubOrderRepository subOrderRepository,
-            JpaServiceSlotRepository serviceSlotRepository,
-            RefundPolicyEngine refundPolicyEngine,
-            OrderPaymentService orderPaymentService,
             CreateOrderUseCase createOrderUseCase,
             GetOrderDetailUseCase getOrderDetailUseCase,
             GetCustomerOrdersUseCase getCustomerOrdersUseCase,
-            RequestRefundUseCase requestRefundUseCase) {
-        this.masterOrderRepository = masterOrderRepository;
-        this.subOrderRepository = subOrderRepository;
-        this.serviceSlotRepository = serviceSlotRepository;
-        this.refundPolicyEngine = refundPolicyEngine;
-        this.orderPaymentService = orderPaymentService;
+            RequestRefundUseCase requestRefundUseCase,
+            GetCancellationPreviewUseCase getCancellationPreviewUseCase) {
         this.createOrderUseCase = createOrderUseCase;
         this.getOrderDetailUseCase = getOrderDetailUseCase;
         this.getCustomerOrdersUseCase = getCustomerOrdersUseCase;
         this.requestRefundUseCase = requestRefundUseCase;
-    }
-
-    public OrderController(
-            JpaMasterOrderRepository masterOrderRepository,
-            JpaSubOrderRepository subOrderRepository,
-            JpaServiceSlotRepository serviceSlotRepository,
-            RefundPolicyEngine refundPolicyEngine,
-            OrderPaymentService orderPaymentService) {
-        this(masterOrderRepository, subOrderRepository, serviceSlotRepository, refundPolicyEngine,
-                orderPaymentService, null, null, null, null);
+        this.getCancellationPreviewUseCase = getCancellationPreviewUseCase;
     }
 
     @PostMapping
@@ -108,14 +80,10 @@ public class OrderController {
             @Valid @RequestBody CreateOrderRequest request,
             @RequestHeader("Idempotency-Key") String idempotencyKey) {
         UUID userId = currentUserId();
-        if (createOrderUseCase != null) {
-            MasterOrderDetailResult result = createOrderUseCase.execute(
-                    new CreateOrderCommand(userId, request.bookingId(), idempotencyKey));
-            return ResponseEntity.status(org.springframework.http.HttpStatus.CREATED)
-                    .body(toOrderResponse(result));
-        }
-        return ResponseEntity.status(org.springframework.http.HttpStatus.CREATED)
-                .body(orderPaymentService.createOrder(userId, request.bookingId(), idempotencyKey));
+        MasterOrderDetailResult result = createOrderUseCase.execute(
+                new CreateOrderCommand(userId, request.bookingId(), idempotencyKey));
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(toOrderResponse(result));
     }
 
     @GetMapping
@@ -123,32 +91,26 @@ public class OrderController {
     public ResponseEntity<OrderPageResponse<OrderResponse>> getMyOrders(
             @RequestParam(name = "page", defaultValue = "0") int page,
             @RequestParam(name = "size", defaultValue = "20") int size) {
-        if (getCustomerOrdersUseCase != null) {
-            OrderPagedResult<MasterOrderDetailResult> paged = getCustomerOrdersUseCase.execute(
-                    new GetCustomerOrdersQuery(currentUserId(), page, size));
-            List<OrderResponse> content = paged.content().stream()
-                    .map(this::toOrderResponse)
-                    .toList();
-            return ResponseEntity.ok(new OrderPageResponse<>(
-                    content,
-                    paged.page(),
-                    paged.size(),
-                    paged.totalElements(),
-                    paged.totalPages()
-            ));
-        }
-        return ResponseEntity.ok(orderPaymentService.getCustomerOrders(currentUserId(), page, size));
+        OrderPagedResult<MasterOrderDetailResult> paged = getCustomerOrdersUseCase.execute(
+                new GetCustomerOrdersQuery(currentUserId(), page, size));
+        List<OrderResponse> content = paged.content().stream()
+                .map(this::toOrderResponse)
+                .toList();
+        return ResponseEntity.ok(new OrderPageResponse<>(
+                content,
+                paged.page(),
+                paged.size(),
+                paged.totalElements(),
+                paged.totalPages()
+        ));
     }
 
     @GetMapping("/{id}")
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<OrderResponse> getOrder(@PathVariable("id") UUID id) {
-        if (getOrderDetailUseCase != null) {
-            MasterOrderDetailResult result = getOrderDetailUseCase.execute(
-                    new GetOrderDetailQuery(currentUserId(), id, isAdmin()));
-            return ResponseEntity.ok(toOrderResponse(result));
-        }
-        return ResponseEntity.ok(orderPaymentService.getOrder(currentUserId(), id, isAdmin()));
+        MasterOrderDetailResult result = getOrderDetailUseCase.execute(
+                new GetOrderDetailQuery(currentUserId(), id, isAdmin()));
+        return ResponseEntity.ok(toOrderResponse(result));
     }
 
     @PostMapping("/{id}/refund-request")
@@ -158,115 +120,34 @@ public class OrderController {
             @RequestBody(required = false) RefundRequest request,
             @RequestHeader("Idempotency-Key") String idempotencyKey) {
         RefundReason reason = request == null ? RefundReason.CUSTOMER_REQUEST : request.reason();
-        return ResponseEntity.status(org.springframework.http.HttpStatus.ACCEPTED)
-                .body(orderPaymentService.requestRefund(currentUserId(), id, reason, idempotencyKey));
+        RequestRefundCommand command = new RequestRefundCommand(
+                currentUserId(),
+                id,
+                reason,
+                idempotencyKey,
+                LocalDateTime.now()
+        );
+        List<OrderRefundResult> results = requestRefundUseCase.execute(command);
+        List<RefundResponse> responses = results.stream()
+                .map(r -> new RefundResponse(
+                        r.refundId(),
+                        r.subOrderId(),
+                        r.amount(),
+                        r.refundPercentage(),
+                        r.reason(),
+                        r.status(),
+                        OffsetDateTime.now()
+                ))
+                .toList();
+        return ResponseEntity.status(HttpStatus.ACCEPTED).body(responses);
     }
 
     @GetMapping("/{id}/cancellation-preview")
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<CancellationPreviewResponse> getCancellationPreview(@PathVariable("id") UUID id) {
-        UUID currentUserId = currentUserId();
-
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        boolean isAdmin = auth != null && auth.getAuthorities().stream()
-                .anyMatch(a -> "ROLE_ADMIN".equals(a.getAuthority()));
-
-        MasterOrderJpaEntity masterOrder;
-        List<SubOrderJpaEntity> subOrders;
-
-        var masterOrderOpt = masterOrderRepository.findById(id);
-        if (masterOrderOpt.isPresent()) {
-            masterOrder = masterOrderOpt.get();
-            subOrders = subOrderRepository.findByMasterOrderId(id);
-        } else {
-            var subOrderOpt = subOrderRepository.findById(id);
-            if (subOrderOpt.isPresent()) {
-                SubOrderJpaEntity subOrder = subOrderOpt.get();
-                masterOrder = masterOrderRepository.findById(subOrder.getMasterOrderId())
-                        .orElseThrow(() -> new OrderNotFoundException("Master order not found for sub-order: " + id));
-                subOrders = List.of(subOrder);
-            } else {
-                throw new OrderNotFoundException("Order not found with id: " + id);
-            }
-        }
-
-        // IDOR security check
-        if (!isAdmin && (masterOrder.getCustomerId() == null || !masterOrder.getCustomerId().equals(currentUserId))) {
-            throw new AccessDeniedException("User does not have permission to view cancellation preview for this order");
-        }
-
-        LocalDateTime now = LocalDateTime.now();
-        List<SubOrderCancellationPreview> items = new ArrayList<>();
-        BigDecimal totalOriginalAmount = BigDecimal.ZERO;
-        BigDecimal totalRefundAmount = BigDecimal.ZERO;
-
-        for (SubOrderJpaEntity subOrder : subOrders) {
-            LocalDateTime departureTime = null;
-            if (subOrder.getSlotId() != null) {
-                var slotOpt = serviceSlotRepository.findById(subOrder.getSlotId());
-                if (slotOpt.isPresent()) {
-                    ServiceSlotJpaEntity slot = slotOpt.get();
-                    if (slot.getDate() != null && slot.getStartTime() != null) {
-                        departureTime = LocalDateTime.of(slot.getDate(), slot.getStartTime());
-                    }
-                }
-            }
-
-            BigDecimal originalAmount = subOrder.getSubtotalAmount() != null
-                    ? subOrder.getSubtotalAmount()
-                    : BigDecimal.ZERO;
-
-            RefundEvaluationResult eval = refundPolicyEngine.evaluate(
-                    RefundReason.CUSTOMER_REQUEST,
-                    departureTime,
-                    now,
-                    originalAmount
-            );
-
-            String policyApplied = refundPolicyEngine.getPolicyDescription(RefundReason.CUSTOMER_REQUEST, eval.refundPercentage());
-
-            items.add(new SubOrderCancellationPreview(
-                    subOrder.getId(),
-                    subOrder.getServiceId(),
-                    subOrder.getSlotId(),
-                    departureTime,
-                    originalAmount,
-                    eval.refundPercentage(),
-                    eval.refundAmount(),
-                    policyApplied
-            ));
-
-            totalOriginalAmount = totalOriginalAmount.add(originalAmount);
-            totalRefundAmount = totalRefundAmount.add(eval.refundAmount());
-        }
-
-        BigDecimal overallPercentage;
-        if (totalOriginalAmount.compareTo(BigDecimal.ZERO) > 0) {
-            overallPercentage = totalRefundAmount.multiply(BigDecimal.valueOf(100.0))
-                    .divide(totalOriginalAmount, 1, RoundingMode.HALF_UP);
-        } else {
-            overallPercentage = BigDecimal.valueOf(0.0);
-        }
-
-        String masterPolicyApplied;
-        if (items.isEmpty()) {
-            masterPolicyApplied = "STANDARD_CANCELLATION_POLICY";
-        } else {
-            String firstPolicy = items.get(0).policyApplied();
-            boolean allSame = items.stream().allMatch(item -> firstPolicy.equals(item.policyApplied()));
-            masterPolicyApplied = allSame ? firstPolicy : "STANDARD_CANCELLATION_POLICY (Mixed items)";
-        }
-
-        CancellationPreviewResponse response = new CancellationPreviewResponse(
-                id,
-                totalOriginalAmount,
-                overallPercentage,
-                totalRefundAmount,
-                masterPolicyApplied,
-                items
-        );
-
-        return ResponseEntity.ok(response);
+        CancellationPreviewResult result = getCancellationPreviewUseCase.execute(
+                new GetCancellationPreviewQuery(currentUserId(), id, isAdmin()));
+        return ResponseEntity.ok(toCancellationPreviewResponse(result));
     }
 
     private OrderResponse toOrderResponse(MasterOrderDetailResult r) {
@@ -294,6 +175,31 @@ public class OrderController {
                 items,
                 r.createdAt(),
                 r.createdAt()
+        );
+    }
+
+    private CancellationPreviewResponse toCancellationPreviewResponse(CancellationPreviewResult r) {
+        if (r == null) {
+            return null;
+        }
+        List<SubOrderCancellationPreview> items = r.items() == null ? List.of() : r.items().stream()
+                .map(item -> new SubOrderCancellationPreview(
+                        item.subOrderId(),
+                        item.serviceId(),
+                        item.slotId(),
+                        item.departureTime(),
+                        item.originalAmount(),
+                        item.refundPercentage(),
+                        item.refundAmount(),
+                        item.policyApplied()
+                )).toList();
+        return new CancellationPreviewResponse(
+                r.orderId(),
+                r.originalAmount(),
+                r.refundPercentage(),
+                r.refundAmount(),
+                r.policyApplied(),
+                items
         );
     }
 
