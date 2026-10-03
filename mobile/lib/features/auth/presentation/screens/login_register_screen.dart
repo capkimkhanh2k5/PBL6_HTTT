@@ -1,9 +1,8 @@
 import 'package:mobile/core/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import '../../../../core/theme/app_colors.dart';
-import '../../../../core/theme/app_shapes.dart';
 import '../../../../core/theme/app_typography.dart';
-import '../../../../shared/widgets/app_pill_button.dart';
+import '../../../home/presentation/screens/home_screen.dart';
 import 'forgot_password_screen.dart';
 
 class LoginRegisterScreen extends StatefulWidget {
@@ -15,7 +14,9 @@ class LoginRegisterScreen extends StatefulWidget {
   State<LoginRegisterScreen> createState() => _LoginRegisterScreenState();
 }
 
-class _LoginRegisterScreenState extends State<LoginRegisterScreen> {
+class _LoginRegisterScreenState extends State<LoginRegisterScreen>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _intro;
   late bool _isLogin;
   bool _obscurePassword = true;
 
@@ -28,10 +29,16 @@ class _LoginRegisterScreenState extends State<LoginRegisterScreen> {
   void initState() {
     super.initState();
     _isLogin = widget.initialIsLogin;
+    _intro = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 5400),
+    );
+    _intro.forward();
   }
 
   @override
   void dispose() {
+    _intro.dispose();
     _emailController.dispose();
     _passwordController.dispose();
     _nameController.dispose();
@@ -40,6 +47,20 @@ class _LoginRegisterScreenState extends State<LoginRegisterScreen> {
   }
 
   void _submit() {
+    final email = _emailController.text.trim();
+    if (!RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$').hasMatch(email) ||
+        _passwordController.text.length < 8 ||
+        (!_isLogin && _nameController.text.trim().isEmpty)) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: LocalizedText(
+            'Nhập email hợp lệ và mật khẩu từ 8 ký tự. Khi đăng ký, hãy nhập họ tên.',
+          ),
+        ),
+      );
+      return;
+    }
+    FocusScope.of(context).unfocus();
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: LocalizedText(
@@ -50,294 +71,481 @@ class _LoginRegisterScreenState extends State<LoginRegisterScreen> {
         backgroundColor: AppColors.secondary,
       ),
     );
-    Navigator.pop(context);
+    if (_isLogin) {
+      Navigator.of(context).pushAndRemoveUntil(
+        PageRouteBuilder<void>(
+          pageBuilder: (_, animation, secondaryAnimation) => const HomeScreen(),
+          transitionsBuilder: (_, animation, secondaryAnimation, child) =>
+              FadeTransition(opacity: animation, child: child),
+          transitionDuration: const Duration(milliseconds: 450),
+        ),
+        (_) => false,
+      );
+    } else {
+      setState(() => _isLogin = true);
+    }
   }
 
   @override
   Widget build(BuildContext context) {
+    final reducedMotion = MediaQuery.disableAnimationsOf(context);
+    final top = MediaQuery.paddingOf(context).top;
+    final screenHeight = MediaQuery.sizeOf(context).height;
     return Scaffold(
       backgroundColor: AppColors.surface,
-      appBar: AppBar(
-        backgroundColor: AppColors.surface,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.close, color: AppColors.onSurface),
-          onPressed: () => Navigator.pop(context),
+      body: LayoutBuilder(
+        builder: (context, constraints) {
+          final form = RepaintBoundary(
+            child: SingleChildScrollView(
+              padding: EdgeInsets.fromLTRB(24, top + 155, 24, 20),
+              child: ConstrainedBox(
+                constraints: BoxConstraints(
+                  minHeight: (constraints.maxHeight - top - 175).clamp(
+                    0.0,
+                    double.infinity,
+                  ),
+                ),
+                child: IntrinsicHeight(
+                  child: AutofillGroup(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children:
+                          [
+                            LocalizedText(
+                              _isLogin ? 'Đăng nhập' : 'Đăng ký',
+                              style: AppTypography.headlineMd().copyWith(
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                            const SizedBox(height: 24),
+                            if (!_isLogin) ...[
+                              _field(
+                                'Họ và tên',
+                                'Họ và tên của bạn',
+                                _nameController,
+                                autofill: AutofillHints.name,
+                              ),
+                              const SizedBox(height: 16),
+                            ],
+                            _field(
+                              'Email',
+                              'Nhập địa chỉ email',
+                              _emailController,
+                              keyboard: TextInputType.emailAddress,
+                              autofill: AutofillHints.email,
+                            ),
+                            const SizedBox(height: 16),
+                            _field(
+                              'Mật khẩu',
+                              'Nhập mật khẩu',
+                              _passwordController,
+                              password: true,
+                              autofill: _isLogin
+                                  ? AutofillHints.password
+                                  : AutofillHints.newPassword,
+                            ),
+                            if (_isLogin)
+                              Align(
+                                alignment: Alignment.centerRight,
+                                child: TextButton(
+                                  style: TextButton.styleFrom(
+                                    foregroundColor: AppColors.secondary,
+                                  ),
+                                  onPressed: () => Navigator.push(
+                                    context,
+                                    MaterialPageRoute<void>(
+                                      builder: (_) =>
+                                          const ForgotPasswordScreen(),
+                                    ),
+                                  ),
+                                  child: const LocalizedText('Quên mật khẩu?'),
+                                ),
+                              )
+                            else
+                              const SizedBox(height: 20),
+                            FilledButton(
+                              style: FilledButton.styleFrom(
+                                backgroundColor: AppColors.secondary,
+                                foregroundColor: Colors.white,
+                                minimumSize: const Size(double.infinity, 52),
+                                textStyle: AppTypography.bodyMd(
+                                  fontWeight: FontWeight.w600,
+                                ),
+                                shape: const StadiumBorder(),
+                              ),
+                              onPressed: _submit,
+                              child: LocalizedText(
+                                _isLogin ? 'Đăng nhập' : 'Đăng ký',
+                              ),
+                            ),
+                            const SizedBox(height: 26),
+                            Row(
+                              children: [
+                                const Expanded(
+                                  child: Divider(
+                                    color: AppColors.outlineVariant,
+                                  ),
+                                ),
+                                Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 14,
+                                  ),
+                                  child: LocalizedText(
+                                    'Hoặc',
+                                    style: AppTypography.bodySm(
+                                      color: AppColors.outline,
+                                    ),
+                                  ),
+                                ),
+                                const Expanded(
+                                  child: Divider(
+                                    color: AppColors.outlineVariant,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 20),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                _social(
+                                  'Facebook',
+                                  const Icon(
+                                    Icons.facebook,
+                                    color: Color(0xFF1877F2),
+                                    size: 28,
+                                  ),
+                                ),
+                                const SizedBox(width: 18),
+                                _social(
+                                  'Google',
+                                  const Text(
+                                    'G',
+                                    style: TextStyle(
+                                      fontSize: 26,
+                                      fontWeight: FontWeight.w700,
+                                      color: Color(0xFF4285F4),
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(width: 18),
+                                _social(
+                                  'Apple',
+                                  const Icon(
+                                    Icons.apple,
+                                    color: Colors.black,
+                                    size: 29,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 12),
+                            LocalizedText(
+                              'Đăng nhập mạng xã hội sắp ra mắt',
+                              textAlign: TextAlign.center,
+                              style: AppTypography.bodySm(
+                                color: AppColors.outline,
+                              ).copyWith(fontSize: 11),
+                            ),
+                            const SizedBox(height: 40),
+                            const Spacer(),
+                            Wrap(
+                              alignment: WrapAlignment.center,
+                              crossAxisAlignment: WrapCrossAlignment.center,
+                              children: [
+                                LocalizedText(
+                                  _isLogin
+                                      ? 'Chưa có tài khoản?'
+                                      : 'Đã có tài khoản?',
+                                  style: AppTypography.bodySm(
+                                    color: AppColors.outline,
+                                  ),
+                                ),
+                                TextButton(
+                                  style: TextButton.styleFrom(
+                                    foregroundColor: AppColors.secondary,
+                                  ),
+                                  onPressed: () =>
+                                      setState(() => _isLogin = !_isLogin),
+                                  child: LocalizedText(
+                                    _isLogin ? 'Đăng ký' : 'Đăng nhập',
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ].asMap().entries.map((entry) {
+                            if (entry.value is Spacer ||
+                                entry.value is SizedBox)
+                              return entry.value;
+                            return AnimatedBuilder(
+                              animation: _intro,
+                              child: entry.value,
+                              builder: (context, child) {
+                                final t = reducedMotion ? 1.0 : _intro.value;
+                                final start =
+                                    .82 +
+                                    (entry.key / 35).clamp(0.0, 1.0) * .04;
+                                final p = _phase(t, start, start + .075);
+                                return Opacity(
+                                  opacity: p,
+                                  child: Transform.translate(
+                                    offset: Offset(0, -12 * (1 - p)),
+                                    child: child,
+                                  ),
+                                );
+                              },
+                            );
+                          }).toList(),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          );
+          return AnimatedBuilder(
+            animation: _intro,
+            child: form,
+            builder: (context, child) {
+              final t = reducedMotion ? 1.0 : _intro.value;
+              final enter = _phase(t, 0, 1200 / 5400, Curves.easeInOutCubic);
+              final exit = _phase(
+                t,
+                2700 / 5400,
+                3000 / 5400,
+                Curves.easeInCubic,
+              );
+              final lift = _phase(
+                t,
+                3050 / 5400,
+                4000 / 5400,
+                Curves.easeInOutCubic,
+              );
+              final heading = _phase(
+                t,
+                4050 / 5400,
+                4425 / 5400,
+                Curves.easeInOutCubic,
+              );
+              return Stack(
+                clipBehavior: Clip.hardEdge,
+                children: [
+                  IgnorePointer(ignoring: t < .935, child: child!),
+                  IgnorePointer(
+                    child: ClipPath(
+                      clipper: _LoginHeaderClipper(lift),
+                      child: Container(
+                        key: const ValueKey('login-curtain'),
+                        height: screenHeight * (1 - lift) + (top + 156) * lift,
+                        width: double.infinity,
+                        color: AppColors.secondary,
+                      ),
+                    ),
+                  ),
+                  if (t < 3050 / 5400)
+                    Positioned.fill(
+                      child: IgnorePointer(
+                        child: Center(
+                          child: Opacity(
+                            opacity: enter * (1 - exit),
+                            child: Transform.translate(
+                              offset: Offset(
+                                MediaQuery.sizeOf(context).width * exit,
+                                30 * (1 - enter),
+                              ),
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  const Icon(
+                                    Icons.waves_rounded,
+                                    key: ValueKey('login-brand-symbol'),
+                                    color: Colors.white,
+                                    size: 32,
+                                  ),
+                                  const SizedBox(height: 10),
+                                  Text(
+                                    'DANASEA',
+                                    key: const ValueKey('intro-wordmark'),
+                                    style: AppTypography.headlineMd(
+                                      color: Colors.white,
+                                    ).copyWith(fontSize: 23, letterSpacing: 5),
+                                  ),
+                                  const SizedBox(height: 8),
+                                  LocalizedText(
+                                    'Chạm sóng biển, mở chuyến đi riêng',
+                                    style: AppTypography.bodySm(
+                                      color: const Color(0xFFD5F0F2),
+                                    ).copyWith(fontSize: 10),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  if (t >= 4000 / 5400)
+                    Positioned(
+                      left: 24,
+                      right: 24,
+                      top: top + 22,
+                      child: IgnorePointer(
+                        child: Opacity(
+                          opacity: heading,
+                          child: Transform.translate(
+                            offset: Offset(0, 8 * (1 - heading)),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'DANASEA',
+                                  style: AppTypography.headlineMd(
+                                    color: Colors.white,
+                                  ).copyWith(fontSize: 22, letterSpacing: 4),
+                                ),
+                                const SizedBox(height: 6),
+                                LocalizedText(
+                                  'Chào mừng trở lại!',
+                                  style: AppTypography.bodySm(
+                                    color: const Color(0xFFD5F0F2),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                ],
+              );
+            },
+          );
+        },
+      ),
+    );
+  }
+
+  double _phase(
+    double t,
+    double start,
+    double end, [
+    Curve curve = Curves.easeOutCubic,
+  ]) => curve.transform(((t - start) / (end - start)).clamp(0.0, 1.0));
+
+  Widget _field(
+    String label,
+    String hint,
+    TextEditingController controller, {
+    bool password = false,
+    TextInputType? keyboard,
+    String? autofill,
+  }) => Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      LocalizedText(
+        label,
+        style: AppTypography.bodySm(
+          color: AppColors.onSurface,
+          fontWeight: FontWeight.w600,
         ),
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.symmetric(horizontal: AppShapes.gutterMobile),
-        child: Column(
-          children: [
-            // BRAND LOGO & TITLE
-            Container(
-              width: 56,
-              height: 56,
-              decoration: const BoxDecoration(
-                color: AppColors.secondary,
-                shape: BoxShape.circle,
-              ),
-              child: const Icon(Icons.surfing, size: 30, color: Colors.white),
-            ),
-            const SizedBox(height: 10),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                LocalizedText(
-                  'DANA',
-                  style: AppTypography.headlineLg(color: AppColors.onSurface),
-                ),
-                LocalizedText(
-                  'SEA',
-                  style: AppTypography.headlineLg(color: AppColors.primary),
-                ),
-              ],
-            ),
-            const SizedBox(height: 4),
-            LocalizedText(
-              'Trải nghiệm thể thao & đại dương nguyên bản Đà Nẵng',
-              style: AppTypography.bodySm(color: AppColors.onSurfaceVariant),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 16),
-
-            // LIVE OCEAN AMBIENT STRIP
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-              decoration: BoxDecoration(
-                color: AppColors.secondaryContainer.withValues(alpha: 0.35),
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const Icon(Icons.waves, size: 16, color: AppColors.secondary),
-                  const SizedBox(width: 6),
-                  Flexible(
-                    child: LocalizedText(
-                      'Sóng 0.8m • Biển êm • 26°C • Cập nhật',
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: AppTypography.labelSm(
-                        color: AppColors.onSecondaryFixedVariant,
-                        fontWeight: FontWeight.w700,
-                      ).copyWith(fontSize: 11),
-                    ),
+      const SizedBox(height: 8),
+      TextField(
+        controller: controller,
+        cursorColor: AppColors.secondary,
+        obscureText: password && _obscurePassword,
+        keyboardType: keyboard,
+        autofillHints: autofill == null ? null : [autofill],
+        autocorrect: !password,
+        enableSuggestions: !password,
+        textInputAction: password ? TextInputAction.done : TextInputAction.next,
+        onSubmitted: password ? (_) => _submit() : null,
+        style: AppTypography.bodyMd(),
+        decoration: InputDecoration(
+          hintText: tr(context, hint),
+          hintStyle: AppTypography.bodySm(color: AppColors.outline),
+          filled: true,
+          fillColor: Colors.white,
+          contentPadding: const EdgeInsets.symmetric(
+            horizontal: 16,
+            vertical: 16,
+          ),
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(13),
+            borderSide: BorderSide.none,
+          ),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(13),
+            borderSide: BorderSide.none,
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(13),
+            borderSide: const BorderSide(color: AppColors.secondary),
+          ),
+          suffixIcon: password
+              ? IconButton(
+                  tooltip: tr(
+                    context,
+                    _obscurePassword ? 'Hiện mật khẩu' : 'Ẩn mật khẩu',
                   ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 20),
-
-            // TAB SWITCHER PILLS
-            Container(
-              padding: const EdgeInsets.all(4),
-              decoration: BoxDecoration(
-                color: AppColors.surfaceContainerHigh,
-                borderRadius: BorderRadius.circular(24),
-              ),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: InkWell(
-                      onTap: () => setState(() => _isLogin = true),
-                      borderRadius: BorderRadius.circular(20),
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(vertical: 8),
-                        decoration: BoxDecoration(
-                          color: _isLogin
-                              ? AppColors.surfaceContainerLowest
-                              : Colors.transparent,
-                          borderRadius: BorderRadius.circular(20),
-                          boxShadow: _isLogin
-                              ? [
-                                  BoxShadow(
-                                    color: Colors.black.withValues(alpha: 0.05),
-                                    blurRadius: 4,
-                                  )
-                                ]
-                              : null,
-                        ),
-                        child: Center(
-                          child: LocalizedText(
-                            'Đăng nhập',
-                            style: AppTypography.labelMd(
-                              color: _isLogin
-                                  ? AppColors.onSurface
-                                  : AppColors.onSurfaceVariant,
-                              fontWeight:
-                                  _isLogin ? FontWeight.w700 : FontWeight.w500,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
+                  onPressed: () =>
+                      setState(() => _obscurePassword = !_obscurePassword),
+                  icon: Icon(
+                    _obscurePassword
+                        ? Icons.visibility_off_outlined
+                        : Icons.visibility_outlined,
+                    size: 20,
+                    color: AppColors.outline,
                   ),
-                  Expanded(
-                    child: InkWell(
-                      onTap: () => setState(() => _isLogin = false),
-                      borderRadius: BorderRadius.circular(20),
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(vertical: 8),
-                        decoration: BoxDecoration(
-                          color: !_isLogin
-                              ? AppColors.surfaceContainerLowest
-                              : Colors.transparent,
-                          borderRadius: BorderRadius.circular(20),
-                          boxShadow: !_isLogin
-                              ? [
-                                  BoxShadow(
-                                    color: Colors.black.withValues(alpha: 0.05),
-                                    blurRadius: 4,
-                                  )
-                                ]
-                              : null,
-                        ),
-                        child: Center(
-                          child: LocalizedText(
-                            'Đăng ký',
-                            style: AppTypography.labelMd(
-                              color: !_isLogin
-                                  ? AppColors.onSurface
-                                  : AppColors.onSurfaceVariant,
-                              fontWeight:
-                                  !_isLogin ? FontWeight.w700 : FontWeight.w500,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
+                )
+              : null,
+        ),
+      ),
+    ],
+  );
+
+  Widget _social(String provider, Widget icon) => Tooltip(
+    message: '$provider — ${tr(context, 'Sắp ra mắt')}',
+    child: Semantics(
+      label: '$provider — ${tr(context, 'Sắp ra mắt')}',
+      button: true,
+      enabled: false,
+      child: Container(
+        width: 54,
+        height: 54,
+        decoration: BoxDecoration(
+          color: Colors.white,
+          shape: BoxShape.circle,
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: .04),
+              blurRadius: 12,
+              offset: const Offset(0, 4),
             ),
-            const SizedBox(height: 20),
-
-            // FORM FIELDS
-            if (!_isLogin) ...[
-              _buildInput(
-                controller: _nameController,
-                hint: 'Họ và tên của bạn',
-                icon: Icons.person_outline,
-              ),
-              const SizedBox(height: 12),
-              _buildInput(
-                controller: _phoneController,
-                hint: 'Số điện thoại liên hệ',
-                icon: Icons.phone_outlined,
-                keyboardType: TextInputType.phone,
-              ),
-              const SizedBox(height: 12),
-            ],
-
-            _buildInput(
-              controller: _emailController,
-              hint: 'Email đăng nhập',
-              icon: Icons.mail_outline,
-              keyboardType: TextInputType.emailAddress,
-            ),
-            const SizedBox(height: 12),
-
-            _buildInput(
-              controller: _passwordController,
-              hint: 'Mật khẩu bảo mật',
-              icon: Icons.lock_outline,
-              obscureText: _obscurePassword,
-              trailing: IconButton(
-                icon: Icon(
-                  _obscurePassword
-                      ? Icons.visibility_off_outlined
-                      : Icons.visibility_outlined,
-                  size: 20,
-                  color: AppColors.outline,
-                ),
-                onPressed: () {
-                  setState(() => _obscurePassword = !_obscurePassword);
-                },
-              ),
-            ),
-            const SizedBox(height: 8),
-
-            if (_isLogin)
-              Align(
-                alignment: Alignment.centerRight,
-                child: TextButton(
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => const ForgotPasswordScreen(),
-                      ),
-                    );
-                  },
-                  child: LocalizedText(
-                    'Quên mật khẩu?',
-                    style: AppTypography.labelSm(color: AppColors.secondary),
-                  ),
-                ),
-              ),
-            const SizedBox(height: 16),
-
-            // SUBMIT BUTTON
-            AppPillButton(
-              label: _isLogin ? 'Đăng nhập vào DANASEA' : 'Tạo tài khoản người mua',
-              variant: AppButtonVariant.primary,
-              width: double.infinity,
-              onPressed: _submit,
-            ),
-            const SizedBox(height: 24),
-
-            // FOOTER TERMS
-            LocalizedText(
-              'Bằng việc tiếp tục, bạn đồng ý với Điều khoản dịch vụ và Chính sách bảo mật của nền tảng DANASEA.',
-              textAlign: TextAlign.center,
-              style: AppTypography.bodySm(color: AppColors.outline)
-                  .copyWith(fontSize: 10),
-            ),
-            const SizedBox(height: 20),
           ],
         ),
+        child: Center(child: icon),
       ),
-    );
-  }
+    ),
+  );
+}
 
-  Widget _buildInput({
-    required TextEditingController controller,
-    required String hint,
-    required IconData icon,
-    bool obscureText = false,
-    Widget? trailing,
-    TextInputType? keyboardType,
-  }) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12),
-      decoration: BoxDecoration(
-        color: AppColors.surfaceContainerLowest,
-        borderRadius: AppShapes.radiusDefault,
-        border: Border.all(color: AppColors.borderSubtle),
-      ),
-      child: Row(
-        children: [
-          Icon(icon, size: 20, color: AppColors.tertiary),
-          const SizedBox(width: 10),
-          Expanded(
-            child: TextField(
-              controller: controller,
-              obscureText: obscureText,
-              keyboardType: keyboardType,
-              decoration: InputDecoration(
-                hintText: tr(context, hint),
-                hintStyle: AppTypography.bodySm(color: AppColors.outline),
-                border: InputBorder.none,
-                isDense: true,
-                contentPadding: const EdgeInsets.symmetric(vertical: 12),
-              ),
-            ),
-          ),
-          ?trailing,
-        ],
-      ),
-    );
-  }
+class _LoginHeaderClipper extends CustomClipper<Path> {
+  const _LoginHeaderClipper(this.progress);
+  final double progress;
+  @override
+  Path getClip(Size size) => Path()
+    ..lineTo(0, size.height - 54 * progress)
+    ..cubicTo(
+      size.width * .30,
+      size.height,
+      size.width * .65,
+      size.height,
+      size.width,
+      size.height - 129 * progress,
+    )
+    ..lineTo(size.width, 0)
+    ..close();
+  @override
+  bool shouldReclip(_LoginHeaderClipper oldClipper) =>
+      oldClipper.progress != progress;
 }
