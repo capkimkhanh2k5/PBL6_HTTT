@@ -1,3 +1,4 @@
+import 'package:vendor_mobile/core/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_shapes.dart';
@@ -71,7 +72,7 @@ class _BusinessProfileScreenState extends State<BusinessProfileScreen> {
           icon: const Icon(Icons.arrow_back, color: AppColors.secondary),
           onPressed: () => Navigator.of(context).maybePop(),
         ),
-        title: const Text('Hồ sơ doanh nghiệp', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.onSurface)),
+        title: const LocalizedText('Hồ sơ doanh nghiệp', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.onSurface)),
       ),
       body: SafeArea(
         child: SingleChildScrollView(
@@ -107,7 +108,7 @@ class _BusinessProfileScreenState extends State<BusinessProfileScreen> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text(
+                              LocalizedText(
                                 _businessNameController.text,
                                 style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: AppColors.onSurface),
                                 maxLines: 1,
@@ -119,7 +120,7 @@ class _BusinessProfileScreenState extends State<BusinessProfileScreen> {
                                   Icon(Icons.event_available, size: 13, color: AppColors.tertiary),
                                   SizedBox(width: 4),
                                   Flexible(
-                                    child: Text(
+                                    child: LocalizedText(
                                       'Gia nhập: 15/03/2023',
                                       style: TextStyle(fontSize: 11, color: AppColors.tertiary),
                                       overflow: TextOverflow.ellipsis,
@@ -137,7 +138,7 @@ class _BusinessProfileScreenState extends State<BusinessProfileScreen> {
                                     Icon(Icons.verified, size: 12, color: AppColors.secondary),
                                     SizedBox(width: 3),
                                     Flexible(
-                                      child: Text(
+                                      child: LocalizedText(
                                         'Hồ sơ pháp nhân chính thức',
                                         style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: AppColors.secondary),
                                         overflow: TextOverflow.ellipsis,
@@ -184,7 +185,7 @@ class _BusinessProfileScreenState extends State<BusinessProfileScreen> {
                         Icon(Icons.rule, size: 18, color: AppColors.secondary),
                         SizedBox(width: 6),
                         Expanded(
-                          child: Text(
+                          child: LocalizedText(
                             'Trạng thái thẩm định hồ sơ',
                             style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: AppColors.onSurface),
                             overflow: TextOverflow.ellipsis,
@@ -214,18 +215,18 @@ class _BusinessProfileScreenState extends State<BusinessProfileScreen> {
                                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                   children: [
                                     Expanded(
-                                      child: Text(
+                                      child: LocalizedText(
                                         'ĐÃ PHÊ DUYỆT (APPROVED)',
                                         style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: AppColors.secondary),
                                         overflow: TextOverflow.ellipsis,
                                       ),
                                     ),
                                     SizedBox(width: 6),
-                                    Text('Đang áp dụng', style: TextStyle(fontSize: 10, color: AppColors.secondary, fontWeight: FontWeight.bold)),
+                                    LocalizedText('Đang áp dụng', style: TextStyle(fontSize: 10, color: AppColors.secondary, fontWeight: FontWeight.bold)),
                                   ],
                                 ),
                                 SizedBox(height: 2),
-                                Text(
+                                LocalizedText(
                                   'Hồ sơ Vendor đã được duyệt. Mỗi dịch vụ vẫn cần được xét duyệt riêng trước khi mở bán chính thức.',
                                   style: TextStyle(fontSize: 11, color: AppColors.tertiary),
                                 ),
@@ -276,9 +277,9 @@ class _BusinessProfileScreenState extends State<BusinessProfileScreen> {
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: const [
-                                    Text('Giấy tờ & Pháp lý bến bãi', style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: AppColors.onSurface)),
+                                    LocalizedText('Giấy tờ & Pháp lý bến bãi', style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: AppColors.onSurface)),
                                     SizedBox(height: 2),
-                                    Text('Hồ sơ pháp nhân & chứng chỉ an toàn', style: TextStyle(fontSize: 11, color: AppColors.tertiary)),
+                                    LocalizedText('Hồ sơ pháp nhân & chứng chỉ an toàn', style: TextStyle(fontSize: 11, color: AppColors.tertiary)),
                                   ],
                                 ),
                               ),
@@ -316,9 +317,9 @@ class _BusinessProfileScreenState extends State<BusinessProfileScreen> {
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: const [
-                                    Text('Tài khoản ngân hàng nhận tiền', style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: AppColors.onSurface)),
+                                    LocalizedText('Tài khoản ngân hàng nhận tiền', style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: AppColors.onSurface)),
                                     SizedBox(height: 2),
-                                    Text('Cấu hình tài khoản nhận đối soát doanh thu', style: TextStyle(fontSize: 11, color: AppColors.tertiary)),
+                                    LocalizedText('Cấu hình tài khoản nhận đối soát doanh thu', style: TextStyle(fontSize: 11, color: AppColors.tertiary)),
                                   ],
                                 ),
                               ),
@@ -353,7 +354,7 @@ class _BusinessProfileScreenState extends State<BusinessProfileScreen> {
                               Icon(Icons.badge_outlined, size: 18, color: AppColors.primary),
                               SizedBox(width: 6),
                               Expanded(
-                                child: Text(
+                                child: LocalizedText(
                                   'Thông tin kinh doanh',
                                   style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: AppColors.onSurface),
                                   overflow: TextOverflow.ellipsis,
@@ -363,7 +364,7 @@ class _BusinessProfileScreenState extends State<BusinessProfileScreen> {
                           ),
                         ),
                         SizedBox(width: 8),
-                        Text('Bảo mật mã hóa', style: TextStyle(fontSize: 10, color: AppColors.tertiary)),
+                        LocalizedText('Bảo mật mã hóa', style: TextStyle(fontSize: 10, color: AppColors.tertiary)),
                       ],
                     ),
                     const SizedBox(height: 14),
@@ -401,7 +402,7 @@ class _BusinessProfileScreenState extends State<BusinessProfileScreen> {
                       ],
                     ),
                     const SizedBox(height: 12),
-                    const Text('Mô tả giới thiệu dịch vụ', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: AppColors.onSurface)),
+                    const LocalizedText('Mô tả giới thiệu dịch vụ', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: AppColors.onSurface)),
                     const SizedBox(height: 6),
                     TextField(
                       controller: _descController,
@@ -436,9 +437,9 @@ class _BusinessProfileScreenState extends State<BusinessProfileScreen> {
       decoration: BoxDecoration(color: AppColors.surfaceContainerLowest, borderRadius: BorderRadius.circular(8)),
       child: Column(
         children: [
-          Text(val, style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: valColor)),
+          LocalizedText(val, style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: valColor)),
           const SizedBox(height: 2),
-          Text(label, style: const TextStyle(fontSize: 10, color: AppColors.tertiary)),
+          LocalizedText(label, style: const TextStyle(fontSize: 10, color: AppColors.tertiary)),
         ],
       ),
     );

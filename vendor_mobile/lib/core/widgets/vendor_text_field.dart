@@ -1,3 +1,4 @@
+import 'package:vendor_mobile/core/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_shapes.dart';
@@ -48,7 +49,7 @@ class VendorTextField extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Expanded(
-              child: Text(
+              child: LocalizedText(
                 label,
                 style: AppTypography.labelMd(color: AppColors.onSurfaceVariant),
                 maxLines: 1,
@@ -57,12 +58,12 @@ class VendorTextField extends StatelessWidget {
             ),
             const SizedBox(width: 4),
             if (isRequired)
-              Text(
+              LocalizedText(
                 'Bắt buộc',
                 style: AppTypography.labelSm(color: AppColors.primary),
               )
             else if (readOnly)
-              Text(
+              LocalizedText(
                 'Chỉ đọc',
                 style: AppTypography.labelSm(color: AppColors.tertiary),
               ),
@@ -73,7 +74,10 @@ class VendorTextField extends StatelessWidget {
           controller: controller,
           initialValue: initialValue,
           onChanged: onChanged,
-          validator: validator,
+          validator: validator == null ? null : (value) {
+            final error = validator!(value);
+            return error == null ? null : tr(context, error);
+          },
           keyboardType: keyboardType,
           obscureText: obscureText,
           readOnly: readOnly,
@@ -82,7 +86,7 @@ class VendorTextField extends StatelessWidget {
             color: readOnly ? AppColors.onSurfaceVariant : AppColors.onSurface,
           ),
           decoration: InputDecoration(
-            hintText: hint,
+            hintText: hint == null ? null : tr(context, hint!),
             hintStyle: AppTypography.bodyMd(color: AppColors.outline),
             filled: true,
             fillColor: readOnly ? AppColors.surfaceContainer : AppColors.surfaceContainerLow,
@@ -90,7 +94,7 @@ class VendorTextField extends StatelessWidget {
                 ? Icon(prefixIcon, color: AppColors.secondary, size: 20)
                 : null,
             suffixIcon: suffixIcon,
-            suffixText: suffixText,
+            suffixText: suffixText == null ? null : tr(context, suffixText!),
             suffixStyle: AppTypography.bodyMd(color: AppColors.onSurfaceVariant),
             contentPadding: EdgeInsets.symmetric(
               horizontal: 18,
@@ -112,7 +116,7 @@ class VendorTextField extends StatelessWidget {
               borderRadius: maxLines > 1 ? AppShapes.radiusDefault : AppShapes.radiusFull,
               borderSide: const BorderSide(color: AppColors.error, width: 1.5),
             ),
-            helperText: helperText,
+            helperText: helperText == null ? null : tr(context, helperText!),
             helperMaxLines: 2,
             helperStyle: AppTypography.bodySm(color: AppColors.tertiary),
           ),

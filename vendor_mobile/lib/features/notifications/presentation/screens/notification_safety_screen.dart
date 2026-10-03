@@ -1,3 +1,4 @@
+import 'package:vendor_mobile/core/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_shapes.dart';
@@ -56,13 +57,13 @@ class _NotificationSafetyScreenState extends State<NotificationSafetyScreen> {
         title: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('DANASEA VENDOR',
+            LocalizedText('DANASEA VENDOR',
                 style: Theme.of(context).textTheme.labelSmall?.copyWith(
                       color: AppColors.secondary,
                       fontWeight: FontWeight.bold,
                       letterSpacing: 0.8,
                     )),
-            Text('Danang Ocean Club',
+            LocalizedText('Danang Ocean Club',
                 style: Theme.of(context).textTheme.titleMedium?.copyWith(
                       fontWeight: FontWeight.bold,
                       color: AppColors.onSurface,
@@ -72,7 +73,7 @@ class _NotificationSafetyScreenState extends State<NotificationSafetyScreen> {
         actions: [
           IconButton(
             icon: const Icon(Icons.done_all, color: AppColors.secondary),
-            tooltip: 'Đánh dấu tất cả đã đọc',
+            tooltip: tr(context, 'Đánh dấu tất cả đã đọc'),
             onPressed: () {
               for (var n in _db.notifications) {
                 _db.markNotificationRead(n.notificationId);
@@ -101,7 +102,7 @@ class _NotificationSafetyScreenState extends State<NotificationSafetyScreen> {
                             Icon(Icons.waves, size: 14, color: AppColors.secondary),
                             SizedBox(width: 4),
                             Expanded(
-                              child: Text(
+                              child: LocalizedText(
                                 'HỆ THỐNG CỨU HỘ & QUAN TRẮC',
                                 style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: AppColors.secondary, letterSpacing: 0.5),
                                 overflow: TextOverflow.ellipsis,
@@ -110,7 +111,7 @@ class _NotificationSafetyScreenState extends State<NotificationSafetyScreen> {
                           ],
                         ),
                         const SizedBox(height: 2),
-                        const Text(
+                        const LocalizedText(
                           'Thông báo & Cảnh báo an toàn',
                           style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.onSurface),
                           overflow: TextOverflow.ellipsis,
@@ -162,7 +163,7 @@ class _NotificationSafetyScreenState extends State<NotificationSafetyScreen> {
                           Icon(Icons.sailing, size: 18, color: AppColors.secondary),
                           SizedBox(width: 6),
                           Expanded(
-                            child: Text(
+                            child: LocalizedText(
                               'Giám sát an toàn theo slot',
                               style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: AppColors.onSurface),
                               overflow: TextOverflow.ellipsis,
@@ -178,7 +179,7 @@ class _NotificationSafetyScreenState extends State<NotificationSafetyScreen> {
                         color: AppColors.secondaryContainer.withOpacity(0.5),
                         borderRadius: BorderRadius.circular(10),
                       ),
-                      child: const Text('Trạm Mỹ Khê #02', style: TextStyle(fontSize: 10, color: AppColors.secondary, fontWeight: FontWeight.bold)),
+                      child: const LocalizedText('Trạm Mỹ Khê #02', style: TextStyle(fontSize: 10, color: AppColors.secondary, fontWeight: FontWeight.bold)),
                     ),
                   ],
                 ),
@@ -200,8 +201,8 @@ class _NotificationSafetyScreenState extends State<NotificationSafetyScreen> {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text('Khung giờ hoạt động: 05:00 - 07:00', style: TextStyle(fontSize: 11, color: AppColors.tertiary), maxLines: 1, overflow: TextOverflow.ellipsis),
-                                Text('Bãi biển Mỹ Khê', style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: AppColors.onSurface), maxLines: 1, overflow: TextOverflow.ellipsis),
+                                LocalizedText('Khung giờ hoạt động: 05:00 - 07:00', style: TextStyle(fontSize: 11, color: AppColors.tertiary), maxLines: 1, overflow: TextOverflow.ellipsis),
+                                LocalizedText('Bãi biển Mỹ Khê', style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: AppColors.onSurface), maxLines: 1, overflow: TextOverflow.ellipsis),
                               ],
                             ),
                           ),
@@ -219,7 +220,7 @@ class _NotificationSafetyScreenState extends State<NotificationSafetyScreen> {
                                   Icon(Icons.verified, size: 12, color: AppColors.onSecondaryContainer),
                                   SizedBox(width: 3),
                                   Flexible(
-                                    child: Text(
+                                    child: LocalizedText(
                                       'Đủ điều kiện xuất bến',
                                       style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: AppColors.onSecondaryContainer),
                                       overflow: TextOverflow.ellipsis,
@@ -281,12 +282,12 @@ class _NotificationSafetyScreenState extends State<NotificationSafetyScreen> {
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Text(
+                                  LocalizedText(
                                     'Mặt nước êm ái, hướng gió thuận lợi cho hoạt động chèo SUP và lướt sóng có huấn luyện viên.',
                                     style: TextStyle(fontSize: 12, color: AppColors.onSurface),
                                   ),
                                   SizedBox(height: 4),
-                                  Text('Đánh giá lúc: 04:30 sáng nay cho slot 05:00 - 07:00',
+                                  LocalizedText('Đánh giá lúc: 04:30 sáng nay cho slot 05:00 - 07:00',
                                       style: TextStyle(fontSize: 10, color: AppColors.tertiary)),
                                 ],
                               ),
@@ -305,7 +306,7 @@ class _NotificationSafetyScreenState extends State<NotificationSafetyScreen> {
                     Icon(Icons.warning_amber_rounded, size: 18, color: AppColors.primaryContainer),
                     SizedBox(width: 6),
                     Expanded(
-                      child: Text(
+                      child: LocalizedText(
                         'Cảnh báo slot thay đổi thời tiết',
                         style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: AppColors.onSurface),
                         overflow: TextOverflow.ellipsis,
@@ -340,7 +341,7 @@ class _NotificationSafetyScreenState extends State<NotificationSafetyScreen> {
                                 ),
                                 const SizedBox(width: 6),
                                 const Expanded(
-                                  child: Text(
+                                  child: LocalizedText(
                                     'Khung giờ liên quan: 15:30',
                                     style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: AppColors.onSurface),
                                     overflow: TextOverflow.ellipsis,
@@ -356,7 +357,7 @@ class _NotificationSafetyScreenState extends State<NotificationSafetyScreen> {
                               color: AppColors.errorContainer,
                               borderRadius: BorderRadius.circular(10),
                             ),
-                            child: const Text('Gió giật cục bộ',
+                            child: const LocalizedText('Gió giật cục bộ',
                                 style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: AppColors.onErrorContainer)),
                           ),
                         ],
@@ -384,8 +385,8 @@ class _NotificationSafetyScreenState extends State<NotificationSafetyScreen> {
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Text('Sức gió ghi nhận: 28 km/h', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: AppColors.onSurface)),
-                                  Text('Kết quả đánh giá theo khung giờ', style: TextStyle(fontSize: 10, color: AppColors.tertiary)),
+                                  LocalizedText('Sức gió ghi nhận: 28 km/h', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: AppColors.onSurface)),
+                                  LocalizedText('Kết quả đánh giá theo khung giờ', style: TextStyle(fontSize: 10, color: AppColors.tertiary)),
                                 ],
                               ),
                             ),
@@ -393,7 +394,7 @@ class _NotificationSafetyScreenState extends State<NotificationSafetyScreen> {
                         ),
                       ),
                       const SizedBox(height: 8),
-                      const Text(
+                      const LocalizedText(
                         'Dữ liệu gió được cập nhật từ nguồn thời tiết cảng vụ. Theo dõi kết quả đánh giá an toàn trước giờ cung cấp dịch vụ.',
                         style: TextStyle(fontSize: 11, color: AppColors.tertiary),
                       ),
@@ -414,7 +415,7 @@ class _NotificationSafetyScreenState extends State<NotificationSafetyScreen> {
                                 elevation: 0,
                                 padding: const EdgeInsets.symmetric(vertical: 8),
                               ),
-                              child: const Text('Tạm khóa slot này', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold)),
+                              child: const LocalizedText('Tạm khóa slot này', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold)),
                             ),
                           ),
                           const SizedBox(width: 8),
@@ -426,7 +427,7 @@ class _NotificationSafetyScreenState extends State<NotificationSafetyScreen> {
                                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
                                 padding: const EdgeInsets.symmetric(vertical: 8),
                               ),
-                              child: const Text('Xem lịch hoạt động', style: TextStyle(fontSize: 11, color: AppColors.onSurface)),
+                              child: const LocalizedText('Xem lịch hoạt động', style: TextStyle(fontSize: 11, color: AppColors.onSurface)),
                             ),
                           ),
                         ],
@@ -447,7 +448,7 @@ class _NotificationSafetyScreenState extends State<NotificationSafetyScreen> {
                         Icon(Icons.notifications_active, size: 18, color: AppColors.secondary),
                         SizedBox(width: 6),
                         Expanded(
-                          child: Text(
+                          child: LocalizedText(
                             'Thông báo cập nhật',
                             style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: AppColors.onSurface),
                             overflow: TextOverflow.ellipsis,
@@ -457,7 +458,7 @@ class _NotificationSafetyScreenState extends State<NotificationSafetyScreen> {
                     ),
                   ),
                   const SizedBox(width: 8),
-                  Text('Thời gian thực (${notifications.length})', style: const TextStyle(fontSize: 11, color: AppColors.tertiary)),
+                  LocalizedText('Thời gian thực (${notifications.length})', style: const TextStyle(fontSize: 11, color: AppColors.tertiary)),
                 ],
               ),
               const SizedBox(height: 10),
@@ -471,7 +472,7 @@ class _NotificationSafetyScreenState extends State<NotificationSafetyScreen> {
                     borderRadius: AppShapes.radiusMd,
                   ),
                   child: const Center(
-                    child: Text('Không có thông báo nào', style: TextStyle(color: AppColors.tertiary)),
+                    child: LocalizedText('Không có thông báo nào', style: TextStyle(color: AppColors.tertiary)),
                   ),
                 )
               else
@@ -505,7 +506,7 @@ class _NotificationSafetyScreenState extends State<NotificationSafetyScreen> {
           borderRadius: BorderRadius.circular(20),
           boxShadow: active ? AppShapes.shadowSm : null,
         ),
-        child: Text(
+        child: LocalizedText(
           label,
           style: TextStyle(
             fontSize: 12,
@@ -538,7 +539,7 @@ class _NotificationSafetyScreenState extends State<NotificationSafetyScreen> {
               Icon(icon, size: 14, color: color),
               const SizedBox(width: 4),
               Flexible(
-                child: Text(
+                child: LocalizedText(
                   label,
                   style: const TextStyle(fontSize: 10, color: AppColors.tertiary),
                   overflow: TextOverflow.ellipsis,
@@ -547,9 +548,9 @@ class _NotificationSafetyScreenState extends State<NotificationSafetyScreen> {
             ],
           ),
           const SizedBox(height: 4),
-          Text(value, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: AppColors.onSurface), maxLines: 1, overflow: TextOverflow.ellipsis),
+          LocalizedText(value, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: AppColors.onSurface), maxLines: 1, overflow: TextOverflow.ellipsis),
           const SizedBox(height: 2),
-          Text(sub, style: TextStyle(fontSize: 9, color: color, fontWeight: FontWeight.bold), maxLines: 1, overflow: TextOverflow.ellipsis),
+          LocalizedText(sub, style: TextStyle(fontSize: 9, color: color, fontWeight: FontWeight.bold), maxLines: 1, overflow: TextOverflow.ellipsis),
         ],
       ),
     );
@@ -611,7 +612,7 @@ class _NotificationSafetyScreenState extends State<NotificationSafetyScreen> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Expanded(
-                        child: Text(
+                        child: LocalizedText(
                           notif.title,
                           style: TextStyle(
                             fontSize: 13,
@@ -622,14 +623,14 @@ class _NotificationSafetyScreenState extends State<NotificationSafetyScreen> {
                         ),
                       ),
                       const SizedBox(width: 8),
-                      Text(
+                      LocalizedText(
                         '${notif.createdAt.hour.toString().padLeft(2, '0')}:${notif.createdAt.minute.toString().padLeft(2, '0')}',
                         style: const TextStyle(fontSize: 10, color: AppColors.tertiary),
                       ),
                     ],
                   ),
                   const SizedBox(height: 4),
-                  Text(notif.content, style: const TextStyle(fontSize: 12, color: AppColors.onSurfaceVariant)),
+                  LocalizedText(notif.content, style: const TextStyle(fontSize: 12, color: AppColors.onSurfaceVariant)),
                 ],
               ),
             ),

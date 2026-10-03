@@ -1,3 +1,4 @@
+import 'package:mobile/core/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_shapes.dart';
@@ -50,7 +51,7 @@ class HomeFooter extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: 8),
-              Text(
+              LocalizedText(
                 'DANASEA',
                 style: AppTypography.headlineSm(
                   color: AppColors.secondary,
@@ -60,7 +61,7 @@ class HomeFooter extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 8),
-          Text(
+          LocalizedText(
             'Chạm sóng biển, mở chuyến đi riêng',
             style: AppTypography.headlineSm(
               color: AppColors.onSurface,
@@ -79,7 +80,7 @@ class HomeFooter extends StatelessWidget {
                 children: links.map((link) {
                   return SizedBox(
                     width: itemWidth,
-                    child: Text(
+                    child: LocalizedText(
                       link,
                       style: AppTypography.labelLg(
                         color: AppColors.onSurfaceVariant,
@@ -114,7 +115,7 @@ class HomeFooter extends StatelessWidget {
                     ),
                     const SizedBox(width: 4),
                     Flexible(
-                      child: Text(
+                      child: LocalizedText(
                         'Hỗ trợ demo: Da Nang, VN',
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
@@ -130,7 +131,7 @@ class HomeFooter extends StatelessWidget {
               Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Text(
+                  LocalizedText(
                     'Tiếng Việt',
                     style: AppTypography.labelMd(
                       color: AppColors.secondary,
@@ -149,7 +150,7 @@ class HomeFooter extends StatelessWidget {
           const SizedBox(height: 8),
 
           // Copyright
-          Text(
+          LocalizedText(
             '© 2025 DANASEA Vietnam. All rights reserved.',
             style: AppTypography.labelSm(
               color: AppColors.outline,

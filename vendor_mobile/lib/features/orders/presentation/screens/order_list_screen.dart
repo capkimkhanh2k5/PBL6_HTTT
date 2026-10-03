@@ -1,3 +1,4 @@
+import 'package:vendor_mobile/core/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_shapes.dart';
@@ -79,7 +80,7 @@ class _OrderListScreenState extends State<OrderListScreen> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 Flexible(
-                  child: Text(
+                  child: LocalizedText(
                     'DANASEA',
                     style: Theme.of(context).textTheme.titleSmall?.copyWith(
                           fontWeight: FontWeight.bold,
@@ -95,17 +96,17 @@ class _OrderListScreenState extends State<OrderListScreen> {
                     color: AppColors.primaryContainer,
                     borderRadius: BorderRadius.circular(10),
                   ),
-                  child: const Text('VENDOR', style: TextStyle(fontSize: 9, fontWeight: FontWeight.bold, color: AppColors.onPrimary)),
+                  child: const LocalizedText('VENDOR', style: TextStyle(fontSize: 9, fontWeight: FontWeight.bold, color: AppColors.onPrimary)),
                 ),
               ],
             ),
-            const Text('Đơn dịch vụ', style: TextStyle(fontSize: 12, color: AppColors.tertiary)),
+            const LocalizedText('Đơn dịch vụ', style: TextStyle(fontSize: 12, color: AppColors.tertiary)),
           ],
         ),
         actions: [
           IconButton(
             icon: const Icon(Icons.qr_code_scanner, color: AppColors.primary),
-            tooltip: 'Quét QR Check-in',
+            tooltip: tr(context, 'Quét QR Check-in'),
             onPressed: () {
               Navigator.of(context).push(
                 MaterialPageRoute(builder: (_) => const QrCheckinScreen()),
@@ -157,7 +158,7 @@ class _OrderListScreenState extends State<OrderListScreen> {
                             Container(width: 6, height: 6, decoration: const BoxDecoration(shape: BoxShape.circle, color: AppColors.primaryContainer)),
                             const SizedBox(width: 6),
                             const Flexible(
-                              child: Text(
+                              child: LocalizedText(
                                 'KÊNH ĐỐI TÁC BIỂN',
                                 style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: AppColors.secondary, letterSpacing: 0.5),
                                 overflow: TextOverflow.ellipsis,
@@ -170,12 +171,12 @@ class _OrderListScreenState extends State<OrderListScreen> {
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                         decoration: BoxDecoration(color: AppColors.surfaceContainerHigh, borderRadius: BorderRadius.circular(10)),
-                        child: Text('$allCount đơn ghi nhận', style: const TextStyle(fontSize: 10, color: AppColors.tertiary, fontWeight: FontWeight.bold)),
+                        child: LocalizedText('$allCount đơn ghi nhận', style: const TextStyle(fontSize: 10, color: AppColors.tertiary, fontWeight: FontWeight.bold)),
                       ),
                     ],
                   ),
                   const SizedBox(height: 4),
-                  const Text('Quản lý đơn dịch vụ', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: AppColors.onSurface)),
+                  const LocalizedText('Quản lý đơn dịch vụ', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: AppColors.onSurface)),
                   const SizedBox(height: 10),
 
                   // Search input
@@ -193,8 +194,8 @@ class _OrderListScreenState extends State<OrderListScreen> {
                         Expanded(
                           child: TextField(
                             onChanged: (val) => setState(() => _searchQuery = val.trim()),
-                            decoration: const InputDecoration(
-                              hintText: 'Tìm theo mã đơn con, tên khách hoặc dịch vụ...',
+                            decoration:  InputDecoration(
+                              hintText: tr(context, 'Tìm theo mã đơn con, tên khách hoặc dịch vụ...'),
                               hintStyle: TextStyle(fontSize: 12, color: AppColors.outline),
                               border: InputBorder.none,
                             ),
@@ -245,7 +246,7 @@ class _OrderListScreenState extends State<OrderListScreen> {
                     Icon(Icons.waves, size: 16, color: AppColors.secondary),
                     SizedBox(width: 8),
                     Expanded(
-                      child: Text(
+                      child: LocalizedText(
                         'Sóng 0.4m • Gió 9 km/h • Khung giờ 05:00 lý tưởng cho hoạt động SUP',
                         style: TextStyle(fontSize: 11, color: AppColors.onSecondaryFixedVariant),
                         maxLines: 1,
@@ -266,14 +267,14 @@ class _OrderListScreenState extends State<OrderListScreen> {
                         children: [
                           const Icon(Icons.receipt_long_outlined, size: 48, color: AppColors.tertiary),
                           const SizedBox(height: 8),
-                          const Text('Không tìm thấy đơn hàng nào', style: TextStyle(color: AppColors.tertiary, fontSize: 14)),
+                          const LocalizedText('Không tìm thấy đơn hàng nào', style: TextStyle(color: AppColors.tertiary, fontSize: 14)),
                           if (_searchQuery.isNotEmpty || _selectedFilter != 'all')
                             TextButton(
                               onPressed: () => setState(() {
                                 _searchQuery = '';
                                 _selectedFilter = 'all';
                               }),
-                              child: const Text('Xóa bộ lọc'),
+                              child: const LocalizedText('Xóa bộ lọc'),
                             ),
                         ],
                       ),
@@ -308,7 +309,7 @@ class _OrderListScreenState extends State<OrderListScreen> {
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text(
+            LocalizedText(
               label,
               style: TextStyle(
                 fontSize: 12,
@@ -323,7 +324,7 @@ class _OrderListScreenState extends State<OrderListScreen> {
                 color: active ? AppColors.onPrimary.withOpacity(0.2) : AppColors.surfaceContainerHighest,
                 borderRadius: BorderRadius.circular(8),
               ),
-              child: Text(
+              child: LocalizedText(
                 '$count',
                 style: TextStyle(
                   fontSize: 10,
@@ -371,7 +372,7 @@ class _OrderListScreenState extends State<OrderListScreen> {
                 child: Row(
                   children: [
                     Flexible(
-                      child: Text(
+                      child: LocalizedText(
                         '#${order.subOrderCode}',
                         style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: AppColors.onSurface),
                         overflow: TextOverflow.ellipsis,
@@ -379,7 +380,7 @@ class _OrderListScreenState extends State<OrderListScreen> {
                     ),
                     const SizedBox(width: 6),
                     Flexible(
-                      child: Text(
+                      child: LocalizedText(
                         '(${order.masterOrderCode})',
                         style: const TextStyle(fontSize: 11, color: AppColors.tertiary),
                         overflow: TextOverflow.ellipsis,
@@ -414,7 +415,7 @@ class _OrderListScreenState extends State<OrderListScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
+                    LocalizedText(
                       order.serviceName,
                       style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: AppColors.onSurface),
                       maxLines: 1,
@@ -426,14 +427,14 @@ class _OrderListScreenState extends State<OrderListScreen> {
                         const Icon(Icons.person, size: 13, color: AppColors.tertiary),
                         const SizedBox(width: 3),
                         Flexible(
-                          child: Text(
+                          child: LocalizedText(
                             order.customerName,
                             style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.onSurface),
                             overflow: TextOverflow.ellipsis,
                           ),
                         ),
-                        const Text(' • ', style: TextStyle(color: AppColors.tertiary)),
-                        Text('${order.quantity} khách', style: const TextStyle(fontSize: 12, color: AppColors.tertiary)),
+                        const LocalizedText(' • ', style: TextStyle(color: AppColors.tertiary)),
+                        LocalizedText('${order.quantity} khách', style: const TextStyle(fontSize: 12, color: AppColors.tertiary)),
                       ],
                     ),
                     const SizedBox(height: 2),
@@ -442,7 +443,7 @@ class _OrderListScreenState extends State<OrderListScreen> {
                         const Icon(Icons.schedule, size: 13, color: AppColors.secondary),
                         const SizedBox(width: 3),
                         Expanded(
-                          child: Text(
+                          child: LocalizedText(
                             '${order.slotDate} • ${order.slotTime}',
                             style: const TextStyle(fontSize: 11, color: AppColors.secondary, fontWeight: FontWeight.bold),
                             overflow: TextOverflow.ellipsis,
@@ -479,7 +480,7 @@ class _OrderListScreenState extends State<OrderListScreen> {
                       ),
                       const SizedBox(width: 6),
                       Expanded(
-                        child: Text(
+                        child: LocalizedText(
                           hasCheckedIn ? 'Đã check-in bãi' : 'Chưa check-in',
                           style: TextStyle(
                             fontSize: 11,
@@ -496,11 +497,11 @@ class _OrderListScreenState extends State<OrderListScreen> {
                 Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Text(
+                    LocalizedText(
                       '${order.quantity}× ',
                       style: const TextStyle(fontSize: 10, color: AppColors.tertiary),
                     ),
-                    Text(
+                    LocalizedText(
                       '${order.totalPrice.toStringAsFixed(0).replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]}.')} đ',
                       style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: AppColors.primary),
                     ),
@@ -528,7 +529,7 @@ class _OrderListScreenState extends State<OrderListScreen> {
                     );
                   },
                   icon: const Icon(Icons.chat_bubble_outline, size: 14),
-                  label: const Text('Nhắn tin', style: TextStyle(fontSize: 12)),
+                  label: const LocalizedText('Nhắn tin', style: TextStyle(fontSize: 12)),
                   style: OutlinedButton.styleFrom(
                     foregroundColor: AppColors.onSurface,
                     side: const BorderSide(color: AppColors.outlineVariant),
@@ -548,7 +549,7 @@ class _OrderListScreenState extends State<OrderListScreen> {
                     );
                   },
                   icon: const Icon(Icons.receipt_long, size: 14),
-                  label: const Text('Chi tiết đơn', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+                  label: const LocalizedText('Chi tiết đơn', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.primaryContainer,
                     foregroundColor: AppColors.onPrimary,

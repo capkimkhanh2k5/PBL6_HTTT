@@ -1,3 +1,4 @@
+import 'package:mobile/core/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import '../../../../core/data/mock_database_data.dart';
 import '../../../../core/models/danasea_models.dart';
@@ -42,7 +43,7 @@ class _ReviewExperienceScreenState extends State<ReviewExperienceScreen> {
     if (_commentController.text.trim().isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Vui lòng chia sẻ cảm nhận của bạn.'),
+          content: LocalizedText('Vui lòng chia sẻ cảm nhận của bạn.'),
           backgroundColor: AppColors.primary,
         ),
       );
@@ -67,7 +68,7 @@ class _ReviewExperienceScreenState extends State<ReviewExperienceScreen> {
 
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
-        content: Text('Cảm ơn bạn đã gửi đánh giá trải nghiệm biển!'),
+        content: LocalizedText('Cảm ơn bạn đã gửi đánh giá trải nghiệm biển!'),
         backgroundColor: AppColors.secondary,
       ),
     );
@@ -88,7 +89,7 @@ class _ReviewExperienceScreenState extends State<ReviewExperienceScreen> {
           icon: const Icon(Icons.arrow_back, color: AppColors.onSurface),
           onPressed: () => Navigator.pop(context),
         ),
-        title: Text(
+        title: LocalizedText(
           'Đánh giá trải nghiệm',
           style: AppTypography.headlineSm(color: AppColors.onSurface),
         ),
@@ -128,14 +129,14 @@ class _ReviewExperienceScreenState extends State<ReviewExperienceScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
+                        LocalizedText(
                           sub.vendorName,
                           style: AppTypography.labelSm(
                             color: AppColors.secondary,
                             fontWeight: FontWeight.w700,
                           ),
                         ),
-                        Text(
+                        LocalizedText(
                           sub.serviceName,
                           style: AppTypography.headlineSm(
                             color: AppColors.onSurface,
@@ -143,7 +144,7 @@ class _ReviewExperienceScreenState extends State<ReviewExperienceScreen> {
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                         ),
-                        Text(
+                        LocalizedText(
                           'Hoàn thành chuyến đi • #${sub.id}',
                           style: AppTypography.bodySm(
                             color: AppColors.outline,
@@ -167,7 +168,7 @@ class _ReviewExperienceScreenState extends State<ReviewExperienceScreen> {
               ),
               child: Column(
                 children: [
-                  Text(
+                  LocalizedText(
                     'Bạn thấy trải nghiệm biển thế nào?',
                     style: AppTypography.labelLg(color: AppColors.onSurface),
                   ),
@@ -191,7 +192,7 @@ class _ReviewExperienceScreenState extends State<ReviewExperienceScreen> {
                     }),
                   ),
                   const SizedBox(height: 4),
-                  Text(
+                  LocalizedText(
                     _ratingLabels[_rating],
                     style: AppTypography.labelMd(
                       color: AppColors.primary,
@@ -204,7 +205,7 @@ class _ReviewExperienceScreenState extends State<ReviewExperienceScreen> {
             const SizedBox(height: 16),
 
             // COMMENT FIELD
-            Text(
+            LocalizedText(
               'Cảm nhận thực tế của bạn',
               style: AppTypography.labelLg(color: AppColors.onSurface),
             ),
@@ -220,7 +221,7 @@ class _ReviewExperienceScreenState extends State<ReviewExperienceScreen> {
                 maxLines: 4,
                 decoration: InputDecoration(
                   hintText:
-                      'Chia sẻ về chất lượng ván SUP, kính lặn, hướng dẫn viên đồng hành, độ trong của nước biển...',
+                      tr(context, 'Chia sẻ về chất lượng ván SUP, kính lặn, hướng dẫn viên đồng hành, độ trong của nước biển...'),
                   hintStyle: AppTypography.bodySm(color: AppColors.outline),
                   contentPadding: const EdgeInsets.all(12),
                   border: InputBorder.none,
@@ -230,7 +231,7 @@ class _ReviewExperienceScreenState extends State<ReviewExperienceScreen> {
             const SizedBox(height: 16),
 
             // PHOTO ATTACHMENTS
-            Text(
+            LocalizedText(
               'Hình ảnh chuyến đi (tùy chọn)',
               style: AppTypography.labelLg(color: AppColors.onSurface),
             ),
@@ -259,7 +260,7 @@ class _ReviewExperienceScreenState extends State<ReviewExperienceScreen> {
                         const Icon(Icons.add_a_photo,
                             size: 22, color: AppColors.secondary),
                         const SizedBox(height: 4),
-                        Text(
+                        LocalizedText(
                           'Thêm ảnh',
                           style: AppTypography.labelSm(
                             color: AppColors.secondary,

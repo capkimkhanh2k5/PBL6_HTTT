@@ -1,3 +1,4 @@
+import 'package:mobile/core/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import '../../../../core/data/mock_database_data.dart';
 import '../../../../core/models/danasea_models.dart';
@@ -131,7 +132,7 @@ class _SearchScreenState extends State<SearchScreen> {
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text(
+                        LocalizedText(
                           'Bộ lọc trải nghiệm',
                           style: AppTypography.headlineSm(
                             color: AppColors.onSurface,
@@ -147,7 +148,7 @@ class _SearchScreenState extends State<SearchScreen> {
                             });
                             setState(() {});
                           },
-                          child: Text(
+                          child: LocalizedText(
                             'Đặt lại',
                             style: AppTypography.labelMd(
                               color: AppColors.primary,
@@ -164,7 +165,7 @@ class _SearchScreenState extends State<SearchScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         // VÙNG BIỂN
-                        Text('Vùng biển',
+                        LocalizedText('Vùng biển',
                             style: AppTypography.labelLg(
                                 color: AppColors.onSurface)),
                         const SizedBox(height: 8),
@@ -173,7 +174,7 @@ class _SearchScreenState extends State<SearchScreen> {
                           children: ['Mỹ Khê', 'Sơn Trà', 'Non Nước'].map((loc) {
                             final isSel = _selectedLocation == loc;
                             return ChoiceChip(
-                              label: Text(loc),
+                              label: LocalizedText(loc),
                               selected: isSel,
                               onSelected: (val) {
                                 setModalState(() {
@@ -191,7 +192,7 @@ class _SearchScreenState extends State<SearchScreen> {
                         const SizedBox(height: 16),
 
                         // DANH MỤC
-                        Text('Loại hoạt động',
+                        LocalizedText('Loại hoạt động',
                             style: AppTypography.labelLg(
                                 color: AppColors.onSurface)),
                         const SizedBox(height: 8),
@@ -205,7 +206,7 @@ class _SearchScreenState extends State<SearchScreen> {
                           ].map((cat) {
                             final isSel = _selectedCategory == cat;
                             return ChoiceChip(
-                              label: Text(cat),
+                              label: LocalizedText(cat),
                               selected: isSel,
                               onSelected: (val) {
                                 setModalState(() {
@@ -223,7 +224,7 @@ class _SearchScreenState extends State<SearchScreen> {
                         const SizedBox(height: 16),
 
                         // GIÁ TỐI ĐA
-                        Text('Mức giá',
+                        LocalizedText('Mức giá',
                             style: AppTypography.labelLg(
                                 color: AppColors.onSurface)),
                         const SizedBox(height: 8),
@@ -237,7 +238,7 @@ class _SearchScreenState extends State<SearchScreen> {
                             final val = item['val'] as int;
                             final isSel = _maxPrice == val;
                             return ChoiceChip(
-                              label: Text(item['label'] as String),
+                              label: LocalizedText(item['label'] as String),
                               selected: isSel,
                               onSelected: (selected) {
                                 setModalState(() {
@@ -269,7 +270,7 @@ class _SearchScreenState extends State<SearchScreen> {
                           ),
                         ),
                         onPressed: () => Navigator.pop(context),
-                        child: Text(
+                        child: LocalizedText(
                           'Áp dụng kết quả (${_filteredServices.length})',
                           style: AppTypography.labelLg(color: Colors.white),
                         ),
@@ -311,7 +312,7 @@ class _SearchScreenState extends State<SearchScreen> {
             controller: _searchController,
             onChanged: (_) => setState(() {}),
             decoration: InputDecoration(
-              hintText: 'Tìm hoạt động, bãi biển, nhà cung cấp...',
+              hintText: tr(context, 'Tìm hoạt động, bãi biển, nhà cung cấp...'),
               hintStyle: AppTypography.bodySm(color: AppColors.outline),
               prefixIcon: const Icon(Icons.search,
                   size: 20, color: AppColors.secondary),
@@ -350,7 +351,7 @@ class _SearchScreenState extends State<SearchScreen> {
                     constraints:
                         const BoxConstraints(minWidth: 16, minHeight: 16),
                     child: Center(
-                      child: Text(
+                      child: LocalizedText(
                         '$_activeFilterCount',
                         style: const TextStyle(
                           color: Colors.white,
@@ -398,7 +399,7 @@ class _SearchScreenState extends State<SearchScreen> {
                         _maxPrice = null;
                       });
                     },
-                    child: Text(
+                    child: LocalizedText(
                       'Xóa tất cả',
                       style: AppTypography.labelSm(color: AppColors.primary),
                     ),
@@ -420,7 +421,7 @@ class _SearchScreenState extends State<SearchScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
+                      LocalizedText(
                         '${services.length} trải nghiệm',
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
@@ -428,7 +429,7 @@ class _SearchScreenState extends State<SearchScreen> {
                           color: AppColors.onSurface,
                         ),
                       ),
-                      Text(
+                      LocalizedText(
                         'Phù hợp điều kiện sóng biển hôm nay',
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
@@ -480,7 +481,7 @@ class _SearchScreenState extends State<SearchScreen> {
                                     : AppColors.onSurfaceVariant,
                               ),
                               const SizedBox(width: 4),
-                              Text(
+                              LocalizedText(
                                 'Danh sách',
                                 style: AppTypography.labelSm(
                                   color: !_isMapView
@@ -526,7 +527,7 @@ class _SearchScreenState extends State<SearchScreen> {
                                     : AppColors.onSurfaceVariant,
                               ),
                               const SizedBox(width: 4),
-                              Text(
+                              LocalizedText(
                                 'Bản đồ',
                                 style: AppTypography.labelSm(
                                   color: _isMapView
@@ -584,7 +585,7 @@ class _SearchScreenState extends State<SearchScreen> {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Text(
+          LocalizedText(
             label,
             style: AppTypography.labelSm(
               color: AppColors.onSecondaryContainer,
@@ -655,7 +656,7 @@ class _SearchScreenState extends State<SearchScreen> {
                           const Icon(Icons.verified,
                               size: 12, color: AppColors.onSecondary),
                           const SizedBox(width: 4),
-                          Text(
+                          LocalizedText(
                             srv.vendorName,
                             style: AppTypography.labelSm(
                               color: AppColors.onSecondary,
@@ -683,7 +684,7 @@ class _SearchScreenState extends State<SearchScreen> {
                           const Icon(Icons.waves,
                               size: 12, color: AppColors.secondary),
                           const SizedBox(width: 4),
-                          Text(
+                          LocalizedText(
                             'Sóng êm: 0.4m',
                             style: AppTypography.labelSm(
                               color: AppColors.secondary,
@@ -711,7 +712,7 @@ class _SearchScreenState extends State<SearchScreen> {
                           const Icon(Icons.star,
                               size: 15, color: AppColors.starRating),
                           const SizedBox(width: 4),
-                          Text(
+                          LocalizedText(
                             srv.avgRating.toStringAsFixed(1),
                             style: AppTypography.labelMd(
                               color: AppColors.onSurface,
@@ -719,7 +720,7 @@ class _SearchScreenState extends State<SearchScreen> {
                             ),
                           ),
                           const SizedBox(width: 4),
-                          Text(
+                          LocalizedText(
                             '(${srv.ratingCount})',
                             style: AppTypography.bodySm(color: AppColors.outline),
                           ),
@@ -727,7 +728,7 @@ class _SearchScreenState extends State<SearchScreen> {
                       ),
                       const SizedBox(width: 6),
                       Flexible(
-                        child: Text(
+                        child: LocalizedText(
                           'Khởi hành 05:00',
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
@@ -740,7 +741,7 @@ class _SearchScreenState extends State<SearchScreen> {
                     ],
                   ),
                   const SizedBox(height: 4),
-                  Text(
+                  LocalizedText(
                     srv.name,
                     style: AppTypography.headlineSm(
                       color: AppColors.onSurface,
@@ -755,7 +756,7 @@ class _SearchScreenState extends State<SearchScreen> {
                           size: 14, color: AppColors.tertiary),
                       const SizedBox(width: 4),
                       Expanded(
-                        child: Text(
+                        child: LocalizedText(
                           srv.locationName,
                           style: AppTypography.bodySm(
                             color: AppColors.onSurfaceVariant,
@@ -767,7 +768,7 @@ class _SearchScreenState extends State<SearchScreen> {
                       const Icon(Icons.schedule,
                           size: 14, color: AppColors.tertiary),
                       const SizedBox(width: 4),
-                      Text(
+                      LocalizedText(
                         '${srv.durationMinutes}p',
                         style: AppTypography.bodySm(
                           color: AppColors.onSurfaceVariant,
@@ -783,10 +784,10 @@ class _SearchScreenState extends State<SearchScreen> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text('Giá trọn gói',
+                            LocalizedText('Giá trọn gói',
                                 style: AppTypography.labelSm(
                                     color: AppColors.onSurfaceVariant)),
-                            Text(
+                            LocalizedText(
                               _formatPrice(srv.price),
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
@@ -816,7 +817,7 @@ class _SearchScreenState extends State<SearchScreen> {
                             ),
                           );
                         },
-                        child: Text(
+                        child: LocalizedText(
                           'Xem chi tiết',
                           style: AppTypography.labelMd(color: Colors.white),
                         ),
@@ -844,12 +845,12 @@ class _SearchScreenState extends State<SearchScreen> {
                 const Icon(Icons.map_outlined,
                     size: 64, color: AppColors.secondary),
                 const SizedBox(height: 12),
-                Text(
+                LocalizedText(
                   'Bản đồ vị trí bãi biển Đà Nẵng',
                   style: AppTypography.headlineSm(color: AppColors.secondary),
                 ),
                 const SizedBox(height: 6),
-                Text(
+                LocalizedText(
                   'Đang hiển thị ${services.length} điểm dịch vụ ven biển',
                   style: AppTypography.bodySm(color: AppColors.onSurfaceVariant),
                 ),
@@ -895,10 +896,10 @@ class _SearchScreenState extends State<SearchScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
             children: [
-              Text(title,
+              LocalizedText(title,
                   style: AppTypography.labelSm(
                       color: AppColors.onSurface, fontWeight: FontWeight.bold)),
-              Text(desc,
+              LocalizedText(desc,
                   style: AppTypography.bodySm(
                       color: AppColors.outline).copyWith(fontSize: 10)),
             ],
@@ -926,12 +927,12 @@ class _SearchScreenState extends State<SearchScreen> {
                   size: 36, color: AppColors.outline),
             ),
             const SizedBox(height: 16),
-            Text(
+            LocalizedText(
               'Không tìm thấy trải nghiệm phù hợp',
               style: AppTypography.headlineSm(color: AppColors.onSurface),
             ),
             const SizedBox(height: 8),
-            Text(
+            LocalizedText(
               'Hãy thử thay đổi từ khóa hoặc xóa bớt tiêu chí lọc khu vực biển và mức giá.',
               textAlign: TextAlign.center,
               style: AppTypography.bodySm(color: AppColors.onSurfaceVariant),
@@ -947,7 +948,7 @@ class _SearchScreenState extends State<SearchScreen> {
                   _maxPrice = null;
                 });
               },
-              child: const Text('Xóa tất cả bộ lọc'),
+              child: const LocalizedText('Xóa tất cả bộ lọc'),
             ),
           ],
         ),

@@ -1,3 +1,4 @@
+import 'package:vendor_mobile/core/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_typography.dart';
@@ -55,7 +56,7 @@ void showVendorToast(
           ),
           const SizedBox(width: 10),
           Expanded(
-            child: Text(
+            child: LocalizedText(
               message,
               style: AppTypography.bodyMd(color: AppColors.inverseOnSurface),
               maxLines: 2,

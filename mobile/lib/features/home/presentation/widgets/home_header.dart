@@ -1,3 +1,4 @@
+import 'package:mobile/core/l10n/app_localizations.dart';
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import '../../../../core/theme/app_colors.dart';
@@ -77,7 +78,7 @@ class HomeHeader extends StatelessWidget implements PreferredSizeWidget {
                           child: FittedBox(
                             fit: BoxFit.scaleDown,
                             alignment: Alignment.centerLeft,
-                            child: Text(
+                            child: LocalizedText(
                               'DANASEA',
                               maxLines: 1,
                               style: AppTypography.headlineSm(
@@ -132,7 +133,7 @@ class HomeHeader extends StatelessWidget implements PreferredSizeWidget {
 
                                 const SizedBox(width: 3),
 
-                                Text(
+                                LocalizedText(
                                   'AI',
                                   style: AppTypography.labelSm(
                                     color: AppColors.secondary,
@@ -183,7 +184,7 @@ class HomeHeader extends StatelessWidget implements PreferredSizeWidget {
                                   BorderRadius.circular(10),
                                 ),
                                 child: Center(
-                                  child: Text(
+                                  child: LocalizedText(
                                     '2',
                                     style:
                                     AppTypography.labelSm(
@@ -243,7 +244,7 @@ class HomeHeader extends StatelessWidget implements PreferredSizeWidget {
                                   BorderRadius.circular(10),
                                 ),
                                 child: Center(
-                                  child: Text(
+                                  child: LocalizedText(
                                     '2',
                                     style:
                                     AppTypography.labelSm(

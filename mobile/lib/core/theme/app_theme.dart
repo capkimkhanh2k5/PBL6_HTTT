@@ -11,6 +11,7 @@ class AppTheme {
   static ThemeData get lightTheme {
     return ThemeData(
       useMaterial3: true,
+      fontFamily: 'NotoSans',
       brightness: Brightness.light,
       scaffoldBackgroundColor: AppColors.surface,
       colorScheme: const ColorScheme(

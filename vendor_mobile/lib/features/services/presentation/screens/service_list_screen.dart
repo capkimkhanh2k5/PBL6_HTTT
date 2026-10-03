@@ -1,3 +1,4 @@
+import 'package:vendor_mobile/core/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_shapes.dart';
@@ -83,7 +84,7 @@ class _ServiceListScreenState extends State<ServiceListScreen> {
           children: [
             Row(
               children: [
-                Text(
+                LocalizedText(
                   'DANASEA',
                   style: Theme.of(context).textTheme.titleSmall?.copyWith(
                         fontWeight: FontWeight.bold,
@@ -97,11 +98,11 @@ class _ServiceListScreenState extends State<ServiceListScreen> {
                     color: AppColors.primaryContainer,
                     borderRadius: BorderRadius.circular(10),
                   ),
-                  child: const Text('VENDOR', style: TextStyle(fontSize: 9, fontWeight: FontWeight.bold, color: AppColors.onPrimary)),
+                  child: const LocalizedText('VENDOR', style: TextStyle(fontSize: 9, fontWeight: FontWeight.bold, color: AppColors.onPrimary)),
                 ),
               ],
             ),
-            const Text('Dịch vụ', style: TextStyle(fontSize: 12, color: AppColors.tertiary)),
+            const LocalizedText('Dịch vụ', style: TextStyle(fontSize: 12, color: AppColors.tertiary)),
           ],
         ),
         actions: [
@@ -153,7 +154,7 @@ class _ServiceListScreenState extends State<ServiceListScreen> {
                             ),
                             const SizedBox(width: 6),
                             const Flexible(
-                              child: Text(
+                              child: LocalizedText(
                                 'DANANG OCEAN CLUB',
                                 style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: AppColors.secondary, letterSpacing: 0.5),
                                 overflow: TextOverflow.ellipsis,
@@ -166,7 +167,7 @@ class _ServiceListScreenState extends State<ServiceListScreen> {
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                         decoration: BoxDecoration(color: AppColors.surfaceContainerHigh, borderRadius: BorderRadius.circular(10)),
-                        child: const Text('Mã: DOC-8842', style: TextStyle(fontSize: 10, color: AppColors.tertiary)),
+                        child: const LocalizedText('Mã: DOC-8842', style: TextStyle(fontSize: 10, color: AppColors.tertiary)),
                       ),
                     ],
                   ),
@@ -175,7 +176,7 @@ class _ServiceListScreenState extends State<ServiceListScreen> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       const Expanded(
-                        child: Text(
+                        child: LocalizedText(
                           'Quản lý dịch vụ',
                           style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: AppColors.onSurface),
                           maxLines: 1,
@@ -190,7 +191,7 @@ class _ServiceListScreenState extends State<ServiceListScreen> {
                           );
                         },
                         icon: const Icon(Icons.add, size: 18),
-                        label: const Text('Thêm mới', style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold)),
+                        label: const LocalizedText('Thêm mới', style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold)),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: AppColors.secondary,
                           foregroundColor: AppColors.onSecondary,
@@ -217,8 +218,8 @@ class _ServiceListScreenState extends State<ServiceListScreen> {
                         Expanded(
                           child: TextField(
                             onChanged: (val) => setState(() => _searchQuery = val.trim()),
-                            decoration: const InputDecoration(
-                              hintText: 'Tìm theo tên dịch vụ, ID hoặc bãi biển...',
+                            decoration:  InputDecoration(
+                              hintText: tr(context, 'Tìm theo tên dịch vụ, ID hoặc bãi biển...'),
                               hintStyle: TextStyle(fontSize: 12, color: AppColors.outline),
                               border: InputBorder.none,
                             ),
@@ -270,8 +271,8 @@ class _ServiceListScreenState extends State<ServiceListScreen> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text('Tỉ lệ lấp đầy bình quân: 92%', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: AppColors.onSecondaryContainer)),
-                          Text('Thời tiết biển hôm nay rất lý tưởng cho SUP', style: TextStyle(fontSize: 11, color: AppColors.secondary)),
+                          LocalizedText('Tỉ lệ lấp đầy bình quân: 92%', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: AppColors.onSecondaryContainer)),
+                          LocalizedText('Thời tiết biển hôm nay rất lý tưởng cho SUP', style: TextStyle(fontSize: 11, color: AppColors.secondary)),
                         ],
                       ),
                     ),
@@ -290,7 +291,7 @@ class _ServiceListScreenState extends State<ServiceListScreen> {
                         children: [
                           const Icon(Icons.kayaking_outlined, size: 48, color: AppColors.tertiary),
                           const SizedBox(height: 8),
-                          const Text('Không tìm thấy dịch vụ nào', style: TextStyle(color: AppColors.tertiary, fontSize: 14)),
+                          const LocalizedText('Không tìm thấy dịch vụ nào', style: TextStyle(color: AppColors.tertiary, fontSize: 14)),
                           if (_searchQuery.isNotEmpty || _selectedFilter != 'all')
                             TextButton(
                               onPressed: () {
@@ -299,7 +300,7 @@ class _ServiceListScreenState extends State<ServiceListScreen> {
                                   _selectedFilter = 'all';
                                 });
                               },
-                              child: const Text('Xóa bộ lọc'),
+                              child: const LocalizedText('Xóa bộ lọc'),
                             ),
                         ],
                       ),
@@ -334,7 +335,7 @@ class _ServiceListScreenState extends State<ServiceListScreen> {
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text(
+            LocalizedText(
               label,
               style: TextStyle(
                 fontSize: 12,
@@ -343,7 +344,7 @@ class _ServiceListScreenState extends State<ServiceListScreen> {
               ),
             ),
             const SizedBox(width: 4),
-            Text(
+            LocalizedText(
               '($count)',
               style: TextStyle(
                 fontSize: 11,
@@ -414,7 +415,7 @@ class _ServiceListScreenState extends State<ServiceListScreen> {
                           color: Colors.black.withOpacity(0.6),
                           borderRadius: BorderRadius.circular(12),
                         ),
-                        child: Text(
+                        child: LocalizedText(
                           '#${service.serviceId.toUpperCase()}',
                           style: const TextStyle(fontSize: 10, color: Colors.white, fontWeight: FontWeight.bold),
                         ),
@@ -436,7 +437,7 @@ class _ServiceListScreenState extends State<ServiceListScreen> {
                       children: [
                         Icon(Icons.star, size: 13, color: AppColors.primaryContainer),
                         SizedBox(width: 3),
-                        Text('4.9', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: AppColors.onSurface)),
+                        LocalizedText('4.9', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: AppColors.onSurface)),
                       ],
                     ),
                   ),
@@ -456,7 +457,7 @@ class _ServiceListScreenState extends State<ServiceListScreen> {
                         const Icon(Icons.water, size: 12, color: AppColors.secondary),
                         const SizedBox(width: 4),
                         Expanded(
-                          child: Text(
+                          child: LocalizedText(
                             'Sóng max: ${service.maxWaveM.toStringAsFixed(1)}m • Gió min: ${service.minWindKmh.toStringAsFixed(0)} km/h',
                             style: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: AppColors.secondary),
                             maxLines: 1,
@@ -473,12 +474,12 @@ class _ServiceListScreenState extends State<ServiceListScreen> {
           const SizedBox(height: 12),
 
           // Title & Description
-          Text(
+          LocalizedText(
             service.nameVi,
             style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: AppColors.onSurface),
           ),
           const SizedBox(height: 2),
-          Text(
+          LocalizedText(
             service.nameEn,
             style: const TextStyle(fontSize: 12, color: AppColors.tertiary, fontStyle: FontStyle.italic),
           ),
@@ -507,18 +508,18 @@ class _ServiceListScreenState extends State<ServiceListScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const Text('Đơn giá duy nhất', style: TextStyle(fontSize: 10, color: AppColors.tertiary)),
+                  const LocalizedText('Đơn giá duy nhất', style: TextStyle(fontSize: 10, color: AppColors.tertiary)),
                   Row(
                     mainAxisSize: MainAxisSize.min,
                     crossAxisAlignment: CrossAxisAlignment.baseline,
                     textBaseline: TextBaseline.alphabetic,
                     children: [
-                      Text(
+                      LocalizedText(
                         '${service.price.toStringAsFixed(0).replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]}.')}',
                         style: const TextStyle(fontSize: 17, fontWeight: FontWeight.bold, color: AppColors.primary),
                       ),
                       const SizedBox(width: 2),
-                      const Text('đ/khách', style: TextStyle(fontSize: 10, color: AppColors.tertiary)),
+                      const LocalizedText('đ/khách', style: TextStyle(fontSize: 10, color: AppColors.tertiary)),
                     ],
                   ),
                 ],
@@ -536,7 +537,7 @@ class _ServiceListScreenState extends State<ServiceListScreen> {
                       );
                     },
                     icon: const Icon(Icons.edit, size: 12),
-                    label: const Text('Sửa', style: TextStyle(fontSize: 11)),
+                    label: const LocalizedText('Sửa', style: TextStyle(fontSize: 11)),
                     style: OutlinedButton.styleFrom(
                       foregroundColor: AppColors.secondary,
                       side: const BorderSide(color: AppColors.secondary),
@@ -555,7 +556,7 @@ class _ServiceListScreenState extends State<ServiceListScreen> {
                       );
                     },
                     icon: const Icon(Icons.shield_outlined, size: 12),
-                    label: const Text('An toàn', style: TextStyle(fontSize: 11)),
+                    label: const LocalizedText('An toàn', style: TextStyle(fontSize: 11)),
                     style: OutlinedButton.styleFrom(
                       foregroundColor: AppColors.primary,
                       side: const BorderSide(color: AppColors.primary),
@@ -576,7 +577,7 @@ class _ServiceListScreenState extends State<ServiceListScreen> {
                       );
                     },
                     icon: const Icon(Icons.calendar_month, color: AppColors.secondary, size: 18),
-                    tooltip: 'Xem lịch khung giờ',
+                    tooltip: tr(context, 'Xem lịch khung giờ'),
                   ),
                 ],
               ),
@@ -603,7 +604,7 @@ class _ServiceListScreenState extends State<ServiceListScreen> {
           Icon(icon, size: 12, color: AppColors.secondary),
           const SizedBox(width: 4),
           Flexible(
-            child: Text(
+            child: LocalizedText(
               text,
               style: const TextStyle(fontSize: 11, color: AppColors.tertiary),
               maxLines: 1,

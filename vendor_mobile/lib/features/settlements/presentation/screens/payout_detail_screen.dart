@@ -1,3 +1,4 @@
+import 'package:vendor_mobile/core/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_shapes.dart';
@@ -138,7 +139,7 @@ class _PayoutDetailScreenState extends State<PayoutDetailScreen> {
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
-        title: const Text('Chi tiết đối soát & Nhận tiền'),
+        title: const LocalizedText('Chi tiết đối soát & Nhận tiền'),
         backgroundColor: AppColors.surface,
         elevation: 0,
         leading: IconButton(
@@ -174,14 +175,14 @@ class _PayoutDetailScreenState extends State<PayoutDetailScreen> {
                             color: AppColors.surfaceContainer,
                             borderRadius: BorderRadius.circular(AppShapes.rFull),
                           ),
-                          child: Text(
+                          child: LocalizedText(
                             'KỲ ĐỐI SOÁT #${currentSettlement.id}',
                             style: AppTypography.labelSm.copyWith(color: AppColors.onSurfaceVariant),
                             overflow: TextOverflow.ellipsis,
                           ),
                         ),
                         const SizedBox(height: 6),
-                        Text(
+                        LocalizedText(
                           '${currentSettlement.periodStart.day}/${currentSettlement.periodStart.month} - ${currentSettlement.periodEnd.day}/${currentSettlement.periodEnd.month}/${currentSettlement.periodEnd.year}',
                           style: AppTypography.headlineSm.copyWith(
                             color: AppColors.onSurface,
@@ -223,12 +224,12 @@ class _PayoutDetailScreenState extends State<PayoutDetailScreen> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(
+                            LocalizedText(
                               'THỰC NHẬN KHẢ DỤNG',
                               style: AppTypography.labelSm.copyWith(color: AppColors.tertiary),
                             ),
                             const SizedBox(height: 2),
-                            Text(
+                            LocalizedText(
                               _formatVnd(currentSettlement.netPayableAmount),
                               style: AppTypography.headlineLgMobile.copyWith(
                                 color: AppColors.primary,
@@ -266,14 +267,14 @@ class _PayoutDetailScreenState extends State<PayoutDetailScreen> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text(
+                              LocalizedText(
                                 'Doanh thu (${currentSettlement.orderCount} đơn)',
                                 style: AppTypography.labelSm.copyWith(color: AppColors.tertiary),
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
                               ),
                               const SizedBox(height: 2),
-                              Text(
+                              LocalizedText(
                                 _formatVnd(currentSettlement.grossAmount),
                                 style: AppTypography.labelLg.copyWith(
                                   color: AppColors.onSurface,
@@ -297,14 +298,14 @@ class _PayoutDetailScreenState extends State<PayoutDetailScreen> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text(
+                              LocalizedText(
                                 'Phí sàn (~10%)',
                                 style: AppTypography.labelSm.copyWith(color: AppColors.tertiary),
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
                               ),
                               const SizedBox(height: 2),
-                              Text(
+                              LocalizedText(
                                 '-${_formatVnd(currentSettlement.commissionAmount)}',
                                 style: AppTypography.labelLg.copyWith(
                                   color: AppColors.primary,
@@ -326,7 +327,7 @@ class _PayoutDetailScreenState extends State<PayoutDetailScreen> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Flexible(
-                        child: Text(
+                        child: LocalizedText(
                           'Tỷ lệ phân phối sàn & đối tác',
                           style: AppTypography.labelSm.copyWith(color: AppColors.tertiary),
                           overflow: TextOverflow.ellipsis,
@@ -334,7 +335,7 @@ class _PayoutDetailScreenState extends State<PayoutDetailScreen> {
                       ),
                       const SizedBox(width: 8),
                       Flexible(
-                        child: Text(
+                        child: LocalizedText(
                           '90% Đối tác • 10% Phí sàn',
                           style: AppTypography.labelSm.copyWith(color: AppColors.secondary, fontWeight: FontWeight.bold),
                           overflow: TextOverflow.ellipsis,
@@ -361,9 +362,9 @@ class _PayoutDetailScreenState extends State<PayoutDetailScreen> {
             const SizedBox(height: 20),
 
             // Detailed Service Bookings in Cycle
-            Text('Đơn dịch vụ trong kỳ', style: AppTypography.headlineSm.copyWith(color: AppColors.onSurface)),
+            LocalizedText('Đơn dịch vụ trong kỳ', style: AppTypography.headlineSm.copyWith(color: AppColors.onSurface)),
             const SizedBox(height: 4),
-            Text('Các đơn đã hoàn thành thực tế được chốt đối soát', style: AppTypography.bodySm.copyWith(color: AppColors.tertiary)),
+            LocalizedText('Các đơn đã hoàn thành thực tế được chốt đối soát', style: AppTypography.bodySm.copyWith(color: AppColors.tertiary)),
             const SizedBox(height: 10),
 
             ListView.separated(
@@ -414,13 +415,13 @@ class _PayoutDetailScreenState extends State<PayoutDetailScreen> {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text(
+                                LocalizedText(
                                   o.serviceName,
                                   style: AppTypography.labelMd.copyWith(color: AppColors.onSurface, fontWeight: FontWeight.bold),
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
                                 ),
-                                Text(
+                                LocalizedText(
                                   '#${o.id} • ${o.quantity} khách • ${o.slotDate}',
                                   style: AppTypography.bodySm.copyWith(color: AppColors.tertiary, fontSize: 12),
                                   maxLines: 1,
@@ -432,11 +433,11 @@ class _PayoutDetailScreenState extends State<PayoutDetailScreen> {
                           Column(
                             crossAxisAlignment: CrossAxisAlignment.end,
                             children: [
-                              Text(
+                              LocalizedText(
                                 _formatVnd(o.vendorPayoutAmount),
                                 style: AppTypography.labelLg.copyWith(color: AppColors.secondary, fontWeight: FontWeight.bold),
                               ),
-                              Text(
+                              LocalizedText(
                                 'Phí -${_formatVnd(o.commissionAmount)}',
                                 style: AppTypography.bodySm.copyWith(color: AppColors.primary, fontSize: 11),
                               ),
@@ -477,7 +478,7 @@ class _PayoutDetailScreenState extends State<PayoutDetailScreen> {
                       ),
                       const SizedBox(width: 10),
                       Expanded(
-                        child: Text(
+                        child: LocalizedText(
                           'Gửi yêu cầu nhận tiền',
                           style: AppTypography.headlineSm.copyWith(color: AppColors.onSurface),
                           overflow: TextOverflow.ellipsis,
@@ -514,7 +515,7 @@ class _PayoutDetailScreenState extends State<PayoutDetailScreen> {
                                 shape: BoxShape.circle,
                               ),
                               alignment: Alignment.center,
-                              child: Text(
+                              child: LocalizedText(
                                 'VCB',
                                 style: AppTypography.labelMd.copyWith(
                                   color: AppColors.secondary,
@@ -527,7 +528,7 @@ class _PayoutDetailScreenState extends State<PayoutDetailScreen> {
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Text(
+                                  LocalizedText(
                                     vendor.bankAccountNumber ?? '0041000889988',
                                     style: AppTypography.labelLg.copyWith(
                                       color: AppColors.onSurface,
@@ -535,7 +536,7 @@ class _PayoutDetailScreenState extends State<PayoutDetailScreen> {
                                       letterSpacing: 1.0,
                                     ),
                                   ),
-                                  Text(
+                                  LocalizedText(
                                     '${vendor.bankAccountHolder ?? "TRAN HAI DANG"} • ${vendor.bankName ?? "Vietcombank"} CN Đà Nẵng',
                                     style: AppTypography.bodySm.copyWith(color: AppColors.tertiary),
                                     maxLines: 1,
@@ -550,7 +551,7 @@ class _PayoutDetailScreenState extends State<PayoutDetailScreen> {
                                 color: AppColors.secondaryFixed.withAlpha(80),
                                 borderRadius: BorderRadius.circular(AppShapes.rFull),
                               ),
-                              child: Text(
+                              child: LocalizedText(
                                 'Thay đổi',
                                 style: AppTypography.labelSm.copyWith(
                                   color: AppColors.onSecondaryFixedVariant,
@@ -578,7 +579,7 @@ class _PayoutDetailScreenState extends State<PayoutDetailScreen> {
                           _amountController.text = _getEligibleMaxAmount().toInt().toString();
                         });
                       },
-                      title: Text(
+                      title: LocalizedText(
                         'Rút gộp tất cả các kỳ chờ đối soát (${_formatVnd(_getEligibleMaxAmount())})',
                         style: AppTypography.labelMd.copyWith(color: AppColors.onSurface),
                       ),
@@ -594,7 +595,7 @@ class _PayoutDetailScreenState extends State<PayoutDetailScreen> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Flexible(
-                        child: Text(
+                        child: LocalizedText(
                           'Số tiền yêu cầu rút',
                           style: AppTypography.labelMd.copyWith(color: AppColors.tertiary),
                           overflow: TextOverflow.ellipsis,
@@ -602,7 +603,7 @@ class _PayoutDetailScreenState extends State<PayoutDetailScreen> {
                       ),
                       const SizedBox(width: 8),
                       Flexible(
-                        child: Text(
+                        child: LocalizedText(
                           'Tối đa: ${_formatVnd(maxEligible)}',
                           style: AppTypography.labelSm.copyWith(color: AppColors.secondary, fontWeight: FontWeight.bold),
                           overflow: TextOverflow.ellipsis,
@@ -637,7 +638,7 @@ class _PayoutDetailScreenState extends State<PayoutDetailScreen> {
                           _amountController.text = maxEligible.toInt().toString();
                         });
                       },
-                      child: const Text('Điền số tiền tối đa', overflow: TextOverflow.ellipsis),
+                      child: const LocalizedText('Điền số tiền tối đa', overflow: TextOverflow.ellipsis),
                     ),
                   ),
                   const SizedBox(height: 12),
@@ -657,7 +658,7 @@ class _PayoutDetailScreenState extends State<PayoutDetailScreen> {
                             const Icon(Icons.verified_user, size: 16, color: AppColors.primaryContainer),
                             const SizedBox(width: 6),
                             Expanded(
-                              child: Text(
+                              child: LocalizedText(
                                 'Chính sách thanh toán DANASEA',
                                 style: AppTypography.labelSm.copyWith(
                                   color: AppColors.onSurface,
@@ -669,7 +670,7 @@ class _PayoutDetailScreenState extends State<PayoutDetailScreen> {
                           ],
                         ),
                         const SizedBox(height: 4),
-                        Text(
+                        LocalizedText(
                           'Đối tác gửi yêu cầu nhận tiền trực tiếp đến ban tài chính DANASEA. Hệ thống không tự động phê duyệt tức thì nhằm rà soát tính hợp lệ của tour đã hoàn tất. Thời gian xử lý được cập nhật theo tiến độ yêu cầu thanh toán.',
                           style: AppTypography.bodySm.copyWith(color: AppColors.tertiary),
                         ),
@@ -685,7 +686,7 @@ class _PayoutDetailScreenState extends State<PayoutDetailScreen> {
                     child: ElevatedButton.icon(
                       onPressed: _isSubmitting ? null : _handleSubmitPayout,
                       icon: const Icon(Icons.send, size: 18),
-                      label: const Text('Gửi yêu cầu nhận tiền', overflow: TextOverflow.ellipsis),
+                      label: const LocalizedText('Gửi yêu cầu nhận tiền', overflow: TextOverflow.ellipsis),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppColors.primary,
                         foregroundColor: Colors.white,
@@ -701,9 +702,9 @@ class _PayoutDetailScreenState extends State<PayoutDetailScreen> {
             const SizedBox(height: 24),
 
             // Payout Cycle History & Request Audit Trail
-            Text('Lịch sử yêu cầu nhận tiền', style: AppTypography.headlineSm.copyWith(color: AppColors.onSurface)),
+            LocalizedText('Lịch sử yêu cầu nhận tiền', style: AppTypography.headlineSm.copyWith(color: AppColors.onSurface)),
             const SizedBox(height: 4),
-            Text('Trạng thái thẩm định và chi trả qua các kỳ', style: AppTypography.bodySm.copyWith(color: AppColors.tertiary)),
+            LocalizedText('Trạng thái thẩm định và chi trả qua các kỳ', style: AppTypography.bodySm.copyWith(color: AppColors.tertiary)),
             const SizedBox(height: 12),
 
             ListView.separated(
@@ -729,7 +730,7 @@ class _PayoutDetailScreenState extends State<PayoutDetailScreen> {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Expanded(
-                            child: Text(
+                            child: LocalizedText(
                               '#${p.id}',
                               style: AppTypography.labelLg.copyWith(
                                 color: AppColors.onSurface,
@@ -749,7 +750,7 @@ class _PayoutDetailScreenState extends State<PayoutDetailScreen> {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Expanded(
-                            child: Text(
+                            child: LocalizedText(
                               'Yêu cầu rút: ${_formatVnd(p.amount)}',
                               style: AppTypography.headlineSm.copyWith(
                                 color: AppColors.secondary,
@@ -759,14 +760,14 @@ class _PayoutDetailScreenState extends State<PayoutDetailScreen> {
                             ),
                           ),
                           const SizedBox(width: 8),
-                          Text(
+                          LocalizedText(
                             '${p.createdAt.day}/${p.createdAt.month}/${p.createdAt.year}',
                             style: AppTypography.bodySm.copyWith(color: AppColors.tertiary),
                           ),
                         ],
                       ),
                       const SizedBox(height: 4),
-                      Text(
+                      LocalizedText(
                         'Tài khoản thụ hưởng: ${p.bankName} ${p.bankAccountNumber}',
                         style: AppTypography.bodySm.copyWith(color: AppColors.tertiary),
                       ),

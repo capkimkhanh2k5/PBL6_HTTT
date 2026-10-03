@@ -1,3 +1,4 @@
+import 'package:mobile/core/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import '../../../../core/data/mock_database_data.dart';
 import '../../../../core/models/danasea_models.dart';
@@ -23,7 +24,7 @@ class NotificationsScreen extends StatelessWidget {
           icon: const Icon(Icons.arrow_back, color: AppColors.onSurface),
           onPressed: () => Navigator.pop(context),
         ),
-        title: Text(
+        title: LocalizedText(
           'Thông báo',
           style: AppTypography.headlineSm(color: AppColors.onSurface),
         ),
@@ -33,7 +34,7 @@ class NotificationsScreen extends StatelessWidget {
             icon: const Icon(Icons.tune, color: AppColors.onSurface),
             onPressed: () {
               ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Cài đặt thông báo ứng dụng')),
+                const SnackBar(content: LocalizedText('Cài đặt thông báo ứng dụng')),
               );
             },
           ),
@@ -102,7 +103,7 @@ class NotificationsScreen extends StatelessWidget {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Expanded(
-                          child: Text(
+                          child: LocalizedText(
                             notif.title,
                             style: AppTypography.labelLg(
                               color: AppColors.onSurface,
@@ -121,13 +122,13 @@ class NotificationsScreen extends StatelessWidget {
                       ],
                     ),
                     const SizedBox(height: 2),
-                    Text(
+                    LocalizedText(
                       '10 phút trước',
                       style: AppTypography.bodySm(color: AppColors.outline)
                           .copyWith(fontSize: 10),
                     ),
                     const SizedBox(height: 6),
-                    Text(
+                    LocalizedText(
                       notif.body,
                       style: AppTypography.bodySm(
                         color: AppColors.onSurfaceVariant,
@@ -169,7 +170,7 @@ class NotificationsScreen extends StatelessWidget {
                               size: 18, color: AppColors.primary),
                           const SizedBox(width: 6),
                           Expanded(
-                            child: Text(
+                            child: LocalizedText(
                               'Mở vé QR đơn #DNS-8924',
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
@@ -219,7 +220,7 @@ class NotificationsScreen extends StatelessWidget {
                               size: 18, color: AppColors.secondary),
                           const SizedBox(width: 6),
                           Expanded(
-                            child: Text(
+                            child: LocalizedText(
                               'Xem chi tiết hoàn tiền',
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,

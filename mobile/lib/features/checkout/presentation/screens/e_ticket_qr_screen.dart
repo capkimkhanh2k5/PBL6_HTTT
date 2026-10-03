@@ -1,3 +1,4 @@
+import 'package:mobile/core/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import '../../../../core/data/mock_database_data.dart';
 import '../../../../core/models/danasea_models.dart';
@@ -42,7 +43,7 @@ class _ETicketQrScreenState extends State<ETicketQrScreen> {
           icon: const Icon(Icons.arrow_back, color: AppColors.onSurface),
           onPressed: () => Navigator.pop(context),
         ),
-        title: Text(
+        title: LocalizedText(
           'Vé điện tử QR',
           style: AppTypography.headlineSm(color: AppColors.onSurface),
         ),
@@ -53,7 +54,7 @@ class _ETicketQrScreenState extends State<ETicketQrScreen> {
             onPressed: () {
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(
-                  content: Text('Đã tạo liên kết chia sẻ vé điện tử!'),
+                  content: LocalizedText('Đã tạo liên kết chia sẻ vé điện tử!'),
                   backgroundColor: AppColors.secondary,
                 ),
               );
@@ -92,7 +93,7 @@ class _ETicketQrScreenState extends State<ETicketQrScreen> {
                               : AppColors.surfaceContainerLow,
                           borderRadius: BorderRadius.circular(16),
                         ),
-                        child: Text(
+                        child: LocalizedText(
                           'Vé ${idx + 1}/${tickets.length}',
                           style: AppTypography.labelSm(
                             color: isSel ? Colors.white : AppColors.onSurface,
@@ -165,7 +166,7 @@ class _ETicketQrScreenState extends State<ETicketQrScreen> {
                                   ),
                                 ),
                                 const SizedBox(width: 4),
-                                Text(
+                                LocalizedText(
                                   'Sóng 0.4m • Gió 8 km/h',
                                   style: AppTypography.labelSm(
                                     color: AppColors.onSurface,
@@ -193,7 +194,7 @@ class _ETicketQrScreenState extends State<ETicketQrScreen> {
                                     size: 12,
                                     color: AppColors.onSecondaryContainer),
                                 const SizedBox(width: 4),
-                                Text(
+                                LocalizedText(
                                   'HỢP LỆ CHECK-IN',
                                   style: AppTypography.labelSm(
                                     color: AppColors.onSecondaryContainer,
@@ -220,7 +221,7 @@ class _ETicketQrScreenState extends State<ETicketQrScreen> {
                                 size: 14, color: AppColors.secondary),
                             const SizedBox(width: 4),
                             Expanded(
-                              child: Text(
+                              child: LocalizedText(
                                 '${_currentSubOrder.vendorName} • ${_currentSubOrder.locationName}',
                                 style: AppTypography.labelSm(
                                   color: AppColors.secondary,
@@ -233,7 +234,7 @@ class _ETicketQrScreenState extends State<ETicketQrScreen> {
                           ],
                         ),
                         const SizedBox(height: 4),
-                        Text(
+                        LocalizedText(
                           _currentSubOrder.serviceName,
                           style: AppTypography.headlineSm(
                             color: AppColors.onSurface,
@@ -301,7 +302,7 @@ class _ETicketQrScreenState extends State<ETicketQrScreen> {
                                         size: 16, color: AppColors.secondary),
                                     const SizedBox(width: 6),
                                     Flexible(
-                                      child: Text(
+                                      child: LocalizedText(
                                         user.fullName,
                                         overflow: TextOverflow.ellipsis,
                                         style: AppTypography.labelMd(
@@ -321,7 +322,7 @@ class _ETicketQrScreenState extends State<ETicketQrScreen> {
                                   color: AppColors.surfaceContainerLowest,
                                   borderRadius: BorderRadius.circular(6),
                                 ),
-                                child: Text(
+                                child: LocalizedText(
                                   'Người đại diện',
                                   style: AppTypography.labelSm(
                                     color: AppColors.secondary,
@@ -485,7 +486,7 @@ class _ETicketQrScreenState extends State<ETicketQrScreen> {
                                       size: 140,
                                       color: Color(0xFF1A1C1A),
                                     ),
-                                    Text(
+                                    LocalizedText(
                                       _currentSubOrder.id,
                                       style: const TextStyle(
                                         fontFamily: 'monospace',
@@ -501,7 +502,7 @@ class _ETicketQrScreenState extends State<ETicketQrScreen> {
                           ),
                         ),
                         const SizedBox(height: 14),
-                        Text(
+                        LocalizedText(
                           'Đưa mã QR cho đối tác quét xác nhận check-in',
                           style: AppTypography.labelMd(
                             color: AppColors.onSurface,
@@ -509,7 +510,7 @@ class _ETicketQrScreenState extends State<ETicketQrScreen> {
                           ),
                         ),
                         const SizedBox(height: 4),
-                        Text(
+                        LocalizedText(
                           'Mã bảo mật: ${_currentSubOrder.qrSecret}',
                           style: AppTypography.bodySm(
                             color: AppColors.outline,
@@ -537,7 +538,7 @@ class _ETicketQrScreenState extends State<ETicketQrScreen> {
                       size: 20, color: AppColors.secondary),
                   const SizedBox(width: 8),
                   Expanded(
-                    child: Text(
+                    child: LocalizedText(
                       'Cần hỗ trợ tại bãi biển? Gọi hotline điều phối Danang Ocean: 1900 6868',
                       style: AppTypography.bodySm(
                         color: AppColors.onSurfaceVariant,
@@ -569,7 +570,7 @@ class _ETicketQrScreenState extends State<ETicketQrScreen> {
               Icon(icon, size: 12, color: AppColors.secondary),
               const SizedBox(width: 4),
               Expanded(
-                child: Text(
+                child: LocalizedText(
                   label,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
@@ -581,7 +582,7 @@ class _ETicketQrScreenState extends State<ETicketQrScreen> {
             ],
           ),
           const SizedBox(height: 2),
-          Text(
+          LocalizedText(
             value,
             style: AppTypography.labelMd(
               color: AppColors.onSurface,

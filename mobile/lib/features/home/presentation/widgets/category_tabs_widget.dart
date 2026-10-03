@@ -1,3 +1,4 @@
+import 'package:mobile/core/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_shapes.dart';
@@ -38,7 +39,7 @@ class _CategoryTabsWidgetState extends State<CategoryTabsWidget> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Expanded(
-                child: Text(
+                child: LocalizedText(
                   'Khám phá theo sở thích',
                   overflow: TextOverflow.ellipsis,
                   style: AppTypography.headlineSm(
@@ -53,7 +54,7 @@ class _CategoryTabsWidgetState extends State<CategoryTabsWidget> {
                 borderRadius: BorderRadius.circular(8),
                 child: Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
-                  child: Text(
+                  child: LocalizedText(
                     'Xem tất cả',
                     style: AppTypography.labelMd(
                       color: AppColors.secondary,
@@ -113,7 +114,7 @@ class _CategoryTabsWidgetState extends State<CategoryTabsWidget> {
                             : AppColors.onSurface,
                       ),
                       const SizedBox(width: 8),
-                      Text(
+                      LocalizedText(
                         item['name'] as String,
                         style: AppTypography.labelMd(
                           color: isSelected

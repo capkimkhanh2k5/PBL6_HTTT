@@ -1,3 +1,4 @@
+import 'package:vendor_mobile/core/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_typography.dart';
@@ -140,7 +141,7 @@ class StatusBadge extends StatelessWidget {
             const SizedBox(width: 4),
           ],
           Flexible(
-            child: Text(
+            child: LocalizedText(
               label,
               style: AppTypography.labelSm(color: fg).copyWith(
                 fontWeight: FontWeight.w700,

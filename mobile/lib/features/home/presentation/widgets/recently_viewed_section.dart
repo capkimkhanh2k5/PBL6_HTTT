@@ -1,3 +1,4 @@
+import 'package:mobile/core/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_shapes.dart';
@@ -50,7 +51,7 @@ class RecentlyViewedSection extends StatelessWidget {
                     ),
                     const SizedBox(width: 6),
                     Flexible(
-                      child: Text(
+                      child: LocalizedText(
                         'Gần đây bạn xem',
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
@@ -66,7 +67,7 @@ class RecentlyViewedSection extends StatelessWidget {
               const SizedBox(width: 8),
               InkWell(
                 onTap: onClearHistory,
-                child: Text(
+                child: LocalizedText(
                   'Xóa lịch sử',
                   style: AppTypography.labelSm(
                     color: AppColors.outline,
@@ -129,7 +130,7 @@ class RecentlyViewedSection extends StatelessWidget {
                                 color: AppColors.inverseSurface.withValues(alpha: 0.8),
                                 borderRadius: AppShapes.radiusFull,
                               ),
-                              child: Text(
+                              child: LocalizedText(
                                 item.location,
                                 style: AppTypography.labelSm(
                                   color: AppColors.inverseOnSurface,
@@ -149,7 +150,7 @@ class RecentlyViewedSection extends StatelessWidget {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(
+                          LocalizedText(
                             item.title,
                             style: AppTypography.labelLg(
                               color: AppColors.onSurface,
@@ -159,7 +160,7 @@ class RecentlyViewedSection extends StatelessWidget {
                             overflow: TextOverflow.ellipsis,
                           ),
                           const SizedBox(height: 2),
-                          Text(
+                          LocalizedText(
                             _formatPrice(item.price),
                             style: AppTypography.labelMd(
                               color: AppColors.primary,
@@ -183,7 +184,7 @@ class RecentlyViewedSection extends StatelessWidget {
                           borderRadius: AppShapes.radiusFull,
                         ),
                         child: Center(
-                          child: Text(
+                          child: LocalizedText(
                             'Đặt nhanh',
                             style: AppTypography.labelSm(
                               color: AppColors.onSecondary,

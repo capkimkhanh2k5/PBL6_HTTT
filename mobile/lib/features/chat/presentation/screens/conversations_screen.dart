@@ -1,3 +1,4 @@
+import 'package:mobile/core/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import '../../../../core/data/mock_database_data.dart';
 import '../../../../core/theme/app_colors.dart';
@@ -42,7 +43,7 @@ class _ConversationsScreenState extends State<ConversationsScreen> {
           icon: const Icon(Icons.arrow_back, color: AppColors.onSurface),
           onPressed: () => Navigator.pop(context),
         ),
-        title: Text(
+        title: LocalizedText(
           'Tin nhắn',
           style: AppTypography.headlineSm(color: AppColors.onSurface),
         ),
@@ -74,7 +75,7 @@ class _ConversationsScreenState extends State<ConversationsScreen> {
                   const Icon(Icons.waves, size: 16, color: AppColors.secondary),
                   const SizedBox(width: 6),
                   Expanded(
-                    child: Text(
+                    child: LocalizedText(
                       'Biển Mỹ Khê sóng êm (0.4m) • Kênh phản hồi trực tiếp',
                       style: AppTypography.bodySm(
                         color: AppColors.onSurface,
@@ -83,7 +84,7 @@ class _ConversationsScreenState extends State<ConversationsScreen> {
                       overflow: TextOverflow.ellipsis,
                     ),
                   ),
-                  Text(
+                  LocalizedText(
                     'Trực tuyến',
                     style: AppTypography.labelSm(
                       color: AppColors.secondary,
@@ -108,7 +109,7 @@ class _ConversationsScreenState extends State<ConversationsScreen> {
               child: TextField(
                 controller: _searchController,
                 decoration: InputDecoration(
-                  hintText: 'Tìm đối tác hoặc mã đơn...',
+                  hintText: tr(context, 'Tìm đối tác hoặc mã đơn...'),
                   hintStyle: AppTypography.bodySm(color: AppColors.outline),
                   prefixIcon: const Icon(Icons.search,
                       size: 20, color: AppColors.secondary),
@@ -143,7 +144,7 @@ class _ConversationsScreenState extends State<ConversationsScreen> {
                           : AppColors.surfaceContainerLow,
                       borderRadius: BorderRadius.circular(16),
                     ),
-                    child: Text(
+                    child: LocalizedText(
                       _pills[index],
                       style: AppTypography.labelSm(
                         color: isSel ? Colors.white : AppColors.onSurfaceVariant,
@@ -188,7 +189,7 @@ class _ConversationsScreenState extends State<ConversationsScreen> {
                                   ? NetworkImage(conv.vendorAvatar!)
                                   : null,
                               child: conv.vendorAvatar == null
-                                  ? Text(conv.vendorName[0])
+                                  ? LocalizedText(conv.vendorName[0])
                                   : null,
                             ),
                             if (conv.isOnline)
@@ -218,7 +219,7 @@ class _ConversationsScreenState extends State<ConversationsScreen> {
                                     MainAxisAlignment.spaceBetween,
                                 children: [
                                   Expanded(
-                                    child: Text(
+                                    child: LocalizedText(
                                       conv.vendorName,
                                       maxLines: 1,
                                       overflow: TextOverflow.ellipsis,
@@ -228,7 +229,7 @@ class _ConversationsScreenState extends State<ConversationsScreen> {
                                     ),
                                   ),
                                   const SizedBox(width: 8),
-                                  Text(
+                                  LocalizedText(
                                     '${conv.lastMessageTime.hour}:${conv.lastMessageTime.minute.toString().padLeft(2, '0')}',
                                     style: AppTypography.bodySm(
                                             color: AppColors.outline)
@@ -237,7 +238,7 @@ class _ConversationsScreenState extends State<ConversationsScreen> {
                                 ],
                               ),
                               const SizedBox(height: 4),
-                              Text(
+                              LocalizedText(
                                 conv.lastMessage,
                                 style: AppTypography.bodySm(
                                   color: conv.unreadCount > 0
@@ -261,7 +262,7 @@ class _ConversationsScreenState extends State<ConversationsScreen> {
                               color: AppColors.primary,
                               shape: BoxShape.circle,
                             ),
-                            child: Text(
+                            child: LocalizedText(
                               '${conv.unreadCount}',
                               style: const TextStyle(
                                   color: Colors.white,

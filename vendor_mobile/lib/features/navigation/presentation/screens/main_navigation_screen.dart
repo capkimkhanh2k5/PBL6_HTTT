@@ -1,3 +1,4 @@
+import 'package:vendor_mobile/core/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/data/vendor_mock_database.dart';
@@ -102,25 +103,25 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
             elevation: 0,
             labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
             destinations: [
-              const NavigationDestination(
+               NavigationDestination(
                 icon: Icon(Icons.dashboard_outlined),
                 selectedIcon: Icon(Icons.dashboard, color: AppColors.onSecondaryContainer),
-                label: 'Tổng quan',
+                label: tr(context, 'Tổng quan'),
               ),
-              const NavigationDestination(
+               NavigationDestination(
                 icon: Icon(Icons.surfing_outlined),
                 selectedIcon: Icon(Icons.surfing, color: AppColors.onSecondaryContainer),
-                label: 'Dịch vụ',
+                label: tr(context, 'Dịch vụ'),
               ),
-              const NavigationDestination(
+               NavigationDestination(
                 icon: Icon(Icons.calendar_month_outlined),
                 selectedIcon: Icon(Icons.calendar_month, color: AppColors.onSecondaryContainer),
-                label: 'Lịch chạy',
+                label: tr(context, 'Lịch chạy'),
               ),
               NavigationDestination(
                 icon: pendingOrdersCount > 0
                     ? Badge(
-                        label: Text('$pendingOrdersCount'),
+                        label: LocalizedText('$pendingOrdersCount'),
                         backgroundColor: AppColors.primaryContainer,
                         textColor: AppColors.onPrimary,
                         child: const Icon(Icons.receipt_long_outlined),
@@ -129,10 +130,10 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
                 selectedIcon: const Icon(Icons.receipt_long, color: AppColors.onSecondaryContainer),
                 label: 'Đơn hàng',
               ),
-              const NavigationDestination(
+               NavigationDestination(
                 icon: Icon(Icons.person_outline),
                 selectedIcon: Icon(Icons.person, color: AppColors.onSecondaryContainer),
-                label: 'Tài khoản',
+                label: tr(context, 'Tài khoản'),
               ),
             ],
           ),

@@ -1,3 +1,4 @@
+import 'package:mobile/core/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import '../../../../core/data/mock_database_data.dart';
 import '../../../../core/models/danasea_models.dart';
@@ -50,7 +51,7 @@ class RefundTrackingScreen extends StatelessWidget {
           icon: const Icon(Icons.arrow_back, color: AppColors.onSurface),
           onPressed: () => Navigator.pop(context),
         ),
-        title: Text(
+        title: LocalizedText(
           'Theo dõi hoàn tiền',
           style: AppTypography.headlineSm(color: AppColors.onSurface),
         ),
@@ -75,14 +76,14 @@ class RefundTrackingScreen extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
+                        LocalizedText(
                           'Tổng yêu cầu',
                           style: AppTypography.bodySm(
                             color: AppColors.onSurfaceVariant,
                           ),
                         ),
                         const SizedBox(height: 4),
-                        Text(
+                        LocalizedText(
                           '${refunds.length} dịch vụ',
                           style: AppTypography.headlineSm(
                             color: AppColors.onSurface,
@@ -105,14 +106,14 @@ class RefundTrackingScreen extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
+                        LocalizedText(
                           'Tổng tiền yêu cầu',
                           style: AppTypography.bodySm(
                             color: AppColors.onSurfaceVariant,
                           ),
                         ),
                         const SizedBox(height: 4),
-                        Text(
+                        LocalizedText(
                           _formatPrice(totalAmount),
                           style: AppTypography.headlineSm(
                             color: AppColors.primary,
@@ -139,7 +140,7 @@ class RefundTrackingScreen extends StatelessWidget {
                       size: 20, color: AppColors.secondary),
                   const SizedBox(width: 8),
                   Expanded(
-                    child: Text(
+                    child: LocalizedText(
                       'Hoàn trả minh bạch kết nối trực tiếp cổng thanh toán gốc, theo đúng lịch đối soát của ngân hàng.',
                       style: AppTypography.bodySm(
                         color: AppColors.onSecondaryFixedVariant,
@@ -187,7 +188,7 @@ class RefundTrackingScreen extends StatelessWidget {
                           color: AppColors.surfaceContainerHigh,
                           borderRadius: BorderRadius.circular(6),
                         ),
-                        child: Text(
+                        child: LocalizedText(
                           ref.subOrderCode,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
@@ -198,7 +199,7 @@ class RefundTrackingScreen extends StatelessWidget {
                     ),
                     const SizedBox(width: 4),
                     Flexible(
-                      child: Text(
+                      child: LocalizedText(
                         '${ref.createdAt.day}/${ref.createdAt.month}/${ref.createdAt.year}',
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
@@ -230,7 +231,7 @@ class RefundTrackingScreen extends StatelessWidget {
                           : AppColors.onSurfaceVariant,
                     ),
                     const SizedBox(width: 4),
-                    Text(
+                    LocalizedText(
                       isProcessed ? 'Đã hoàn tất' : 'Đang xử lý',
                       style: AppTypography.labelSm(
                         color: isProcessed
@@ -245,7 +246,7 @@ class RefundTrackingScreen extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 6),
-          Text(
+          LocalizedText(
             ref.serviceName,
             style: AppTypography.headlineSm(
               color: AppColors.onSurface,
@@ -267,10 +268,10 @@ class RefundTrackingScreen extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('Số tiền hoàn:',
+                      LocalizedText('Số tiền hoàn:',
                           style: AppTypography.bodySm(
                               color: AppColors.onSurfaceVariant)),
-                      Text(
+                      LocalizedText(
                         _formatPrice(ref.amount),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
@@ -289,7 +290,7 @@ class RefundTrackingScreen extends StatelessWidget {
                     color: AppColors.surfaceContainerLowest,
                     borderRadius: BorderRadius.circular(12),
                   ),
-                  child: Text(
+                  child: LocalizedText(
                     'Tỷ lệ: ${ref.refundPercentage.toInt()}%',
                     style: AppTypography.labelSm(
                       color: AppColors.secondary,
@@ -318,14 +319,14 @@ class RefundTrackingScreen extends StatelessWidget {
             onPressed: () {
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
-                  content: Text('Xem chi tiết đơn ${ref.subOrderCode}'),
+                  content: LocalizedText('Xem chi tiết đơn ${ref.subOrderCode}'),
                   duration: const Duration(seconds: 1),
                 ),
               );
             },
             icon: const Icon(Icons.receipt_long,
                 size: 16, color: AppColors.secondary),
-            label: Text(
+            label: LocalizedText(
               'Xem mã đơn gốc & hóa đơn',
               style: AppTypography.labelSm(color: AppColors.secondary),
             ),
@@ -339,11 +340,11 @@ class RefundTrackingScreen extends StatelessWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Text(label,
+        LocalizedText(label,
             style: AppTypography.bodySm(color: AppColors.onSurfaceVariant)),
         const SizedBox(width: 12),
         Expanded(
-          child: Text(
+          child: LocalizedText(
             value,
             textAlign: TextAlign.right,
             style: AppTypography.labelMd(

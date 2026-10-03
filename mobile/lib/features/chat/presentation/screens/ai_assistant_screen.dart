@@ -1,3 +1,4 @@
+import 'package:mobile/core/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import '../../../../core/data/mock_database_data.dart';
 import '../../../../core/models/danasea_models.dart';
@@ -93,7 +94,7 @@ class _AiAssistantScreenState extends State<AiAssistantScreen> {
             ),
             const SizedBox(width: 6),
             Flexible(
-              child: Text(
+              child: LocalizedText(
                 'DANASEA AI',
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
@@ -111,7 +112,7 @@ class _AiAssistantScreenState extends State<AiAssistantScreen> {
               });
             },
             icon: const Icon(Icons.refresh, size: 20, color: AppColors.secondary),
-            tooltip: 'Làm mới',
+            tooltip: tr(context, 'Làm mới'),
           ),
         ],
       ),
@@ -130,14 +131,14 @@ class _AiAssistantScreenState extends State<AiAssistantScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
+                      LocalizedText(
                         'TRẠNG THÁI BIỂN ĐÀ NẴNG HÔM NAY',
                         style: AppTypography.labelSm(
                           color: AppColors.onSurfaceVariant,
                           fontWeight: FontWeight.w700,
                         ).copyWith(fontSize: 10),
                       ),
-                      Text(
+                      LocalizedText(
                         'Mỹ Khê & Sơn Trà: Sóng 0.4m • Nắng dịu • Lý tưởng',
                         style: AppTypography.labelSm(
                           color: AppColors.secondary,
@@ -154,7 +155,7 @@ class _AiAssistantScreenState extends State<AiAssistantScreen> {
                     color: AppColors.secondaryContainer,
                     borderRadius: BorderRadius.circular(8),
                   ),
-                  child: Text(
+                  child: LocalizedText(
                     'LIVE',
                     style: AppTypography.labelSm(
                       color: AppColors.onSecondaryContainer,
@@ -200,7 +201,7 @@ class _AiAssistantScreenState extends State<AiAssistantScreen> {
                             ),
                             const SizedBox(width: 4),
                           ],
-                          Text(
+                          LocalizedText(
                             isUser ? 'Bạn' : 'DANASEA AI',
                             style: AppTypography.labelSm(
                               color: AppColors.onSurfaceVariant,
@@ -227,7 +228,7 @@ class _AiAssistantScreenState extends State<AiAssistantScreen> {
                             ? null
                             : Border.all(color: AppColors.borderSubtle),
                       ),
-                      child: Text(
+                      child: LocalizedText(
                         msg.content,
                         style: AppTypography.bodyMd(
                           color: isUser ? Colors.white : AppColors.onSurface,
@@ -256,7 +257,7 @@ class _AiAssistantScreenState extends State<AiAssistantScreen> {
               separatorBuilder: (_, unused) => const SizedBox(width: 8),
               itemBuilder: (context, index) {
                 return ActionChip(
-                  label: Text(
+                  label: LocalizedText(
                     _suggestedPrompts[index],
                     style: AppTypography.labelSm(color: AppColors.secondary),
                   ),
@@ -297,7 +298,7 @@ class _AiAssistantScreenState extends State<AiAssistantScreen> {
                     child: TextField(
                       controller: _controller,
                       decoration: InputDecoration(
-                        hintText: 'Hỏi bất kỳ điều gì về du lịch biển Đà Nẵng...',
+                        hintText: tr(context, 'Hỏi bất kỳ điều gì về du lịch biển Đà Nẵng...'),
                         hintStyle:
                             AppTypography.bodySm(color: AppColors.outline),
                         border: InputBorder.none,
@@ -359,7 +360,7 @@ class _AiAssistantScreenState extends State<AiAssistantScreen> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Expanded(
-                      child: Text(
+                      child: LocalizedText(
                         service.vendorName,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
@@ -377,7 +378,7 @@ class _AiAssistantScreenState extends State<AiAssistantScreen> {
                         color: AppColors.primaryFixed,
                         borderRadius: BorderRadius.circular(6),
                       ),
-                      child: Text(
+                      child: LocalizedText(
                         'Được gợi ý',
                         style: AppTypography.labelSm(
                           color: AppColors.primary,
@@ -387,7 +388,7 @@ class _AiAssistantScreenState extends State<AiAssistantScreen> {
                   ],
                 ),
                 const SizedBox(height: 4),
-                Text(
+                LocalizedText(
                   service.name,
                   style: AppTypography.headlineSm(
                     color: AppColors.onSurface,
@@ -398,7 +399,7 @@ class _AiAssistantScreenState extends State<AiAssistantScreen> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Expanded(
-                      child: Text(
+                      child: LocalizedText(
                         '${service.price ~/ 1000}.000 đ / khách',
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
@@ -426,7 +427,7 @@ class _AiAssistantScreenState extends State<AiAssistantScreen> {
                           ),
                         );
                       },
-                      child: Text(
+                      child: LocalizedText(
                         'Xem & Đặt',
                         style: AppTypography.labelSm(color: Colors.white),
                       ),

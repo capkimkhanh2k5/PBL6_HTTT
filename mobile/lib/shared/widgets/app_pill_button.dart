@@ -1,3 +1,4 @@
+import 'package:mobile/core/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_shapes.dart';
@@ -85,7 +86,7 @@ class AppPillButton extends StatelessWidget {
                   const SizedBox(width: 8),
                 ],
                 Flexible(
-                  child: Text(
+                  child: LocalizedText(
                     label,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,

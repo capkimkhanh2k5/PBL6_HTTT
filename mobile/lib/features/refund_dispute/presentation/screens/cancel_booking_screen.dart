@@ -1,3 +1,4 @@
+import 'package:mobile/core/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import '../../../../core/models/danasea_models.dart';
 import '../../../../core/theme/app_colors.dart';
@@ -45,7 +46,7 @@ class _CancelBookingScreenState extends State<CancelBookingScreen> {
   void _submitCancelRequest() {
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
-        content: Text('Đã gửi yêu cầu hủy dịch vụ thành công! Hệ thống đang xử lý đối soát.'),
+        content: LocalizedText('Đã gửi yêu cầu hủy dịch vụ thành công! Hệ thống đang xử lý đối soát.'),
         backgroundColor: AppColors.secondary,
       ),
     );
@@ -70,7 +71,7 @@ class _CancelBookingScreenState extends State<CancelBookingScreen> {
           icon: const Icon(Icons.arrow_back, color: AppColors.onSurface),
           onPressed: () => Navigator.pop(context),
         ),
-        title: Text(
+        title: LocalizedText(
           'Yêu cầu hủy dịch vụ',
           style: AppTypography.headlineSm(color: AppColors.onSurface),
         ),
@@ -82,7 +83,7 @@ class _CancelBookingScreenState extends State<CancelBookingScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // SELECTED SUB-ORDER CARD
-            Text(
+            LocalizedText(
               'Dịch vụ con yêu cầu hủy',
               style: AppTypography.labelLg(color: AppColors.onSurface),
             ),
@@ -108,7 +109,7 @@ class _CancelBookingScreenState extends State<CancelBookingScreen> {
                             color: AppColors.secondaryContainer,
                             borderRadius: BorderRadius.circular(10),
                           ),
-                          child: Text(
+                          child: LocalizedText(
                             sub.vendorName,
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
@@ -120,7 +121,7 @@ class _CancelBookingScreenState extends State<CancelBookingScreen> {
                         ),
                       ),
                       const SizedBox(width: 6),
-                      Text(
+                      LocalizedText(
                         '#${sub.id}',
                         style: const TextStyle(
                           fontSize: 11,
@@ -130,12 +131,12 @@ class _CancelBookingScreenState extends State<CancelBookingScreen> {
                     ],
                   ),
                   const SizedBox(height: 6),
-                  Text(
+                  LocalizedText(
                     sub.serviceName,
                     style: AppTypography.headlineSm(color: AppColors.onSurface),
                   ),
                   const SizedBox(height: 4),
-                  Text(
+                  LocalizedText(
                     '${sub.slotTime} • ${sub.slotDate.day}/${sub.slotDate.month}/${sub.slotDate.year}',
                     style: AppTypography.bodySm(color: AppColors.onSurfaceVariant),
                   ),
@@ -144,12 +145,12 @@ class _CancelBookingScreenState extends State<CancelBookingScreen> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Expanded(
-                        child: Text(
+                        child: LocalizedText(
                           'Số lượng vé: ${sub.quantity} vé',
                           style: AppTypography.labelMd(color: AppColors.onSurface),
                         ),
                       ),
-                      Text(
+                      LocalizedText(
                         _formatPrice(sub.subtotalAmount),
                         style: AppTypography.headlineSm(color: AppColors.primary),
                       ),
@@ -161,7 +162,7 @@ class _CancelBookingScreenState extends State<CancelBookingScreen> {
             const SizedBox(height: 20),
 
             // REASON SELECTION
-            Text(
+            LocalizedText(
               'Lý do yêu cầu hủy',
               style: AppTypography.labelLg(color: AppColors.onSurface),
             ),
@@ -217,13 +218,13 @@ class _CancelBookingScreenState extends State<CancelBookingScreen> {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text(
+                                LocalizedText(
                                   'Khách chủ động yêu cầu hủy',
                                   style: AppTypography.labelMd(
                                       color: AppColors.onSurface),
                                 ),
                                 const SizedBox(height: 4),
-                                Text(
+                                LocalizedText(
                                   'Khách chủ động hủy theo quy định và điều kiện dịch vụ.',
                                   style: AppTypography.bodySm(
                                           color: AppColors.onSurfaceVariant)
@@ -277,13 +278,13 @@ class _CancelBookingScreenState extends State<CancelBookingScreen> {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text(
+                                LocalizedText(
                                   'Thời tiết biển bất lợi / Gió sóng vượt ngưỡng an toàn',
                                   style: AppTypography.labelMd(
                                       color: AppColors.onSurface),
                                 ),
                                 const SizedBox(height: 4),
-                                Text(
+                                LocalizedText(
                                   'Thời tiết biển bất lợi hoặc vượt ngưỡng an toàn theo quy định hệ thống.',
                                   style: AppTypography.bodySm(
                                           color: AppColors.onSurfaceVariant)
@@ -302,7 +303,7 @@ class _CancelBookingScreenState extends State<CancelBookingScreen> {
             const SizedBox(height: 16),
 
             // EXPLANATION NOTE TEXTFIELD
-            Text(
+            LocalizedText(
               'Ghi chú thêm (không bắt buộc)',
               style: AppTypography.labelLg(color: AppColors.onSurface),
             ),
@@ -317,7 +318,7 @@ class _CancelBookingScreenState extends State<CancelBookingScreen> {
                 controller: _noteController,
                 maxLines: 3,
                 decoration: InputDecoration(
-                  hintText: 'Nhập lý do cụ thể hoặc yêu cầu hỗ trợ đặc biệt...',
+                  hintText: tr(context, 'Nhập lý do cụ thể hoặc yêu cầu hỗ trợ đặc biệt...'),
                   hintStyle: AppTypography.bodySm(color: AppColors.outline),
                   contentPadding: const EdgeInsets.all(12),
                   border: InputBorder.none,
@@ -342,14 +343,14 @@ class _CancelBookingScreenState extends State<CancelBookingScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
+                        LocalizedText(
                           'Dữ liệu quan trắc thời tiết biển Đà Nẵng',
                           style: AppTypography.labelSm(
                             color: AppColors.onSecondaryFixedVariant,
                             fontWeight: FontWeight.w700,
                           ),
                         ),
-                        Text(
+                        LocalizedText(
                           'Cập nhật: 06:00 • Sóng 0.4m • Gió 8 km/h • Mưa 0mm',
                           style: AppTypography.bodySm(
                             color: AppColors.onSurfaceVariant,
@@ -377,7 +378,7 @@ class _CancelBookingScreenState extends State<CancelBookingScreen> {
                       size: 18, color: AppColors.secondary),
                   const SizedBox(width: 8),
                   Expanded(
-                    child: Text(
+                    child: LocalizedText(
                       'Yêu cầu hoàn tiền sẽ được hệ thống tiếp nhận và xử lý căn cứ theo bảng hoàn tiền (refunds) và quy định dịch vụ.',
                       style: AppTypography.bodySm(
                         color: AppColors.onSurface,

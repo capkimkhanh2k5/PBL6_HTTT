@@ -1,3 +1,4 @@
+import 'package:mobile/core/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_shapes.dart';
@@ -33,14 +34,14 @@ class HowItWorksSection extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         // Title
-        Text(
+        LocalizedText(
           'Đặt trải nghiệm dễ dàng',
           style: AppTypography.headlineMd(
             color: AppColors.onSurface,
           ),
         ),
         const SizedBox(height: 2),
-        Text(
+        LocalizedText(
           'Chỉ với 3 bước chạm cho chuyến phiêu lưu hoàn hảo',
           style: AppTypography.bodySm(
             color: AppColors.onSurfaceVariant,
@@ -65,7 +66,7 @@ class HowItWorksSection extends StatelessWidget {
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
+                  LocalizedText(
                     step['num']!,
                     style: AppTypography.displayHeroMobile(
                       color: AppColors.secondary.withValues(alpha: 0.28),
@@ -79,7 +80,7 @@ class HowItWorksSection extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
+                        LocalizedText(
                           step['title']!,
                           style: AppTypography.headlineSm(
                             color: AppColors.onSurface,
@@ -87,7 +88,7 @@ class HowItWorksSection extends StatelessWidget {
                           ).copyWith(fontSize: 17),
                         ),
                         const SizedBox(height: 4),
-                        Text(
+                        LocalizedText(
                           step['desc']!,
                           style: AppTypography.bodySm(
                             color: AppColors.onSurfaceVariant,

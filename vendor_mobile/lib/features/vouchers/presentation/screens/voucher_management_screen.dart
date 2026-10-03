@@ -1,3 +1,4 @@
+import 'package:vendor_mobile/core/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_shapes.dart';
@@ -155,7 +156,7 @@ class _VoucherManagementScreenState extends State<VoucherManagementScreen> with 
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(
+                  LocalizedText(
                     'Chỉnh sửa mã ${voucher.code}',
                     style: AppTypography.headlineSm.copyWith(color: AppColors.onSurface),
                   ),
@@ -166,13 +167,13 @@ class _VoucherManagementScreenState extends State<VoucherManagementScreen> with 
                 ],
               ),
               const SizedBox(height: 12),
-              Text(
+              LocalizedText(
                 'Lượt đã dùng: ${voucher.usedCount} (Không được giảm số lượt tối đa dưới số này)',
                 style: AppTypography.bodySm.copyWith(color: AppColors.tertiary),
               ),
               const SizedBox(height: 14),
 
-              Text('Số lượt dùng tối đa', style: AppTypography.labelMd.copyWith(color: AppColors.tertiary)),
+              LocalizedText('Số lượt dùng tối đa', style: AppTypography.labelMd.copyWith(color: AppColors.tertiary)),
               const SizedBox(height: 6),
               TextField(
                 controller: maxUsesCtrl,
@@ -188,7 +189,7 @@ class _VoucherManagementScreenState extends State<VoucherManagementScreen> with 
               ),
               const SizedBox(height: 14),
 
-              Text('Ngày kết thúc hiệu lực', style: AppTypography.labelMd.copyWith(color: AppColors.tertiary)),
+              LocalizedText('Ngày kết thúc hiệu lực', style: AppTypography.labelMd.copyWith(color: AppColors.tertiary)),
               const SizedBox(height: 6),
               OutlinedButton.icon(
                 onPressed: () async {
@@ -205,7 +206,7 @@ class _VoucherManagementScreenState extends State<VoucherManagementScreen> with 
                   }
                 },
                 icon: const Icon(Icons.calendar_today, size: 16),
-                label: Text(
+                label: LocalizedText(
                   '${editValidTo.day.toString().padLeft(2, '0')}/${editValidTo.month.toString().padLeft(2, '0')}/${editValidTo.year}',
                 ),
               ),
@@ -239,7 +240,7 @@ class _VoucherManagementScreenState extends State<VoucherManagementScreen> with 
                     foregroundColor: Colors.white,
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppShapes.rFull)),
                   ),
-                  child: const Text('Lưu thay đổi'),
+                  child: const LocalizedText('Lưu thay đổi'),
                 ),
               ),
             ],
@@ -257,7 +258,7 @@ class _VoucherManagementScreenState extends State<VoucherManagementScreen> with 
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
-        title: const Text('Mã giảm giá'),
+        title: const LocalizedText('Mã giảm giá'),
         backgroundColor: AppColors.surface,
         elevation: 0,
         leading: IconButton(
@@ -301,7 +302,7 @@ class _VoucherManagementScreenState extends State<VoucherManagementScreen> with 
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text(
+                                LocalizedText(
                                   'PHẠM VI ÁP DỤNG',
                                   style: AppTypography.labelSm.copyWith(
                                     color: AppColors.secondary,
@@ -310,7 +311,7 @@ class _VoucherManagementScreenState extends State<VoucherManagementScreen> with 
                                   ),
                                   overflow: TextOverflow.ellipsis,
                                 ),
-                                Text(
+                                LocalizedText(
                                   'Mã khuyến mãi Nhà cung cấp (VENDOR)',
                                   style: AppTypography.labelLg.copyWith(color: AppColors.onSurface),
                                   overflow: TextOverflow.ellipsis,
@@ -328,7 +329,7 @@ class _VoucherManagementScreenState extends State<VoucherManagementScreen> with 
                         color: AppColors.secondaryContainer,
                         borderRadius: BorderRadius.circular(AppShapes.rFull),
                       ),
-                      child: Text(
+                      child: LocalizedText(
                         'Độc quyền',
                         style: AppTypography.labelSm.copyWith(
                           color: AppColors.onSecondaryContainer,
@@ -339,7 +340,7 @@ class _VoucherManagementScreenState extends State<VoucherManagementScreen> with 
                   ],
                 ),
                 const SizedBox(height: 8),
-                Text(
+                LocalizedText(
                   'Khuyến mãi trực tiếp từ đối tác DANASEA, chiết khấu trực tiếp vào gói chèo SUP, lặn biển và tour cano của bạn.',
                   style: AppTypography.bodySm.copyWith(color: AppColors.onSurfaceVariant),
                 ),
@@ -378,7 +379,7 @@ class _VoucherManagementScreenState extends State<VoucherManagementScreen> with 
                       const Icon(Icons.confirmation_number_outlined, size: 16),
                       const SizedBox(width: 4),
                       Flexible(
-                        child: Text(
+                        child: LocalizedText(
                           'Danh sách (${vouchers.length})',
                           overflow: TextOverflow.ellipsis,
                         ),
@@ -393,7 +394,7 @@ class _VoucherManagementScreenState extends State<VoucherManagementScreen> with 
                       const Icon(Icons.add_circle_outline, size: 16, color: AppColors.primaryContainer),
                       const SizedBox(width: 4),
                       const Flexible(
-                        child: Text(
+                        child: LocalizedText(
                           'Tạo mã mới',
                           overflow: TextOverflow.ellipsis,
                         ),
@@ -463,7 +464,7 @@ class _VoucherManagementScreenState extends State<VoucherManagementScreen> with 
                               Row(
                                 children: [
                                   Flexible(
-                                    child: Text(
+                                    child: LocalizedText(
                                       v.code,
                                       style: AppTypography.headlineSm.copyWith(
                                         color: isExpired ? AppColors.tertiary : AppColors.secondary,
@@ -480,7 +481,7 @@ class _VoucherManagementScreenState extends State<VoucherManagementScreen> with 
                                       color: AppColors.primaryContainer.withAlpha(40),
                                       borderRadius: BorderRadius.circular(AppShapes.rFull),
                                     ),
-                                    child: Text(
+                                    child: LocalizedText(
                                       v.discountType == DiscountType.percentage
                                           ? 'Giảm ${v.discountValue.toInt()}%'
                                           : '-${v.discountValue.toInt()} đ',
@@ -493,7 +494,7 @@ class _VoucherManagementScreenState extends State<VoucherManagementScreen> with 
                                 ],
                               ),
                               const SizedBox(height: 2),
-                              Text(
+                              LocalizedText(
                                 v.discountType == DiscountType.percentage
                                     ? 'Giảm theo tỷ lệ % (PERCENTAGE)'
                                     : 'Giảm trừ trực tiếp (FIXED)',
@@ -519,7 +520,7 @@ class _VoucherManagementScreenState extends State<VoucherManagementScreen> with 
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Flexible(
-                          child: Text(
+                          child: LocalizedText(
                             'Đã dùng: ${v.usedCount}/${v.maxUses} lượt',
                             style: AppTypography.labelSm.copyWith(color: AppColors.onSurfaceVariant),
                             overflow: TextOverflow.ellipsis,
@@ -527,7 +528,7 @@ class _VoucherManagementScreenState extends State<VoucherManagementScreen> with 
                         ),
                         const SizedBox(width: 8),
                         Flexible(
-                          child: Text(
+                          child: LocalizedText(
                             '${(progress * 100).toInt()}% hoàn thành',
                             style: AppTypography.labelSm.copyWith(
                               color: AppColors.secondary,
@@ -562,7 +563,7 @@ class _VoucherManagementScreenState extends State<VoucherManagementScreen> with 
                               const Icon(Icons.date_range, size: 14, color: AppColors.tertiary),
                               const SizedBox(width: 4),
                               Expanded(
-                                child: Text(
+                                child: LocalizedText(
                                   '${v.validFrom.day}/${v.validFrom.month} - ${v.validTo.day}/${v.validTo.month}/${v.validTo.year}',
                                   style: AppTypography.bodySm.copyWith(color: AppColors.tertiary, fontSize: 12),
                                   overflow: TextOverflow.ellipsis,
@@ -581,7 +582,7 @@ class _VoucherManagementScreenState extends State<VoucherManagementScreen> with 
                               children: [
                                 const Icon(Icons.edit, size: 14, color: AppColors.secondary),
                                 const SizedBox(width: 4),
-                                Text(
+                                LocalizedText(
                                   'Sửa',
                                   style: AppTypography.labelSm.copyWith(color: AppColors.secondary, fontWeight: FontWeight.bold),
                                 ),
@@ -599,12 +600,12 @@ class _VoucherManagementScreenState extends State<VoucherManagementScreen> with 
           const SizedBox(height: 24),
 
           // Redemptions Table Section
-          Text(
+          LocalizedText(
             'Lịch sử áp dụng theo mã đơn tổng',
             style: AppTypography.headlineSm.copyWith(color: AppColors.onSurface),
           ),
           const SizedBox(height: 4),
-          Text(
+          LocalizedText(
             'Theo dõi khách đã dùng mã trong các đơn booking',
             style: AppTypography.bodySm.copyWith(color: AppColors.tertiary),
           ),
@@ -634,7 +635,7 @@ class _VoucherManagementScreenState extends State<VoucherManagementScreen> with 
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text(
+                              LocalizedText(
                                 'Đơn #${r.masterOrderId}',
                                 style: AppTypography.labelLg.copyWith(
                                   color: AppColors.onSurface,
@@ -642,7 +643,7 @@ class _VoucherManagementScreenState extends State<VoucherManagementScreen> with 
                                 ),
                                 overflow: TextOverflow.ellipsis,
                               ),
-                              Text(
+                              LocalizedText(
                                 'Mã: ${r.discountCodeText}',
                                 style: AppTypography.labelSm.copyWith(color: AppColors.secondary),
                                 overflow: TextOverflow.ellipsis,
@@ -651,7 +652,7 @@ class _VoucherManagementScreenState extends State<VoucherManagementScreen> with 
                           ),
                         ),
                         const SizedBox(width: 8),
-                        Text(
+                        LocalizedText(
                           '-${r.amountDeducted.toInt()} đ',
                           style: AppTypography.headlineSm.copyWith(
                             color: AppColors.primary,
@@ -685,22 +686,22 @@ class _VoucherManagementScreenState extends State<VoucherManagementScreen> with 
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Tạo mã giảm giá mới', style: AppTypography.headlineSm.copyWith(color: AppColors.onSurface)),
+            LocalizedText('Tạo mã giảm giá mới', style: AppTypography.headlineSm.copyWith(color: AppColors.onSurface)),
             const SizedBox(height: 4),
-            Text(
+            LocalizedText(
               'Mã áp dụng tự động cho toàn bộ dịch vụ của Danang Ocean Club',
               style: AppTypography.bodySm.copyWith(color: AppColors.tertiary),
             ),
             const SizedBox(height: 18),
 
             // Voucher Code
-            Text('Mã khuyến mãi (Viết liền, không dấu) *', style: AppTypography.labelMd.copyWith(color: AppColors.tertiary)),
+            LocalizedText('Mã khuyến mãi (Viết liền, không dấu) *', style: AppTypography.labelMd.copyWith(color: AppColors.tertiary)),
             const SizedBox(height: 6),
             TextField(
               controller: _codeController,
               textCapitalization: TextCapitalization.characters,
               decoration: InputDecoration(
-                hintText: 'VD: SUMMER2024',
+                hintText: tr(context, 'VD: SUMMER2024'),
                 prefixIcon: const Icon(Icons.confirmation_number_outlined, color: AppColors.tertiary),
                 filled: true,
                 fillColor: AppColors.surfaceContainerLow,
@@ -713,7 +714,7 @@ class _VoucherManagementScreenState extends State<VoucherManagementScreen> with 
             const SizedBox(height: 16),
 
             // Discount Type Toggle
-            Text('Hình thức giảm giá *', style: AppTypography.labelMd.copyWith(color: AppColors.tertiary)),
+            LocalizedText('Hình thức giảm giá *', style: AppTypography.labelMd.copyWith(color: AppColors.tertiary)),
             const SizedBox(height: 8),
             Row(
               children: [
@@ -729,7 +730,7 @@ class _VoucherManagementScreenState extends State<VoucherManagementScreen> with 
                         borderRadius: BorderRadius.circular(AppShapes.rFull),
                       ),
                       alignment: Alignment.center,
-                      child: Text(
+                      child: LocalizedText(
                         'Phần trăm (%)',
                         style: AppTypography.labelMd.copyWith(
                           color: _selectedType == DiscountType.percentage ? Colors.white : AppColors.onSurface,
@@ -752,7 +753,7 @@ class _VoucherManagementScreenState extends State<VoucherManagementScreen> with 
                         borderRadius: BorderRadius.circular(AppShapes.rFull),
                       ),
                       alignment: Alignment.center,
-                      child: Text(
+                      child: LocalizedText(
                         'Số tiền cố định (đ)',
                         style: AppTypography.labelMd.copyWith(
                           color: _selectedType == DiscountType.fixed ? Colors.white : AppColors.onSurface,
@@ -767,7 +768,7 @@ class _VoucherManagementScreenState extends State<VoucherManagementScreen> with 
             const SizedBox(height: 16),
 
             // Discount Value
-            Text(
+            LocalizedText(
               _selectedType == DiscountType.percentage ? 'Tỷ lệ giảm (%) *' : 'Số tiền giảm (đ) *',
               style: AppTypography.labelMd.copyWith(color: AppColors.tertiary),
             ),
@@ -776,7 +777,7 @@ class _VoucherManagementScreenState extends State<VoucherManagementScreen> with 
               controller: _valueController,
               keyboardType: TextInputType.number,
               decoration: InputDecoration(
-                hintText: _selectedType == DiscountType.percentage ? 'VD: 15' : 'VD: 50000',
+                hintText: tr(context, _selectedType == DiscountType.percentage ? 'VD: 15' : 'VD: 50000'),
                 prefixIcon: Icon(
                   _selectedType == DiscountType.percentage ? Icons.percent : Icons.attach_money,
                   color: AppColors.tertiary,
@@ -792,7 +793,7 @@ class _VoucherManagementScreenState extends State<VoucherManagementScreen> with 
             const SizedBox(height: 16),
 
             // Max Uses
-            Text('Số lượt sử dụng tối đa *', style: AppTypography.labelMd.copyWith(color: AppColors.tertiary)),
+            LocalizedText('Số lượt sử dụng tối đa *', style: AppTypography.labelMd.copyWith(color: AppColors.tertiary)),
             const SizedBox(height: 6),
             TextField(
               controller: _maxUsesController,
@@ -810,7 +811,7 @@ class _VoucherManagementScreenState extends State<VoucherManagementScreen> with 
             const SizedBox(height: 16),
 
             // Date Pickers
-            Text('Thời hạn áp dụng *', style: AppTypography.labelMd.copyWith(color: AppColors.tertiary)),
+            LocalizedText('Thời hạn áp dụng *', style: AppTypography.labelMd.copyWith(color: AppColors.tertiary)),
             const SizedBox(height: 8),
             Row(
               children: [
@@ -826,7 +827,7 @@ class _VoucherManagementScreenState extends State<VoucherManagementScreen> with 
                       if (picked != null) setState(() => _validFrom = picked);
                     },
                     icon: const Icon(Icons.calendar_today, size: 14),
-                    label: Text('${_validFrom.day}/${_validFrom.month}/${_validFrom.year}'),
+                    label: LocalizedText('${_validFrom.day}/${_validFrom.month}/${_validFrom.year}'),
                     style: OutlinedButton.styleFrom(
                       padding: const EdgeInsets.symmetric(vertical: 12),
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppShapes.rFull)),
@@ -834,7 +835,7 @@ class _VoucherManagementScreenState extends State<VoucherManagementScreen> with 
                   ),
                 ),
                 const SizedBox(width: 8),
-                const Text('đến'),
+                const LocalizedText('đến'),
                 const SizedBox(width: 8),
                 Expanded(
                   child: OutlinedButton.icon(
@@ -848,7 +849,7 @@ class _VoucherManagementScreenState extends State<VoucherManagementScreen> with 
                       if (picked != null) setState(() => _validTo = picked);
                     },
                     icon: const Icon(Icons.calendar_today, size: 14),
-                    label: Text('${_validTo.day}/${_validTo.month}/${_validTo.year}'),
+                    label: LocalizedText('${_validTo.day}/${_validTo.month}/${_validTo.year}'),
                     style: OutlinedButton.styleFrom(
                       padding: const EdgeInsets.symmetric(vertical: 12),
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppShapes.rFull)),
@@ -877,7 +878,7 @@ class _VoucherManagementScreenState extends State<VoucherManagementScreen> with 
                         children: [
                           const Icon(Icons.add, size: 20),
                           const SizedBox(width: 8),
-                          Text('Tạo và kích hoạt mã', style: AppTypography.labelLg.copyWith(color: Colors.white)),
+                          LocalizedText('Tạo và kích hoạt mã', style: AppTypography.labelLg.copyWith(color: Colors.white)),
                         ],
                       ),
               ),

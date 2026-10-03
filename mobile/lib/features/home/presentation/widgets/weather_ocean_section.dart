@@ -1,3 +1,4 @@
+import 'package:mobile/core/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_shapes.dart';
@@ -49,7 +50,7 @@ class _WeatherOceanSectionState extends State<WeatherOceanSection> {
                     ),
                     const SizedBox(width: 8),
                     Flexible(
-                      child: Text(
+                      child: LocalizedText(
                         'Điều kiện biển & Thời tiết',
                         overflow: TextOverflow.ellipsis,
                         style: AppTypography.headlineSm(
@@ -68,7 +69,7 @@ class _WeatherOceanSectionState extends State<WeatherOceanSection> {
                   color: AppColors.secondaryContainer,
                   borderRadius: AppShapes.radiusFull,
                 ),
-                child: Text(
+                child: LocalizedText(
                   current.updatedAt,
                   style: AppTypography.labelSm(
                     color: AppColors.onSecondaryContainer,
@@ -150,7 +151,7 @@ class _WeatherOceanSectionState extends State<WeatherOceanSection> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
+                      LocalizedText(
                         'Khuyến nghị an toàn',
                         style: AppTypography.labelMd(
                           color: AppColors.onSecondaryFixedVariant,
@@ -158,7 +159,7 @@ class _WeatherOceanSectionState extends State<WeatherOceanSection> {
                         ),
                       ),
                       const SizedBox(height: 2),
-                      Text(
+                      LocalizedText(
                         current.safetyTip,
                         style: AppTypography.bodySm(
                           color: AppColors.onSecondaryFixedVariant,
@@ -173,7 +174,7 @@ class _WeatherOceanSectionState extends State<WeatherOceanSection> {
           const SizedBox(height: 8),
 
           // Footer info
-          Text(
+          LocalizedText(
             'Cập nhật 15 phút trước',
             style: AppTypography.labelSm(
               color: AppColors.outline,
@@ -195,7 +196,7 @@ class _WeatherOceanSectionState extends State<WeatherOceanSection> {
           color: isSelected ? AppColors.secondary : AppColors.surfaceContainer,
           borderRadius: AppShapes.radiusFull,
         ),
-        child: Text(
+        child: LocalizedText(
           label,
           style: AppTypography.labelSm(
             color: isSelected ? AppColors.onSecondary : AppColors.onSurface,
@@ -221,7 +222,7 @@ class _WeatherOceanSectionState extends State<WeatherOceanSection> {
         children: [
           Icon(icon, size: 20, color: AppColors.secondary),
           const SizedBox(height: 4),
-          Text(
+          LocalizedText(
             value,
             style: AppTypography.headlineSm(
               color: AppColors.onSurface,
@@ -229,7 +230,7 @@ class _WeatherOceanSectionState extends State<WeatherOceanSection> {
             ).copyWith(fontSize: 16),
           ),
           const SizedBox(height: 2),
-          Text(
+          LocalizedText(
             label,
             style: AppTypography.labelSm(
               color: AppColors.onSurfaceVariant,

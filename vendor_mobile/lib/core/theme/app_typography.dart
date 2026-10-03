@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'app_colors.dart';
 
 /// Extension of TextStyle that is callable as a function (e.g. `AppTypography.bodyMd(color: ...)`)
@@ -69,7 +68,7 @@ class CallableTextStyle extends TextStyle {
 }
 
 /// Coastal Avant-Garde Typography System for DANASEA Vendor
-/// Pairs kinetic 'Syne' for Display/Headlines with clear 'Plus Jakarta Sans' for Body/Labels.
+/// Bundled Noto Sans for consistent Vietnamese, English and numeric text.
 class AppTypography {
   AppTypography._();
 
@@ -103,48 +102,54 @@ class AppTypography {
     );
   }
 
-  // ---------------- DISPLAY & HEADLINES (SYNE) ----------------
-  static CallableTextStyle get displayHero => _wrap(GoogleFonts.syne(
+  // ---------------- DISPLAY & HEADLINES (NOTO SANS) ----------------
+  static CallableTextStyle get displayHero => _wrap(TextStyle(
+      fontFamily: 'NotoSans',
         fontSize: 56,
         fontWeight: FontWeight.w800,
         height: 64 / 56,
-        letterSpacing: -0.03 * 56,
+        letterSpacing: 0,
         color: AppColors.onSurface,
       ));
 
-  static CallableTextStyle get displayHeroMobile => _wrap(GoogleFonts.syne(
+  static CallableTextStyle get displayHeroMobile => _wrap(TextStyle(
+      fontFamily: 'NotoSans',
         fontSize: 36,
         fontWeight: FontWeight.w800,
         height: 42 / 36,
-        letterSpacing: -0.02 * 36,
+        letterSpacing: 0,
         color: AppColors.onSurface,
       ));
 
-  static CallableTextStyle get headlineLg => _wrap(GoogleFonts.syne(
+  static CallableTextStyle get headlineLg => _wrap(TextStyle(
+      fontFamily: 'NotoSans',
         fontSize: 32,
         fontWeight: FontWeight.w700,
         height: 40 / 32,
-        letterSpacing: -0.02 * 32,
+        letterSpacing: 0,
         color: AppColors.onSurface,
       ));
 
-  static CallableTextStyle get headlineLgMobile => _wrap(GoogleFonts.syne(
+  static CallableTextStyle get headlineLgMobile => _wrap(TextStyle(
+      fontFamily: 'NotoSans',
         fontSize: 26,
         fontWeight: FontWeight.w700,
         height: 32 / 26,
-        letterSpacing: -0.01 * 26,
+        letterSpacing: 0,
         color: AppColors.onSurface,
       ));
 
-  static CallableTextStyle get headlineMd => _wrap(GoogleFonts.syne(
+  static CallableTextStyle get headlineMd => _wrap(TextStyle(
+      fontFamily: 'NotoSans',
         fontSize: 22,
         fontWeight: FontWeight.w700,
         height: 28 / 22,
-        letterSpacing: -0.01 * 22,
+        letterSpacing: 0,
         color: AppColors.onSurface,
       ));
 
-  static CallableTextStyle get headlineSm => _wrap(GoogleFonts.syne(
+  static CallableTextStyle get headlineSm => _wrap(TextStyle(
+      fontFamily: 'NotoSans',
         fontSize: 18,
         fontWeight: FontWeight.w600,
         height: 24 / 18,
@@ -152,16 +157,18 @@ class AppTypography {
         color: AppColors.onSurface,
       ));
 
-  // ---------------- BODY & LABELS (PLUS JAKARTA SANS) ----------------
-  static CallableTextStyle get bodyLg => _wrap(GoogleFonts.plusJakartaSans(
+  // ---------------- BODY & LABELS (NOTO SANS) ----------------
+  static CallableTextStyle get bodyLg => _wrap(TextStyle(
+      fontFamily: 'NotoSans',
         fontSize: 17,
         fontWeight: FontWeight.w400,
         height: 26 / 17,
-        letterSpacing: -0.01 * 17,
+        letterSpacing: 0,
         color: AppColors.onSurface,
       ));
 
-  static CallableTextStyle get bodyMd => _wrap(GoogleFonts.plusJakartaSans(
+  static CallableTextStyle get bodyMd => _wrap(TextStyle(
+      fontFamily: 'NotoSans',
         fontSize: 14,
         fontWeight: FontWeight.w400,
         height: 22 / 14,
@@ -169,35 +176,39 @@ class AppTypography {
         color: AppColors.onSurface,
       ));
 
-  static CallableTextStyle get bodySm => _wrap(GoogleFonts.plusJakartaSans(
+  static CallableTextStyle get bodySm => _wrap(TextStyle(
+      fontFamily: 'NotoSans',
         fontSize: 12,
         fontWeight: FontWeight.w400,
         height: 18 / 12,
-        letterSpacing: 0.01 * 12,
+        letterSpacing: 0,
         color: AppColors.onSurfaceVariant,
       ));
 
-  static CallableTextStyle get labelLg => _wrap(GoogleFonts.plusJakartaSans(
+  static CallableTextStyle get labelLg => _wrap(TextStyle(
+      fontFamily: 'NotoSans',
         fontSize: 14,
         fontWeight: FontWeight.w700,
         height: 20 / 14,
-        letterSpacing: 0.02 * 14,
+        letterSpacing: 0,
         color: AppColors.onSurface,
       ));
 
-  static CallableTextStyle get labelMd => _wrap(GoogleFonts.plusJakartaSans(
+  static CallableTextStyle get labelMd => _wrap(TextStyle(
+      fontFamily: 'NotoSans',
         fontSize: 12,
         fontWeight: FontWeight.w600,
         height: 16 / 12,
-        letterSpacing: 0.03 * 12,
+        letterSpacing: 0,
         color: AppColors.onSurface,
       ));
 
-  static CallableTextStyle get labelSm => _wrap(GoogleFonts.plusJakartaSans(
+  static CallableTextStyle get labelSm => _wrap(TextStyle(
+      fontFamily: 'NotoSans',
         fontSize: 10,
         fontWeight: FontWeight.w700,
         height: 14 / 10,
-        letterSpacing: 0.06 * 10,
+        letterSpacing: 0,
         color: AppColors.onSurfaceVariant,
       ));
 }

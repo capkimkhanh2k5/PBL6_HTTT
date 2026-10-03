@@ -1,3 +1,4 @@
+import 'package:vendor_mobile/core/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_typography.dart';
@@ -89,7 +90,7 @@ class VendorAppBar extends StatelessWidget implements PreferredSizeWidget {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Flexible(
-                      child: Text(
+                      child: LocalizedText(
                         title,
                         style: AppTypography.headlineSm(color: AppColors.secondary),
                         maxLines: 1,
@@ -104,7 +105,7 @@ class VendorAppBar extends StatelessWidget implements PreferredSizeWidget {
                           color: AppColors.primaryContainer,
                           borderRadius: BorderRadius.circular(9999),
                         ),
-                        child: Text(
+                        child: LocalizedText(
                           'VENDOR',
                           style: AppTypography.labelSm(color: AppColors.onPrimary).copyWith(
                             fontSize: 9,
@@ -116,7 +117,7 @@ class VendorAppBar extends StatelessWidget implements PreferredSizeWidget {
                   ],
                 ),
                 if (subtitle != null)
-                  Text(
+                  LocalizedText(
                     subtitle!,
                     style: AppTypography.bodySm(color: AppColors.tertiary),
                     maxLines: 1,

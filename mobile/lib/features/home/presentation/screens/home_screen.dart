@@ -1,3 +1,4 @@
+import 'package:mobile/core/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import '../../../../core/data/mock_database_data.dart';
 import '../../../../core/models/danasea_models.dart';
@@ -203,14 +204,14 @@ class _HomeScreenState extends State<HomeScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
+                LocalizedText(
                   'Trải nghiệm nổi bật tại Đà Nẵng',
                   style: AppTypography.headlineMd(
                     color: AppColors.onSurface,
                   ),
                 ),
                 const SizedBox(height: 2),
-                Text(
+                LocalizedText(
                   'Lựa chọn được yêu thích nhất trong tuần',
                   style: AppTypography.bodySm(
                     color: AppColors.onSurfaceVariant,
@@ -236,7 +237,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
                 const SizedBox(height: 8),
                 Center(
-                  child: Text(
+                  child: LocalizedText(
                     '* Dữ liệu trải nghiệm biển Đà Nẵng đối chiếu theo thiết kế hệ thống',
                     style: AppTypography.labelSm(
                       color: AppColors.outline,
@@ -256,14 +257,14 @@ class _HomeScreenState extends State<HomeScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
+                LocalizedText(
                   'Vùng biển bạn muốn đến?',
                   style: AppTypography.headlineMd(
                     color: AppColors.onSurface,
                   ),
                 ),
                 const SizedBox(height: 2),
-                Text(
+                LocalizedText(
                   'Điểm đến phong phú dọc bờ duyên hải miền Trung',
                   style: AppTypography.bodySm(
                     color: AppColors.onSurfaceVariant,

@@ -1,3 +1,4 @@
+import 'package:vendor_mobile/core/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_shapes.dart';
@@ -67,7 +68,7 @@ class _SettlementRevenueScreenState extends State<SettlementRevenueScreen> {
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
-        title: const Text('Đối soát doanh thu'),
+        title: const LocalizedText('Đối soát doanh thu'),
         backgroundColor: AppColors.surface,
         elevation: 0,
         leading: IconButton(
@@ -112,7 +113,7 @@ class _SettlementRevenueScreenState extends State<SettlementRevenueScreen> {
                             children: [
                               const Icon(Icons.verified, color: Colors.white, size: 14),
                               const SizedBox(width: 4),
-                              Text(
+                              LocalizedText(
                                 'KỲ ĐÃ QUYẾT TOÁN',
                                 style: AppTypography.labelSm.copyWith(
                                   color: Colors.white,
@@ -122,19 +123,19 @@ class _SettlementRevenueScreenState extends State<SettlementRevenueScreen> {
                             ],
                           ),
                         ),
-                        Text(
+                        LocalizedText(
                           '${latestPaid.periodStart.day}/${latestPaid.periodStart.month} - ${latestPaid.periodEnd.day}/${latestPaid.periodEnd.month}/${latestPaid.periodEnd.year}',
                           style: AppTypography.labelSm.copyWith(color: AppColors.tertiary),
                         ),
                       ],
                     ),
                     const SizedBox(height: 12),
-                    Text(
+                    LocalizedText(
                       'Thực nhận về tài khoản đối tác',
                       style: AppTypography.bodySm.copyWith(color: AppColors.onSurfaceVariant),
                     ),
                     const SizedBox(height: 2),
-                    Text(
+                    LocalizedText(
                       _formatVnd(latestPaid.netPayableAmount),
                       style: AppTypography.headlineLgMobile.copyWith(
                         color: AppColors.onSurface,
@@ -161,7 +162,7 @@ class _SettlementRevenueScreenState extends State<SettlementRevenueScreen> {
                                     const Icon(Icons.sailing, size: 16, color: AppColors.secondary),
                                     const SizedBox(width: 6),
                                     Expanded(
-                                      child: Text(
+                                      child: LocalizedText(
                                         'Tổng doanh thu dịch vụ',
                                         style: AppTypography.bodySm.copyWith(color: AppColors.onSurfaceVariant),
                                         overflow: TextOverflow.ellipsis,
@@ -171,7 +172,7 @@ class _SettlementRevenueScreenState extends State<SettlementRevenueScreen> {
                                 ),
                               ),
                               const SizedBox(width: 8),
-                              Text(
+                              LocalizedText(
                                 _formatVnd(latestPaid.grossAmount),
                                 style: AppTypography.labelLg.copyWith(color: AppColors.onSurface),
                               ),
@@ -187,7 +188,7 @@ class _SettlementRevenueScreenState extends State<SettlementRevenueScreen> {
                                     const Icon(Icons.percent, size: 16, color: AppColors.primary),
                                     const SizedBox(width: 6),
                                     Expanded(
-                                      child: Text(
+                                      child: LocalizedText(
                                         'Phí nền tảng DANASEA (~10%)',
                                         style: AppTypography.bodySm.copyWith(color: AppColors.onSurfaceVariant),
                                         overflow: TextOverflow.ellipsis,
@@ -197,7 +198,7 @@ class _SettlementRevenueScreenState extends State<SettlementRevenueScreen> {
                                 ),
                               ),
                               const SizedBox(width: 8),
-                              Text(
+                              LocalizedText(
                                 '-${_formatVnd(latestPaid.commissionAmount)}',
                                 style: AppTypography.labelLg.copyWith(color: AppColors.primary),
                               ),
@@ -209,7 +210,7 @@ class _SettlementRevenueScreenState extends State<SettlementRevenueScreen> {
                               const Icon(Icons.account_balance, size: 16, color: AppColors.secondary),
                               const SizedBox(width: 6),
                               Expanded(
-                                child: Text(
+                                child: LocalizedText(
                                   'Đã thanh toán ngày 16/10/2024 vào Vietcombank',
                                   style: AppTypography.labelSm.copyWith(color: AppColors.secondary),
                                 ),
@@ -268,7 +269,7 @@ class _SettlementRevenueScreenState extends State<SettlementRevenueScreen> {
                   );
                 },
                 icon: const Icon(Icons.payments_outlined, size: 20),
-                label: const Text('Chi tiết đối soát & Nhận tiền (Payout)'),
+                label: const LocalizedText('Chi tiết đối soát & Nhận tiền (Payout)'),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.primary,
                   foregroundColor: Colors.white,
@@ -293,7 +294,7 @@ class _SettlementRevenueScreenState extends State<SettlementRevenueScreen> {
           color: isSelected ? AppColors.secondary : AppColors.surfaceContainer,
           borderRadius: BorderRadius.circular(AppShapes.rFull),
         ),
-        child: Text(
+        child: LocalizedText(
           label,
           style: AppTypography.labelMd.copyWith(
             color: isSelected ? Colors.white : AppColors.onSurfaceVariant,
@@ -338,12 +339,12 @@ class _SettlementRevenueScreenState extends State<SettlementRevenueScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
+                    LocalizedText(
                       'KỲ ĐỐI SOÁT #${item.id}',
                       style: AppTypography.labelSm.copyWith(color: AppColors.tertiary),
                     ),
                     const SizedBox(height: 2),
-                    Text(
+                    LocalizedText(
                       '${item.periodStart.day}/${item.periodStart.month} - ${item.periodEnd.day}/${item.periodEnd.month}/${item.periodEnd.year}',
                       style: AppTypography.headlineSm.copyWith(
                         color: AppColors.onSurface,
@@ -372,9 +373,9 @@ class _SettlementRevenueScreenState extends State<SettlementRevenueScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('Doanh thu tour', style: AppTypography.labelSm.copyWith(color: AppColors.onSurfaceVariant)),
+                      LocalizedText('Doanh thu tour', style: AppTypography.labelSm.copyWith(color: AppColors.onSurfaceVariant)),
                       const SizedBox(height: 2),
-                      Text(
+                      LocalizedText(
                         _formatVnd(item.grossAmount),
                         style: AppTypography.labelLg.copyWith(color: AppColors.onSurface),
                       ),
@@ -385,9 +386,9 @@ class _SettlementRevenueScreenState extends State<SettlementRevenueScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('Phí sàn', style: AppTypography.labelSm.copyWith(color: AppColors.onSurfaceVariant)),
+                      LocalizedText('Phí sàn', style: AppTypography.labelSm.copyWith(color: AppColors.onSurfaceVariant)),
                       const SizedBox(height: 2),
-                      Text(
+                      LocalizedText(
                         '-${_formatVnd(item.commissionAmount)}',
                         style: AppTypography.labelLg.copyWith(color: AppColors.primary),
                       ),
@@ -406,12 +407,12 @@ class _SettlementRevenueScreenState extends State<SettlementRevenueScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
+                    LocalizedText(
                       isPending ? 'Thực nhận dự kiến' : 'Thực nhận ngân hàng',
                       style: AppTypography.labelSm.copyWith(color: AppColors.onSurfaceVariant),
                       overflow: TextOverflow.ellipsis,
                     ),
-                    Text(
+                    LocalizedText(
                       _formatVnd(item.netPayableAmount),
                       style: AppTypography.headlineSm.copyWith(
                         color: isPending ? AppColors.tertiary : AppColors.secondary,
@@ -433,7 +434,7 @@ class _SettlementRevenueScreenState extends State<SettlementRevenueScreen> {
                   );
                 },
                 icon: const Icon(Icons.visibility_outlined, size: 16),
-                label: const Text('Xem chi tiết'),
+                label: const LocalizedText('Xem chi tiết'),
                 style: OutlinedButton.styleFrom(
                   foregroundColor: AppColors.secondary,
                   side: const BorderSide(color: AppColors.outlineVariant),

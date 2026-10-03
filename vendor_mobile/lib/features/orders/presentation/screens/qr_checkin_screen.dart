@@ -1,3 +1,4 @@
+import 'package:vendor_mobile/core/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_shapes.dart';
@@ -88,7 +89,7 @@ class _QrCheckinScreenState extends State<QrCheckinScreen> {
           icon: const Icon(Icons.arrow_back, color: AppColors.secondary),
           onPressed: () => Navigator.of(context).maybePop(),
         ),
-        title: const Text('Quét mã check-in', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.onSurface)),
+        title: const LocalizedText('Quét mã check-in', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.onSurface)),
       ),
       body: SafeArea(
         child: SingleChildScrollView(
@@ -113,7 +114,7 @@ class _QrCheckinScreenState extends State<QrCheckinScreen> {
                           Container(width: 8, height: 8, decoration: const BoxDecoration(shape: BoxShape.circle, color: AppColors.secondary)),
                           const SizedBox(width: 6),
                           const Expanded(
-                            child: Text('Ống kính sẵn sàng', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: AppColors.secondary), maxLines: 1, overflow: TextOverflow.ellipsis),
+                            child: LocalizedText('Ống kính sẵn sàng', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: AppColors.secondary), maxLines: 1, overflow: TextOverflow.ellipsis),
                           ),
                         ],
                       ),
@@ -127,13 +128,13 @@ class _QrCheckinScreenState extends State<QrCheckinScreen> {
                           constraints: const BoxConstraints(),
                           icon: Icon(_flashOn ? Icons.flash_on : Icons.flash_off, color: _flashOn ? Colors.amber : AppColors.tertiary, size: 20),
                           onPressed: () => setState(() => _flashOn = !_flashOn),
-                          tooltip: 'Bật/tắt đèn flash',
+                          tooltip: tr(context, 'Bật/tắt đèn flash'),
                         ),
                         const SizedBox(width: 6),
                         ElevatedButton.icon(
                           onPressed: () => _simulateScan('valid'),
                           icon: const Icon(Icons.flip_camera_ios, size: 14),
-                          label: const Text('Mô phỏng', style: TextStyle(fontSize: 11)),
+                          label: const LocalizedText('Mô phỏng', style: TextStyle(fontSize: 11)),
                           style: ElevatedButton.styleFrom(
                             backgroundColor: AppColors.primaryContainer,
                             foregroundColor: AppColors.onPrimary,
@@ -204,7 +205,7 @@ class _QrCheckinScreenState extends State<QrCheckinScreen> {
                           color: Colors.black.withOpacity(0.6),
                           borderRadius: BorderRadius.circular(14),
                         ),
-                        child: const Text('Hướng camera về mã QR trên app khách hàng', style: TextStyle(fontSize: 11, color: Colors.white)),
+                        child: const LocalizedText('Hướng camera về mã QR trên app khách hàng', style: TextStyle(fontSize: 11, color: Colors.white)),
                       ),
                     ),
                   ],
@@ -227,8 +228,8 @@ class _QrCheckinScreenState extends State<QrCheckinScreen> {
                     Expanded(
                       child: TextField(
                         controller: _lookupController,
-                        decoration: const InputDecoration(
-                          hintText: 'Nhập mã đơn con (vd: DNS-8924-1)...',
+                        decoration:  InputDecoration(
+                          hintText: tr(context, 'Nhập mã đơn con (vd: DNS-8924-1)...'),
                           hintStyle: TextStyle(fontSize: 12, color: AppColors.outline),
                           border: InputBorder.none,
                         ),
@@ -258,7 +259,7 @@ class _QrCheckinScreenState extends State<QrCheckinScreen> {
                     Icon(Icons.verified_user, size: 16, color: AppColors.secondary),
                     SizedBox(width: 8),
                     Expanded(
-                      child: Text(
+                      child: LocalizedText(
                         'Hệ thống chỉ giải mã và đối soát đơn hàng thuộc Danang Ocean Club. Khóa bảo mật được mã hóa đầu cuối, đảm bảo chống gian lận vé.',
                         style: TextStyle(fontSize: 11, color: AppColors.onSurfaceVariant),
                       ),
@@ -273,10 +274,10 @@ class _QrCheckinScreenState extends State<QrCheckinScreen> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   const Expanded(
-                    child: Text('Kết quả tra cứu', style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: AppColors.onSurface), maxLines: 1, overflow: TextOverflow.ellipsis),
+                    child: LocalizedText('Kết quả tra cứu', style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: AppColors.onSurface), maxLines: 1, overflow: TextOverflow.ellipsis),
                   ),
                   const SizedBox(width: 8),
-                  const Text('MÔ PHỎNG KIỂM TRA', style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: AppColors.tertiary)),
+                  const LocalizedText('MÔ PHỎNG KIỂM TRA', style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: AppColors.tertiary)),
                 ],
               ),
               const SizedBox(height: 8),
@@ -319,7 +320,7 @@ class _QrCheckinScreenState extends State<QrCheckinScreen> {
             boxShadow: active ? AppShapes.shadowSm : null,
           ),
           child: Center(
-            child: Text(
+            child: LocalizedText(
               label,
               style: TextStyle(
                 fontSize: 12,
@@ -358,8 +359,8 @@ class _QrCheckinScreenState extends State<QrCheckinScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('Xác nhận thành công!', style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: AppColors.onSurface)),
-                    Text('Vé hợp lệ & Đủ điều kiện ra bãi', style: TextStyle(fontSize: 11, color: AppColors.secondary, fontWeight: FontWeight.w600)),
+                    LocalizedText('Xác nhận thành công!', style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: AppColors.onSurface)),
+                    LocalizedText('Vé hợp lệ & Đủ điều kiện ra bãi', style: TextStyle(fontSize: 11, color: AppColors.secondary, fontWeight: FontWeight.w600)),
                   ],
                 ),
               ),
@@ -376,7 +377,7 @@ class _QrCheckinScreenState extends State<QrCheckinScreen> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Flexible(
-                      child: Text(
+                      child: LocalizedText(
                         '#${o.subOrderCode}',
                         style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: AppColors.secondary),
                         maxLines: 1,
@@ -385,7 +386,7 @@ class _QrCheckinScreenState extends State<QrCheckinScreen> {
                     ),
                     const SizedBox(width: 6),
                     Flexible(
-                      child: Text(
+                      child: LocalizedText(
                         '${o.slotDate} • ${o.slotTime}',
                         style: const TextStyle(fontSize: 11, color: AppColors.tertiary),
                         maxLines: 1,
@@ -395,9 +396,9 @@ class _QrCheckinScreenState extends State<QrCheckinScreen> {
                   ],
                 ),
                 const SizedBox(height: 6),
-                Text(o.serviceName, style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: AppColors.onSurface)),
-                Text('Khách hàng: ${o.customerName}', style: const TextStyle(fontSize: 12, color: AppColors.onSurfaceVariant)),
-                Text('Số lượng: ${o.quantity} người lớn (${o.quantity} ván SUP)', style: const TextStyle(fontSize: 11, color: AppColors.tertiary)),
+                LocalizedText(o.serviceName, style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: AppColors.onSurface)),
+                LocalizedText('Khách hàng: ${o.customerName}', style: const TextStyle(fontSize: 12, color: AppColors.onSurfaceVariant)),
+                LocalizedText('Số lượng: ${o.quantity} người lớn (${o.quantity} ván SUP)', style: const TextStyle(fontSize: 11, color: AppColors.tertiary)),
               ],
             ),
           ),
@@ -414,7 +415,7 @@ class _QrCheckinScreenState extends State<QrCheckinScreen> {
                       Icon(Icons.draw, size: 15, color: AppColors.secondary),
                       SizedBox(width: 6),
                       Expanded(
-                        child: Text('Cam kết an toàn biển', style: TextStyle(fontSize: 11, color: AppColors.onSurface), maxLines: 1, overflow: TextOverflow.ellipsis),
+                        child: LocalizedText('Cam kết an toàn biển', style: TextStyle(fontSize: 11, color: AppColors.onSurface), maxLines: 1, overflow: TextOverflow.ellipsis),
                       ),
                     ],
                   ),
@@ -425,7 +426,7 @@ class _QrCheckinScreenState extends State<QrCheckinScreen> {
                   children: const [
                     Icon(Icons.verified, size: 13, color: AppColors.secondary),
                     SizedBox(width: 3),
-                    Text('Đã ký điện tử', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: AppColors.secondary)),
+                    LocalizedText('Đã ký điện tử', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: AppColors.secondary)),
                   ],
                 ),
               ],
@@ -454,7 +455,7 @@ class _QrCheckinScreenState extends State<QrCheckinScreen> {
               );
             },
             icon: const Icon(Icons.receipt_long, size: 16, color: AppColors.secondary),
-            label: const Text('Xem chi tiết đơn hàng', style: TextStyle(fontSize: 12, color: AppColors.secondary)),
+            label: const LocalizedText('Xem chi tiết đơn hàng', style: TextStyle(fontSize: 12, color: AppColors.secondary)),
             style: OutlinedButton.styleFrom(
               minimumSize: const Size(double.infinity, 40),
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
@@ -492,8 +493,8 @@ class _QrCheckinScreenState extends State<QrCheckinScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('Vé này đã được sử dụng', style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: AppColors.onSurface)),
-                    Text('Không thể check-in lần thứ hai', style: TextStyle(fontSize: 11, color: AppColors.primary, fontWeight: FontWeight.w600)),
+                    LocalizedText('Vé này đã được sử dụng', style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: AppColors.onSurface)),
+                    LocalizedText('Không thể check-in lần thứ hai', style: TextStyle(fontSize: 11, color: AppColors.primary, fontWeight: FontWeight.w600)),
                   ],
                 ),
               ),
@@ -506,16 +507,16 @@ class _QrCheckinScreenState extends State<QrCheckinScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('Mã đơn: #${o.subOrderCode}', style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: AppColors.onSurface)),
+                LocalizedText('Mã đơn: #${o.subOrderCode}', style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: AppColors.onSurface)),
                 const SizedBox(height: 4),
-                Text('Khách hàng: ${o.customerName}', style: const TextStyle(fontSize: 12, color: AppColors.onSurfaceVariant)),
+                LocalizedText('Khách hàng: ${o.customerName}', style: const TextStyle(fontSize: 12, color: AppColors.onSurfaceVariant)),
                 const SizedBox(height: 4),
                 Row(
                   children: [
                     const Icon(Icons.access_time, size: 14, color: AppColors.primary),
                     const SizedBox(width: 4),
                     Expanded(
-                      child: Text(
+                      child: LocalizedText(
                         'Đã check-in lúc: ${checkInTime.hour}:${checkInTime.minute.toString().padLeft(2, '0')} ngày ${checkInTime.day}/${checkInTime.month}',
                         style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: AppColors.primary),
                         overflow: TextOverflow.ellipsis,
@@ -540,7 +541,7 @@ class _QrCheckinScreenState extends State<QrCheckinScreen> {
                     );
                   },
                   icon: const Icon(Icons.receipt_long, size: 16, color: AppColors.secondary),
-                  label: const Text('Chi tiết đơn', style: TextStyle(fontSize: 12, color: AppColors.secondary)),
+                  label: const LocalizedText('Chi tiết đơn', style: TextStyle(fontSize: 12, color: AppColors.secondary)),
                   style: OutlinedButton.styleFrom(
                     minimumSize: const Size(0, 44),
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
@@ -552,7 +553,7 @@ class _QrCheckinScreenState extends State<QrCheckinScreen> {
                 child: OutlinedButton.icon(
                   onPressed: () => _simulateScan('valid'),
                   icon: const Icon(Icons.qr_code_scanner, size: 16),
-                  label: const Text('Quét mã khác', style: TextStyle(fontSize: 12)),
+                  label: const LocalizedText('Quét mã khác', style: TextStyle(fontSize: 12)),
                   style: OutlinedButton.styleFrom(
                     minimumSize: const Size(0, 44),
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
@@ -590,8 +591,8 @@ class _QrCheckinScreenState extends State<QrCheckinScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('Mã QR không hợp lệ', style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: AppColors.onSurface)),
-                    Text('Không thuộc đơn vị Danang Ocean Club', style: TextStyle(fontSize: 11, color: AppColors.error, fontWeight: FontWeight.w600)),
+                    LocalizedText('Mã QR không hợp lệ', style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: AppColors.onSurface)),
+                    LocalizedText('Không thuộc đơn vị Danang Ocean Club', style: TextStyle(fontSize: 11, color: AppColors.error, fontWeight: FontWeight.w600)),
                   ],
                 ),
               ),
@@ -601,7 +602,7 @@ class _QrCheckinScreenState extends State<QrCheckinScreen> {
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(color: AppColors.errorContainer.withOpacity(0.3), borderRadius: BorderRadius.circular(10)),
-            child: const Text(
+            child: const LocalizedText(
               'Mã đơn không tồn tại trong hệ thống của bạn hoặc thuộc về một đơn vị đối tác khác tại Đà Nẵng. Vui lòng hướng dẫn khách kiểm tra lại thông tin trên ứng dụng.',
               style: TextStyle(fontSize: 11, color: AppColors.onErrorContainer),
             ),
@@ -610,7 +611,7 @@ class _QrCheckinScreenState extends State<QrCheckinScreen> {
           OutlinedButton.icon(
             onPressed: () => _simulateScan('valid'),
             icon: const Icon(Icons.qr_code_scanner, size: 16),
-            label: const Text('Thử quét lại', style: TextStyle(fontSize: 12)),
+            label: const LocalizedText('Thử quét lại', style: TextStyle(fontSize: 12)),
             style: OutlinedButton.styleFrom(
               minimumSize: const Size(double.infinity, 44),
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),

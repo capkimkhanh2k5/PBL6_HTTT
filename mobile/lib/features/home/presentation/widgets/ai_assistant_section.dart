@@ -1,3 +1,4 @@
+import 'package:mobile/core/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_shapes.dart';
@@ -49,7 +50,7 @@ class AiAssistantSection extends StatelessWidget {
               ),
               const SizedBox(width: 8),
               Expanded(
-                child: Text(
+                child: LocalizedText(
                   'TRỢ LÝ DU LỊCH THÔNG MINH',
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
@@ -64,7 +65,7 @@ class AiAssistantSection extends StatelessWidget {
           const SizedBox(height: 10),
 
           // Title & Subtitle
-          Text(
+          LocalizedText(
             'Một chuyến đi hợp gu, bắt đầu từ bạn.',
             style: AppTypography.headlineSm(
               color: AppColors.onSurface,
@@ -72,7 +73,7 @@ class AiAssistantSection extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 4),
-          Text(
+          LocalizedText(
             'Gợi ý hoạt động cá nhân hoá theo ngân sách, khung giờ và sở thích nhóm bạn chỉ trong vài giây.',
             style: AppTypography.bodySm(
               color: AppColors.onSurfaceVariant,
@@ -111,7 +112,7 @@ class AiAssistantSection extends StatelessWidget {
                         bottomRight: Radius.zero,
                       ),
                     ),
-                    child: Text(
+                    child: LocalizedText(
                       'Bọn mình có 3 người, muốn trải nghiệm vào sáng sớm mai ở Mỹ Khê, ngân sách tầm 300k/người.',
                       style: AppTypography.bodySm(
                         color: AppColors.onSecondary,
@@ -148,7 +149,7 @@ class AiAssistantSection extends StatelessWidget {
                               color: AppColors.secondary,
                             ),
                             const SizedBox(width: 4),
-                            Text(
+                            LocalizedText(
                               'DANASEA AI',
                               style: AppTypography.labelSm(
                                 color: AppColors.secondary,
@@ -161,12 +162,12 @@ class AiAssistantSection extends StatelessWidget {
                         RichText(
                           text: TextSpan(
                             style: AppTypography.bodySm(color: AppColors.onSurface),
-                            children: const [
+                            children:  [
                               TextSpan(
-                                text: 'Chào bạn! Gợi ý hoàn hảo nhất là buổi ',
+                                text: tr(context, 'Chào bạn! Gợi ý hoàn hảo nhất là buổi '),
                               ),
                               TextSpan(
-                                text: 'Chèo SUP đón bình minh',
+                                text: tr(context, 'Chèo SUP đón bình minh'),
                                 style: TextStyle(
                                   color: AppColors.primary,
                                   fontWeight: FontWeight.bold,
@@ -174,7 +175,7 @@ class AiAssistantSection extends StatelessWidget {
                               ),
                               TextSpan(
                                 text:
-                                    ' lúc 5:00 sáng tại Mỹ Khê (280.000đ/người) có huấn luyện viên kèm và chụp ảnh lưu niệm.',
+                                    tr(context, ' lúc 5:00 sáng tại Mỹ Khê (280.000đ/người) có huấn luyện viên kèm và chụp ảnh lưu niệm.'),
                               ),
                             ],
                           ),
@@ -189,7 +190,7 @@ class AiAssistantSection extends StatelessWidget {
           const SizedBox(height: 14),
 
           // Quick Prompt Chips
-          Text(
+          LocalizedText(
             'Gợi ý nhanh cho bạn:',
             style: AppTypography.labelSm(
               color: AppColors.onSurfaceVariant,
@@ -216,7 +217,7 @@ class AiAssistantSection extends StatelessWidget {
                       ),
                     ],
                   ),
-                  child: Text(
+                  child: LocalizedText(
                     prompt,
                     style: AppTypography.labelSm(
                       color: AppColors.onSurface,

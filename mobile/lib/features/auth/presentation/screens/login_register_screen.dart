@@ -1,3 +1,4 @@
+import 'package:mobile/core/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_shapes.dart';
@@ -41,7 +42,7 @@ class _LoginRegisterScreenState extends State<LoginRegisterScreen> {
   void _submit() {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text(
+        content: LocalizedText(
           _isLogin
               ? 'Đăng nhập thành công! Chào mừng bạn trở lại DANASEA.'
               : 'Đăng ký tài khoản thành công! Vui lòng kiểm tra email để xác thực.',
@@ -82,18 +83,18 @@ class _LoginRegisterScreenState extends State<LoginRegisterScreen> {
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Text(
+                LocalizedText(
                   'DANA',
                   style: AppTypography.headlineLg(color: AppColors.onSurface),
                 ),
-                Text(
+                LocalizedText(
                   'SEA',
                   style: AppTypography.headlineLg(color: AppColors.primary),
                 ),
               ],
             ),
             const SizedBox(height: 4),
-            Text(
+            LocalizedText(
               'Trải nghiệm thể thao & đại dương nguyên bản Đà Nẵng',
               style: AppTypography.bodySm(color: AppColors.onSurfaceVariant),
               textAlign: TextAlign.center,
@@ -114,7 +115,7 @@ class _LoginRegisterScreenState extends State<LoginRegisterScreen> {
                   const Icon(Icons.waves, size: 16, color: AppColors.secondary),
                   const SizedBox(width: 6),
                   Flexible(
-                    child: Text(
+                    child: LocalizedText(
                       'Sóng 0.8m • Biển êm • 26°C • Cập nhật',
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
@@ -159,7 +160,7 @@ class _LoginRegisterScreenState extends State<LoginRegisterScreen> {
                               : null,
                         ),
                         child: Center(
-                          child: Text(
+                          child: LocalizedText(
                             'Đăng nhập',
                             style: AppTypography.labelMd(
                               color: _isLogin
@@ -194,7 +195,7 @@ class _LoginRegisterScreenState extends State<LoginRegisterScreen> {
                               : null,
                         ),
                         child: Center(
-                          child: Text(
+                          child: LocalizedText(
                             'Đăng ký',
                             style: AppTypography.labelMd(
                               color: !_isLogin
@@ -270,7 +271,7 @@ class _LoginRegisterScreenState extends State<LoginRegisterScreen> {
                       ),
                     );
                   },
-                  child: Text(
+                  child: LocalizedText(
                     'Quên mật khẩu?',
                     style: AppTypography.labelSm(color: AppColors.secondary),
                   ),
@@ -288,7 +289,7 @@ class _LoginRegisterScreenState extends State<LoginRegisterScreen> {
             const SizedBox(height: 24),
 
             // FOOTER TERMS
-            Text(
+            LocalizedText(
               'Bằng việc tiếp tục, bạn đồng ý với Điều khoản dịch vụ và Chính sách bảo mật của nền tảng DANASEA.',
               textAlign: TextAlign.center,
               style: AppTypography.bodySm(color: AppColors.outline)
@@ -326,7 +327,7 @@ class _LoginRegisterScreenState extends State<LoginRegisterScreen> {
               obscureText: obscureText,
               keyboardType: keyboardType,
               decoration: InputDecoration(
-                hintText: hint,
+                hintText: tr(context, hint),
                 hintStyle: AppTypography.bodySm(color: AppColors.outline),
                 border: InputBorder.none,
                 isDense: true,

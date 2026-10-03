@@ -1,3 +1,4 @@
+import 'package:mobile/core/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_shapes.dart';
@@ -32,7 +33,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
     if (_step == 1) {
       if (_emailController.text.trim().isEmpty) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Vui lòng nhập email đăng ký tài khoản.')),
+          const SnackBar(content: LocalizedText('Vui lòng nhập email đăng ký tài khoản.')),
         );
         return;
       }
@@ -40,7 +41,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
     } else if (_step == 2) {
       if (_otpController.text.trim().length < 4) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Vui lòng nhập mã OTP hợp lệ.')),
+          const SnackBar(content: LocalizedText('Vui lòng nhập mã OTP hợp lệ.')),
         );
         return;
       }
@@ -48,7 +49,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Đổi mật khẩu thành công! Bạn có thể đăng nhập ngay.'),
+          content: LocalizedText('Đổi mật khẩu thành công! Bạn có thể đăng nhập ngay.'),
           backgroundColor: AppColors.secondary,
         ),
       );
@@ -67,7 +68,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
           icon: const Icon(Icons.arrow_back, color: AppColors.onSurface),
           onPressed: () => Navigator.pop(context),
         ),
-        title: Text(
+        title: LocalizedText(
           'Khôi phục mật khẩu',
           style: AppTypography.headlineSm(color: AppColors.onSurface),
         ),
@@ -87,7 +88,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                   color: AppColors.secondaryContainer.withValues(alpha: 0.35),
                   borderRadius: BorderRadius.circular(16),
                 ),
-                child: Text(
+                child: LocalizedText(
                   'Bước $_step / 3: ${_getStepTitle()}',
                   style: AppTypography.labelSm(
                     color: AppColors.onSecondaryContainer,
@@ -99,12 +100,12 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
             const SizedBox(height: 24),
 
             if (_step == 1) ...[
-              Text(
+              LocalizedText(
                 'Nhập địa chỉ email',
                 style: AppTypography.headlineSm(color: AppColors.onSurface),
               ),
               const SizedBox(height: 6),
-              Text(
+              LocalizedText(
                 'Mã xác nhận bảo mật gồm 6 chữ số sẽ được gửi đến hộp thư email của bạn.',
                 style: AppTypography.bodySm(color: AppColors.onSurfaceVariant),
               ),
@@ -116,12 +117,12 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                 keyboardType: TextInputType.emailAddress,
               ),
             ] else if (_step == 2) ...[
-              Text(
+              LocalizedText(
                 'Nhập mã xác thực OTP',
                 style: AppTypography.headlineSm(color: AppColors.onSurface),
               ),
               const SizedBox(height: 6),
-              Text(
+              LocalizedText(
                 'Đã gửi mã đến ${_emailController.text}. Vui lòng nhập mã xác minh bên dưới:',
                 style: AppTypography.bodySm(color: AppColors.onSurfaceVariant),
               ),
@@ -133,12 +134,12 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                 keyboardType: TextInputType.number,
               ),
             ] else ...[
-              Text(
+              LocalizedText(
                 'Tạo mật khẩu mới',
                 style: AppTypography.headlineSm(color: AppColors.onSurface),
               ),
               const SizedBox(height: 6),
-              Text(
+              LocalizedText(
                 'Mật khẩu nên chứa ít nhất 8 ký tự, bao gồm chữ và số để đảm bảo an toàn.',
                 style: AppTypography.bodySm(color: AppColors.onSurfaceVariant),
               ),
@@ -201,7 +202,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
               obscureText: obscure,
               keyboardType: keyboardType,
               decoration: InputDecoration(
-                hintText: hint,
+                hintText: tr(context, hint),
                 hintStyle: AppTypography.bodySm(color: AppColors.outline),
                 border: InputBorder.none,
                 isDense: true,

@@ -1,3 +1,4 @@
+import 'package:mobile/core/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import '../../../../core/data/mock_database_data.dart';
 import '../../../../core/models/danasea_models.dart';
@@ -127,7 +128,7 @@ class _CartScreenState extends State<CartScreen> {
           icon: const Icon(Icons.arrow_back, color: AppColors.onSurface),
           onPressed: widget.onBack ?? () => Navigator.pop(context),
         ),
-        title: Text(
+        title: LocalizedText(
           'Giỏ hàng (${_items.length})',
           style: AppTypography.headlineSm(color: AppColors.onSurface),
         ),
@@ -138,7 +139,7 @@ class _CartScreenState extends State<CartScreen> {
                 setState(() => _items.clear());
               },
               icon: const Icon(Icons.delete_sweep, size: 18, color: AppColors.outline),
-              label: Text(
+              label: LocalizedText(
                 'Xóa tất cả',
                 style: AppTypography.labelSm(color: AppColors.outline),
               ),
@@ -189,7 +190,7 @@ class _CartScreenState extends State<CartScreen> {
                                   Row(
                                     children: [
                                       Flexible(
-                                        child: Text(
+                                        child: LocalizedText(
                                           'Khung giờ biển giới hạn',
                                           maxLines: 1,
                                           overflow: TextOverflow.ellipsis,
@@ -208,7 +209,7 @@ class _CartScreenState extends State<CartScreen> {
                                           borderRadius:
                                               BorderRadius.circular(8),
                                         ),
-                                        child: Text(
+                                        child: LocalizedText(
                                           'Giữ chỗ tạm',
                                           style: AppTypography.labelSm(
                                             color: AppColors.primary,
@@ -218,7 +219,7 @@ class _CartScreenState extends State<CartScreen> {
                                     ],
                                   ),
                                   const SizedBox(height: 2),
-                                  Text(
+                                  LocalizedText(
                                     'Số lượng slot sáng sớm có hạn, hãy hoàn tất thanh toán để giữ chỗ.',
                                     style: AppTypography.bodySm(
                                       color: AppColors.onSurfaceVariant,
@@ -263,7 +264,7 @@ class _CartScreenState extends State<CartScreen> {
                           mainAxisSize: MainAxisSize.min,
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(
+                            LocalizedText(
                               'Tạm tính ($_selectedCount dịch vụ):',
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
@@ -271,7 +272,7 @@ class _CartScreenState extends State<CartScreen> {
                                 color: AppColors.onSurfaceVariant,
                               ),
                             ),
-                            Text(
+                            LocalizedText(
                               _formatPrice(_selectedSubtotal),
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
@@ -345,7 +346,7 @@ class _CartScreenState extends State<CartScreen> {
               ),
               const SizedBox(width: 6),
               Expanded(
-                child: Text(
+                child: LocalizedText(
                   item.service.vendorName,
                   style: AppTypography.labelMd(
                     color: AppColors.onSurface,
@@ -389,7 +390,7 @@ class _CartScreenState extends State<CartScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
+                    LocalizedText(
                       item.service.name,
                       style: AppTypography.labelLg(
                         color: AppColors.onSurface,
@@ -403,7 +404,7 @@ class _CartScreenState extends State<CartScreen> {
                         const Icon(Icons.calendar_today,
                             size: 12, color: AppColors.secondary),
                         const SizedBox(width: 4),
-                        Text(
+                        LocalizedText(
                           '${item.slot.startTime} - ${item.slot.endTime}',
                           style: AppTypography.labelSm(
                             color: AppColors.secondary,
@@ -419,7 +420,7 @@ class _CartScreenState extends State<CartScreen> {
                             size: 12, color: AppColors.tertiary),
                         const SizedBox(width: 4),
                         Expanded(
-                          child: Text(
+                          child: LocalizedText(
                             '${item.quantity} khách • ${_formatPrice(item.service.price)}/khách',
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
@@ -453,7 +454,7 @@ class _CartScreenState extends State<CartScreen> {
                                 const Icon(Icons.edit_calendar,
                                     size: 12, color: AppColors.secondary),
                                 const SizedBox(width: 4),
-                                Text(
+                                LocalizedText(
                                   'Đổi lịch',
                                   style: AppTypography.labelSm(
                                     color: AppColors.secondary,
@@ -463,7 +464,7 @@ class _CartScreenState extends State<CartScreen> {
                             ),
                           ),
                         ),
-                        Text(
+                        LocalizedText(
                           _formatPrice(item.subtotal),
                           textAlign: TextAlign.right,
                           style: AppTypography.headlineSm(
@@ -500,12 +501,12 @@ class _CartScreenState extends State<CartScreen> {
                   size: 40, color: AppColors.secondary),
             ),
             const SizedBox(height: 16),
-            Text(
+            LocalizedText(
               'Giỏ hàng của bạn đang trống',
               style: AppTypography.headlineSm(color: AppColors.onSurface),
             ),
             const SizedBox(height: 8),
-            Text(
+            LocalizedText(
               'Hãy chọn các trải nghiệm biển yêu thích tại Đà Nẵng và thêm vào giỏ để chuẩn bị chuyến đi.',
               textAlign: TextAlign.center,
               style: AppTypography.bodySm(color: AppColors.onSurfaceVariant),

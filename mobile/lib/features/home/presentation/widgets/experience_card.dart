@@ -1,3 +1,4 @@
+import 'package:mobile/core/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_shapes.dart';
@@ -87,7 +88,7 @@ class ExperienceCard extends StatelessWidget {
                               color: AppColors.onSecondary,
                             ),
                             const SizedBox(width: 4),
-                            Text(
+                            LocalizedText(
                               'Nhà cung cấp đã xác minh',
                               style: AppTypography.labelSm(
                                 color: AppColors.onSecondary,
@@ -135,7 +136,7 @@ class ExperienceCard extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Expanded(
-                        child: Text(
+                        child: LocalizedText(
                           '${item.location} • ${item.duration}',
                           style: AppTypography.bodySm(
                             color: AppColors.onSurfaceVariant,
@@ -153,14 +154,14 @@ class ExperienceCard extends StatelessWidget {
                             color: AppColors.primary,
                           ),
                           const SizedBox(width: 3),
-                          Text(
+                          LocalizedText(
                             item.rating.toStringAsFixed(1),
                             style: AppTypography.labelMd(
                               color: AppColors.onSurface,
                               fontWeight: FontWeight.w700,
                             ),
                           ),
-                          Text(
+                          LocalizedText(
                             ' (${item.reviewCount})',
                             style: AppTypography.bodySm(
                               color: AppColors.onSurfaceVariant,
@@ -173,7 +174,7 @@ class ExperienceCard extends StatelessWidget {
                   const SizedBox(height: 6),
 
                   // Title
-                  Text(
+                  LocalizedText(
                     item.title,
                     style: AppTypography.headlineSm(
                       color: AppColors.onSurface,
@@ -191,7 +192,7 @@ class ExperienceCard extends StatelessWidget {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(
+                            LocalizedText(
                               'Giá ưu đãi',
                               style: AppTypography.labelSm(
                                 color: AppColors.onSurfaceVariant,
@@ -201,14 +202,14 @@ class ExperienceCard extends StatelessWidget {
                               text: TextSpan(
                                 children: [
                                   TextSpan(
-                                    text: 'Từ ${_formatPrice(item.price)}',
+                                    text: tr(context, 'Từ ${_formatPrice(item.price)}'),
                                     style: AppTypography.headlineSm(
                                       color: AppColors.primary,
                                       fontWeight: FontWeight.w800,
                                     ),
                                   ),
                                   TextSpan(
-                                    text: '/người',
+                                    text: tr(context, '/người'),
                                     style: AppTypography.bodySm(
                                       color: AppColors.onSurfaceVariant,
                                     ),
@@ -237,7 +238,7 @@ class ExperienceCard extends StatelessWidget {
                               ),
                             ],
                           ),
-                          child: Text(
+                          child: LocalizedText(
                             'Xem chi tiết',
                             style: AppTypography.labelMd(
                               color: AppColors.onSecondary,

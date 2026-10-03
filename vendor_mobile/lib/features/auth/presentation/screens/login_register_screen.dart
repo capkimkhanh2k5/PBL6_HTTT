@@ -1,3 +1,4 @@
+import 'package:vendor_mobile/core/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_shapes.dart';
@@ -143,7 +144,7 @@ class _LoginRegisterScreenState extends State<LoginRegisterScreen> {
                           const Icon(Icons.info_outline, color: AppColors.secondary, size: 20),
                           const SizedBox(width: 8),
                           Expanded(
-                            child: Text(
+                            child: LocalizedText(
                               _statusBannerMessage!,
                               style: AppTypography.bodySm(color: AppColors.onSecondaryContainer),
                             ),
@@ -207,8 +208,8 @@ class _LoginRegisterScreenState extends State<LoginRegisterScreen> {
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('DANASEA', style: AppTypography.headlineSm(color: AppColors.secondary)),
-                      Text('VENDOR PORTAL', style: AppTypography.labelSm(color: AppColors.tertiary)),
+                      LocalizedText('DANASEA', style: AppTypography.headlineSm(color: AppColors.secondary)),
+                      LocalizedText('VENDOR PORTAL', style: AppTypography.labelSm(color: AppColors.tertiary)),
                     ],
                   ),
                 ],
@@ -231,7 +232,7 @@ class _LoginRegisterScreenState extends State<LoginRegisterScreen> {
                       ),
                     ),
                     const SizedBox(width: 6),
-                    Text(
+                    LocalizedText(
                       'Hệ thống trực tuyến',
                       style: AppTypography.labelSm(color: AppColors.onSecondaryContainer),
                     ),
@@ -279,13 +280,13 @@ class _LoginRegisterScreenState extends State<LoginRegisterScreen> {
                       mainAxisSize: MainAxisSize.min,
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
+                        LocalizedText(
                           'CỔNG KẾT NỐI DỊCH VỤ BIỂN',
                           style: AppTypography.labelSm(color: AppColors.secondaryContainer),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                         ),
-                        Text(
+                        LocalizedText(
                           'Đồng hành phát triển du lịch biển Đà Nẵng',
                           style: AppTypography.headlineSm(color: Colors.white).copyWith(fontSize: 15),
                           maxLines: 2,
@@ -337,7 +338,7 @@ class _LoginRegisterScreenState extends State<LoginRegisterScreen> {
                     ),
                     const SizedBox(width: 6),
                     Flexible(
-                      child: Text(
+                      child: LocalizedText(
                         'Đăng nhập',
                         style: AppTypography.labelLg(
                           color: _isLoginTab ? AppColors.onSecondary : AppColors.tertiary,
@@ -374,7 +375,7 @@ class _LoginRegisterScreenState extends State<LoginRegisterScreen> {
                     ),
                     const SizedBox(width: 6),
                     Flexible(
-                      child: Text(
+                      child: LocalizedText(
                         'Đăng ký đối tác',
                         style: AppTypography.labelLg(
                           color: !_isLoginTab ? AppColors.onSecondary : AppColors.tertiary,
@@ -406,9 +407,9 @@ class _LoginRegisterScreenState extends State<LoginRegisterScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Chào mừng trở lại!', style: AppTypography.headlineSm(color: AppColors.onSurface)),
+            LocalizedText('Chào mừng trở lại!', style: AppTypography.headlineSm(color: AppColors.onSurface)),
             const SizedBox(height: 4),
-            Text(
+            LocalizedText(
               'Truy cập trung tâm điều hành & quản trị đơn dịch vụ biển DANASEA.',
               style: AppTypography.bodySm(color: AppColors.tertiary),
             ),
@@ -468,7 +469,7 @@ class _LoginRegisterScreenState extends State<LoginRegisterScreen> {
                       ),
                     ),
                     const SizedBox(width: 8),
-                    Text('Ghi nhớ đăng nhập', style: AppTypography.bodySm(color: AppColors.tertiary)),
+                    LocalizedText('Ghi nhớ đăng nhập', style: AppTypography.bodySm(color: AppColors.tertiary)),
                   ],
                 ),
                 InkWell(
@@ -479,7 +480,7 @@ class _LoginRegisterScreenState extends State<LoginRegisterScreen> {
                   },
                   child: Padding(
                     padding: const EdgeInsets.symmetric(vertical: 4),
-                    child: Text(
+                    child: LocalizedText(
                       'Quên mật khẩu?',
                       style: AppTypography.labelMd(color: AppColors.secondary),
                     ),
@@ -513,9 +514,9 @@ class _LoginRegisterScreenState extends State<LoginRegisterScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Gia nhập Mạng lưới Đối tác', style: AppTypography.headlineSm(color: AppColors.onSurface)),
+            LocalizedText('Gia nhập Mạng lưới Đối tác', style: AppTypography.headlineSm(color: AppColors.onSurface)),
             const SizedBox(height: 4),
-            Text(
+            LocalizedText(
               'Mở rộng kinh doanh tour ca nô, lướt sóng, lặn ngắm san hô & thuyền buồm.',
               style: AppTypography.bodySm(color: AppColors.tertiary),
             ),
@@ -539,7 +540,7 @@ class _LoginRegisterScreenState extends State<LoginRegisterScreen> {
                   ),
                   const SizedBox(width: 8),
                   Expanded(
-                    child: Text(
+                    child: LocalizedText(
                       'Hồ sơ đối tác cần được quản trị viên xét duyệt trước khi hoạt động.',
                       style: AppTypography.bodySm(color: AppColors.tertiary),
                     ),
@@ -638,7 +639,7 @@ class _LoginRegisterScreenState extends State<LoginRegisterScreen> {
                 ),
                 const SizedBox(width: 8),
                 Expanded(
-                  child: Text(
+                  child: LocalizedText(
                     'Tôi đồng ý với Điều khoản hợp tác nhà cung cấp và quy chuẩn an toàn hàng hải của DANASEA.',
                     style: AppTypography.bodySm(color: AppColors.onSurface),
                   ),
@@ -674,7 +675,7 @@ class _LoginRegisterScreenState extends State<LoginRegisterScreen> {
               const Icon(Icons.security_rounded, color: AppColors.secondary, size: 20),
               const SizedBox(width: 8),
               Expanded(
-                child: Text(
+                child: LocalizedText(
                   'Hệ thống bảo mật đối tác DANASEA',
                   style: AppTypography.labelLg(color: AppColors.secondary),
                   maxLines: 1,
@@ -684,7 +685,7 @@ class _LoginRegisterScreenState extends State<LoginRegisterScreen> {
             ],
           ),
           const SizedBox(height: 6),
-          Text(
+          LocalizedText(
             'Nền tảng xác thực chuyên dụng được mã hóa đầu cuối, tuân thủ an toàn dữ liệu hàng hải và quản lý thông tin đối soát theo từng kỳ.',
             style: AppTypography.bodySm(color: AppColors.tertiary),
           ),
@@ -700,7 +701,7 @@ class _LoginRegisterScreenState extends State<LoginRegisterScreen> {
                 children: [
                   const Icon(Icons.support_agent_rounded, size: 18, color: AppColors.secondary),
                   const SizedBox(width: 6),
-                  Text('Hotline: 1900 8899', style: AppTypography.labelMd(color: AppColors.onSurface)),
+                  LocalizedText('Hotline: 1900 8899', style: AppTypography.labelMd(color: AppColors.onSurface)),
                 ],
               ),
               Container(
@@ -709,7 +710,7 @@ class _LoginRegisterScreenState extends State<LoginRegisterScreen> {
                   color: AppColors.secondaryContainer,
                   borderRadius: BorderRadius.circular(9999),
                 ),
-                child: Text(
+                child: LocalizedText(
                   'Trợ giúp 24/7',
                   style: AppTypography.labelSm(color: AppColors.onSecondaryContainer),
                 ),

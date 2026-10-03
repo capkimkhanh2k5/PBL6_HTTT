@@ -1,3 +1,4 @@
+import 'package:mobile/core/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import '../../../../core/models/danasea_models.dart';
 import '../../../../core/theme/app_colors.dart';
@@ -130,14 +131,14 @@ class _BookingSlotSheetState extends State<BookingSlotSheet> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
+                        LocalizedText(
                           'Chọn lịch & số người',
                           style: AppTypography.headlineSm(
                             color: AppColors.onSurface,
                           ),
                         ),
                         const SizedBox(height: 2),
-                        Text(
+                        LocalizedText(
                           '${widget.service.name} • ${widget.service.vendorName}',
                           style: AppTypography.bodySm(
                             color: AppColors.onSurfaceVariant,
@@ -167,7 +168,7 @@ class _BookingSlotSheetState extends State<BookingSlotSheet> {
                     // 1. DATE SELECTION
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: AppShapes.gutterMobile),
-                      child: Text(
+                      child: LocalizedText(
                         '1. Chọn ngày trải nghiệm',
                         style: AppTypography.labelLg(color: AppColors.onSurface),
                       ),
@@ -206,7 +207,7 @@ class _BookingSlotSheetState extends State<BookingSlotSheet> {
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Text(
+                        LocalizedText(
                           _getDayName(date, index),
                           style: AppTypography.labelSm(
                             color: isSelected
@@ -216,7 +217,7 @@ class _BookingSlotSheetState extends State<BookingSlotSheet> {
                           ),
                         ),
                         const SizedBox(height: 2),
-                        Text(
+                        LocalizedText(
                           '${date.day}/${date.month}',
                           style: AppTypography.labelMd(
                             color: isSelected
@@ -241,7 +242,7 @@ class _BookingSlotSheetState extends State<BookingSlotSheet> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Expanded(
-                  child: Text(
+                  child: LocalizedText(
                     '2. Chọn khung giờ xuất phát',
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
@@ -262,7 +263,7 @@ class _BookingSlotSheetState extends State<BookingSlotSheet> {
                       const Icon(Icons.waves,
                           size: 12, color: AppColors.onSecondaryFixedVariant),
                       const SizedBox(width: 4),
-                      Text(
+                      LocalizedText(
                         'Sóng êm: 0.4m',
                         style: AppTypography.labelSm(
                           color: AppColors.onSecondaryFixedVariant,
@@ -309,7 +310,7 @@ class _BookingSlotSheetState extends State<BookingSlotSheet> {
                     ),
                     child: Column(
                       children: [
-                        Text(
+                        LocalizedText(
                           '${slot.startTime} - ${slot.endTime}',
                           style: AppTypography.labelMd(
                             color: isSelected
@@ -319,7 +320,7 @@ class _BookingSlotSheetState extends State<BookingSlotSheet> {
                           ),
                         ),
                         const SizedBox(height: 2),
-                        Text(
+                        LocalizedText(
                           'Còn ${slot.remainingSlots} chỗ',
                           style: AppTypography.bodySm(
                             color: isSelected
@@ -346,13 +347,13 @@ class _BookingSlotSheetState extends State<BookingSlotSheet> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
+                      LocalizedText(
                         '3. Số lượng khách',
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: AppTypography.labelLg(color: AppColors.onSurface),
                       ),
-                      Text(
+                      LocalizedText(
                         '${_formatPrice(widget.service.price)} / khách',
                         style: AppTypography.bodySm(
                           color: AppColors.onSurfaceVariant,
@@ -381,7 +382,7 @@ class _BookingSlotSheetState extends State<BookingSlotSheet> {
                       Container(
                         constraints: const BoxConstraints(minWidth: 32),
                         alignment: Alignment.center,
-                        child: Text(
+                        child: LocalizedText(
                           '$_guestCount',
                           style: AppTypography.headlineSm(
                             color: AppColors.onSurface,
@@ -426,7 +427,7 @@ class _BookingSlotSheetState extends State<BookingSlotSheet> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Expanded(
-                      child: Text(
+                      child: LocalizedText(
                         'Tổng tạm tính ($_guestCount khách):',
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
@@ -436,7 +437,7 @@ class _BookingSlotSheetState extends State<BookingSlotSheet> {
                       ),
                     ),
                     const SizedBox(width: 8),
-                    Text(
+                    LocalizedText(
                       _formatPrice(subtotal),
                       style: AppTypography.headlineMd(
                         color: AppColors.primary,

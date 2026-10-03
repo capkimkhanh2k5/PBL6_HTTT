@@ -1,3 +1,4 @@
+import 'package:mobile/core/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import '../../../../core/models/danasea_models.dart';
 import '../../../../core/theme/app_colors.dart';
@@ -51,7 +52,7 @@ class PaymentResultScreen extends StatelessWidget {
         backgroundColor: AppColors.surface,
         elevation: 0,
         automaticallyImplyLeading: false,
-        title: Text(
+        title: LocalizedText(
           'Kết quả thanh toán',
           style: AppTypography.headlineSm(color: AppColors.onSurface),
         ),
@@ -82,14 +83,14 @@ class PaymentResultScreen extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 16),
-            Text(
+            LocalizedText(
               isSuccess ? 'Thanh toán thành công!' : 'Thanh toán chưa hoàn tất',
               style: AppTypography.headlineLgMobile(
                 color: isSuccess ? AppColors.secondary : AppColors.error,
               ),
             ),
             const SizedBox(height: 6),
-            Text(
+            LocalizedText(
               isSuccess
                   ? 'Đơn đặt chỗ trải nghiệm biển của bạn đã được xác nhận.'
                   : 'Giao dịch bị gián đoạn, vui lòng kiểm tra lại phương thức thanh toán.',
@@ -133,7 +134,7 @@ class PaymentResultScreen extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Expanded(
-                        child: Text(
+                        child: LocalizedText(
                           'Tổng tiền đã thanh toán:',
                           style: AppTypography.labelLg(
                             color: AppColors.onSurface,
@@ -141,7 +142,7 @@ class PaymentResultScreen extends StatelessWidget {
                         ),
                       ),
                       const SizedBox(width: 8),
-                      Text(
+                      LocalizedText(
                         _formatPrice(masterOrder.totalAmount),
                         style: AppTypography.headlineSm(
                           color: AppColors.primary,
@@ -168,7 +169,7 @@ class PaymentResultScreen extends StatelessWidget {
                         size: 24, color: AppColors.secondary),
                     const SizedBox(width: 10),
                     Expanded(
-                      child: Text(
+                      child: LocalizedText(
                         'Vé điện tử QR và thông tin chi tiết đã được gửi đến email an.nguyen@example.com',
                         style: AppTypography.bodySm(
                           color: AppColors.onSurface,
@@ -208,7 +209,7 @@ class PaymentResultScreen extends StatelessWidget {
               onPressed: () {
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(
-                    content: Text('Đang tạo và tải file hóa đơn điện tử PDF...'),
+                    content: LocalizedText('Đang tạo và tải file hóa đơn điện tử PDF...'),
                     backgroundColor: AppColors.secondary,
                   ),
                 );
@@ -220,7 +221,7 @@ class PaymentResultScreen extends StatelessWidget {
                 Navigator.of(context).popUntil((route) => route.isFirst);
               },
               icon: const Icon(Icons.arrow_back, size: 16),
-              label: const Text('Về trang Khám phá'),
+              label: const LocalizedText('Về trang Khám phá'),
             ),
           ],
         ),
@@ -232,13 +233,13 @@ class PaymentResultScreen extends StatelessWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Text(
+        LocalizedText(
           label,
           style: AppTypography.bodySm(color: AppColors.onSurfaceVariant),
         ),
         const SizedBox(width: 12),
         Expanded(
-          child: Text(
+          child: LocalizedText(
             value,
             textAlign: TextAlign.right,
             style: AppTypography.labelMd(

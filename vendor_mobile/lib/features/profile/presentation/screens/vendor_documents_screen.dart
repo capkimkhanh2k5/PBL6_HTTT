@@ -1,3 +1,4 @@
+import 'package:vendor_mobile/core/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_shapes.dart';
@@ -62,7 +63,7 @@ class _VendorDocumentsScreenState extends State<VendorDocumentsScreen> {
             const Icon(Icons.picture_as_pdf, color: AppColors.primary, size: 24),
             const SizedBox(width: 8),
             Expanded(
-              child: Text(
+              child: LocalizedText(
                 title,
                 style: AppTypography.headlineSm.copyWith(color: AppColors.onSurface),
                 maxLines: 1,
@@ -75,7 +76,7 @@ class _VendorDocumentsScreenState extends State<VendorDocumentsScreen> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
+            LocalizedText(
               'Tệp tin: $fileName',
               style: AppTypography.labelLg.copyWith(color: AppColors.secondary),
             ),
@@ -93,11 +94,11 @@ class _VendorDocumentsScreenState extends State<VendorDocumentsScreen> {
                 children: [
                   const Icon(Icons.verified_user, color: AppColors.secondary, size: 40),
                   const SizedBox(height: 8),
-                  Text(
+                  LocalizedText(
                     'Bản sao hợp thức hóa điện tử',
                     style: AppTypography.labelMd.copyWith(color: AppColors.onSurfaceVariant),
                   ),
-                  Text(
+                  LocalizedText(
                     'Được lưu trữ bảo mật trên DANASEA Cloud',
                     style: AppTypography.bodySm.copyWith(color: AppColors.tertiary),
                   ),
@@ -109,7 +110,7 @@ class _VendorDocumentsScreenState extends State<VendorDocumentsScreen> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: const Text('Đóng'),
+            child: const LocalizedText('Đóng'),
           ),
         ],
       ),
@@ -150,7 +151,7 @@ class _VendorDocumentsScreenState extends State<VendorDocumentsScreen> {
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
-        title: const Text('Giấy tờ đối tác'),
+        title: const LocalizedText('Giấy tờ đối tác'),
         backgroundColor: AppColors.surface,
         elevation: 0,
         leading: IconButton(
@@ -193,7 +194,7 @@ class _VendorDocumentsScreenState extends State<VendorDocumentsScreen> {
                         const Icon(Icons.verified_user, color: AppColors.secondaryFixed, size: 16),
                         const SizedBox(width: 6),
                         Flexible(
-                          child: Text(
+                          child: LocalizedText(
                             'HỒ SƠ XÁC THỰC PHÁP LÝ',
                             style: AppTypography.labelSm.copyWith(
                               color: Colors.white,
@@ -206,7 +207,7 @@ class _VendorDocumentsScreenState extends State<VendorDocumentsScreen> {
                     ),
                   ),
                   const SizedBox(height: 12),
-                  Text(
+                  LocalizedText(
                     'Giấy tờ & Chứng nhận',
                     style: AppTypography.headlineLgMobile.copyWith(
                       color: Colors.white,
@@ -214,7 +215,7 @@ class _VendorDocumentsScreenState extends State<VendorDocumentsScreen> {
                     ),
                   ),
                   const SizedBox(height: 6),
-                  Text(
+                  LocalizedText(
                     'Danang Ocean Club cam kết minh bạch pháp lý và an toàn chuẩn mực theo quy chuẩn kiểm duyệt dịch vụ thể thao biển DANASEA.',
                     style: AppTypography.bodySm.copyWith(
                       color: AppColors.surfaceContainerHigh.withAlpha(230),
@@ -238,7 +239,7 @@ class _VendorDocumentsScreenState extends State<VendorDocumentsScreen> {
                             ),
                             const SizedBox(width: 8),
                             Expanded(
-                              child: Text(
+                              child: LocalizedText(
                                 'Trạng thái hồ sơ:',
                                 style: AppTypography.labelMd.copyWith(color: Colors.white),
                                 overflow: TextOverflow.ellipsis,
@@ -254,7 +255,7 @@ class _VendorDocumentsScreenState extends State<VendorDocumentsScreen> {
                           color: Colors.white.withAlpha(50),
                           borderRadius: BorderRadius.circular(AppShapes.rFull),
                         ),
-                        child: Text(
+                        child: LocalizedText(
                           '2 Hạng mục chính',
                           style: AppTypography.labelSm.copyWith(
                             color: Colors.white,
@@ -308,12 +309,12 @@ class _VendorDocumentsScreenState extends State<VendorDocumentsScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
+                        LocalizedText(
                           'Lưu ý về quy trình kiểm duyệt',
                           style: AppTypography.labelLg.copyWith(color: AppColors.onSurface),
                         ),
                         const SizedBox(height: 4),
-                        Text(
+                        LocalizedText(
                           'Theo quy định DANASEA, giấy tờ mới tải lên sẽ có trạng thái "Đang chờ duyệt". Chỉ Admin hệ thống mới có quyền phê duyệt giấy tờ đối tác. Chứng chỉ an toàn riêng của từng dịch vụ được quản lý độc lập tại mục chỉnh sửa dịch vụ tương ứng.',
                           style: AppTypography.bodySm.copyWith(
                             color: AppColors.onSurfaceVariant,
@@ -370,7 +371,7 @@ class _VendorDocumentsScreenState extends State<VendorDocumentsScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
+                    LocalizedText(
                       title,
                       style: AppTypography.headlineSm.copyWith(
                         color: AppColors.onSurface,
@@ -378,7 +379,7 @@ class _VendorDocumentsScreenState extends State<VendorDocumentsScreen> {
                       ),
                     ),
                     const SizedBox(height: 2),
-                    Text(
+                    LocalizedText(
                       subtitle,
                       style: AppTypography.labelSm.copyWith(color: AppColors.tertiary),
                     ),
@@ -413,14 +414,14 @@ class _VendorDocumentsScreenState extends State<VendorDocumentsScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
+                      LocalizedText(
                         doc.fileName,
                         style: AppTypography.labelLg.copyWith(color: AppColors.onSurface),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
                       const SizedBox(height: 2),
-                      Text(
+                      LocalizedText(
                         '${doc.fileSize} • Tải lên: ${doc.uploadedAt.day.toString().padLeft(2, '0')}/${doc.uploadedAt.month.toString().padLeft(2, '0')}/${doc.uploadedAt.year}',
                         style: AppTypography.bodySm.copyWith(color: AppColors.tertiary),
                       ),
@@ -449,7 +450,7 @@ class _VendorDocumentsScreenState extends State<VendorDocumentsScreen> {
                 child: OutlinedButton.icon(
                   onPressed: onView,
                   icon: const Icon(Icons.visibility_outlined, size: 18),
-                  label: const Text('Xem tài liệu'),
+                  label: const LocalizedText('Xem tài liệu'),
                   style: OutlinedButton.styleFrom(
                     foregroundColor: AppColors.secondary,
                     side: const BorderSide(color: AppColors.outlineVariant),
@@ -463,7 +464,7 @@ class _VendorDocumentsScreenState extends State<VendorDocumentsScreen> {
                 child: ElevatedButton.icon(
                   onPressed: onUploadNew,
                   icon: const Icon(Icons.refresh, size: 18),
-                  label: const Text('Tải lại file mới'),
+                  label: const LocalizedText('Tải lại file mới'),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.secondaryContainer.withAlpha(90),
                     foregroundColor: AppColors.onSecondaryContainer,
@@ -512,7 +513,7 @@ class _VendorDocumentsScreenState extends State<VendorDocumentsScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
+                    LocalizedText(
                       'Chứng nhận an toàn biển & Cứu hộ',
                       style: AppTypography.headlineSm.copyWith(
                         color: AppColors.onSurface,
@@ -520,7 +521,7 @@ class _VendorDocumentsScreenState extends State<VendorDocumentsScreen> {
                       ),
                     ),
                     const SizedBox(height: 2),
-                    Text(
+                    LocalizedText(
                       'Loại: Chứng nhận tiêu chuẩn thể thao biển',
                       style: AppTypography.labelSm.copyWith(color: AppColors.tertiary),
                     ),
@@ -531,7 +532,7 @@ class _VendorDocumentsScreenState extends State<VendorDocumentsScreen> {
             ],
           ),
           const SizedBox(height: 10),
-          Text(
+          LocalizedText(
             'Chứng nhận an toàn thể thao biển và năng lực cứu hộ cứu nạn cấp bởi Ban quản lý bán đảo Sơn Trà và các bãi biển du lịch Đà Nẵng.',
             style: AppTypography.bodySm.copyWith(color: AppColors.tertiary, height: 1.4),
           ),
@@ -560,14 +561,14 @@ class _VendorDocumentsScreenState extends State<VendorDocumentsScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
+                      LocalizedText(
                         safetyCert.fileName,
                         style: AppTypography.labelLg.copyWith(color: AppColors.onSurface),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
                       const SizedBox(height: 2),
-                      Text(
+                      LocalizedText(
                         '${safetyCert.fileSize} • Tải lên: 12/01/2024',
                         style: AppTypography.bodySm.copyWith(color: AppColors.tertiary),
                       ),
@@ -605,7 +606,7 @@ class _VendorDocumentsScreenState extends State<VendorDocumentsScreen> {
                           const Icon(Icons.tune, size: 16, color: AppColors.onSurfaceVariant),
                           const SizedBox(width: 4),
                           Expanded(
-                            child: Text(
+                            child: LocalizedText(
                               'KIỂM TRA 3 TRẠNG THÁI HỆ THỐNG',
                               style: AppTypography.labelSm.copyWith(
                                 color: AppColors.onSurfaceVariant,
@@ -619,7 +620,7 @@ class _VendorDocumentsScreenState extends State<VendorDocumentsScreen> {
                       ),
                     ),
                     const SizedBox(width: 8),
-                    Text(
+                    LocalizedText(
                       'Xem trước',
                       style: AppTypography.labelSm.copyWith(color: AppColors.tertiary),
                     ),
@@ -648,7 +649,7 @@ class _VendorDocumentsScreenState extends State<VendorDocumentsScreen> {
                   ],
                 ),
                 const SizedBox(height: 8),
-                Text(
+                LocalizedText(
                   _getStateDescription(effectiveStatus),
                   style: AppTypography.bodySm.copyWith(
                     color: AppColors.tertiary,
@@ -687,7 +688,7 @@ class _VendorDocumentsScreenState extends State<VendorDocumentsScreen> {
                 : null,
           ),
           alignment: Alignment.center,
-          child: Text(
+          child: LocalizedText(
             label,
             style: AppTypography.labelSm.copyWith(
               color: isActive ? AppColors.secondary : AppColors.tertiary,
