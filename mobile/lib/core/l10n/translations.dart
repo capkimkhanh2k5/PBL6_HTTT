@@ -3,18 +3,13 @@
 const englishTranslations = <String, String>{
   " / khách": " / guest",
   " / {0} khách": " / {0} guests",
-  " lúc 5:00 sáng tại Mỹ Khê (280.000đ/người) có huấn luyện viên kèm và chụp ảnh lưu niệm.":
-      " at 5:00 AM at Mỹ Khê (280,000 VND/person), with an instructor and souvenir photos.",
-  "\"Gợi ý hoạt động theo thời tiết\"":
-      "\"Suggest activities for the weather\"",
-  "\"Tìm trải nghiệm nhẹ nhàng cho hai người\"":
-      "\"Find a relaxing experience for two\"",
-  "\"Đi biển nửa ngày cùng nhóm bạn\"":
-      "\"A half-day beach trip with friends\"",
+  " lúc 5:00 sáng tại Mỹ Khê (280.000đ/người) có huấn luyện viên kèm và chụp ảnh lưu niệm.": " at 5:00 AM at Mỹ Khê (280,000 VND/person), with an instructor and souvenir photos.",
+  "\"Gợi ý hoạt động theo thời tiết\"": "\"Suggest activities for the weather\"",
+  "\"Tìm trải nghiệm nhẹ nhàng cho hai người\"": "\"Find a relaxing experience for two\"",
+  "\"Đi biển nửa ngày cùng nhóm bạn\"": "\"A half-day beach trip with friends\"",
   "#{0} • {1} khách • {2}": "#{0} • {1} guests • {2}",
   "({0} đánh giá)": "({0} reviews)",
-  "* Dữ liệu trải nghiệm biển Đà Nẵng đối chiếu theo thiết kế hệ thống":
-      "* Da Nang marine experience data based on the system design",
+  "* Dữ liệu trải nghiệm biển Đà Nẵng đối chiếu theo thiết kế hệ thống": "* Da Nang marine experience data based on the system design",
   "-{0} đ": "-{0} VND",
   "/ 20 khách": "/ 20 guests",
   "/ khách": "/ guest",
@@ -45,26 +40,20 @@ const englishTranslations = <String, String>{
   "4. Mật khẩu": "4. Password",
   "90% Đối tác • 10% Phí sàn": "90% Partner • 10% Platform fee",
   "98% Hài lòng": "98% satisfaction",
-  "Admin từ chối khiếu nại: Đối tác đã chờ 20 phút và gọi điện xác nhận nhưng khách không có mặt. Trường hợp khách tự ý trễ giờ không thuộc diện được bồi hoàn theo điều khoản dịch vụ.":
-      "Complaint rejected: The partner waited 20 minutes and called, but the guest did not arrive. Late arrivals are not eligible for compensation under the terms of service.",
-  "Admin đã kiểm tra phản ánh, nhà cung cấp thừa nhận sai sót do quá tải khách. Đã xử lý hoàn tiền 50% bồi thường cho khách hàng.":
-      "The administrator reviewed the report. The provider acknowledged overcrowding and a 50% refund was issued to the customer.",
+  "Admin từ chối khiếu nại: Đối tác đã chờ 20 phút và gọi điện xác nhận nhưng khách không có mặt. Trường hợp khách tự ý trễ giờ không thuộc diện được bồi hoàn theo điều khoản dịch vụ.": "Complaint rejected: The partner waited 20 minutes and called, but the guest did not arrive. Late arrivals are not eligible for compensation under the terms of service.",
+  "Admin đã kiểm tra phản ánh, nhà cung cấp thừa nhận sai sót do quá tải khách. Đã xử lý hoàn tiền 50% bồi thường cho khách hàng.": "The administrator reviewed the report. The provider acknowledged overcrowding and a 50% refund was issued to the customer.",
   "An toàn": "Safety",
   "An toàn & Chứng chỉ": "Safety & Certificates",
   "An toàn biển": "Marine safety",
   "An toàn bến bãi": "Site safety",
   "Ban Quản Trị DANASEA": "DANASEA Administration",
   "Ban quản lý vịnh: 1900-DANA-SEA": "Bay management: 1900-DANA-SEA",
-  "Ban quản trị DANASEA đã thẩm định dữ liệu thời tiết thực tế từ trạm khí tượng Sơn Trà. Hoàn tiền 100% cho khách theo diện bất khả kháng.":
-      "DANASEA verified weather data from the Sơn Trà station. A full refund was issued due to force majeure.",
+  "Ban quản trị DANASEA đã thẩm định dữ liệu thời tiết thực tế từ trạm khí tượng Sơn Trà. Hoàn tiền 100% cho khách theo diện bất khả kháng.": "DANASEA verified weather data from the Sơn Trà station. A full refund was issued due to force majeure.",
   "Bao gồm chữ hoa và chữ số": "Includes uppercase letters and numbers",
   "Bao gồm số (0-9)": "Includes numbers (0-9)",
-  "Biển Mỹ Khê & Bãi Bụt sáng êm, gió nhẹ 8km/h, sóng 0.4m trong lành.":
-      "Calm morning seas at Mỹ Khê & Bãi Bụt, light winds of 8 km/h and 0.4 m waves.",
-  "Biển Mỹ Khê sóng êm (0.4m) • Kênh phản hồi trực tiếp":
-      "Calm seas at Mỹ Khê (0.4 m) • Direct feedback",
-  "Biển Mỹ Khê sóng êm 0.4m, gió nhẹ 8 km/h, không mưa. Điều kiện lý tưởng cho các hoạt động thể thao mặt nước.":
-      "Mỹ Khê has calm 0.4 m waves, light winds of 8 km/h and no rain. Ideal conditions for water sports.",
+  "Biển Mỹ Khê & Bãi Bụt sáng êm, gió nhẹ 8km/h, sóng 0.4m trong lành.": "Calm morning seas at Mỹ Khê & Bãi Bụt, light winds of 8 km/h and 0.4 m waves.",
+  "Biển Mỹ Khê sóng êm (0.4m) • Kênh phản hồi trực tiếp": "Calm seas at Mỹ Khê (0.4 m) • Direct feedback",
+  "Biển Mỹ Khê sóng êm 0.4m, gió nhẹ 8 km/h, không mưa. Điều kiện lý tưởng cho các hoạt động thể thao mặt nước.": "Mỹ Khê has calm 0.4 m waves, light winds of 8 km/h and no rain. Ideal conditions for water sports.",
   "Biển Mỹ Khê • Hôm nay": "Mỹ Khê Beach • Today",
   "BÃI BIỂN MỸ KHÊ": "MỸ KHÊ BEACH",
   "Bán hàng & Khách hàng": "Sales & Customers",
@@ -74,13 +63,10 @@ const englishTranslations = <String, String>{
   "Bãi Rạng - Sơn Trà": "Bãi Rạng - Sơn Trà",
   "Bãi biển Mỹ Khê": "Mỹ Khê Beach",
   "Bãi biển Non Nước": "Non Nước Beach",
-  "Bãi biển Non Nước, Ngũ Hành Sơn, Đà Nẵng":
-      "Non Nước Beach, Ngũ Hành Sơn, Da Nang",
+  "Bãi biển Non Nước, Ngũ Hành Sơn, Đà Nẵng": "Non Nước Beach, Ngũ Hành Sơn, Da Nang",
   "Bãi tắm Non Nước, Đà Nẵng": "Non Nước Beach, Da Nang",
-  "Bên mình có trang bị sẵn túi chống nước cho mỗi khách rồi bạn nhé!":
-      "We provide a waterproof bag for every guest!",
-  "Bình minh, sóng êm và hoạt động chèo SUP ven bờ":
-      "Sunrise, calm waves and coastal paddleboarding",
+  "Bên mình có trang bị sẵn túi chống nước cho mỗi khách rồi bạn nhé!": "We provide a waterproof bag for every guest!",
+  "Bình minh, sóng êm và hoạt động chèo SUP ven bờ": "Sunrise, calm waves and coastal paddleboarding",
   "Bù trừ tách đơn": "Sub-order adjustment",
   "BƯỚC QUY TRÌNH (MÔ PHỎNG)": "PROCESS STEPS (SIMULATION)",
   "Bước 1/3": "Step 1/3",
@@ -89,10 +75,8 @@ const englishTranslations = <String, String>{
   "Bước {0} / 3: {1}": "Step {0} / 3: {1}",
   "Bước {0}/4": "Step {0}/4",
   "Bạn": "You",
-  "Bạn có chắc chắn muốn đăng xuất khỏi ứng dụng DANASEA Vendor?":
-      "Are you sure you want to sign out of DANASEA Vendor?",
-  "Bạn có chắc chắn muốn đăng xuất khỏi ứng dụng DANASEA trên thiết bị này?":
-      "Are you sure you want to sign out of DANASEA on this device?",
+  "Bạn có chắc chắn muốn đăng xuất khỏi ứng dụng DANASEA Vendor?": "Are you sure you want to sign out of DANASEA Vendor?",
+  "Bạn có chắc chắn muốn đăng xuất khỏi ứng dụng DANASEA trên thiết bị này?": "Are you sure you want to sign out of DANASEA on this device?",
   "Bạn thấy trải nghiệm biển thế nào?": "How was your marine experience?",
   "BẢO MẬT TÀI KHOẢN BẾN BÃI": "PARTNER ACCOUNT SECURITY",
   "Bản nháp": "Draft",
@@ -107,22 +91,16 @@ const englishTranslations = <String, String>{
   "Bật/tắt đèn flash": "Toggle flashlight",
   "BẮT BUỘC": "REQUIRED",
   "Bắt buộc": "Required",
-  "Bằng việc tiếp tục, bạn đồng ý với Điều khoản dịch vụ và Chính sách bảo mật của nền tảng DANASEA.":
-      "By continuing, you agree to DANASEA's Terms of Service and Privacy Policy.",
+  "Bằng việc tiếp tục, bạn đồng ý với Điều khoản dịch vụ và Chính sách bảo mật của nền tảng DANASEA.": "By continuing, you agree to DANASEA's Terms of Service and Privacy Policy.",
   "Bến bãi Danang Ocean Club": "Danang Ocean Club site",
-  "Bến bãi Danang Ocean Club - Bãi biển Mỹ Khê":
-      "Danang Ocean Club - Mỹ Khê Beach",
+  "Bến bãi Danang Ocean Club - Bãi biển Mỹ Khê": "Danang Ocean Club - Mỹ Khê Beach",
   "Bến bãi chính thức": "Official site",
-  "Bến bãi không có bảo vệ trông giữ xe và thiếu áo phao dự phòng cho trẻ em đi kèm như tư vấn ban đầu.":
-      "The site had no parking attendant or spare life jackets for children as originally promised.",
-  "Bến thuyền Sơn Trà, Bãi Trẹm, Thọ Quang, Đà Nẵng":
-      "Sơn Trà Marina, Bãi Trẹm, Thọ Quang, Da Nang",
+  "Bến bãi không có bảo vệ trông giữ xe và thiếu áo phao dự phòng cho trẻ em đi kèm như tư vấn ban đầu.": "The site had no parking attendant or spare life jackets for children as originally promised.",
+  "Bến thuyền Sơn Trà, Bãi Trẹm, Thọ Quang, Đà Nẵng": "Sơn Trà Marina, Bãi Trẹm, Thọ Quang, Da Nang",
   "Bị báo cáo ({0})": "Reported ({0})",
   "Bị từ chối": "Rejected",
-  "Bọn mình có 2 người, muốn đi trải nghiệm biển vào sáng sớm mai ở Mỹ Khê, ngân sách tầm 300k/người thì nên chọn gì bạn nhỉ?":
-      "There are two of us looking for an early morning experience at Mỹ Khê tomorrow, around 300,000 VND each. What would you recommend?",
-  "Bọn mình có 3 người, muốn trải nghiệm vào sáng sớm mai ở Mỹ Khê, ngân sách tầm 300k/người.":
-      "There are three of us looking for an early morning experience at Mỹ Khê tomorrow, around 300,000 VND each.",
+  "Bọn mình có 2 người, muốn đi trải nghiệm biển vào sáng sớm mai ở Mỹ Khê, ngân sách tầm 300k/người thì nên chọn gì bạn nhỉ?": "There are two of us looking for an early morning experience at Mỹ Khê tomorrow, around 300,000 VND each. What would you recommend?",
+  "Bọn mình có 3 người, muốn trải nghiệm vào sáng sớm mai ở Mỹ Khê, ngân sách tầm 300k/người.": "There are three of us looking for an early morning experience at Mỹ Khê tomorrow, around 300,000 VND each.",
   "Bồi thường khiếu nại": "Complaint compensation",
   "Bộ lọc trải nghiệm": "Experience filters",
   "CHƯA KÝ": "NOT SIGNED",
@@ -140,48 +118,35 @@ const englishTranslations = <String, String>{
   "Chi tiết đơn #{0}": "Order #{0} details",
   "Chi tiết đối soát & Nhận tiền": "Settlement & Payout details",
   "Chi tiết đối soát & Nhận tiền (Payout)": "Settlement & Payout details",
-  "Chia sẻ về chất lượng ván SUP, kính lặn, hướng dẫn viên đồng hành, độ trong của nước biển...":
-      "Tell us about the paddleboards, diving masks, guides, water clarity...",
+  "Chia sẻ về chất lượng ván SUP, kính lặn, hướng dẫn viên đồng hành, độ trong của nước biển...": "Tell us about the paddleboards, diving masks, guides, water clarity...",
   "Chiều cao sóng tối đa (m)": "Maximum wave height (m)",
   "Chu kỳ 16/10 - 31/10/2024": "Period: Oct 16 - Oct 31, 2024",
-  "Chuyến đi tuyệt vời, đón bình minh trên biển Mỹ Khê rất thơ mộng. Hướng dẫn viên chỉ dẫn nhiệt tình, chụp hình đẹp có tâm!":
-      "A wonderful trip with a beautiful sunrise at Mỹ Khê. The guide was enthusiastic and took great photos!",
+  "Chuyến đi tuyệt vời, đón bình minh trên biển Mỹ Khê rất thơ mộng. Hướng dẫn viên chỉ dẫn nhiệt tình, chụp hình đẹp có tâm!": "A wonderful trip with a beautiful sunrise at Mỹ Khê. The guide was enthusiastic and took great photos!",
   "Chuyển khoản VietQR (SePay)": "VietQR bank transfer (SePay)",
   "Chuẩn bị xuất bến": "Prepare for departure",
   "Chuẩn vị thế": "Get ready",
-  "Chào bạn An! Bạn có thể gửi xe tại bãi tắm số 2 đối diện khách sạn Mường Thanh nhé, có nhân viên trực 24/24.":
-      "Hi An! You can park at beach entrance 2, opposite Mường Thanh Hotel. Staff are available 24/7.",
-  "Chào bạn An! Danang Ocean Club đã nhận đơn #DNS-8924-1 của bạn. Bạn nhớ mang theo đồ bơi gọn nhẹ nhé!":
-      "Hi An! Danang Ocean Club has received your order #DNS-8924-1. Remember to bring swimwear!",
-  "Chào bạn An, sáng mai đội ngũ sẵn sàng đón bạn lúc 04:50 tại điểm tập kết Mỹ Khê nhé!":
-      "Hi An, our team will welcome you at the Mỹ Khê meeting point at 04:50 tomorrow!",
-  "Chào bạn! Gợi ý hoàn hảo nhất là buổi ":
-      "Hi! The perfect choice is a session of ",
-  "Chào bạn! Tôi là Trợ lý AI DANASEA. Hôm nay biển Đà Nẵng rất đẹp với sóng êm 0.4m tại Mỹ Khê và nước trong tại Sơn Trà. Bạn muốn khám phá trải nghiệm nào?":
-      "Hi! I'm the DANASEA AI Assistant. Da Nang's sea looks great today, with calm 0.4 m waves at Mỹ Khê and clear water at Sơn Trà. What would you like to try?",
+  "Chào bạn An! Bạn có thể gửi xe tại bãi tắm số 2 đối diện khách sạn Mường Thanh nhé, có nhân viên trực 24/24.": "Hi An! You can park at beach entrance 2, opposite Mường Thanh Hotel. Staff are available 24/7.",
+  "Chào bạn An! Danang Ocean Club đã nhận đơn #DNS-8924-1 của bạn. Bạn nhớ mang theo đồ bơi gọn nhẹ nhé!": "Hi An! Danang Ocean Club has received your order #DNS-8924-1. Remember to bring swimwear!",
+  "Chào bạn An, sáng mai đội ngũ sẵn sàng đón bạn lúc 04:50 tại điểm tập kết Mỹ Khê nhé!": "Hi An, our team will welcome you at the Mỹ Khê meeting point at 04:50 tomorrow!",
+  "Chào bạn! Gợi ý hoàn hảo nhất là buổi ": "Hi! The perfect choice is a session of ",
+  "Chào bạn! Tôi là Trợ lý AI DANASEA. Hôm nay biển Đà Nẵng rất đẹp với sóng êm 0.4m tại Mỹ Khê và nước trong tại Sơn Trà. Bạn muốn khám phá trải nghiệm nào?": "Hi! I'm the DANASEA AI Assistant. Da Nang's sea looks great today, with calm 0.4 m waves at Mỹ Khê and clear water at Sơn Trà. What would you like to try?",
   "Chào mừng trở lại!": "Welcome back!",
-  "Chào shop, sáng mai 5:00 tập trung đúng cổng 2 bãi Mỹ Khê phải không?":
-      "Hi, are we meeting at Mỹ Khê entrance 2 at 5:00 tomorrow morning?",
-  "Chào shop, sáng mai 5h nhóm mình có mặt thì gửi xe ở bãi nào gần nhất vậy ạ?":
-      "Hi, our group arrives at 5:00 tomorrow. Where is the nearest parking area?",
+  "Chào shop, sáng mai 5:00 tập trung đúng cổng 2 bãi Mỹ Khê phải không?": "Hi, are we meeting at Mỹ Khê entrance 2 at 5:00 tomorrow morning?",
+  "Chào shop, sáng mai 5h nhóm mình có mặt thì gửi xe ở bãi nào gần nhất vậy ạ?": "Hi, our group arrives at 5:00 tomorrow. Where is the nearest parking area?",
   "Chèo SUP": "Paddleboarding",
   "Chèo SUP Mỹ Khê": "Mỹ Khê paddleboarding",
   "Chèo SUP ngắm bình minh Mỹ Khê": "Mỹ Khê sunrise paddleboarding",
-  "Chèo SUP ngắm bình minh biển Mỹ Khê":
-      "Sunrise paddleboarding at Mỹ Khê Beach",
+  "Chèo SUP ngắm bình minh biển Mỹ Khê": "Sunrise paddleboarding at Mỹ Khê Beach",
   "Chèo SUP đón bình minh": "Sunrise paddleboarding",
   "Chèo SUP đón bình minh Mỹ Khê": "Mỹ Khê sunrise paddleboarding",
   "Chèo kayak": "Kayaking",
   "Chèo kayak cùng nhóm bạn": "Kayaking with friends",
-  "Chính sách hoàn hủy và giải quyết khiếu nại áp dụng theo quy chế bảo vệ khách hàng DANASEA. Đối tác phối hợp xử lý theo chuẩn dịch vụ bờ biển.":
-      "Cancellations, refunds and complaints follow DANASEA's customer protection policy. Partners cooperate under the coastal service standards.",
+  "Chính sách hoàn hủy và giải quyết khiếu nại áp dụng theo quy chế bảo vệ khách hàng DANASEA. Đối tác phối hợp xử lý theo chuẩn dịch vụ bờ biển.": "Cancellations, refunds and complaints follow DANASEA's customer protection policy. Partners cooperate under the coastal service standards.",
   "Chính sách thanh toán DANASEA": "DANASEA payment policy",
   "Chính sách đặt/hủy": "Booking / cancellation policy",
-  "Chúng tôi đã gửi đường dẫn đặt lại mật khẩu an toàn đến hộp thư quản lý:":
-      "We sent a secure password reset link to your management email:",
+  "Chúng tôi đã gửi đường dẫn đặt lại mật khẩu an toàn đến hộp thư quản lý:": "We sent a secure password reset link to your management email:",
   "Chưa check-in": "Not checked in",
-  "Chưa có chứng chỉ an toàn riêng cho dịch vụ này":
-      "No safety certificate for this service yet",
+  "Chưa có chứng chỉ an toàn riêng cho dịch vụ này": "No safety certificate for this service yet",
   "Chưa có hình ảnh nào": "No images yet",
   "Chưa có khung giờ nào cho ngày này": "No time slots for this date",
   "Chưa có trải nghiệm yêu thích": "No favorite experiences yet",
@@ -192,29 +157,22 @@ const englishTranslations = <String, String>{
   "Chưa trả lời": "Not replied",
   "Chưa đọc": "Unread",
   "Chưa đọc (1)": "Unread (1)",
-  "Chạm sóng biển,\nmở chuyến đi riêng.":
-      "Feel the waves,\nmake the journey yours.",
-  "Chạm sóng biển, mở chuyến đi riêng":
-      "Feel the waves, make the journey yours",
-  "Chất lượng dịch vụ không đúng mô tả":
-      "Service does not match the description",
+  "Chạm sóng biển,\nmở chuyến đi riêng.": "Feel the waves,\nmake the journey yours.",
+  "Chạm sóng biển, mở chuyến đi riêng": "Feel the waves, make the journey yours",
+  "Chất lượng dịch vụ không đúng mô tả": "Service does not match the description",
   "Chất lượng không đúng cam kết": "Quality did not meet expectations",
   "Chặn nhận thêm (BLOCKED)": "Block new bookings (BLOCKED)",
   "Chặn nhận thêm khách (BLOCKED)": "Block additional guests (BLOCKED)",
-  "Chỉ với 3 bước chạm cho chuyến phiêu lưu hoàn hảo":
-      "Your perfect adventure in just 3 steps",
-  "Chỉ đơn đã xác nhận mới có thể check-in.":
-      "Only confirmed orders can be checked in.",
-  "Chỉ đơn đã xác nhận mới có thể hoàn tất.":
-      "Only confirmed orders can be completed.",
+  "Chỉ với 3 bước chạm cho chuyến phiêu lưu hoàn hảo": "Your perfect adventure in just 3 steps",
+  "Chỉ đơn đã xác nhận mới có thể check-in.": "Only confirmed orders can be checked in.",
+  "Chỉ đơn đã xác nhận mới có thể hoàn tất.": "Only confirmed orders can be completed.",
   "Chỉ đọc": "Read only",
   "Chỉnh sửa hồ sơ": "Edit profile",
   "Chỉnh sửa mã {0}": "Edit code {0}",
   "Chỉnh sửa phản hồi của bạn:": "Edit your reply:",
   "Chọn lịch & số người": "Choose date & guests",
   "Chọn lịch & đặt": "Choose date & book",
-  "Chọn số lượng người tham gia, áp dụng ưu đãi và thanh toán trực tuyến bảo mật đa kênh tiện lợi.":
-      "Choose the number of guests, apply a promotion and pay securely online with your preferred method.",
+  "Chọn số lượng người tham gia, áp dụng ưu đãi và thanh toán trực tuyến bảo mật đa kênh tiện lợi.": "Choose the number of guests, apply a promotion and pay securely online with your preferred method.",
   "Chọn trải nghiệm & giờ": "Choose experience & time",
   "Chỗ được khóa tạm thời trên hệ thống": "Your places are temporarily held",
   "Chờ duyệt": "Pending approval",
@@ -226,32 +184,24 @@ const englishTranslations = <String, String>{
   "Chờ đối soát": "Awaiting settlement",
   "Chờ đối soát ({0})": "Awaiting settlement ({0})",
   "Chờ đối tác duyệt": "Awaiting partner approval",
-  "Chụp ảnh chất lượng cao bắt trọn khoảnh khắc bình minh.":
-      "High-quality photography capturing every sunrise moment.",
-  "Chứa ít nhất một ký tự đặc biệt (!@#\$)":
-      "Contains at least one special character (!@#\$)",
+  "Chụp ảnh chất lượng cao bắt trọn khoảnh khắc bình minh.": "High-quality photography capturing every sunrise moment.",
+  "Chứa ít nhất một ký tự đặc biệt (!@#\$)": "Contains at least one special character (!@#\$)",
   "Chứng chỉ Cứu hộ đường nước cấp mới": "New water rescue certificate",
   "Chứng chỉ an toàn dịch vụ": "Service safety certificate",
   "Chứng nhận an toàn biển": "Marine safety certificate",
   "Chứng nhận an toàn biển & Cứu hộ": "Marine Safety & Rescue Certificate",
-  "Chứng nhận an toàn biển & Cứu hộ cơ sở":
-      "Site Marine Safety & Rescue Certificate",
-  "Chứng nhận an toàn thể thao biển và năng lực cứu hộ cứu nạn cấp bởi Ban quản lý bán đảo Sơn Trà và các bãi biển du lịch Đà Nẵng.":
-      "Marine sports safety and rescue certification issued by the Sơn Trà Peninsula and Da Nang Tourism Beaches Management Board.",
+  "Chứng nhận an toàn biển & Cứu hộ cơ sở": "Site Marine Safety & Rescue Certificate",
+  "Chứng nhận an toàn thể thao biển và năng lực cứu hộ cứu nạn cấp bởi Ban quản lý bán đảo Sơn Trà và các bãi biển du lịch Đà Nẵng.": "Marine sports safety and rescue certification issued by the Sơn Trà Peninsula and Da Nang Tourism Beaches Management Board.",
   "Chữ hoa & thường": "Uppercase & lowercase letters",
   "CÀI ĐẶT & BẢO MẬT": "SETTINGS & SECURITY",
   "CÀI ĐẶT AN NINH": "SECURITY SETTINGS",
   "CÒN CHỖ": "AVAILABLE",
   "Cài đặt hệ thống": "System settings",
   "Cài đặt thông báo ứng dụng": "App notification settings",
-  "Các chứng chỉ an toàn, phao cứu sinh và sơ cấp cứu gắn riêng cho dịch vụ này.":
-      "Safety, lifesaving and first aid certificates for this service.",
-  "Các đơn đã hoàn thành thực tế được chốt đối soát":
-      "Completed orders finalized for settlement",
-  "Các đơn đặt chỗ trải nghiệm biển của bạn sẽ được hiển thị và cập nhật theo trạng thái tại đây.":
-      "Your marine experience bookings and their latest status will appear here.",
-  "Câu lạc bộ thể thao biển chuyên nghiệp tại bờ biển Mỹ Khê và Bán đảo Sơn Trà. Chuyên cung cấp dịch vụ chèo SUP, lướt sóng, lặn ngắm san hô với đội ngũ cứu hộ và HLV chứng chỉ quốc tế.":
-      "A professional water sports club at Mỹ Khê Beach and Sơn Trà Peninsula. Paddleboarding, surfing and snorkeling with internationally certified lifeguards and instructors.",
+  "Các chứng chỉ an toàn, phao cứu sinh và sơ cấp cứu gắn riêng cho dịch vụ này.": "Safety, lifesaving and first aid certificates for this service.",
+  "Các đơn đã hoàn thành thực tế được chốt đối soát": "Completed orders finalized for settlement",
+  "Các đơn đặt chỗ trải nghiệm biển của bạn sẽ được hiển thị và cập nhật theo trạng thái tại đây.": "Your marine experience bookings and their latest status will appear here.",
+  "Câu lạc bộ thể thao biển chuyên nghiệp tại bờ biển Mỹ Khê và Bán đảo Sơn Trà. Chuyên cung cấp dịch vụ chèo SUP, lướt sóng, lặn ngắm san hô với đội ngũ cứu hộ và HLV chứng chỉ quốc tế.": "A professional water sports club at Mỹ Khê Beach and Sơn Trà Peninsula. Paddleboarding, surfing and snorkeling with internationally certified lifeguards and instructors.",
   "Còn {0} chỗ": "{0} places left",
   "Có sẵn túi chống nước": "Waterproof bags provided",
   "Có thể gửi lại liên kết": "You can resend the link",
@@ -259,21 +209,16 @@ const englishTranslations = <String, String>{
   "Công suất": "Capacity",
   "Cơ chế trọng tài độc lập DANASEA": "DANASEA independent arbitration",
   "Cảm nhận thực tế của bạn": "Your experience",
-  "Cảm ơn bạn Đức đã đồng hành cùng Danang Ocean Club! Chúc bạn luôn có những chuyến du lịch biển tuyệt vời!":
-      "Thank you, Đức, for joining Danang Ocean Club! Wishing you more wonderful seaside adventures!",
-  "Cảm ơn bạn đã gửi đánh giá trải nghiệm biển!":
-      "Thank you for reviewing your marine experience!",
-  "Cảm ơn khách hàng và giải đáp thắc mắc nếu có...":
-      "Thank the customer and answer any questions...",
+  "Cảm ơn bạn Đức đã đồng hành cùng Danang Ocean Club! Chúc bạn luôn có những chuyến du lịch biển tuyệt vời!": "Thank you, Đức, for joining Danang Ocean Club! Wishing you more wonderful seaside adventures!",
+  "Cảm ơn bạn đã gửi đánh giá trải nghiệm biển!": "Thank you for reviewing your marine experience!",
+  "Cảm ơn khách hàng và giải đáp thắc mắc nếu có...": "Thank the customer and answer any questions...",
   "Cảng vụ": "Port authority",
   "Cảnh báo slot thay đổi thời tiết": "Weather change alert for time slot",
   "Cảnh báo thời tiết biển Mỹ Khê": "Mỹ Khê marine weather alert",
   "Cấu hình": "Configuration",
   "Cấu hình khung giờ": "Time slot settings",
-  "Cấu hình tài khoản nhận đối soát doanh thu":
-      "Set up your revenue settlement account",
-  "Cần hỗ trợ tại bãi biển? Gọi hotline điều phối Danang Ocean: 1900 6868":
-      "Need help at the beach? Call Danang Ocean coordination: 1900 6868",
+  "Cấu hình tài khoản nhận đối soát doanh thu": "Set up your revenue settlement account",
+  "Cần hỗ trợ tại bãi biển? Gọi hotline điều phối Danang Ocean: 1900 6868": "Need help at the beach? Call Danang Ocean coordination: 1900 6868",
   "Cần hỗ trợ từ ban quản lý vịnh": "Bay management support needed",
   "Cần xử lý": "Action needed",
   "Cập nhật": "Update",
@@ -284,23 +229,17 @@ const englishTranslations = <String, String>{
   "Cập nhật mật khẩu": "Update password",
   "Cập nhật mật khẩu bảo mật tài khoản": "Update your account password",
   "Cập nhật sóng biển sáng nay": "This morning's wave update",
-  "Cập nhật thông tin hồ sơ và tài khoản thành công!":
-      "Profile and account updated successfully!",
-  "Cập nhật vé QR, trạm sóng và hoàn tiền":
-      "QR ticket, wave monitoring and refund updates",
-  "Cập nhật: 06:00 • Sóng 0.4m • Gió 8 km/h • Mưa 0mm":
-      "Updated: 06:00 • Waves 0.4 m • Wind 8 km/h • Rain 0 mm",
+  "Cập nhật thông tin hồ sơ và tài khoản thành công!": "Profile and account updated successfully!",
+  "Cập nhật vé QR, trạm sóng và hoàn tiền": "QR ticket, wave monitoring and refund updates",
+  "Cập nhật: 06:00 • Sóng 0.4m • Gió 8 km/h • Mưa 0mm": "Updated: 06:00 • Waves 0.4 m • Wind 8 km/h • Rain 0 mm",
   "Cố định (VNĐ)": "Fixed amount (VND)",
   "CỔNG KẾT NỐI DỊCH VỤ BIỂN": "MARINE SERVICES PORTAL",
   "Cổng thanh toán:": "Payment gateway:",
   "Cổng đối tác": "Partner portal",
   "DOANH THU TẠM TÍNH HÔM NAY": "TODAY'S ESTIMATED REVENUE",
-  "Danang Ocean Club cam kết minh bạch pháp lý và an toàn chuẩn mực theo quy chuẩn kiểm duyệt dịch vụ thể thao biển DANASEA.":
-      "Danang Ocean Club commits to legal transparency and safety under DANASEA's marine sports service standards.",
-  "Danang Ocean Club cảm ơn bạn An rất nhiều! Hẹn gặp lại bạn trong những chuyến lướt sóng tiếp theo!":
-      "Thank you so much, An! Danang Ocean Club looks forward to your next surfing trip!",
-  "Danang Ocean Club ghi nhận đóng góp quý giá từ bạn My. Cơ sở đã bổ sung 2 nhân sự điều phối bãi cát để phục vụ tốt hơn.":
-      "Danang Ocean Club appreciates your feedback, My. We have added two beach coordinators to improve our service.",
+  "Danang Ocean Club cam kết minh bạch pháp lý và an toàn chuẩn mực theo quy chuẩn kiểm duyệt dịch vụ thể thao biển DANASEA.": "Danang Ocean Club commits to legal transparency and safety under DANASEA's marine sports service standards.",
+  "Danang Ocean Club cảm ơn bạn An rất nhiều! Hẹn gặp lại bạn trong những chuyến lướt sóng tiếp theo!": "Thank you so much, An! Danang Ocean Club looks forward to your next surfing trip!",
+  "Danang Ocean Club ghi nhận đóng góp quý giá từ bạn My. Cơ sở đã bổ sung 2 nhân sự điều phối bãi cát để phục vụ tốt hơn.": "Danang Ocean Club appreciates your feedback, My. We have added two beach coordinators to improve our service.",
   "Danh mục trải nghiệm": "Experience categories",
   "Danh sách": "List",
   "Danh sách ({0})": "List ({0})",
@@ -312,40 +251,29 @@ const englishTranslations = <String, String>{
   "Dưới 1 triệu": "Under 1 million VND",
   "Dưới 300k": "Under 300,000 VND",
   "Dưới 500k": "Under 500,000 VND",
-  "Dạ có tủ gửi đồ an toàn tại quầy luôn bạn nhé.":
-      "Yes, secure lockers are available at the counter.",
-  "Dạ shop ơi mình đã đặt vé tour SUP bình minh sáng mai rồi nhé.":
-      "Hi, I've booked tomorrow morning's sunrise paddleboarding tour.",
+  "Dạ có tủ gửi đồ an toàn tại quầy luôn bạn nhé.": "Yes, secure lockers are available at the counter.",
+  "Dạ shop ơi mình đã đặt vé tour SUP bình minh sáng mai rồi nhé.": "Hi, I've booked tomorrow morning's sunrise paddleboarding tour.",
   "DỊCH VỤ ÁP DỤNG": "APPLICABLE SERVICES",
   "DỊCH VỤ ĐANG CHỌN": "SELECTED SERVICE",
   "Dịch vụ": "Services",
   "Dịch vụ chèo SUP Mỹ Khê": "Mỹ Khê paddleboarding service",
   "Dịch vụ con yêu cầu hủy": "Sub-order to cancel",
   "Dịch vụ không tồn tại.": "Service not found.",
-  "Dịch vụ phụ thuộc điều kiện thời tiết biển":
-      "Service depends on marine weather conditions",
-  "Dịch vụ sau khi gửi sẽ được Ban kiểm duyệt DANASEA xem xét hồ sơ theo quy định trước khi mở bán chính thức.":
-      "After submission, DANASEA will review your service documents before it can be offered for sale.",
+  "Dịch vụ phụ thuộc điều kiện thời tiết biển": "Service depends on marine weather conditions",
+  "Dịch vụ sau khi gửi sẽ được Ban kiểm duyệt DANASEA xem xét hồ sơ theo quy định trước khi mở bán chính thức.": "After submission, DANASEA will review your service documents before it can be offered for sale.",
   "Dịch vụ đã hoàn tất trước đó.": "This service has already been completed.",
-  "Dữ liệu chỉ đọc từ hệ thống đơn đặt của khách. Đối tác không thể giảm sức chứa dưới tổng số khách đã đặt & tạm giữ.":
-      "Read-only booking data. Capacity cannot be reduced below the total number of booked and temporarily held places.",
-  "Dữ liệu gió được cập nhật từ nguồn thời tiết cảng vụ. Theo dõi kết quả đánh giá an toàn trước giờ cung cấp dịch vụ.":
-      "Wind data is updated from port authority weather sources. Check the safety assessment before providing the service.",
+  "Dữ liệu chỉ đọc từ hệ thống đơn đặt của khách. Đối tác không thể giảm sức chứa dưới tổng số khách đã đặt & tạm giữ.": "Read-only booking data. Capacity cannot be reduced below the total number of booked and temporarily held places.",
+  "Dữ liệu gió được cập nhật từ nguồn thời tiết cảng vụ. Theo dõi kết quả đánh giá an toàn trước giờ cung cấp dịch vụ.": "Wind data is updated from port authority weather sources. Check the safety assessment before providing the service.",
   "Dữ liệu gần nhất": "Latest data",
-  "Dữ liệu quan trắc thời tiết biển Đà Nẵng":
-      "Da Nang marine weather observations",
-  "Dựa trên thông số sóng biển hiện tại tại bán đảo Sơn Trà (sóng 0.4m, nước trong tầm nhìn 8m), đây là gợi ý tối ưu nhất cho bạn:":
-      "Based on current conditions at Sơn Trà Peninsula (0.4 m waves, 8 m underwater visibility), here is our best suggestion:",
+  "Dữ liệu quan trắc thời tiết biển Đà Nẵng": "Da Nang marine weather observations",
+  "Dựa trên thông số sóng biển hiện tại tại bán đảo Sơn Trà (sóng 0.4m, nước trong tầm nhìn 8m), đây là gợi ý tối ưu nhất cho bạn:": "Based on current conditions at Sơn Trà Peninsula (0.4 m waves, 8 m underwater visibility), here is our best suggestion:",
   "Email (Đã xác minh)": "Email (Verified)",
-  "Email bảo mật không thể thay đổi tại màn hình này để duy trì hợp đồng bến bãi.":
-      "This verified email cannot be changed here to preserve the site agreement.",
-  "Email bảo mật xác minh không thể sửa trực tiếp. Vui lòng liên hệ Hotline quản trị nếu cần đổi.":
-      "The verified email cannot be edited directly. Please contact the administration hotline to change it.",
+  "Email bảo mật không thể thay đổi tại màn hình này để duy trì hợp đồng bến bãi.": "This verified email cannot be changed here to preserve the site agreement.",
+  "Email bảo mật xác minh không thể sửa trực tiếp. Vui lòng liên hệ Hotline quản trị nếu cần đổi.": "The verified email cannot be edited directly. Please contact the administration hotline to change it.",
   "Email doanh nghiệp / Hộ kinh doanh": "Business email",
   "Email không hợp lệ.": "Invalid email.",
   "Email không đúng định dạng.": "Invalid email format.",
-  "Email phải trùng khớp với hồ sơ đăng ký kinh doanh.":
-      "The email must match your business registration.",
+  "Email phải trùng khớp với hồ sơ đăng ký kinh doanh.": "The email must match your business registration.",
   "Email quản trị đối tác": "Partner administrator email",
   "Email tài khoản đối tác": "Partner account email",
   "Email đã xác minh": "Verified email",
@@ -355,17 +283,14 @@ const englishTranslations = <String, String>{
   "Ghi nhớ đăng nhập": "Remember me",
   "Gia nhập Mạng lưới Đối tác": "Join the Partner Network",
   "Gia nhập: 15/03/2023": "Joined: Mar 15, 2023",
-  "Giao dịch bị gián đoạn, vui lòng kiểm tra lại phương thức thanh toán.":
-      "The transaction was interrupted. Please check your payment method.",
+  "Giao dịch bị gián đoạn, vui lòng kiểm tra lại phương thức thanh toán.": "The transaction was interrupted. Please check your payment method.",
   "Giá <= {0}": "Price <= {0}",
   "Giá niêm yết": "Listed price",
   "Giá trọn gói": "Package price",
-  "Giá trọn gói đã bao gồm thiết bị chèo, áo phao và hướng dẫn viên.":
-      "The package includes paddling equipment, life jackets and a guide.",
+  "Giá trọn gói đã bao gồm thiết bị chèo, áo phao và hướng dẫn viên.": "The package includes paddling equipment, life jackets and a guide.",
   "Giá ưu đãi": "Special price",
   "Giám sát an toàn theo slot": "Safety monitoring by time slot",
-  "Gió 12 km/h • Sóng 0.4m • Nước 26°C":
-      "Wind 12 km/h • Waves 0.4 m • Water 26°C",
+  "Gió 12 km/h • Sóng 0.4m • Nước 26°C": "Wind 12 km/h • Waves 0.4 m • Water 26°C",
   "Gió cấp 2": "Force 2 wind",
   "Gió giật cục bộ": "Localized gusts",
   "Gió nhẹ": "Light wind",
@@ -386,16 +311,13 @@ const englishTranslations = <String, String>{
   "Giờ bắt đầu": "Start time",
   "Giờ kết thúc": "End time",
   "Giữ chỗ tạm": "Temporary hold",
-  "Gói tour cam kết bao gồm chân vịt và kính lặn chống mờ chuyên dụng nhưng tại bến nhân viên thông báo hết chân vịt.":
-      "The tour promised fins and anti-fog diving masks, but staff said no fins were available at the site.",
+  "Gói tour cam kết bao gồm chân vịt và kính lặn chống mờ chuyên dụng nhưng tại bến nhân viên thông báo hết chân vịt.": "The tour promised fins and anti-fog diving masks, but staff said no fins were available at the site.",
   "Gói trải nghiệm": "Experience package",
   "Gần đây bạn xem": "Recently viewed",
   "Gọi HDV phụ trách bến": "Call the site guide",
   "Gọi hotline đối tác: 0905 888 999": "Call partner hotline: 0905 888 999",
-  "Gợi ý hoạt động cá nhân hoá theo ngân sách, khung giờ và sở thích nhóm bạn chỉ trong vài giây.":
-      "Personalized activity suggestions for your budget, schedule and group interests in seconds.",
-  "Gợi ý lịch trình biển 1 ngày ở Đà Nẵng":
-      "Suggest a one-day seaside itinerary in Da Nang",
+  "Gợi ý hoạt động cá nhân hoá theo ngân sách, khung giờ và sở thích nhóm bạn chỉ trong vài giây.": "Personalized activity suggestions for your budget, schedule and group interests in seconds.",
+  "Gợi ý lịch trình biển 1 ngày ở Đà Nẵng": "Suggest a one-day seaside itinerary in Da Nang",
   "Gợi ý lịch trình cho tôi": "Suggest an itinerary",
   "Gợi ý nhanh cho bạn:": "Quick suggestions for you:",
   "Gửi giải trình": "Submit explanation",
@@ -418,67 +340,51 @@ const englishTranslations = <String, String>{
   "Hoàn thành chuyến đi • #{0}": "Trip completed • #{0}",
   "Hoàn thành một phần": "Partially completed",
   "Hoàn tiền": "Refund",
-  "Hoàn trả minh bạch kết nối trực tiếp cổng thanh toán gốc, theo đúng lịch đối soát của ngân hàng.":
-      "Transparent refunds directly to the original payment method, following the bank's settlement schedule.",
+  "Hoàn trả minh bạch kết nối trực tiếp cổng thanh toán gốc, theo đúng lịch đối soát của ngân hàng.": "Transparent refunds directly to the original payment method, following the bank's settlement schedule.",
   "Hoàn {0}%": "{0}% refund",
   "Huấn luyện viên kèm 1:5": "1 instructor per 5 guests",
-  "Hành trình cano cao tốc băng qua những con sóng xanh ngắt quanh vách đá kỳ vĩ Mũi Nghê - điểm đón bình minh đầu tiên của Đà Nẵng. Cảm giác phấn khích tột độ khi lướt qua bọt sóng trắng xóa cùng cảnh quan thiên nhiên hoang sơ ngoạn mục.":
-      "Ride a speedboat through blue waves around the spectacular cliffs of Mũi Nghê, Da Nang's first sunrise spot. Enjoy the thrill of white-water spray and breathtaking natural scenery.",
+  "Hành trình cano cao tốc băng qua những con sóng xanh ngắt quanh vách đá kỳ vĩ Mũi Nghê - điểm đón bình minh đầu tiên của Đà Nẵng. Cảm giác phấn khích tột độ khi lướt qua bọt sóng trắng xóa cùng cảnh quan thiên nhiên hoang sơ ngoạn mục.": "Ride a speedboat through blue waves around the spectacular cliffs of Mũi Nghê, Da Nang's first sunrise spot. Enjoy the thrill of white-water spray and breathtaking natural scenery.",
   "Hành trình trải nghiệm": "Experience itinerary",
-  "Hành trình xuất phát từ bãi cát Mỹ Khê lúc bình minh 5:00 sáng. Huấn luyện viên chuyên nghiệp kèm cặp, cung cấp áo phao chất lượng cao, ván SUP composite và mái chèo chuẩn thi đấu.":
-      "Depart from Mỹ Khê Beach at 5:00 AM for sunrise. Professional instructors, quality life jackets, composite paddleboards and competition-standard paddles are provided.",
-  "Hành trình xuất phát từ bãi cát Mỹ Khê lúc bình minh 5:00 sáng. Huấn luyện viên chuyên nghiệp kèm cặp, cung cấp áo phao chất lượng cao, ván SUP composite và mái chèo chuẩn thi đấu. Bao gồm chụp ảnh máy cơ bắt trọn khoảnh khắc mặt trời nhô lên khỏi đường chân trời biển Đà Nẵng.":
-      "Depart from Mỹ Khê Beach at 5:00 AM for sunrise. Professional instructors, quality life jackets, composite paddleboards and competition-standard paddles are provided. Includes professional photography capturing sunrise over Da Nang's sea.",
-  "Hãy chọn các trải nghiệm biển yêu thích tại Đà Nẵng và thêm vào giỏ để chuẩn bị chuyến đi.":
-      "Choose your favorite marine experiences in Da Nang and add them to your cart.",
-  "Hãy thử thay đổi từ khóa hoặc xóa bớt tiêu chí lọc khu vực biển và mức giá.":
-      "Try another keyword or remove some location and price filters.",
+  "Hành trình xuất phát từ bãi cát Mỹ Khê lúc bình minh 5:00 sáng. Huấn luyện viên chuyên nghiệp kèm cặp, cung cấp áo phao chất lượng cao, ván SUP composite và mái chèo chuẩn thi đấu.": "Depart from Mỹ Khê Beach at 5:00 AM for sunrise. Professional instructors, quality life jackets, composite paddleboards and competition-standard paddles are provided.",
+  "Hành trình xuất phát từ bãi cát Mỹ Khê lúc bình minh 5:00 sáng. Huấn luyện viên chuyên nghiệp kèm cặp, cung cấp áo phao chất lượng cao, ván SUP composite và mái chèo chuẩn thi đấu. Bao gồm chụp ảnh máy cơ bắt trọn khoảnh khắc mặt trời nhô lên khỏi đường chân trời biển Đà Nẵng.": "Depart from Mỹ Khê Beach at 5:00 AM for sunrise. Professional instructors, quality life jackets, composite paddleboards and competition-standard paddles are provided. Includes professional photography capturing sunrise over Da Nang's sea.",
+  "Hãy chọn các trải nghiệm biển yêu thích tại Đà Nẵng và thêm vào giỏ để chuẩn bị chuyến đi.": "Choose your favorite marine experiences in Da Nang and add them to your cart.",
+  "Hãy thử thay đổi từ khóa hoặc xóa bớt tiêu chí lọc khu vực biển và mức giá.": "Try another keyword or remove some location and price filters.",
   "Hình thức giảm giá *": "Discount type *",
   "Hình ảnh chuyến đi (tùy chọn)": "Trip photos (optional)",
   "Hình ảnh dịch vụ": "Service images",
   "Hóa đơn & Thanh toán": "Invoices & Payments",
   "Hôm nay": "Today",
-  "Hướng camera về mã QR trên app khách hàng":
-      "Point the camera at the QR code in the customer's app",
+  "Hướng camera về mã QR trên app khách hàng": "Point the camera at the QR code in the customer's app",
   "Hướng dẫn kiểm tra": "Verification guide",
   "HẾT CHỖ": "FULL",
   "HỆ THỐNG CỨU HỘ & QUAN TRẮC": "RESCUE & MONITORING SYSTEM",
   "Hệ thống": "System",
   "Hệ thống bảo mật đối tác DANASEA": "DANASEA partner security system",
-  "Hệ thống chỉ giải mã và đối soát đơn hàng thuộc Danang Ocean Club. Khóa bảo mật được mã hóa đầu cuối, đảm bảo chống gian lận vé.":
-      "The system only verifies orders belonging to Danang Ocean Club. Security keys are encrypted end to end to prevent ticket fraud.",
+  "Hệ thống chỉ giải mã và đối soát đơn hàng thuộc Danang Ocean Club. Khóa bảo mật được mã hóa đầu cuối, đảm bảo chống gian lận vé.": "The system only verifies orders belonging to Danang Ocean Club. Security keys are encrypted end to end to prevent ticket fraud.",
   "Hệ thống trực tuyến": "System online",
-  "Hệ thống xác minh độc quyền dành cho các đơn vị lướt ván, chèo SUP và lặn biển tại bờ biển Đà Nẵng.":
-      "A dedicated verification system for surfing, paddleboarding and diving operators on Da Nang's coast.",
-  "Hệ thống đang chuyển 560.000đ về phương thức thanh toán ban đầu của đơn #DNS-8924-1.":
-      "The system is returning 560,000 VND to the original payment method for order #DNS-8924-1.",
+  "Hệ thống xác minh độc quyền dành cho các đơn vị lướt ván, chèo SUP và lặn biển tại bờ biển Đà Nẵng.": "A dedicated verification system for surfing, paddleboarding and diving operators on Da Nang's coast.",
+  "Hệ thống đang chuyển 560.000đ về phương thức thanh toán ban đầu của đơn #DNS-8924-1.": "The system is returning 560,000 VND to the original payment method for order #DNS-8924-1.",
   "Họ và tên": "Full name",
   "Họ và tên của bạn": "Your full name",
   "Họ và tên người đại diện": "Representative's full name",
   "Họ và tên người đại diện *": "Representative's full name *",
-  "Hỏi bất kỳ điều gì về du lịch biển Đà Nẵng...":
-      "Ask anything about seaside travel in Da Nang...",
+  "Hỏi bất kỳ điều gì về du lịch biển Đà Nẵng...": "Ask anything about seaside travel in Da Nang...",
   "HỒ SƠ XÁC THỰC PHÁP LÝ": "LEGAL VERIFICATION DOCUMENTS",
   "Hồ sơ & Ngân hàng": "Profile & Banking",
-  "Hồ sơ Vendor đã được duyệt. Mỗi dịch vụ vẫn cần được xét duyệt riêng trước khi mở bán chính thức.":
-      "The vendor profile is approved. Each service still requires individual approval before going on sale.",
+  "Hồ sơ Vendor đã được duyệt. Mỗi dịch vụ vẫn cần được xét duyệt riêng trước khi mở bán chính thức.": "The vendor profile is approved. Each service still requires individual approval before going on sale.",
   "Hồ sơ chi tiết": "Detailed profile",
   "Hồ sơ doanh nghiệp": "Business profile",
-  "Hồ sơ khiếu nại được gửi trực tiếp đến Bộ phận Quản trị & Đối soát DANASEA để xác minh độc lập với nhà cung cấp.":
-      "Your complaint is sent directly to DANASEA Administration & Settlement for verification independent of the provider.",
+  "Hồ sơ khiếu nại được gửi trực tiếp đến Bộ phận Quản trị & Đối soát DANASEA để xác minh độc lập với nhà cung cấp.": "Your complaint is sent directly to DANASEA Administration & Settlement for verification independent of the provider.",
   "Hồ sơ pháp nhân & chứng chỉ an toàn": "Legal profile & safety certificates",
   "Hồ sơ pháp nhân chính thức": "Official legal profile",
   "Hồ sơ đối soát đã cập nhật!": "Settlement information updated!",
-  "Hồ sơ đối tác cần được quản trị viên xét duyệt trước khi hoạt động.":
-      "Your partner profile must be reviewed by an administrator before activation.",
+  "Hồ sơ đối tác cần được quản trị viên xét duyệt trước khi hoạt động.": "Your partner profile must be reviewed by an administrator before activation.",
   "Hỗ trợ CSKH": "Customer support",
   "Hỗ trợ demo: Da Nang, VN": "Demo support: Da Nang, VN",
   "Hỗ trợ khách hàng": "Customer support",
-  "Hỗ trợ kỹ thuật chèo, cứu hộ và đồng hành suốt chuyến.":
-      "Paddling instruction, rescue support and guidance throughout the trip.",
+  "Hỗ trợ kỹ thuật chèo, cứu hộ và đồng hành suốt chuyến.": "Paddling instruction, rescue support and guidance throughout the trip.",
   "Hỗ trợ kỹ thuật: 1900-6886": "Technical support: 1900-6886",
-  "Hỗ trợ thẻ ATM nội địa, QR Pay, Visa/Mastercard":
-      "Supports domestic ATM cards, QR Pay, Visa/Mastercard",
+  "Hỗ trợ thẻ ATM nội địa, QR Pay, Visa/Mastercard": "Supports domestic ATM cards, QR Pay, Visa/Mastercard",
   "Hộp thư nhận quyết toán": "Settlement email",
   "HỢP LỆ CHECK-IN": "VALID FOR CHECK-IN",
   "Hợp lệ": "Valid",
@@ -497,10 +403,8 @@ const englishTranslations = <String, String>{
   "Khiếu nại dịch vụ liên quan": "Related service complaint",
   "Khiếu nại không tồn tại.": "Complaint not found.",
   "Khoản hoàn tiền dịch vụ": "Service refund",
-  "Khoản hoàn tiền được hệ thống DANASEA tự động hạch toán giảm trừ vào kỳ đối soát tương ứng. Đối tác không cần thao tác tài chính thủ công.":
-      "DANASEA automatically deducts the refund from the corresponding settlement period. No manual financial action is required from the partner.",
-  "Khoản hoàn tiền được xử lý theo quy định bảo vệ khách hàng do điều kiện thời tiết biển bất khả kháng (Đơn #{0}).":
-      "The refund follows customer protection rules for force majeure marine weather conditions (Order #{0}).",
+  "Khoản hoàn tiền được hệ thống DANASEA tự động hạch toán giảm trừ vào kỳ đối soát tương ứng. Đối tác không cần thao tác tài chính thủ công.": "DANASEA automatically deducts the refund from the corresponding settlement period. No manual financial action is required from the partner.",
+  "Khoản hoàn tiền được xử lý theo quy định bảo vệ khách hàng do điều kiện thời tiết biển bất khả kháng (Đơn #{0}).": "The refund follows customer protection rules for force majeure marine weather conditions (Order #{0}).",
   "Khu vực biển": "Coastal area",
   "Khu vực sôi động": "Popular area",
   "Khung giờ": "Time slots",
@@ -510,30 +414,21 @@ const englishTranslations = <String, String>{
   "Khung giờ hoạt động: 05:00 - 07:00": "Operating hours: 05:00 - 07:00",
   "Khung giờ không tồn tại.": "Time slot not found.",
   "Khung giờ liên quan: 15:30": "Related time slot: 15:30",
-  "Khuyến mãi trực tiếp từ đối tác DANASEA, chiết khấu trực tiếp vào gói chèo SUP, lặn biển và tour cano của bạn.":
-      "Direct promotions from DANASEA partners, applied to your paddleboarding, diving and speedboat packages.",
-  "Khuyến nghị an ninh trạm bến DANASEA":
-      "DANASEA site security recommendations",
+  "Khuyến mãi trực tiếp từ đối tác DANASEA, chiết khấu trực tiếp vào gói chèo SUP, lặn biển và tour cano của bạn.": "Direct promotions from DANASEA partners, applied to your paddleboarding, diving and speedboat packages.",
+  "Khuyến nghị an ninh trạm bến DANASEA": "DANASEA site security recommendations",
   "Khuyến nghị an toàn": "Safety recommendations",
   "Khá": "Good",
   "Khá mạnh": "Quite strong",
   "Khá ổn": "Quite good",
   "Khách biển": "Beach guests",
-  "Khách cam kết biết bơi cơ bản, luôn mặc áo phao tiêu chuẩn trong suốt hành trình chèo và tuân thủ tuyệt đối tín hiệu điều phối của huấn luyện viên Danang Ocean Club.":
-      "Guests confirm basic swimming ability, agree to wear a standard life jacket throughout the trip and follow all instructions from Danang Ocean Club instructors.",
-  "Khách cam kết biết bơi cơ bản, luôn mặc áo phao tiêu chuẩn trong suốt hành trình chèo và tuân thủ tuyệt đối tín hiệu điều phối của huấn luyện viên Danang Ocean Club. Mọi hành vi tự ý tách đoàn vượt quá 200m ra khỏi phao tiêu giới hạn sẽ tự chịu trách nhiệm về an toàn cá nhân.":
-      "Guests confirm basic swimming ability, agree to wear a standard life jacket throughout the trip and follow all instructions from Danang Ocean Club instructors. Anyone leaving the group more than 200 m beyond the marker buoys is responsible for their own safety.",
-  "Khách cam kết không có tiền sử bệnh tim mạch hoặc huyết áp nặng, tuân thủ bảng chỉ dẫn an toàn lặn biển.":
-      "Guests confirm no history of serious heart or blood pressure conditions and agree to follow diving safety instructions.",
-  "Khách cam kết tuân thủ quy định cứu hộ bãi biển.":
-      "Guests agree to follow beach rescue regulations.",
-  "Khách chủ động hủy theo quy định và điều kiện dịch vụ.":
-      "Customer cancellation under the service terms and conditions.",
+  "Khách cam kết biết bơi cơ bản, luôn mặc áo phao tiêu chuẩn trong suốt hành trình chèo và tuân thủ tuyệt đối tín hiệu điều phối của huấn luyện viên Danang Ocean Club.": "Guests confirm basic swimming ability, agree to wear a standard life jacket throughout the trip and follow all instructions from Danang Ocean Club instructors.",
+  "Khách cam kết biết bơi cơ bản, luôn mặc áo phao tiêu chuẩn trong suốt hành trình chèo và tuân thủ tuyệt đối tín hiệu điều phối của huấn luyện viên Danang Ocean Club. Mọi hành vi tự ý tách đoàn vượt quá 200m ra khỏi phao tiêu giới hạn sẽ tự chịu trách nhiệm về an toàn cá nhân.": "Guests confirm basic swimming ability, agree to wear a standard life jacket throughout the trip and follow all instructions from Danang Ocean Club instructors. Anyone leaving the group more than 200 m beyond the marker buoys is responsible for their own safety.",
+  "Khách cam kết không có tiền sử bệnh tim mạch hoặc huyết áp nặng, tuân thủ bảng chỉ dẫn an toàn lặn biển.": "Guests confirm no history of serious heart or blood pressure conditions and agree to follow diving safety instructions.",
+  "Khách cam kết tuân thủ quy định cứu hộ bãi biển.": "Guests agree to follow beach rescue regulations.",
+  "Khách chủ động hủy theo quy định và điều kiện dịch vụ.": "Customer cancellation under the service terms and conditions.",
   "Khách chủ động yêu cầu hủy": "Customer requested cancellation",
-  "Khách hàng Nguyễn Văn An đã hoàn tất thanh toán 2 suất chèo SUP lúc 05:00.":
-      "Nguyễn Văn An paid for 2 paddleboarding places at 05:00.",
-  "Khách hàng buộc phải ký điện tử trước giờ lên ván SUP":
-      "Customers must sign electronically before boarding the paddleboard",
+  "Khách hàng Nguyễn Văn An đã hoàn tất thanh toán 2 suất chèo SUP lúc 05:00.": "Nguyễn Văn An paid for 2 paddleboarding places at 05:00.",
+  "Khách hàng buộc phải ký điện tử trước giờ lên ván SUP": "Customers must sign electronically before boarding the paddleboard",
   "Khách hàng hủy vé": "Customer cancelled ticket",
   "Khách hàng khiếu nại": "Customer complaint",
   "Khách hàng: {0}": "Customer: {0}",
@@ -542,23 +437,18 @@ const englishTranslations = <String, String>{
   "Khách đã thanh toán": "Paid guests",
   "Khách đã đặt": "Booked guests",
   "Khách đã đặt: ": "Booked guests: ",
-  "Khách đến điểm tập kết muộn 40 phút so với giờ xuất bến, cano đã khởi hành trước.":
-      "The customer arrived 40 minutes after departure time. The speedboat had already left.",
+  "Khách đến điểm tập kết muộn 40 phút so với giờ xuất bến, cano đã khởi hành trước.": "The customer arrived 40 minutes after departure time. The speedboat had already left.",
   "Khám phá": "Explore",
   "Khám phá biển bằng cano": "Explore the sea by speedboat",
-  "Khám phá các hoạt động chèo SUP, lặn biển, cano tại Đà Nẵng và nhấn biểu tượng trái tim để lưu lại.":
-      "Explore paddleboarding, diving and speedboat activities in Da Nang. Tap the heart to save your favorites.",
-  "Khám phá hệ sinh thái rạn san hô tự nhiên tuyệt đẹp tại Bãi Bụt thuộc bán đảo Sơn Trà. Nước biển ngọc lam trong vắt với tầm nhìn đáy lên đến 8-10m. Khách được trang bị kính lặn, ống thở silicone cao cấp, chân vịt và hướng dẫn kỹ năng lặn ống thở căn bản cùng chuyên gia lặn biển.":
-      "Explore the beautiful natural coral reefs at Bãi Bụt on Sơn Trà Peninsula. Clear turquoise water offers 8-10 m visibility. Includes a mask, premium silicone snorkel, fins and basic snorkeling instruction from a diving expert.",
+  "Khám phá các hoạt động chèo SUP, lặn biển, cano tại Đà Nẵng và nhấn biểu tượng trái tim để lưu lại.": "Explore paddleboarding, diving and speedboat activities in Da Nang. Tap the heart to save your favorites.",
+  "Khám phá hệ sinh thái rạn san hô tự nhiên tuyệt đẹp tại Bãi Bụt thuộc bán đảo Sơn Trà. Nước biển ngọc lam trong vắt với tầm nhìn đáy lên đến 8-10m. Khách được trang bị kính lặn, ống thở silicone cao cấp, chân vịt và hướng dẫn kỹ năng lặn ống thở căn bản cùng chuyên gia lặn biển.": "Explore the beautiful natural coral reefs at Bãi Bụt on Sơn Trà Peninsula. Clear turquoise water offers 8-10 m visibility. Includes a mask, premium silicone snorkel, fins and basic snorkeling instruction from a diving expert.",
   "Khám phá ngay": "Explore now",
-  "Khám phá những trải nghiệm biển phù hợp với bạn. Chọn hoạt động, đặt lịch và sẵn sàng tận hưởng Đà Nẵng.":
-      "Find marine experiences that suit you. Choose an activity, book a time and get ready to enjoy Da Nang.",
+  "Khám phá những trải nghiệm biển phù hợp với bạn. Chọn hoạt động, đặt lịch và sẵn sàng tận hưởng Đà Nẵng.": "Find marine experiences that suit you. Choose an activity, book a time and get ready to enjoy Da Nang.",
   "Khám phá theo sở thích": "Explore by interest",
   "Khám phá trải nghiệm": "Explore experiences",
   "Khám phá trải nghiệm biển": "Explore marine experiences",
   "Khám phá trải nghiệm ngay": "Explore experiences now",
-  "Khóa học lướt sóng nhập môn dành cho người mới bắt đầu. Huấn luyện viên kèm 1:2 tại bãi sóng đẹp nhất Đà Nẵng.":
-      "An introductory surfing course for beginners. One instructor per two guests at Da Nang's best surfing beach.",
+  "Khóa học lướt sóng nhập môn dành cho người mới bắt đầu. Huấn luyện viên kèm 1:2 tại bãi sóng đẹp nhất Đà Nẵng.": "An introductory surfing course for beginners. One instructor per two guests at Da Nang's best surfing beach.",
   "Khóa học lướt ván vỡ lòng Non Nước": "Non Nước beginner surfing course",
   "Khôi phục mật khẩu": "Reset password",
   "Không còn hiệu lực": "No longer valid",
@@ -566,14 +456,12 @@ const englishTranslations = <String, String>{
   "Không có khiếu nại nào trong mục này.": "No complaints in this section.",
   "Không có thông báo nào": "No notifications",
   "Không có đánh giá nào trong bộ lọc này.": "No reviews match this filter.",
-  "Không gian thoáng đãng cho kayak và lướt sóng nhẹ":
-      "Open waters for kayaking and gentle surfing",
+  "Không gian thoáng đãng cho kayak và lướt sóng nhẹ": "Open waters for kayaking and gentle surfing",
   "Không mưa": "No rain",
   "Không thuộc đơn vị Danang Ocean Club": "Not a Danang Ocean Club order",
   "Không thể check-in lần thứ hai": "Cannot check in twice",
   "Không thể cập nhật mật khẩu": "Unable to update password",
-  "Không thể giảm sức chứa dưới tổng số khách đã đặt & tạm giữ ({0} khách)":
-      "Capacity cannot be lower than booked and temporarily held places ({0} guests)",
+  "Không thể giảm sức chứa dưới tổng số khách đã đặt & tạm giữ ({0} khách)": "Capacity cannot be lower than booked and temporarily held places ({0} guests)",
   "Không tìm thấy cuộc trò chuyện nào": "No conversations found",
   "Không tìm thấy dịch vụ nào": "No services found",
   "Không tìm thấy trải nghiệm phù hợp": "No matching experiences found",
@@ -592,24 +480,18 @@ const englishTranslations = <String, String>{
   "Kết quả đánh giá theo khung giờ": "Assessment by time slot",
   "KỲ ĐÃ QUYẾT TOÁN": "SETTLED PERIOD",
   "KỲ ĐỐI SOÁT #{0}": "SETTLEMENT PERIOD #{0}",
-  "Kỳ #SETTLE-202410-01 (5.040.000 đ) đã sẵn sàng. Đối tác có thể gửi yêu cầu nhận tiền.":
-      "Period #SETTLE-202410-01 (5,040,000 VND) is ready. You can request a payout.",
+  "Kỳ #SETTLE-202410-01 (5.040.000 đ) đã sẵn sàng. Đối tác có thể gửi yêu cầu nhận tiền.": "Period #SETTLE-202410-01 (5,040,000 VND) is ready. You can request a payout.",
   "Kỳ hạn Payout": "Payout period",
   "Kỳ đối soát sẵn sàng quyết toán": "Settlement ready for payout",
   "Liên kết đã hết hạn": "Link expired",
-  "Liên kết đã hết hạn hoặc không còn hiệu lực. Vui lòng yêu cầu liên kết mới để đảm bảo an toàn tài khoản đối tác.":
-      "This link has expired or is no longer valid. Request a new link to keep your partner account secure.",
-  "Liên kết đã được sử dụng một lần để đặt mật khẩu thành công.":
-      "This link has already been used to reset the password.",
-  "Liên kết đặt lại mật khẩu chỉ dùng cho tài khoản đã yêu cầu.":
-      "A password reset link can only be used for the account that requested it.",
+  "Liên kết đã hết hạn hoặc không còn hiệu lực. Vui lòng yêu cầu liên kết mới để đảm bảo an toàn tài khoản đối tác.": "This link has expired or is no longer valid. Request a new link to keep your partner account secure.",
+  "Liên kết đã được sử dụng một lần để đặt mật khẩu thành công.": "This link has already been used to reset the password.",
+  "Liên kết đặt lại mật khẩu chỉ dùng cho tài khoản đã yêu cầu.": "A password reset link can only be used for the account that requested it.",
   "Loại hoạt động": "Activity type",
-  "Loại: Chứng nhận tiêu chuẩn thể thao biển":
-      "Type: Marine sports standards certificate",
+  "Loại: Chứng nhận tiêu chuẩn thể thao biển": "Type: Marine sports standards certificate",
   "Loại: Giấy tờ pháp lý doanh nghiệp": "Type: Business legal document",
   "Làm mới": "Refresh",
-  "Làm quen với môn thể thao lướt sóng cùng huấn luyện viên có chứng chỉ quốc tế ISA. Học cách đọc sóng, bắt nhịp sóng, đứng trên ván lướt vững chãi và an toàn tại bờ biển Non Nước với bãi cát thoải và sóng đều.":
-      "Learn to surf with an ISA-certified instructor. Learn to read waves, catch them and stand safely on your board at Non Nước Beach, with its gently sloping sand and consistent waves.",
+  "Làm quen với môn thể thao lướt sóng cùng huấn luyện viên có chứng chỉ quốc tế ISA. Học cách đọc sóng, bắt nhịp sóng, đứng trên ván lướt vững chãi và an toàn tại bờ biển Non Nước với bãi cát thoải và sóng đều.": "Learn to surf with an ISA-certified instructor. Learn to read waves, catch them and stand safely on your board at Non Nước Beach, with its gently sloping sand and consistent waves.",
   "Lên lịch cùng AI": "Plan with AI",
   "Lý do hoàn tiền:": "Refund reason:",
   "Lý do hoàn:": "Refund reason:",
@@ -626,8 +508,7 @@ const englishTranslations = <String, String>{
   "Lướt ván biển Non Nước": "Non Nước surfing",
   "Lướt ván diều & Lướt sóng (Surfing)": "Kitesurfing & Surfing",
   "Lượng mưa": "Rainfall",
-  "Lượt đã dùng: {0} (Không được giảm số lượt tối đa dưới số này)":
-      "Used: {0} (Maximum uses cannot be set below this)",
+  "Lượt đã dùng: {0} (Không được giảm số lượt tối đa dưới số này)": "Used: {0} (Maximum uses cannot be set below this)",
   "Lượt đặt mới: #DNS-8924-1": "New booking: #DNS-8924-1",
   "Lần chuyển gần nhất: 16/10": "Last transfer: Oct 16",
   "Lặn biển": "Diving",
@@ -638,8 +519,7 @@ const englishTranslations = <String, String>{
   "Lặn ngắm san hô (Snorkeling & Diving)": "Snorkeling & Diving",
   "Lặn ngắm san hô Bán đảo Sơn Trà": "Sơn Trà Peninsula coral snorkeling",
   "Lặn ngắm san hô Bãi Bụt Sơn Trà": "Bãi Bụt, Sơn Trà coral snorkeling",
-  "Lặn ngắm san hô Sơn Trà hôm nay biển có trong không?":
-      "Is the water clear for snorkeling at Sơn Trà today?",
+  "Lặn ngắm san hô Sơn Trà hôm nay biển có trong không?": "Is the water clear for snorkeling at Sơn Trà today?",
   "Lặn san hô": "Coral snorkeling",
   "Lặp lại cho các ngày trong tuần (T2 - T6)": "Repeat on weekdays (Mon - Fri)",
   "Lịch chạy": "Schedule",
@@ -651,8 +531,7 @@ const englishTranslations = <String, String>{
   "Lỗi gửi yêu cầu: {0}": "Request error: {0}",
   "Lỗi tạo mã: {0}": "Code creation error: {0}",
   "Lỗi: {0}": "Error: {0}",
-  "Lựa chọn môn thể thao nước bạn yêu thích, xem tình trạng sóng biển và chọn khung giờ hoàng kim.":
-      "Choose your favorite water sport, check the waves and pick the perfect time.",
+  "Lựa chọn môn thể thao nước bạn yêu thích, xem tình trạng sóng biển và chọn khung giờ hoàng kim.": "Choose your favorite water sport, check the waves and pick the perfect time.",
   "Lựa chọn được yêu thích nhất trong tuần": "This week's favorites",
   "MOMO Ví điện tử": "MoMo e-wallet",
   "Minh chứng khách hàng gửi:": "Customer evidence:",
@@ -666,81 +545,62 @@ const englishTranslations = <String, String>{
   "Mã giảm giá (ví dụ DANASEA2024)": "Promo code (e.g. DANASEA2024)",
   "Mã giảm giá ({0}):": "Promo code ({0}):",
   "Mã giảm giá của đối tác": "Partner promo codes",
-  "Mã giảm giá không hợp lệ hoặc đã hết hạn.":
-      "This promo code is invalid or has expired.",
+  "Mã giảm giá không hợp lệ hoặc đã hết hạn.": "This promo code is invalid or has expired.",
   "Mã giảm giá không tồn tại.": "Promo code not found.",
   "Mã gốc: {0}": "Original code: {0}",
-  "Mã khuyến mãi (Viết liền, không dấu) *":
-      "Promo code (no spaces or accents) *",
+  "Mã khuyến mãi (Viết liền, không dấu) *": "Promo code (no spaces or accents) *",
   "Mã khuyến mãi Nhà cung cấp (VENDOR)": "Provider promo code (VENDOR)",
   "Mã không tồn tại.": "Code not found.",
   "Mã số thuế": "Tax ID",
   "Mã vé / Mã đơn": "Ticket / Order code",
-  "Mã vé không hợp lệ hoặc không thuộc nhà cung cấp này.":
-      "This ticket is invalid or does not belong to this provider.",
-  "Mã xác nhận bảo mật gồm 6 chữ số sẽ được gửi đến hộp thư email của bạn.":
-      "A 6-digit security verification code will be sent to your email.",
-  "Mã áp dụng tự động cho toàn bộ dịch vụ của Danang Ocean Club":
-      "Automatically applies to all Danang Ocean Club services",
+  "Mã vé không hợp lệ hoặc không thuộc nhà cung cấp này.": "This ticket is invalid or does not belong to this provider.",
+  "Mã xác nhận bảo mật gồm 6 chữ số sẽ được gửi đến hộp thư email của bạn.": "A 6-digit security verification code will be sent to your email.",
+  "Mã áp dụng tự động cho toàn bộ dịch vụ của Danang Ocean Club": "Automatically applies to all Danang Ocean Club services",
   "Mã đơn hàng:": "Order ID:",
-  "Mã đơn không tồn tại trong hệ thống của bạn hoặc thuộc về một đơn vị đối tác khác tại Đà Nẵng. Vui lòng hướng dẫn khách kiểm tra lại thông tin trên ứng dụng.":
-      "This order is not in your system or belongs to another partner in Da Nang. Ask the customer to check the details in their app.",
+  "Mã đơn không tồn tại trong hệ thống của bạn hoặc thuộc về một đơn vị đối tác khác tại Đà Nẵng. Vui lòng hướng dẫn khách kiểm tra lại thông tin trên ứng dụng.": "This order is not in your system or belongs to another partner in Da Nang. Ask the customer to check the details in their app.",
   "Mã đơn: #{0}": "Order: #{0}",
   "Mã: DOC-8842": "ID: DOC-8842",
   "Mã: {0}": "Code: {0}",
   "Mô phỏng": "Simulation",
   "Mô phỏng: Link hết hạn": "Simulate: Expired link",
   "Mô phỏng: Link hợp lệ": "Simulate: Valid link",
-  "Mô phỏng: Đã chọn ảnh chân dung mới.":
-      "Simulation: New profile photo selected.",
+  "Mô phỏng: Đã chọn ảnh chân dung mới.": "Simulation: New profile photo selected.",
   "Mô tả chi tiết": "Detailed description",
   "Mô tả chi tiết lịch trình": "Detailed itinerary",
   "Mô tả giới thiệu dịch vụ": "Service description",
-  "Mô tả hành trình bằng tiếng Việt...":
-      "Describe the itinerary in Vietnamese...",
+  "Mô tả hành trình bằng tiếng Việt...": "Describe the itinerary in Vietnamese...",
   "Mấy giờ có mặt là vừa?": "What time should we arrive?",
   "Mẫu lỗi": "Error example",
   "Mật khẩu": "Password",
   "Mật khẩu bảo mật": "Secure password",
   "Mật khẩu chưa khớp": "Passwords do not match",
-  "Mật khẩu cần tối thiểu 8 ký tự":
-      "Password must contain at least 8 characters",
+  "Mật khẩu cần tối thiểu 8 ký tự": "Password must contain at least 8 characters",
   "Mật khẩu hiện tại": "Current password",
-  "Mật khẩu hiện tại không chính xác hoặc xác nhận mật khẩu chưa trùng khớp. Vui lòng kiểm tra lại.":
-      "The current password is incorrect or the confirmation does not match. Please check again.",
+  "Mật khẩu hiện tại không chính xác hoặc xác nhận mật khẩu chưa trùng khớp. Vui lòng kiểm tra lại.": "The current password is incorrect or the confirmation does not match. Please check again.",
   "Mật khẩu mới": "New password",
-  "Mật khẩu mới phải có tối thiểu 8 ký tự.":
-      "The new password must contain at least 8 characters.",
-  "Mật khẩu mới đã được cập nhật an toàn!":
-      "Your new password has been saved securely!",
-  "Mật khẩu nên chứa ít nhất 8 ký tự, bao gồm chữ và số để đảm bảo an toàn.":
-      "Use at least 8 characters, including letters and numbers, for a secure password.",
-  "Mật khẩu phải từ 8 ký tự trở lên.":
-      "Password must contain at least 8 characters.",
+  "Mật khẩu mới phải có tối thiểu 8 ký tự.": "The new password must contain at least 8 characters.",
+  "Mật khẩu mới đã được cập nhật an toàn!": "Your new password has been saved securely!",
+  "Mật khẩu nên chứa ít nhất 8 ký tự, bao gồm chữ và số để đảm bảo an toàn.": "Use at least 8 characters, including letters and numbers, for a secure password.",
+  "Mật khẩu phải từ 8 ký tự trở lên.": "Password must contain at least 8 characters.",
   "Mật khẩu quản trị": "Administrator password",
   "Mật khẩu xác nhận chưa khớp.": "Password confirmation does not match.",
   "Mật khẩu xác nhận hoàn toàn khớp.": "Password confirmation matches.",
   "Mật khẩu xác nhận hoàn toàn trùng khớp": "Password confirmation matches",
   "Mật khẩu xác nhận không khớp": "Password confirmation does not match",
   "Mật khẩu xác nhận không khớp.": "Password confirmation does not match.",
-  "Mật khẩu xác nhận không trùng khớp hoặc chưa đạt chuẩn an toàn 8 ký tự.":
-      "Password confirmation does not match or the password is shorter than 8 characters.",
+  "Mật khẩu xác nhận không trùng khớp hoặc chưa đạt chuẩn an toàn 8 ký tự.": "Password confirmation does not match or the password is shorter than 8 characters.",
   "Mặt nước phẳng": "Flat water",
-  "Mặt nước êm ái, hướng gió thuận lợi cho hoạt động chèo SUP và lướt sóng có huấn luyện viên.":
-      "Calm waters and favorable winds for paddleboarding and surfing with an instructor.",
+  "Mặt nước êm ái, hướng gió thuận lợi cho hoạt động chèo SUP và lướt sóng có huấn luyện viên.": "Calm waters and favorable winds for paddleboarding and surfing with an instructor.",
   "Một chuyến đi hợp gu, bắt đầu từ bạn.": "Your perfect trip starts with you.",
   "Mở khóa": "Unlock",
   "Mở nhận khách": "Open for bookings",
-  "Mở rộng kinh doanh tour ca nô, lướt sóng, lặn ngắm san hô & thuyền buồm.":
-      "Grow your speedboat, surfing, snorkeling and sailing business.",
+  "Mở rộng kinh doanh tour ca nô, lướt sóng, lặn ngắm san hô & thuyền buồm.": "Grow your speedboat, surfing, snorkeling and sailing business.",
   "Mở vé QR đơn #DNS-8924": "Open QR ticket for #DNS-8924",
   "Mức giá": "Price range",
-  "Mỹ Khê & Sơn Trà: Sóng 0.4m • Nắng dịu • Lý tưởng":
-      "Mỹ Khê & Sơn Trà: Waves 0.4 m • Mild sunshine • Ideal",
+  "Mỹ Khê & Sơn Trà: Sóng 0.4m • Nắng dịu • Lý tưởng": "Mỹ Khê & Sơn Trà: Waves 0.4 m • Mild sunshine • Ideal",
   "NHÀ CUNG CẤP": "PROVIDER",
   "Ngày kết thúc hiệu lực": "Valid until",
-  "Ngày kết thúc phải sau ngày bắt đầu.":
-      "The end date must be after the start date.",
+  "Ngày kết thúc phải sau ngày bắt đầu.": "The end date must be after the start date.",
   "Ngày mai": "Tomorrow",
   "Ngày trải nghiệm": "Experience date",
   "Ngày áp dụng": "Applicable date",
@@ -752,47 +612,38 @@ const englishTranslations = <String, String>{
   "Ngưỡng gió tối thiểu (km/h)": "Minimum wind threshold (km/h)",
   "Ngưỡng: <1.2": "Threshold: <1.2",
   "Ngưỡng: <25": "Threshold: <25",
-  "Ngừng mở bán mới trên ứng dụng mà không ảnh hưởng tới {0} khách đã đặt thành công.":
-      "Stop new bookings without affecting the {0} guests already booked.",
-  "Nhà cung cấp Danang Ocean Club đã xác nhận slot Chèo SUP sáng 28/10. Bạn có thể mở vé QR để chuẩn bị ra biển.":
-      "Danang Ocean Club confirmed your morning paddleboarding slot on Oct 28. Open your QR ticket to get ready for the beach.",
+  "Ngừng mở bán mới trên ứng dụng mà không ảnh hưởng tới {0} khách đã đặt thành công.": "Stop new bookings without affecting the {0} guests already booked.",
+  "Nhà cung cấp Danang Ocean Club đã xác nhận slot Chèo SUP sáng 28/10. Bạn có thể mở vé QR để chuẩn bị ra biển.": "Danang Ocean Club confirmed your morning paddleboarding slot on Oct 28. Open your QR ticket to get ready for the beach.",
   "Nhà cung cấp đã xác minh": "Verified provider",
   "Nhà cung cấp: Danang Ocean Club": "Provider: Danang Ocean Club",
   "Nhận tour chuẩn": "Receive verified bookings",
   "Nhận vé QR & ra biển": "Get your QR ticket & head to the beach",
-  "Nhập email đăng ký tài khoản đơn vị vận hành đối tác (Vendor). DANASEA sẽ gửi liên kết bảo mật có thời hạn sử dụng.":
-      "Enter the email registered to your vendor account. DANASEA will send a secure, time-limited link.",
-  "Nhập lý do cụ thể hoặc yêu cầu hỗ trợ đặc biệt...":
-      "Enter a specific reason or special support request...",
+  "Nhập email đăng ký tài khoản đơn vị vận hành đối tác (Vendor). DANASEA sẽ gửi liên kết bảo mật có thời hạn sử dụng.": "Enter the email registered to your vendor account. DANASEA will send a secure, time-limited link.",
+  "Nhập lý do cụ thể hoặc yêu cầu hỗ trợ đặc biệt...": "Enter a specific reason or special support request...",
   "Nhập lại mật khẩu": "Confirm password",
   "Nhập lại mật khẩu mới": "Confirm new password",
   "Nhập mã xác thực OTP": "Enter OTP verification code",
-  "Nhập mã đơn con (vd: DNS-8924-1)...":
-      "Enter sub-order ID (e.g. DNS-8924-1)...",
+  "Nhập mã đơn con (vd: DNS-8924-1)...": "Enter sub-order ID (e.g. DNS-8924-1)...",
   "Nhập mật khẩu": "Enter password",
   "Nhập mật khẩu mới": "Enter new password",
   "Nhập mật khẩu đang dùng": "Enter current password",
-  "Nhập thông tin xác nhận bến bãi, camera an ninh...":
-      "Enter site verification details, security camera evidence...",
+  "Nhập thông tin xác nhận bến bãi, camera an ninh...": "Enter site verification details, security camera evidence...",
   "Nhập tin nhắn cho khách...": "Message the customer...",
   "Nhập tin nhắn cho nhà cung cấp...": "Message the provider...",
   "Nhập tên dịch vụ tiếng Anh": "Enter the service name in English",
-  "Nhập tên trải nghiệm bằng tiếng Việt":
-      "Enter the experience name in Vietnamese",
+  "Nhập tên trải nghiệm bằng tiếng Việt": "Enter the experience name in Vietnamese",
   "Nhập địa chỉ email": "Enter email address",
   "Nhắn tin": "Message",
   "Nhắn tin khách": "Message customer",
   "Nắng nhẹ": "Mild sunshine",
   "Nắng ráo": "Sunny",
-  "Nền tảng xác thực chuyên dụng được mã hóa đầu cuối, tuân thủ an toàn dữ liệu hàng hải và quản lý thông tin đối soát theo từng kỳ.":
-      "A dedicated verification platform with end-to-end encryption, marine data security and settlement information managed by period.",
+  "Nền tảng xác thực chuyên dụng được mã hóa đầu cuối, tuân thủ an toàn dữ liệu hàng hải và quản lý thông tin đối soát theo từng kỳ.": "A dedicated verification platform with end-to-end encryption, marine data security and settlement information managed by period.",
   "NỘI DUNG XÁC THỰC BẮT BUỘC": "REQUIRED VERIFICATION",
   "Nội dung biên bản / giải trình:": "Report / explanation:",
   "Nội dung khiếu nại từ khách:": "Customer complaint:",
   "Nộp minh chứng giải trình": "Submit supporting evidence",
   "PHẠM VI ÁP DỤNG": "SCOPE",
-  "Phiên làm việc của bạn đã được cập nhật chuẩn an toàn cao cấp DANASEA Core.":
-      "Your session has been updated to DANASEA Core's enhanced security standards.",
+  "Phiên làm việc của bạn đã được cập nhật chuẩn an toàn cao cấp DANASEA Core.": "Your session has been updated to DANASEA Core's enhanced security standards.",
   "Phân loại tranh chấp": "Dispute category",
   "Phân loại: {0}": "Category: {0}",
   "Phí -{0}": "Fee -{0}",
@@ -803,15 +654,11 @@ const englishTranslations = <String, String>{
   "Phương thức nhận:": "Payment destination:",
   "Phương thức thanh toán": "Payment method",
   "Phản hồi từ Danang Ocean Club": "Reply from Danang Ocean Club",
-  "Phản hồi đánh giá của khách hàng kịp thời để nâng cao uy tín":
-      "Reply promptly to customer reviews to build trust",
+  "Phản hồi đánh giá của khách hàng kịp thời để nâng cao uy tín": "Reply promptly to customer reviews to build trust",
   "Phần trăm (%)": "Percentage (%)",
-  "Phần trăm giảm không được vượt quá 100%.":
-      "Percentage discount cannot exceed 100%.",
-  "Quyền phán quyết thuộc Admin DANASEA. Đối tác không có thẩm quyền tự hoàn tiền hay đơn phương đóng khiếu nại.":
-      "DANASEA administrators make the final decision. Partners cannot issue refunds or close complaints independently.",
-  "Quá thời hạn hiệu lực 15 phút kể từ lúc gửi.":
-      "The 15-minute validity period has expired.",
+  "Phần trăm giảm không được vượt quá 100%.": "Percentage discount cannot exceed 100%.",
+  "Quyền phán quyết thuộc Admin DANASEA. Đối tác không có thẩm quyền tự hoàn tiền hay đơn phương đóng khiếu nại.": "DANASEA administrators make the final decision. Partners cannot issue refunds or close complaints independently.",
+  "Quá thời hạn hiệu lực 15 phút kể từ lúc gửi.": "The 15-minute validity period has expired.",
   "Quét QR Check-in": "Scan QR to Check In",
   "Quét mã MoMo thanh toán liền mạch": "Scan the MoMo code to pay",
   "Quét mã check-in": "Scan check-in code",
@@ -819,32 +666,24 @@ const englishTranslations = <String, String>{
   "Quét vé QR": "Scan QR ticket",
   "Quên mật khẩu?": "Forgot password?",
   "Quản lý dịch vụ": "Manage services",
-  "Quản lý vé & lịch trình trải nghiệm biển":
-      "Manage tickets & marine itineraries",
+  "Quản lý vé & lịch trình trải nghiệm biển": "Manage tickets & marine itineraries",
   "Quản lý đơn dịch vụ": "Manage service orders",
-  "Quầy Danang Ocean Club tại Lô 12 Võ Nguyên Giáp, bãi tắm số 3 Mỹ Khê ạ.":
-      "The Danang Ocean Club counter is at Lot 12 Võ Nguyên Giáp, Mỹ Khê beach entrance 3.",
+  "Quầy Danang Ocean Club tại Lô 12 Võ Nguyên Giáp, bãi tắm số 3 Mỹ Khê ạ.": "The Danang Ocean Club counter is at Lot 12 Võ Nguyên Giáp, Mỹ Khê beach entrance 3.",
   "Ra khơi an toàn": "Set sail safely",
-  "Rút gộp tất cả các kỳ chờ đối soát ({0})":
-      "Withdraw all pending settlement periods ({0})",
+  "Rút gộp tất cả các kỳ chờ đối soát ({0})": "Withdraw all pending settlement periods ({0})",
   "Rất mạnh": "Very strong",
   "Rất tốt": "Excellent",
   "Rất tốt và an toàn": "Excellent and safe",
   "SUP & Lướt sóng": "Paddleboarding & Surfing",
   "Sai đối tác": "Wrong partner",
   "Sang bước an toàn": "Continue to safety",
-  "Shop chuẩn bị giúp nhóm mình 4 áo phao cỡ M nhé!":
-      "Please prepare four size M life jackets for our group!",
+  "Shop chuẩn bị giúp nhóm mình 4 áo phao cỡ M nhé!": "Please prepare four size M life jackets for our group!",
   "Sáng & Chiều": "Morning & Afternoon",
   "Sóng 0.4m • Gió 8 km/h": "Waves 0.4 m • Wind 8 km/h",
-  "Sóng 0.4m • Gió 8 km/h • Đủ điều kiện an toàn xuất bến":
-      "Waves 0.4 m • Wind 8 km/h • Safe for departure",
-  "Sóng 0.4m • Gió 9 km/h • Khung giờ 05:00 lý tưởng cho hoạt động SUP":
-      "Waves 0.4 m • Wind 9 km/h • Ideal for paddleboarding at 05:00",
-  "Sóng 0.8m • Biển êm • 26°C • Cập nhật":
-      "Waves 0.8 m • Calm sea • 26°C • Updated",
-  "Sóng biển duy trì 0.4m, gió 9km/h. Điều kiện an toàn tuyệt đối cho các tour chèo SUP sáng nay.":
-      "Waves remain at 0.4 m with winds of 9 km/h. Safe conditions for this morning's paddleboarding tours.",
+  "Sóng 0.4m • Gió 8 km/h • Đủ điều kiện an toàn xuất bến": "Waves 0.4 m • Wind 8 km/h • Safe for departure",
+  "Sóng 0.4m • Gió 9 km/h • Khung giờ 05:00 lý tưởng cho hoạt động SUP": "Waves 0.4 m • Wind 9 km/h • Ideal for paddleboarding at 05:00",
+  "Sóng 0.8m • Biển êm • 26°C • Cập nhật": "Waves 0.8 m • Calm sea • 26°C • Updated",
+  "Sóng biển duy trì 0.4m, gió 9km/h. Điều kiện an toàn tuyệt đối cho các tour chèo SUP sáng nay.": "Waves remain at 0.4 m with winds of 9 km/h. Safe conditions for this morning's paddleboarding tours.",
   "Sóng max: {0}m • Gió min: {1} km/h": "Max waves: {0} m • Min wind: {1} km/h",
   "Sóng êm": "Calm waves",
   "Sóng êm 0.4m": "Calm waves 0.4 m",
@@ -852,43 +691,34 @@ const englishTranslations = <String, String>{
   "Sóng: {0}m": "Waves: {0} m",
   "Sắp khởi hành": "Departing soon",
   "Sẵn sàng": "Ready",
-  "Sẵn sàng quét mã QR khi khách tập trung tại bãi cát Mỹ Khê.":
-      "Ready to scan QR codes as guests gather at Mỹ Khê Beach.",
+  "Sẵn sàng quét mã QR khi khách tập trung tại bãi cát Mỹ Khê.": "Ready to scan QR codes as guests gather at Mỹ Khê Beach.",
   "SỐ TIỀN HOÀN TRẢ CHO KHÁCH (AMOUNT)": "CUSTOMER REFUND AMOUNT",
   "SỐ TÀI KHOẢN THỤ HƯỞNG": "RECIPIENT ACCOUNT NUMBER",
   "Số khách đã đặt (Booked):": "Booked guests:",
   "Số lượng": "Quantity",
   "Số lượng dịch vụ:": "Number of services:",
   "Số lượng khách": "Number of guests",
-  "Số lượng slot sáng sớm có hạn, hãy hoàn tất thanh toán để giữ chỗ.":
-      "Early morning places are limited. Complete payment to secure yours.",
+  "Số lượng slot sáng sớm có hạn, hãy hoàn tất thanh toán để giữ chỗ.": "Early morning places are limited. Complete payment to secure yours.",
   "Số lượng vé: {0} vé": "Tickets: {0}",
-  "Số lượng: {0} người lớn ({1} ván SUP)":
-      "Quantity: {0} adults ({1} paddleboards)",
+  "Số lượng: {0} người lớn ({1} ván SUP)": "Quantity: {0} adults ({1} paddleboards)",
   "Số lượt dùng tối đa": "Maximum uses",
-  "Số lượt dùng tối đa không được nhỏ hơn số lượt đã sử dụng ({0}).":
-      "Maximum uses cannot be lower than uses so far ({0}).",
+  "Số lượt dùng tối đa không được nhỏ hơn số lượt đã sử dụng ({0}).": "Maximum uses cannot be lower than uses so far ({0}).",
   "Số lượt sử dụng tối đa *": "Maximum uses *",
-  "Số lượt sử dụng tối đa phải lớn hơn 0.":
-      "Maximum uses must be greater than 0.",
-  "Số lượt tối đa không được nhỏ hơn {0}.":
-      "Maximum uses cannot be lower than {0}.",
+  "Số lượt sử dụng tối đa phải lớn hơn 0.": "Maximum uses must be greater than 0.",
+  "Số lượt tối đa không được nhỏ hơn {0}.": "Maximum uses cannot be lower than {0}.",
   "Số tiền cố định (đ)": "Fixed amount (VND)",
   "Số tiền giảm (đ) *": "Discount amount (VND) *",
   "Số tiền hoàn:": "Refund amount:",
-  "Số tiền rút ({0}) vượt quá hạn mức khả dụng ({1}).":
-      "The withdrawal amount ({0}) exceeds the available balance ({1}).",
+  "Số tiền rút ({0}) vượt quá hạn mức khả dụng ({1}).": "The withdrawal amount ({0}) exceeds the available balance ({1}).",
   "Số tiền yêu cầu rút": "Withdrawal amount",
   "Số tài khoản *": "Account number *",
   "Số điện thoại": "Phone number",
   "Số điện thoại liên hệ": "Contact phone number",
   "Số điện thoại liên hệ (tùy chọn)": "Contact phone number (optional)",
   "Sức chứa / slot": "Capacity / slot",
-  "Sức chứa không được nhỏ hơn tổng số khách đã đặt và giữ tạm ({0}).":
-      "Capacity cannot be lower than booked and temporarily held places ({0}).",
+  "Sức chứa không được nhỏ hơn tổng số khách đã đặt và giữ tạm ({0}).": "Capacity cannot be lower than booked and temporarily held places ({0}).",
   "Sức chứa thiết lập": "Configured capacity",
-  "Sức chứa tối thiểu phải từ {0} khách trở lên":
-      "Minimum capacity is {0} guests",
+  "Sức chứa tối thiểu phải từ {0} khách trở lên": "Minimum capacity is {0} guests",
   "Sức chứa tối đa (Capacity)": "Maximum capacity",
   "Sức gió": "Wind speed",
   "Sức gió ghi nhận: 28 km/h": "Recorded wind speed: 28 km/h",
@@ -912,20 +742,14 @@ const englishTranslations = <String, String>{
   "Thay đổi": "Change",
   "Thay đổi ảnh": "Change photo",
   "Theo dõi hoàn tiền": "Track refund",
-  "Theo dõi khách đã dùng mã trong các đơn booking":
-      "Track customers who used codes in their bookings",
+  "Theo dõi khách đã dùng mã trong các đơn booking": "Track customers who used codes in their bookings",
   "Theo dõi xử lý tranh chấp đơn hàng": "Track order dispute resolution",
-  "Theo quy định DANASEA, giấy tờ mới tải lên sẽ có trạng thái \"Đang chờ duyệt\". Chỉ Admin hệ thống mới có quyền phê duyệt giấy tờ đối tác. Chứng chỉ an toàn riêng của từng dịch vụ được quản lý độc lập tại mục chỉnh sửa dịch vụ tương ứng.":
-      "Under DANASEA policy, newly uploaded documents are Pending review. Only system administrators can approve partner documents. Service-specific safety certificates are managed separately in each service's edit screen.",
+  "Theo quy định DANASEA, giấy tờ mới tải lên sẽ có trạng thái \"Đang chờ duyệt\". Chỉ Admin hệ thống mới có quyền phê duyệt giấy tờ đối tác. Chứng chỉ an toàn riêng của từng dịch vụ được quản lý độc lập tại mục chỉnh sửa dịch vụ tương ứng.": "Under DANASEA policy, newly uploaded documents are Pending review. Only system administrators can approve partner documents. Service-specific safety certificates are managed separately in each service's edit screen.",
   "Thiên nhiên hoang sơ": "Unspoiled nature",
-  "Thiết bị công cộng: Luôn đăng xuất khỏi máy POS hoặc tablet tại quầy bãi biển khi kết thúc ca làm việc.":
-      "Shared devices: Always sign out of the POS or tablet at the beach counter at the end of your shift.",
-  "Thiết lập mật khẩu bảo mật cao cho tài khoản điều phối dịch vụ biển tại DANASEA.":
-      "Set a strong password for your DANASEA marine service account.",
-  "Thiếu thiết bị lặn chuyên dụng đi kèm":
-      "Missing specialized diving equipment",
-  "Thiếu trang bị an toàn / phao cứu sinh":
-      "Missing safety equipment / life jackets",
+  "Thiết bị công cộng: Luôn đăng xuất khỏi máy POS hoặc tablet tại quầy bãi biển khi kết thúc ca làm việc.": "Shared devices: Always sign out of the POS or tablet at the beach counter at the end of your shift.",
+  "Thiết lập mật khẩu bảo mật cao cho tài khoản điều phối dịch vụ biển tại DANASEA.": "Set a strong password for your DANASEA marine service account.",
+  "Thiếu thiết bị lặn chuyên dụng đi kèm": "Missing specialized diving equipment",
+  "Thiếu trang bị an toàn / phao cứu sinh": "Missing safety equipment / life jackets",
   "Thoát khỏi phiên làm việc hiện tại": "Sign out of this session",
   "Thu gọn": "Show less",
   "Thành công": "Success",
@@ -938,8 +762,7 @@ const englishTranslations = <String, String>{
   "Thêm vào giỏ": "Add to cart",
   "Thêm ảnh": "Add photos",
   "Thêm ảnh trải nghiệm": "Add experience photos",
-  "Thích hợp nhất cho lặn ngắm san hô Bãi Bụt và Bãi Rạng. Chú ý giữ gìn vệ sinh môi trường biển san hô.":
-      "Ideal for snorkeling at Bãi Bụt and Bãi Rạng. Please protect the marine environment and coral reefs.",
+  "Thích hợp nhất cho lặn ngắm san hô Bãi Bụt và Bãi Rạng. Chú ý giữ gìn vệ sinh môi trường biển san hô.": "Ideal for snorkeling at Bãi Bụt and Bãi Rạng. Please protect the marine environment and coral reefs.",
   "Thông báo": "Notifications",
   "Thông báo & Cảnh báo an toàn": "Notifications & Safety Alerts",
   "Thông báo cập nhật": "Update notifications",
@@ -947,19 +770,15 @@ const englishTranslations = <String, String>{
   "Thông tin cơ bản": "Basic information",
   "Thông tin kinh doanh": "Business information",
   "Thông tin liên lạc": "Contact information",
-  "Thông tin ngân hàng đã được cập nhật trong bản xem trước.":
-      "Bank details updated in the preview.",
+  "Thông tin ngân hàng đã được cập nhật trong bản xem trước.": "Bank details updated in the preview.",
   "Thông tin người đặt": "Booking contact",
   "Thư thái & riêng tư": "Relaxing & private",
   "Thất bại": "Failed",
-  "Thể thao nước (Chèo SUP / Kayak)":
-      "Water sports (Paddleboarding / Kayaking)",
+  "Thể thao nước (Chèo SUP / Kayak)": "Water sports (Paddleboarding / Kayaking)",
   "Thời gian": "Time",
   "Thời gian giữ chỗ": "Reservation hold time",
-  "Thời gian hoàn tất: {0}:{1} • {2}/{3}/{4}":
-      "Completed at: {0}:{1} • {2}/{3}/{4}",
-  "Thời gian khởi hành bị trễ quá 60 phút":
-      "Departure delayed by more than 60 minutes",
+  "Thời gian hoàn tất: {0}:{1} • {2}/{3}/{4}": "Completed at: {0}:{1} • {2}/{3}/{4}",
+  "Thời gian khởi hành bị trễ quá 60 phút": "Departure delayed by more than 60 minutes",
   "Thời gian ký: {0}/{1} lúc {2}:{3}": "Signed: {0}/{1} at {2}:{3}",
   "Thời gian thực ({0})": "Real time ({0})",
   "Thời gian vào bãi: {0}/{1} lúc {2}:{3}": "Checked in: {0}/{1} at {2}:{3}",
@@ -969,17 +788,12 @@ const englishTranslations = <String, String>{
   "Thời lượng (phút)": "Duration (minutes)",
   "Thời lượng: {0} phút": "Duration: {0} minutes",
   "Thời tiết biển bất lợi": "Adverse marine weather",
-  "Thời tiết biển bất lợi / Gió sóng vượt ngưỡng an toàn":
-      "Adverse marine weather / Wind or waves exceed safety limits",
-  "Thời tiết biển bất lợi hoặc vượt ngưỡng an toàn theo quy định hệ thống.":
-      "Adverse marine weather or conditions exceed system safety limits.",
-  "Thời tiết biển hôm nay rất lý tưởng cho SUP":
-      "Today's sea conditions are ideal for paddleboarding",
-  "Thời tiết biển xấu không xuất bến được theo cam kết.":
-      "Bad marine weather prevented departure as agreed.",
+  "Thời tiết biển bất lợi / Gió sóng vượt ngưỡng an toàn": "Adverse marine weather / Wind or waves exceed safety limits",
+  "Thời tiết biển bất lợi hoặc vượt ngưỡng an toàn theo quy định hệ thống.": "Adverse marine weather or conditions exceed system safety limits.",
+  "Thời tiết biển hôm nay rất lý tưởng cho SUP": "Today's sea conditions are ideal for paddleboarding",
+  "Thời tiết biển xấu không xuất bến được theo cam kết.": "Bad marine weather prevented departure as agreed.",
   "Thời tiết bất khả kháng": "Force majeure weather",
-  "Thời điểm lý tưởng: Mặt biển phẳng lặng, độ cao sóng 0.3m":
-      "Ideal conditions: Calm sea, wave height 0.3 m",
+  "Thời điểm lý tưởng: Mặt biển phẳng lặng, độ cao sóng 0.3m": "Ideal conditions: Calm sea, wave height 0.3 m",
   "Thử lại": "Try again",
   "Thử nghiệm": "Demo",
   "Thử quét lại": "Scan again",
@@ -994,45 +808,33 @@ const englishTranslations = <String, String>{
   "Tiếng Việt": "Tiếng Việt",
   "Tiếng Việt / English": "Tiếng Việt / English",
   "Tiếp tục": "Continue",
-  "Tour Lặn biển Ngắm san hô Bán đảo Sơn Trà":
-      "Sơn Trà Peninsula snorkeling tour",
+  "Tour Lặn biển Ngắm san hô Bán đảo Sơn Trà": "Sơn Trà Peninsula snorkeling tour",
   "Tour biển đảo": "Island tours",
   "Tour xuất bến gần nhất": "Next departing tour",
-  "Toàn bộ quyền phán quyết và xử lý bồi hoàn do Ban quản trị DANASEA trực tiếp thực hiện. Đối tác theo dõi tiến độ và nộp tài liệu giải trình bổ sung tại đây.":
-      "DANASEA administrators handle all decisions and compensation. Partners can track progress and submit supporting documents here.",
+  "Toàn bộ quyền phán quyết và xử lý bồi hoàn do Ban quản trị DANASEA trực tiếp thực hiện. Đối tác theo dõi tiến độ và nộp tài liệu giải trình bổ sung tại đây.": "DANASEA administrators handle all decisions and compensation. Partners can track progress and submit supporting documents here.",
   "Trang thiết bị an toàn tiêu chuẩn": "Standard safety equipment",
   "Tranh chấp khiếu nại": "Disputes & Complaints",
   "Trung bình": "Average",
   "Trung tâm hỗ trợ vận hành": "Operations support center",
-  "Truy cập trung tâm điều hành & quản trị đơn dịch vụ biển DANASEA.":
-      "Access the DANASEA marine service operations and order management center.",
-  "Trình bày thời gian, diễn biến sự việc và yêu cầu xử lý...":
-      "Describe when it happened, what happened and your requested resolution...",
-  "Trò chuyện hỗ trợ thợ lặn, cano, SUP":
-      "Support chat for diving, speedboats and paddleboarding",
+  "Truy cập trung tâm điều hành & quản trị đơn dịch vụ biển DANASEA.": "Access the DANASEA marine service operations and order management center.",
+  "Trình bày thời gian, diễn biến sự việc và yêu cầu xử lý...": "Describe when it happened, what happened and your requested resolution...",
+  "Trò chuyện hỗ trợ thợ lặn, cano, SUP": "Support chat for diving, speedboats and paddleboarding",
   "Trường dạy lướt ván": "Surf school",
   "Trạm Mỹ Khê #02": "Mỹ Khê Station #02",
   "Trạng thái hồ sơ:": "Profile status:",
   "Trạng thái thẩm định hồ sơ": "Profile review status",
-  "Trạng thái thẩm định và chi trả qua các kỳ":
-      "Review and payout status by period",
+  "Trạng thái thẩm định và chi trả qua các kỳ": "Review and payout status by period",
   "Trạng thái vào bãi (Check-in)": "Check-in status",
   "Trải nghiệm biển": "Marine experiences",
   "Trải nghiệm biển bạn quan tâm & lưu lại": "Marine experiences you saved",
-  "Trải nghiệm biển hấp dẫn bậc nhất Đà Nẵng cùng đội ngũ huấn luyện viên giàu kinh nghiệm và trang thiết bị an toàn đạt chuẩn.":
-      "Discover Da Nang's best marine experiences with experienced instructors and certified safety equipment.",
-  "Trải nghiệm chèo ván đứng (SUP) đón ánh bình minh rạng ngời tại bãi biển Mỹ Khê Đà Nẵng. Mặt biển sáng sớm phẳng lặng như gương soi, nước ấm dịu và không khí trong lành mang lại nguồn năng lượng sảng khoái. Gói dịch vụ đã bao gồm ván chèo chuyên dụng, áo phao tiêu chuẩn, thợ chụp ảnh chuyên nghiệp bằng máy ảnh và flycam, cùng hướng dẫn viên đồng hành đảm bảo an toàn tuyệt đối.":
-      "Enjoy sunrise paddleboarding at Mỹ Khê Beach, Da Nang. Mirror-like morning seas, warm water and fresh air provide a refreshing start. Includes specialized paddleboards, standard life jackets, professional camera and drone photography, and a guide for your safety.",
+  "Trải nghiệm biển hấp dẫn bậc nhất Đà Nẵng cùng đội ngũ huấn luyện viên giàu kinh nghiệm và trang thiết bị an toàn đạt chuẩn.": "Discover Da Nang's best marine experiences with experienced instructors and certified safety equipment.",
+  "Trải nghiệm chèo ván đứng (SUP) đón ánh bình minh rạng ngời tại bãi biển Mỹ Khê Đà Nẵng. Mặt biển sáng sớm phẳng lặng như gương soi, nước ấm dịu và không khí trong lành mang lại nguồn năng lượng sảng khoái. Gói dịch vụ đã bao gồm ván chèo chuyên dụng, áo phao tiêu chuẩn, thợ chụp ảnh chuyên nghiệp bằng máy ảnh và flycam, cùng hướng dẫn viên đồng hành đảm bảo an toàn tuyệt đối.": "Enjoy sunrise paddleboarding at Mỹ Khê Beach, Da Nang. Mirror-like morning seas, warm water and fresh air provide a refreshing start. Includes specialized paddleboards, standard life jackets, professional camera and drone photography, and a guide for your safety.",
   "Trải nghiệm lặn biển": "Diving experience",
-  "Trải nghiệm lặn biển cùng chuyên gia lặn chứng chỉ quốc tế PADI. Khám phá các rạn san hô nguyên sơ Hòn Sụp, Bãi Bụt. Toàn bộ trang bị mặt nạ thở, chân vịt, bình khí được kiểm định an toàn hàng hải.":
-      "Dive with an internationally PADI-certified expert. Explore the pristine coral reefs of Hòn Sụp and Bãi Bụt. All masks, fins and air tanks meet marine safety requirements.",
+  "Trải nghiệm lặn biển cùng chuyên gia lặn chứng chỉ quốc tế PADI. Khám phá các rạn san hô nguyên sơ Hòn Sụp, Bãi Bụt. Toàn bộ trang bị mặt nạ thở, chân vịt, bình khí được kiểm định an toàn hàng hải.": "Dive with an internationally PADI-certified expert. Explore the pristine coral reefs of Hòn Sụp and Bãi Bụt. All masks, fins and air tanks meet marine safety requirements.",
   "Trải nghiệm nổi bật tại Đà Nẵng": "Featured experiences in Da Nang",
-  "Trải nghiệm thể thao & đại dương nguyên bản Đà Nẵng":
-      "Authentic ocean & sports experiences in Da Nang",
-  "Trải nghiệm tuyệt vời ngoài sức tưởng tượng! Anh hướng dẫn viên bơi kèm rất nhiệt tình, chụp ảnh bình minh Mỹ Khê cực kỳ nghệ thuật. Nước biển sáng sớm êm và sạch mát.":
-      "An experience beyond expectations! The guide was very helpful and took beautiful sunrise photos at Mỹ Khê. The early morning sea was calm, clean and refreshing.",
-  "Trải nghiệm tốt nhưng sáng cuối tuần bãi hơi đông khách, nên có thêm nhân viên hướng dẫn bến xuất phát.":
-      "A good experience, but the beach was crowded on the weekend morning. More departure staff would help.",
+  "Trải nghiệm thể thao & đại dương nguyên bản Đà Nẵng": "Authentic ocean & sports experiences in Da Nang",
+  "Trải nghiệm tuyệt vời ngoài sức tưởng tượng! Anh hướng dẫn viên bơi kèm rất nhiệt tình, chụp ảnh bình minh Mỹ Khê cực kỳ nghệ thuật. Nước biển sáng sớm êm và sạch mát.": "An experience beyond expectations! The guide was very helpful and took beautiful sunrise photos at Mỹ Khê. The early morning sea was calm, clean and refreshing.",
+  "Trải nghiệm tốt nhưng sáng cuối tuần bãi hơi đông khách, nên có thêm nhân viên hướng dẫn bến xuất phát.": "A good experience, but the beach was crowded on the weekend morning. More departure staff would help.",
   "Trời quang": "Clear skies",
   "Trợ giúp 24/7": "24/7 Help",
   "Trợ lý AI DanaSea": "DanaSea AI Assistant",
@@ -1042,50 +844,34 @@ const englishTranslations = <String, String>{
   "Tuần 18": "Week 18",
   "Tài chính & Khiếu nại": "Finance & Complaints",
   "Tài khoản": "Account",
-  "Tài khoản bị khóa. Vui lòng liên hệ quản trị viên.":
-      "Your account is locked. Please contact an administrator.",
+  "Tài khoản bị khóa. Vui lòng liên hệ quản trị viên.": "Your account is locked. Please contact an administrator.",
   "Tài khoản ngân hàng nhận tiền": "Payout bank account",
   "Tài khoản nhận tiền": "Payout account",
   "Tài khoản thụ hưởng: {0} {1}": "Recipient account: {0} {1}",
-  "Tàu đón trễ 1 tiếng khiến nhóm không kịp lịch trình tiếp theo trong ngày.":
-      "The boat arrived an hour late, causing our group to miss the next activity.",
-  "Tên chủ tài khoản (in hoa không dấu) *":
-      "Account holder name (uppercase, no accents) *",
+  "Tàu đón trễ 1 tiếng khiến nhóm không kịp lịch trình tiếp theo trong ngày.": "The boat arrived an hour late, causing our group to miss the next activity.",
+  "Tên chủ tài khoản (in hoa không dấu) *": "Account holder name (uppercase, no accents) *",
   "Tên doanh nghiệp / CLB *": "Business / Club name *",
   "Tên dịch vụ (Tiếng Anh)": "Service name (English)",
   "Tên dịch vụ (Tiếng Việt)": "Service name (Vietnamese)",
   "Tên điểm hẹn tập kết": "Meeting point name",
-  "Tìm cuộc hội thoại, mã đơn, khách hàng...":
-      "Search conversations, orders, customers...",
-  "Tìm hoạt động, bãi biển, nhà cung cấp...":
-      "Search activities, beaches, providers...",
-  "Tìm theo mã đơn con, tên khách hoặc dịch vụ...":
-      "Search sub-order ID, guest name or service...",
-  "Tìm theo tên dịch vụ, ID hoặc bãi biển...":
-      "Search service name, ID or beach...",
+  "Tìm cuộc hội thoại, mã đơn, khách hàng...": "Search conversations, orders, customers...",
+  "Tìm hoạt động, bãi biển, nhà cung cấp...": "Search activities, beaches, providers...",
+  "Tìm theo mã đơn con, tên khách hoặc dịch vụ...": "Search sub-order ID, guest name or service...",
+  "Tìm theo tên dịch vụ, ID hoặc bãi biển...": "Search service name, ID or beach...",
   "Tìm trải nghiệm": "Find experiences",
   "Tìm đối tác hoặc mã đơn...": "Search partners or order IDs...",
   "Tính năng đính kèm ảnh": "Photo attachment feature",
   "Tóm tắt dịch vụ biển": "Marine service summary",
-  "Tôi cam kết đủ điều kiện sức khỏe tham gia các hoạt động thể thao biển và tuân thủ tuyệt đối quy định an toàn cứu sinh.":
-      "I confirm I am fit to participate in marine sports and agree to follow all lifesaving safety rules.",
-  "Tôi cam kết đủ điều kiện sức khỏe tham gia hoạt động trên biển, tuân thủ mặc áo phao và hướng dẫn của huấn luyện viên trong suốt thời gian diễn ra trải nghiệm.":
-      "I confirm I am fit for marine activities and agree to wear a life jacket and follow the instructor's guidance throughout the experience.",
-  "Tôi xác nhận biết bơi căn bản và tự chịu trách nhiệm về thể lực bản thân khi tham gia tập luyện thể thao dưới nước.":
-      "I confirm basic swimming ability and accept responsibility for my fitness when participating in water sports.",
-  "Tôi xác nhận không có tiền sử bệnh tim mạch, huyết áp cao cấp tính hoặc chấn thương màng nhĩ nghiêm trọng. Tôi đồng ý tuân thủ quy tắc bảo vệ rạn san hô, không dẫm đạp hay bẻ gãy san hô.":
-      "I confirm no history of heart disease, acute high blood pressure or serious eardrum injury. I agree to protect coral reefs and not step on or break coral.",
-  "Tôi xác nhận đủ điều kiện sức khỏe và đồng ý với Cam kết miễn trừ trách nhiệm khi tham gia các hoạt động thể thao biển tại Đà Nẵng.":
-      "I confirm I am fit to participate and agree to the liability waiver for marine sports in Da Nang.",
-  "Tôi đồng ý mặc áo phao bảo hộ trong toàn bộ thời gian di chuyển trên cano và nghe theo chỉ dẫn an toàn của thuyền trưởng.":
-      "I agree to wear a life jacket throughout the speedboat trip and follow the captain's safety instructions.",
-  "Tôi đồng ý với Điều khoản hợp tác nhà cung cấp và quy chuẩn an toàn hàng hải của DANASEA.":
-      "I agree to DANASEA's Partner Terms and marine safety standards.",
+  "Tôi cam kết đủ điều kiện sức khỏe tham gia các hoạt động thể thao biển và tuân thủ tuyệt đối quy định an toàn cứu sinh.": "I confirm I am fit to participate in marine sports and agree to follow all lifesaving safety rules.",
+  "Tôi cam kết đủ điều kiện sức khỏe tham gia hoạt động trên biển, tuân thủ mặc áo phao và hướng dẫn của huấn luyện viên trong suốt thời gian diễn ra trải nghiệm.": "I confirm I am fit for marine activities and agree to wear a life jacket and follow the instructor's guidance throughout the experience.",
+  "Tôi xác nhận biết bơi căn bản và tự chịu trách nhiệm về thể lực bản thân khi tham gia tập luyện thể thao dưới nước.": "I confirm basic swimming ability and accept responsibility for my fitness when participating in water sports.",
+  "Tôi xác nhận không có tiền sử bệnh tim mạch, huyết áp cao cấp tính hoặc chấn thương màng nhĩ nghiêm trọng. Tôi đồng ý tuân thủ quy tắc bảo vệ rạn san hô, không dẫm đạp hay bẻ gãy san hô.": "I confirm no history of heart disease, acute high blood pressure or serious eardrum injury. I agree to protect coral reefs and not step on or break coral.",
+  "Tôi xác nhận đủ điều kiện sức khỏe và đồng ý với Cam kết miễn trừ trách nhiệm khi tham gia các hoạt động thể thao biển tại Đà Nẵng.": "I confirm I am fit to participate and agree to the liability waiver for marine sports in Da Nang.",
+  "Tôi đồng ý mặc áo phao bảo hộ trong toàn bộ thời gian di chuyển trên cano và nghe theo chỉ dẫn an toàn của thuyền trưởng.": "I agree to wear a life jacket throughout the speedboat trip and follow the captain's safety instructions.",
+  "Tôi đồng ý với Điều khoản hợp tác nhà cung cấp và quy chuẩn an toàn hàng hải của DANASEA.": "I agree to DANASEA's Partner Terms and marine safety standards.",
   "Tăng 18.5% so với cùng kỳ thứ Bảy tuần trước": "Up 18.5% from last Saturday",
-  "Tư vấn hành trình & gợi ý theo sóng biển":
-      "Itinerary advice & suggestions based on sea conditions",
-  "Tương tác trực tiếp & hỗ trợ khách trải nghiệm thể thao biển":
-      "Direct communication & support for marine sports customers",
+  "Tư vấn hành trình & gợi ý theo sóng biển": "Itinerary advice & suggestions based on sea conditions",
+  "Tương tác trực tiếp & hỗ trợ khách trải nghiệm thể thao biển": "Direct communication & support for marine sports customers",
   "TẠM KHÓA": "TEMPORARILY LOCKED",
   "Tạm dừng": "Paused",
   "Tạm giữ thanh toán (Held):": "Temporarily held for payment:",
@@ -1095,8 +881,7 @@ const englishTranslations = <String, String>{
   "Tạm tính ({0} dịch vụ):": "Subtotal ({0} services):",
   "Tạm tính:": "Subtotal:",
   "Tạm được": "Fair",
-  "Tạo khung giờ tương ứng cho các ngày làm việc":
-      "Create matching time slots for weekdays",
+  "Tạo khung giờ tương ứng cho các ngày làm việc": "Create matching time slots for weekdays",
   "Tạo mã giảm giá mới": "Create new promo code",
   "Tạo mã khuyến mãi {0} thành công!": "Promo code {0} created successfully!",
   "Tạo mã mới": "Create new code",
@@ -1107,14 +892,12 @@ const englishTranslations = <String, String>{
   "Tải hóa đơn điện tử (PDF)": "Download e-invoice (PDF)",
   "Tải hóa đơn điện tử VAT (PDF)": "Download VAT e-invoice (PDF)",
   "Tải lên": "Upload",
-  "Tải lên thành công! Hồ sơ đang ở trạng thái Chờ duyệt bởi Admin DANASEA.":
-      "Upload successful! Your documents are awaiting DANASEA administrator approval.",
+  "Tải lên thành công! Hồ sơ đang ở trạng thái Chờ duyệt bởi Admin DANASEA.": "Upload successful! Your documents are awaiting DANASEA administrator approval.",
   "Tải lại file mới": "Upload a new file",
   "Tất cả": "All",
   "Tất cả (2)": "All (2)",
   "Tất cả ({0})": "All ({0})",
-  "Tất cả khiếu nại được tiếp nhận và giải quyết căn cứ theo chứng từ và thỏa thuận bảo vệ khách hàng của DANASEA.":
-      "All complaints are reviewed based on evidence and DANASEA's customer protection agreement.",
+  "Tất cả khiếu nại được tiếp nhận và giải quyết căn cứ theo chứng từ và thỏa thuận bảo vệ khách hàng của DANASEA.": "All complaints are reviewed based on evidence and DANASEA's customer protection agreement.",
   "Tất cả thông báo": "All notifications",
   "Tất cả tin nhắn": "All messages",
   "Tệp tin: {0}": "File: {0}",
@@ -1139,13 +922,10 @@ const englishTranslations = <String, String>{
   "Từ chối duyệt (REJECTED)": "Rejected (REJECTED)",
   "Từ hồ sơ": "From profile",
   "Từ {0}": "From {0}",
-  "Tự ý hủy hoặc dời giờ xuất phát quá 60p":
-      "Unauthorized cancellation or departure delay over 60 minutes",
-  "Tự động khóa lịch đặt nếu vượt ngưỡng":
-      "Automatically close bookings when limits are exceeded",
+  "Tự ý hủy hoặc dời giờ xuất phát quá 60p": "Unauthorized cancellation or departure delay over 60 minutes",
+  "Tự động khóa lịch đặt nếu vượt ngưỡng": "Automatically close bookings when limits are exceeded",
   "Tự động quyết toán theo kỳ": "Automatic periodic settlement",
-  "Tự động trả về phương thức thanh toán ban đầu của khách hàng.":
-      "Automatically returned to the customer's original payment method.",
+  "Tự động trả về phương thức thanh toán ban đầu của khách hàng.": "Automatically returned to the customer's original payment method.",
   "Tỷ lệ giảm (%) *": "Discount rate (%) *",
   "Tỷ lệ phân phối sàn & đối tác": "Platform & partner share",
   "Tỷ lệ: {0}%": "Rate: {0}%",
@@ -1154,18 +934,14 @@ const englishTranslations = <String, String>{
   "VNĐ": "VND",
   "Viết phản hồi tới khách hàng:": "Write a reply to the customer:",
   "Vui lòng chia sẻ cảm nhận của bạn.": "Please share your experience.",
-  "Vui lòng kiểm tra kỹ cả thư mục Quảng cáo và Hộp thư rác (Spam) nếu không nhận được email sau 1 phút.":
-      "If you do not receive the email within a minute, check your Promotions and Spam folders.",
-  "Vui lòng mô tả chi tiết sự việc khiếu nại.":
-      "Please describe the complaint in detail.",
+  "Vui lòng kiểm tra kỹ cả thư mục Quảng cáo và Hộp thư rác (Spam) nếu không nhận được email sau 1 phút.": "If you do not receive the email within a minute, check your Promotions and Spam folders.",
+  "Vui lòng mô tả chi tiết sự việc khiếu nại.": "Please describe the complaint in detail.",
   "Vui lòng nhập email quản trị": "Please enter the administrator email",
-  "Vui lòng nhập email đăng ký tài khoản.":
-      "Please enter your registered email.",
+  "Vui lòng nhập email đăng ký tài khoản.": "Please enter your registered email.",
   "Vui lòng nhập email.": "Please enter your email.",
   "Vui lòng nhập giá trị giảm hợp lệ.": "Please enter a valid discount value.",
   "Vui lòng nhập họ tên.": "Please enter your full name.",
-  "Vui lòng nhập họ và tên đại diện.":
-      "Please enter the representative's full name.",
+  "Vui lòng nhập họ và tên đại diện.": "Please enter the representative's full name.",
   "Vui lòng nhập mã OTP hợp lệ.": "Please enter a valid OTP code.",
   "Vui lòng nhập mã khuyến mãi.": "Please enter a promo code.",
   "Vui lòng nhập mã vé để tra cứu.": "Please enter a ticket code to search.",
@@ -1174,53 +950,38 @@ const englishTranslations = <String, String>{
   "Vui lòng nhập nội dung giải trình.": "Please enter an explanation.",
   "Vui lòng nhập nội dung phản hồi.": "Please enter a reply.",
   "Vui lòng nhập số tiền hợp lệ.": "Please enter a valid amount.",
-  "Vui lòng nhập đầy đủ thông tin tài khoản ngân hàng.":
-      "Please complete all bank account details.",
-  "Vui lòng xác minh địa chỉ email {0} để tiếp tục.":
-      "Please verify the email address {0} to continue.",
-  "Vui lòng xác nhận Cam kết miễn trừ trách nhiệm trước khi thanh toán.":
-      "Please accept the liability waiver before payment.",
-  "Vui lòng điền mật khẩu hiện tại của bạn.":
-      "Please enter your current password.",
-  "Vui lòng đồng ý với điều khoản hợp tác đối tác.":
-      "Please agree to the partner terms.",
-  "Ván SUP chất lượng, áo phao mới tinh. 5h sáng ra biển gió nhẹ sóng êm chèo rất nhẹ tay. 10/10 điểm cho dịch vụ biển Đà Nẵng!":
-      "Quality paddleboards and brand-new life jackets. Light wind and calm waves at 5 AM made paddling easy. 10/10 for this Da Nang marine experience!",
-  "Ván SUP rất mới và chắc chắn, áo phao tiêu chuẩn an toàn. Rất ưng ý dịch vụ của Danang Ocean Club.":
-      "The paddleboards were new and sturdy, and the life jackets met safety standards. Very happy with Danang Ocean Club.",
+  "Vui lòng nhập đầy đủ thông tin tài khoản ngân hàng.": "Please complete all bank account details.",
+  "Vui lòng xác minh địa chỉ email {0} để tiếp tục.": "Please verify the email address {0} to continue.",
+  "Vui lòng xác nhận Cam kết miễn trừ trách nhiệm trước khi thanh toán.": "Please accept the liability waiver before payment.",
+  "Vui lòng điền mật khẩu hiện tại của bạn.": "Please enter your current password.",
+  "Vui lòng đồng ý với điều khoản hợp tác đối tác.": "Please agree to the partner terms.",
+  "Ván SUP chất lượng, áo phao mới tinh. 5h sáng ra biển gió nhẹ sóng êm chèo rất nhẹ tay. 10/10 điểm cho dịch vụ biển Đà Nẵng!": "Quality paddleboards and brand-new life jackets. Light wind and calm waves at 5 AM made paddling easy. 10/10 for this Da Nang marine experience!",
+  "Ván SUP rất mới và chắc chắn, áo phao tiêu chuẩn an toàn. Rất ưng ý dịch vụ của Danang Ocean Club.": "The paddleboards were new and sturdy, and the life jackets met safety standards. Very happy with Danang Ocean Club.",
   "Vé QR & Kích hoạt": "QR Ticket & Activation",
   "Vé hợp lệ & Đủ điều kiện ra bãi": "Valid ticket & Ready to enter",
-  "Vé hợp lệ. Có thể xác nhận check-in.":
-      "Valid ticket. Check-in can be confirmed.",
-  "Vé hợp lệ. Có thể xác nhận vào bãi và nhận ván SUP.":
-      "Valid ticket. Entry and paddleboard collection can be confirmed.",
+  "Vé hợp lệ. Có thể xác nhận check-in.": "Valid ticket. Check-in can be confirmed.",
+  "Vé hợp lệ. Có thể xác nhận vào bãi và nhận ván SUP.": "Valid ticket. Entry and paddleboard collection can be confirmed.",
   "Vé này đã được sử dụng": "This ticket has already been used",
   "Vé {0}/{1}": "Ticket {0}/{1}",
   "Vé điện tử QR": "QR e-ticket",
-  "Vé điện tử QR và thông tin chi tiết đã được gửi đến email an.nguyen@example.com":
-      "Your QR e-ticket and details have been sent to an.nguyen@example.com",
+  "Vé điện tử QR và thông tin chi tiết đã được gửi đến email an.nguyen@example.com": "Your QR e-ticket and details have been sent to an.nguyen@example.com",
   "Vé điện tử QR đã sẵn sàng!": "Your QR e-ticket is ready!",
-  "Vé điện tử lưu ngay trên điện thoại. Xuất trình tại trạm phục vụ bãi biển để bắt đầu đón sóng!":
-      "Your e-ticket is saved on your phone. Show it at the beach service station to start your adventure!",
-  "Vé đã check-in trước đó lúc {0}:{1}. Không thể dùng lại.":
-      "This ticket was checked in at {0}:{1}. It cannot be reused.",
+  "Vé điện tử lưu ngay trên điện thoại. Xuất trình tại trạm phục vụ bãi biển để bắt đầu đón sóng!": "Your e-ticket is saved on your phone. Show it at the beach service station to start your adventure!",
+  "Vé đã check-in trước đó lúc {0}:{1}. Không thể dùng lại.": "This ticket was checked in at {0}:{1}. It cannot be reused.",
   "Vé đã check-in trước đó.": "This ticket was already checked in.",
-  "Vé đã check-in trước đó. Không thể sử dụng lại.":
-      "This ticket was already checked in and cannot be reused.",
+  "Vé đã check-in trước đó. Không thể sử dụng lại.": "This ticket was already checked in and cannot be reused.",
   "Ví MoMo": "MoMo wallet",
   "Ví dụ: 829412": "Example: 829412",
   "Ví điện tử MoMo": "MoMo e-wallet",
   "Vùng biển": "Coastal area",
   "Vùng biển bạn muốn đến?": "Which coastal area would you like to visit?",
-  "Vùng nước xanh ngọc bích, rạn san hô tự nhiên":
-      "Turquoise waters and natural coral reefs",
+  "Vùng nước xanh ngọc bích, rạn san hô tự nhiên": "Turquoise waters and natural coral reefs",
   "Vĩ độ (Latitude)": "Latitude",
   "Vận hành & Đơn giá": "Operations & Pricing",
   "Vận hành hôm nay": "Today's operations",
   "Về trang Khám phá": "Back to Explore",
   "Vị trí tập kết": "Meeting point",
-  "Với 2 người và ngân sách 300.000đ/người vào sáng sớm mai tại Mỹ Khê, hoạt động lý tưởng nhất là Chèo SUP đón bình minh Mỹ Khê! Giá trọn gói chỉ 280.000đ/người đã gồm chụp ảnh và đồ uống.":
-      "For two people with a budget of 300,000 VND each at Mỹ Khê early tomorrow, sunrise paddleboarding is ideal! The package is just 280,000 VND per person, including photos and drinks.",
+  "Với 2 người và ngân sách 300.000đ/người vào sáng sớm mai tại Mỹ Khê, hoạt động lý tưởng nhất là Chèo SUP đón bình minh Mỹ Khê! Giá trọn gói chỉ 280.000đ/người đã gồm chụp ảnh và đồ uống.": "For two people with a budget of 300,000 VND each at Mỹ Khê early tomorrow, sunrise paddleboarding is ideal! The package is just 280,000 VND per person, including photos and drinks.",
   "Xem & Đặt": "View & Book",
   "Xem & Đặt chỗ": "View & Reserve",
   "Xem chi tiết": "View details",
@@ -1261,16 +1022,13 @@ const englishTranslations = <String, String>{
   "Xóa tất cả": "Clear all",
   "Xóa tất cả bộ lọc": "Clear all filters",
   "Yêu cầu hoàn tiền do đến muộn": "Refund request for late arrival",
-  "Yêu cầu hoàn tiền sẽ được hệ thống tiếp nhận và xử lý căn cứ theo bảng hoàn tiền (refunds) và quy định dịch vụ.":
-      "Your refund request will be reviewed and processed according to the refund policy and service terms.",
+  "Yêu cầu hoàn tiền sẽ được hệ thống tiếp nhận và xử lý căn cứ theo bảng hoàn tiền (refunds) và quy định dịch vụ.": "Your refund request will be reviewed and processed according to the refund policy and service terms.",
   "Yêu cầu hoàn tiền đang được xử lý": "Your refund request is being processed",
   "Yêu cầu hủy": "Request cancellation",
   "Yêu cầu hủy dịch vụ": "Request service cancellation",
   "Yêu cầu liên kết mới": "Request a new link",
-  "Yêu cầu mới hơn đã được kích hoạt sau đó.":
-      "A newer request has since been activated.",
-  "Yêu cầu nhận tiền {0} đã được gửi tới ban tài chính DANASEA!":
-      "Payout request {0} sent to DANASEA Finance!",
+  "Yêu cầu mới hơn đã được kích hoạt sau đó.": "A newer request has since been activated.",
+  "Yêu cầu nhận tiền {0} đã được gửi tới ban tài chính DANASEA!": "Payout request {0} sent to DANASEA Finance!",
   "Yêu cầu rút: {0}": "Withdrawal request: {0}",
   "Yêu cầu thanh toán & Lịch sử": "Payout Requests & History",
   "Yêu thích": "Favorites",
@@ -1293,8 +1051,7 @@ const englishTranslations = <String, String>{
   "{0} trải nghiệm": "{0} experiences",
   "{0} yêu cầu cần theo dõi": "{0} requests to track",
   "{0} đ": "{0} VND",
-  "{0} đã đặt dịch vụ #{1} • Tổng {2} đ":
-      "{0} booked service #{1} • Total {2} VND",
+  "{0} đã đặt dịch vụ #{1} • Tổng {2} đ": "{0} booked service #{1} • Total {2} VND",
   "{0} đơn ghi nhận": "{0} recorded orders",
   "{0} đơn đã check-in": "{0} checked-in orders",
   "{0} • Lô 12 Võ Nguyên Giáp": "{0} • Lot 12 Võ Nguyên Giáp",
@@ -1311,49 +1068,40 @@ const englishTranslations = <String, String>{
   "{0}.000 đ / khách": "{0},000 VND / guest",
   "{0}/{1} khách ({2})": "{0}/{1} guests ({2})",
   "Áo phao & mái chèo sẵn sàng": "Life jackets & paddles ready",
-  "Áo phao cung cấp bị rách dây cài an toàn và không có thợ chụp ảnh đồng hành như cam kết trong gói dịch vụ.":
-      "The life jackets had broken safety buckles and there was no photographer as promised in the package.",
-  "Áo phao đạt chuẩn, dây leash và ván chèo chuyên dụng.":
-      "Certified life jackets, leashes and specialized paddleboards.",
+  "Áo phao cung cấp bị rách dây cài an toàn và không có thợ chụp ảnh đồng hành như cam kết trong gói dịch vụ.": "The life jackets had broken safety buckles and there was no photographer as promised in the package.",
+  "Áo phao đạt chuẩn, dây leash và ván chèo chuyên dụng.": "Certified life jackets, leashes and specialized paddleboards.",
   "Áp dụng": "Apply",
   "Áp dụng kết quả ({0})": "Show results ({0})",
-  "Áp dụng mã giảm giá DANASEA2024 thành công (-40.000 đ)!":
-      "Promo code DANASEA2024 applied successfully (-40,000 VND)!",
+  "Áp dụng mã giảm giá DANASEA2024 thành công (-40.000 đ)!": "Promo code DANASEA2024 applied successfully (-40,000 VND)!",
   "Ít nhất 8 ký tự": "At least 8 characters",
   "Đang chờ duyệt": "Pending review",
   "Đang chờ xử lý": "Pending",
   "Đang có tour (1)": "Active tours (1)",
   "Đang giải quyết (1)": "In progress (1)",
-  "Đang hiển thị {0} điểm dịch vụ ven biển":
-      "Showing {0} coastal service locations",
+  "Đang hiển thị {0} điểm dịch vụ ven biển": "Showing {0} coastal service locations",
   "Đang hoạt động": "Active",
   "Đang hoạt động trên biển": "Currently at sea",
   "Đang mở": "Open",
   "Đang mở bán": "On sale",
   "Đang thẩm định": "Under review",
   "Đang trực tuyến": "Online",
-  "Đang tạo và tải file hóa đơn điện tử PDF...":
-      "Generating and downloading your PDF e-invoice...",
+  "Đang tạo và tải file hóa đơn điện tử PDF...": "Generating and downloading your PDF e-invoice...",
   "Đang tải hóa đơn điện tử PDF...": "Downloading PDF e-invoice...",
   "Đang tải xuống {0}...": "Downloading {0}...",
   "Đang xử lý": "Processing",
   "Đang áp dụng": "Applied",
-  "Đi biển 2 người dưới 300k/người?":
-      "A beach trip for two under 300,000 VND each?",
+  "Đi biển 2 người dưới 300k/người?": "A beach trip for two under 300,000 VND each?",
   "Điền số tiền tối đa": "Enter maximum amount",
   "Điều khoản dịch vụ": "Terms of Service",
   "Điều kiện biển & Thời tiết": "Sea Conditions & Weather",
   "Điều kiện biển hôm nay: Rất tốt": "Today's sea conditions: Excellent",
-  "Điều kiện biển thuận lợi cho SUP và lướt cano. Luôn mặc áo phao và tuân thủ cờ hiệu cứu hộ dọc bãi biển.":
-      "Favorable conditions for paddleboarding and speedboats. Always wear a life jacket and follow beach safety flags.",
-  "Điều kiện thời tiết biển không đảm bảo an toàn hoạt động theo khuyến cáo của cơ quan quản lý vịnh Đà Nẵng.":
-      "Marine weather conditions are unsafe for activities according to Da Nang bay management guidance.",
+  "Điều kiện biển thuận lợi cho SUP và lướt cano. Luôn mặc áo phao và tuân thủ cờ hiệu cứu hộ dọc bãi biển.": "Favorable conditions for paddleboarding and speedboats. Always wear a life jacket and follow beach safety flags.",
+  "Điều kiện thời tiết biển không đảm bảo an toàn hoạt động theo khuyến cáo của cơ quan quản lý vịnh Đà Nẵng.": "Marine weather conditions are unsafe for activities according to Da Nang bay management guidance.",
   "Điểm gửi xe ở đâu?": "Where can we park?",
   "Điểm nổi bật của trải nghiệm": "Experience highlights",
   "Điểm đánh giá": "Rating",
   "Điểm đón khách": "Pickup point",
-  "Điểm đến phong phú dọc bờ duyên hải miền Trung":
-      "Diverse destinations along the Central Coast",
+  "Điểm đến phong phú dọc bờ duyên hải miền Trung": "Diverse destinations along the Central Coast",
   "ĐÃ CHECK-IN": "CHECKED IN",
   "ĐÃ KÝ ĐIỆN TỬ": "ELECTRONICALLY SIGNED",
   "ĐÃ PHÊ DUYỆT (APPROVED)": "APPROVED",
@@ -1363,8 +1111,7 @@ const englishTranslations = <String, String>{
   "Đánh giá của khách hàng": "Customer reviews",
   "Đánh giá dịch vụ": "Service review",
   "Đánh giá không tồn tại.": "Review not found.",
-  "Đánh giá lúc: 04:30 sáng nay cho slot 05:00 - 07:00":
-      "Assessed at 04:30 today for the 05:00 - 07:00 slot",
+  "Đánh giá lúc: 04:30 sáng nay cho slot 05:00 - 07:00": "Assessed at 04:30 today for the 05:00 - 07:00 slot",
   "Đánh giá trải nghiệm": "Review experience",
   "Đánh giá từ khách hàng ({0})": "Customer reviews ({0})",
   "Đã bỏ {0} khỏi danh sách yêu thích.": "Removed {0} from favorites.",
@@ -1378,21 +1125,15 @@ const englishTranslations = <String, String>{
   "Đã dùng: {0}/{1} lượt": "Used: {0}/{1}",
   "Đã giải quyết": "Resolved",
   "Đã giải quyết (1)": "Resolved (1)",
-  "Đã gửi dịch vụ lên Ban kiểm duyệt DANASEA":
-      "Service submitted to DANASEA for review",
-  "Đã gửi khiếu nại thành công! Ban quản trị DANASEA sẽ phản hồi trong 24h.":
-      "Complaint submitted! DANASEA will respond within 24 hours.",
+  "Đã gửi dịch vụ lên Ban kiểm duyệt DANASEA": "Service submitted to DANASEA for review",
+  "Đã gửi khiếu nại thành công! Ban quản trị DANASEA sẽ phản hồi trong 24h.": "Complaint submitted! DANASEA will respond within 24 hours.",
   "Đã gửi liên kết xác minh": "Verification link sent",
   "Đã gửi liên kết xác minh đến {0}": "Verification link sent to {0}",
   "Đã gửi lại liên kết mới": "New link sent",
-  "Đã gửi minh chứng giải trình tới thẩm định viên DANASEA.":
-      "Supporting evidence sent to DANASEA reviewers.",
-  "Đã gửi mã đến {0}. Vui lòng nhập mã xác minh bên dưới:":
-      "A code was sent to {0}. Enter the verification code below:",
-  "Đã gửi phản hồi tới khách hàng thành công!":
-      "Reply sent to the customer successfully!",
-  "Đã gửi yêu cầu hủy dịch vụ thành công! Hệ thống đang xử lý đối soát.":
-      "Cancellation request submitted! The settlement is being processed.",
+  "Đã gửi minh chứng giải trình tới thẩm định viên DANASEA.": "Supporting evidence sent to DANASEA reviewers.",
+  "Đã gửi mã đến {0}. Vui lòng nhập mã xác minh bên dưới:": "A code was sent to {0}. Enter the verification code below:",
+  "Đã gửi phản hồi tới khách hàng thành công!": "Reply sent to the customer successfully!",
+  "Đã gửi yêu cầu hủy dịch vụ thành công! Hệ thống đang xử lý đối soát.": "Cancellation request submitted! The settlement is being processed.",
   "Đã hoàn thành": "Completed",
   "Đã hoàn tiền": "Refunded",
   "Đã hoàn tất": "Completed",
@@ -1404,16 +1145,14 @@ const englishTranslations = <String, String>{
   "Đã lưu hồ sơ doanh nghiệp thành công": "Business profile saved",
   "Đã lưu thông tin cơ bản": "Basic information saved",
   "Đã mở khóa slot {0}": "Slot {0} unlocked",
-  "Đã nhận yêu cầu của bạn về áo lặn kích cỡ L cho 2 người.":
-      "We received your request for two size L wetsuits.",
+  "Đã nhận yêu cầu của bạn về áo lặn kích cỡ L cho 2 người.": "We received your request for two size L wetsuits.",
   "Đã phê duyệt": "Approved",
   "Đã sao chép liên kết chia sẻ!": "Share link copied!",
   "Đã sao chép mã đơn hàng!": "Order ID copied!",
   "Đã thanh toán": "Paid",
   "Đã thanh toán (PAID)": "Paid (PAID)",
   "Đã thanh toán ({0})": "Paid ({0})",
-  "Đã thanh toán ngày 16/10/2024 vào Vietcombank":
-      "Paid to Vietcombank on Oct 16, 2024",
+  "Đã thanh toán ngày 16/10/2024 vào Vietcombank": "Paid to Vietcombank on Oct 16, 2024",
   "Đã thanh toán thành công": "Payment successful",
   "Đã thêm {0} vào giỏ hàng!": "Added {0} to your cart!",
   "Đã thêm ảnh mới": "New photo added",
@@ -1421,12 +1160,10 @@ const englishTranslations = <String, String>{
   "Đã tạm dừng mã {0}": "Code {0} paused",
   "Đã tạm dừng nhận khách cho dịch vụ": "New bookings paused for this service",
   "Đã tạm khóa": "Temporarily locked",
-  "Đã tạm khóa slot 15:30 để đảm bảo an toàn gió":
-      "The 15:30 slot is temporarily locked due to wind conditions",
+  "Đã tạm khóa slot 15:30 để đảm bảo an toàn gió": "The 15:30 slot is temporarily locked due to wind conditions",
   "Đã tạm khóa slot {0}": "Slot {0} temporarily locked",
   "Đã tạo liên kết chia sẻ vé điện tử!": "E-ticket share link created!",
-  "Đã tải lên chứng chỉ mới (Đang chờ duyệt)":
-      "New certificate uploaded (Pending review)",
+  "Đã tải lên chứng chỉ mới (Đang chờ duyệt)": "New certificate uploaded (Pending review)",
   "Đã từ chối": "Rejected",
   "Đã từ chối (0)": "Rejected (0)",
   "Đã từ chối đơn hàng": "Order rejected",
@@ -1437,30 +1174,25 @@ const englishTranslations = <String, String>{
   "Đã xảy ra lỗi": "Something went wrong",
   "Đã xử lý thành công": "Processed successfully",
   "Đã đánh dấu tất cả đã đọc": "All marked as read",
-  "Đã đính kèm ảnh chụp camera an ninh bến bãi.":
-      "Site security camera photo attached.",
+  "Đã đính kèm ảnh chụp camera an ninh bến bãi.": "Site security camera photo attached.",
   "Đã đóng": "Closed",
   "Đính kèm ảnh hiện trường (Tùy chọn)": "Attach on-site photos (optional)",
   "Đóng": "Close",
   "Đăng ký": "Register",
-  "Đăng ký thành công! Vui lòng xác minh email để bắt đầu.":
-      "Registration successful! Verify your email to get started.",
+  "Đăng ký thành công! Vui lòng xác minh email để bắt đầu.": "Registration successful! Verify your email to get started.",
   "Đăng ký trở thành đối tác": "Become a partner",
-  "Đăng ký tài khoản thành công! Vui lòng kiểm tra email để xác thực.":
-      "Account created! Check your email to verify it.",
+  "Đăng ký tài khoản thành công! Vui lòng kiểm tra email để xác thực.": "Account created! Check your email to verify it.",
   "Đăng ký đối tác": "Register as partner",
   "Đăng nhập": "Sign in",
   "Đăng nhập quản trị": "Administrator sign-in",
-  "Đăng nhập thành công! Chào mừng bạn trở lại DANASEA.":
-      "Signed in successfully! Welcome back to DANASEA.",
+  "Đăng nhập thành công! Chào mừng bạn trở lại DANASEA.": "Signed in successfully! Welcome back to DANASEA.",
   "Đăng nhập vào DANASEA": "Sign in to DANASEA",
   "Đăng xuất": "Sign out",
   "Đăng xuất tài khoản": "Sign out",
   "Đăng xuất tài khoản?": "Sign out of your account?",
   "ĐƠN CON #{0}": "SUB-ORDER #{0}",
   "Đơn #{0}": "Order #{0}",
-  "Đơn chưa được xác nhận. Chưa thể check-in.":
-      "This order is not confirmed and cannot be checked in yet.",
+  "Đơn chưa được xác nhận. Chưa thể check-in.": "This order is not confirmed and cannot be checked in yet.",
   "Đơn con #{0}": "Sub-order #{0}",
   "Đơn con: #{0}": "Sub-order: #{0}",
   "Đơn có khoản hoàn tiền": "Order with refund",
@@ -1469,26 +1201,18 @@ const englishTranslations = <String, String>{
   "Đơn giá duy nhất": "Single unit price",
   "Đơn giá {0} khách ({1} × {2} đ)": "Price for {0} guests ({1} × {2} VND)",
   "Đơn hàng": "Orders",
-  "Đơn hàng #{0} • Chèo SUP đón bình minh Mỹ Khê":
-      "Order #{0} • Mỹ Khê sunrise paddleboarding",
-  "Đơn hàng chưa được xác nhận. Chưa thể check-in.":
-      "This order is not confirmed and cannot be checked in yet.",
+  "Đơn hàng #{0} • Chèo SUP đón bình minh Mỹ Khê": "Order #{0} • Mỹ Khê sunrise paddleboarding",
+  "Đơn hàng chưa được xác nhận. Chưa thể check-in.": "This order is not confirmed and cannot be checked in yet.",
   "Đơn hàng của tôi": "My orders",
   "Đơn hàng mới": "New order",
-  "Đơn hàng đã bị hủy. Vé không còn giá trị.":
-      "This order was cancelled. The ticket is no longer valid.",
+  "Đơn hàng đã bị hủy. Vé không còn giá trị.": "This order was cancelled. The ticket is no longer valid.",
   "Đơn hàng đã bị từ chối.": "This order was rejected.",
-  "Đơn hàng đã được hoàn tiền. Vé không còn hiệu lực.":
-      "This order was refunded. The ticket is no longer valid.",
+  "Đơn hàng đã được hoàn tiền. Vé không còn hiệu lực.": "This order was refunded. The ticket is no longer valid.",
   "Đơn không tồn tại.": "Order not found.",
-  "Đơn đã hoàn tiền. Không thể check-in.":
-      "This order was refunded and cannot be checked in.",
-  "Đơn đã hủy. Không thể check-in.":
-      "This order was cancelled and cannot be checked in.",
-  "Đơn đặt chỗ trải nghiệm biển của bạn đã được xác nhận.":
-      "Your marine experience booking is confirmed.",
-  "Đưa mã QR cho đối tác quét xác nhận check-in":
-      "Show this QR code to the partner for check-in",
+  "Đơn đã hoàn tiền. Không thể check-in.": "This order was refunded and cannot be checked in.",
+  "Đơn đã hủy. Không thể check-in.": "This order was cancelled and cannot be checked in.",
+  "Đơn đặt chỗ trải nghiệm biển của bạn đã được xác nhận.": "Your marine experience booking is confirmed.",
+  "Đưa mã QR cho đối tác quét xác nhận check-in": "Show this QR code to the partner for check-in",
   "Đường dẫn định danh (Slug)": "URL identifier (Slug)",
   "Được gợi ý": "Recommended",
   "Được lưu trữ bảo mật trên DANASEA Cloud": "Stored securely on DANASEA Cloud",
@@ -1501,12 +1225,10 @@ const englishTranslations = <String, String>{
   "Đặt ngay": "Book now",
   "Đặt nhanh": "Quick booking",
   "Đặt trải nghiệm dễ dàng": "Book experiences easily",
-  "Đặt {0} ({1} khách, {2} - {3}) thành công!":
-      "Booked {0} ({1} guests, {2} - {3}) successfully!",
+  "Đặt {0} ({1} khách, {2} - {3}) thành công!": "Booked {0} ({1} guests, {2} - {3}) successfully!",
   "Địa chỉ cụ thể": "Full address",
   "Địa chỉ trụ sở / Bến bãi *": "Office / Site address *",
-  "Định dạng JPG, PNG dưới 5MB. Khuyên dùng ảnh chân dung rõ mặt.":
-      "JPG or PNG under 5 MB. A clear portrait photo is recommended.",
+  "Định dạng JPG, PNG dưới 5MB. Khuyên dùng ảnh chân dung rõ mặt.": "JPG or PNG under 5 MB. A clear portrait photo is recommended.",
   "ĐỐI TÁC": "PARTNER",
   "ĐỐI TÁC CHÍNH THỨC": "OFFICIAL PARTNER",
   "ĐỐI TÁC {0}": "PARTNER {0}",
@@ -1514,20 +1236,16 @@ const englishTranslations = <String, String>{
   "Đối soát doanh thu": "Revenue settlement",
   "Đối soát doanh thu kỳ này": "This period's revenue settlement",
   "Đối tác biển đã xác thực": "Verified marine partner",
-  "Đối tác gửi yêu cầu nhận tiền trực tiếp đến ban tài chính DANASEA. Hệ thống không tự động phê duyệt tức thì nhằm rà soát tính hợp lệ của tour đã hoàn tất. Thời gian xử lý được cập nhật theo tiến độ yêu cầu thanh toán.":
-      "Partners submit payout requests directly to DANASEA Finance. Requests are not approved instantly so completed tours can be verified. Processing times follow the request's progress.",
+  "Đối tác gửi yêu cầu nhận tiền trực tiếp đến ban tài chính DANASEA. Hệ thống không tự động phê duyệt tức thì nhằm rà soát tính hợp lệ của tour đã hoàn tất. Thời gian xử lý được cập nhật theo tiến độ yêu cầu thanh toán.": "Partners submit payout requests directly to DANASEA Finance. Requests are not approved instantly so completed tours can be verified. Processing times follow the request's progress.",
   "Đối tác hàng đầu": "Top partner",
   "Đối tác mới": "New partner",
   "Đối tác xác thực": "Verified partner",
-  "Đồng hành phát triển du lịch biển Đà Nẵng":
-      "Growing seaside tourism in Da Nang together",
+  "Đồng hành phát triển du lịch biển Đà Nẵng": "Growing seaside tourism in Da Nang together",
   "Đổi lịch": "Reschedule",
   "Đổi mật khẩu": "Change password",
   "Đổi mật khẩu thành công!": "Password changed successfully!",
-  "Đổi mật khẩu thành công! Bạn có thể đăng nhập ngay.":
-      "Password changed! You can sign in now.",
-  "Đổi mật khẩu định kỳ 90 ngày: Đặc biệt sau các đợt cao điểm du lịch biển hoặc thay đổi nhân sự phụ trách bến.":
-      "Change your password every 90 days, especially after peak tourist seasons or changes in site staff.",
+  "Đổi mật khẩu thành công! Bạn có thể đăng nhập ngay.": "Password changed! You can sign in now.",
+  "Đổi mật khẩu định kỳ 90 ngày: Đặc biệt sau các đợt cao điểm du lịch biển hoặc thay đổi nhân sự phụ trách bến.": "Change your password every 90 days, especially after peak tourist seasons or changes in site staff.",
   "Độ cao sóng": "Wave height",
   "Độ mạnh mật khẩu:": "Password strength:",
   "Độ nhạy thời tiết biển": "Weather sensitivity",
@@ -1541,22 +1259,16 @@ const englishTranslations = <String, String>{
   "Ưu tiên cao": "High priority",
   "Ảnh bìa đại diện": "Cover image",
   "Ảnh {0}": "Photo {0}",
-  "Ảnh đầu tiên là ảnh bìa. Dùng mũi tên để thay đổi thứ tự.":
-      "The first image is the cover. Use the arrows to reorder.",
+  "Ảnh đầu tiên là ảnh bìa. Dùng mũi tên để thay đổi thứ tự.": "The first image is the cover. Use the arrows to reorder.",
   "Ống kính sẵn sàng": "Camera ready",
   "• Cảng Sơn Trà": "• Sơn Trà Port",
-  "• Giấy tờ bị từ chối do mờ hoặc hết hạn. Vui lòng tải lại bản công chứng mới.":
-      "• Document rejected because it was unclear or expired. Upload a new certified copy.",
-  "• Giấy tờ đã được Admin phê duyệt. Dịch vụ gắn chứng chỉ này được phép mở bán.":
-      "• Document approved by an administrator. Services with this certificate may go on sale.",
-  "• Hồ sơ đang trong hàng đợi thẩm định của ban an toàn thể thao biển.":
-      "• Your documents are queued for review by the marine sports safety team.",
+  "• Giấy tờ bị từ chối do mờ hoặc hết hạn. Vui lòng tải lại bản công chứng mới.": "• Document rejected because it was unclear or expired. Upload a new certified copy.",
+  "• Giấy tờ đã được Admin phê duyệt. Dịch vụ gắn chứng chỉ này được phép mở bán.": "• Document approved by an administrator. Services with this certificate may go on sale.",
+  "• Hồ sơ đang trong hàng đợi thẩm định của ban an toàn thể thao biển.": "• Your documents are queued for review by the marine sports safety team.",
   "• {0} khách": "• {0} guests",
-  "📍 Đã gửi vị trí: Bến bãi Danang Ocean Club - Bãi biển Mỹ Khê":
-      "📍 Location shared: Danang Ocean Club - Mỹ Khê Beach",
+  "📍 Đã gửi vị trí: Bến bãi Danang Ocean Club - Bãi biển Mỹ Khê": "📍 Location shared: Danang Ocean Club - Mỹ Khê Beach",
 
-  'Nhập email hợp lệ và mật khẩu từ 8 ký tự. Khi đăng ký, hãy nhập họ tên.':
-      'Enter a valid email and a password of at least 8 characters. Include your name when registering.',
+  'Nhập email hợp lệ và mật khẩu từ 8 ký tự. Khi đăng ký, hãy nhập họ tên.': 'Enter a valid email and a password of at least 8 characters. Include your name when registering.',
 
   "Hoặc": "Or",
   "Chưa có tài khoản?": "Don't have an account?",
@@ -1566,33 +1278,23 @@ const englishTranslations = <String, String>{
   "Hiện mật khẩu": "Show password",
   "Ẩn mật khẩu": "Hide password",
   'Bản xem trước': 'Preview',
-  'Lướt chọn trải nghiệm biển yêu thích':
-      'Swipe to find your next ocean experience',
+  'Lướt chọn trải nghiệm biển yêu thích': 'Swipe to find your next ocean experience',
   "Nhập email hợp lệ và mật khẩu.": "Enter a valid email and password.",
-  "Nhập họ tên và mật khẩu mạnh; xác nhận mật khẩu phải khớp.":
-      "Enter your name and a strong password; passwords must match.",
-  "Mật khẩu 8–100 ký tự, gồm chữ hoa, chữ thường, số và ký tự đặc biệt.":
-      "Use 8–100 characters including uppercase, lowercase, numbers and a symbol (@\$!%*?&).",
-  "Đã gửi mã xác minh. Kiểm tra email của bạn.":
-      "Verification code sent. Check your email.",
-  "Nhấn gửi mã để nhận OTP gồm 6 chữ số. Mã có hiệu lực trong 5 phút.":
-      "Request a six-digit code by email. The code expires in five minutes.",
+  "Nhập họ tên và mật khẩu mạnh; xác nhận mật khẩu phải khớp.": "Enter your name and a strong password; passwords must match.",
+  "Mật khẩu 8–100 ký tự, gồm chữ hoa, chữ thường, số và ký tự đặc biệt.": "Use 8–100 characters including uppercase, lowercase, numbers and a symbol (@\$!%*?&).",
+  "Đã gửi mã xác minh. Kiểm tra email của bạn.": "Verification code sent. Check your email.",
+  "Nhấn gửi mã để nhận OTP gồm 6 chữ số. Mã có hiệu lực trong 5 phút.": "Request a six-digit code by email. The code expires in five minutes.",
   "Gửi mã xác minh": "Send verification code",
   "Xác minh email": "Verify email",
   "Dùng tài khoản khác": "Use another account",
   "Tài khoản cần xác minh email.": "Please verify your email.",
-  "Khôi phục mật khẩu chưa khả dụng. Vui lòng liên hệ hỗ trợ.":
-      "Password recovery is not available yet. Please contact support.",
+  "Khôi phục mật khẩu chưa khả dụng. Vui lòng liên hệ hỗ trợ.": "Password recovery is not available yet. Please contact support.",
   "Backend phải dùng HTTPS.": "The server must use HTTPS.",
-  "Không kết nối được máy chủ. Kiểm tra mạng và địa chỉ backend.":
-      "Cannot connect to the server. Check your connection and server address.",
-  "Máy chủ phản hồi quá lâu. Vui lòng thử lại.":
-      "The server timed out. Please try again.",
-  "Không thể thực hiện yêu cầu. Vui lòng thử lại.":
-      "Unable to complete the request. Please try again.",
+  "Không kết nối được máy chủ. Kiểm tra mạng và địa chỉ backend.": "Cannot connect to the server. Check your connection and server address.",
+  "Máy chủ phản hồi quá lâu. Vui lòng thử lại.": "The server timed out. Please try again.",
+  "Không thể thực hiện yêu cầu. Vui lòng thử lại.": "Unable to complete the request. Please try again.",
   "Phiên đăng nhập đã hết hạn.": "Your session has expired.",
-  "Hồ sơ bị từ chối. Vui lòng liên hệ hỗ trợ.":
-      "Your application was rejected. Please contact support.",
+  "Hồ sơ bị từ chối. Vui lòng liên hệ hỗ trợ.": "Your application was rejected. Please contact support.",
   "Hồ sơ đang chờ xét duyệt.": "Your application is pending review.",
   "Hoàn thiện hồ sơ doanh nghiệp": "Complete your business profile",
   "Gửi hồ sơ": "Submit application",
