@@ -60,6 +60,44 @@
 3. Đánh giá lại chính sách hoàn tiền qua `RefundPolicyEngine.evaluate(...)`.
 4. Nếu số tiền hoàn `refundAmount > 0`:
    - Tạo bản ghi `Refund` ở trạng thái `PENDING` kèm lý do, số tiền và **Idempotency Key** bảo vệ chống tạo lặp giao dịch.
-5. Cập nhật trạng thái đơn phụ: `SubOrder.status = CANCELLED` và hoàn trả số lượng slot tồn kho.
+   - Bản ghi này lưu trữ đầy đủ `subOrderId`, `paymentId`, số tiền cần hoàn và số lần thử lại (`retryCount = 0`).
+5. Cập nhật trạng thái đơn phụ: `SubOrder.status = CANCELLED` và hoàn trả số lượng slot tồn kho (`serviceSlotPort.releaseBookedSlot`).
 6. Phát sự kiện `SubOrderCancelledEvent` qua `OrderEventPublisherPort` để các module liên quan đồng bộ.
 7. Trả về chi tiết kết quả hủy kèm mã giao dịch hoàn tiền cho khách hàng.
+
+---
+
+### Giai đoạn 3: Thực thi chuyển tiền hoàn thực tế qua Cổng thanh toán (Refund Processing Pipeline)
+
+**Thành phần xử lý:** `RefundProcessingService` & `RefundProcessingJob` → `PaymentGatewayPort` (`PayPalPaymentAdapter` / `VNPayPaymentAdapter`) → `PostgreSQL`
+
+Các bản ghi hoàn tiền `Refund (status = PENDING)` được khởi tạo từ nhiều nguồn trong hệ thống:
+- Khách hàng chủ động hủy đơn (`RequestRefundUseCase`).
+- Hủy đặt chỗ / Vendor từ chối phục vụ (`BookingCancellationFinancialAdapter`).
+- Admin phê duyệt khiếu nại (`ResolveDisputeUseCase`).
+- Admin duyệt hủy tour do thời tiết xấu cảnh báo đỏ (`AdminWeatherAlertController`).
+
+**Quy trình xử lý hoàn tiền thực tế:**
+1. `RefundProcessingService.processRefund(refundId)` truy vấn thông tin thanh toán gốc (`Payment`) thành công của đơn hàng để lấy:
+   - Cổng thanh toán gốc (`VNPAY` hoặc `PAYPAL`).
+   - Mã tham chiếu giao dịch gốc (`providerPaymentId`, hoặc `providerCaptureId` đối với PayPal).
+2. Xây dựng yêu cầu `GatewayRefundRequest` và gọi `PaymentGatewayPort.refund(...)`:
+   - **Với PayPal:** Gọi PayPal REST API v2 `POST /v2/payments/captures/{capture_id}/refund` với số tiền quy đổi USD tương ứng, lưu lại `providerRefundId` trả về từ PayPal.
+   - **Với VNPay:** Gọi API hoàn tiền VNPay (`vnp_Command=refund`) với chữ ký HMAC-SHA512 và mã giao dịch gốc.
+3. **Cập nhật trạng thái & Xử lý sự cố:**
+   - **Thành công (`SUCCESS`):** Cập nhật `Refund.status = PROCESSED`, lưu `providerRefundId`, ghi nhận thời gian `processedAt`. Đồng bộ cập nhật trạng thái dòng tiền `MasterOrder.paymentStatus = REFUNDED`.
+   - **Bị từ chối (`REJECTED`):** Cập nhật `Refund.status = FAILED`, ghi nhận `failureReason` từ cổng.
+   - **Lỗi mạng / Timeout cổng (`RETRYABLE`):** Tăng `retryCount`, thiết lập thời gian thử lại tiếp theo (`nextRetryAt`) theo chiến lược giãn cách thời gian (Exponential Backoff), giữ nguyên trạng thái `PENDING`.
+   - Nếu số lần thử lại vượt quá hạn mức (ví dụ 5 lần): Chuyển sang `FAILED` và ghi log cảnh báo để quản trị viên can thiệp thủ công.
+4. **Scheduled Background Job (`RefundProcessingJob`):**
+   - Chạy định kỳ (mỗi 1 phút) tự động quét các bản ghi `Refund` ở trạng thái `PENDING` có `nextRetryAt <= now()` để tự động kích hoạt `RefundProcessingService.processPendingRefunds()`.
+
+---
+
+### Giai đoạn 4: Quản lý & Giám sát Hoàn tiền (Admin & Customer APIs)
+
+1. **Dành cho Quản trị viên (Admin Portal):**
+   - `GET /api/admin/refunds`: Tra cứu danh sách các khoản hoàn tiền toàn hệ thống (hỗ trợ phân trang, lọc theo trạng thái `PENDING`, `PROCESSED`, `FAILED`).
+   - `GET /api/admin/refunds/{id}`: Xem chi tiết khoản hoàn tiền, mã tham chiếu cổng, số lần thử lại (`retryCount`), thời gian xử lý và nguyên nhân lỗi (nếu có).
+2. **Dành cho Khách hàng:**
+   - `GET /api/orders/{orderId}/refunds`: Khách hàng tra cứu tiến trình và trạng thái các khoản hoàn tiền thuộc đơn hàng của mình.

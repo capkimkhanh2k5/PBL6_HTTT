@@ -54,36 +54,53 @@
 
 ---
 
-## 3. RevalidBooking.png — Xác nhận đặt chỗ (Sequence)
+## 3. RevalidBooking.png — Xác nhận đặt chỗ (Sequence & Ràng buộc bảo mật)
 
-**Thành phần:** `User` → `ConfirmBookingUseCase` → `Redis (Draft Cards)` → `Service/Slot DB`
+**Thành phần:** `User` → `AssistantController` → `ChatHistoryService` → `ConfirmBookingUseCase` → `ConfirmationCardStorePort (Redis)` → `GetPublicServiceDetailUseCase (PostgreSQL)` → `CreateBookingHoldUseCase`
 
 **Luồng:**
-1. Khách bấm xác nhận → `POST /confirm (cardId)`
-2. Lấy **Draft Card** từ Redis
-3. Truy vấn **giá & chỗ trống hiện tại** từ DB → so sánh với Card:
+1. Khách bấm xác nhận → `POST /api/assistant/conversations/{id}/confirm` gửi kèm `{"cardId": "..."}`.
+2. **Kiểm tra quyền sở hữu hội thoại (Ownership Guard):**
+   - Controller gọi `ChatHistoryService.getConversationForUser(id, currentUserId)`.
+   - Nếu hội thoại không tồn tại → HTTP 404 Not Found.
+   - Nếu hội thoại thuộc người dùng khác → ném `AccessDeniedException` trả về **HTTP 403 Forbidden** (`ACCESS_DENIED`).
+3. **Ràng buộc 3 bên (Card — Conversation — User):**
+   - Controller gọi `confirmBookingUseCase.execute(cardId, userId, sessionId, expectedConversationId = id)`.
+   - Lấy **Draft Card** từ Redis qua `cardStorePort.findById(cardId)`.
+   - Kiểm tra: `card.getConversationId().equals(expectedConversationId)`. Nếu không khớp → ném `AccessDeniedException` (**HTTP 403 Forbidden**), chặn đứng tấn công dùng Card của hội thoại khác (Cross-conversation card hijacking).
+4. **Truy vấn giá & chỗ trống thực tế** từ DB qua `GetPublicServiceDetailUseCase` → so sánh với Card:
 
 | Kết quả so sánh | Xử lý |
 |---|---|
-| **Giá thay đổi / Hết chỗ** | Hủy Card cũ → Tạo Alternative Card (đề xuất thay thế) → trả `ALTERNATIVE_SUGGESTED` |
-| **Dữ liệu khớp** | Tạo Booking chờ thanh toán → Xóa Draft Card (chống Replay Attack) → trả `SUCCESS` |
+| **Giá thay đổi / Hết chỗ** | Hủy Card cũ → Tạo Alternative Card (đề xuất thay thế) → trả `alternative_needed` |
+| **Dữ liệu khớp** | Kích hoạt `CreateBookingHoldUseCase` tạo giữ chỗ phân tán (Redis Lua lock + DB Booking `HOLD` TTL 15p) → Đánh dấu Card `CONFIRMED` → Ghi Audit Log → trả `success` kèm `bookingId`, `holdExpiresAt` |
+| **Lỗi bù trừ (Compensation)** | Nếu lưu Card thất bại sau khi tạo Hold, tự động gọi `CancelBookingHoldUseCase` giải phóng tồn kho ngay lập tức |
 
 ---
 
 ## 4. RevalidBookingFlow.png — Logic phân nhánh Re-validation (Flowchart)
 
-**Cây quyết định:**
-1. **Tìm ConfirmationCard** theo cardId
-2. **Trạng thái = PENDING?**
-   - Không → *"Thẻ không hợp lệ / Hết hạn"*
+**Cây quyết định chi tiết:**
+1. **Xác thực quyền sở hữu Conversation:** `conversation.userId == currentUserId`?
+   - Sai → **403 Forbidden**
+   - Không tìm thấy → **404 Not Found**
+   - Đúng → tiếp
+2. **Tìm ConfirmationCard** theo cardId:
+   - Không tìm thấy / hết hạn → ném `IllegalArgumentException`
+   - Tìm thấy → tiếp
+3. **Card thuộc về Conversation hiện tại?** (`card.conversationId == expectedConversationId`):
+   - Sai → **403 Forbidden** (`AccessDeniedException`)
+   - Đúng → tiếp
+4. **Trạng thái Card = PENDING?**
+   - Không → *"Thẻ không ở trạng thái PENDING"*
    - Có → tiếp
-3. **Còn slot trống?**
-   - Hết → `CANCELLED` → *"out_of_stock, gợi ý ngày khác"*
+5. **Còn slot trống?**
+   - Hết hẳn → `CANCELLED` → *"out_of_stock, gợi ý ngày khác"*
    - Còn → tiếp
-4. **Giá/Slot có thay đổi?**
-   - Không → `CONFIRMED & Giữ chỗ` → HTTP 200 thành công
+6. **Giá/Slot có thay đổi?**
+   - Không → Gọi `CreateBookingHoldUseCase` giữ chỗ → `CONFIRMED` → HTTP 200 thành công (`bookingId`, `holdExpiresAt`)
    - Có → kiểm tra retry
-5. **Retry count ≥ 2?**
+7. **Retry count ≥ 2?**
    - ≥ 2 → `CANCELLED` → *"Thay đổi quá nhiều lần, vui lòng đặt lại"*
    - < 2 → Tăng `retryCount` (Redis TTL:15p) → Tạo Card mới `PRICE_CHANGED / SLOT_UNAVAILABLE` → Hủy Card cũ → trả `alternative_needed`
 

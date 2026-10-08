@@ -31,7 +31,7 @@ Không quy đổi số endpoint thành phần trăm hoàn thành: một API tồ
 
 ## Những vấn đề cần sửa ở API đã có
 
-### P0 Thanh toán chưa nối đủ payment intent với webhook — đã sửa lõi persistence/idempotency
+### P0 Thanh toán chưa nối đủ payment intent với webhook — ĐÃ XỬ LÝ
 
 Cập nhật 06/10/2026: `CreatePaymentIntentUseCase` lưu và commit payment trước khi gọi gateway. Một transaction tiếp theo khóa payment rồi order để tuần tự hóa các request cùng key; khi gateway timeout, payment PENDING vẫn tồn tại và retry dùng lại cùng UUID. PayPal nhận `PayPal-Request-Id` bằng UUID đó. Entry point cũ trong `OrderPaymentService` cũng ủy quyền cho cùng use case.
 
@@ -39,7 +39,7 @@ Payment SUCCESS/FAILED/REFUNDED không được trả lại thành intent PENDIN
 
 Lõi nối payment ID trong hệ thống đã được sửa. Tích hợp provider hoàn chỉnh vẫn còn các việc ở mục cổng thanh toán bên dưới. Xem [kết quả kiểm tra sandbox](payment-sandbox-verification-2026-10-06.md).
 
-### P0 Hoàn tiền chưa thống nhất persistence và thực thi
+### P0 Hoàn tiền chưa thống nhất persistence và thực thi -> ĐÃ XỬ LÝ
 
 `OrderController.requestRefund()` gọi `RequestRefundUseCase`. Usecase truyền `subOrderId.toString()` vào tham số `providerTransactionId`, bỏ qua kết quả gateway, tạo UUID refund trong response, nhưng không lưu refund, không tra idempotency đã xử lý và không cập nhật/nhả chỗ trong luồng đó. Webhook refund lại cần tìm refund đã lưu. Hệ quả: ID phản hồi không có lifecycle bền vững và gọi lặp chưa được bảo vệ bằng việc chỉ yêu cầu header.
 
@@ -49,15 +49,15 @@ Cần dùng payment thành công gốc để lấy provider và transaction/capt
 
 Bằng chứng: `modules/order/application/usecases/RequestRefundUseCase.java:140`, `modules/order/application/OrderPaymentService.java:416`, `modules/order/infrastructure/BookingCancellationFinancialAdapter.java`, `modules/dispute/application/usecases/ResolveDisputeUseCase.java`, `modules/weather/presentation/controllers/AdminWeatherAlertController.java`.
 
-### P0 Kiểm tra quyền sở hữu còn thiếu ở một số nhánh
+### P0 Kiểm tra quyền sở hữu còn thiếu ở một số nhánh — ĐÃ XỬ LÝ
 
-- `GET /api/assistant/conversations/{id}` đọc trực tiếp repository. `GET .../{id}/history` gọi bản `getRecentMessages()` không kiểm tra user. Cả hai chỉ yêu cầu đã đăng nhập. Service đã có `getConversationForUser()` và `getRecentMessagesForUser()` nhưng controller chưa dùng. Người dùng biết UUID có thể yêu cầu dữ liệu hội thoại người khác theo đường gọi này.
-- `POST /api/orders`: nhánh tìm order cũ theo booking ID trong `CreateOrderUseCase` trả order trước bước kiểm tra chủ booking. Cần kiểm tra owner trên mọi nhánh idempotent, không chỉ nhánh tạo mới.
-- `POST /api/assistant/conversations/{id}/confirm`: controller chưa kiểm tra owner hội thoại, chưa truyền `id` vào overload `expectedConversationId` đã có trong usecase. Cần ràng buộc card, conversation và user trước khi tạo hold.
+Cập nhật 08/10/2026:
+- `GET /api/assistant/conversations/{id}` và `GET .../{id}/history`: `AssistantController` đã chuyển sang gọi `ChatHistoryService.getConversationForUser()` và `getRecentMessagesForUser()`, kiểm tra quyền sở hữu của user đã đăng nhập. Trả về 403 Forbidden (`ACCESS_DENIED`) nếu hội thoại thuộc user khác, 404 Not Found nếu không tồn tại.
+- `POST /api/assistant/conversations/{id}/confirm`: `AssistantController` đã kiểm tra quyền sở hữu hội thoại trước và truyền `id` vào overload `confirmBookingUseCase.execute(cardId, userId, sessionId, id)`. Ràng buộc chặt chẽ Card, Conversation và User trước khi tạo hold; trả về 403 nếu hội thoại thuộc user khác hoặc card thuộc conversation khác.
+- `POST /api/orders`: `CreateOrderUseCase` đã bổ sung kiểm tra quyền sở hữu `order.getCustomerId().equals(command.customerId())` ở cả hai nhánh idempotency (`findByBookingId` và `findByCustomerIdAndIdempotencyKey`), ném `UnauthorizedOrderAccessException` (403 `UNAUTHORIZED_ORDER_ACCESS`) nếu phát hiện request lặp của user khác.
+- Đã bổ sung 2 bộ test regression ở tầng HTTP với 2 tài khoản A/B: `AssistantOwnershipHttpRegressionTest` (10 test cases) và `OrderOwnershipHttpRegressionTest` (5 test cases), cùng các test case bổ sung trong `CreateOrderUseCaseTest`.
 
-Cần regression ở tầng HTTP với hai tài khoản A/B cho cả đọc dữ liệu và request lặp.
-
-Bằng chứng: `modules/ai/presentation/controllers/AssistantController.java:103`, `:123`, `:131`; `modules/ai/domain/services/ChatHistoryService.java`; `modules/order/application/usecases/CreateOrderUseCase.java:64`.
+Bằng chứng: `modules/ai/presentation/controllers/AssistantController.java:103`, `:123`, `:131`; `modules/ai/domain/services/ChatHistoryService.java`; `modules/order/application/usecases/CreateOrderUseCase.java:64`; `modules/ai/presentation/controllers/AssistantOwnershipHttpRegressionTest.java`; `modules/order/presentation/controllers/OrderOwnershipHttpRegressionTest.java`.
 
 ### P0/P1 Cổng thanh toán có route nhưng tích hợp thực chưa hoàn chỉnh
 

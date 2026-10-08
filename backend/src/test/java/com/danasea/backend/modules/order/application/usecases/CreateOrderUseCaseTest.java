@@ -246,5 +246,37 @@ class CreateOrderUseCaseTest {
                     .isInstanceOf(InvalidOrderStateException.class)
                     .hasMessageContaining("idempotency key was already used for another booking");
         }
+
+        @Test
+        @DisplayName("Chặn IDOR trên nhánh idempotent bookingId (403): Order cũ thuộc về khách hàng khác")
+        void shouldThrowUnauthorizedAccessWhenExistingOrderByBookingBelongsToAnotherCustomer() {
+            UUID otherCustomer = UUID.randomUUID();
+            MasterOrder existing = MasterOrder.createFromBooking(
+                    otherCustomer, bookingId, new BigDecimal("500.00"), OffsetDateTime.now().plusMinutes(10), idempotencyKey);
+
+            when(masterOrderRepository.findByBookingId(bookingId)).thenReturn(Optional.of(existing));
+
+            CreateOrderCommand command = new CreateOrderCommand(customerId, bookingId, idempotencyKey);
+
+            assertThatThrownBy(() -> useCase.execute(command))
+                    .isInstanceOf(UnauthorizedOrderAccessException.class);
+            verify(bookingLookupPort, never()).findBookingForOrder(any());
+        }
+
+        @Test
+        @DisplayName("Chặn IDOR trên nhánh idempotent key (403): Order cũ thuộc về khách hàng khác")
+        void shouldThrowUnauthorizedAccessWhenExistingOrderByKeyBelongsToAnotherCustomer() {
+            UUID otherCustomer = UUID.randomUUID();
+            MasterOrder existing = MasterOrder.createFromBooking(
+                    otherCustomer, bookingId, new BigDecimal("500.00"), OffsetDateTime.now().plusMinutes(10), idempotencyKey);
+
+            when(masterOrderRepository.findByBookingId(bookingId)).thenReturn(Optional.empty());
+            when(masterOrderRepository.findByCustomerIdAndIdempotencyKey(customerId, idempotencyKey)).thenReturn(Optional.of(existing));
+
+            CreateOrderCommand command = new CreateOrderCommand(customerId, bookingId, idempotencyKey);
+
+            assertThatThrownBy(() -> useCase.execute(command))
+                    .isInstanceOf(UnauthorizedOrderAccessException.class);
+        }
     }
 }

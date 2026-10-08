@@ -35,8 +35,8 @@
 2. Áp dụng **Pessimistic Lock** (`findByIdForUpdate`) để đảm bảo tính an toàn đồng thời trong cơ sở dữ liệu.
 3. Kiểm tra nếu khiếu nại đã được giải quyết trước đó, ném ngoại lệ `409 DisputeAlreadyResolvedException`.
 4. **Phân nhánh xử lý tài chính theo quyết định:**
-   - **`RESOLVED_REFUND` (Hoàn 100%):** Tính số tiền hoàn = toàn bộ giá trị đơn phụ (`subtotal`). Tạo bản ghi `Refund` ở trạng thái `PENDING` với lý do `ADMIN_OVERRIDE`.
-   - **`RESOLVED_PARTIAL` (Hoàn một phần):** Tính số tiền hoàn theo tỷ lệ phần trăm được chỉ định (`subtotal * percentage / 100`). Tạo bản ghi `Refund` ở trạng thái `PENDING`.
+   - **`RESOLVED_REFUND` (Hoàn 100%):** Tính số tiền hoàn = toàn bộ giá trị đơn phụ (`subtotal`). Ủy quyền qua `financialRefundPort.initiateRefund(...)` tạo bản ghi `Refund (PENDING)` với lý do `DISPUTE` và kích hoạt luồng hoàn tiền thực tế qua cổng thanh toán gốc.
+   - **`RESOLVED_PARTIAL` (Hoàn một phần):** Tính số tiền hoàn theo tỷ lệ phần trăm được chỉ định (`subtotal * percentage / 100`). Ủy quyền qua `financialRefundPort.initiateRefund(...)` tạo bản ghi `Refund (PENDING)` chuyển sang `RefundProcessingService`.
    - **`RESOLVED_REJECTED` (Bác bỏ):** Giữ nguyên đơn hàng, không tạo bản ghi hoàn tiền.
 5. Tạo khóa chống lặp hoàn tiền (**Idempotency Key:** `"dispute-{disputeId}"`) để đảm bảo không bị trừ tiền nhiều lần.
 6. Cập nhật trạng thái Dispute thành trạng thái giải quyết tương ứng, ghi nhận `adminId` và thời điểm phê duyệt.

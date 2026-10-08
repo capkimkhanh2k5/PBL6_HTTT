@@ -123,8 +123,8 @@
         - **Cho phép:** Gửi cảnh báo → kết thúc
         - **Duyệt HỦY:**
           - Chuyển SubOrder → `CANCELLED`
-          - Tạo `RefundJpaEntity`: hoàn tiền 100% (Reason: WEATHER)
-          - Gửi email/in-app xác nhận hoàn tiền
+          - Khởi tạo hoàn tiền qua `financialRefundPort.initiateRefund(...)` tạo bản ghi `Refund (PENDING)` hoàn tiền 100% (Reason: `WEATHER`), kích hoạt pipeline `RefundProcessingService` gửi lệnh hoàn tiền thực tế sang cổng thanh toán
+          - Gửi email/in-app thông báo khẩn cấp và xác nhận hoàn tiền cho khách hàng
 
 ---
 
