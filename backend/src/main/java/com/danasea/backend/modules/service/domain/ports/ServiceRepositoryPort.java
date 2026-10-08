@@ -13,6 +13,8 @@ public interface ServiceRepositoryPort {
 
     Optional<Service> findById(UUID id);
 
+    Optional<Service> findByIdForUpdate(UUID id);
+
     List<Service> findByVendorId(UUID vendorId);
 
     List<Service> findByStatus(ServiceStatus status);

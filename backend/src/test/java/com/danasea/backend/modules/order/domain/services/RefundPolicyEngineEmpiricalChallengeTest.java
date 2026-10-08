@@ -2,8 +2,14 @@ package com.danasea.backend.modules.order.domain.services;
 
 import com.danasea.backend.modules.order.domain.models.RefundEvaluationResult;
 import com.danasea.backend.modules.order.domain.models.RefundReason;
+import com.danasea.backend.modules.order.application.usecases.GetCancellationPreviewUseCase;
+import com.danasea.backend.modules.order.infrastructure.adapters.ServiceSlotDepartureLookupAdapter;
+import com.danasea.backend.modules.order.infrastructure.persistence.adapters.MasterOrderRepositoryAdapter;
+import com.danasea.backend.modules.order.infrastructure.persistence.adapters.SubOrderRepositoryAdapter;
 import com.danasea.backend.modules.order.infrastructure.persistence.entities.MasterOrderJpaEntity;
 import com.danasea.backend.modules.order.infrastructure.persistence.entities.SubOrderJpaEntity;
+import com.danasea.backend.modules.order.infrastructure.persistence.mappers.MasterOrderMapper;
+import com.danasea.backend.modules.order.infrastructure.persistence.mappers.SubOrderMapper;
 import com.danasea.backend.modules.order.infrastructure.persistence.repositories.JpaMasterOrderRepository;
 import com.danasea.backend.modules.order.infrastructure.persistence.repositories.JpaSubOrderRepository;
 import com.danasea.backend.modules.order.presentation.controllers.OrderController;
@@ -494,18 +500,16 @@ public class RefundPolicyEngineEmpiricalChallengeTest {
             customerId = UUID.randomUUID();
             masterOrderId = UUID.randomUUID();
 
-            com.danasea.backend.modules.order.infrastructure.persistence.mappers.MasterOrderMapper masterOrderMapper =
-                    new com.danasea.backend.modules.order.infrastructure.persistence.mappers.MasterOrderMapper();
-            com.danasea.backend.modules.order.infrastructure.persistence.mappers.SubOrderMapper subOrderMapper =
-                    new com.danasea.backend.modules.order.infrastructure.persistence.mappers.SubOrderMapper();
-            com.danasea.backend.modules.order.infrastructure.persistence.adapters.MasterOrderRepositoryAdapter masterOrderAdapter =
-                    new com.danasea.backend.modules.order.infrastructure.persistence.adapters.MasterOrderRepositoryAdapter(masterOrderRepository, masterOrderMapper);
-            com.danasea.backend.modules.order.infrastructure.persistence.adapters.SubOrderRepositoryAdapter subOrderAdapter =
-                    new com.danasea.backend.modules.order.infrastructure.persistence.adapters.SubOrderRepositoryAdapter(subOrderRepository, subOrderMapper);
-            com.danasea.backend.modules.order.infrastructure.adapters.ServiceSlotDepartureLookupAdapter slotAdapter =
-                    new com.danasea.backend.modules.order.infrastructure.adapters.ServiceSlotDepartureLookupAdapter(serviceSlotRepository);
-            com.danasea.backend.modules.order.application.usecases.GetCancellationPreviewUseCase previewUseCase =
-                    new com.danasea.backend.modules.order.application.usecases.GetCancellationPreviewUseCase(
+            MasterOrderMapper masterOrderMapper = new MasterOrderMapper();
+            SubOrderMapper subOrderMapper = new SubOrderMapper();
+            MasterOrderRepositoryAdapter masterOrderAdapter =
+                    new MasterOrderRepositoryAdapter(masterOrderRepository, masterOrderMapper);
+            SubOrderRepositoryAdapter subOrderAdapter =
+                    new SubOrderRepositoryAdapter(subOrderRepository, subOrderMapper);
+            ServiceSlotDepartureLookupAdapter slotAdapter =
+                    new ServiceSlotDepartureLookupAdapter(serviceSlotRepository);
+            GetCancellationPreviewUseCase previewUseCase =
+                    new GetCancellationPreviewUseCase(
                             masterOrderAdapter,
                             subOrderAdapter,
                             slotAdapter,

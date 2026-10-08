@@ -144,6 +144,12 @@
 - [x] GET /api/admin/services?status=
 - [x] PATCH /api/admin/services/{id}/approve (đã gọi canPublish() safety guard)
 - [x] PATCH /api/admin/services/{id}/reject
+- [x] GET /api/vendor/services/{id}/options (Xem lựa chọn đặt của dịch vụ)
+- [x] POST /api/vendor/services/{id}/options (Tạo lựa chọn đặt SHARED hoặc PRIVATE)
+- [x] PATCH /api/vendor/services/{id}/options/{optionId} (Sửa hoặc ngừng bán lựa chọn)
+- [x] GET /api/vendor/services/{id}/slots (Xem ca và cấu hình tồn chỗ)
+- [x] POST /api/vendor/services/{id}/slots (Tạo ca: PERSON_LIMIT hoặc SHARED_CAPACITY_UNITS)
+- [x] PATCH /api/vendor/services/{id}/slots/{slotId} (Sửa ca, hạn mức, bảo vệ cam kết hoặc đóng/mở)
 
 ### Vendor Services — Test
 - [x] CreateServiceUseCaseTest (6 case)
@@ -153,6 +159,8 @@
 - [x] RejectServiceUseCaseTest (3 case)
 - [x] DeleteServiceUseCaseTest (3 case)
 - [x] ServiceControllerTest (13 case RBAC)
+- [x] ServiceOptionsAndInventoryAllocationIntegrationTest: vendor khác không được đọc/tạo/sửa option; booking phải chọn option hoạt động thuộc dịch vụ. Không dùng tên test class chưa tồn tại.
+- [x] ServiceOptionsAndInventoryAllocationIntegrationTest: ca trùng bị chặn; sửa tồn tính cả hold còn hiệu lực; giữ nguyên bookedCount; khóa ca với checkout; đơn vị thuê riêng không được đổi sức chứa trong thời gian cam kết. PATCH không nhận ngày/giờ nên không đổi được lịch ca.
 
 ### Service Images & Safety Documents — API
 - [x] POST /api/vendor/services/{serviceId}/images
@@ -171,7 +179,8 @@
 
 ### Public Catalog + Wishlist + Recently Viewed — API
 - [x] GET /api/services
-- [x] GET /api/services/{id}
+- [x] GET /api/services/{id} (trả chi tiết dịch vụ kèm danh sách options để khách chọn)
+- [x] GET /api/services/{id}/slots?optionId=&from=&to=&quantity=&allowSplit= (Khách xem ca khả dụng theo lựa chọn đặt)
 - [x] GET /api/v1/catalog (alias của GET /api/services)
 - [x] GET /api/v1/catalog/{id} (alias của GET /api/services/{id})
 - [x] POST /api/wishlists/{serviceId}
@@ -181,7 +190,7 @@
 
 ### Public Catalog + Wishlist + Recently Viewed — Test
 - [x] SearchServicesUseCaseTest
-- [x] GetServiceDetailUseCaseTest (atomic increment, DRAFT→404)
+- [x] GetServiceDetailUseCaseTest (atomic increment, DRAFT→404, trả options hoạt động)
 - [x] RecordRecentlyViewedUseCaseTest (upsert userId/sessionId)
 - [x] WishlistUseCaseTest (idempotent add/remove)
 - [x] CatalogControllerTest
@@ -204,7 +213,7 @@
 - [ ] Hoàn thiện gửi yêu cầu refund tới cổng gốc, thông báo khách hàng và gợi ý vendor khác còn slot để khách tự chọn lại
 
 ### API
-- [x] POST /api/bookings/hold (giữ chỗ nhiều dịch vụ trong 1 lần, TTL 10-15 phút)
+- [x] POST /api/bookings/hold (giữ chỗ nhiều dịch vụ/lựa chọn trong 1 lần, hỗ trợ SHARED và PRIVATE, TTL 10-15 phút)
 - [x] POST /api/bookings/{holdId}/confirm (chỉ xác nhận sau khi thanh toán toàn bộ thành công)
 - [x] DELETE /api/bookings/hold/{holdId}
 - [x] GET /api/bookings/{id}
@@ -215,12 +224,40 @@
 - [x] Scheduled job dọn Redis hold hết hạn + rollback inventory
 
 ### Test
-- [x] CreateBookingHoldUseCaseTest (nhiều dịch vụ trong 1 hold, slot hết → chặn, TTL đúng)
+- [x] CreateBookingHoldUseCaseTest (nhiều dịch vụ, slot hết, TTL, giới hạn tổng quantity); validate option/max pax và allocation được kiểm tra bằng ServiceOptionsAndInventoryAllocationIntegrationTest.
 - [x] ConfirmBookingUseCaseTest (chỉ confirm khi đã thanh toán đủ, hold hết hạn → lỗi, sai owner → 403)
-- [ ] Test race condition đa luồng thật (2 request giữ slot cuối cùng, dùng Lua script atomic)
+- [x] Test race condition đa luồng thật (2 request giữ slot cuối cùng, dùng Lua script atomic - ServiceOptionsAndInventoryAllocationIntegrationTest)
 - [x] CancelBookingUseCaseTest (đúng mốc thời gian mất toàn bộ tiền)
 - [x] BookingExpiryJobTest (rollback đúng, không rollback nhầm hold đã confirm)
 - [x] BookingControllerTest (IDOR: khách A/B, vendor không liên quan)
+- [x] ServiceOptionsAndInventoryAllocationIntegrationTest (33 test với PostgreSQL 16 + Redis thật): 10 tình huống cơ bản và 23 hồi quy cho nhiều item cùng ca, giữ cả nhóm, split có đồng ý, rollback toàn bộ hold, booked/held tách biệt, ca đã bắt đầu/ca trùng, option ngừng bán/sai dịch vụ, participantsCount âm, vendor ownership, trả tồn private khi từ chối, trả tồn idempotent, hold hết hạn, đơn vị private không bị mở thêm chỗ, checkout cạnh tranh với sửa sức chứa, và hủy hold cạnh tranh với xác nhận thanh toán, và item chưa xác nhận không được trừ tồn đã đặt của booking khác.
+- [x] BookingHoldControllerTest: request cũ không có allowSplit vẫn hoạt động; allowSplit=true được truyền đúng; participantsCount âm bị chặn trước use case.
+- [x] RefundProcessingServiceTest: hoàn tiền của item có allocation gọi cơ chế trả tồn theo bookingItemId đúng một lần; dữ liệu legacy không có bookingItemId giữ nhánh cũ.
+
+### Hợp đồng booking và tồn dùng chung
+
+**Kiểm chứng ngày 2026-10-08:** `./mvnw verify` → BUILD SUCCESS; 1.624 tests, 0 failures, 0 errors, 135 skipped. Bao gồm 33 test tồn/option tích hợp trên PostgreSQL 16 + Redis 7, 11 test BookingHoldController, 13 test RefundProcessingService, và 2 test migration (database mới + nâng V18→V19). Guard inventory xác nhận 122 endpoint. `git diff --check` đạt. Đây là bằng chứng backend/test, không thay thế nghiệm thu thanh toán sandbox qua giao diện.
+
+- `slotId` là ca/chuyến; `optionId` xác định SHARED/PER_PERSON hoặc PRIVATE/PER_PACKAGE. Có nhiều option hoạt động thì phải gửi optionId; ngừng bán tất cả option không được fallback về giá service.
+- `quantity` là số người với SHARED, số gói với PRIVATE. `participantsCount` nếu có phải >= 1 và là số khách mỗi gói trong item; các gói có số khách khác nhau gửi thành các item riêng.
+- `allowSplit` mặc định false (kể cả request cũ hoặc null): cả nhóm ở một đơn vị đủ chỗ; chỉ chia qua nhiều đơn vị khi true. API availability dùng cùng cờ để tính `bookable`.
+- PERSON_LIMIT dành cho khách ghép. PRIVATE chỉ được đặt trên SHARED_CAPACITY_UNITS; giữ toàn bộ đơn vị đủ sức chứa theo giới hạn gói, không dựa vào số khách thực tế để chọn đơn vị nhỏ hơn.
+- Mọi item cùng slot trong một hold dùng chung kế hoạch phân bổ tích lũy. Không đủ tồn ở bất kỳ item nào thì không giữ một phần.
+- Checkout, xác nhận và sửa tồn khóa cùng bản ghi slot. Hủy hold và xác nhận cùng khóa booking; Redis hold chỉ được nhả sau khi transaction hủy commit. `bookedCount` chỉ tính booking đã xác nhận; hold được tính riêng, bỏ qua hold hết hạn.
+- Hủy/từ chối/hoàn tiền trả đúng allocation theo bookingItemId; cờ `capacity_released` ngăn trả lặp. Các sub-order legacy không có bookingItemId dùng nhánh trả quantity cũ.
+- V19 bổ sung cờ trả tồn, đối soát lại bộ đếm shared units theo allocation đã xác nhận, và unique(service_id, date, start_time). PostgreSqlMigrationIntegrationTest kiểm tra database mới và nâng V18→V19: bỏ bộ đếm hold hết hạn/item đã từ chối nhưng giữ nguyên allocation còn hiệu lực. Ca được kiểm tra theo Asia/Ho_Chi_Minh.
+
+Ví dụ hai gói riêng có số khách khác nhau trong cùng ca:
+```json
+{
+  "items": [
+    {"slotId": "<slotId>", "optionId": "<privateOptionId>", "quantity": 1, "participantsCount": 4},
+    {"slotId": "<slotId>", "optionId": "<privateOptionId>", "quantity": 1, "participantsCount": 7}
+  ]
+}
+```
+Hai item phải nhận hai đơn vị khác nhau và tính giá hai gói. Nhóm ghép 4 người khi đơn vị 1 còn 2 chỗ sẽ được đưa nguyên nhóm vào đơn vị 2 nếu đủ chỗ.
+
 
 ---
 
@@ -404,7 +441,7 @@
 
 # ĐỀ XUẤT
 
-1. **Quản lý lịch và tồn chỗ** Vendor chưa có API tự tạo/sửa/đóng lịch bán. Khách cần nhận được `slotId`, giờ hoạt động và chỗ còn trống để đặt.
+1. **Quản lý lịch và tồn chỗ — đã có API** Lịch, option và tồn dùng chung đã được triển khai trong EPIC-02/03; các mục API bên dưới đã nằm trong inventory, không còn là API thiếu. Tạo lịch lặp, đồng bộ tồn từ kênh ngoài và điều phối phương tiện thực tế nằm ngoài đợt triển khai này.
    - `GET /api/services/{id}/slots`
    - `GET/POST /api/vendor/services/{id}/slots`
    - `PATCH /api/vendor/services/{id}/slots/{slotId}`
