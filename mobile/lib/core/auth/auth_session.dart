@@ -213,6 +213,14 @@ class AuthSession {
     }
   }
 
+  Future<void> updateProfile({required String fullName}) async {
+    profile = await request(
+      '/api/users/me',
+      method: 'PATCH',
+      data: {'fullName': fullName.trim()},
+    );
+  }
+
   Future<void> refresh() =>
       _refreshing ??= _doRefresh().whenComplete(() => _refreshing = null);
   Future<void> _doRefresh() async {
