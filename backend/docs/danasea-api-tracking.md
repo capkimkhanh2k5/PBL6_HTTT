@@ -263,10 +263,11 @@
 - [ ] Đăng ký URL HTTPS callback PayPal và APP_PAYPAL_WEBHOOK_ID; nghiệm thu capture/refund và callback trên sandbox thật
 - [ ] Đối soát thủ công trường hợp mất provider refund ID và không có callback chứa invoice_id/mã thao tác; tiếp tục PENDING, không tự gửi lại refund
 - [ ] Bản ghi payment cũ thiếu gateway amount/currency/ngày VNPay cần khôi phục dữ liệu từ giao dịch cổng gốc; không suy đoán bằng tỷ giá hiện tại
-- [ ] Kiểm tra owner trước khi trả order đã có ở nhánh idempotent
+- [x] Kiểm tra owner trước khi trả order đã có ở cả nhánh bookingId và idempotency key; sai owner trả 403 trước khi đọc sub-order
 
 ### Test
 - [x] CreateOrderUseCaseTest (split đúng Sub-Order theo vendor, chờ thanh toán toàn bộ)
+- [x] OrderOwnershipHttpRegressionTest (5 ca MockMvc standalone: owner tạo/replay được; user khác bị chặn ở booking mới và hai nhánh replay)
 - [x] OrderSplittingTest (RabbitMQ message đúng số lượng vendor)
 - [x] PaymentWebhookHmacTest (chữ ký sai → từ chối)
 - [x] PaymentWebhookIdempotencyTest (trùng transactionId → xử lý 1 lần)
@@ -331,10 +332,12 @@
 - [x] GET /api/assistant/conversations/{id}/history
 
 ### AI — Việc cần hoàn thiện
-- [ ] Kiểm tra owner ở API đọc hội thoại và lịch sử
-- [ ] Ràng buộc owner, conversationId và confirmation card trước khi tạo hold
+- [x] Kiểm tra owner ở API đọc hội thoại và lịch sử; sai owner trả 403, UUID không tồn tại trả 404
+- [x] Ràng buộc owner, conversationId và confirmation card trước khi tạo hold; chặn ghép card của hội thoại khác
 
 ### Test
+- [x] AssistantOwnershipHttpRegressionTest (10 ca MockMvc standalone với service/use case thật và repository mock: đọc/confirm đúng owner, chặn truy cập chéo và trả 404 khi không tồn tại)
+- [x] Nghiệm thu quyền sở hữu ngày 08/10/2026: 38 test tập trung pass; 11 probe bổ sung ngoài repository dùng JWT/Spring Security/PostgreSQL thật pass (card store và lệnh tạo hold được mock). Toàn bộ `mvn verify` chạy 1.587 test, 0 failure, 2 error, 135 skip: hai error ở fixture Dispute đặt chuyến 09:00 ngày chạy, đã tái hiện khi chạy trước 09:00; chưa xác nhận full suite xanh
 - [ ] AssistantChatUseCaseTest (tool calling đúng function)
 - [ ] Test rate limit endpoint chat
 - [ ] Test fallback khi LLM lỗi/timeout

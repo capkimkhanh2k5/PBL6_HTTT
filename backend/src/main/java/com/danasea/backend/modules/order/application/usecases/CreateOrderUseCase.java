@@ -65,6 +65,9 @@ public class CreateOrderUseCase {
         Optional<MasterOrder> existingByBooking = masterOrderRepository.findByBookingId(command.bookingId());
         if (existingByBooking.isPresent()) {
             MasterOrder order = existingByBooking.get();
+            if (!order.getCustomerId().equals(command.customerId())) {
+                throw new UnauthorizedOrderAccessException(command.bookingId(), command.customerId());
+            }
             order.setSubOrders(subOrderRepository.findByMasterOrderId(order.getId()));
             return MasterOrderDetailResult.fromDomain(order);
         }
@@ -74,6 +77,9 @@ public class CreateOrderUseCase {
                 command.customerId(), command.idempotencyKey());
         if (existingByKey.isPresent()) {
             MasterOrder order = existingByKey.get();
+            if (!order.getCustomerId().equals(command.customerId())) {
+                throw new UnauthorizedOrderAccessException(command.bookingId(), command.customerId());
+            }
             if (!command.bookingId().equals(order.getBookingId())) {
                 throw new InvalidOrderStateException("The idempotency key was already used for another booking.");
             }

@@ -12,14 +12,18 @@
 
 ---
 
-## 1. Order_Creation_And_Splitting.png — Tạo Master Order & Tách Sub-Orders 1:1
+### 1. Order_Creation_And_Splitting.png — Tạo Master Order & Tách Sub-Orders 1:1
 
 **Luồng nghiệp vụ chi tiết:**
 1. Khách hàng gửi yêu cầu tạo đơn qua `POST /api/orders` với `{bookingId}` và header `Idempotency-Key`.
-2. **Kiểm tra Idempotency:** Tra cứu qua `MasterOrderRepositoryPort.findByBookingId(bookingId)`. Nếu đơn hàng cho Booking này đã tồn tại, lập tức trả về kết quả `MasterOrder` hiện có (Idempotent response) để tránh tạo trùng lặp.
-3. **Xác thực Booking & Chống IDOR:**
+2. **Kiểm tra Idempotency & Bảo vệ quyền sở hữu (IDOR Guard):**
+   - **Nhánh tra cứu theo `bookingId` (`findByBookingId`):** Nếu đơn hàng cho Booking này đã tồn tại, hệ thống **bắt buộc kiểm tra quyền sở hữu**: `order.getCustomerId().equals(currentUserId)`.
+     - Nếu khớp: Lập tức trả về kết quả `MasterOrder` hiện có (`201 Created` / Idempotent response).
+     - Nếu không khớp (User B cố tình gửi lại `bookingId` của User A): Ném ngay `UnauthorizedOrderAccessException` trả về **HTTP 403 Forbidden** (`UNAUTHORIZED_ORDER_ACCESS`), triệt tiêu nguy cơ rò rỉ dữ liệu đơn hàng và thông tin cá nhân.
+   - **Nhánh tra cứu theo Idempotency Key (`findByCustomerIdAndIdempotencyKey`):** Kiểm tra quyền sở hữu tương tự và xác thực `bookingId` khớp với đơn cũ (`409 Conflict` nếu cùng key nhưng khác booking).
+3. **Xác thực Booking & Chống IDOR (Nhánh tạo mới):**
    - Lấy thông tin đặt chỗ qua `BookingLookupPort.findBookingForOrder(bookingId)`.
-   - Xác minh người gửi yêu cầu là chủ sở hữu (`booking.customerId == currentUserId`).
+   - Xác minh người gửi yêu cầu là chủ sở hữu (`booking.customerId == currentUserId`). Nếu vi phạm → **HTTP 403 Forbidden**.
    - Kiểm tra trạng thái Booking bắt buộc phải là `HOLD`. Nếu không hợp lệ, ném ngoại lệ `409 Conflict (BookingNotEligibleForOrderException)`.
 4. **Tách Sub-Orders 1:1 & Tính hoa hồng (Commission Policy):**
    - Với mỗi mục đặt chỗ (`BookingItem`), hệ thống tạo một `SubOrder` riêng biệt thuộc về `vendorId` tương ứng.
@@ -34,14 +38,17 @@
 
 ---
 
-## 2. Payment_Intent_DualGateways.png — Tạo Payment Intent Đa Cổng (VNPay / PayPal)
+## 2. Payment_Intent_DualGateways.png — Tạo Payment Intent Đa Cổng, Khóa Tuần Tự & Bền Vững Hóa
 
 **Luồng nghiệp vụ chi tiết:**
-1. Khách hàng gửi yêu cầu thanh toán qua `POST /api/payments/{orderId}/create-intent` kèm nhà cung cấp `{provider: "VNPAY" | "PAYPAL"}`.
+1. Khách hàng gửi yêu cầu thanh toán qua `POST /api/payments/{orderId}/create-intent` kèm `{provider: "VNPAY" | "PAYPAL"}`.
 2. **Kiểm tra quyền sở hữu & trạng thái đơn:**
-   - Kiểm tra IDOR: `order.customerId == currentUserId`.
-   - Đơn hàng bắt buộc phải ở trạng thái `PENDING_PAYMENT`.
-3. **Phân nhánh xử lý theo cổng thanh toán:**
+   - Kiểm tra IDOR: `order.customerId == currentUserId` (403 Forbidden nếu không phải chủ đơn).
+   - Đơn hàng bắt buộc phải ở trạng thái `PENDING_PAYMENT` (409 Conflict nếu đơn đã thanh toán hoặc đã hủy).
+3. **Cơ chế khóa tuần tự & Bền vững hóa (Pessimistic Lock & Idempotent Persistence):**
+   - Áp dụng khóa tuần tự: Khóa bản ghi `Payment` theo `orderId`, sau đó khóa `MasterOrder` trong DB để loại trừ xung đột đồng thời (Race Condition) khi người dùng bấm gửi nhiều yêu cầu liên tiếp.
+   - **Tạo và Commit Payment trước khi gọi cổng:** Bản ghi `Payment` ở trạng thái `PENDING` được lưu và commit vào PostgreSQL trước khi gửi yêu cầu sang gateway. Khi xảy ra timeout hoặc người dùng retry, hệ thống tái sử dụng đúng UUID của Payment `PENDING` đó, ngăn ngừa tạo ra các bản ghi rác.
+4. **Phân nhánh xử lý theo cổng thanh toán:**
    - **Cổng nội địa VNPay (`provider == "VNPAY"`):**
      - Nhân số tiền x 100 theo quy định cổng VNPay.
      - Sắp xếp tất cả các trường tham số query (`vnp_*`) theo thứ tự từ điển ASCII.
@@ -50,9 +57,17 @@
    - **Cổng quốc tế PayPal (`provider == "PAYPAL"`):**
      - Gọi endpoint OAuth2 `/v1/oauth2/token` để lấy Bearer Access Token.
      - Quy đổi số tiền từ VNĐ sang USD theo tỷ giá cấu hình (mặc định `25,400`, đảm bảo mức tối thiểu `$1.00 USD`).
-     - Gọi PayPal REST API v2 `POST /v2/checkout/orders` với chế độ `intent: "CAPTURE"`.
+     - Gọi PayPal REST API v2 `POST /v2/checkout/orders` với chế độ `intent: "CAPTURE"`, truyền `PayPal-Request-Id` bằng Payment UUID để đảm bảo tính Idempotent trên cổng PayPal.
+     - Lưu `providerOrderId` (PayPal Order ID) vào bản ghi `Payment` để phục vụ bước Capture tiếp theo.
      - Trích xuất liên kết phê duyệt thanh toán (`rel: "approve"`).
-4. Lưu bản ghi thanh toán ở trạng thái `PENDING` và trả về URL thanh toán cho khách hàng để thực hiện chuyển tiền.
+5. **Hoàn tất bước Capture PayPal (`POST /api/payments/paypal/capture`):**
+   - Sau khi khách hàng duyệt thanh toán trên giao diện PayPal, client gửi yêu cầu capture kèm `orderId` và `paypalOrderId`.
+   - `OrderPaymentService` gọi PayPal REST API v2 `POST /v2/checkout/orders/{id}/capture` để khớp dòng tiền, lưu `providerCaptureId` và cập nhật đơn hàng thành `PAID`.
+6. **Đối soát tự động (Payment Reconciliation Job):**
+   - `PaymentReconciliationJob` chạy ngầm định kỳ quét các `Payment` ở trạng thái `PENDING` quá thời gian quy định (ví dụ quá 15 phút) để tự động truy vấn trạng thái từ cổng thanh toán và đồng bộ dữ liệu.
+7. **Quản trị thanh toán (Admin Payment Management):**
+   - `GET /api/admin/payments`: Xem danh sách toàn bộ các thanh toán trong hệ thống (phân trang, lọc theo trạng thái).
+   - `GET /api/admin/payments/{id}`: Tra cứu chi tiết thanh toán, mã tham chiếu cổng, lịch sử capture và snapshot giao dịch.
 
 ---
 
@@ -60,9 +75,10 @@
 
 **Luồng nghiệp vụ chi tiết:**
 1. Cổng thanh toán (VNPay hoặc PayPal) gửi HTTP POST Webhook IPN đến `/api/payments/webhook/{provider}` kèm payload giao dịch và chữ ký số.
-2. **Xác thực chữ ký số bảo mật:**
-   - Với VNPay: Xác thực chữ ký `vnp_SecureHash` (HMAC-SHA512).
-   - Với PayPal: Xác thực webhook signature qua chứng chỉ PayPal Certificate.
+2. **Xác thực chữ ký số bảo mật thực tế:**
+   - **Với VNPay:** Xác thực chữ ký `vnp_SecureHash` (HMAC-SHA512) dựa trên toàn bộ các tham số phản hồi.
+   - **Với PayPal:** Xác thực webhook signature thực tế qua PayPal REST API v2 (`POST /v1/notifications/verify-webhook-signature`) bằng trọn bộ transmission headers (`PAYPAL-AUTH-ALGO`, `PAYPAL-CERT-URL`, `PAYPAL-TRANSMISSION-ID`, `PAYPAL-TRANSMISSION-SIG`, `PAYPAL-TRANSMISSION-TIME`) và raw JSON body.
+   - **Môi trường Test / Dev nội bộ:** Bổ sung endpoint riêng `/api/internal/payments/webhook/{provider}` sử dụng chữ ký HMAC-SHA256 DANASEA, chỉ được kích hoạt trong profile `dev` hoặc `test` để kiểm thử giả lập an toàn.
    - Nếu chữ ký bị làm giả hoặc sai lệch, ném `PaymentVerificationException` và từ chối với `400 Bad Request`.
 3. **Bảo vệ Idempotency chống xử lý lặp:**
    - Nếu `MasterOrder` đã ở trạng thái `PAID` trước đó, hệ thống nhận diện giao dịch bị lặp và trả về ngay `200 OK` (No-op).
@@ -82,7 +98,7 @@ Sơ đồ biểu diễn mô hình máy trạng thái phân tách 2 trục độc
 
 - **Trục Master Order Fulfillment (`OrderStatus`):**
   - `PENDING_PAYMENT`: Khởi tạo từ Booking HOLD (UNPAID).
-  - `PAID`: Khớp Webhook thanh toán thành công (Thanh toán 100%).
+  - `PAID`: Khớp Webhook thanh toán thành công hoặc Capture thành công (Thanh toán 100%).
   - `CANCELLED`: Quá hạn 15 phút không thanh toán hoặc khách chủ động hủy đơn.
   - `COMPLETED`: Toàn bộ Sub-Orders đã hoàn tất check-in và phục vụ dịch vụ.
   - `PARTIALLY_COMPLETED`: Một số Sub-Orders hoàn tất, một số bị hủy hoặc hoàn tiền.
@@ -103,21 +119,27 @@ Sơ đồ biểu diễn mô hình máy trạng thái phân tách 2 trục độc
 
 Sơ đồ tổng quan toàn bộ kiến trúc phân tầng chuẩn Clean Architecture của EPIC-04:
 
-1. **Client Tier:** React Web, Mobile App và Portal Quản trị.
+1. **Client Tier:** React Web, Mobile App và Portal Quản trị (Admin Portal).
 2. **REST Controllers (Interface Adapters):**
-   - `OrderController`: Tiếp nhận tạo đơn hàng từ Booking.
-   - `PaymentController`: Khởi tạo Intent và đón nhận Webhook IPN từ cổng thanh toán.
-   - `OrderCancellationController`: Tiếp nhận yêu cầu xem trước và thực thi hủy đơn.
-3. **Application Use Cases (Phân tách trách nhiệm đơn nhất - Single Responsibility):**
-   - `CreateOrderUseCase` (Command): Tách Sub-Orders 1:1 và tính hoa hồng nền tảng.
-   - `CreatePaymentIntentUseCase` (Command): Phân luồng tạo link thanh toán VNPay / PayPal.
-   - `HandleWebhookUseCase` (Command): Khớp Webhook, xác thực chữ ký và kích hoạt hoàn tất đơn.
+   - `OrderController`: Tiếp nhận tạo đơn hàng từ Booking, tra cứu danh sách đơn và lịch sử hoàn tiền đơn hàng.
+   - `PaymentController`: Khởi tạo Intent, thực hiện Capture PayPal và đón nhận Webhook IPN từ cổng thanh toán.
+   - `AdminPaymentController`: Quản lý danh sách và chi tiết các giao dịch thanh toán phía quản trị.
+   - `AdminRefundController`: Quản lý danh sách và chi tiết các yêu cầu hoàn tiền phía quản trị.
+   - `InternalPaymentWebhookController`: Đón nhận webhook mô phỏng nội bộ (chỉ bật ở profile dev/test).
+   - `OrderCancellationController`: Tiếp nhận yêu cầu xem trước và thực thi hủy đơn từ khách hàng.
+3. **Application Use Cases & Services:**
+   - `CreateOrderUseCase` (Command): Tách Sub-Orders 1:1, kiểm tra quyền sở hữu IDOR trên mọi nhánh Idempotency và tính hoa hồng nền tảng.
+   - `CreatePaymentIntentUseCase` (Command): Khóa tuần tự hóa Payment/Order, lưu trước Payment PENDING và phân luồng tạo link thanh toán VNPay / PayPal.
+   - `OrderPaymentService`: Quản lý nghiệp vụ thanh toán, điều phối Capture PayPal và liên kết cổng.
+   - `RefundProcessingService`: Quản lý vòng đời hoàn tiền, gửi lệnh hoàn tiền thực tế sang cổng thanh toán.
+   - `HandleWebhookUseCase` (Command): Khớp Webhook, xác thực chữ ký thực tế và kích hoạt hoàn tất đơn.
    - `GetCancellationPreviewUseCase` (Query): Tra cứu % và số tiền hoàn tiền, đảm bảo tính Idempotent và không biến đổi dữ liệu.
    - `RequestRefundUseCase` (Command): Tạo bản ghi Refund PENDING với Idempotency Key, cập nhật trạng thái đơn sang CANCELLED và nhả slot tồn kho.
-   - `OrderExpiryEventListener`: Lắng nghe sự kiện quá hạn giữ chỗ 15 phút để tự động hủy đơn.
+   - `PaymentReconciliationJob` (Scheduled Job): Định kỳ đối soát trạng thái các giao dịch PENDING treo.
+   - `RefundProcessingJob` (Scheduled Job): Định kỳ quét và xử lý các bản ghi Refund PENDING gửi sang cổng thanh toán.
 4. **Domain Core & Policy Engines:**
    - `RefundPolicyEngine`: Tính toán tỷ lệ hoàn tiền tự động theo nhóm lý do và mốc giờ.
    - `CommissionPolicyEngine`: Tính toán hoa hồng và đối soát cho từng Vendor.
 5. **Infrastructure Ports & Adapters:**
-   - `PaymentGatewayPort` -> `VNPayPaymentAdapter` (Sandbox API) & `PayPalPaymentAdapter` (REST API v2).
-   - `MasterOrderRepositoryPort`, `SubOrderRepositoryPort`, `RefundRepositoryPort`, `OrderEventPublisherPort`.
+   - `PaymentGatewayPort` -> `VNPayPaymentAdapter` & `PayPalPaymentAdapter`.
+   - `MasterOrderRepositoryPort`, `SubOrderRepositoryPort`, `PaymentRepositoryPort`, `RefundRepositoryPort`, `OrderEventPublisherPort`.

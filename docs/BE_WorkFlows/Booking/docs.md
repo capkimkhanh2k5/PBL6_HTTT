@@ -50,6 +50,6 @@
      - Số tiền hoàn lại là `0 VNĐ` (do khách chưa thanh toán).
    - **Trường hợp Booking ở trạng thái `CONFIRMED` (Đã thanh toán):**
      - Đánh giá khoảng cách thời gian từ thời điểm hủy tới giờ bắt đầu trải nghiệm dịch vụ:
-       - **Hủy SỚM (> 24 giờ trước khởi hành):** Đủ điều kiện hoàn tiền 100%. Giảm `bookedCount` của slot tồn kho để người khác có thể đặt, cập nhật booking sang `CANCELLED`, ghi nhận tỷ lệ hoàn `100%`.
+       - **Hủy SỚM (> 24 giờ trước khởi hành):** Đủ điều kiện hoàn tiền 100%. Giảm `bookedCount` của slot tồn kho để người khác có thể đặt, cập nhật booking sang `CANCELLED`, ghi nhận tỷ lệ hoàn `100%`. Kích hoạt `financialRefundPort.initiateRefund(...)` thông qua `BookingCancellationFinancialAdapter` để tạo bản ghi `Refund (PENDING)` chuyển sang `RefundProcessingService` thực thi hoàn tiền với cổng thanh toán.
        - **Hủy TRỄ (<= 24 giờ trước khởi hành):** Áp dụng quy tắc chính sách, khách bị mất 100% tiền vé (tỷ lệ hoàn `0%`). Vẫn giảm `bookedCount` để giải phóng slot tồn kho, cập nhật booking sang `CANCELLED`.
 4. Trả về kết quả hủy booking thành công `200 OK` kèm tỷ lệ hoàn và số tiền hoàn tương ứng.

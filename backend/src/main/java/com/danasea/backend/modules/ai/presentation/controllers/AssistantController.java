@@ -108,9 +108,14 @@ public class AssistantController {
         String cardId = (String) request.get("cardId");
 
         UUID userId = SecurityUtils.getCurrentUserId().orElseThrow(() -> new IllegalStateException("User not authenticated"));
+        var conversationOpt = chatHistoryService.getConversationForUser(id, userId);
+        if (conversationOpt.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+
         String sessionId = request.getOrDefault("sessionId", DEFAULT_SESSION_PREFIX + userId).toString();
 
-        Map<String, Object> result = confirmBookingUseCase.execute(cardId, userId, sessionId);
+        Map<String, Object> result = confirmBookingUseCase.execute(cardId, userId, sessionId, id);
         
         // Log confirmation action as tool call/chat action
         auditLogService.logToolCall(id, userId, "confirm_booking",
@@ -123,7 +128,8 @@ public class AssistantController {
     @GetMapping("/conversations/{id}")
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<AiConversationJpaEntity> getConversation(@PathVariable UUID id) {
-        return conversationRepository.findById(id)
+        UUID userId = SecurityUtils.getCurrentUserId().orElseThrow(() -> new IllegalStateException("User not authenticated"));
+        return chatHistoryService.getConversationForUser(id, userId)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
@@ -133,8 +139,9 @@ public class AssistantController {
     public ResponseEntity<List<AiMessageJpaEntity>> getConversationHistory(
             @PathVariable UUID id,
             @RequestParam(defaultValue = "20") int limit) {
-
-        List<AiMessageJpaEntity> history = chatHistoryService.getRecentMessages(id, limit);
-        return ResponseEntity.ok(history);
+        UUID userId = SecurityUtils.getCurrentUserId().orElseThrow(() -> new IllegalStateException("User not authenticated"));
+        return chatHistoryService.getRecentMessagesForUser(id, userId, limit)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
     }
 }
