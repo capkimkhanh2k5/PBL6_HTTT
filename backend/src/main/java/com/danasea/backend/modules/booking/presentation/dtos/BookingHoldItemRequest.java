@@ -11,5 +11,13 @@ public record BookingHoldItemRequest(
 
         @NotNull(message = "{validation.booking.quantity.required}")
         @Min(value = 1, message = "{validation.booking.quantity.min}")
-        Integer quantity
-) {}
+        Integer quantity,
+
+        UUID optionId,
+
+        Integer participantsCount
+) {
+    public BookingHoldItemRequest(UUID slotId, Integer quantity) {
+        this(slotId, quantity, null, null);
+    }
+}

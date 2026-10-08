@@ -47,7 +47,7 @@ public class BookingHoldController {
                 .orElseThrow(() -> new AccessDeniedException("User is not authenticated"));
 
         List<BookingHoldItemDto> itemDtos = request.items().stream()
-                .map(item -> new BookingHoldItemDto(item.slotId(), item.quantity()))
+                .map(item -> new BookingHoldItemDto(item.slotId(), item.quantity(), item.optionId(), item.participantsCount()))
                 .toList();
 
         CreateBookingHoldCommand command = new CreateBookingHoldCommand(customerId, itemDtos);

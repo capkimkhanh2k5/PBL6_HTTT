@@ -4,5 +4,11 @@ import java.util.UUID;
 
 public record BookingHoldItemDto(
         UUID slotId,
-        Integer quantity
-) {}
+        Integer quantity,
+        UUID optionId,
+        Integer participantsCount
+) {
+    public BookingHoldItemDto(UUID slotId, Integer quantity) {
+        this(slotId, quantity, null, null);
+    }
+}

@@ -95,6 +95,7 @@ public class CatalogController {
                 .categoryName(result.getCategoryName())
                 .imageUrls(result.getImageUrls())
                 .availableSlots(result.getAvailableSlots())
+                .options(result.getOptions())
                 .build();
 
         return ResponseEntity.ok(response);

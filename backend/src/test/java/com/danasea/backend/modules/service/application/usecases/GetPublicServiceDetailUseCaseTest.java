@@ -2,13 +2,15 @@ package com.danasea.backend.modules.service.application.usecases;
 
 import com.danasea.backend.modules.service.application.dtos.ServiceDetailResult;
 import com.danasea.backend.modules.service.domain.exceptions.ServiceNotFoundException;
-import com.danasea.backend.modules.service.domain.models.Service;
-import com.danasea.backend.modules.service.domain.models.ServiceStatus;
 import com.danasea.backend.modules.service.domain.models.Category;
+import com.danasea.backend.modules.service.domain.models.OptionStatus;
+import com.danasea.backend.modules.service.domain.models.Service;
 import com.danasea.backend.modules.service.domain.models.ServiceImage;
+import com.danasea.backend.modules.service.domain.models.ServiceStatus;
 import com.danasea.backend.modules.service.domain.ports.CategoryRepositoryPort;
 import com.danasea.backend.modules.service.domain.ports.ServiceAvailabilityPort;
 import com.danasea.backend.modules.service.domain.ports.ServiceImageRepositoryPort;
+import com.danasea.backend.modules.service.domain.ports.ServiceOptionRepositoryPort;
 import com.danasea.backend.modules.service.domain.ports.ServiceRepositoryPort;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -42,6 +44,9 @@ class GetPublicServiceDetailUseCaseTest {
     @Mock
     private ServiceAvailabilityPort serviceAvailabilityPort;
 
+    @Mock
+    private ServiceOptionRepositoryPort serviceOptionRepositoryPort;
+
     @InjectMocks
     private GetPublicServiceDetailUseCase getServiceDetailUseCase;
 
@@ -68,6 +73,8 @@ class GetPublicServiceDetailUseCaseTest {
         when(serviceImageRepositoryPort.findByServiceId(serviceId)).thenReturn(List.of(image));
         when(serviceAvailabilityPort.findAvailableSlots(serviceId))
                 .thenReturn(List.of("2026-09-24T08:00:00"));
+        when(serviceOptionRepositoryPort.findByServiceIdAndStatus(serviceId, OptionStatus.ACTIVE))
+                .thenReturn(List.of());
 
         ServiceDetailResult result = getServiceDetailUseCase.execute(serviceId, userId, sessionId);
 

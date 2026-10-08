@@ -22,6 +22,7 @@ import com.danasea.backend.modules.booking.infrastructure.persistence.entities.B
 import com.danasea.backend.modules.booking.infrastructure.persistence.mappers.BookingMapper;
 import com.danasea.backend.modules.booking.infrastructure.persistence.repositories.JpaBookingItemRepository;
 import com.danasea.backend.modules.booking.infrastructure.persistence.repositories.JpaBookingRepository;
+import com.danasea.backend.shared.core.infrastructure.persistence.entities.BaseJpaEntity;
 import lombok.RequiredArgsConstructor;
 
 @Component
@@ -36,6 +37,18 @@ public class BookingRepositoryAdapter implements BookingRepositoryPort {
     @Transactional
     public Booking save(Booking booking) {
         BookingJpaEntity entity = bookingMapper.toEntity(booking);
+        boolean exists = entity.getId() != null && jpaBookingRepository.existsById(entity.getId());
+        if (!exists) {
+            entity.markNew();
+            if (entity.getItems() != null) {
+                for (BookingItemJpaEntity item : entity.getItems()) {
+                    item.markNew();
+                    if (item.getAllocations() != null) {
+                        item.getAllocations().forEach(BaseJpaEntity::markNew);
+                    }
+                }
+            }
+        }
         BookingJpaEntity saved = jpaBookingRepository.save(entity);
         return bookingMapper.toDomain(saved);
     }

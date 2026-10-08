@@ -38,7 +38,7 @@ class PostgreSqlMigrationIntegrationTest {
         var migrationResult = flyway.migrate();
         assertTrue(migrationResult.success);
         assertNotNull(flyway.info().current());
-        assertEquals("17", flyway.info().current().getVersion().getVersion());
+        assertEquals("19", flyway.info().current().getVersion().getVersion());
         assertTrue(flyway.validateWithResult().validationSuccessful);
 
         try (var connection = DriverManager.getConnection(jdbcUrl, "migration_user", "migration_password");
@@ -47,6 +47,78 @@ class PostgreSqlMigrationIntegrationTest {
             assertTrue(tableExists(statement, "settlements"));
             assertTrue(tableExists(statement, "checkin_tokens"));
             assertTrue(tableExists(statement, "category_safety_rules"));
+        }
+    }
+
+    @Test
+    void v19ReconcilesExpiredHoldsAndReleasedPrivateItemsWithoutLosingConfirmedSeats() throws Exception {
+        String url = "jdbc:postgresql://" + POSTGRES.getHost() + ":" + POSTGRES.getFirstMappedPort() + "/migration_test";
+        Flyway.configure().dataSource(url, "migration_user", "migration_password")
+                .schemas("inventory_upgrade").defaultSchema("inventory_upgrade")
+                .locations("classpath:db/migration").target("18").load().migrate();
+        try (var connection = DriverManager.getConnection(url, "migration_user", "migration_password");
+             var statement = connection.createStatement()) {
+            statement.execute("SET search_path TO inventory_upgrade");
+            statement.executeUpdate("""
+                    INSERT INTO users(id, role, created_at, updated_at)
+                    VALUES ('00000000-0000-0000-0000-000000000001','CUSTOMER',NOW(),NOW());
+                    INSERT INTO services(id,name,price,status,created_at,updated_at)
+                    VALUES ('00000000-0000-0000-0000-000000000002','Upgrade test',100,'PUBLISHED',NOW(),NOW());
+                    INSERT INTO service_slots(id,service_id,date,start_time,end_time,capacity,booked_count,status,inventory_type,created_at,updated_at)
+                    SELECT ('00000000-0000-0000-0000-00000000000' || n)::uuid,
+                           '00000000-0000-0000-0000-000000000002',DATE '2030-01-01',
+                           TIME '08:00' + n * INTERVAL '1 hour', TIME '09:00' + n * INTERVAL '1 hour',
+                           10, CASE n WHEN 3 THEN 4 WHEN 4 THEN 9 ELSE 6 END,
+                           'OPEN','SHARED_CAPACITY_UNITS',NOW(),NOW()
+                    FROM generate_series(3,5) n;
+                    INSERT INTO service_slot_units(id,slot_id,unit_number,capacity,booked_count,created_at,updated_at)
+                    SELECT ('00000000-0000-0000-0000-00000000001' || n)::uuid,
+                           ('00000000-0000-0000-0000-00000000000' || n)::uuid,1,10,
+                           CASE n WHEN 3 THEN 4 WHEN 4 THEN 10 ELSE 6 END,NOW(),NOW()
+                    FROM generate_series(3,5) n;
+                    INSERT INTO bookings(id,customer_id,status,total_amount,hold_expires_at,created_at,updated_at)
+                    SELECT ('00000000-0000-0000-0000-00000000002' || n)::uuid,
+                           '00000000-0000-0000-0000-000000000001',
+                           CASE n WHEN 3 THEN 'HOLD' ELSE 'CONFIRMED' END,1000,NOW()-INTERVAL '1 minute',NOW(),NOW()
+                    FROM generate_series(3,5) n;
+                    INSERT INTO booking_items(id,booking_id,service_id,vendor_id,slot_id,quantity,booking_date,booking_time,price,created_at,updated_at)
+                    SELECT ('00000000-0000-0000-0000-00000000003' || n)::uuid,
+                           ('00000000-0000-0000-0000-00000000002' || n)::uuid,
+                           '00000000-0000-0000-0000-000000000002','00000000-0000-0000-0000-000000000001',
+                           ('00000000-0000-0000-0000-00000000000' || n)::uuid,
+                           CASE n WHEN 3 THEN 4 WHEN 4 THEN 1 ELSE 6 END,DATE '2030-01-01',TIME '08:00',100,NOW(),NOW()
+                    FROM generate_series(3,5) n;
+                    INSERT INTO booking_item_allocations(id,booking_item_id,slot_id,unit_number,allocated_seats,is_private_lock,created_at,updated_at)
+                    SELECT ('00000000-0000-0000-0000-00000000004' || n)::uuid,
+                           ('00000000-0000-0000-0000-00000000003' || n)::uuid,
+                           ('00000000-0000-0000-0000-00000000000' || n)::uuid,1,
+                           CASE n WHEN 3 THEN 4 WHEN 4 THEN 10 ELSE 6 END,n=4,NOW(),NOW()
+                    FROM generate_series(3,5) n;
+                    INSERT INTO master_orders(id,booking_id,status,created_at,updated_at)
+                    VALUES ('00000000-0000-0000-0000-000000000050','00000000-0000-0000-0000-000000000024','PAID',NOW(),NOW());
+                    INSERT INTO sub_orders(id,master_order_id,booking_item_id,status,created_at,updated_at)
+                    VALUES ('00000000-0000-0000-0000-000000000051','00000000-0000-0000-0000-000000000050',
+                            '00000000-0000-0000-0000-000000000034','REJECTED',NOW(),NOW());
+                    """);
+        }
+        Flyway upgrade = Flyway.configure().dataSource(url,"migration_user","migration_password")
+                .schemas("inventory_upgrade").defaultSchema("inventory_upgrade").locations("classpath:db/migration").load();
+        assertEquals(1,upgrade.migrate().migrationsExecuted);
+        assertTrue(upgrade.validateWithResult().validationSuccessful);
+        try (var connection = DriverManager.getConnection(url,"migration_user","migration_password");
+             var statement = connection.createStatement()) {
+            statement.execute("SET search_path TO inventory_upgrade");
+            try (var rows=statement.executeQuery("SELECT booked_count FROM service_slot_units ORDER BY slot_id")) {
+                assertTrue(rows.next());assertEquals(0,rows.getInt(1));
+                assertTrue(rows.next());assertEquals(0,rows.getInt(1));
+                assertTrue(rows.next());assertEquals(6,rows.getInt(1));
+            }
+            try (var rows=statement.executeQuery("SELECT SUM(booked_count) FROM service_slots")) {
+                assertTrue(rows.next());assertEquals(6,rows.getInt(1));
+            }
+            try (var rows=statement.executeQuery("SELECT capacity_released FROM booking_items WHERE id='00000000-0000-0000-0000-000000000034'")) {
+                assertTrue(rows.next());assertTrue(rows.getBoolean(1));
+            }
         }
     }
 

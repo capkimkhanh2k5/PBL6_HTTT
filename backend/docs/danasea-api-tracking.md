@@ -129,6 +129,12 @@
 - [x] GET /api/admin/services?status=
 - [x] PATCH /api/admin/services/{id}/approve (đã gọi canPublish() safety guard)
 - [x] PATCH /api/admin/services/{id}/reject
+- [x] GET /api/vendor/services/{id}/options (Xem lựa chọn đặt của dịch vụ)
+- [x] POST /api/vendor/services/{id}/options (Tạo lựa chọn đặt SHARED hoặc PRIVATE)
+- [x] PATCH /api/vendor/services/{id}/options/{optionId} (Sửa hoặc ngừng bán lựa chọn)
+- [x] GET /api/vendor/services/{id}/slots (Xem ca và cấu hình tồn chỗ)
+- [x] POST /api/vendor/services/{id}/slots (Tạo ca: PERSON_LIMIT hoặc SHARED_CAPACITY_UNITS)
+- [x] PATCH /api/vendor/services/{id}/slots/{slotId} (Sửa ca, hạn mức, bảo vệ cam kết hoặc đóng/mở)
 
 ### Vendor Services — Test
 - [x] CreateServiceUseCaseTest (6 case)
@@ -138,6 +144,8 @@
 - [x] RejectServiceUseCaseTest (3 case)
 - [x] DeleteServiceUseCaseTest (3 case)
 - [x] ServiceControllerTest (13 case RBAC)
+- [x] CreateServiceOptionUseCaseTest & UpdateServiceOptionUseCaseTest (bảo vệ quyền sở hữu, validate PRIVATE maxPaxPerPackage)
+- [x] CreateServiceSlotUseCaseTest & UpdateServiceSlotUseCaseTest (bảo vệ sức chứa cam kết, chặn sửa giờ có hold/booking)
 
 ### Service Images & Safety Documents — API
 - [x] POST /api/vendor/services/{serviceId}/images
@@ -156,7 +164,8 @@
 
 ### Public Catalog + Wishlist + Recently Viewed — API
 - [x] GET /api/services
-- [x] GET /api/services/{id}
+- [x] GET /api/services/{id} (trả chi tiết dịch vụ kèm danh sách options để khách chọn)
+- [x] GET /api/services/{id}/slots?optionId=&from=&to=&quantity= (Khách xem ca khả dụng theo lựa chọn đặt)
 - [x] GET /api/v1/catalog (alias của GET /api/services)
 - [x] GET /api/v1/catalog/{id} (alias của GET /api/services/{id})
 - [x] POST /api/wishlists/{serviceId}
@@ -166,7 +175,7 @@
 
 ### Public Catalog + Wishlist + Recently Viewed — Test
 - [x] SearchServicesUseCaseTest
-- [x] GetServiceDetailUseCaseTest (atomic increment, DRAFT→404)
+- [x] GetServiceDetailUseCaseTest (atomic increment, DRAFT→404, trả options hoạt động)
 - [x] RecordRecentlyViewedUseCaseTest (upsert userId/sessionId)
 - [x] WishlistUseCaseTest (idempotent add/remove)
 - [x] CatalogControllerTest
@@ -189,7 +198,7 @@
 - [ ] Hoàn thiện gửi yêu cầu refund tới cổng gốc, thông báo khách hàng và gợi ý vendor khác còn slot để khách tự chọn lại
 
 ### API
-- [x] POST /api/bookings/hold (giữ chỗ nhiều dịch vụ trong 1 lần, TTL 10-15 phút)
+- [x] POST /api/bookings/hold (giữ chỗ nhiều dịch vụ/lựa chọn trong 1 lần, hỗ trợ SHARED và PRIVATE, TTL 10-15 phút)
 - [x] POST /api/bookings/{holdId}/confirm (chỉ xác nhận sau khi thanh toán toàn bộ thành công)
 - [x] DELETE /api/bookings/hold/{holdId}
 - [x] GET /api/bookings/{id}
@@ -200,12 +209,13 @@
 - [x] Scheduled job dọn Redis hold hết hạn + rollback inventory
 
 ### Test
-- [x] CreateBookingHoldUseCaseTest (nhiều dịch vụ trong 1 hold, slot hết → chặn, TTL đúng)
+- [x] CreateBookingHoldUseCaseTest (nhiều dịch vụ trong 1 hold, slot hết → chặn, TTL đúng, validate options & max pax)
 - [x] ConfirmBookingUseCaseTest (chỉ confirm khi đã thanh toán đủ, hold hết hạn → lỗi, sai owner → 403)
-- [ ] Test race condition đa luồng thật (2 request giữ slot cuối cùng, dùng Lua script atomic)
+- [x] Test race condition đa luồng thật (2 request giữ slot cuối cùng, dùng Lua script atomic - ServiceOptionsAndInventoryAllocationIntegrationTest)
 - [x] CancelBookingUseCaseTest (đúng mốc thời gian mất toàn bộ tiền)
 - [x] BookingExpiryJobTest (rollback đúng, không rollback nhầm hold đã confirm)
 - [x] BookingControllerTest (IDOR: khách A/B, vendor không liên quan)
+- [x] ServiceOptionsAndInventoryAllocationIntegrationTest (10 kịch bản kiểm thử tích hợp trên PostgreSQL & Redis thật: 30 khách ghép / 3 gói riêng, hold gói riêng 4 người tính giá 1 gói, 20 khách ghép lấp đầy 2 đơn vị, 21 khách ghép chặn gói riêng, 3 đơn vị đều có khách ghép chặn gói riêng dù chỗ trống >= 10, từ chối gói riêng vượt maxPaxPerPackage, race condition đa luồng tranh chấp đơn vị cuối, hủy hold giải phóng đơn vị trống, idempotency webhook xác nhận lặp, vendor guards bảo vệ cam kết)
 
 ---
 

@@ -2,6 +2,9 @@ package com.danasea.backend.modules.service.application.dtos;
 
 import java.math.BigDecimal;
 import java.util.UUID;
+
+import com.danasea.backend.modules.service.presentation.dtos.ServiceOptionResponse;
+
 import lombok.Builder;
 import lombok.Data;
 import java.util.List;
@@ -24,4 +27,5 @@ public class ServiceDetailResult {
     private String categoryName;
     private List<String> imageUrls;
     private List<String> availableSlots;
+    private List<ServiceOptionResponse> options;
 }

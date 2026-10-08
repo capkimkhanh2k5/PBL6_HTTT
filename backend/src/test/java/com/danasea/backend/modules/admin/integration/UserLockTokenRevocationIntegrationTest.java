@@ -16,6 +16,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.danasea.backend.modules.account.application.service.AccountInternalService;
 import com.danasea.backend.modules.account.domain.models.Role;
 import com.danasea.backend.modules.account.domain.models.User;
+import com.danasea.backend.modules.audit.application.service.AuditLogInternalService;
 import com.danasea.backend.modules.audit.infrastructure.mappers.AuditLogMapper;
 import com.danasea.backend.modules.audit.infrastructure.adapters.AuditLogAdapter;
 import com.danasea.backend.modules.account.infrastructure.mappers.RefreshTokenMapper;
@@ -80,7 +81,7 @@ class UserLockTokenRevocationIntegrationTest {
                 mock(CacheManager.class));
 
         auditLogAdapter = new AuditLogAdapter(auditLogRepository, auditLogMapper);
-        com.danasea.backend.modules.audit.application.service.AuditLogInternalService auditLogInternalService = new com.danasea.backend.modules.audit.application.service.AuditLogInternalService(
+        AuditLogInternalService auditLogInternalService = new AuditLogInternalService(
                 auditLogAdapter);
 
         lockUserUseCase = new LockUserUseCase(accountInternalService, auditLogInternalService);
