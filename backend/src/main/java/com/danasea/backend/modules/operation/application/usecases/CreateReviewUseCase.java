@@ -1,6 +1,8 @@
 package com.danasea.backend.modules.operation.application.usecases;
 
 import java.util.UUID;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.hibernate.exception.ConstraintViolationException;
 
 import com.danasea.backend.modules.operation.domain.exceptions.DuplicateReviewException;
 import com.danasea.backend.modules.operation.domain.exceptions.InvalidReviewSubOrderStateException;
@@ -63,6 +65,8 @@ public class CreateReviewUseCase {
             throw new UnauthorizedReviewAccessException("User is not the owner of this sub-order");
         }
 
+        reviewRatingService.lockVendor(subOrder.getVendorId());
+
         // 4. Kiểm tra tính duy nhất: 1 đơn hàng con = 1 đánh giá
         if (reviewRepository.existsBySubOrderId(subOrderId)) {
             throw new DuplicateReviewException("A review has already been submitted for this sub-order: " + subOrderId);
@@ -81,7 +85,18 @@ public class CreateReviewUseCase {
                 .isVisible(true)
                 .build();
 
-        ReviewJpaEntity saved = reviewRepository.save(entity);
+        ReviewJpaEntity saved;
+        try {
+            saved = reviewRepository.saveAndFlush(entity);
+        } catch (DataIntegrityViolationException exception) {
+            for (Throwable cause = exception; cause != null; cause = cause.getCause()) {
+                if (cause instanceof ConstraintViolationException violation
+                        && "uq_reviews_sub_order".equals(violation.getConstraintName())) {
+                    throw new DuplicateReviewException("A review already exists for this sub-order");
+                }
+            }
+            throw exception;
+        }
 
         // 6. Cập nhật điểm service và vendor
         reviewRatingService.recalculateRatings(saved.getServiceId(), saved.getVendorId());

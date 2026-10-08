@@ -27,7 +27,7 @@ public class UpdateReviewVisibilityUseCase {
     public ReviewResponse execute(UUID reviewId, UpdateReviewVisibilityRequest request) {
         log.info("Updating visibility for review: {} to: {}", reviewId, request.isVisible());
 
-        ReviewJpaEntity review = reviewRepository.findById(reviewId)
+        ReviewJpaEntity review = reviewRepository.findByIdForUpdate(reviewId)
                 .orElseThrow(() -> new ReviewNotFoundException("Review not found with id: " + reviewId));
 
         boolean wasVisible = Boolean.TRUE.equals(review.getIsVisible());
@@ -35,7 +35,7 @@ public class UpdateReviewVisibilityUseCase {
 
         review.setIsVisible(newVisible);
         if (request.note() != null) {
-            review.setFlagReason(request.note());
+            review.setModerationNote(request.note());
         }
 
         ReviewJpaEntity saved = reviewRepository.save(review);

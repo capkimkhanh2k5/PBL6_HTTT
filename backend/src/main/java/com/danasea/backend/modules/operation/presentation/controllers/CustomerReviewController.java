@@ -7,6 +7,7 @@ import com.danasea.backend.modules.operation.application.usecases.FlagReviewUseC
 import com.danasea.backend.modules.operation.application.usecases.UpdateReviewUseCase;
 import com.danasea.backend.modules.operation.presentation.dtos.CreateReviewRequest;
 import com.danasea.backend.modules.operation.presentation.dtos.FlagReviewRequest;
+import com.danasea.backend.modules.operation.presentation.dtos.FlagReviewResponse;
 import com.danasea.backend.modules.operation.presentation.dtos.ReviewResponse;
 import com.danasea.backend.modules.operation.presentation.dtos.UpdateReviewRequest;
 import com.danasea.backend.security.infrastructure.SecurityUtils;
@@ -67,11 +68,11 @@ public class CustomerReviewController {
 
     @PostMapping("/reviews/{id}/flag")
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<ReviewResponse> flagReview(
+    public ResponseEntity<FlagReviewResponse> flagReview(
             @PathVariable("id") UUID reviewId,
             @Valid @RequestBody FlagReviewRequest request
     ) {
-        ReviewResponse response = flagReviewUseCase.execute(reviewId, request);
+        FlagReviewResponse response = flagReviewUseCase.execute(reviewId, request);
         return ResponseEntity.ok(response);
     }
 }

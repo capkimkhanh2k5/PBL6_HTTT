@@ -98,9 +98,20 @@ public class ReviewMapper {
                 .isFlagged(entity.getIsFlagged())
                 .isVisible(entity.getIsVisible())
                 .flagReason(entity.getFlagReason())
+                .moderationNote(entity.getModerationNote())
                 .createdAt(entity.getCreatedAt())
                 .updatedAt(entity.getUpdatedAt())
                 .build();
+    }
+
+    public ReviewResponse toPublicResponse(ReviewJpaEntity entity) {
+        ReviewResponse response = toResponse(entity);
+        return ReviewResponse.builder()
+                .id(response.id()).customerName(response.customerName()).customerAvatar(response.customerAvatar())
+                .vendorId(response.vendorId()).serviceId(response.serviceId()).rating(response.rating())
+                .comment(response.comment()).images(response.images()).vendorReply(response.vendorReply())
+                .vendorRepliedAt(response.vendorRepliedAt()).isVisible(response.isVisible())
+                .createdAt(response.createdAt()).updatedAt(response.updatedAt()).build();
     }
 
     public String serializeImages(List<String> images) {

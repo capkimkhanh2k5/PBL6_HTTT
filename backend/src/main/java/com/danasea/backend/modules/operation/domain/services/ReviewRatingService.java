@@ -8,6 +8,7 @@ import com.danasea.backend.modules.operation.infrastructure.persistence.reposito
 import com.danasea.backend.modules.service.infrastructure.persistence.entities.ServiceJpaEntity;
 import com.danasea.backend.modules.service.infrastructure.persistence.repositories.JpaServiceRepository;
 import com.danasea.backend.modules.vendor.domain.models.BadgeTier;
+import com.danasea.backend.modules.vendor.domain.exceptions.VendorNotFoundException;
 import com.danasea.backend.modules.vendor.infrastructure.persistence.entities.VendorJpaEntity;
 import com.danasea.backend.modules.vendor.infrastructure.persistence.repositories.JpaVendorRepository;
 import lombok.RequiredArgsConstructor;
@@ -25,7 +26,16 @@ public class ReviewRatingService {
     private final JpaVendorRepository vendorRepository;
 
     @Transactional
+    public void lockVendor(UUID vendorId) {
+        vendorRepository.findByIdForUpdate(vendorId)
+                .orElseThrow(VendorNotFoundException::new);
+    }
+
+    @Transactional
     public void recalculateRatings(UUID serviceId, UUID vendorId) {
+        if (vendorId != null) {
+            lockVendor(vendorId);
+        }
         if (serviceId != null) {
             recalculateServiceRating(serviceId);
         }
@@ -34,9 +44,8 @@ public class ReviewRatingService {
         }
     }
 
-    @Transactional
-    public void recalculateServiceRating(UUID serviceId) {
-        ServiceJpaEntity serviceEntity = serviceRepository.findById(serviceId).orElse(null);
+    private void recalculateServiceRating(UUID serviceId) {
+        ServiceJpaEntity serviceEntity = serviceRepository.findByIdForUpdate(serviceId).orElse(null);
         if (serviceEntity == null) {
             log.warn("Service not found for rating recalculation: {}", serviceId);
             return;
@@ -54,9 +63,8 @@ public class ReviewRatingService {
         log.info("Recalculated Service [{}] - avgRating: {}, ratingCount: {}", serviceId, avgRating, count);
     }
 
-    @Transactional
-    public void recalculateVendorRating(UUID vendorId) {
-        VendorJpaEntity vendorEntity = vendorRepository.findById(vendorId).orElse(null);
+    private void recalculateVendorRating(UUID vendorId) {
+        VendorJpaEntity vendorEntity = vendorRepository.findByIdForUpdate(vendorId).orElse(null);
         if (vendorEntity == null) {
             log.warn("Vendor not found for rating recalculation: {}", vendorId);
             return;

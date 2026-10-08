@@ -13,7 +13,7 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@Table(name = "reviews")
+@Table(name = "reviews", uniqueConstraints = @UniqueConstraint(name = "uq_reviews_sub_order", columnNames = "sub_order_id"))
 public class ReviewJpaEntity extends BaseJpaEntity {
 
     @Column(name = "sub_order_id", nullable = false)
@@ -34,7 +34,7 @@ public class ReviewJpaEntity extends BaseJpaEntity {
     @Column(name = "comment", length = 2000)
     private String comment;
 
-    @Column(name = "images", length = 2000)
+    @Column(name = "images", columnDefinition = "text")
     private String images;
 
     @Column(name = "vendor_reply", length = 2000)
@@ -53,5 +53,8 @@ public class ReviewJpaEntity extends BaseJpaEntity {
 
     @Column(name = "flag_reason")
     private String flagReason;
+
+    @Column(name = "moderation_note", length = 255)
+    private String moderationNote;
 
 }

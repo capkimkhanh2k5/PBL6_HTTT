@@ -238,11 +238,7 @@ class ReviewControllerTest {
         void flagReviewSuccess() throws Exception {
             FlagReviewRequest request = new FlagReviewRequest("Nội dung không chuẩn mực");
 
-            ReviewResponse response = ReviewResponse.builder()
-                    .id(reviewId)
-                    .isFlagged(true)
-                    .flagReason("Nội dung không chuẩn mực")
-                    .build();
+            FlagReviewResponse response = new FlagReviewResponse(reviewId, true);
 
             when(flagReviewUseCase.execute(eq(reviewId), any(FlagReviewRequest.class)))
                     .thenReturn(response);
@@ -252,7 +248,8 @@ class ReviewControllerTest {
                             .content(objectMapper.writeValueAsString(request)))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.isFlagged").value(true))
-                    .andExpect(jsonPath("$.flagReason").value("Nội dung không chuẩn mực"));
+                    .andExpect(jsonPath("$.comment").doesNotExist())
+                    .andExpect(jsonPath("$.flagReason").doesNotExist());
         }
     }
 
@@ -358,7 +355,7 @@ class ReviewControllerTest {
             ReviewResponse response = ReviewResponse.builder()
                     .id(reviewId)
                     .isVisible(false)
-                    .flagReason("Ẩn do vi phạm")
+                    .moderationNote("Ẩn do vi phạm")
                     .build();
 
             when(updateReviewVisibilityUseCase.execute(eq(reviewId), any(UpdateReviewVisibilityRequest.class)))
@@ -369,7 +366,7 @@ class ReviewControllerTest {
                             .content(objectMapper.writeValueAsString(request)))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.isVisible").value(false))
-                    .andExpect(jsonPath("$.flagReason").value("Ẩn do vi phạm"));
+                    .andExpect(jsonPath("$.moderationNote").value("Ẩn do vi phạm"));
         }
     }
 }

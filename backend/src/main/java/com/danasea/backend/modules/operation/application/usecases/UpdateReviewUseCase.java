@@ -38,7 +38,7 @@ public class UpdateReviewUseCase {
     public ReviewResponse execute(UUID reviewId, UpdateReviewRequest request, UUID customerId) {
         log.info("Updating review: {} by customer: {}", reviewId, customerId);
 
-        ReviewJpaEntity review = reviewRepository.findById(reviewId)
+        ReviewJpaEntity review = reviewRepository.findByIdForUpdate(reviewId)
                 .orElseThrow(() -> new ReviewNotFoundException("Review not found with id: " + reviewId));
 
         if (!review.getCustomerId().equals(customerId)) {
@@ -66,8 +66,8 @@ public class UpdateReviewUseCase {
 
     @Transactional
     public ReviewResponse executeBySubOrder(UUID subOrderId, UpdateReviewRequest request, UUID customerId) {
-        ReviewJpaEntity review = reviewRepository.findBySubOrderId(subOrderId)
+        UUID reviewId = reviewRepository.findReviewIdBySubOrderId(subOrderId)
                 .orElseThrow(() -> new ReviewNotFoundException("Review not found for sub-order: " + subOrderId));
-        return execute(review.getId(), request, customerId);
+        return execute(reviewId, request, customerId);
     }
 }

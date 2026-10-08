@@ -42,7 +42,7 @@ public class ReplyVendorReviewUseCase {
         VendorJpaEntity vendor = vendorRepository.findByUserId(userId)
                 .orElseThrow(() -> new VendorNotFoundException("Vendor profile not found for user: " + userId));
 
-        ReviewJpaEntity review = reviewRepository.findById(reviewId)
+        ReviewJpaEntity review = reviewRepository.findByIdForUpdate(reviewId)
                 .orElseThrow(() -> new ReviewNotFoundException("Review not found with id: " + reviewId));
 
         if (!review.getVendorId().equals(vendor.getId())) {

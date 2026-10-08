@@ -95,13 +95,14 @@ class ReviewUseCaseTest {
         subOrderId = UUID.randomUUID();
         reviewId = UUID.randomUUID();
 
+        lenient().when(vendorRepository.findByIdForUpdate(any(UUID.class))).thenReturn(Optional.of(new VendorJpaEntity()));
         ObjectMapper objectMapper = new ObjectMapper();
         reviewMapper = new ReviewMapper(objectMapper, mock(com.danasea.backend.modules.account.infrastructure.persistence.repositories.JpaUserRepository.class));
         reviewRatingService = new ReviewRatingService(reviewRepository, serviceRepository, vendorRepository);
 
         createReviewUseCase = new CreateReviewUseCase(reviewRepository, subOrderRepository, masterOrderRepository, reviewMapper, reviewRatingService);
         updateReviewUseCase = new UpdateReviewUseCase(reviewRepository, reviewMapper, reviewRatingService);
-        flagReviewUseCase = new FlagReviewUseCase(reviewRepository, reviewMapper);
+        flagReviewUseCase = new FlagReviewUseCase(reviewRepository);
         getServiceReviewsUseCase = new GetServiceReviewsUseCase(reviewRepository, reviewMapper);
         getVendorReviewsUseCase = new GetVendorReviewsUseCase(reviewRepository, vendorRepository, reviewMapper);
         replyVendorReviewUseCase = new ReplyVendorReviewUseCase(reviewRepository, vendorRepository, reviewMapper);
@@ -144,11 +145,11 @@ class ReviewUseCaseTest {
             savedReview.setId(reviewId);
             savedReview.setCreatedAt(OffsetDateTime.now());
 
-            when(reviewRepository.save(any(ReviewJpaEntity.class))).thenReturn(savedReview);
+            when(reviewRepository.saveAndFlush(any(ReviewJpaEntity.class))).thenReturn(savedReview);
 
             // Mock rating recalculation queries
-            when(serviceRepository.findById(serviceId)).thenReturn(Optional.of(new ServiceJpaEntity()));
-            when(vendorRepository.findById(vendorId)).thenReturn(Optional.of(new VendorJpaEntity()));
+            when(serviceRepository.findByIdForUpdate(serviceId)).thenReturn(Optional.of(new ServiceJpaEntity()));
+            when(vendorRepository.findByIdForUpdate(vendorId)).thenReturn(Optional.of(new VendorJpaEntity()));
             when(reviewRepository.countByServiceIdAndIsVisibleTrue(serviceId)).thenReturn(1L);
             when(reviewRepository.getAvgRatingByServiceId(serviceId)).thenReturn(5.0);
             when(reviewRepository.countByVendorIdAndIsVisibleTrue(vendorId)).thenReturn(1L);
@@ -161,7 +162,7 @@ class ReviewUseCaseTest {
             assertThat(response.rating()).isEqualTo((short) 5);
             assertThat(response.comment()).isEqualTo("Trải nghiệm tuyệt vời!");
 
-            verify(reviewRepository).save(any(ReviewJpaEntity.class));
+            verify(reviewRepository).saveAndFlush(any(ReviewJpaEntity.class));
             verify(serviceRepository).save(any(ServiceJpaEntity.class));
             verify(vendorRepository).save(any(VendorJpaEntity.class));
         }
@@ -210,6 +211,8 @@ class ReviewUseCaseTest {
             SubOrderJpaEntity subOrder = new SubOrderJpaEntity();
             subOrder.setId(subOrderId);
             subOrder.setMasterOrderId(masterOrderId);
+            subOrder.setVendorId(vendorId);
+            subOrder.setServiceId(serviceId);
             subOrder.setStatus(SubOrderStatus.COMPLETED);
 
             MasterOrderJpaEntity masterOrder = new MasterOrderJpaEntity();
@@ -247,12 +250,12 @@ class ReviewUseCaseTest {
             review.setId(reviewId);
             review.setCreatedAt(OffsetDateTime.now().minusDays(2)); // 2 days ago
 
-            when(reviewRepository.findById(reviewId)).thenReturn(Optional.of(review));
+            when(reviewRepository.findByIdForUpdate(reviewId)).thenReturn(Optional.of(review));
             when(reviewRepository.save(any(ReviewJpaEntity.class))).thenAnswer(i -> i.getArgument(0));
 
             // Mock rating recalculation
-            when(serviceRepository.findById(serviceId)).thenReturn(Optional.of(new ServiceJpaEntity()));
-            when(vendorRepository.findById(vendorId)).thenReturn(Optional.of(new VendorJpaEntity()));
+            when(serviceRepository.findByIdForUpdate(serviceId)).thenReturn(Optional.of(new ServiceJpaEntity()));
+            when(vendorRepository.findByIdForUpdate(vendorId)).thenReturn(Optional.of(new VendorJpaEntity()));
 
             UpdateReviewRequest request = new UpdateReviewRequest((short) 5, "Sau khi hỗ trợ thì rất ưng ý!", null);
             ReviewResponse response = updateReviewUseCase.execute(reviewId, request, customerId);
@@ -273,7 +276,7 @@ class ReviewUseCaseTest {
             review.setId(reviewId);
             review.setCreatedAt(OffsetDateTime.now().minusDays(8)); // 8 days ago
 
-            when(reviewRepository.findById(reviewId)).thenReturn(Optional.of(review));
+            when(reviewRepository.findByIdForUpdate(reviewId)).thenReturn(Optional.of(review));
 
             UpdateReviewRequest request = new UpdateReviewRequest((short) 4, "Updated", null);
 
@@ -291,7 +294,7 @@ class ReviewUseCaseTest {
                     .build();
             review.setId(reviewId);
 
-            when(reviewRepository.findById(reviewId)).thenReturn(Optional.of(review));
+            when(reviewRepository.findByIdForUpdate(reviewId)).thenReturn(Optional.of(review));
 
             UpdateReviewRequest request = new UpdateReviewRequest((short) 4, "Updated", null);
 
@@ -322,7 +325,7 @@ class ReviewUseCaseTest {
             review.setId(reviewId);
 
             when(vendorRepository.findByUserId(vendorUserId)).thenReturn(Optional.of(vendor));
-            when(reviewRepository.findById(reviewId)).thenReturn(Optional.of(review));
+            when(reviewRepository.findByIdForUpdate(reviewId)).thenReturn(Optional.of(review));
             when(reviewRepository.save(any(ReviewJpaEntity.class))).thenAnswer(i -> i.getArgument(0));
 
             VendorReplyRequest request = new VendorReplyRequest("Cảm ơn quý khách đã trải nghiệm dịch vụ!");
@@ -346,7 +349,7 @@ class ReviewUseCaseTest {
             review.setId(reviewId);
 
             when(vendorRepository.findByUserId(vendorUserId)).thenReturn(Optional.of(vendor));
-            when(reviewRepository.findById(reviewId)).thenReturn(Optional.of(review));
+            when(reviewRepository.findByIdForUpdate(reviewId)).thenReturn(Optional.of(review));
 
             VendorReplyRequest request = new VendorReplyRequest("Phản hồi");
 
@@ -372,7 +375,7 @@ class ReviewUseCaseTest {
                     .build();
             review.setId(reviewId);
 
-            when(reviewRepository.findById(reviewId)).thenReturn(Optional.of(review));
+            when(reviewRepository.findByIdForUpdate(reviewId)).thenReturn(Optional.of(review));
             when(reviewRepository.save(any(ReviewJpaEntity.class))).thenAnswer(i -> i.getArgument(0));
 
             // Setup entities for recalculation
@@ -380,14 +383,14 @@ class ReviewUseCaseTest {
             service.setId(serviceId);
             service.setAvgRating(new BigDecimal("5.00"));
             service.setRatingCount(1);
-            when(serviceRepository.findById(serviceId)).thenReturn(Optional.of(service));
+            when(serviceRepository.findByIdForUpdate(serviceId)).thenReturn(Optional.of(service));
 
             VendorJpaEntity vendor = new VendorJpaEntity();
             vendor.setId(vendorId);
             vendor.setRatingAvg(new BigDecimal("5.00"));
             vendor.setRatingCount(1);
             vendor.setBadgeTier(BadgeTier.VERIFIED);
-            when(vendorRepository.findById(vendorId)).thenReturn(Optional.of(vendor));
+            when(vendorRepository.findByIdForUpdate(vendorId)).thenReturn(Optional.of(vendor));
 
             // After hiding, counts drop to 0
             when(reviewRepository.countByServiceIdAndIsVisibleTrue(serviceId)).thenReturn(0L);
@@ -399,7 +402,7 @@ class ReviewUseCaseTest {
             ReviewResponse response = updateReviewVisibilityUseCase.execute(reviewId, request);
 
             assertThat(response.isVisible()).isFalse();
-            assertThat(response.flagReason()).isEqualTo("Nội dung vi phạm tiêu chuẩn");
+            assertThat(response.moderationNote()).isEqualTo("Nội dung vi phạm tiêu chuẩn");
 
             // Verify service score updated to 0
             ArgumentCaptor<ServiceJpaEntity> serviceCaptor = ArgumentCaptor.forClass(ServiceJpaEntity.class);
@@ -420,12 +423,12 @@ class ReviewUseCaseTest {
         void shouldDeriveTopRatedBadge() {
             VendorJpaEntity vendor = new VendorJpaEntity();
             vendor.setId(vendorId);
-            when(vendorRepository.findById(vendorId)).thenReturn(Optional.of(vendor));
+            when(vendorRepository.findByIdForUpdate(vendorId)).thenReturn(Optional.of(vendor));
 
             when(reviewRepository.countByVendorIdAndIsVisibleTrue(vendorId)).thenReturn(5L);
             when(reviewRepository.getAvgRatingByVendorId(vendorId)).thenReturn(4.6);
 
-            reviewRatingService.recalculateVendorRating(vendorId);
+            reviewRatingService.recalculateRatings(null, vendorId);
 
             ArgumentCaptor<VendorJpaEntity> captor = ArgumentCaptor.forClass(VendorJpaEntity.class);
             verify(vendorRepository).save(captor.capture());
@@ -439,12 +442,12 @@ class ReviewUseCaseTest {
         void shouldDeriveVerifiedBadge() {
             VendorJpaEntity vendor = new VendorJpaEntity();
             vendor.setId(vendorId);
-            when(vendorRepository.findById(vendorId)).thenReturn(Optional.of(vendor));
+            when(vendorRepository.findByIdForUpdate(vendorId)).thenReturn(Optional.of(vendor));
 
             when(reviewRepository.countByVendorIdAndIsVisibleTrue(vendorId)).thenReturn(2L);
             when(reviewRepository.getAvgRatingByVendorId(vendorId)).thenReturn(3.5);
 
-            reviewRatingService.recalculateVendorRating(vendorId);
+            reviewRatingService.recalculateRatings(null, vendorId);
 
             ArgumentCaptor<VendorJpaEntity> captor = ArgumentCaptor.forClass(VendorJpaEntity.class);
             verify(vendorRepository).save(captor.capture());

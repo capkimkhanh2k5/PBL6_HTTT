@@ -4,10 +4,9 @@ import java.util.UUID;
 
 import com.danasea.backend.modules.operation.domain.exceptions.ReviewNotFoundException;
 import com.danasea.backend.modules.operation.infrastructure.persistence.entities.ReviewJpaEntity;
-import com.danasea.backend.modules.operation.infrastructure.persistence.mappers.ReviewMapper;
 import com.danasea.backend.modules.operation.infrastructure.persistence.repositories.JpaReviewRepository;
 import com.danasea.backend.modules.operation.presentation.dtos.FlagReviewRequest;
-import com.danasea.backend.modules.operation.presentation.dtos.ReviewResponse;
+import com.danasea.backend.modules.operation.presentation.dtos.FlagReviewResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -19,19 +18,21 @@ import org.springframework.transaction.annotation.Transactional;
 public class FlagReviewUseCase {
 
     private final JpaReviewRepository reviewRepository;
-    private final ReviewMapper reviewMapper;
 
     @Transactional
-    public ReviewResponse execute(UUID reviewId, FlagReviewRequest request) {
+    public FlagReviewResponse execute(UUID reviewId, FlagReviewRequest request) {
         log.info("Flagging review: {} with reason: {}", reviewId, request.reason());
 
-        ReviewJpaEntity review = reviewRepository.findById(reviewId)
+        ReviewJpaEntity review = reviewRepository.findByIdForUpdate(reviewId)
                 .orElseThrow(() -> new ReviewNotFoundException("Review not found with id: " + reviewId));
 
+        if (!Boolean.TRUE.equals(review.getIsVisible())) {
+            throw new ReviewNotFoundException("Review not found");
+        }
         review.setIsFlagged(true);
         review.setFlagReason(request.reason());
 
         ReviewJpaEntity saved = reviewRepository.save(review);
-        return reviewMapper.toResponse(saved);
+        return new FlagReviewResponse(saved.getId(), true);
     }
 }

@@ -22,6 +22,7 @@ public record ReviewResponse(
         Boolean isFlagged,
         Boolean isVisible,
         String flagReason,
+        String moderationNote,
         OffsetDateTime createdAt,
         OffsetDateTime updatedAt
 ) {}
