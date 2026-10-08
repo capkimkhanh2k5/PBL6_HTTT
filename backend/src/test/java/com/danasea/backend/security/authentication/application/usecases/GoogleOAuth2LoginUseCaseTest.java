@@ -1,5 +1,17 @@
 package com.danasea.backend.security.authentication.application.usecases;
 
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
+
+import java.time.OffsetDateTime;
+import java.util.Optional;
+import java.util.UUID;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
+
 import com.danasea.backend.modules.account.application.api.AccountInternalApi;
 import com.danasea.backend.modules.account.domain.models.RefreshToken;
 import com.danasea.backend.modules.account.domain.models.Role;
@@ -11,17 +23,6 @@ import com.danasea.backend.security.authentication.domain.exceptions.InvalidCred
 import com.danasea.backend.security.authentication.domain.models.Authentication;
 import com.danasea.backend.security.authentication.domain.models.GoogleUserInfo;
 import com.danasea.backend.security.authentication.infrastructure.security.JwtProperties;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.mockito.ArgumentCaptor;
-
-import java.time.OffsetDateTime;
-import java.util.Optional;
-import java.util.UUID;
-
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
 
 class GoogleOAuth2LoginUseCaseTest {
 
@@ -69,7 +70,7 @@ class GoogleOAuth2LoginUseCaseTest {
         existingUser.setLocale("vi");
 
         when(tokenVerifier.verify(idToken)).thenReturn(googleUser);
-        when(accountInternalApi.findUserByEmail("user@example.com")).thenReturn(Optional.of(existingUser));
+        when(accountInternalApi.findUserByEmailForUpdate("user@example.com")).thenReturn(Optional.of(existingUser));
         when(tokenProvider.generateAccessToken(any(Authentication.class))).thenReturn("access-token-123");
         when(tokenProvider.generateRefreshToken(any(Authentication.class))).thenReturn("refresh-token-456");
 
@@ -97,7 +98,7 @@ class GoogleOAuth2LoginUseCaseTest {
         );
 
         when(tokenVerifier.verify(idToken)).thenReturn(googleUser);
-        when(accountInternalApi.findUserByEmail("newuser@example.com")).thenReturn(Optional.empty());
+        when(accountInternalApi.findUserByEmailForUpdate("newuser@example.com")).thenReturn(Optional.empty());
 
         UUID generatedId = UUID.randomUUID();
         when(accountInternalApi.saveUser(any(User.class))).thenAnswer(invocation -> {
@@ -154,7 +155,7 @@ class GoogleOAuth2LoginUseCaseTest {
         lockedUser.setIsLocked(true);
 
         when(tokenVerifier.verify(idToken)).thenReturn(googleUser);
-        when(accountInternalApi.findUserByEmail("locked@example.com")).thenReturn(Optional.of(lockedUser));
+        when(accountInternalApi.findUserByEmailForUpdate("locked@example.com")).thenReturn(Optional.of(lockedUser));
 
         InvalidCredentialsException ex = assertThrows(InvalidCredentialsException.class,
                 () -> googleOAuth2LoginUseCase.execute(idToken));
@@ -185,7 +186,7 @@ class GoogleOAuth2LoginUseCaseTest {
         existingUser.setRole(Role.CUSTOMER);
 
         when(tokenVerifier.verify(idToken)).thenReturn(googleUser);
-        when(accountInternalApi.findUserByEmail("existing@example.com")).thenReturn(Optional.of(existingUser));
+        when(accountInternalApi.findUserByEmailForUpdate("existing@example.com")).thenReturn(Optional.of(existingUser));
         when(accountInternalApi.saveUser(any(User.class))).thenAnswer(invocation -> invocation.getArgument(0));
         when(tokenProvider.generateAccessToken(any(Authentication.class))).thenReturn("access");
         when(tokenProvider.generateRefreshToken(any(Authentication.class))).thenReturn("refresh");

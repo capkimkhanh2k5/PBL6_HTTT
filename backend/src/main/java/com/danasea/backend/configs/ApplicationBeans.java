@@ -1,51 +1,45 @@
 package com.danasea.backend.configs;
 
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import com.danasea.backend.security.authentication.application.ports.AuthEventPublisher;
-import com.danasea.backend.security.authentication.application.ports.OtpStorePort;
-import com.danasea.backend.security.authentication.application.ports.PasswordHasher;
-import com.danasea.backend.security.authentication.application.ports.TokenProvider;
-import com.danasea.backend.security.authentication.application.ports.UserAccountPort;
-import com.danasea.backend.security.authentication.application.usecases.LoginUseCase;
-import com.danasea.backend.security.authentication.application.usecases.RegisterUseCase;
-import com.danasea.backend.security.authentication.application.usecases.SendVerificationOtpUseCase;
-import com.danasea.backend.security.authentication.application.usecases.VerifyOtpUseCase;
 import com.danasea.backend.modules.account.application.api.AccountInternalApi;
 import com.danasea.backend.modules.account.application.usecases.ChangePasswordUseCase;
 import com.danasea.backend.modules.account.application.usecases.GetMyProfileUseCase;
 import com.danasea.backend.modules.account.application.usecases.UpdateProfileUseCase;
-
-import org.springframework.context.ApplicationEventPublisher;
-
-import com.danasea.backend.security.authentication.application.ports.GoogleTokenVerifierPort;
-import com.danasea.backend.security.authentication.application.usecases.GoogleOAuth2LoginUseCase;
-import com.danasea.backend.security.authentication.infrastructure.security.JwtProperties;
-import com.danasea.backend.security.authentication.application.usecases.RefreshTokenUseCase;
-import com.danasea.backend.security.authentication.application.usecases.LogoutUseCase;
 import com.danasea.backend.modules.admin.application.usecases.GetUserDetailUseCase;
 import com.danasea.backend.modules.admin.application.usecases.GetUsersUseCase;
 import com.danasea.backend.modules.admin.application.usecases.LockUserUseCase;
 import com.danasea.backend.modules.admin.application.usecases.UnlockUserUseCase;
 import com.danasea.backend.modules.audit.application.api.AuditLogInternalApi;
+import com.danasea.backend.security.authentication.application.ports.AuthEventPublisher;
+import com.danasea.backend.security.authentication.application.ports.GoogleTokenVerifierPort;
+import com.danasea.backend.security.authentication.application.ports.OtpStorePort;
+import com.danasea.backend.security.authentication.application.ports.PasswordHasher;
+import com.danasea.backend.security.authentication.application.ports.TokenProvider;
+import com.danasea.backend.security.authentication.application.ports.UserAccountPort;
 import com.danasea.backend.security.authentication.application.usecases.ForgotPasswordUseCase;
+import com.danasea.backend.security.authentication.application.usecases.GoogleOAuth2LoginUseCase;
+import com.danasea.backend.security.authentication.application.usecases.LoginUseCase;
+import com.danasea.backend.security.authentication.application.usecases.LogoutUseCase;
+import com.danasea.backend.security.authentication.application.usecases.RefreshTokenUseCase;
+import com.danasea.backend.security.authentication.application.usecases.RegisterUseCase;
 import com.danasea.backend.security.authentication.application.usecases.ResetPasswordUseCase;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.redis.core.StringRedisTemplate;
+import com.danasea.backend.security.authentication.application.usecases.SendVerificationOtpUseCase;
+import com.danasea.backend.security.authentication.application.usecases.VerifyOtpUseCase;
+import com.danasea.backend.security.authentication.infrastructure.security.JwtProperties;
 
 @Configuration
 public class ApplicationBeans {
 
     @Bean
     LoginUseCase loginUseCase(
-            UserAccountPort userAccountPort,
             AccountInternalApi accountInternalApi,
             PasswordHasher passwordHasher,
             TokenProvider tokenProvider,
             JwtProperties jwtProperties) {
         return new LoginUseCase(
-                userAccountPort,
                 accountInternalApi,
                 passwordHasher,
                 tokenProvider,
@@ -157,8 +151,7 @@ public class ApplicationBeans {
     ResetPasswordUseCase resetPasswordUseCase(
             AccountInternalApi accountInternalApi,
             PasswordHasher passwordHasher,
-            AuditLogInternalApi auditLogInternalApi,
-            @Autowired(required = false) StringRedisTemplate redisTemplate) {
-        return new ResetPasswordUseCase(accountInternalApi, passwordHasher, auditLogInternalApi, redisTemplate);
+            AuditLogInternalApi auditLogInternalApi) {
+        return new ResetPasswordUseCase(accountInternalApi, passwordHasher, auditLogInternalApi);
     }
 }

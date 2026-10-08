@@ -33,7 +33,7 @@ public class ForgotPasswordUseCase {
         }
 
         String normalizedEmail = email.trim().toLowerCase(Locale.ROOT);
-        Optional<User> optionalUser = accountInternalApi.findUserByEmail(normalizedEmail);
+        Optional<User> optionalUser = accountInternalApi.findUserByEmailForUpdate(normalizedEmail);
 
         if (optionalUser.isEmpty()) {
             log.info("Password reset requested for non-existent email: {}", normalizedEmail);
@@ -57,13 +57,13 @@ public class ForgotPasswordUseCase {
         accountInternalApi.createPasswordResetToken(user.getId(), hashedOtp, expiresAt);
 
         String locale = (language != null ? language : SupportedLanguage.DEFAULT).code();
-        authEventPublisher.publishPasswordResetRequestedEvent(new PasswordResetRequestedEvent(
-                user.getId(),
-                user.getEmail(),
-                rawOtp,
-                locale
-        ));
-
-        log.info("Password reset OTP generated and event published for userId: {}", user.getId());
+        try {
+            authEventPublisher.publishPasswordResetRequestedEvent(new PasswordResetRequestedEvent(
+                    user.getId(), user.getEmail(), rawOtp, locale));
+            log.info("Password reset OTP generated and event published for userId: {}", user.getId());
+        } catch (RuntimeException exception) {
+            // Delivery errors must not reveal whether the requested account exists.
+            log.error("Password reset email event publication failed for userId: {}", user.getId(), exception);
+        }
     }
 }

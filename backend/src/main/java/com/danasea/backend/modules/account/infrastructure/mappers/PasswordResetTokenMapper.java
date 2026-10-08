@@ -19,6 +19,7 @@ public class PasswordResetTokenMapper {
         domain.setTokenHash(entity.getTokenHash());
         domain.setExpiresAt(entity.getExpiresAt());
         domain.setUsedAt(entity.getUsedAt());
+        domain.setFailedAttempts(entity.getFailedAttempts());
         domain.setCreatedAt(entity.getCreatedAt());
         domain.setUpdatedAt(entity.getUpdatedAt());
         return domain;
@@ -35,6 +36,7 @@ public class PasswordResetTokenMapper {
         entity.setTokenHash(domain.getTokenHash());
         entity.setExpiresAt(domain.getExpiresAt());
         entity.setUsedAt(domain.getUsedAt());
+        entity.setFailedAttempts(domain.getFailedAttempts());
         entity.setCreatedAt(domain.getCreatedAt());
         entity.setUpdatedAt(domain.getUpdatedAt());
         return entity;

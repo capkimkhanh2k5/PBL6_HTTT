@@ -25,6 +25,8 @@ public interface AccountInternalApi {
 
     Optional<RefreshToken> findRefreshTokenByHash(String tokenHash);
 
+    Optional<UUID> findRefreshTokenUserIdByHash(String tokenHash);
+
     Optional<RefreshToken> findRefreshTokenByHashForUpdate(String tokenHash);
 
     void revokeRefreshTokenFamily(UUID familyId);
@@ -34,6 +36,14 @@ public interface AccountInternalApi {
     void revokeAllRefreshTokensByUserId(UUID userId);
 
     Page<User> findUsers(Pageable pageable, Role role, Boolean isLocked, String search);
+
+    Optional<User> findUserByEmailUncached(String email);
+
+    Optional<User> findUserByEmailForUpdate(String email);
+
+    Optional<User> findUserByIdForUpdate(UUID userId);
+
+    void recordFailedPasswordResetAttempt(UUID tokenId);
 
     void createPasswordResetToken(UUID userId, String tokenHash, OffsetDateTime expiresAt);
 

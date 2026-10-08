@@ -1,11 +1,14 @@
 package com.danasea.backend.security.authentication.application.usecases;
 
-import com.danasea.backend.modules.account.application.api.AccountInternalApi;
-import com.danasea.backend.modules.account.domain.models.Role;
-import com.danasea.backend.modules.account.domain.models.User;
-import com.danasea.backend.security.authentication.application.ports.AuthEventPublisher;
-import com.danasea.backend.security.authentication.domain.events.PasswordResetRequestedEvent;
-import com.danasea.backend.shared.i18n.SupportedLanguage;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.*;
+
+import java.time.OffsetDateTime;
+import java.util.Optional;
+import java.util.UUID;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -13,14 +16,12 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.time.OffsetDateTime;
-import java.util.Optional;
-import java.util.UUID;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.*;
+import com.danasea.backend.modules.account.application.api.AccountInternalApi;
+import com.danasea.backend.modules.account.domain.models.Role;
+import com.danasea.backend.modules.account.domain.models.User;
+import com.danasea.backend.security.authentication.application.ports.AuthEventPublisher;
+import com.danasea.backend.security.authentication.domain.events.PasswordResetRequestedEvent;
+import com.danasea.backend.shared.i18n.SupportedLanguage;
 
 @ExtendWith(MockitoExtension.class)
 class ForgotPasswordUseCaseTest {
@@ -41,7 +42,7 @@ class ForgotPasswordUseCaseTest {
     @Test
     void execute_UserNotFound_ReturnsSilentlyWithoutPublishingEvent() {
         String email = "notfound@example.com";
-        when(accountInternalApi.findUserByEmail(email)).thenReturn(Optional.empty());
+        when(accountInternalApi.findUserByEmailForUpdate(email)).thenReturn(Optional.empty());
 
         forgotPasswordUseCase.execute(email, SupportedLanguage.VI);
 
@@ -57,7 +58,7 @@ class ForgotPasswordUseCaseTest {
         user.setId(UUID.randomUUID());
         user.setEmail(email);
         user.setIsLocked(true);
-        when(accountInternalApi.findUserByEmail(email)).thenReturn(Optional.of(user));
+        when(accountInternalApi.findUserByEmailForUpdate(email)).thenReturn(Optional.of(user));
 
         forgotPasswordUseCase.execute(email, SupportedLanguage.VI);
 
@@ -84,7 +85,7 @@ class ForgotPasswordUseCaseTest {
         user.setRole(Role.CUSTOMER);
         user.setIsLocked(false);
 
-        when(accountInternalApi.findUserByEmail(email)).thenReturn(Optional.of(user));
+        when(accountInternalApi.findUserByEmailForUpdate(email)).thenReturn(Optional.of(user));
 
         forgotPasswordUseCase.execute(email, SupportedLanguage.EN);
 

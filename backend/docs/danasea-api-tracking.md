@@ -1,10 +1,10 @@
 # DANASEA — Master API & Test Checklist (EPIC-01 → EPIC-08)
 
-**Cập nhật:** 07/10/2026 — đối chiếu controller trên nhánh `main`; sửa capture/refund/webhook và ghi nhận kiểm tra backend.
+**Cập nhật:** 08/10/2026 — nhánh `implement_password_reset_api`; bổ sung forgot/reset password, bảo vệ OTP dùng một lần và thu hồi phiên cũ.
 
 **Quy ước:** Với mục API, `[x]` nghĩa là endpoint đã có trong controller; không đồng nghĩa đã kiểm chứng toàn bộ nghiệp vụ hoặc tích hợp cổng thanh toán thật. Với mục Test, hạ tầng và quyết định nghiệp vụ, giữ trạng thái checklist đã ghi nhận; `[ ]` là việc còn thiếu/chưa xác nhận. Lần cập nhật này không đánh dấu các test chưa xác nhận thành đã pass.
 
-**Phạm vi kiểm kê:** 115 tổ hợp HTTP method/path từ 38 controller trong profile `test`, gồm 4 đường dẫn alias, 4 endpoint chẩn đoán ở profile `dev/test` và 1 webhook nội bộ chỉ ở `test`. Swagger/Actuator do thư viện cung cấp không nằm trong số API controller này. Các API cần hoàn thiện nghiệp vụ được ghi chú tại mục tương ứng; xem thêm [báo cáo rà soát](API-completeness-review-2026-10-06.md) và [kết quả sandbox](payment-sandbox-verification-2026-10-06.md).
+**Phạm vi kiểm kê:** 117 tổ hợp HTTP method/path từ 38 controller trong profile `test`, gồm 4 đường dẫn alias, 4 endpoint chẩn đoán ở profile `dev/test` và 1 webhook nội bộ chỉ ở `test`. Swagger/Actuator do thư viện cung cấp không nằm trong số API controller này. Các API cần hoàn thiện nghiệp vụ được ghi chú tại mục tương ứng; xem thêm [báo cáo rà soát](API-completeness-review-2026-10-06.md) và [kết quả sandbox](payment-sandbox-verification-2026-10-06.md).
 
 ---
 
@@ -33,7 +33,8 @@
 - [x] SendVerificationOtpUseCaseTest
 - [x] VerifyOtpUseCaseTest (đúng, sai, hết hạn, vượt max attempts, one-time-use)
 - [x] ForgotPasswordUseCaseTest (thành công, chống enumeration, user locked, event publishing)
-- [x] ResetPasswordUseCaseTest (thành công, OTP sai, vượt max attempts, token hết hạn, thu hồi session)
+- [x] ResetPasswordUseCaseTest (thành công, OTP sai, vượt max attempts, token hết hạn, tăng phiên bản session)
+- [x] PasswordResetSecurityIntegrationTest (PostgreSQL 16/Redis thật: 17 ca kiểm tra OTP, HTTP response đồng nhất kể cả publisher lỗi, race reset/cấp mã/login/refresh, rollback, JWT cũ và cache stale)
 - [x] OtpEmailConsumerTest (mail lỗi → DLQ)
 - [x] PasswordResetEmailConsumerTest (gửi thành công, mail lỗi → DLQ)
 - [x] AuthenticationControllerTest (login/register/refresh/logout/OTP/forgot-password/reset-password, cookie httpOnly)
@@ -41,6 +42,15 @@
 - [x] Test Family Revocation persist thật qua DB sau khi fix noRollbackFor
 - [x] Test X-Forwarded-For không bypass được rate limit (sau khi cấu hình forward-headers-strategy)
 - [x] Test emailVerified đồng nhất giữa Login và Refresh
+
+### Password reset — Bảo đảm nghiệp vụ
+- [x] OTP riêng trong `password_reset_tokens`, hash SHA-256, hết hạn 15 phút; UUID do Hibernate sinh.
+- [x] Lưu số lần sai trong DB; lần sai thứ 5 khóa token và commit trước khi trả lỗi.
+- [x] Cấp mã/reset/login/refresh khóa cùng tài khoản; request đồng thời không dùng OTP hai lần hoặc tạo phiên cũ sau reset.
+- [x] Reset tăng `session_version` và revoke mọi refresh token; JWT filter kiểm tra phiên bản trên dữ liệu tài khoản không qua cache.
+- [x] Migration `V20__password_reset_security.sql` giữ dữ liệu cũ; JWT không có version được coi là 0 cho đến lần reset đầu tiên.
+
+**Kiểm chứng 08/10/2026:** `./mvnw verify` thành công; 1.623 test, 0 failure/error, 135 skipped theo cấu hình suite. Cả 17 ca `PasswordResetSecurityIntegrationTest` chạy và pass với PostgreSQL 16/Redis thật; migration V20 áp dụng và schema Hibernate validate thành công. SMTP/publisher được mock trong kiểm thử, chưa phải kiểm tra gửi email ngoài hệ thống.
 
 ### RBAC — Hạ tầng
 - [x] Role trong JWT claims + map GrantedAuthority (ROLE_*)

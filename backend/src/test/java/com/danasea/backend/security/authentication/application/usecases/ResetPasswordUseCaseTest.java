@@ -1,5 +1,22 @@
 package com.danasea.backend.security.authentication.application.usecases;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.*;
+
+import java.time.OffsetDateTime;
+import java.util.Optional;
+import java.util.UUID;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+
 import com.danasea.backend.modules.account.application.api.AccountInternalApi;
 import com.danasea.backend.modules.account.domain.models.PasswordResetToken;
 import com.danasea.backend.modules.account.domain.models.User;
@@ -9,24 +26,6 @@ import com.danasea.backend.security.authentication.domain.exceptions.OtpExpiredE
 import com.danasea.backend.security.authentication.domain.exceptions.OtpInvalidException;
 import com.danasea.backend.security.authentication.domain.exceptions.OtpMaxAttemptsExceededException;
 import com.danasea.backend.security.authentication.infrastructure.security.HashUtils;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.data.redis.core.StringRedisTemplate;
-import org.springframework.data.redis.core.ValueOperations;
-
-import java.time.OffsetDateTime;
-import java.util.Optional;
-import java.util.UUID;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class ResetPasswordUseCaseTest {
@@ -40,23 +39,16 @@ class ResetPasswordUseCaseTest {
     @Mock
     private AuditLogInternalApi auditLogInternalApi;
 
-    @Mock
-    private StringRedisTemplate redisTemplate;
-
-    @Mock
-    private ValueOperations<String, String> valueOperations;
-
     private ResetPasswordUseCase resetPasswordUseCase;
 
     @BeforeEach
     void setUp() {
-        lenient().when(redisTemplate.opsForValue()).thenReturn(valueOperations);
-        resetPasswordUseCase = new ResetPasswordUseCase(accountInternalApi, passwordHasher, auditLogInternalApi, redisTemplate);
+        resetPasswordUseCase = new ResetPasswordUseCase(accountInternalApi, passwordHasher, auditLogInternalApi);
     }
 
     @Test
     void execute_UserNotFound_ThrowsOtpInvalidException() {
-        when(accountInternalApi.findUserByEmail("unknown@example.com")).thenReturn(Optional.empty());
+        when(accountInternalApi.findUserByEmailForUpdate("unknown@example.com")).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> resetPasswordUseCase.execute("unknown@example.com", "123456", "NewPassword1!"))
                 .isInstanceOf(OtpInvalidException.class);
@@ -69,7 +61,7 @@ class ResetPasswordUseCaseTest {
         user.setEmail("locked@example.com");
         user.setIsLocked(true);
 
-        when(accountInternalApi.findUserByEmail("locked@example.com")).thenReturn(Optional.of(user));
+        when(accountInternalApi.findUserByEmailForUpdate("locked@example.com")).thenReturn(Optional.of(user));
 
         assertThatThrownBy(() -> resetPasswordUseCase.execute("locked@example.com", "123456", "NewPassword1!"))
                 .isInstanceOf(OtpInvalidException.class);
@@ -83,7 +75,7 @@ class ResetPasswordUseCaseTest {
         user.setEmail("user@example.com");
         user.setIsLocked(false);
 
-        when(accountInternalApi.findUserByEmail("user@example.com")).thenReturn(Optional.of(user));
+        when(accountInternalApi.findUserByEmailForUpdate("user@example.com")).thenReturn(Optional.of(user));
         when(accountInternalApi.findLatestActivePasswordResetToken(userId)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> resetPasswordUseCase.execute("user@example.com", "123456", "NewPassword1!"))
@@ -104,10 +96,9 @@ class ResetPasswordUseCaseTest {
         token.setTokenHash(HashUtils.sha256("654321"));
         token.setExpiresAt(OffsetDateTime.now().plusMinutes(15));
 
-        when(accountInternalApi.findUserByEmail("user@example.com")).thenReturn(Optional.of(user));
+        when(accountInternalApi.findUserByEmailForUpdate("user@example.com")).thenReturn(Optional.of(user));
         when(accountInternalApi.findLatestActivePasswordResetToken(userId)).thenReturn(Optional.of(token));
-        when(valueOperations.get("otp:reset-attempts:" + userId)).thenReturn("1");
-        when(valueOperations.increment("otp:reset-attempts:" + userId)).thenReturn(2L);
+        token.setFailedAttempts(1);
 
         assertThatThrownBy(() -> resetPasswordUseCase.execute("user@example.com", "123456", "NewPassword1!"))
                 .isInstanceOf(OtpInvalidException.class);
@@ -131,16 +122,14 @@ class ResetPasswordUseCaseTest {
         token.setTokenHash(HashUtils.sha256("654321"));
         token.setExpiresAt(OffsetDateTime.now().plusMinutes(15));
 
-        when(accountInternalApi.findUserByEmail("user@example.com")).thenReturn(Optional.of(user));
+        when(accountInternalApi.findUserByEmailForUpdate("user@example.com")).thenReturn(Optional.of(user));
         when(accountInternalApi.findLatestActivePasswordResetToken(userId)).thenReturn(Optional.of(token));
-        when(valueOperations.get("otp:reset-attempts:" + userId)).thenReturn("4");
-        when(valueOperations.increment("otp:reset-attempts:" + userId)).thenReturn(5L);
+        token.setFailedAttempts(4);
 
         assertThatThrownBy(() -> resetPasswordUseCase.execute("user@example.com", "123456", "NewPassword1!"))
                 .isInstanceOf(OtpMaxAttemptsExceededException.class);
 
-        verify(accountInternalApi).markPasswordResetTokenUsed(tokenId);
-        verify(redisTemplate).delete("otp:reset-attempts:" + userId);
+        verify(accountInternalApi).recordFailedPasswordResetAttempt(tokenId);
         verify(accountInternalApi, never()).saveUser(any());
     }
 
@@ -161,16 +150,15 @@ class ResetPasswordUseCaseTest {
         token.setTokenHash(HashUtils.sha256(rawOtp));
         token.setExpiresAt(OffsetDateTime.now().plusMinutes(15));
 
-        when(accountInternalApi.findUserByEmail("user@example.com")).thenReturn(Optional.of(user));
+        when(accountInternalApi.findUserByEmailForUpdate("user@example.com")).thenReturn(Optional.of(user));
         when(accountInternalApi.findLatestActivePasswordResetToken(userId)).thenReturn(Optional.of(token));
-        when(valueOperations.get("otp:reset-attempts:" + userId)).thenReturn("0");
         when(passwordHasher.hash("NewPassword1!")).thenReturn("newHashedPassword");
 
         resetPasswordUseCase.execute("user@example.com", rawOtp, "NewPassword1!");
 
         verify(accountInternalApi).markPasswordResetTokenUsed(tokenId);
-        verify(redisTemplate).delete("otp:reset-attempts:" + userId);
         assertThat(user.getPasswordHash()).isEqualTo("newHashedPassword");
+        assertThat(user.getSessionVersion()).isEqualTo(1);
         verify(accountInternalApi).saveUser(user);
         verify(accountInternalApi).revokeAllRefreshTokensByUserId(userId);
         verify(auditLogInternalApi).recordAuditLog(

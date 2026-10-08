@@ -5,12 +5,12 @@ import java.util.Optional;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Component;
 
+import com.danasea.backend.modules.account.application.api.AccountInternalApi;
+import com.danasea.backend.modules.account.domain.models.Role;
+import com.danasea.backend.modules.account.domain.models.User;
 import com.danasea.backend.security.authentication.application.ports.UserAccountPort;
 import com.danasea.backend.security.authentication.domain.exceptions.EmailAlreadyUsedException;
 import com.danasea.backend.security.authentication.domain.models.Authentication;
-import com.danasea.backend.modules.account.application.api.AccountInternalApi;
-import com.danasea.backend.modules.account.domain.models.User;
-import com.danasea.backend.modules.account.domain.models.Role;
 
 import lombok.RequiredArgsConstructor;
 
@@ -22,7 +22,7 @@ public class UserAccountAdapter implements UserAccountPort {
 
     @Override
     public Optional<Authentication> findByEmail(String email) {
-        return accountApi.findUserByEmail(email)
+        return accountApi.findUserByEmailUncached(email)
                 .map(this::toDomain);
     }
 
@@ -50,7 +50,7 @@ public class UserAccountAdapter implements UserAccountPort {
                 (user.getRole() != null ? user.getRole().name() : "CUSTOMER"),
                 !Boolean.TRUE.equals(user.getIsLocked()),
                 Boolean.TRUE.equals(user.getIsEmailVerified()),
-                user.getLocale());
+                user.getLocale(), user.getSessionVersion());
     }
 
     private User toUser(Authentication auth) {
@@ -61,6 +61,7 @@ public class UserAccountAdapter implements UserAccountPort {
         user.setIsLocked(!auth.enabled());
         user.setIsEmailVerified(auth.emailVerified());
         user.setLocale(auth.locale());
+        user.setSessionVersion(auth.sessionVersion());
         try {
             user.setRole(Role.valueOf(auth.role()));
         } catch (Exception e) {

@@ -1,9 +1,10 @@
 package com.danasea.backend.modules.account.infrastructure.persistence.entities;
 
-import com.danasea.backend.modules.account.domain.models.Role;
-
-import com.danasea.backend.shared.core.infrastructure.persistence.entities.BaseJpaEntity;
 import jakarta.persistence.*;
+
+import com.danasea.backend.modules.account.domain.models.Role;
+import com.danasea.backend.shared.core.infrastructure.persistence.entities.BaseJpaEntity;
+
 import lombok.Getter;
 import lombok.Setter;
 
@@ -29,6 +30,9 @@ public class UserJpaEntity extends BaseJpaEntity {
     private Boolean isEmailVerified;
 
     private Boolean isLocked;
+
+    @Column(name = "session_version", nullable = false)
+    private long sessionVersion;
 
     @Column(nullable = false, length = 2)
     private String locale = "vi";
