@@ -1,3 +1,4 @@
+import '../../../../core/auth/auth_session.dart';
 import 'package:mobile/core/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import '../../../../core/data/mock_database_data.dart';
@@ -51,13 +52,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   borderRadius: BorderRadius.circular(16),
                 ),
               ),
-              onPressed: () {
+              onPressed: () async {
+                try { await AuthSession.instance.logout(); } catch (_) {}
+                if (!context.mounted) return;
                 Navigator.pop(context);
-                Navigator.push(
+                Navigator.pushAndRemoveUntil(
                   context,
                   MaterialPageRoute(
                     builder: (_) => const LoginRegisterScreen(),
                   ),
+                  (_) => false,
                 );
               },
               child: const LocalizedText('Đăng xuất', style: TextStyle(color: Colors.white)),
@@ -112,7 +116,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                 ? NetworkImage(user.avatarUrl!)
                                 : null,
                             child: user.avatarUrl == null
-                                ? LocalizedText(user.fullName[0],
+                                ? LocalizedText((AuthSession.instance.profile?['fullName']?.toString().isNotEmpty == true ? AuthSession.instance.profile!['fullName'].toString()[0] : '?'),
                                     style: const TextStyle(fontSize: 24))
                                 : null,
                           ),
@@ -137,20 +141,20 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             LocalizedText(
-                              user.fullName,
+                              (AuthSession.instance.profile?['fullName'] ?? AuthSession.instance.profile?['email'] ?? '').toString(),
                               style: AppTypography.headlineSm(
                                 color: AppColors.onSurface,
                               ),
                             ),
                             const SizedBox(height: 2),
                             LocalizedText(
-                              user.email,
+                              (AuthSession.instance.profile?['email'] ?? '').toString(),
                               style: AppTypography.bodySm(
                                 color: AppColors.onSurfaceVariant,
                               ),
                             ),
                             LocalizedText(
-                              user.phone ?? '0905 123 456',
+                              '',
                               style: AppTypography.labelSm(
                                 color: AppColors.secondary,
                                 fontWeight: FontWeight.w600,
