@@ -1,6 +1,15 @@
 // English UI catalog. Vietnamese source phrases are stable lookup keys.
 // Numbered placeholders retain values from the existing presentation layer.
 const englishTranslations = <String, String>{
+  "Dữ liệu máy chủ không hợp lệ.": "Invalid server response.",
+  "Chi tiết trải nghiệm": "Experience details",
+  "Đặt chỗ hiện chưa khả dụng.": "Booking will be available soon.",
+  "Không tải được danh mục. Thử lại": "Unable to load categories. Retry",
+  "Tất cả mức giá": "All prices",
+  "Không tìm thấy trải nghiệm.": "No experiences found.",
+  "Khám phá tất cả trải nghiệm": "Explore all experiences",
+  "{0} kết quả": "{0} results",
+  "đánh giá": "reviews",
   "Họ và tên phải có từ 1 đến 255 ký tự.": "Full name must contain 1 to 255 characters.",
   "Email chưa xác minh": "Email not verified",
   " / khách": " / guest",
