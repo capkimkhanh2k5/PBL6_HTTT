@@ -1,21 +1,22 @@
 package com.danasea.backend.security.authentication.infrastructure.persistence;
 
-import com.danasea.backend.modules.account.application.api.AccountInternalApi;
-import com.danasea.backend.modules.audit.application.ports.AuditLogPort;
-import com.danasea.backend.modules.account.domain.models.Role;
-import com.danasea.backend.modules.account.domain.models.User;
-import com.danasea.backend.security.authentication.domain.exceptions.EmailAlreadyUsedException;
-import com.danasea.backend.security.authentication.domain.models.Authentication;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.springframework.dao.DataIntegrityViolationException;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
 
 import java.util.Optional;
 import java.util.UUID;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.springframework.dao.DataIntegrityViolationException;
+
+import com.danasea.backend.modules.account.application.api.AccountInternalApi;
+import com.danasea.backend.modules.account.domain.models.Role;
+import com.danasea.backend.modules.account.domain.models.User;
+import com.danasea.backend.modules.audit.application.ports.AuditLogPort;
+import com.danasea.backend.security.authentication.domain.exceptions.EmailAlreadyUsedException;
+import com.danasea.backend.security.authentication.domain.models.Authentication;
 
 class UserAccountAdapterTest {
 
@@ -37,7 +38,7 @@ class UserAccountAdapterTest {
         user.setRole(Role.CUSTOMER);
         user.setIsLocked(false);
 
-        when(accountInternalApi.findUserByEmail("test@example.com")).thenReturn(Optional.of(user));
+        when(accountInternalApi.findUserByEmailUncached("test@example.com")).thenReturn(Optional.of(user));
 
         Optional<Authentication> result = adapter.findByEmail("test@example.com");
 
@@ -48,7 +49,7 @@ class UserAccountAdapterTest {
 
     @Test
     void shouldReturnEmptyWhenUserNotFound() {
-        when(accountInternalApi.findUserByEmail(anyString())).thenReturn(Optional.empty());
+        when(accountInternalApi.findUserByEmailUncached(anyString())).thenReturn(Optional.empty());
 
         Optional<Authentication> result = adapter.findByEmail("test@example.com");
 

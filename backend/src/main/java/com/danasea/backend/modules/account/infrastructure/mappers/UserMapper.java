@@ -1,8 +1,9 @@
 package com.danasea.backend.modules.account.infrastructure.mappers;
 
+import org.springframework.stereotype.Component;
+
 import com.danasea.backend.modules.account.domain.models.User;
 import com.danasea.backend.modules.account.infrastructure.persistence.entities.UserJpaEntity;
-import org.springframework.stereotype.Component;
 
 @Component
 public class UserMapper {
@@ -20,6 +21,7 @@ public class UserMapper {
         domain.setIsEmailVerified(entity.getIsEmailVerified());
         domain.setIsLocked(entity.getIsLocked());
         domain.setLocale(entity.getLocale());
+        domain.setSessionVersion(entity.getSessionVersion());
         domain.setCreatedAt(entity.getCreatedAt());
         domain.setUpdatedAt(entity.getUpdatedAt());
         return domain;
@@ -38,6 +40,7 @@ public class UserMapper {
         entity.setIsEmailVerified(domain.getIsEmailVerified());
         entity.setIsLocked(domain.getIsLocked());
         entity.setLocale(domain.getLocale() == null ? "vi" : domain.getLocale());
+        entity.setSessionVersion(domain.getSessionVersion());
         return entity;
     }
 }

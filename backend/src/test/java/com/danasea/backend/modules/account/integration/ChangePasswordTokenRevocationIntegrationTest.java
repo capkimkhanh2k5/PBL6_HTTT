@@ -98,6 +98,12 @@ class ChangePasswordTokenRevocationIntegrationTest {
         userEntity.setIsEmailVerified(true);
         userStore.add(userEntity);
 
+        when(userRepository.findByIdForUpdate(targetUserId))
+                .thenAnswer(inv -> userStore.stream().filter(u -> u.getId().equals(targetUserId)).findFirst());
+        when(refreshTokenRepository.findUserIdByTokenHash(anyString())).thenAnswer(inv -> {
+            String hash = inv.getArgument(0);
+            return tokenStore.stream().filter(t -> t.getTokenHash().equals(hash)).map(RefreshTokenJpaEntity::getUserId).findFirst();
+        });
         // Token 1 - Family 1
         RefreshTokenJpaEntity tokenEntity1 = RefreshTokenJpaEntity.builder()
                 .id(UUID.randomUUID())
@@ -140,6 +146,10 @@ class ChangePasswordTokenRevocationIntegrationTest {
             return tokenStore.stream().filter(t -> t.getTokenHash().equals(hash)).findFirst();
         });
 
+        when(refreshTokenRepository.findForUpdateByTokenHash(anyString())).thenAnswer(inv -> {
+            String hash = inv.getArgument(0);
+            return tokenStore.stream().filter(t -> t.getTokenHash().equals(hash)).findFirst();
+        });
         lenient().when(refreshTokenRepository.saveAll(any())).thenAnswer(inv -> {
             Iterable<RefreshTokenJpaEntity> tokens = inv.getArgument(0);
             tokens.forEach(t -> {

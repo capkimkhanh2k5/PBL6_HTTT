@@ -1,26 +1,28 @@
 package com.danasea.backend.security.authentication.infrastructure.security;
 
-import com.danasea.backend.security.authentication.application.ports.TokenProvider;
-import com.danasea.backend.security.authentication.application.ports.UserAccountPort;
-import com.danasea.backend.security.authentication.domain.models.Authentication;
-import com.danasea.backend.security.authorization.application.ports.AuthorizationPort;
-import com.danasea.backend.security.authorization.domain.models.AuthorizationSubject;
-import jakarta.servlet.FilterChain;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.springframework.security.core.context.SecurityContextHolder;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.springframework.security.core.context.SecurityContextHolder;
+
+import com.danasea.backend.security.authentication.application.ports.TokenProvider;
+import com.danasea.backend.security.authentication.application.ports.UserAccountPort;
+import com.danasea.backend.security.authentication.domain.models.Authentication;
+import com.danasea.backend.security.authorization.application.ports.AuthorizationPort;
+import com.danasea.backend.security.authorization.domain.models.AuthorizationSubject;
 
 class JwtAuthenticationFilterTest {
 
@@ -79,6 +81,7 @@ class JwtAuthenticationFilterTest {
         when(request.getHeader("Authorization")).thenReturn("Bearer access-token");
         when(request.getRequestURI()).thenReturn(requestUri);
         when(tokenProvider.getEmail("access-token")).thenReturn(Optional.of(user.email()));
+        when(tokenProvider.getSessionVersion("access-token")).thenReturn(Optional.of(0L));
         when(userAccountPort.findByEmail(user.email())).thenReturn(Optional.of(user));
         when(authorizationPort.findSubjectByEmail(user.email())).thenReturn(subject);
     }

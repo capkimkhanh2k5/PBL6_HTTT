@@ -13,6 +13,7 @@ import com.danasea.backend.security.authentication.domain.models.Authentication;
 
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
+
 import lombok.RequiredArgsConstructor;
 
 @Component
@@ -28,6 +29,7 @@ public class JwtTokenProvider implements TokenProvider {
         return Jwts.builder()
                 .subject(user.email())
                 .claim("role", user.role())
+                .claim("session_version", user.sessionVersion())
                 .issuedAt(Date.from(now))
                 .expiration(Date.from(
                         now.plus(properties.accessTokenMinutes(),
@@ -53,6 +55,19 @@ public class JwtTokenProvider implements TokenProvider {
             return Optional.of(email);
         } catch (JwtException
                 | IllegalArgumentException exception) {
+            return Optional.empty();
+        }
+    }
+
+    @Override
+    public Optional<Long> getSessionVersion(String token) {
+        try {
+            var claims = Jwts.parser().verifyWith(properties.secretKey()).build()
+                    .parseSignedClaims(token).getPayload();
+            Long version = claims.get("session_version", Long.class);
+            // Existing tokens are accepted only until the account's first reset.
+            return Optional.of(version == null ? 0L : version);
+        } catch (JwtException | IllegalArgumentException exception) {
             return Optional.empty();
         }
     }

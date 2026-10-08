@@ -33,10 +33,13 @@ public class RateLimitFilter extends OncePerRequestFilter {
 
     private static final String LOGIN_PATH = "/api/auth/login";
     private static final String REGISTER_PATH = "/api/auth/register";
+    private static final String FORGOT_PASSWORD_PATH = "/api/auth/forgot-password";
+    private static final String RESET_PASSWORD_PATH = "/api/auth/reset-password";
 
     private final LettuceBasedProxyManager<byte[]> proxyManager;
     private final ObjectMapper objectMapper;
     private final RateLimitProperties.Limit limit;
+    private final RateLimitProperties.Limit forgotPasswordLimit;
     private final LocalizedMessageService messages;
 
     @Autowired
@@ -48,6 +51,7 @@ public class RateLimitFilter extends OncePerRequestFilter {
         this.proxyManager = proxyManager;
         this.objectMapper = objectMapper;
         this.limit = properties.loginRegistration();
+        this.forgotPasswordLimit = properties.forgotPassword();
         this.messages = messages;
     }
 
@@ -55,6 +59,7 @@ public class RateLimitFilter extends OncePerRequestFilter {
         this.proxyManager = proxyManager;
         this.objectMapper = new ObjectMapper();
         this.limit = new RateLimitProperties.Limit(50, Duration.ofMinutes(1));
+        this.forgotPasswordLimit = new RateLimitProperties.Limit(5, Duration.ofMinutes(1));
         this.messages = LocalizedMessageService.standalone();
     }
 
@@ -69,9 +74,13 @@ public class RateLimitFilter extends OncePerRequestFilter {
         }
 
         try {
+            boolean isForgotPassword = FORGOT_PASSWORD_PATH.equals(request.getRequestURI());
+            String keyPrefix = isForgotPassword ? "forgot-pw:" : (RESET_PASSWORD_PATH.equals(request.getRequestURI()) ? "reset-pw:" : "");
+            RateLimitProperties.Limit effectiveLimit = isForgotPassword ? forgotPasswordLimit : limit;
+
             Bucket bucket = proxyManager.builder().build(
-                    request.getRemoteAddr().getBytes(StandardCharsets.UTF_8),
-                    this::configuration);
+                    (keyPrefix + request.getRemoteAddr()).getBytes(StandardCharsets.UTF_8),
+                    () -> configuration(effectiveLimit));
             ConsumptionProbe probe = bucket.tryConsumeAndReturnRemaining(1);
             if (probe.isConsumed()) {
                 response.setHeader("X-Rate-Limit-Remaining", String.valueOf(probe.getRemainingTokens()));
@@ -91,12 +100,13 @@ public class RateLimitFilter extends OncePerRequestFilter {
     }
 
     private boolean isRateLimitedPath(String path) {
-        return LOGIN_PATH.equals(path) || REGISTER_PATH.equals(path);
+        return LOGIN_PATH.equals(path) || REGISTER_PATH.equals(path)
+                || FORGOT_PASSWORD_PATH.equals(path) || RESET_PASSWORD_PATH.equals(path);
     }
 
-    private BucketConfiguration configuration() {
+    private BucketConfiguration configuration(RateLimitProperties.Limit limitToUse) {
         return BucketConfiguration.builder()
-                .addLimit(Bandwidth.classic(limit.capacity(), Refill.intervally(limit.capacity(), limit.refillPeriod())))
+                .addLimit(Bandwidth.classic(limitToUse.capacity(), Refill.intervally(limitToUse.capacity(), limitToUse.refillPeriod())))
                 .build();
     }
 

@@ -67,12 +67,15 @@ Vendor có thể nhập waiver content, sub-order có waiverAccepted/waiverAccep
 
 Mở rộng public detail trả nội dung điều kiện tham gia/waiver theo ngôn ngữ và version. Mở rộng request tạo order/checkout nhận xác nhận từng service rủi ro; lưu user, thời điểm, version/nội dung snapshot. Có thể dùng endpoint `POST /api/sub-orders/{id}/waiver-acceptance` nếu phù hợp thứ tự checkout. Không cần thêm cả hai cách.
 
-### P1 Quên mật khẩu -> Đang xử lý
+### P1 Quên mật khẩu — ĐÃ XỬ LÝ
 
-Có đổi mật khẩu khi đã biết mật khẩu cũ và OTP xác minh email. PasswordResetToken hiện chỉ có model/entity/repository; chưa có API phục hồi tài khoản.
+Cập nhật 08/10/2026:
+- `POST /api/auth/forgot-password`: Nhận email, chống User Enumeration bằng phản hồi đồng nhất; tạo mã OTP 6 chữ số băm SHA-256 lưu trong `password_reset_tokens` (hết hạn sau 15 phút, vô hiệu hóa các mã cũ của user); phát sự kiện `PasswordResetRequestedEvent` qua RabbitMQ topic exchange `danasea.exchange.topic` tới queue `notification.password-reset-email.queue` để gửi email bất đồng bộ; áp dụng Rate Limit (5 requests/phút theo IP qua Bucket4j/Redis).
+- `POST /api/auth/reset-password`: Nhận email, OTP 6 chữ số và mật khẩu mới; kiểm tra active token và giới hạn tối đa 5 lần thử sai bằng `failed_attempts` trong PostgreSQL; lần sai thứ 5 commit trạng thái vô hiệu hóa dù API trả lỗi. Cấp mã, reset, login và refresh dùng khóa bi quan chung trên tài khoản, bảo đảm OTP dùng một lần khi request đồng thời. Reset cập nhật BCrypt password hash, đánh dấu `usedAt`, tăng `users.session_version`, thu hồi mọi refresh token và ghi audit log `PASSWORD_RESET`. JWT có claim `session_version`; filter đọc tài khoản không qua cache và từ chối access token có phiên bản cũ.
+- Migration `V20__password_reset_security.sql` bổ sung trạng thái bảo mật với giá trị mặc định cho dữ liệu cũ; token reset mới để Hibernate tự sinh UUID. V18/V19 được giữ cho nhánh quản lý slot đang triển khai riêng. JWT cũ chưa có claim version được coi là phiên bản 0 và bị vô hiệu hóa sau lần reset đầu tiên.
+- Đã bổ sung bộ test kiểm chứng: `ForgotPasswordUseCaseTest`, `ResetPasswordUseCaseTest`, `PasswordResetEmailConsumerTest`, `AuthenticationControllerTest`; `PasswordResetSecurityIntegrationTest` dùng PostgreSQL 16/Redis thật để kiểm tra migration/schema, HTTP response đồng nhất kể cả publisher lỗi, giới hạn OTP, hết hạn, cấp mã/reset đồng thời, thu hồi access/refresh token, race login/refresh với reset, cache cũ và rollback; cập nhật kiểm kê `BackendApplicationTests` (117 endpoints).
 
-- `POST /api/auth/forgot-password` và `POST /api/auth/reset-password`.
-- Token/OTP riêng mục đích reset, hết hạn, dùng một lần, rate limit; response không tiết lộ email tồn tại; thu hồi phiên cũ khi reset thành công.
+Bằng chứng: `security/authentication/presentation/AuthenticationController.java`, `ForgotPasswordUseCase.java`, `ResetPasswordUseCase.java`, `PasswordResetEmailConsumer.java`, `configs/RabbitMQConfig.java`.
 
 ### P1 Quản trị giao dịch và theo dõi hoàn tiền
 

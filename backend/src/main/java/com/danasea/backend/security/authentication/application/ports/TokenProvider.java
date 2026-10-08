@@ -11,4 +11,6 @@ public interface TokenProvider {
 
     Optional<String> getEmail(String token);
     boolean validateToken(String token);
+
+    Optional<Long> getSessionVersion(String token);
 }

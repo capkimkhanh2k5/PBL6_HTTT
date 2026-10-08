@@ -1,8 +1,13 @@
 package com.danasea.backend.security.authentication.infrastructure.security;
+
+import java.io.IOException;
+import java.util.List;
 import java.util.stream.Stream;
 
-import java.util.List;
-import java.io.IOException;
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -15,10 +20,6 @@ import com.danasea.backend.security.authentication.application.ports.UserAccount
 import com.danasea.backend.security.authorization.application.ports.AuthorizationPort;
 import com.danasea.backend.security.authorization.domain.models.AuthorizationSubject;
 
-import jakarta.servlet.FilterChain;
-import jakarta.servlet.ServletException;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 
 @Component
@@ -50,6 +51,8 @@ public class JwtAuthenticationFilter
 
             tokenProvider.getEmail(token)
                 .flatMap(userAccountPort::findByEmail)
+                .filter(user -> tokenProvider.getSessionVersion(token)
+                        .map(version -> version == user.sessionVersion()).orElse(false))
                 .filter(user -> user.enabled()
                         && (user.emailVerified() || isOtpEndpoint(request)))
                 .map(user -> authorizationPort.findSubjectByEmail(user.email()))
