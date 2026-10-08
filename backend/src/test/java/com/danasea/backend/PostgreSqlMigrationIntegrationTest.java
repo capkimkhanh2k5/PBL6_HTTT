@@ -1,5 +1,11 @@
 package com.danasea.backend;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import java.sql.DriverManager;
+
 import org.flywaydb.core.Flyway;
 import org.junit.jupiter.api.Test;
 import org.testcontainers.containers.GenericContainer;
@@ -7,12 +13,6 @@ import org.testcontainers.containers.wait.strategy.Wait;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.utility.DockerImageName;
-
-import java.sql.DriverManager;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @Testcontainers(disabledWithoutDocker = true)
 class PostgreSqlMigrationIntegrationTest {
@@ -38,7 +38,7 @@ class PostgreSqlMigrationIntegrationTest {
         var migrationResult = flyway.migrate();
         assertTrue(migrationResult.success);
         assertNotNull(flyway.info().current());
-        assertEquals("11", flyway.info().current().getVersion().getVersion());
+        assertEquals("17", flyway.info().current().getVersion().getVersion());
         assertTrue(flyway.validateWithResult().validationSuccessful);
 
         try (var connection = DriverManager.getConnection(jdbcUrl, "migration_user", "migration_password");

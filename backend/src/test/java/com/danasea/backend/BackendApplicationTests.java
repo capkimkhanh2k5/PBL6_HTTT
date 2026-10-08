@@ -1,16 +1,16 @@
 package com.danasea.backend;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+import java.util.Set;
+import java.util.stream.Collectors;
+
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
-
-import java.util.Set;
-import java.util.stream.Collectors;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @SpringBootTest
 @ActiveProfiles("test")
@@ -35,7 +35,7 @@ class BackendApplicationTests {
 								.map(method -> method.name() + " " + pattern)))
 				.collect(Collectors.toSet());
 
-		assertEquals(105, endpoints.size(),
+		assertEquals(115, endpoints.size(),
 				() -> "Backend API inventory changed; discovered " + endpoints.size() + " endpoints");
 	}
 

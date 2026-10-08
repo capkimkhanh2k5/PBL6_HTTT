@@ -1,6 +1,22 @@
 package com.danasea.backend.modules.weather.presentation.controllers;
 
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.*;
+
 import com.danasea.backend.modules.communication.application.usecases.SendNotificationUseCase;
+import com.danasea.backend.modules.order.application.RefundProcessingService;
 import com.danasea.backend.modules.order.domain.models.RefundEvaluationResult;
 import com.danasea.backend.modules.order.domain.models.RefundReason;
 import com.danasea.backend.modules.order.domain.models.RefundStatus;
@@ -15,23 +31,10 @@ import com.danasea.backend.modules.service.infrastructure.persistence.repositori
 import com.danasea.backend.modules.weather.infrastructure.persistence.entities.SafetyRuleEvaluationJpaEntity;
 import com.danasea.backend.modules.weather.infrastructure.persistence.repositories.JpaSafetyRuleEvaluationRepository;
 import com.danasea.backend.security.infrastructure.SecurityUtils;
+
 import lombok.Builder;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.*;
-
-import java.math.BigDecimal;
-import java.time.LocalDateTime;
-import java.time.OffsetDateTime;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 
 @Slf4j
 @RestController
@@ -46,6 +49,7 @@ public class AdminWeatherAlertController {
     private final JpaServiceRepository serviceRepository;
     private final SendNotificationUseCase sendNotificationUseCase;
     private final RefundPolicyEngine refundPolicyEngine;
+    private final RefundProcessingService refundProcessingService;
 
     @Autowired
     public AdminWeatherAlertController(
@@ -55,7 +59,8 @@ public class AdminWeatherAlertController {
             JpaServiceSlotRepository slotRepository,
             JpaServiceRepository serviceRepository,
             SendNotificationUseCase sendNotificationUseCase,
-            RefundPolicyEngine refundPolicyEngine
+            RefundPolicyEngine refundPolicyEngine,
+            @Autowired(required = false) RefundProcessingService refundProcessingService
     ) {
         this.evaluationRepository = evaluationRepository;
         this.subOrderRepository = subOrderRepository;
@@ -64,6 +69,20 @@ public class AdminWeatherAlertController {
         this.serviceRepository = serviceRepository;
         this.sendNotificationUseCase = sendNotificationUseCase;
         this.refundPolicyEngine = java.util.Objects.requireNonNull(refundPolicyEngine, "refundPolicyEngine");
+        this.refundProcessingService = refundProcessingService;
+    }
+
+    public AdminWeatherAlertController(
+            JpaSafetyRuleEvaluationRepository evaluationRepository,
+            JpaSubOrderRepository subOrderRepository,
+            JpaRefundRepository refundRepository,
+            JpaServiceSlotRepository slotRepository,
+            JpaServiceRepository serviceRepository,
+            SendNotificationUseCase sendNotificationUseCase,
+            RefundPolicyEngine refundPolicyEngine
+    ) {
+        this(evaluationRepository, subOrderRepository, refundRepository, slotRepository,
+             serviceRepository, sendNotificationUseCase, refundPolicyEngine, null);
     }
 
     public AdminWeatherAlertController(
@@ -75,7 +94,7 @@ public class AdminWeatherAlertController {
             SendNotificationUseCase sendNotificationUseCase
     ) {
         this(evaluationRepository, subOrderRepository, refundRepository, slotRepository,
-             serviceRepository, sendNotificationUseCase, new RefundPolicyEngine());
+             serviceRepository, sendNotificationUseCase, new RefundPolicyEngine(), null);
     }
 
     @Data
@@ -225,18 +244,23 @@ public class AdminWeatherAlertController {
                         );
 
                         String idempotencyKey = "weather-" + evaluationId;
-                        if (refundRepository.findBySubOrderIdAndIdempotencyKey(
-                                subOrder.getId(), idempotencyKey).isEmpty()) {
-                            RefundJpaEntity refund = new RefundJpaEntity();
-                            refund.setSubOrderId(subOrder.getId());
-                            refund.setAmount(evalResult.refundAmount());
-                            refund.setRefundPercentage(evalResult.refundPercentage());
-                            refund.setReason(RefundReason.WEATHER);
-                            refund.setStatus(RefundStatus.PENDING);
-                            refund.setRequestedBy(SecurityUtils.getCurrentUserId().orElse(null));
-                            refund.setIdempotencyKey(idempotencyKey);
-                            refundRepository.save(refund);
+                        var existingRefund = refundRepository.findBySubOrderIdAndIdempotencyKey(
+                                subOrder.getId(), idempotencyKey);
+                        RefundJpaEntity refund = null;
+                        if (existingRefund.isEmpty()) {
+                            RefundJpaEntity newRefund = new RefundJpaEntity();
+                            newRefund.setSubOrderId(subOrder.getId());
+                            newRefund.setAmount(evalResult.refundAmount());
+                            newRefund.setRefundPercentage(evalResult.refundPercentage());
+                            newRefund.setReason(RefundReason.WEATHER);
+                            newRefund.setStatus(RefundStatus.PENDING);
+                            newRefund.setRequestedBy(SecurityUtils.getCurrentUserId().orElse(null));
+                            newRefund.setIdempotencyKey(idempotencyKey);
+                            refund = refundRepository.save(newRefund);
+                        } else {
+                            refund = existingRefund.get();
                         }
+
 
                         refundedCount++;
                     }

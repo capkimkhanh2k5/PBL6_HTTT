@@ -6,5 +6,11 @@ public record RefundResult(
         boolean success,
         String providerRefundId,
         BigDecimal amount,
-        String message
-) {}
+        String message,
+        GatewayRefundStatus status,
+        String currency) {
+    public RefundResult(boolean success, String providerRefundId, BigDecimal amount, String message) {
+        this(success, providerRefundId, amount, message,
+                success ? GatewayRefundStatus.COMPLETED : GatewayRefundStatus.FAILED, null);
+    }
+}

@@ -1,18 +1,21 @@
 package com.danasea.backend.modules.order.presentation.handlers;
 
-import com.danasea.backend.modules.order.domain.exceptions.BookingNotEligibleForOrderException;
-import com.danasea.backend.modules.order.domain.exceptions.InvalidOrderStateException;
-import com.danasea.backend.modules.order.domain.exceptions.InvalidWebhookException;
-import com.danasea.backend.modules.order.domain.exceptions.OrderNotFoundException;
-import com.danasea.backend.modules.order.domain.exceptions.PaymentVerificationException;
-import com.danasea.backend.modules.order.domain.exceptions.UnauthorizedOrderAccessException;
-import com.danasea.backend.shared.presentation.ErrorResponse;
-import com.danasea.backend.shared.presentation.LocalizedExceptionHandlerSupport;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+
+import com.danasea.backend.modules.order.domain.exceptions.BookingNotEligibleForOrderException;
+import com.danasea.backend.modules.order.domain.exceptions.InvalidOrderStateException;
+import com.danasea.backend.modules.order.domain.exceptions.InvalidWebhookException;
+import com.danasea.backend.modules.order.domain.exceptions.OrderNotFoundException;
+import com.danasea.backend.modules.order.domain.exceptions.PaymentGatewayException;
+import com.danasea.backend.modules.order.domain.exceptions.PaymentVerificationException;
+import com.danasea.backend.modules.order.domain.exceptions.RefundNotFoundException;
+import com.danasea.backend.modules.order.domain.exceptions.UnauthorizedOrderAccessException;
+import com.danasea.backend.shared.presentation.ErrorResponse;
+import com.danasea.backend.shared.presentation.LocalizedExceptionHandlerSupport;
 
 @RestControllerAdvice
 public class OrderExceptionHandler extends LocalizedExceptionHandlerSupport {
@@ -21,6 +24,12 @@ public class OrderExceptionHandler extends LocalizedExceptionHandlerSupport {
     public ResponseEntity<ErrorResponse> handleOrderNotFound(OrderNotFoundException ex) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND)
                 .body(error("ORDER_NOT_FOUND"));
+    }
+
+    @ExceptionHandler(RefundNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleRefundNotFound(RefundNotFoundException ex) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(error("REFUND_NOT_FOUND"));
     }
 
     @ExceptionHandler(AccessDeniedException.class)
@@ -45,6 +54,12 @@ public class OrderExceptionHandler extends LocalizedExceptionHandlerSupport {
     public ResponseEntity<ErrorResponse> handleInvalidOrderState(InvalidOrderStateException ex) {
         return ResponseEntity.status(HttpStatus.CONFLICT)
                 .body(error("INVALID_ORDER_STATE"));
+    }
+
+    @ExceptionHandler(PaymentGatewayException.class)
+    public ResponseEntity<ErrorResponse> handlePaymentGateway(PaymentGatewayException ex) {
+        return ResponseEntity.status(HttpStatus.BAD_GATEWAY)
+                .body(error("PAYMENT_GATEWAY_UNAVAILABLE"));
     }
 
     @ExceptionHandler(PaymentVerificationException.class)

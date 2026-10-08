@@ -1,5 +1,14 @@
 package com.danasea.backend.modules.dispute.application.usecases;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.time.OffsetDateTime;
+import java.util.UUID;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.danasea.backend.modules.dispute.domain.exceptions.DisputeAlreadyResolvedException;
 import com.danasea.backend.modules.dispute.domain.exceptions.DisputeNotFoundException;
 import com.danasea.backend.modules.dispute.domain.exceptions.InvalidDisputeResolutionException;
@@ -8,6 +17,7 @@ import com.danasea.backend.modules.dispute.infrastructure.persistence.entities.D
 import com.danasea.backend.modules.dispute.infrastructure.persistence.repositories.JpaDisputeRepository;
 import com.danasea.backend.modules.dispute.presentation.dtos.DisputeResponse;
 import com.danasea.backend.modules.dispute.presentation.dtos.ResolveDisputeRequest;
+import com.danasea.backend.modules.order.application.RefundProcessingService;
 import com.danasea.backend.modules.order.domain.exceptions.OrderNotFoundException;
 import com.danasea.backend.modules.order.domain.models.RefundReason;
 import com.danasea.backend.modules.order.domain.models.RefundStatus;
@@ -17,24 +27,37 @@ import com.danasea.backend.modules.order.infrastructure.persistence.entities.Sub
 import com.danasea.backend.modules.order.infrastructure.persistence.repositories.JpaRefundRepository;
 import com.danasea.backend.modules.order.infrastructure.persistence.repositories.JpaSubOrderRepository;
 import com.danasea.backend.security.infrastructure.SecurityUtils;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import java.math.BigDecimal;
-import java.math.RoundingMode;
-import java.time.OffsetDateTime;
-import java.util.UUID;
 
 @Slf4j
 @Service
-@RequiredArgsConstructor
 public class ResolveDisputeUseCase {
 
     private final JpaDisputeRepository disputeRepository;
     private final JpaSubOrderRepository subOrderRepository;
     private final JpaRefundRepository refundRepository;
+    private final RefundProcessingService refundProcessingService;
+
+    @Autowired
+    public ResolveDisputeUseCase(
+            JpaDisputeRepository disputeRepository,
+            JpaSubOrderRepository subOrderRepository,
+            JpaRefundRepository refundRepository,
+            @Autowired(required = false) RefundProcessingService refundProcessingService) {
+        this.disputeRepository = disputeRepository;
+        this.subOrderRepository = subOrderRepository;
+        this.refundRepository = refundRepository;
+        this.refundProcessingService = refundProcessingService;
+    }
+
+    public ResolveDisputeUseCase(
+            JpaDisputeRepository disputeRepository,
+            JpaSubOrderRepository subOrderRepository,
+            JpaRefundRepository refundRepository) {
+        this(disputeRepository, subOrderRepository, refundRepository, null);
+    }
 
     @Transactional
     public DisputeResponse execute(UUID disputeId, ResolveDisputeRequest request) {
@@ -96,19 +119,24 @@ public class ResolveDisputeUseCase {
                     .divide(BigDecimal.valueOf(100), 2, RoundingMode.HALF_UP);
 
             String idempotencyKey = "dispute-" + disputeId;
-            if (refundRepository.findBySubOrderIdAndIdempotencyKey(subOrder.getId(), idempotencyKey).isEmpty()) {
-                RefundJpaEntity refund = new RefundJpaEntity();
-                refund.setSubOrderId(subOrder.getId());
-                refund.setAmount(refundAmount);
-                refund.setRefundPercentage(appliedRefundPercentage);
-                refund.setReason(RefundReason.ADMIN_OVERRIDE);
-                refund.setStatus(RefundStatus.PENDING);
-                refund.setRequestedBy(adminUserId);
-                refund.setIdempotencyKey(idempotencyKey);
-                refundRepository.save(refund);
+            var existingRefund = refundRepository.findBySubOrderIdAndIdempotencyKey(subOrder.getId(), idempotencyKey);
+            RefundJpaEntity refund = null;
+            if (existingRefund.isEmpty()) {
+                RefundJpaEntity newRefund = new RefundJpaEntity();
+                newRefund.setSubOrderId(subOrder.getId());
+                newRefund.setAmount(refundAmount);
+                newRefund.setRefundPercentage(appliedRefundPercentage);
+                newRefund.setReason(RefundReason.ADMIN_OVERRIDE);
+                newRefund.setStatus(RefundStatus.PENDING);
+                newRefund.setRequestedBy(adminUserId);
+                newRefund.setIdempotencyKey(idempotencyKey);
+                refund = refundRepository.save(newRefund);
+            } else {
+                refund = existingRefund.get();
             }
 
-            log.info("Dispute {} approved refund request: {} ({}%) for sub-order {}. Provider processing is pending.",
+
+            log.info("Dispute {} approved refund request: {} ({}%) for sub-order {}. Provider processing is queued.",
                     disputeId, refundAmount, appliedRefundPercentage, subOrder.getId());
         } else {
             // RESOLVED_REJECTED: Không tạo refund, không đổi SubOrder

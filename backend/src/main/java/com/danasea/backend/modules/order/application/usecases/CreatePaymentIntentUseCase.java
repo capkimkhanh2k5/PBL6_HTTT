@@ -1,60 +1,169 @@
 package com.danasea.backend.modules.order.application.usecases;
 
 import java.math.BigDecimal;
+import java.time.OffsetDateTime;
+import java.util.Objects;
+import java.util.UUID;
+import java.util.regex.Pattern;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.TransactionDefinition;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionTemplate;
 
 import com.danasea.backend.modules.order.application.dtos.CreatePaymentIntentCommand;
 import com.danasea.backend.modules.order.domain.exceptions.InvalidOrderStateException;
 import com.danasea.backend.modules.order.domain.exceptions.OrderNotFoundException;
+import com.danasea.backend.modules.order.domain.exceptions.PaymentGatewayException;
 import com.danasea.backend.modules.order.domain.exceptions.UnauthorizedOrderAccessException;
 import com.danasea.backend.modules.order.domain.models.MasterOrder;
 import com.danasea.backend.modules.order.domain.models.MasterOrderStatus;
+import com.danasea.backend.modules.order.domain.models.PaymentProvider;
+import com.danasea.backend.modules.order.domain.models.PaymentStatus;
 import com.danasea.backend.modules.order.domain.ports.MasterOrderRepositoryPort;
 import com.danasea.backend.modules.order.domain.ports.PaymentGatewayPort;
 import com.danasea.backend.modules.order.domain.ports.PaymentIntentResult;
+import com.danasea.backend.modules.order.infrastructure.persistence.entities.PaymentJpaEntity;
+import com.danasea.backend.modules.order.infrastructure.persistence.repositories.JpaPaymentRepository;
 
 @Service
 public class CreatePaymentIntentUseCase {
 
+    private static final Pattern IDEMPOTENCY_KEY_PATTERN = Pattern.compile("^[A-Za-z0-9._:-]{8,100}$");
+
     private final MasterOrderRepositoryPort masterOrderRepository;
     private final PaymentGatewayPort paymentGatewayPort;
+    private final JpaPaymentRepository paymentRepository;
+    private final TransactionTemplate transaction;
 
     public CreatePaymentIntentUseCase(
             MasterOrderRepositoryPort masterOrderRepository,
-            PaymentGatewayPort paymentGatewayPort) {
+            PaymentGatewayPort paymentGatewayPort,
+            JpaPaymentRepository paymentRepository,
+            PlatformTransactionManager transactionManager) {
         this.masterOrderRepository = masterOrderRepository;
         this.paymentGatewayPort = paymentGatewayPort;
+        this.paymentRepository = paymentRepository;
+        this.transaction = new TransactionTemplate(transactionManager);
+        this.transaction.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
     }
 
-    @Transactional
+    @Transactional(propagation = Propagation.NOT_SUPPORTED)
     public PaymentIntentResult execute(CreatePaymentIntentCommand command) {
         if (command == null || command.customerId() == null || command.orderId() == null || command.provider() == null) {
             throw new IllegalArgumentException("Customer ID, Order ID and Payment Provider are required.");
         }
-        if (command.idempotencyKey() == null || command.idempotencyKey().isBlank()) {
-            throw new IllegalArgumentException("Idempotency key is required.");
+        if (command.idempotencyKey() == null || !IDEMPOTENCY_KEY_PATTERN.matcher(command.idempotencyKey().trim()).matches()) {
+            throw new IllegalArgumentException(
+                    "Idempotency-Key must contain 8 to 100 letters, digits, dots, underscores, colons, or hyphens.");
+        }
+        if (command.provider() != PaymentProvider.VNPAY && command.provider() != PaymentProvider.PAYPAL) {
+            throw new InvalidOrderStateException("The selected payment provider is not supported.");
         }
 
-        MasterOrder order = masterOrderRepository.findById(command.orderId())
-                .orElseThrow(() -> new OrderNotFoundException(command.orderId()));
+        // Commit the identity before contacting the provider; a timeout must not erase it.
+        UUID paymentId = Objects.requireNonNull(transaction.execute(status -> preparePayment(command)));
+        IntentOutcome outcome = Objects.requireNonNull(transaction.execute(status -> initializeIntent(paymentId, command)));
+        if (outcome.expired()) {
+            throw new InvalidOrderStateException(
+                    "Payment intent has expired. Please initiate a new payment with a new idempotency key.");
+        }
+        return outcome.result();
+    }
 
-        // Chặn IDOR: Khách hàng chỉ được tạo intent cho đơn của chính mình
+    private UUID preparePayment(CreatePaymentIntentCommand command) {
+        MasterOrder order = requirePayableOrder(command);
+        String key = command.idempotencyKey().trim();
+        var existing = paymentRepository.findByMasterOrderIdAndIdempotencyKey(order.getId(), key);
+        if (existing.isPresent()) {
+            return existing.get().getId();
+        }
+        PaymentJpaEntity payment = new PaymentJpaEntity();
+        payment.setMasterOrderId(order.getId());
+        payment.setProvider(command.provider());
+        payment.setAmount(order.getTotalAmount());
+        payment.setStatus(PaymentStatus.PENDING);
+        payment.setIdempotencyKey(key);
+        OffsetDateTime expiry = OffsetDateTime.now().plusMinutes(15);
+        if (order.getPaymentDeadline() != null && order.getPaymentDeadline().isBefore(expiry)) {
+            expiry = order.getPaymentDeadline();
+        }
+        payment.setExpiresAt(expiry);
+        return paymentRepository.save(payment).getId();
+    }
+
+    private IntentOutcome initializeIntent(UUID paymentId, CreatePaymentIntentCommand command) {
+        // Serialize retries with the same row and use the same lock order as webhook processing.
+        PaymentJpaEntity payment = paymentRepository.findByIdForUpdate(paymentId)
+                .orElseThrow(() -> new InvalidOrderStateException("The payment intent no longer exists."));
+        if (payment.getProvider() != command.provider()) {
+            throw new InvalidOrderStateException("The idempotency key was already used with another provider.");
+        }
+        if (payment.getStatus() != PaymentStatus.PENDING) {
+            throw new InvalidOrderStateException("The payment has already reached a terminal state: " + payment.getStatus());
+        }
+        if (payment.getExpiresAt() == null) {
+            payment.setExpiresAt((payment.getCreatedAt() != null ? payment.getCreatedAt() : OffsetDateTime.now()).plusMinutes(15));
+        }
+        if (!payment.getExpiresAt().isAfter(OffsetDateTime.now())) {
+            payment.setStatus(PaymentStatus.FAILED);
+            paymentRepository.save(payment);
+            // Reject outside the transaction so the FAILED transition remains committed.
+            return new IntentOutcome(null, true);
+        }
+        MasterOrder order = requirePayableOrder(command);
+        if (payment.getAmount() == null || payment.getAmount().compareTo(order.getTotalAmount()) != 0) {
+            throw new InvalidOrderStateException("The payment amount no longer matches the order amount.");
+        }
+        if (payment.getPaymentUrl() == null || payment.getPaymentUrl().isBlank()) {
+            PaymentIntentResult result = paymentGatewayPort.createPaymentIntent(
+                    payment.getId(), order.getId(), payment.getAmount(), payment.getProvider());
+            if (result == null || !payment.getId().equals(result.paymentId())
+                    || !order.getId().equals(result.orderId()) || payment.getProvider() != result.provider()
+                    || result.amount() == null || payment.getAmount().compareTo(result.amount()) != 0
+                    || result.paymentUrl() == null || result.paymentUrl().isBlank()) {
+                throw new PaymentGatewayException("The gateway returned an invalid payment intent.");
+            }
+            payment.setPaymentUrl(result.paymentUrl());
+            payment.setQrCodeUrl(result.qrCodeUrl());
+            payment.setProviderAmount(result.providerAmount());
+            payment.setProviderCurrency(result.providerCurrency());
+            payment.setProviderTransactionDate(result.providerTransactionDate());
+            if (result.providerOrderId() != null) {
+                payment.setProviderOrderId(result.providerOrderId());
+            }
+            if (result.expiresAt() != null && result.expiresAt().isBefore(payment.getExpiresAt())) {
+                payment.setExpiresAt(result.expiresAt());
+            }
+            paymentRepository.save(payment);
+        }
+        return new IntentOutcome(new PaymentIntentResult(payment.getId(), payment.getMasterOrderId(),
+                payment.getProvider(), payment.getAmount(), payment.getPaymentUrl(), payment.getQrCodeUrl(),
+                payment.getExpiresAt(), payment.getProviderOrderId(), payment.getProviderAmount(),
+                payment.getProviderCurrency(), payment.getProviderTransactionDate()), false);
+    }
+
+    private MasterOrder requirePayableOrder(CreatePaymentIntentCommand command) {
+        MasterOrder order = masterOrderRepository.findByIdForUpdate(command.orderId())
+                .orElseThrow(() -> new OrderNotFoundException(command.orderId()));
         if (!command.customerId().equals(order.getCustomerId())) {
             throw new UnauthorizedOrderAccessException(command.orderId(), command.customerId());
         }
-
-        // Chỉ tạo payment intent cho đơn đang chờ thanh toán
         if (order.getStatus() != MasterOrderStatus.PENDING_PAYMENT) {
             throw new InvalidOrderStateException(
                     "Payment intent can only be created for an order in PENDING_PAYMENT status; current: " + order.getStatus());
         }
-
         if (order.getTotalAmount() == null || order.getTotalAmount().compareTo(BigDecimal.ZERO) <= 0) {
             throw new InvalidOrderStateException("The order amount must be positive.");
         }
+        if (order.getPaymentDeadline() != null && !order.getPaymentDeadline().isAfter(OffsetDateTime.now())) {
+            throw new InvalidOrderStateException("The order payment deadline has expired.");
+        }
+        return order;
+    }
 
-        return paymentGatewayPort.createPaymentIntent(order.getId(), order.getTotalAmount(), command.provider());
+    private record IntentOutcome(PaymentIntentResult result, boolean expired) {
     }
 }

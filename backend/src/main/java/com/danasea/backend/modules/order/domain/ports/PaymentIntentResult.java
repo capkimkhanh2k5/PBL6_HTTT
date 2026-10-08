@@ -13,5 +13,24 @@ public record PaymentIntentResult(
         BigDecimal amount,
         String paymentUrl,
         String qrCodeUrl,
-        OffsetDateTime expiresAt
-) {}
+        OffsetDateTime expiresAt,
+        String providerOrderId,
+        BigDecimal providerAmount,
+        String providerCurrency,
+        String providerTransactionDate
+) {
+    public PaymentIntentResult(
+            UUID paymentId,
+            UUID orderId,
+            PaymentProvider provider,
+            BigDecimal amount,
+            String paymentUrl,
+            String qrCodeUrl,
+            OffsetDateTime expiresAt) {
+        this(paymentId, orderId, provider, amount, paymentUrl, qrCodeUrl, expiresAt, null, null, null, null);
+    }
+    public PaymentIntentResult(UUID paymentId, UUID orderId, PaymentProvider provider, BigDecimal amount,
+            String paymentUrl, String qrCodeUrl, OffsetDateTime expiresAt, String providerOrderId) {
+        this(paymentId, orderId, provider, amount, paymentUrl, qrCodeUrl, expiresAt, providerOrderId, null, null, null);
+    }
+}
