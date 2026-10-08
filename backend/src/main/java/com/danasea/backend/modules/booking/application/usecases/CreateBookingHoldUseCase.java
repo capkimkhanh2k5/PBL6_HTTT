@@ -1,7 +1,8 @@
 package com.danasea.backend.modules.booking.application.usecases;
 
+import java.math.BigDecimal;
 import java.time.Duration;
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -11,6 +12,10 @@ import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
+
 import com.danasea.backend.modules.booking.application.dtos.BookingHoldItemDto;
 import com.danasea.backend.modules.booking.application.dtos.BookingHoldItemResult;
 import com.danasea.backend.modules.booking.application.dtos.BookingHoldResult;
@@ -18,11 +23,16 @@ import com.danasea.backend.modules.booking.application.dtos.CreateBookingHoldCom
 import com.danasea.backend.modules.booking.domain.exceptions.SlotNotAvailableException;
 import com.danasea.backend.modules.booking.domain.models.Booking;
 import com.danasea.backend.modules.booking.domain.models.BookingItem;
+import com.danasea.backend.modules.booking.domain.models.BookingItemAllocation;
 import com.danasea.backend.modules.booking.domain.models.InventoryLockItem;
 import com.danasea.backend.modules.booking.domain.models.SlotValidationDetails;
 import com.danasea.backend.modules.booking.domain.ports.BookingRepositoryPort;
 import com.danasea.backend.modules.booking.domain.ports.InventoryLockPort;
 import com.danasea.backend.modules.booking.domain.ports.ServiceSlotPort;
+import com.danasea.backend.modules.service.domain.models.InventoryType;
+import com.danasea.backend.modules.service.domain.models.OptionType;
+import com.danasea.backend.modules.service.domain.models.PricingUnit;
+
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
@@ -36,6 +46,9 @@ public class CreateBookingHoldUseCase {
     private final InventoryLockPort inventoryLockPort;
     private final ServiceSlotPort serviceSlotPort;
 
+    private record AggregationKey(UUID slotId, UUID optionId, Integer participantsCount, boolean allowSplit, int groupIndex) {}
+
+    @Transactional
     public BookingHoldResult execute(CreateBookingHoldCommand command) {
         // 1. Validate basic input
         if (command == null) {
@@ -51,10 +64,17 @@ public class CreateBookingHoldUseCase {
             throw new IllegalArgumentException("Booking must contain at most " + MAX_REQUEST_ITEMS + " items");
         }
 
-        // 2. Aggregate quantities by slotId to avoid duplicate entries in lock requests
-        Map<UUID, Integer> aggregatedSlotQuantities = new LinkedHashMap<>();
+        // 2. Aggregate quantities by (slotId, optionId, participantsCount)
+        Map<AggregationKey, Integer> aggregatedQuantities = new LinkedHashMap<>();
         int totalQuantity = 0;
+        int groupIndex = 0;
         for (BookingHoldItemDto item : command.items()) {
+            if (item == null) {
+                throw new IllegalArgumentException("Booking item cannot be null");
+            }
+            if (item.participantsCount() != null && item.participantsCount() <= 0) {
+                throw new IllegalArgumentException("Participants per package must be positive");
+            }
             if (item.slotId() == null) {
                 throw new IllegalArgumentException("slotId cannot be null");
             }
@@ -63,7 +83,9 @@ public class CreateBookingHoldUseCase {
             }
             try {
                 totalQuantity = Math.addExact(totalQuantity, item.quantity());
-                aggregatedSlotQuantities.merge(item.slotId(), item.quantity(), Math::addExact);
+                AggregationKey key = new AggregationKey(item.slotId(), item.optionId(), item.participantsCount(), item.allowSplit(),
+                        item.optionId() != null ? ++groupIndex : 0);
+                aggregatedQuantities.merge(key, item.quantity(), Math::addExact);
             } catch (ArithmeticException exception) {
                 throw new IllegalArgumentException("Total booking quantity is too large", exception);
             }
@@ -74,14 +96,19 @@ public class CreateBookingHoldUseCase {
         }
 
         // 3. Query slot and service details to validate business rules
-        List<UUID> slotIds = new ArrayList<>(aggregatedSlotQuantities.keySet());
+        List<UUID> slotIds = aggregatedQuantities.keySet().stream()
+                .map(AggregationKey::slotId)
+                .distinct()
+                .toList();
+
+        serviceSlotPort.lockSlotsForUpdate(slotIds);
         List<SlotValidationDetails> slotDetailsList = serviceSlotPort.findSlotDetailsBatch(slotIds);
         Map<UUID, SlotValidationDetails> slotDetailsMap = slotDetailsList.stream()
                 .collect(Collectors.toMap(SlotValidationDetails::getSlotId, Function.identity()));
 
-        LocalDate today = LocalDate.now();
-        for (Map.Entry<UUID, Integer> entry : aggregatedSlotQuantities.entrySet()) {
-            UUID slotId = entry.getKey();
+        LocalDateTime nowAtVenue = LocalDateTime.now(Booking.VIETNAM_ZONE);
+        for (Map.Entry<AggregationKey, Integer> entry : aggregatedQuantities.entrySet()) {
+            UUID slotId = entry.getKey().slotId();
             SlotValidationDetails details = slotDetailsMap.get(slotId);
             if (details == null) {
                 throw new SlotNotAvailableException(slotId, "Slot does not exist");
@@ -92,42 +119,118 @@ public class CreateBookingHoldUseCase {
             if (!details.isOpen()) {
                 throw new SlotNotAvailableException(slotId, "Slot status is " + details.getStatus());
             }
-            if (details.getBookingDate().isBefore(today)) {
+            if (details.getBookingDate() == null || details.getBookingTime() == null
+                    || !LocalDateTime.of(details.getBookingDate(), details.getBookingTime()).isAfter(nowAtVenue)) {
                 throw new SlotNotAvailableException(slotId, "Cannot book slots in the past");
             }
         }
 
         // 4. Build lock items for Redis batch Lua script
-        List<InventoryLockItem> lockItems = aggregatedSlotQuantities.entrySet().stream()
-                .map(e -> {
-                    SlotValidationDetails details = slotDetailsMap.get(e.getKey());
-                    return InventoryLockItem.of(e.getKey(), e.getValue(), details.getAvailableCapacity());
-                })
-                .toList();
+        List<InventoryLockItem> lockItems = new ArrayList<>();
+        List<AggregationKey> orderedKeys = new ArrayList<>(aggregatedQuantities.keySet());
+
+        for (AggregationKey key : orderedKeys) {
+            int qty = aggregatedQuantities.get(key);
+            SlotValidationDetails details = slotDetailsMap.get(key.slotId());
+            SlotValidationDetails.ServiceOptionValidationDetails option = resolveOption(details, key.optionId());
+            if (option != null && option.isPrivate()) {
+                if (!InventoryType.SHARED_CAPACITY_UNITS.equals(details.getInventoryType())) {
+                    throw new IllegalArgumentException("Private packages require shared capacity units");
+                }
+                if (option.getMaxPaxPerPackage() == null || option.getMaxPaxPerPackage() <= 0) {
+                    throw new IllegalArgumentException("Private package capacity is not configured");
+                }
+                if (key.participantsCount() != null && key.participantsCount() > option.getMaxPaxPerPackage()) {
+                    throw new IllegalArgumentException("Participants exceed the private package limit");
+                }
+            }
+
+            if (InventoryType.SHARED_CAPACITY_UNITS.equals(details.getInventoryType())) {
+                List<InventoryLockItem.UnitLockInfo> unitInfos = details.getUnits().stream()
+                        .map(u -> new InventoryLockItem.UnitLockInfo(u.getUnitNumber(), u.getCapacity(), u.getBookedCount()))
+                        .toList();
+
+                OptionType optType = option != null ? option.getOptionType() : OptionType.SHARED;
+                Integer pax = option != null ? option.getMaxPaxPerPackage() : null;
+
+                lockItems.add(InventoryLockItem.builder()
+                        .slotId(key.slotId())
+                        .quantity(qty)
+                        .maxCapacity(details.getCapacity())
+                        .inventoryType(InventoryType.SHARED_CAPACITY_UNITS)
+                        .optionType(optType)
+                        .paxPerPackage(pax != null ? pax : 1)
+                        .allowSplit(key.allowSplit())
+                        .units(unitInfos)
+                        .allocations(new ArrayList<>())
+                        .build());
+            } else {
+                // PERSON_LIMIT
+                lockItems.add(InventoryLockItem.builder()
+                        .slotId(key.slotId())
+                        .quantity(qty)
+                        .maxCapacity(details.getAvailableCapacity())
+                        .inventoryType(InventoryType.PERSON_LIMIT)
+                        .optionType(option != null ? option.getOptionType() : OptionType.SHARED)
+                        .paxPerPackage(key.participantsCount())
+                        .units(new ArrayList<>())
+                        .allocations(new ArrayList<>())
+                        .build());
+            }
+        }
 
         UUID bookingId = UUID.randomUUID();
 
         // 5. Atomic Redis inventory lock (All-or-Nothing)
         inventoryLockPort.acquireHolds(bookingId, lockItems, HOLD_DURATION);
+        if (TransactionSynchronizationManager.isSynchronizationActive()) {
+            TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+                @Override
+                public void afterCompletion(int status) {
+                    if (status != STATUS_COMMITTED) {
+                        inventoryLockPort.releaseHolds(bookingId, lockItems);
+                    }
+                }
+            });
+        }
 
         // 6. Build Booking & BookingItems and persist to DB with compensating rollback on failure
         try {
             List<BookingItem> bookingItems = new ArrayList<>();
-            for (Map.Entry<UUID, Integer> entry : aggregatedSlotQuantities.entrySet()) {
-                UUID slotId = entry.getKey();
-                int qty = entry.getValue();
-                SlotValidationDetails details = slotDetailsMap.get(slotId);
+            for (int i = 0; i < orderedKeys.size(); i++) {
+                AggregationKey key = orderedKeys.get(i);
+                int qty = aggregatedQuantities.get(key);
+                InventoryLockItem lockItem = lockItems.get(i);
+                SlotValidationDetails details = slotDetailsMap.get(key.slotId());
+                SlotValidationDetails.ServiceOptionValidationDetails option = resolveOption(details, key.optionId());
+
+                BigDecimal itemPrice = (option != null && option.getPrice() != null) ? option.getPrice() : details.getPrice();
+                PricingUnit pricingUnit = option != null ? option.getPricingUnit() : PricingUnit.PER_PERSON;
+                UUID optId = option != null ? option.getId() : null;
+
+                UUID bookingItemId = UUID.randomUUID();
+                List<BookingItemAllocation> itemAllocations = new ArrayList<>();
+                if (lockItem.getAllocations() != null) {
+                    for (BookingItemAllocation alloc : lockItem.getAllocations()) {
+                        alloc.setBookingItemId(bookingItemId);
+                        itemAllocations.add(alloc);
+                    }
+                }
 
                 bookingItems.add(BookingItem.builder()
-                        .id(UUID.randomUUID())
+                        .id(bookingItemId)
                         .bookingId(bookingId)
-                        .slotId(slotId)
+                        .slotId(key.slotId())
                         .serviceId(details.getServiceId())
                         .vendorId(details.getVendorId())
+                        .optionId(optId)
+                        .pricingUnit(pricingUnit)
+                        .participantsCount(key.participantsCount())
                         .quantity(qty)
                         .bookingDate(details.getBookingDate())
                         .bookingTime(details.getBookingTime())
-                        .price(details.getPrice())
+                        .price(itemPrice)
+                        .allocations(itemAllocations)
                         .build());
             }
 
@@ -141,6 +244,23 @@ public class CreateBookingHoldUseCase {
             inventoryLockPort.releaseHolds(bookingId, lockItems);
             throw ex;
         }
+    }
+
+    private SlotValidationDetails.ServiceOptionValidationDetails resolveOption(SlotValidationDetails details, UUID optionId) {
+        if (optionId != null) {
+            var option = details.getOptions().get(optionId);
+            if (option == null || !option.isActive()) {
+                throw new IllegalArgumentException("Option is invalid or inactive");
+            }
+            return option;
+        }
+        if (details.getOptions().size() == 1) {
+            return details.getOptions().values().iterator().next();
+        }
+        if (details.isOptionsConfigured() || !details.getOptions().isEmpty()) {
+            throw new IllegalArgumentException("An active optionId must be selected");
+        }
+        return null;
     }
 
     private BookingHoldResult mapToResult(Booking booking) {

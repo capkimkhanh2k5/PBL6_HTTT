@@ -87,7 +87,7 @@ class CancelBookingHoldUseCaseTest {
     void execute_WhenValidHold_ShouldCancelSuccessfully() {
         CancelBookingHoldCommand command = new CancelBookingHoldCommand(bookingId, customerId);
 
-        when(bookingRepository.findById(bookingId)).thenReturn(Optional.of(sampleHoldBooking));
+        when(bookingRepository.findByIdWithItemsForUpdate(bookingId)).thenReturn(Optional.of(sampleHoldBooking));
         when(bookingRepository.save(any(Booking.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
         BookingHoldResult result = cancelBookingHoldUseCase.execute(command);
@@ -110,7 +110,7 @@ class CancelBookingHoldUseCaseTest {
         sampleHoldBooking.setStatus(BookingStatus.CANCELLED);
         CancelBookingHoldCommand command = new CancelBookingHoldCommand(bookingId, customerId);
 
-        when(bookingRepository.findById(bookingId)).thenReturn(Optional.of(sampleHoldBooking));
+        when(bookingRepository.findByIdWithItemsForUpdate(bookingId)).thenReturn(Optional.of(sampleHoldBooking));
 
         BookingHoldResult result = cancelBookingHoldUseCase.execute(command);
 
@@ -126,7 +126,7 @@ class CancelBookingHoldUseCaseTest {
         UUID otherCustomerId = UUID.randomUUID();
         CancelBookingHoldCommand command = new CancelBookingHoldCommand(bookingId, otherCustomerId);
 
-        when(bookingRepository.findById(bookingId)).thenReturn(Optional.of(sampleHoldBooking));
+        when(bookingRepository.findByIdWithItemsForUpdate(bookingId)).thenReturn(Optional.of(sampleHoldBooking));
 
         assertThatThrownBy(() -> cancelBookingHoldUseCase.execute(command))
                 .isInstanceOf(UnauthorizedBookingAccessException.class);
@@ -139,7 +139,7 @@ class CancelBookingHoldUseCaseTest {
     @DisplayName("Cancel non-existent booking throws BookingNotFoundException")
     void execute_WhenBookingNotFound_ShouldThrowException() {
         CancelBookingHoldCommand command = new CancelBookingHoldCommand(bookingId, customerId);
-        when(bookingRepository.findById(bookingId)).thenReturn(Optional.empty());
+        when(bookingRepository.findByIdWithItemsForUpdate(bookingId)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> cancelBookingHoldUseCase.execute(command))
                 .isInstanceOf(BookingNotFoundException.class);
@@ -153,7 +153,7 @@ class CancelBookingHoldUseCaseTest {
         sampleHoldBooking.setStatus(BookingStatus.CONFIRMED);
         CancelBookingHoldCommand command = new CancelBookingHoldCommand(bookingId, customerId);
 
-        when(bookingRepository.findById(bookingId)).thenReturn(Optional.of(sampleHoldBooking));
+        when(bookingRepository.findByIdWithItemsForUpdate(bookingId)).thenReturn(Optional.of(sampleHoldBooking));
 
         assertThatThrownBy(() -> cancelBookingHoldUseCase.execute(command))
                 .isInstanceOf(InvalidBookingStateException.class);

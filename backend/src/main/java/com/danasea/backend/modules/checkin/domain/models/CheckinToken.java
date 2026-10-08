@@ -34,17 +34,17 @@ public class CheckinToken extends BaseDomainModel {
     }
 
     public boolean isExpired(OffsetDateTime now) {
-        Objects.requireNonNull(now, "Thời điểm kiểm tra không được null");
+        Objects.requireNonNull(now, "Current time must not be null");
         return expiresAt != null && now.isAfter(expiresAt);
     }
 
     public void markUsed(UUID staffId, OffsetDateTime timestamp) {
-        Objects.requireNonNull(staffId, "Staff ID không được null");
-        Objects.requireNonNull(timestamp, "Timestamp không được null");
+        Objects.requireNonNull(staffId, "Staff ID must not be null");
+        Objects.requireNonNull(timestamp, "Timestamp must not be null");
 
         if (isUsed()) {
             throw new CheckinAlreadyUsedException(
-                    String.format("Vé check-in cho SubOrder %s đã được sử dụng lúc %s bởi nhân viên %s",
+                    String.format("Check-in ticket for SubOrder %s was already used at %s by staff %s",
                             subOrderId, usedAt, usedByVendorStaffId),
                     usedAt,
                     usedByVendorStaffId
@@ -53,7 +53,7 @@ public class CheckinToken extends BaseDomainModel {
 
         if (isExpired(timestamp)) {
             throw new QrTokenExpiredException(
-                    String.format("Vé check-in cho SubOrder %s đã hết hạn lúc %s (thời điểm quét: %s)",
+                    String.format("Check-in ticket for SubOrder %s expired at %s (scanned at: %s)",
                             subOrderId, expiresAt, timestamp)
             );
         }
@@ -63,12 +63,12 @@ public class CheckinToken extends BaseDomainModel {
     }
 
     public static CheckinToken create(UUID subOrderId, String qrTokenHash, OffsetDateTime expiresAt) {
-        Objects.requireNonNull(subOrderId, "subOrderId không được null");
-        Objects.requireNonNull(qrTokenHash, "qrTokenHash không được null");
-        Objects.requireNonNull(expiresAt, "expiresAt không được null");
+        Objects.requireNonNull(subOrderId, "subOrderId must not be null");
+        Objects.requireNonNull(qrTokenHash, "qrTokenHash must not be null");
+        Objects.requireNonNull(expiresAt, "expiresAt must not be null");
 
         if (qrTokenHash.length() != 64) {
-            throw new IllegalArgumentException("qrTokenHash phải có đúng 64 ký tự hex (SHA-256)");
+            throw new IllegalArgumentException("qrTokenHash must be exactly 64 hex characters (SHA-256)");
         }
 
         return CheckinToken.builder()

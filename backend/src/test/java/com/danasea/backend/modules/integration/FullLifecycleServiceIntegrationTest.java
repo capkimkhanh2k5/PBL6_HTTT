@@ -1,5 +1,6 @@
 package com.danasea.backend.modules.integration;
 
+import com.danasea.backend.modules.audit.application.api.AuditLogInternalApi;
 import com.danasea.backend.modules.booking.domain.ports.VendorLookupPort;
 import com.danasea.backend.modules.checkin.application.usecases.GenerateCheckinQrUseCase;
 import com.danasea.backend.modules.checkin.application.usecases.VerifyCheckinUseCase;
@@ -212,7 +213,7 @@ public class FullLifecycleServiceIntegrationTest {
 
         finalizeSettlementUseCase = new FinalizeSettlementUseCase(
                 settlementRepository, settlementMapper,
-                mock(com.danasea.backend.modules.audit.application.api.AuditLogInternalApi.class));
+                mock(AuditLogInternalApi.class));
 
         getSettlementsUseCase = new GetSettlementsUseCase(
                 settlementRepository, settlementLineItemRepository, vendorLookupPort, settlementMapper);

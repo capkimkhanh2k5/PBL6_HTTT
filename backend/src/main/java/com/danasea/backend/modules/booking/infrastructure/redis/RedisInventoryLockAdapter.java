@@ -12,8 +12,11 @@ import org.springframework.data.redis.core.script.RedisScript;
 import org.springframework.stereotype.Component;
 
 import com.danasea.backend.modules.booking.domain.exceptions.InsufficientInventoryException;
+import com.danasea.backend.modules.booking.domain.models.BookingItemAllocation;
 import com.danasea.backend.modules.booking.domain.models.InventoryLockItem;
 import com.danasea.backend.modules.booking.domain.ports.InventoryLockPort;
+import com.danasea.backend.modules.service.domain.models.InventoryType;
+
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -62,8 +65,23 @@ public class RedisInventoryLockAdapter implements InventoryLockPort {
 
         for (InventoryLockItem item : items) {
             keys.add(buildSlotKey(item.getSlotId()));
-            args.add(String.valueOf(item.getQuantity()));
-            args.add(String.valueOf(item.getMaxCapacity()));
+            if (InventoryType.SHARED_CAPACITY_UNITS.equals(item.getInventoryType())) {
+                StringBuilder unitsSb = new StringBuilder();
+                if (item.getUnits() != null) {
+                    for (int u = 0; u < item.getUnits().size(); u++) {
+                        var unit = item.getUnits().get(u);
+                        if (u > 0) unitsSb.append(";");
+                        unitsSb.append(unit.getUnitNumber()).append(":")
+                                .append(unit.getCapacity()).append(":")
+                                .append(unit.getBookedCount());
+                    }
+                }
+                String optType = item.getOptionType() != null ? item.getOptionType().name() : "SHARED";
+                int pax = item.getPaxPerPackage() != null ? item.getPaxPerPackage() : 1;
+                args.add("SHARED_CAPACITY_UNITS|" + optType + "|" + item.getQuantity() + "|" + pax + "|" + unitsSb + "|" + (item.isAllowSplit() ? "1" : "0"));
+            } else {
+                args.add("PERSON_LIMIT|" + item.getQuantity() + "|" + item.getMaxCapacity());
+            }
         }
 
         @SuppressWarnings("unchecked")
@@ -82,6 +100,34 @@ public class RedisInventoryLockAdapter implements InventoryLockPort {
             UUID failedSlotId = extractSlotIdFromKey(key);
             log.warn("Inventory hold failed for slot {}: requested {}, available {}", failedSlotId, req, avail);
             throw new InsufficientInventoryException(failedSlotId, req, avail);
+        }
+
+        // Parse allocated units for SHARED_CAPACITY_UNITS items if returned
+        if (result.size() > 1 && result.get(1) != null) {
+            String combinedAlloc = String.valueOf(result.get(1));
+            String[] slotAllocs = combinedAlloc.split("@", -1);
+            for (int i = 0; i < items.size(); i++) {
+                if (i < slotAllocs.length && !slotAllocs[i].isBlank()) {
+                    List<BookingItemAllocation> allocs = new ArrayList<>();
+                    String[] entries = slotAllocs[i].split(";");
+                    for (String eStr : entries) {
+                        if (eStr.isBlank()) continue;
+                        String[] p = eStr.split(":");
+                        if (p.length >= 3) {
+                            int uNum = Integer.parseInt(p[0]);
+                            int seats = Integer.parseInt(p[1]);
+                            boolean isPriv = "1".equals(p[2]);
+                            allocs.add(BookingItemAllocation.builder()
+                                    .slotId(items.get(i).getSlotId())
+                                    .unitNumber(uNum)
+                                    .allocatedSeats(seats)
+                                    .isPrivateLock(isPriv)
+                                    .build());
+                        }
+                    }
+                    items.get(i).setAllocations(allocs);
+                }
+            }
         }
     }
 

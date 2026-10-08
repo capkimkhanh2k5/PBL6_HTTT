@@ -4,6 +4,7 @@ import com.danasea.backend.modules.communication.application.usecases.SendNotifi
 import com.danasea.backend.modules.order.domain.models.RefundReason;
 import com.danasea.backend.modules.order.domain.models.RefundStatus;
 import com.danasea.backend.modules.order.domain.models.SubOrderStatus;
+import com.danasea.backend.modules.order.domain.services.RefundPolicyEngine;
 import com.danasea.backend.modules.order.infrastructure.persistence.entities.RefundJpaEntity;
 import com.danasea.backend.modules.order.infrastructure.persistence.entities.SubOrderJpaEntity;
 import com.danasea.backend.modules.order.infrastructure.persistence.repositories.JpaRefundRepository;
@@ -74,7 +75,7 @@ class AdminWeatherAlertControllerTest {
                 slotRepository,
                 serviceRepository,
                 sendNotificationUseCase,
-                new com.danasea.backend.modules.order.domain.services.RefundPolicyEngine());
+                new RefundPolicyEngine());
         evaluationId = UUID.randomUUID();
         serviceId = UUID.randomUUID();
         slotId = UUID.randomUUID();

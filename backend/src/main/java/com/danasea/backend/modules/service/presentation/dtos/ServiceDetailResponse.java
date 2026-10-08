@@ -24,4 +24,5 @@ public class ServiceDetailResponse {
     private String categoryName;
     private List<String> imageUrls;
     private List<String> availableSlots;
+    private List<ServiceOptionResponse> options;
 }

@@ -1,5 +1,17 @@
 package com.danasea.backend.modules.booking.presentation.controllers;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -25,6 +37,7 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import com.danasea.backend.modules.booking.application.dtos.BookingHoldItemResult;
 import com.danasea.backend.modules.booking.application.dtos.BookingHoldResult;
+import com.danasea.backend.modules.booking.application.dtos.CreateBookingHoldCommand;
 import com.danasea.backend.modules.booking.application.usecases.CancelBookingHoldUseCase;
 import com.danasea.backend.modules.booking.application.usecases.ConfirmBookingUseCase;
 import com.danasea.backend.modules.booking.application.usecases.CreateBookingHoldUseCase;
@@ -36,15 +49,6 @@ import com.danasea.backend.modules.booking.domain.models.BookingStatus;
 import com.danasea.backend.modules.booking.presentation.handlers.BookingExceptionHandler;
 import com.danasea.backend.shared.presentation.GlobalExceptionHandler;
 import com.fasterxml.jackson.databind.ObjectMapper;
-
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @ExtendWith(MockitoExtension.class)
 class BookingHoldControllerTest {
@@ -275,5 +279,27 @@ class BookingHoldControllerTest {
                 .andExpect(status().isForbidden())
                 .andExpect(jsonPath("$.code").value("UNAUTHORIZED_BOOKING_ACCESS"));
     }
-}
+    @Test
+    void explicitSplitConsentIsForwardedToTheHoldCommand() throws Exception {
+        UUID slotId=UUID.randomUUID();
+        UUID optionId=UUID.randomUUID();
+        when(createBookingHoldUseCase.execute(any())).thenAnswer(invocation->{
+            var command=invocation.getArgument(0,CreateBookingHoldCommand.class);
+            assertTrue(command.items().get(0).allowSplit());
+            assertEquals(optionId,command.items().get(0).optionId());
+            return new BookingHoldResult(UUID.randomUUID(),customerId,BookingStatus.HOLD,BigDecimal.ONE,
+                OffsetDateTime.now().plusMinutes(15),List.of(),OffsetDateTime.now());
+        });
+        mockMvc.perform(post("/api/bookings/hold").contentType(MediaType.APPLICATION_JSON)
+                .content("{\"items\":[{\"slotId\":\""+slotId+"\",\"quantity\":4,\"optionId\":\""+optionId+"\",\"allowSplit\":true}]}"))
+                .andExpect(status().isCreated());
+    }
 
+    @Test
+    void negativeParticipantsAreRejectedBeforeCallingTheUseCase() throws Exception {
+        mockMvc.perform(post("/api/bookings/hold").contentType(MediaType.APPLICATION_JSON)
+                .content("{\"items\":[{\"slotId\":\""+UUID.randomUUID()+"\",\"quantity\":1,\"participantsCount\":-1}]}"))
+                .andExpect(status().isBadRequest());
+        verifyNoInteractions(createBookingHoldUseCase);
+    }
+}
