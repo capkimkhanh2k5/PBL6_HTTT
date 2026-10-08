@@ -44,6 +44,7 @@ class AuthSession {
     String method = 'GET',
     Map<String, dynamic>? data,
     bool retry = true,
+    bool authenticated = true,
   }) async {
     final uri = Uri.parse('$baseUrl$path');
     if (kReleaseMode && uri.scheme != 'https')
@@ -55,7 +56,8 @@ class AuthSession {
       req.followRedirects = false;
       req.headers.contentType = ContentType.json;
       req.headers.set('Accept-Language', AppLanguage.instance.code);
-      if (_access != null) req.headers.set('Authorization', 'Bearer $_access');
+      if (authenticated && _access != null)
+        req.headers.set('Authorization', 'Bearer $_access');
       if (_refresh != null &&
           (path == '/api/auth/refresh' || path == '/api/auth/logout')) {
         req.cookies.add(Cookie('refresh_token', _refresh!));
@@ -159,6 +161,27 @@ class AuthSession {
     pendingEmail = email.trim();
     pendingVerification = true;
     await _save();
+  }
+
+  Future<void> requestPasswordReset(String email) async {
+    await request(
+      '/api/auth/forgot-password',
+      method: 'POST',
+      data: {'email': email.trim()},
+      authenticated: false,
+      retry: false,
+    );
+  }
+
+  Future<void> resetPassword(String email, String otp, String password) async {
+    await request(
+      '/api/auth/reset-password',
+      method: 'POST',
+      data: {'email': email.trim(), 'otp': otp.trim(), 'newPassword': password},
+      authenticated: false,
+      retry: false,
+    );
+    await clear();
   }
 
   Future<void> sendOtp() async {

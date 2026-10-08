@@ -25,7 +25,22 @@ void main() {
           : jsonDecode(text) as Map<String, dynamic>;
       final path = req.uri.path;
       req.response.headers.contentType = ContentType.json;
-      if (path == '/api/auth/login' && body['password'] == 'wrong') {
+      if (path == '/api/auth/forgot-password' ||
+          path == '/api/auth/reset-password') {
+        expect(req.method, 'POST');
+        expect(req.headers.value('Authorization'), isNull);
+        expect(req.cookies, isEmpty);
+        expect(body['email'], 'test@example.com');
+        if (path.endsWith('/reset-password')) {
+          expect(body['newPassword'], 'NewStrong123!');
+          if (body['otp'] != '123456') {
+            req.response.statusCode = 400;
+            req.response.write(
+              jsonEncode({'message': 'Invalid or expired OTP'}),
+            );
+          }
+        }
+      } else if (path == '/api/auth/login' && body['password'] == 'wrong') {
         req.response.statusCode = 401;
         req.response.write(jsonEncode({'message': 'Invalid credentials'}));
       } else if (path == '/api/auth/login' || path == '/api/auth/register') {
@@ -95,4 +110,19 @@ void main() {
     expect(AuthSession.strongPassword('12345678'), isFalse);
     expect(AuthSession.strongPassword('Strong123#'), isFalse);
   });
+  test(
+    'Password reset uses public endpoints and clears session only on success',
+    () async {
+      await auth.login('test@example.com', 'Strong123!');
+      await auth.requestPasswordReset(' test@example.com ');
+      await expectLater(
+        auth.resetPassword('test@example.com', '000000', 'NewStrong123!'),
+        throwsA(isA<AuthFailure>()),
+      );
+      expect(auth.profile, isNotNull);
+      await auth.resetPassword('test@example.com', '123456', 'NewStrong123!');
+      expect(auth.profile, isNull);
+      expect(await auth.restore(), isFalse);
+    },
+  );
 }
