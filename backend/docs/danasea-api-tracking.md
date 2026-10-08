@@ -18,6 +18,8 @@
 - [x] POST /api/auth/logout
 - [x] POST /api/auth/otp/send
 - [x] POST /api/auth/otp/verify
+- [x] POST /api/auth/forgot-password
+- [x] POST /api/auth/reset-password
 
 ### Auth Module — Test
 - [x] RegisterUseCaseTest (thành công, email trùng, publish event)
@@ -30,8 +32,11 @@
 - [x] LogoutUseCaseTest
 - [x] SendVerificationOtpUseCaseTest
 - [x] VerifyOtpUseCaseTest (đúng, sai, hết hạn, vượt max attempts, one-time-use)
+- [x] ForgotPasswordUseCaseTest (thành công, chống enumeration, user locked, event publishing)
+- [x] ResetPasswordUseCaseTest (thành công, OTP sai, vượt max attempts, token hết hạn, thu hồi session)
 - [x] OtpEmailConsumerTest (mail lỗi → DLQ)
-- [x] AuthenticationControllerTest (login/register/refresh/logout/OTP, cookie httpOnly)
+- [x] PasswordResetEmailConsumerTest (gửi thành công, mail lỗi → DLQ)
+- [x] AuthenticationControllerTest (login/register/refresh/logout/OTP/forgot-password/reset-password, cookie httpOnly)
 - [x] RateLimitFilterIntegrationTest
 - [x] Test Family Revocation persist thật qua DB sau khi fix noRollbackFor
 - [x] Test X-Forwarded-For không bypass được rate limit (sau khi cấu hình forward-headers-strategy)

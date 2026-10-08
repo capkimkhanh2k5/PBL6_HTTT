@@ -1,11 +1,13 @@
 package com.danasea.backend.modules.account.application.api;
 
+import java.time.OffsetDateTime;
 import java.util.Optional;
 import java.util.UUID;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
+import com.danasea.backend.modules.account.domain.models.PasswordResetToken;
 import com.danasea.backend.modules.account.domain.models.RefreshToken;
 import com.danasea.backend.modules.account.domain.models.Role;
 import com.danasea.backend.modules.account.domain.models.User;
@@ -32,4 +34,12 @@ public interface AccountInternalApi {
     void revokeAllRefreshTokensByUserId(UUID userId);
 
     Page<User> findUsers(Pageable pageable, Role role, Boolean isLocked, String search);
+
+    void createPasswordResetToken(UUID userId, String tokenHash, OffsetDateTime expiresAt);
+
+    Optional<PasswordResetToken> findLatestActivePasswordResetToken(UUID userId);
+
+    void invalidatePasswordResetTokens(UUID userId);
+
+    void markPasswordResetTokenUsed(UUID tokenId);
 }

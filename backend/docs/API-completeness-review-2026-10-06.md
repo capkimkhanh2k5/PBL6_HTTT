@@ -128,12 +128,14 @@ Vendor có thể nhập waiver content, sub-order có waiverAccepted/waiverAccep
 
 Mở rộng public detail trả nội dung điều kiện tham gia/waiver theo ngôn ngữ và version. Mở rộng request tạo order/checkout nhận xác nhận từng service rủi ro; lưu user, thời điểm, version/nội dung snapshot. Có thể dùng endpoint `POST /api/sub-orders/{id}/waiver-acceptance` nếu phù hợp thứ tự checkout. Không cần thêm cả hai cách.
 
-### P1 Quên mật khẩu
+### P1 Quên mật khẩu — ĐÃ XỬ LÝ
 
-Có đổi mật khẩu khi đã biết mật khẩu cũ và OTP xác minh email. PasswordResetToken hiện chỉ có model/entity/repository; chưa có API phục hồi tài khoản.
+Cập nhật 08/10/2026:
+- `POST /api/auth/forgot-password`: Nhận email, chống User Enumeration bằng phản hồi đồng nhất; tạo mã OTP 6 chữ số băm SHA-256 lưu trong `password_reset_tokens` (hết hạn sau 15 phút, vô hiệu hóa các mã cũ của user); phát sự kiện `PasswordResetRequestedEvent` qua RabbitMQ topic exchange `danasea.exchange.topic` tới queue `notification.password-reset-email.queue` để gửi email bất đồng bộ; áp dụng Rate Limit (5 requests/phút theo IP qua Bucket4j/Redis).
+- `POST /api/auth/reset-password`: Nhận email, OTP 6 chữ số và mật khẩu mới; kiểm tra active token và giới hạn tối đa 5 lần thử sai (sau 5 lần sai thì token bị vô hiệu hóa); cập nhật BCrypt password hash, đánh dấu `usedAt`, thu hồi toàn bộ phiên đăng nhập cũ (`revokeAllRefreshTokensByUserId`), và ghi audit log `PASSWORD_RESET`.
+- Đã bổ sung bộ test kiểm chứng: `ForgotPasswordUseCaseTest`, `ResetPasswordUseCaseTest`, `PasswordResetEmailConsumerTest`, `AuthenticationControllerTest` và cập nhật kiểm kê `BackendApplicationTests` (117 endpoints).
 
-- `POST /api/auth/forgot-password` và `POST /api/auth/reset-password`.
-- Token/OTP riêng mục đích reset, hết hạn, dùng một lần, rate limit; response không tiết lộ email tồn tại; thu hồi phiên cũ khi reset thành công.
+Bằng chứng: `security/authentication/presentation/AuthenticationController.java`, `ForgotPasswordUseCase.java`, `ResetPasswordUseCase.java`, `PasswordResetEmailConsumer.java`, `configs/RabbitMQConfig.java`.
 
 ### P1 Quản trị giao dịch và theo dõi hoàn tiền
 

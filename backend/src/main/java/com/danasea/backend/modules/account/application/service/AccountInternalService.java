@@ -27,24 +27,56 @@ import com.danasea.backend.modules.account.domain.models.Role;
 import com.danasea.backend.modules.account.domain.models.User;
 import com.danasea.backend.modules.account.infrastructure.mappers.RefreshTokenMapper;
 import com.danasea.backend.modules.account.infrastructure.mappers.UserMapper;
+import com.danasea.backend.modules.account.domain.models.PasswordResetToken;
+import com.danasea.backend.modules.account.infrastructure.mappers.PasswordResetTokenMapper;
+import com.danasea.backend.modules.account.infrastructure.persistence.entities.PasswordResetTokenJpaEntity;
 import com.danasea.backend.modules.account.infrastructure.persistence.entities.RefreshTokenJpaEntity;
 import com.danasea.backend.modules.account.infrastructure.persistence.entities.UserJpaEntity;
+import com.danasea.backend.modules.account.infrastructure.persistence.repositories.JpaPasswordResetTokenRepository;
 import com.danasea.backend.modules.account.infrastructure.persistence.repositories.JpaRefreshTokenRepository;
 import com.danasea.backend.modules.account.infrastructure.persistence.repositories.JpaUserRepository;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import jakarta.persistence.criteria.Predicate;
-import lombok.RequiredArgsConstructor;
 
 @Service
-@RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class AccountInternalService implements AccountInternalApi {
 
     private final JpaUserRepository userRepository;
     private final JpaRefreshTokenRepository refreshTokenRepository;
+    private final JpaPasswordResetTokenRepository passwordResetTokenRepository;
     private final UserMapper userMapper;
     private final RefreshTokenMapper refreshTokenMapper;
+    private final PasswordResetTokenMapper passwordResetTokenMapper;
     private final CacheManager cacheManager;
+
+    @Autowired
+    public AccountInternalService(
+            JpaUserRepository userRepository,
+            JpaRefreshTokenRepository refreshTokenRepository,
+            JpaPasswordResetTokenRepository passwordResetTokenRepository,
+            UserMapper userMapper,
+            RefreshTokenMapper refreshTokenMapper,
+            PasswordResetTokenMapper passwordResetTokenMapper,
+            CacheManager cacheManager) {
+        this.userRepository = userRepository;
+        this.refreshTokenRepository = refreshTokenRepository;
+        this.passwordResetTokenRepository = passwordResetTokenRepository;
+        this.userMapper = userMapper;
+        this.refreshTokenMapper = refreshTokenMapper;
+        this.passwordResetTokenMapper = passwordResetTokenMapper;
+        this.cacheManager = cacheManager;
+    }
+
+    public AccountInternalService(
+            JpaUserRepository userRepository,
+            JpaRefreshTokenRepository refreshTokenRepository,
+            UserMapper userMapper,
+            RefreshTokenMapper refreshTokenMapper,
+            CacheManager cacheManager) {
+        this(userRepository, refreshTokenRepository, null, userMapper, refreshTokenMapper, new PasswordResetTokenMapper(), cacheManager);
+    }
 
     private String normalizeEmail(String email) {
         return email != null ? email.trim().toLowerCase(Locale.ROOT) : null;
@@ -192,6 +224,44 @@ public class AccountInternalService implements AccountInternalApi {
 
         Page<UserJpaEntity> entities = userRepository.findAll(spec, pageable);
         return entities.map(userMapper::toDomain);
+    }
+
+    @Override
+    @Transactional
+    public void createPasswordResetToken(UUID userId, String tokenHash, OffsetDateTime expiresAt) {
+        PasswordResetTokenJpaEntity entity = new PasswordResetTokenJpaEntity();
+        entity.setId(UUID.randomUUID());
+        entity.setUserId(userId);
+        entity.setTokenHash(tokenHash);
+        entity.setExpiresAt(expiresAt);
+        entity.setUsedAt(null);
+        passwordResetTokenRepository.save(entity);
+    }
+
+    @Override
+    public Optional<PasswordResetToken> findLatestActivePasswordResetToken(UUID userId) {
+        return passwordResetTokenRepository
+                .findTopByUserIdAndUsedAtIsNullOrderByCreatedAtDesc(userId)
+                .filter(token -> token.getExpiresAt() != null && token.getExpiresAt().isAfter(OffsetDateTime.now()))
+                .map(passwordResetTokenMapper::toDomain);
+    }
+
+    @Override
+    @Transactional
+    public void invalidatePasswordResetTokens(UUID userId) {
+        List<PasswordResetTokenJpaEntity> tokens = passwordResetTokenRepository.findAllByUserIdAndUsedAtIsNull(userId);
+        OffsetDateTime now = OffsetDateTime.now();
+        tokens.forEach(token -> token.setUsedAt(now));
+        passwordResetTokenRepository.saveAll(tokens);
+    }
+
+    @Override
+    @Transactional
+    public void markPasswordResetTokenUsed(UUID tokenId) {
+        passwordResetTokenRepository.findById(tokenId).ifPresent(token -> {
+            token.setUsedAt(OffsetDateTime.now());
+            passwordResetTokenRepository.save(token);
+        });
     }
 
 }

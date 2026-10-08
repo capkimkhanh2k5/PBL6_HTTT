@@ -13,7 +13,14 @@ import jakarta.validation.constraints.NotNull;
 @ConfigurationProperties(prefix = "app.rate-limit")
 public record RateLimitProperties(
         @Valid @NotNull Limit loginRegistration,
-        @Valid @NotNull Limit otp) {
+        @Valid @NotNull Limit otp,
+        @Valid Limit forgotPassword) {
+
+    public RateLimitProperties {
+        if (forgotPassword == null) {
+            forgotPassword = new Limit(5, Duration.ofMinutes(1));
+        }
+    }
 
     public record Limit(
             @Min(1) long capacity,

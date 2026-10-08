@@ -4,6 +4,7 @@ import com.danasea.backend.shared.i18n.SupportedLanguage;
 
 import com.danasea.backend.security.authentication.domain.exceptions.InvalidCredentialsException;
 import com.danasea.backend.security.authentication.domain.exceptions.OtpInvalidException;
+import com.danasea.backend.security.authentication.domain.exceptions.OtpMaxAttemptsExceededException;
 import com.danasea.backend.security.authentication.application.results.LoginResult;
 import com.danasea.backend.security.authentication.application.usecases.LoginUseCase;
 import com.danasea.backend.security.authentication.application.usecases.LogoutUseCase;
@@ -12,10 +13,14 @@ import com.danasea.backend.security.authentication.application.usecases.Register
 import com.danasea.backend.security.authentication.application.usecases.SendVerificationOtpUseCase;
 import com.danasea.backend.security.authentication.application.usecases.VerifyOtpUseCase;
 import com.danasea.backend.security.authentication.application.usecases.GoogleOAuth2LoginUseCase;
+import com.danasea.backend.security.authentication.application.usecases.ForgotPasswordUseCase;
+import com.danasea.backend.security.authentication.application.usecases.ResetPasswordUseCase;
 import com.danasea.backend.security.authentication.presentation.dtos.GoogleOAuth2Request;
 import com.danasea.backend.security.authentication.presentation.dtos.LoginRequest;
 import com.danasea.backend.security.authentication.presentation.dtos.RegisterRequest;
 import com.danasea.backend.security.authentication.presentation.dtos.VerifyOtpRequest;
+import com.danasea.backend.security.authentication.presentation.dtos.ForgotPasswordRequest;
+import com.danasea.backend.security.authentication.presentation.dtos.ResetPasswordRequest;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.Cookie;
 import org.junit.jupiter.api.BeforeEach;
@@ -62,6 +67,12 @@ class AuthenticationControllerTest {
     @Mock
     private GoogleOAuth2LoginUseCase googleOAuth2LoginUseCase;
 
+    @Mock
+    private ForgotPasswordUseCase forgotPasswordUseCase;
+
+    @Mock
+    private ResetPasswordUseCase resetPasswordUseCase;
+
     private AuthenticationController authenticationController;
 
     private ObjectMapper objectMapper = new ObjectMapper();
@@ -78,6 +89,8 @@ class AuthenticationControllerTest {
                 sendVerificationOtpUseCase,
                 verifyOtpUseCase,
                 googleOAuth2LoginUseCase,
+                forgotPasswordUseCase,
+                resetPasswordUseCase,
                 jwtProperties);
         mockMvc = MockMvcBuilders.standaloneSetup(authenticationController)
                 .setControllerAdvice(new AuthenticationExceptionHandler(), new GlobalExceptionHandler())
@@ -210,5 +223,98 @@ class AuthenticationControllerTest {
                 .andExpect(jsonPath("$.code").value("INVALID_INPUT"));
 
         verifyNoInteractions(verifyOtpUseCase);
+    }
+
+    @Test
+    void shouldHandleForgotPasswordSuccessfully() throws Exception {
+        ForgotPasswordRequest request = new ForgotPasswordRequest("user@example.com");
+
+        mockMvc.perform(post("/api/auth/forgot-password")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.message").isNotEmpty());
+
+        verify(forgotPasswordUseCase).execute(eq("user@example.com"), any());
+    }
+
+    @Test
+    void shouldRejectForgotPasswordWithInvalidEmail() throws Exception {
+        ForgotPasswordRequest request = new ForgotPasswordRequest("invalid-email");
+
+        mockMvc.perform(post("/api/auth/forgot-password")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("INVALID_INPUT"));
+
+        verifyNoInteractions(forgotPasswordUseCase);
+    }
+
+    @Test
+    void shouldResetPasswordSuccessfully() throws Exception {
+        ResetPasswordRequest request = new ResetPasswordRequest("user@example.com", "123456", "NewPassword1!");
+
+        mockMvc.perform(post("/api/auth/reset-password")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.message").isNotEmpty());
+
+        verify(resetPasswordUseCase).execute("user@example.com", "123456", "NewPassword1!");
+    }
+
+    @Test
+    void shouldRejectResetPasswordWithWeakPassword() throws Exception {
+        ResetPasswordRequest request = new ResetPasswordRequest("user@example.com", "123456", "weak");
+
+        mockMvc.perform(post("/api/auth/reset-password")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("INVALID_INPUT"));
+
+        verifyNoInteractions(resetPasswordUseCase);
+    }
+
+    @Test
+    void shouldRejectResetPasswordWithInvalidOtpLength() throws Exception {
+        ResetPasswordRequest request = new ResetPasswordRequest("user@example.com", "123", "NewPassword1!");
+
+        mockMvc.perform(post("/api/auth/reset-password")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("INVALID_INPUT"));
+
+        verifyNoInteractions(resetPasswordUseCase);
+    }
+
+    @Test
+    void shouldFailResetPasswordWhenOtpIsInvalid() throws Exception {
+        ResetPasswordRequest request = new ResetPasswordRequest("user@example.com", "123456", "NewPassword1!");
+
+        doThrow(new OtpInvalidException())
+                .when(resetPasswordUseCase).execute(anyString(), anyString(), anyString());
+
+        mockMvc.perform(post("/api/auth/reset-password")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("INVALID_OTP"));
+    }
+
+    @Test
+    void shouldFailResetPasswordWhenMaxAttemptsExceeded() throws Exception {
+        ResetPasswordRequest request = new ResetPasswordRequest("user@example.com", "123456", "NewPassword1!");
+
+        doThrow(new OtpMaxAttemptsExceededException())
+                .when(resetPasswordUseCase).execute(anyString(), anyString(), anyString());
+
+        mockMvc.perform(post("/api/auth/reset-password")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("INVALID_OTP"));
     }
 }

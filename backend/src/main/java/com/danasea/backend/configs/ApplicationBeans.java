@@ -29,6 +29,10 @@ import com.danasea.backend.modules.admin.application.usecases.GetUsersUseCase;
 import com.danasea.backend.modules.admin.application.usecases.LockUserUseCase;
 import com.danasea.backend.modules.admin.application.usecases.UnlockUserUseCase;
 import com.danasea.backend.modules.audit.application.api.AuditLogInternalApi;
+import com.danasea.backend.security.authentication.application.usecases.ForgotPasswordUseCase;
+import com.danasea.backend.security.authentication.application.usecases.ResetPasswordUseCase;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.StringRedisTemplate;
 
 @Configuration
 public class ApplicationBeans {
@@ -140,5 +144,21 @@ public class ApplicationBeans {
             TokenProvider tokenProvider,
             JwtProperties jwtProperties) {
         return new GoogleOAuth2LoginUseCase(tokenVerifier, accountInternalApi, tokenProvider, jwtProperties);
+    }
+
+    @Bean
+    ForgotPasswordUseCase forgotPasswordUseCase(
+            AccountInternalApi accountInternalApi,
+            AuthEventPublisher authEventPublisher) {
+        return new ForgotPasswordUseCase(accountInternalApi, authEventPublisher);
+    }
+
+    @Bean
+    ResetPasswordUseCase resetPasswordUseCase(
+            AccountInternalApi accountInternalApi,
+            PasswordHasher passwordHasher,
+            AuditLogInternalApi auditLogInternalApi,
+            @Autowired(required = false) StringRedisTemplate redisTemplate) {
+        return new ResetPasswordUseCase(accountInternalApi, passwordHasher, auditLogInternalApi, redisTemplate);
     }
 }
