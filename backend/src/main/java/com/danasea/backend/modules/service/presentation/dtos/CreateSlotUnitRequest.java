@@ -4,11 +4,11 @@ import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 
 public record CreateSlotUnitRequest(
-        @NotNull(message = "Unit number must not be null")
-        @Min(value = 1, message = "Unit number must be >= 1")
+        @NotNull(message = "{validation.service.unit.number.required}")
+        @Min(value = 1, message = "{validation.service.unit.number.min}")
         Integer unitNumber,
 
-        @NotNull(message = "Unit capacity must not be null")
-        @Min(value = 1, message = "Unit capacity must be >= 1")
+        @NotNull(message = "{validation.service.unit.capacity.required}")
+        @Min(value = 1, message = "{validation.service.unit.capacity.min}")
         Integer capacity
 ) {}

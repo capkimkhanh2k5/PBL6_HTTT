@@ -9,6 +9,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
+
+import com.danasea.backend.modules.booking.domain.models.Booking;
 import com.danasea.backend.modules.service.domain.exceptions.ServiceNotFoundException;
 import com.danasea.backend.modules.service.domain.models.InventoryType;
 import com.danasea.backend.modules.service.domain.models.OptionStatus;
@@ -21,10 +26,8 @@ import com.danasea.backend.modules.service.domain.ports.ServiceOptionRepositoryP
 import com.danasea.backend.modules.service.domain.ports.ServiceRepositoryPort;
 import com.danasea.backend.modules.service.domain.ports.ServiceSlotRepositoryPort;
 import com.danasea.backend.modules.service.presentation.dtos.PublicServiceSlotAvailabilityResponse;
+
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.redis.core.StringRedisTemplate;
-import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 
 @Component
 @RequiredArgsConstructor
@@ -43,6 +46,18 @@ public class GetServiceSlotsAvailabilityUseCase {
             LocalDate to,
             Integer quantity
     ) {
+        return execute(serviceId, optionId, from, to, quantity, false);
+    }
+
+    @Transactional(readOnly = true)
+    public List<PublicServiceSlotAvailabilityResponse> execute(UUID serviceId, UUID optionId,
+            LocalDate from, LocalDate to, Integer quantity, boolean allowSplit) {
+        if (quantity != null && quantity <= 0) {
+            throw new IllegalArgumentException("Quantity must be positive");
+        }
+        if (from != null && to != null && to.isBefore(from)) {
+            throw new IllegalArgumentException("End date must not precede start date");
+        }
         Service service = serviceRepository.findPublishedById(serviceId)
                 .orElseThrow(() -> new ServiceNotFoundException("Service not found or not published: " + serviceId));
 
@@ -58,11 +73,14 @@ public class GetServiceSlotsAvailabilityUseCase {
             if (activeOptions.isEmpty()) {
                 return Collections.emptyList();
             }
+            if (activeOptions.size() > 1) {
+                throw new IllegalArgumentException("An active optionId must be selected");
+            }
             option = activeOptions.get(0);
         }
 
-        LocalDate today = LocalDate.now();
-        LocalTime nowTime = LocalTime.now();
+        LocalDate today = LocalDate.now(Booking.VIETNAM_ZONE);
+        LocalTime nowTime = LocalTime.now(Booking.VIETNAM_ZONE);
 
         LocalDate queryFrom = (from != null && !from.isBefore(today)) ? from : today;
         LocalDate queryTo = (to != null && !to.isBefore(queryFrom)) ? to : queryFrom.plusDays(30);
@@ -87,7 +105,11 @@ public class GetServiceSlotsAvailabilityUseCase {
 
             int availablePaxOrPackages = calculateAvailability(slot, option);
             int reqQty = (quantity != null && quantity > 0) ? quantity : 1;
-            boolean bookable = (availablePaxOrPackages >= reqQty);
+            boolean bookable = availablePaxOrPackages >= reqQty;
+            if (bookable && option.isShared() && !allowSplit
+                    && InventoryType.SHARED_CAPACITY_UNITS.equals(slot.getInventoryType())) {
+                bookable = largestAvailableSharedUnit(slot) >= reqQty;
+            }
 
             responses.add(PublicServiceSlotAvailabilityResponse.builder()
                     .slotId(slot.getId())
@@ -176,13 +198,25 @@ public class GetServiceSlotsAvailabilityUseCase {
             int avail = Math.max(0, cap - booked - totalActiveHoldSeats);
 
             if (option.isPrivate()) {
-                int paxPerPkg = (option.getMaxPaxPerPackage() != null && option.getMaxPaxPerPackage() > 0)
-                        ? option.getMaxPaxPerPackage()
-                        : 1;
-                return avail / paxPerPkg;
+                return 0;
             }
             return avail;
         }
+    }
+
+    private int largestAvailableSharedUnit(ServiceSlot slot) {
+        Map<Integer, Integer> held = new HashMap<>();
+        Map<Integer, Boolean> privateHeld = new HashMap<>();
+        redisTemplate.opsForHash().entries("inventory:slot:" + slot.getId() + ":holds").values()
+                .forEach(value -> parseUnitHoldEntry(String.valueOf(value), System.currentTimeMillis(), held, privateHeld));
+        List<ServiceSlotUnit> units = slot.getUnits();
+        if (units == null || units.isEmpty()) {
+            units = serviceSlotRepository.findUnitsBySlotId(slot.getId());
+        }
+        return units.stream().filter(unit -> !privateHeld.getOrDefault(unit.getUnitNumber(), false))
+                .mapToInt(unit -> Math.max(0, unit.getCapacity() - (unit.getBookedCount() != null ? unit.getBookedCount() : 0)
+                        - held.getOrDefault(unit.getUnitNumber(), 0)))
+                .max().orElse(0);
     }
 
     private void parseUnitHoldEntry(

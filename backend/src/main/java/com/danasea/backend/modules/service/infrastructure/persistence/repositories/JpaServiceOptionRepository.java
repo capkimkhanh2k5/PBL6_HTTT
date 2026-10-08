@@ -4,13 +4,16 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-import com.danasea.backend.modules.service.domain.models.OptionStatus;
-import com.danasea.backend.modules.service.infrastructure.persistence.entities.ServiceOptionJpaEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import com.danasea.backend.modules.service.domain.models.OptionStatus;
+import com.danasea.backend.modules.service.infrastructure.persistence.entities.ServiceOptionJpaEntity;
+
 @Repository
 public interface JpaServiceOptionRepository extends JpaRepository<ServiceOptionJpaEntity, UUID> {
+
+    boolean existsByServiceId(UUID serviceId);
 
     List<ServiceOptionJpaEntity> findByServiceIdOrderByCreatedAtAsc(UUID serviceId);
 

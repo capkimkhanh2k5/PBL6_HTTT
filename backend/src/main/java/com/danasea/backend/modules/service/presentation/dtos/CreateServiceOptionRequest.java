@@ -4,22 +4,23 @@ import java.math.BigDecimal;
 
 import com.danasea.backend.modules.service.domain.models.OptionType;
 import com.danasea.backend.modules.service.domain.models.PricingUnit;
+
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
 public record CreateServiceOptionRequest(
-        @NotBlank(message = "Option name must not be blank")
+        @NotBlank(message = "{validation.service.option.name.required}")
         String name,
 
-        @NotNull(message = "Option type (SHARED/PRIVATE) must not be null")
+        @NotNull(message = "{validation.service.option.type.required}")
         OptionType optionType,
 
-        @NotNull(message = "Pricing unit (PER_PERSON/PER_PACKAGE) must not be null")
+        @NotNull(message = "{validation.service.option.pricing.required}")
         PricingUnit pricingUnit,
 
-        @NotNull(message = "Price must not be null")
-        @DecimalMin(value = "0.0", inclusive = false, message = "Price must be greater than 0")
+        @NotNull(message = "{validation.service.option.price.required}")
+        @DecimalMin(value = "0.0", inclusive = false, message = "{validation.service.option.price.positive}")
         BigDecimal price,
 
         Integer maxPaxPerPackage,

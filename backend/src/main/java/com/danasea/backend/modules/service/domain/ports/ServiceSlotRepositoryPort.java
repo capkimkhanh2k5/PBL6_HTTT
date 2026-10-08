@@ -1,6 +1,7 @@
 package com.danasea.backend.modules.service.domain.ports;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -14,6 +15,12 @@ public interface ServiceSlotRepositoryPort {
 
     Optional<ServiceSlot> findById(UUID id);
 
+    Optional<ServiceSlot> findByIdForUpdate(UUID id);
+
+    int getActiveHeldCount(UUID slotId);
+
+    boolean existsByServiceIdAndDateAndStartTime(UUID serviceId, LocalDate date, LocalTime startTime);
+
     List<ServiceSlot> findByServiceId(UUID serviceId);
 
     List<ServiceSlot> findByServiceIdAndDateBetween(UUID serviceId, LocalDate from, LocalDate to);
@@ -26,7 +33,11 @@ public interface ServiceSlotRepositoryPort {
 
     void deleteUnitsBySlotId(UUID slotId);
 
+    void deleteUnit(UUID slotId, int unitNumber);
+
     boolean hasActiveBookingOrHold(UUID slotId);
 
     int getCommittedCountForUnit(UUID slotId, int unitNumber);
+
+    boolean hasPrivateCommitmentForUnit(UUID slotId, int unitNumber);
 }

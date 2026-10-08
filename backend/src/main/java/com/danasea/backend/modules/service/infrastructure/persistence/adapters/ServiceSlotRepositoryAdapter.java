@@ -1,6 +1,7 @@
 package com.danasea.backend.modules.service.infrastructure.persistence.adapters;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -8,6 +9,11 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
+
+import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.danasea.backend.modules.service.domain.models.InventoryType;
 import com.danasea.backend.modules.service.domain.models.ServiceSlot;
@@ -17,11 +23,8 @@ import com.danasea.backend.modules.service.infrastructure.persistence.entities.S
 import com.danasea.backend.modules.service.infrastructure.persistence.entities.ServiceSlotUnitJpaEntity;
 import com.danasea.backend.modules.service.infrastructure.persistence.repositories.JpaServiceSlotRepository;
 import com.danasea.backend.modules.service.infrastructure.persistence.repositories.JpaServiceSlotUnitRepository;
+
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.redis.core.StringRedisTemplate;
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 
 @Component
 @RequiredArgsConstructor
@@ -50,31 +53,39 @@ public class ServiceSlotRepositoryAdapter implements ServiceSlotRepositoryPort {
     }
 
     @Override
+    @Transactional
+    public Optional<ServiceSlot> findByIdForUpdate(UUID id) {
+        return jpaServiceSlotRepository.findByIdForUpdate(id)
+                .map(entity -> toDomain(entity, findUnitsBySlotId(id)));
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public boolean existsByServiceIdAndDateAndStartTime(UUID serviceId, LocalDate date, LocalTime startTime) {
+        return jpaServiceSlotRepository.existsByServiceIdAndDateAndStartTime(serviceId, date, startTime);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public int getActiveHeldCount(UUID slotId) {
+        return jdbcTemplate.queryForObject("""
+                SELECT COALESCE(SUM(bi.quantity), 0) FROM booking_items bi JOIN bookings b ON bi.booking_id = b.id
+                WHERE bi.slot_id = ? AND b.status IN ('HOLD', 'PENDING_PAYMENT') AND b.hold_expires_at > CURRENT_TIMESTAMP
+                """, Integer.class, slotId);
+    }
+
+    @Override
     @Transactional(readOnly = true)
     public List<ServiceSlot> findByServiceId(UUID serviceId) {
-        List<ServiceSlotJpaEntity> entities = jpaServiceSlotRepository
-                .findByServiceIdAndStatusAndDateGreaterThanEqualOrderByDateAscStartTimeAsc(
-                        serviceId, null, LocalDate.now());
-        if (entities.isEmpty()) {
-            entities = jpaServiceSlotRepository.findAll().stream()
-                    .filter(s -> serviceId.equals(s.getServiceId()))
-                    .sorted((a, b) -> a.getDate().compareTo(b.getDate()))
-                    .toList();
-        }
+        List<ServiceSlotJpaEntity> entities = jpaServiceSlotRepository.findByServiceIdOrderByDateAscStartTimeAsc(serviceId);
         return mapEntitiesWithUnits(entities);
     }
 
     @Override
     @Transactional(readOnly = true)
     public List<ServiceSlot> findByServiceIdAndDateBetween(UUID serviceId, LocalDate from, LocalDate to) {
-        List<ServiceSlotJpaEntity> entities = jpaServiceSlotRepository.findAll().stream()
-                .filter(s -> serviceId.equals(s.getServiceId()))
-                .filter(s -> !s.getDate().isBefore(from) && !s.getDate().isAfter(to))
-                .sorted((a, b) -> {
-                    int c = a.getDate().compareTo(b.getDate());
-                    return c != 0 ? c : a.getStartTime().compareTo(b.getStartTime());
-                })
-                .toList();
+        List<ServiceSlotJpaEntity> entities = jpaServiceSlotRepository
+                .findByServiceIdAndDateBetweenOrderByDateAscStartTimeAsc(serviceId, from, to);
         return mapEntitiesWithUnits(entities);
     }
 
@@ -121,11 +132,18 @@ public class ServiceSlotRepositoryAdapter implements ServiceSlotRepositoryPort {
     }
 
     @Override
+    @Transactional
+    public void deleteUnit(UUID slotId, int unitNumber) {
+        jpaServiceSlotUnitRepository.findBySlotIdAndUnitNumber(slotId, unitNumber)
+                .ifPresent(jpaServiceSlotUnitRepository::delete);
+    }
+
+    @Override
     @Transactional(readOnly = true)
     public boolean hasActiveBookingOrHold(UUID slotId) {
         String sql = "SELECT COUNT(*) FROM booking_items bi " +
                 "JOIN bookings b ON bi.booking_id = b.id " +
-                "WHERE bi.slot_id = ? AND b.status IN ('HOLD', 'CONFIRMED')";
+                "WHERE bi.slot_id = ? AND (b.status = 'CONFIRMED' AND NOT bi.capacity_released OR b.status IN ('HOLD', 'PENDING_PAYMENT') AND b.hold_expires_at > CURRENT_TIMESTAMP)";
         Integer count = jdbcTemplate.queryForObject(sql, Integer.class, slotId);
         if (count != null && count > 0) {
             return true;
@@ -168,9 +186,22 @@ public class ServiceSlotRepositoryAdapter implements ServiceSlotRepositoryPort {
         String sql = "SELECT COALESCE(SUM(bia.allocated_seats), 0) FROM booking_item_allocations bia " +
                 "JOIN booking_items bi ON bia.booking_item_id = bi.id " +
                 "JOIN bookings b ON bi.booking_id = b.id " +
-                "WHERE bia.slot_id = ? AND bia.unit_number = ? AND b.status IN ('HOLD', 'CONFIRMED')";
+                "WHERE bia.slot_id = ? AND bia.unit_number = ? AND (b.status = 'CONFIRMED' AND NOT bi.capacity_released OR b.status IN ('HOLD', 'PENDING_PAYMENT') AND b.hold_expires_at > CURRENT_TIMESTAMP)";
         Integer count = jdbcTemplate.queryForObject(sql, Integer.class, slotId, unitNumber);
         return count != null ? count : 0;
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public boolean hasPrivateCommitmentForUnit(UUID slotId, int unitNumber) {
+        Integer count = jdbcTemplate.queryForObject("""
+                SELECT COUNT(*) FROM booking_item_allocations a
+                JOIN booking_items bi ON bi.id = a.booking_item_id JOIN bookings b ON b.id = bi.booking_id
+                WHERE a.slot_id = ? AND a.unit_number = ? AND a.is_private_lock AND NOT bi.capacity_released
+                  AND (b.status = 'CONFIRMED' OR b.status IN ('HOLD', 'PENDING_PAYMENT')
+                       AND b.hold_expires_at > CURRENT_TIMESTAMP)
+                """, Integer.class, slotId, unitNumber);
+        return count != null && count > 0;
     }
 
     private List<ServiceSlot> mapEntitiesWithUnits(List<ServiceSlotJpaEntity> entities) {

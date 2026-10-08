@@ -14,7 +14,7 @@
 
 Các đường dẫn dưới đây là hợp đồng đề xuất, chưa tồn tại trừ khi ghi rõ mở rộng API có sẵn. Không cần tách endpoint riêng nếu có thể hoàn thiện hợp đồng hiện tại.
 
-### P1 Quản lý lịch và tồn chỗ
+### P1 Quản lý lịch và tồn chỗ -> Đang Xử Lý
 
 Có model/repository slot và engine giữ chỗ, nhưng chưa có API vendor tạo/sửa/đóng/mở slot. `capacityPerSlot` trên service không thay thế lịch bán. Public detail hiện trả `availableSlots: List<String>` theo ngày/giờ, thiếu slotId mà `POST /bookings/hold` bắt buộc nhận; thiếu sức chứa, số chỗ trống và trạng thái cho khách lựa chọn.
 
@@ -26,7 +26,7 @@ Có model/repository slot và engine giữ chỗ, nhưng chưa có API vendor t�
 
 Không giảm capacity thấp hơn booked/held; không xóa slot có giao dịch; chặn thao tác vendor khác. Availability chỉ là dữ liệu tham khảo; hold vẫn phải kiểm tra nguyên tử. Cần test cạnh tranh slot cuối bằng Redis/DB thật.
 
-### P1 Thống kê và báo cáo
+### P1 Thống kê và báo cáo -> Đang xử lý
 
 Yêu cầu học phần bắt buộc có báo cáo theo ngày, tuần, quý, năm và khoảng từ ngày đến ngày. `/api/admin/dashboard` chỉ trả `ADMIN_ACCESS_GRANTED`. Listing settlement có bộ lọc ngày là chức năng đối soát, chưa thay thế báo cáo kinh doanh/phân tích.
 
@@ -39,7 +39,7 @@ Yêu cầu học phần bắt buộc có báo cáo theo ngày, tuần, quý, nă
 
 Phân biệt giá trị bán, tiền thu, hoàn tiền, hoa hồng và số thực nhận; thống nhất trạng thái được tính, timezone và các ngày biên. Phần phân tích nên giúp chọn thời gian/dịch vụ/vendor cần cải thiện, không chỉ cộng tổng.
 
-### P1 Đánh giá và chất lượng dịch vụ
+### P1 Đánh giá và chất lượng dịch vụ -> Đang xử lý
 
 `Review`, JPA entity và repository đã có; chưa có usecase/controller ghi và đọc đánh giá. Trường averageRating/reviewCount trên catalog chưa chứng minh vòng đời đánh giá hoạt động.
 
@@ -67,7 +67,7 @@ Vendor có thể nhập waiver content, sub-order có waiverAccepted/waiverAccep
 
 Mở rộng public detail trả nội dung điều kiện tham gia/waiver theo ngôn ngữ và version. Mở rộng request tạo order/checkout nhận xác nhận từng service rủi ro; lưu user, thời điểm, version/nội dung snapshot. Có thể dùng endpoint `POST /api/sub-orders/{id}/waiver-acceptance` nếu phù hợp thứ tự checkout. Không cần thêm cả hai cách.
 
-### P1 Quên mật khẩu
+### P1 Quên mật khẩu -> Đang xử lý
 
 Có đổi mật khẩu khi đã biết mật khẩu cũ và OTP xác minh email. PasswordResetToken hiện chỉ có model/entity/repository; chưa có API phục hồi tài khoản.
 
@@ -126,25 +126,6 @@ Conversation/Message của communication mới có persistence, chưa có API nh
 Checklist `danasea-api-tracking.md` hiện ghi nhiều API weather/AI/check-in/dispute/settlement chưa xong dù code đã có; ngược lại thiếu module reviews/promotions/messaging/reporting/payout. Workflow refund mô tả persist/cancel/release slot nhưng đường HTTP hiện tại chưa làm các bước đó. Cần cập nhật cả hợp đồng API, workflow và tiêu chí nghiệm thu từ code cuối cùng.
 
 Giỏ hàng không bắt buộc cần CRUD backend riêng: yêu cầu học phần cho phép có hoặc không tùy ứng dụng. Client cart cộng với hold nhiều item có thể đáp ứng MVP; chỉ cần API cart nếu muốn lưu bền vững/đồng bộ nhiều thiết bị. Ba cổng thanh toán cũng không cần hoàn thiện đồng thời nếu một cổng nội địa và một cổng quốc tế đáp ứng phạm vi đã chốt.
-
-## Đề xuất thứ tự triển khai
-
-1. Sửa quyền truy cập, thống nhất payment intent/webhook và refund lifecycle; loại bỏ success mô phỏng khỏi adapter thật. Có test HTTP tới DB và callback sandbox cho cổng chọn.
-2. Hoàn thiện slot CRUD/availability và dữ liệu detail; test cạnh tranh slot cuối, hold expiry và rollback nhiều item.
-3. Thống kê/báo cáo admin/vendor, lọc khoảng thời gian, CSV; đây là khoảng trống trực tiếp của yêu cầu học phần.
-4. Review, waiver, forgot password, payout/mark-paid, commission và admin quản trị giao dịch.
-5. Đổi lịch, voucher, nhắn tin, tranh chấp đọc/phản hồi, khám phá và thông báo; xếp lại theo phạm vi nghiệm thu và thời gian còn lại.
-
-## Kiểm chứng trong lần rà soát này
-
-Chạy `./mvnw -q test` từ backend. Kết quả tổng hợp Maven: **1497 tests, 1 failure, 27 errors, 136 skipped**, exit code 1. Các test skipped không phải bằng chứng pass.
-
-- Failure: `BackendApplicationTests.allApplicationEndpointsAreDiscoverable` kỳ vọng 105 endpoint nhưng Spring phát hiện 106. Cần cập nhật kiểm kê có chủ đích; đây không tự nó là lỗi nghiệp vụ.
-- 27 errors thuộc các test tích hợp liên quan Testcontainers không tìm được Docker environment và các class phụ thuộc khởi tạo thất bại. Cần chạy lại khi Docker dùng được; chưa thể nghiệm thu các invariant bằng kết quả này.
-- Context test thông thường đã chạy được, nhưng không thay thế full integration context với PostgreSQL/Redis thật.
-- Những vấn đề payment/refund/owner nêu trên là phát hiện từ mã nguồn; suite hiện tại chưa chứng minh đã bao phủ các đường lỗi đó.
-
-Không sửa mã nguồn sản phẩm hoặc test trong lần nhận xét này. Phụ lục dưới đây liệt kê toàn bộ API tìm thấy, gồm alias và endpoint chỉ dùng dev/test.
 
 ## Phụ lục kiểm kê toàn bộ API
 

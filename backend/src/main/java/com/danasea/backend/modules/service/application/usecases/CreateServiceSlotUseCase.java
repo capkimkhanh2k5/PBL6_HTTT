@@ -1,12 +1,16 @@
 package com.danasea.backend.modules.service.application.usecases;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
+import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
+
+import com.danasea.backend.modules.booking.domain.models.Booking;
 import com.danasea.backend.modules.service.domain.exceptions.ServiceNotFoundException;
 import com.danasea.backend.modules.service.domain.exceptions.VendorNotApprovedException;
 import com.danasea.backend.modules.service.domain.models.InventoryType;
@@ -22,9 +26,8 @@ import com.danasea.backend.modules.service.presentation.dtos.CreateSlotUnitReque
 import com.danasea.backend.modules.service.presentation.dtos.ServiceSlotResponse;
 import com.danasea.backend.modules.service.presentation.dtos.ServiceSlotUnitResponse;
 import com.danasea.backend.modules.vendor.domain.models.Vendor;
+
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 
 @Component
 @RequiredArgsConstructor
@@ -43,17 +46,21 @@ public class CreateServiceSlotUseCase {
         Vendor vendor = vendorPort.findByUserId(userId)
                 .orElseThrow(() -> new VendorNotApprovedException("Vendor not found for user: " + userId));
 
-        Service service = serviceRepository.findById(serviceId)
+        Service service = serviceRepository.findByIdForUpdate(serviceId)
                 .orElseThrow(() -> new ServiceNotFoundException(serviceId));
 
         service.validateOwnership(vendor.getId());
 
-        if (request.date().isBefore(LocalDate.now())) {
+        if (!LocalDateTime.of(request.date(), request.startTime()).isAfter(LocalDateTime.now(Booking.VIETNAM_ZONE))) {
             throw new IllegalArgumentException("Cannot create a slot in the past");
         }
 
         if (!request.startTime().isBefore(request.endTime())) {
             throw new IllegalArgumentException("Start time must be before end time");
+        }
+
+        if (serviceSlotRepository.existsByServiceIdAndDateAndStartTime(serviceId, request.date(), request.startTime())) {
+            throw new IllegalArgumentException("A departure already exists at this date and start time");
         }
 
         int totalCapacity;
@@ -77,7 +84,7 @@ public class CreateServiceSlotUseCase {
                 if (uReq.capacity() == null || uReq.capacity() <= 0) {
                     throw new IllegalArgumentException("Each unit capacity must be greater than 0");
                 }
-                sum += uReq.capacity();
+                sum = Math.addExact(sum, uReq.capacity());
                 units.add(ServiceSlotUnit.builder()
                         .id(UUID.randomUUID())
                         .slotId(slotId)

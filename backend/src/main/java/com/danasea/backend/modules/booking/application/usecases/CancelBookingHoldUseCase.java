@@ -3,6 +3,10 @@ package com.danasea.backend.modules.booking.application.usecases;
 import java.time.OffsetDateTime;
 import java.util.List;
 
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
+
 import com.danasea.backend.modules.booking.application.dtos.BookingHoldItemResult;
 import com.danasea.backend.modules.booking.application.dtos.BookingHoldResult;
 import com.danasea.backend.modules.booking.application.dtos.CancelBookingHoldCommand;
@@ -21,12 +25,13 @@ public class CancelBookingHoldUseCase {
     private final BookingRepositoryPort bookingRepository;
     private final InventoryLockPort inventoryLockPort;
 
+    @Transactional
     public BookingHoldResult execute(CancelBookingHoldCommand command) {
         if (command == null || command.bookingId() == null) {
             throw new IllegalArgumentException("Booking ID cannot be null");
         }
 
-        Booking booking = bookingRepository.findById(command.bookingId())
+        Booking booking = bookingRepository.findByIdWithItemsForUpdate(command.bookingId())
                 .orElseThrow(() -> new BookingNotFoundException(command.bookingId()));
 
         if (command.customerId() != null) {
@@ -47,7 +52,16 @@ public class CancelBookingHoldUseCase {
         List<InventoryLockItem> lockItems = booking.getItems().stream()
                 .map(item -> InventoryLockItem.of(item.getSlotId(), item.getQuantity(), 0))
                 .toList();
-        inventoryLockPort.releaseHolds(booking.getId(), lockItems);
+        if (TransactionSynchronizationManager.isSynchronizationActive()) {
+            TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+                @Override
+                public void afterCommit() {
+                    inventoryLockPort.releaseHolds(booking.getId(), lockItems);
+                }
+            });
+        } else {
+            inventoryLockPort.releaseHolds(booking.getId(), lockItems);
+        }
 
         Booking saved = bookingRepository.save(booking);
         return mapToResult(saved);

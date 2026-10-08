@@ -5,22 +5,23 @@ import java.time.LocalTime;
 import java.util.List;
 
 import com.danasea.backend.modules.service.domain.models.InventoryType;
+
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.FutureOrPresent;
 import jakarta.validation.constraints.NotNull;
 
 public record CreateServiceSlotRequest(
-        @NotNull(message = "Slot date must not be null")
-        @FutureOrPresent(message = "Slot date must not be in the past")
+        @NotNull(message = "{validation.service.slot.date.required}")
+        @FutureOrPresent(message = "{validation.service.slot.date.future}")
         LocalDate date,
 
-        @NotNull(message = "Start time must not be null")
+        @NotNull(message = "{validation.service.slot.start.required}")
         LocalTime startTime,
 
-        @NotNull(message = "End time must not be null")
+        @NotNull(message = "{validation.service.slot.end.required}")
         LocalTime endTime,
 
-        @NotNull(message = "Inventory type (PERSON_LIMIT/SHARED_CAPACITY_UNITS) must not be null")
+        @NotNull(message = "{validation.service.slot.inventory.required}")
         InventoryType inventoryType,
 
         Integer capacity,

@@ -16,6 +16,7 @@ import com.danasea.backend.modules.booking.domain.models.BookingItemAllocation;
 import com.danasea.backend.modules.booking.domain.models.InventoryLockItem;
 import com.danasea.backend.modules.booking.domain.ports.InventoryLockPort;
 import com.danasea.backend.modules.service.domain.models.InventoryType;
+
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -77,7 +78,7 @@ public class RedisInventoryLockAdapter implements InventoryLockPort {
                 }
                 String optType = item.getOptionType() != null ? item.getOptionType().name() : "SHARED";
                 int pax = item.getPaxPerPackage() != null ? item.getPaxPerPackage() : 1;
-                args.add("SHARED_CAPACITY_UNITS|" + optType + "|" + item.getQuantity() + "|" + pax + "|" + unitsSb);
+                args.add("SHARED_CAPACITY_UNITS|" + optType + "|" + item.getQuantity() + "|" + pax + "|" + unitsSb + "|" + (item.isAllowSplit() ? "1" : "0"));
             } else {
                 args.add("PERSON_LIMIT|" + item.getQuantity() + "|" + item.getMaxCapacity());
             }

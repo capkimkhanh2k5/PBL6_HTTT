@@ -9,6 +9,9 @@ import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.danasea.backend.modules.service.domain.exceptions.ServiceNotFoundException;
 import com.danasea.backend.modules.service.domain.exceptions.VendorNotApprovedException;
 import com.danasea.backend.modules.service.domain.models.InventoryType;
@@ -23,9 +26,8 @@ import com.danasea.backend.modules.service.presentation.dtos.ServiceSlotResponse
 import com.danasea.backend.modules.service.presentation.dtos.ServiceSlotUnitResponse;
 import com.danasea.backend.modules.service.presentation.dtos.UpdateServiceSlotRequest;
 import com.danasea.backend.modules.vendor.domain.models.Vendor;
+
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 
 @Component
 @RequiredArgsConstructor
@@ -49,7 +51,7 @@ public class UpdateServiceSlotUseCase {
 
         service.validateOwnership(vendor.getId());
 
-        ServiceSlot slot = serviceSlotRepository.findById(slotId)
+        ServiceSlot slot = serviceSlotRepository.findByIdForUpdate(slotId)
                 .orElseThrow(() -> new IllegalArgumentException("Slot not found: " + slotId));
 
         if (!serviceId.equals(slot.getServiceId())) {
@@ -65,8 +67,6 @@ public class UpdateServiceSlotUseCase {
 
         if (InventoryType.SHARED_CAPACITY_UNITS.equals(slot.getInventoryType())) {
             if (request.units() != null && !request.units().isEmpty()) {
-                boolean hasActiveHoldsOrBookings = serviceSlotRepository.hasActiveBookingOrHold(slotId);
-
                 Map<Integer, ServiceSlotUnit> currentUnitMap = currentUnits.stream()
                         .collect(Collectors.toMap(ServiceSlotUnit::getUnitNumber, Function.identity()));
 
@@ -86,10 +86,15 @@ public class UpdateServiceSlotUseCase {
                     }
 
                     ServiceSlotUnit existing = currentUnitMap.get(uReq.unitNumber());
+                    if (existing != null && !uReq.capacity().equals(existing.getCapacity())
+                            && serviceSlotRepository.hasPrivateCommitmentForUnit(slotId, uReq.unitNumber())) {
+                        throw new IllegalArgumentException("Cannot resize a unit reserved for a private package");
+                    }
                     int committed = serviceSlotRepository.getCommittedCountForUnit(slotId, uReq.unitNumber());
-                    int booked = Math.max((existing != null && existing.getBookedCount() != null) ? existing.getBookedCount() : 0, committed);
+                    int booked = (existing != null && existing.getBookedCount() != null) ? existing.getBookedCount() : 0;
+                    int occupied = Math.max(booked, committed);
 
-                    if (booked > 0 && uReq.capacity() < booked) {
+                    if (uReq.capacity() < occupied) {
                         throw new IllegalArgumentException("Cannot reduce unit " + uReq.unitNumber() + " capacity below committed capacity (" + booked + ")");
                     }
 
@@ -100,7 +105,7 @@ public class UpdateServiceSlotUseCase {
                             .capacity(uReq.capacity())
                             .bookedCount(booked)
                             .build());
-                    sumCapacity += uReq.capacity();
+                    sumCapacity = Math.addExact(sumCapacity, uReq.capacity());
                 }
 
                 // Check removed units: if any removed unit has booked > 0 or has active hold -> reject!
@@ -108,13 +113,17 @@ public class UpdateServiceSlotUseCase {
                     if (!newUnitNumbers.contains(oldU.getUnitNumber())) {
                         int committed = serviceSlotRepository.getCommittedCountForUnit(slotId, oldU.getUnitNumber());
                         int booked = Math.max(oldU.getBookedCount() != null ? oldU.getBookedCount() : 0, committed);
-                        if (booked > 0 || hasActiveHoldsOrBookings) {
+                        if (booked > 0) {
                             throw new IllegalArgumentException("Only completely empty units can be removed; unit " + oldU.getUnitNumber() + " has active bookings or holds");
                         }
                     }
                 }
 
-                serviceSlotRepository.deleteUnitsBySlotId(slotId);
+                for (ServiceSlotUnit oldUnit : currentUnits) {
+                    if (!newUnitNumbers.contains(oldUnit.getUnitNumber())) {
+                        serviceSlotRepository.deleteUnit(slotId, oldUnit.getUnitNumber());
+                    }
+                }
                 serviceSlotRepository.saveUnits(slotId, nextUnits);
                 slot.setCapacity(sumCapacity);
                 updatedUnits = nextUnits;
@@ -123,7 +132,7 @@ public class UpdateServiceSlotUseCase {
             // PERSON_LIMIT
             if (request.capacity() != null) {
                 int booked = slot.getBookedCount() != null ? slot.getBookedCount() : 0;
-                if (request.capacity() < booked) {
+                if (request.capacity() <= 0 || request.capacity() < booked + serviceSlotRepository.getActiveHeldCount(slotId)) {
                     throw new IllegalArgumentException("Cannot reduce capacity below committed guests (" + booked + ")");
                 }
                 slot.setCapacity(request.capacity());

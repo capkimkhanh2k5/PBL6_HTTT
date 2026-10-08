@@ -6,6 +6,7 @@ import java.util.UUID;
 
 import com.danasea.backend.modules.service.domain.models.InventoryType;
 import com.danasea.backend.modules.service.domain.models.OptionType;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -22,6 +23,7 @@ public class InventoryLockItem {
     private final InventoryType inventoryType;
     private final OptionType optionType;
     private final Integer paxPerPackage;
+    private final boolean allowSplit;
     @Builder.Default
     private final List<UnitLockInfo> units = new ArrayList<>();
     @Builder.Default

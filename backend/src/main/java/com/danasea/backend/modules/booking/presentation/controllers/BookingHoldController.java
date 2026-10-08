@@ -26,6 +26,7 @@ import com.danasea.backend.modules.booking.presentation.dtos.BookingHoldItemResp
 import com.danasea.backend.modules.booking.presentation.dtos.BookingHoldRequest;
 import com.danasea.backend.modules.booking.presentation.dtos.BookingHoldResponse;
 import com.danasea.backend.security.infrastructure.SecurityUtils;
+
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
@@ -47,7 +48,7 @@ public class BookingHoldController {
                 .orElseThrow(() -> new AccessDeniedException("User is not authenticated"));
 
         List<BookingHoldItemDto> itemDtos = request.items().stream()
-                .map(item -> new BookingHoldItemDto(item.slotId(), item.quantity(), item.optionId(), item.participantsCount()))
+                .map(item -> new BookingHoldItemDto(item.slotId(), item.quantity(), item.optionId(), item.participantsCount(), item.allowSplit()))
                 .toList();
 
         CreateBookingHoldCommand command = new CreateBookingHoldCommand(customerId, itemDtos);
@@ -106,4 +107,3 @@ public class BookingHoldController {
         );
     }
 }
-

@@ -2,10 +2,14 @@ package com.danasea.backend.modules.service.application.usecases;
 
 import java.util.UUID;
 
+import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.danasea.backend.modules.service.domain.exceptions.ServiceNotFoundException;
 import com.danasea.backend.modules.service.domain.exceptions.VendorNotApprovedException;
 import com.danasea.backend.modules.service.domain.models.OptionStatus;
 import com.danasea.backend.modules.service.domain.models.OptionType;
+import com.danasea.backend.modules.service.domain.models.PricingUnit;
 import com.danasea.backend.modules.service.domain.models.Service;
 import com.danasea.backend.modules.service.domain.models.ServiceOption;
 import com.danasea.backend.modules.service.domain.ports.ServiceOptionRepositoryPort;
@@ -14,9 +18,8 @@ import com.danasea.backend.modules.service.domain.ports.VendorPort;
 import com.danasea.backend.modules.service.presentation.dtos.CreateServiceOptionRequest;
 import com.danasea.backend.modules.service.presentation.dtos.ServiceOptionResponse;
 import com.danasea.backend.modules.vendor.domain.models.Vendor;
+
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 
 @Component
 @RequiredArgsConstructor
@@ -39,6 +42,17 @@ public class CreateServiceOptionUseCase {
                 .orElseThrow(() -> new ServiceNotFoundException(serviceId));
 
         service.validateOwnership(vendor.getId());
+
+        if (request.optionType() == null || request.pricingUnit() == null || request.price() == null
+                || request.price().signum() <= 0) {
+            throw new IllegalArgumentException("A valid option type, pricing unit and positive price are required");
+        }
+        if ((OptionType.PRIVATE.equals(request.optionType())
+                && request.pricingUnit() != PricingUnit.PER_PACKAGE)
+                || (OptionType.SHARED.equals(request.optionType())
+                && request.pricingUnit() != PricingUnit.PER_PERSON)) {
+            throw new IllegalArgumentException("Shared options are priced per person; private options are priced per package");
+        }
 
         if (OptionType.PRIVATE.equals(request.optionType())) {
             if (request.maxPaxPerPackage() == null || request.maxPaxPerPackage() <= 0) {

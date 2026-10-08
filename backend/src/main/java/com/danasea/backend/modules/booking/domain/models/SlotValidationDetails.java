@@ -14,6 +14,7 @@ import com.danasea.backend.modules.service.domain.models.OptionStatus;
 import com.danasea.backend.modules.service.domain.models.OptionType;
 import com.danasea.backend.modules.service.domain.models.PricingUnit;
 import com.danasea.backend.modules.service.domain.models.SlotStatus;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -36,6 +37,7 @@ public class SlotValidationDetails {
     private BigDecimal price;
     private boolean servicePublished;
     private InventoryType inventoryType;
+    private boolean optionsConfigured;
 
     @Builder.Default
     private List<SlotUnitValidationDetails> units = new ArrayList<>();
