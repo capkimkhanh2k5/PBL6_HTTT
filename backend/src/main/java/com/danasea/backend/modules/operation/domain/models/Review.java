@@ -4,11 +4,17 @@ import java.time.OffsetDateTime;
 import java.util.UUID;
 
 import com.danasea.backend.shared.core.domain.models.BaseDomainModel;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
 
 @Data
 @EqualsAndHashCode(callSuper = true)
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class Review extends BaseDomainModel {
     private UUID subOrderId;
     private UUID customerId;
@@ -20,4 +26,6 @@ public class Review extends BaseDomainModel {
     private String vendorReply;
     private OffsetDateTime vendorRepliedAt;
     private Boolean isFlagged;
+    private Boolean isVisible;
+    private String flagReason;
 }
