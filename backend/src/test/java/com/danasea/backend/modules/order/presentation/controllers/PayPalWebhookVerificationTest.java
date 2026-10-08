@@ -1,5 +1,13 @@
 package com.danasea.backend.modules.order.presentation.controllers;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
 import java.util.UUID;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -20,14 +28,6 @@ import com.danasea.backend.modules.order.domain.models.PaymentStatus;
 import com.danasea.backend.modules.order.domain.models.RefundStatus;
 import com.danasea.backend.modules.order.presentation.dtos.PaymentWebhookResponse;
 import com.danasea.backend.modules.order.presentation.dtos.RefundWebhookResponse;
-
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @ExtendWith(MockitoExtension.class)
 @DisplayName("PayPal Webhook Verification & Processing Tests")
@@ -60,19 +60,25 @@ class PayPalWebhookVerificationTest {
                 false
         );
 
-        when(orderPaymentService.processWebhook(eq(PaymentProvider.PAYPAL), eq(payload), eq(signature)))
+        when(orderPaymentService.processPayPalWebhook(
+                eq(payload), eq("trans-123"), eq("2026-10-06T00:00:00Z"), eq(signature), eq("https://cert.url"), eq("SHA256withRSA")))
                 .thenReturn(expectedResponse);
 
         mockMvc.perform(post("/api/payments/webhook/paypal")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(payload)
-                        .header("Paypal-Transmission-Sig", signature))
+                        .header("Paypal-Transmission-Id", "trans-123")
+                        .header("Paypal-Transmission-Time", "2026-10-06T00:00:00Z")
+                        .header("Paypal-Transmission-Sig", signature)
+                        .header("Paypal-Cert-Url", "https://cert.url")
+                        .header("Paypal-Auth-Algo", "SHA256withRSA"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.eventId").value("WH-12345"))
                 .andExpect(jsonPath("$.paymentId").value(paymentId.toString()))
                 .andExpect(jsonPath("$.alreadyProcessed").value(false));
 
-        verify(orderPaymentService).processWebhook(PaymentProvider.PAYPAL, payload, signature);
+        verify(orderPaymentService).processPayPalWebhook(
+                payload, "trans-123", "2026-10-06T00:00:00Z", signature, "https://cert.url", "SHA256withRSA");
     }
 
     @Test
@@ -89,7 +95,8 @@ class PayPalWebhookVerificationTest {
                 true
         );
 
-        when(orderPaymentService.processWebhook(eq(PaymentProvider.PAYPAL), eq(payload), eq(signature)))
+        when(orderPaymentService.processPayPalWebhook(
+                eq(payload), any(), any(), eq(signature), any(), any()))
                 .thenReturn(duplicateResponse);
 
         mockMvc.perform(post("/api/payments/webhook/paypal")
@@ -115,13 +122,17 @@ class PayPalWebhookVerificationTest {
                 false
         );
 
-        when(orderPaymentService.processRefundWebhook(eq(PaymentProvider.PAYPAL), eq(payload), eq(signature)))
+        when(orderPaymentService.processPayPalRefundWebhook(eq(payload), eq("trans-123"), eq("2026-10-06T00:00:00Z"), eq(signature), eq("https://cert.url"), eq("SHA256withRSA")))
                 .thenReturn(refundResponse);
 
         mockMvc.perform(post("/api/payments/webhook/paypal/refund")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(payload)
-                        .header("Paypal-Transmission-Sig", signature))
+                        .header("Paypal-Transmission-Sig", signature)
+                        .header("Paypal-Transmission-Id", "trans-123")
+                        .header("Paypal-Transmission-Time", "2026-10-06T00:00:00Z")
+                        .header("Paypal-Cert-Url", "https://cert.url")
+                        .header("Paypal-Auth-Algo", "SHA256withRSA"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.eventId").value("REF-123"))
                 .andExpect(jsonPath("$.status").value("PROCESSED"));

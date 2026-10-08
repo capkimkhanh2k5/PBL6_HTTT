@@ -59,6 +59,20 @@ services:
       SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER}
       SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD}
       APP_JWT_SECRET: ${APP_JWT_SECRET}
+      APP_PAYMENT_WEBHOOK_SECRET: ${APP_PAYMENT_WEBHOOK_SECRET:-local-development-payment-webhook-secret-change-me}
+      APP_VNPAY_API_URL: ${APP_VNPAY_API_URL:-https://sandbox.vnpayment.vn/merchant_webapi/api/transaction}
+      APP_VNPAY_IP_ADDRESS: ${APP_VNPAY_IP_ADDRESS:-127.0.0.1}
+      APP_PAYPAL_MODE: ${APP_PAYPAL_MODE:-sandbox}
+      APP_PAYPAL_CLIENT_ID: ${APP_PAYPAL_CLIENT_ID}
+      APP_PAYPAL_CLIENT_SECRET: ${APP_PAYPAL_CLIENT_SECRET}
+      APP_PAYPAL_WEBHOOK_ID: ${APP_PAYPAL_WEBHOOK_ID:-}
+      APP_PAYPAL_BASE_URL: ${APP_PAYPAL_BASE_URL:-https://api-m.sandbox.paypal.com}
+      APP_PAYPAL_RETURN_URL: ${APP_PAYPAL_RETURN_URL:-http://localhost:3000/payment/success}
+      APP_PAYPAL_CANCEL_URL: ${APP_PAYPAL_CANCEL_URL:-http://localhost:3000/payment/cancel}
+      VNPAY_TMN_CODE: ${VNPAY_TMN_CODE}
+      VNPAY_HASH_SECRET: ${VNPAY_HASH_SECRET}
+      VNPAY_PAY_URL: ${VNPAY_PAY_URL:-https://sandbox.vnpayment.vn/paymentv2/vpcpay.html}
+      VNPAY_RETURN_URL: ${VNPAY_RETURN_URL:-http://localhost:3000/payment/vnpay-return}
       GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
       GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET}
       AI_GROQ_API_KEYS: ${GROQ_API_KEYS}

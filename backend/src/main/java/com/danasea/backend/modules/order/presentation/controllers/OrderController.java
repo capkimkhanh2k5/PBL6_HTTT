@@ -21,6 +21,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.danasea.backend.modules.order.application.OrderPaymentService;
 import com.danasea.backend.modules.order.application.dtos.CancellationPreviewResult;
 import com.danasea.backend.modules.order.application.dtos.CreateOrderCommand;
 import com.danasea.backend.modules.order.application.dtos.GetCancellationPreviewQuery;
@@ -40,6 +41,7 @@ import com.danasea.backend.modules.order.presentation.dtos.CancellationPreviewRe
 import com.danasea.backend.modules.order.presentation.dtos.CreateOrderRequest;
 import com.danasea.backend.modules.order.presentation.dtos.OrderPageResponse;
 import com.danasea.backend.modules.order.presentation.dtos.OrderResponse;
+import com.danasea.backend.modules.order.presentation.dtos.RefundDetailResponse;
 import com.danasea.backend.modules.order.presentation.dtos.RefundRequest;
 import com.danasea.backend.modules.order.presentation.dtos.RefundResponse;
 import com.danasea.backend.modules.order.presentation.dtos.SubOrderCancellationPreview;
@@ -47,6 +49,7 @@ import com.danasea.backend.modules.order.presentation.dtos.SubOrderResponse;
 import com.danasea.backend.security.infrastructure.SecurityUtils;
 
 import jakarta.validation.Valid;
+
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -59,6 +62,7 @@ public class OrderController {
     private final GetCustomerOrdersUseCase getCustomerOrdersUseCase;
     private final RequestRefundUseCase requestRefundUseCase;
     private final GetCancellationPreviewUseCase getCancellationPreviewUseCase;
+    private final OrderPaymentService orderPaymentService;
 
     @Autowired
     public OrderController(
@@ -66,12 +70,24 @@ public class OrderController {
             GetOrderDetailUseCase getOrderDetailUseCase,
             GetCustomerOrdersUseCase getCustomerOrdersUseCase,
             RequestRefundUseCase requestRefundUseCase,
-            GetCancellationPreviewUseCase getCancellationPreviewUseCase) {
+            GetCancellationPreviewUseCase getCancellationPreviewUseCase,
+            @Autowired(required = false) OrderPaymentService orderPaymentService) {
         this.createOrderUseCase = createOrderUseCase;
         this.getOrderDetailUseCase = getOrderDetailUseCase;
         this.getCustomerOrdersUseCase = getCustomerOrdersUseCase;
         this.requestRefundUseCase = requestRefundUseCase;
         this.getCancellationPreviewUseCase = getCancellationPreviewUseCase;
+        this.orderPaymentService = orderPaymentService;
+    }
+
+    public OrderController(
+            CreateOrderUseCase createOrderUseCase,
+            GetOrderDetailUseCase getOrderDetailUseCase,
+            GetCustomerOrdersUseCase getCustomerOrdersUseCase,
+            RequestRefundUseCase requestRefundUseCase,
+            GetCancellationPreviewUseCase getCancellationPreviewUseCase) {
+        this(createOrderUseCase, getOrderDetailUseCase, getCustomerOrdersUseCase,
+                requestRefundUseCase, getCancellationPreviewUseCase, null);
     }
 
     @PostMapping
@@ -140,6 +156,16 @@ public class OrderController {
                 ))
                 .toList();
         return ResponseEntity.status(HttpStatus.ACCEPTED).body(responses);
+    }
+
+    @GetMapping("/{id}/refunds")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<List<RefundDetailResponse>> getOrderRefunds(@PathVariable("id") UUID id) {
+        if (orderPaymentService == null) {
+            return ResponseEntity.ok(List.of());
+        }
+        List<RefundDetailResponse> responses = orderPaymentService.getOrderRefunds(currentUserId(), id, isAdmin());
+        return ResponseEntity.ok(responses);
     }
 
     @GetMapping("/{id}/cancellation-preview")

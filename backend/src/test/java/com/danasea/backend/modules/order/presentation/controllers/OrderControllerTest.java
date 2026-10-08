@@ -28,8 +28,9 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 
-import com.danasea.backend.modules.order.application.dtos.CancellationPreviewResult;
+import com.danasea.backend.modules.order.application.OrderPaymentService;
 import com.danasea.backend.modules.order.application.dtos.CancellationPreviewResult.SubOrderCancellationPreviewResult;
+import com.danasea.backend.modules.order.application.dtos.CancellationPreviewResult;
 import com.danasea.backend.modules.order.application.dtos.CreateOrderCommand;
 import com.danasea.backend.modules.order.application.dtos.GetCancellationPreviewQuery;
 import com.danasea.backend.modules.order.application.dtos.GetCustomerOrdersQuery;
@@ -52,6 +53,7 @@ import com.danasea.backend.modules.order.presentation.dtos.CancellationPreviewRe
 import com.danasea.backend.modules.order.presentation.dtos.CreateOrderRequest;
 import com.danasea.backend.modules.order.presentation.dtos.OrderPageResponse;
 import com.danasea.backend.modules.order.presentation.dtos.OrderResponse;
+import com.danasea.backend.modules.order.presentation.dtos.RefundDetailResponse;
 import com.danasea.backend.modules.order.presentation.dtos.RefundRequest;
 import com.danasea.backend.modules.order.presentation.dtos.RefundResponse;
 
@@ -73,6 +75,9 @@ class OrderControllerTest {
 
     @Mock
     private GetCancellationPreviewUseCase getCancellationPreviewUseCase;
+
+    @Mock
+    private OrderPaymentService orderPaymentService;
 
     @InjectMocks
     private OrderController orderController;
@@ -394,5 +399,35 @@ class OrderControllerTest {
         assertEquals(subOrderId, body.get(0).subOrderId());
         assertEquals(new BigDecimal("500000.00"), body.get(0).amount());
         verify(requestRefundUseCase).execute(any(RequestRefundCommand.class));
+    }
+
+    @Test
+    @DisplayName("Should get order refunds successfully")
+    void shouldGetOrderRefundsSuccessfully() {
+        mockSecurityUser(customerId, "ROLE_CUSTOMER");
+        RefundDetailResponse detail = new RefundDetailResponse(
+                UUID.randomUUID(),
+                subOrderId,
+                BigDecimal.valueOf(100000),
+                BigDecimal.valueOf(100),
+                RefundReason.CUSTOMER_REQUEST,
+                RefundStatus.PROCESSED,
+                null,
+                "REF-1",
+                "TXN-1",
+                0,
+                null,
+                OffsetDateTime.now(),
+                OffsetDateTime.now()
+        );
+        when(orderPaymentService.getOrderRefunds(customerId, masterOrderId, false))
+                .thenReturn(List.of(detail));
+
+        ResponseEntity<List<RefundDetailResponse>> response = orderController.getOrderRefunds(masterOrderId);
+
+        assertEquals(200, response.getStatusCode().value());
+        assertNotNull(response.getBody());
+        assertEquals(1, response.getBody().size());
+        assertEquals(subOrderId, response.getBody().get(0).subOrderId());
     }
 }

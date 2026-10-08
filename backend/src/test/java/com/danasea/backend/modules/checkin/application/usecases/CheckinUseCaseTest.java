@@ -366,7 +366,9 @@ class CheckinUseCaseTest {
         void testVerifyCheckin_Throws400_WhenSignatureTampered() {
             OffsetDateTime expiresAt = OffsetDateTime.now(ZoneOffset.UTC).plusHours(2);
             String rawToken = qrTokenSigner.generateToken(subOrderId, expiresAt);
-            String tamperedToken = rawToken.substring(0, rawToken.length() - 2) + "ab";
+            char lastCharacter = rawToken.charAt(rawToken.length() - 1);
+            String tamperedToken = rawToken.substring(0, rawToken.length() - 1)
+                    + (lastCharacter == '0' ? '1' : '0');
 
             assertThatThrownBy(() -> verifyCheckinUseCase.execute(new VerifyCheckinRequest(tamperedToken), staffId))
                     .isInstanceOf(InvalidQrSignatureException.class);

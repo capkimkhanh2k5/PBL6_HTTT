@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.danasea.backend.modules.order.application.RefundProcessingService;
 import com.danasea.backend.modules.order.application.dtos.OrderRefundResult;
 import com.danasea.backend.modules.order.application.dtos.RequestRefundCommand;
 import com.danasea.backend.modules.order.domain.exceptions.InvalidOrderStateException;
@@ -18,6 +19,7 @@ import com.danasea.backend.modules.order.domain.exceptions.OrderNotFoundExceptio
 import com.danasea.backend.modules.order.domain.exceptions.UnauthorizedOrderAccessException;
 import com.danasea.backend.modules.order.domain.models.MasterOrder;
 import com.danasea.backend.modules.order.domain.models.MasterOrderStatus;
+import com.danasea.backend.modules.order.domain.models.PaymentStatus;
 import com.danasea.backend.modules.order.domain.models.RefundEvaluationResult;
 import com.danasea.backend.modules.order.domain.models.RefundReason;
 import com.danasea.backend.modules.order.domain.models.RefundStatus;
@@ -28,6 +30,10 @@ import com.danasea.backend.modules.order.domain.ports.PaymentGatewayPort;
 import com.danasea.backend.modules.order.domain.ports.ServiceSlotDepartureLookupPort;
 import com.danasea.backend.modules.order.domain.ports.SubOrderRepositoryPort;
 import com.danasea.backend.modules.order.domain.services.RefundPolicyEngine;
+import com.danasea.backend.modules.order.infrastructure.persistence.entities.PaymentJpaEntity;
+import com.danasea.backend.modules.order.infrastructure.persistence.entities.RefundJpaEntity;
+import com.danasea.backend.modules.order.infrastructure.persistence.repositories.JpaPaymentRepository;
+import com.danasea.backend.modules.order.infrastructure.persistence.repositories.JpaRefundRepository;
 
 @Service
 public class RequestRefundUseCase {
@@ -37,6 +43,9 @@ public class RequestRefundUseCase {
     private final PaymentGatewayPort paymentGatewayPort;
     private final RefundPolicyEngine refundPolicyEngine;
     private final ServiceSlotDepartureLookupPort departureLookupPort;
+    private final JpaRefundRepository refundRepository;
+    private final JpaPaymentRepository paymentRepository;
+    private final RefundProcessingService refundProcessingService;
 
     @Autowired
     public RequestRefundUseCase(
@@ -44,12 +53,18 @@ public class RequestRefundUseCase {
             SubOrderRepositoryPort subOrderRepository,
             PaymentGatewayPort paymentGatewayPort,
             RefundPolicyEngine refundPolicyEngine,
-            @Autowired(required = false) ServiceSlotDepartureLookupPort departureLookupPort) {
+            @Autowired(required = false) ServiceSlotDepartureLookupPort departureLookupPort,
+            @Autowired(required = false) JpaRefundRepository refundRepository,
+            @Autowired(required = false) JpaPaymentRepository paymentRepository,
+            @Autowired(required = false) RefundProcessingService refundProcessingService) {
         this.masterOrderRepository = masterOrderRepository;
         this.subOrderRepository = subOrderRepository;
         this.paymentGatewayPort = paymentGatewayPort;
         this.refundPolicyEngine = refundPolicyEngine;
         this.departureLookupPort = departureLookupPort;
+        this.refundRepository = refundRepository;
+        this.paymentRepository = paymentRepository;
+        this.refundProcessingService = refundProcessingService;
     }
 
     public RequestRefundUseCase(
@@ -57,7 +72,7 @@ public class RequestRefundUseCase {
             SubOrderRepositoryPort subOrderRepository,
             PaymentGatewayPort paymentGatewayPort,
             RefundPolicyEngine refundPolicyEngine) {
-        this(masterOrderRepository, subOrderRepository, paymentGatewayPort, refundPolicyEngine, null);
+        this(masterOrderRepository, subOrderRepository, paymentGatewayPort, refundPolicyEngine, null, null, null, null);
     }
 
     @Transactional
@@ -102,11 +117,40 @@ public class RequestRefundUseCase {
             throw new UnauthorizedOrderAccessException(order.getId(), command.customerId());
         }
 
+        // Kiểm tra Idempotency: Nếu request đã được xử lý thành công trước đó, trả về kết quả cũ
+        if (refundRepository != null) {
+            List<OrderRefundResult> existingResults = new ArrayList<>();
+            for (SubOrder subOrder : subOrders) {
+                var existingOpt = refundRepository.findBySubOrderIdAndIdempotencyKey(subOrder.getId(), command.idempotencyKey());
+                existingOpt.ifPresent(existing -> existingResults.add(new OrderRefundResult(
+                        existing.getId(),
+                        subOrder.getId(),
+                        existing.getAmount(),
+                        existing.getRefundPercentage(),
+                        existing.getReason(),
+                        existing.getStatus(),
+                        "IDEMPOTENT_REPLAY"
+                )));
+            }
+            if (!existingResults.isEmpty() && existingResults.size() == subOrders.size()) {
+                return existingResults;
+            }
+        }
+
         // Chỉ cho phép yêu cầu hoàn tiền khi đơn đã thanh toán
         if (order.getStatus() != MasterOrderStatus.PAID
                 && order.getStatus() != MasterOrderStatus.PARTIALLY_COMPLETED
                 && order.getStatus() != MasterOrderStatus.COMPLETED) {
             throw new InvalidOrderStateException("Refunds can only be requested for a paid order; current: " + order.getStatus());
+        }
+
+        PaymentJpaEntity originalPayment = null;
+        if (paymentRepository != null) {
+            originalPayment = paymentRepository
+                    .findByMasterOrderIdOrderByCreatedAtDesc(order.getId()).stream()
+                    .filter(p -> p.getStatus() == PaymentStatus.SUCCESS || p.getStatus() == PaymentStatus.REFUNDED)
+                    .findFirst()
+                    .orElse(null);
         }
 
         LocalDateTime cancelTime = command.cancelTime() != null ? command.cancelTime() : LocalDateTime.now();
@@ -136,18 +180,49 @@ public class RequestRefundUseCase {
                         "The cancellation policy does not allow a refund for sub-order " + subOrder.getId() + " (< 24h).");
             }
 
-            // Gọi cổng thanh toán để thực hiện lệnh refund
-            paymentGatewayPort.requestRefund(subOrder.getId().toString(), evaluation.refundAmount());
+            if (refundRepository != null) {
+                var existingOpt = refundRepository.findBySubOrderIdAndIdempotencyKey(subOrder.getId(), command.idempotencyKey());
+                if (existingOpt.isPresent()) {
+                    RefundJpaEntity existing = existingOpt.get();
+                    results.add(new OrderRefundResult(
+                            existing.getId(),
+                            subOrder.getId(),
+                            existing.getAmount(),
+                            existing.getRefundPercentage(),
+                            existing.getReason(),
+                            existing.getStatus(),
+                            evaluation.policyCode()
+                    ));
+                    continue;
+                }
 
-            results.add(new OrderRefundResult(
-                    UUID.randomUUID(),
-                    subOrder.getId(),
-                    evaluation.refundAmount(),
-                    evaluation.refundPercentage(),
-                    reason,
-                    RefundStatus.PENDING,
-                    evaluation.policyCode()
-            ));
+                RefundJpaEntity refund = new RefundJpaEntity();
+                refund.setSubOrderId(subOrder.getId());
+                refund.setAmount(evaluation.refundAmount());
+                refund.setRefundPercentage(evaluation.refundPercentage());
+                refund.setReason(reason);
+                refund.setStatus(RefundStatus.PENDING);
+                refund.setRequestedBy(command.customerId());
+                refund.setIdempotencyKey(command.idempotencyKey());
+                if (originalPayment != null) {
+                    refund.setProvider(originalPayment.getProvider());
+                    refund.setPaymentId(originalPayment.getId());
+                    refund.setProviderTransactionId(originalPayment.getProviderTransactionId());
+                }
+                refund = refundRepository.save(refund);
+
+                results.add(new OrderRefundResult(
+                        refund.getId(),
+                        subOrder.getId(),
+                        evaluation.refundAmount(),
+                        evaluation.refundPercentage(),
+                        reason,
+                        RefundStatus.PENDING,
+                        evaluation.policyCode()
+                ));
+            } else {
+                throw new IllegalStateException("Refund persistence is required before gateway processing.");
+            }
         }
 
         return results;

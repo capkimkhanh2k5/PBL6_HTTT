@@ -7,10 +7,12 @@ import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.UUID;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.danasea.backend.modules.booking.domain.models.CancellationFinancialResult;
 import com.danasea.backend.modules.booking.domain.ports.BookingCancellationFinancialPort;
+import com.danasea.backend.modules.order.application.RefundProcessingService;
 import com.danasea.backend.modules.order.domain.exceptions.InvalidOrderStateException;
 import com.danasea.backend.modules.order.domain.models.MasterOrderStatus;
 import com.danasea.backend.modules.order.domain.models.RefundEvaluationResult;
@@ -33,6 +35,23 @@ public class BookingCancellationFinancialAdapter implements BookingCancellationF
     private final JpaRefundRepository refundRepository;
     private final JpaServiceSlotRepository serviceSlotRepository;
     private final RefundPolicyEngine refundPolicyEngine;
+    private final RefundProcessingService refundProcessingService;
+
+    @Autowired
+    public BookingCancellationFinancialAdapter(
+            JpaMasterOrderRepository masterOrderRepository,
+            JpaSubOrderRepository subOrderRepository,
+            JpaRefundRepository refundRepository,
+            JpaServiceSlotRepository serviceSlotRepository,
+            RefundPolicyEngine refundPolicyEngine,
+            @Autowired(required = false) RefundProcessingService refundProcessingService) {
+        this.masterOrderRepository = masterOrderRepository;
+        this.subOrderRepository = subOrderRepository;
+        this.refundRepository = refundRepository;
+        this.serviceSlotRepository = serviceSlotRepository;
+        this.refundPolicyEngine = refundPolicyEngine;
+        this.refundProcessingService = refundProcessingService;
+    }
 
     public BookingCancellationFinancialAdapter(
             JpaMasterOrderRepository masterOrderRepository,
@@ -40,11 +59,7 @@ public class BookingCancellationFinancialAdapter implements BookingCancellationF
             JpaRefundRepository refundRepository,
             JpaServiceSlotRepository serviceSlotRepository,
             RefundPolicyEngine refundPolicyEngine) {
-        this.masterOrderRepository = masterOrderRepository;
-        this.subOrderRepository = subOrderRepository;
-        this.refundRepository = refundRepository;
-        this.serviceSlotRepository = serviceSlotRepository;
-        this.refundPolicyEngine = refundPolicyEngine;
+        this(masterOrderRepository, subOrderRepository, refundRepository, serviceSlotRepository, refundPolicyEngine, null);
     }
 
     @Override
@@ -91,7 +106,8 @@ public class BookingCancellationFinancialAdapter implements BookingCancellationF
                 refund.setStatus(RefundStatus.PENDING);
                 refund.setRequestedBy(requestedBy);
                 refund.setIdempotencyKey(idempotencyKey);
-                refundRepository.save(refund);
+                refund = refundRepository.save(refund);
+
             }
             subOrder.setStatus(SubOrderStatus.CANCELLED);
         }

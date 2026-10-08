@@ -3,6 +3,8 @@ package com.danasea.backend.modules.order.application.usecases;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -33,6 +35,8 @@ import com.danasea.backend.modules.order.domain.ports.MasterOrderRepositoryPort;
 import com.danasea.backend.modules.order.domain.ports.PaymentGatewayPort;
 import com.danasea.backend.modules.order.domain.ports.SubOrderRepositoryPort;
 import com.danasea.backend.modules.order.domain.services.RefundPolicyEngine;
+import com.danasea.backend.modules.order.infrastructure.persistence.entities.RefundJpaEntity;
+import com.danasea.backend.modules.order.infrastructure.persistence.repositories.JpaRefundRepository;
 
 @ExtendWith(MockitoExtension.class)
 @DisplayName("RequestRefundUseCase Unit Tests")
@@ -54,11 +58,15 @@ class RequestRefundUseCaseTest {
 
     @BeforeEach
     void setUp() {
+        var refunds = mock(JpaRefundRepository.class);
+        org.mockito.Mockito.lenient().when(refunds.save(any())).thenAnswer(inv -> {
+            RefundJpaEntity refund = inv.getArgument(0); refund.setId(UUID.randomUUID()); return refund;
+        });
         useCase = new RequestRefundUseCase(
                 masterOrderRepository,
                 subOrderRepository,
                 paymentGatewayPort,
-                refundPolicyEngine
+                refundPolicyEngine, null, refunds, null, null
         );
     }
 
@@ -90,7 +98,7 @@ class RequestRefundUseCaseTest {
         assertThat(results).hasSize(1);
         assertThat(results.get(0).amount()).isEqualByComparingTo("100.00");
         assertThat(results.get(0).refundPercentage()).isEqualByComparingTo("100.0");
-        verify(paymentGatewayPort).requestRefund(any(), any());
+        verify(paymentGatewayPort, never()).requestRefund(any(), any());
     }
 
     @Test

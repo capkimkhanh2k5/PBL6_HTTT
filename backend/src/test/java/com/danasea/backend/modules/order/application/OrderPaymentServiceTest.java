@@ -22,6 +22,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.danasea.backend.configs.properties.PaymentProperties;
+import com.danasea.backend.modules.order.application.usecases.CreatePaymentIntentUseCase;
 import com.danasea.backend.modules.booking.application.dtos.ConfirmBookingCommand;
 import com.danasea.backend.modules.booking.application.usecases.ConfirmBookingUseCase;
 import com.danasea.backend.modules.booking.domain.models.BookingStatus;
@@ -61,6 +62,7 @@ class OrderPaymentServiceTest {
     @Mock private JpaServiceSlotRepository serviceSlotRepository;
     @Mock private VendorInternalApi vendorInternalApi;
     @Mock private ConfirmBookingUseCase confirmBookingUseCase;
+    @Mock private CreatePaymentIntentUseCase createPaymentIntentUseCase;
 
     private PaymentWebhookSigner signer;
     private OrderPaymentService service;
@@ -80,7 +82,8 @@ class OrderPaymentServiceTest {
                 new RefundPolicyEngine(),
                 signer,
                 confirmBookingUseCase,
-                new ObjectMapper());
+                new ObjectMapper(),
+                createPaymentIntentUseCase);
     }
 
     @Test

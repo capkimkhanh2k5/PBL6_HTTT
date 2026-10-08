@@ -1,21 +1,24 @@
 package com.danasea.backend.shared.presentation;
 
-import com.danasea.backend.security.authorization.domain.exceptions.AccessDeniedException;
-import com.danasea.backend.security.authentication.domain.exceptions.InvalidCredentialsException;
-import com.danasea.backend.security.authentication.infrastructure.security.CookieUtils;
-import com.danasea.backend.shared.i18n.LocalizedException;
-import com.danasea.backend.shared.i18n.LocalizedMessageService;
-import com.danasea.backend.modules.ai.domain.exceptions.AiConversationLocaleMismatchException;
+import java.util.stream.Collectors;
 
-import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-import lombok.extern.slf4j.Slf4j;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 
-import java.util.stream.Collectors;
+import com.danasea.backend.modules.ai.domain.exceptions.AiConversationLocaleMismatchException;
+import com.danasea.backend.security.authentication.domain.exceptions.InvalidCredentialsException;
+import com.danasea.backend.security.authentication.infrastructure.security.CookieUtils;
+import com.danasea.backend.security.authorization.domain.exceptions.AccessDeniedException;
+import com.danasea.backend.shared.i18n.LocalizedException;
+import com.danasea.backend.shared.i18n.LocalizedMessageService;
+
+import jakarta.servlet.http.HttpServletResponse;
+
+import lombok.extern.slf4j.Slf4j;
 
 @RestControllerAdvice
 @Slf4j
@@ -82,6 +85,12 @@ public class GlobalExceptionHandler {
 
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                 .body(new ErrorResponse("INVALID_INPUT", message));
+    }
+
+    @ExceptionHandler(NoResourceFoundException.class)
+    public ResponseEntity<ErrorResponse> handleMissingEndpoint(NoResourceFoundException exception) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(new ErrorResponse("ENDPOINT_NOT_FOUND", messages.get("error.endpoint_not_found")));
     }
 
     @ExceptionHandler(Exception.class)

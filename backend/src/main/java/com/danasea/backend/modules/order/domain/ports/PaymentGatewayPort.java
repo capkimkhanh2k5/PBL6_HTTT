@@ -12,9 +12,41 @@ import com.danasea.backend.modules.order.domain.models.PaymentProvider;
  */
 public interface PaymentGatewayPort {
 
-    PaymentIntentResult createPaymentIntent(UUID orderId, BigDecimal amount, PaymentProvider provider);
+    PaymentIntentResult createPaymentIntent(UUID paymentId, UUID orderId, BigDecimal amount, PaymentProvider provider);
+
+    default PaymentIntentResult createPaymentIntent(UUID orderId, BigDecimal amount, PaymentProvider provider) {
+        return createPaymentIntent(UUID.randomUUID(), orderId, amount, provider);
+    }
 
     boolean verifyWebhookSignature(Map<String, String> rawParams, String signature);
 
     RefundResult requestRefund(String providerTransactionId, BigDecimal amount);
+
+    default RefundResult requestRefund(PaymentProvider provider, String providerTransactionId, BigDecimal amount) {
+        return requestRefund(providerTransactionId, amount);
+    }
+
+    default RefundResult requestRefund(PaymentProvider provider, String providerTransactionId, BigDecimal amount, String idempotencyKey) {
+        return requestRefund(provider, providerTransactionId, amount);
+    }
+
+    default PaymentCaptureResult captureOrder(PaymentProvider provider, String providerOrderId, String idempotencyKey) {
+        throw new UnsupportedOperationException("Capture is not supported for provider: " + provider);
+    }
+
+    default PaymentCaptureResult queryCapture(PaymentProvider provider, String providerOrderId) {
+        throw new UnsupportedOperationException("Capture lookup is not supported for provider: " + provider);
+    }
+
+    default RefundResult requestRefund(GatewayRefundRequest request) {
+        throw new UnsupportedOperationException("Refund context is not supported for provider: " + request.provider());
+    }
+
+    default RefundResult queryRefund(GatewayRefundRequest request, String providerRefundId) {
+        throw new UnsupportedOperationException("Refund lookup is not supported for provider: " + request.provider());
+    }
+
+    default RefundResult queryRefund(PaymentProvider provider, String providerTransactionId, String providerRefundId) {
+        throw new UnsupportedOperationException("Query refund is not supported for provider: " + provider);
+    }
 }
