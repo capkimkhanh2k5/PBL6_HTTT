@@ -84,7 +84,7 @@ Cập nhật 08/10/2026:
 
 Bằng chứng: `security/authentication/presentation/AuthenticationController.java`, `ForgotPasswordUseCase.java`, `ResetPasswordUseCase.java`, `PasswordResetEmailConsumer.java`, `configs/RabbitMQConfig.java`.
 
-### P1 Quản trị giao dịch và theo dõi hoàn tiền ->
+### P1 Quản trị giao dịch và theo dõi hoàn tiền -> Đã Xử Lý
 
 **Kiểm chứng 09/10/2026:** `./mvnw clean verify` → BUILD SUCCESS; 1.711 test cases, 1576 thực chạy, 135 skipped, 0 failures, 0 errors. Trong đó 29 ca `AdminTransactionIntegrationTest` trên PostgreSQL 16/Flyway/Redis 7 riêng và 57 ca tập trung reconciliation/adapter/job. Kiểm kê runtime: 126 method/path; migration mới V23 đã được kiểm tra trên DB mới và nâng từ V20. Gateway được mock; sandbox thật chưa được chạy trong lần này.
 
@@ -115,7 +115,7 @@ Chưa thấy API chuyển booking/sub-order sang slot mới. Action DISMISSED �
 
 Mức P1 nếu giữ cam kết đổi lịch trong đề tài; có thể tạm giảm phạm vi sang hủy/hoàn minh bạch nếu được chấp nhận.
 
-### P2 Khuyến mãi
+### P2 Khuyến mãi -> Đã Xử Lý
 
 Có DiscountCode/DiscountRedemption nhưng chưa có API quản lý, kiểm tra/apply voucher; tạo order đặt discount bằng 0.
 
