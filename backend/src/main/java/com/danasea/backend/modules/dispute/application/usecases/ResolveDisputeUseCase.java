@@ -113,15 +113,15 @@ public class ResolveDisputeUseCase {
                         "Refund percentage must be greater than 0 and less than or equal to 100");
             }
 
-            // Tính toán Refund Amount: subtotalAmount * (refundPercentage / 100)
-            BigDecimal subtotal = subOrder.getSubtotalAmount() != null ? subOrder.getSubtotalAmount() : BigDecimal.ZERO;
+            // Refund only the customer-paid snapshot, excluding voucher funding.
+            BigDecimal subtotal = subOrder.getFinalAmount() != null ? subOrder.getFinalAmount() : BigDecimal.ZERO;
             BigDecimal refundAmount = subtotal.multiply(appliedRefundPercentage)
                     .divide(BigDecimal.valueOf(100), 2, RoundingMode.HALF_UP);
 
             String idempotencyKey = "dispute-" + disputeId;
             var existingRefund = refundRepository.findBySubOrderIdAndIdempotencyKey(subOrder.getId(), idempotencyKey);
             RefundJpaEntity refund = null;
-            if (existingRefund.isEmpty()) {
+            if (existingRefund.isEmpty() && refundAmount.signum() > 0) {
                 RefundJpaEntity newRefund = new RefundJpaEntity();
                 newRefund.setSubOrderId(subOrder.getId());
                 newRefund.setAmount(refundAmount);
@@ -132,11 +132,11 @@ public class ResolveDisputeUseCase {
                 newRefund.setIdempotencyKey(idempotencyKey);
                 refund = refundRepository.save(newRefund);
             } else {
-                refund = existingRefund.get();
+                refund = existingRefund.orElse(null);
             }
 
 
-            log.info("Dispute {} approved refund request: {} ({}%) for sub-order {}. Provider processing is queued.",
+            log.info("Dispute {} approved refund amount: {} ({}%) for sub-order {}. Positive cash refunds are queued for provider processing.",
                     disputeId, refundAmount, appliedRefundPercentage, subOrder.getId());
         } else {
             // RESOLVED_REJECTED: Không tạo refund, không đổi SubOrder

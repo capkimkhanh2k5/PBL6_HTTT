@@ -1,5 +1,14 @@
 package com.danasea.backend.modules.settlement.application.usecases;
 
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.OffsetDateTime;
+import java.util.*;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.danasea.backend.modules.dispute.domain.models.DisputeStatus;
 import com.danasea.backend.modules.dispute.infrastructure.persistence.entities.DisputeJpaEntity;
 import com.danasea.backend.modules.dispute.infrastructure.persistence.repositories.JpaDisputeRepository;
@@ -26,14 +35,6 @@ import com.danasea.backend.modules.settlement.infrastructure.persistence.mappers
 import com.danasea.backend.modules.settlement.infrastructure.persistence.repositories.JpaSettlementLineItemRepository;
 import com.danasea.backend.modules.settlement.infrastructure.persistence.repositories.JpaSettlementRepository;
 import com.danasea.backend.modules.vendor.application.api.VendorInternalApi;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import java.math.BigDecimal;
-import java.time.LocalDate;
-import java.time.OffsetDateTime;
-import java.util.*;
 
 @Service
 public class GenerateSettlementUseCase {
@@ -192,6 +193,10 @@ public class GenerateSettlementUseCase {
                     .refundAmount(totalRefund)
                     .hasActiveDispute(hasActiveDispute)
                     .commissionRate(rate)
+                    .vendorDiscountAmount(so.getVendorDiscountAmount())
+                    .platformDiscountAmount(so.getPlatformDiscountAmount())
+                    .commissionBasisAmount(so.getCommissionBasisAmount())
+                    .finalAmount(so.getFinalAmount())
                     .build();
 
             SettlementLineItem item = calculationEngine.calculateLineItem(context);

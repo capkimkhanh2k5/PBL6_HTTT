@@ -140,7 +140,7 @@ class OrderOwnershipHttpRegressionTest {
         BookingOrderView bookingView = new BookingOrderView(
                 bookingIdA, userA, "HOLD", new BigDecimal("500.00"), OffsetDateTime.now().plusMinutes(15), List.of(item));
 
-        when(bookingLookupPort.findBookingForOrder(bookingIdA)).thenReturn(Optional.of(bookingView));
+        when(bookingLookupPort.findBookingForOrderForUpdate(bookingIdA)).thenReturn(Optional.of(bookingView));
         when(commissionPolicyPort.getCommissionRate(vendorId)).thenReturn(new BigDecimal("0.10"));
 
         UUID generatedOrderId = UUID.randomUUID();
@@ -198,7 +198,7 @@ class OrderOwnershipHttpRegressionTest {
                 .andExpect(jsonPath("$.bookingId").value(bookingIdA.toString()))
                 .andExpect(jsonPath("$.customerId").value(userA.toString()));
 
-        verify(bookingLookupPort, never()).findBookingForOrder(any());
+        verify(bookingLookupPort, never()).findBookingForOrderForUpdate(any());
         verify(masterOrderRepository, never()).save(any());
     }
 
@@ -278,7 +278,7 @@ class OrderOwnershipHttpRegressionTest {
         BookingOrderView bookingViewOfA = new BookingOrderView(
                 bookingIdA, userA, "HOLD", new BigDecimal("500.00"), OffsetDateTime.now().plusMinutes(15), List.of(item));
 
-        when(bookingLookupPort.findBookingForOrder(bookingIdA)).thenReturn(Optional.of(bookingViewOfA));
+        when(bookingLookupPort.findBookingForOrderForUpdate(bookingIdA)).thenReturn(Optional.of(bookingViewOfA));
 
         String body = """
                 {

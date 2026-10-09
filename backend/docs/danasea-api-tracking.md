@@ -1,10 +1,10 @@
 # DANASEA — Master API & Test Checklist (EPIC-01 → EPIC-08)
 
-**Cập nhật:** 08/10/2026 — nhánh `implement_password_reset_api`; bổ sung forgot/reset password, bảo vệ OTP dùng một lần và thu hồi phiên cũ.
+**Cập nhật:** 09/10/2026 — nhánh `implement_discount_management_api`; bổ sung quản lý voucher, snapshot tiền sau giảm giá, bảo vệ quota và đồng bộ hoàn tiền/settlement.
 
 **Quy ước:** Với mục API, `[x]` nghĩa là endpoint đã có trong controller; không đồng nghĩa đã kiểm chứng toàn bộ nghiệp vụ hoặc tích hợp cổng thanh toán thật. Với mục Test, hạ tầng và quyết định nghiệp vụ, giữ trạng thái checklist đã ghi nhận; `[ ]` là việc còn thiếu/chưa xác nhận. Lần cập nhật này không đánh dấu các test chưa xác nhận thành đã pass.
 
-**Phạm vi kiểm kê:** 117 tổ hợp HTTP method/path từ 38 controller trong profile `test`, gồm 4 đường dẫn alias, 4 endpoint chẩn đoán ở profile `dev/test` và 1 webhook nội bộ chỉ ở `test`. Swagger/Actuator do thư viện cung cấp không nằm trong số API controller này. Các API cần hoàn thiện nghiệp vụ được ghi chú tại mục tương ứng; xem thêm [báo cáo rà soát](API-completeness-review-2026-10-06.md) và [kết quả sandbox](payment-sandbox-verification-2026-10-06.md).
+**Phạm vi kiểm kê:** 133 tổ hợp HTTP method/path từ 44 controller trong profile `test`, gồm 4 đường dẫn alias, 4 endpoint chẩn đoán ở profile `dev/test` và 1 webhook nội bộ chỉ ở `test`. Swagger/Actuator do thư viện cung cấp không nằm trong số API controller này. Các API cần hoàn thiện nghiệp vụ được ghi chú tại mục tương ứng; xem thêm [báo cáo rà soát](API-completeness-review-2026-10-06.md) và [kết quả sandbox](payment-sandbox-verification-2026-10-06.md).
 
 ---
 
@@ -292,6 +292,27 @@ Hai item phải nhận hai đơn vị khác nhau và tính giá hai gói. Nhóm 
 - [x] GET /api/admin/payments/{id} (chi tiết giao dịch thanh toán cho admin)
 - [x] GET /api/admin/refunds (danh sách yêu cầu hoàn tiền toàn sàn cho admin, lọc theo status/reason/subOrderId, có phân trang)
 - [x] GET /api/admin/refunds/{id} (chi tiết yêu cầu hoàn tiền cho admin)
+- [x] GET /api/admin/discount-codes (danh sách mã khuyến mãi toàn sàn cho admin, lọc theo code/scope/vendorId/isActive)
+- [x] GET /api/admin/discount-codes/{id} (chi tiết mã giảm giá cho admin)
+- [x] POST /api/admin/discount-codes (admin tạo mã giảm giá toàn sàn hoặc tài trợ)
+- [x] PATCH /api/admin/discount-codes/{id} (admin cập nhật trạng thái/thông tin mã giảm giá)
+- [x] GET /api/vendor/discount-codes (vendor xem danh sách mã giảm giá thuộc phạm vi của mình)
+- [x] GET /api/vendor/discount-codes/{id} (chi tiết mã giảm giá thuộc vendor)
+- [x] POST /api/vendor/discount-codes (vendor tạo mã giảm giá giới hạn phạm vi dịch vụ/cửa hàng của mình)
+- [x] PATCH /api/vendor/discount-codes/{id} (vendor cập nhật mã giảm giá của mình, chống IDOR)
+- [x] POST /api/checkout/discount-preview (khách hàng kiểm tra voucher trước khi thanh toán, tính toán phân bổ dự kiến)
+
+### Discount Management — Hợp đồng nghiệp vụ
+- Giá backend quyết định; `MasterOrder.totalAmount` là tổng thực trả, bằng tổng `SubOrder.finalAmount`; `discountAmount` là phần giảm riêng.
+- Phân bổ trên item đủ điều kiện theo tỷ trọng subtotal và Largest Remainder; tổng phần giảm item bằng mức giảm toàn đơn.
+- VENDOR tài trợ: cơ sở hoa hồng = subtotal - vendorDiscount. PLATFORM tài trợ: cơ sở hoa hồng không giảm; vendor vẫn nhận tiền theo cơ sở đó.
+- Tạo order khóa booking rồi khóa voucher; kiểm tra lại quota toàn mã, từng khách, thời hạn và trạng thái sau khi giữ khóa. Chỉnh sửa voucher cũng khóa cùng bản ghi.
+- Tạo order giữ lượt bằng redemption; thanh toán thành công giữ nguyên lượt. Hủy đơn chưa thanh toán hoặc hết hạn xóa reservation và trả lượt đúng một lần trong cùng transaction; lỗi rollback toàn bộ.
+- Vendor chỉ sửa voucher VENDOR do mình tài trợ; mã PLATFORM tài trợ cho dịch vụ của vendor chỉ được admin sửa. serviceId bị giới hạn phải thuộc vendor tương ứng.
+- Hoàn tiền dùng finalAmount cho các nhánh customer cancel, vendor reject, dispute và weather; không tạo refund tiền mặt bằng 0. Hoàn một phần đảo cơ sở hoa hồng và trợ giá theo tỷ lệ cashRefund/finalAmount; settlement ghi cashRefund thực tế.
+- Chặn phần trăm >100, khoảng ngày không hợp lệ và cấu hình tài trợ sai phạm vi. Preview không nhận booking đã hết hạn/không còn HOLD.
+- Tổng thực trả phải >0; voucher làm toàn đơn miễn phí bị từ chối với DISCOUNT_ZERO_PAYABLE_UNSUPPORTED trước khi giữ lượt. Checkout miễn phí nằm ngoài phạm vi hiện tại.
+- Flyway V24 bổ sung schema, backfill finalAmount/commissionBasis và customerId của redemption; không dùng V21 vì phiên bản đó đã được các tính năng khác sử dụng.
 
 **Thay đổi callback:** bỏ hai endpoint mô phỏng `/webhook/vnpay/refund` và `/webhook/momo/refund`. VNPay refund được worker xác minh qua response API/querydr có checksum; PayPal refund dùng callback chuẩn có chữ ký. Hợp đồng cổng được đối chiếu với [PayPal Payments v2](https://developer.paypal.com/api/payments/v2/captures-refund) và [VNPay querydr/refund](https://sandbox.vnpayment.vn/apis/docs/truy-van-hoan-tien/querydr%26refund.html).
 
@@ -339,6 +360,16 @@ Hai item phải nhận hai đơn vị khác nhau và tính giá hai gói. Nhóm 
 - [x] GetCustomerOrdersUseCaseTest (phân trang, IDOR boundary, mapping SubOrders)
 - [x] GetCancellationPreviewUseCaseTest (tính toán preview hoàn tiền, chính sách phân tầng theo giờ)
 - [x] OrderControllerTest (IDOR customer/vendor)
+- [x] DiscountAllocationEngineTest (8 test case: phân bổ theo tỷ trọng subtotal, Largest Remainder xử lý số lẻ, chặn quá maxDiscount, voucher cố định và %, cô lập scope vendor/service)
+- [x] DiscountControllersTest (4 unit test dùng Mockito: mapping response, phân giải vendor, admin tạo mã và preview; không thay thế kiểm tra HTTP RBAC)
+- [x] DiscountManagementIntegrationTest (6 unit test dùng Mockito: tạo mã admin/vendor, chặn mã trùng/vendor khác, preview và tạo đơn có snapshot giảm giá)
+- [x] DiscountConcurrencyIntegrationTest (12 ca với PostgreSQL 16 thật/Flyway V24 và Redis Testcontainers: quota toàn mã/từng khách, sửa hoặc tắt voucher trong checkout, intent dùng tiền net, replay, hủy/hết hạn lặp, bảo vệ paid, rollback, chặn checkout miễn phí, hoàn net khi cancel/vendor reject; chỉ gateway/publisher/commission được mock)
+- [x] DiscountConfigurationTest (6 unit test: cấm vendor sửa mã sàn tài trợ, cấm service của vendor khác, phần trăm, ngày hiệu lực và phạm vi tài trợ)
+- [x] DiscountRefundRegressionTest (4 unit test: hoàn tiền net, ghi cashRefund/tổng refund, đảo trợ giá khi hoàn một phần, nhận diện hoàn đủ số tiền net)
+- [x] DiscountLocalizationTest (3 unit test: thông báo VI/EN, booking hết hạn, preview từ chối tổng thực trả bằng 0)
+- [x] Kiểm tra toàn backend ngày 09/10/2026 trên nhánh này: `./mvnw clean verify` BUILD SUCCESS; Maven báo 1.707 test, 0 failure, 0 error, 135 skip; PostgreSQL 16/Flyway V24 và schema validate pass. Gateway trong test khuyến mãi được mock, chưa thay thế nghiệm thu giao dịch voucher trên sandbox thật.
+- [x] OrderExpiryEventListenerTest (4 unit test: hủy khi pending, giữ nguyên paid, không có đơn, trả reservation khi hết hạn)
+- [x] SettlementCalculationTest (15 unit test: tính settlement, loại trừ, hoa hồng và snapshot giảm giá; trường hợp đồng tài trợ ở mức engine, API hiện chỉ có PLATFORM hoặc VENDOR)
 
 ---
 

@@ -99,7 +99,7 @@ class OrderSplittingTest {
 
         when(masterOrderRepository.findByBookingId(bookingId)).thenReturn(Optional.empty());
         when(masterOrderRepository.findByCustomerIdAndIdempotencyKey(any(), any())).thenReturn(Optional.empty());
-        when(bookingLookupPort.findBookingForOrder(bookingId)).thenReturn(Optional.of(bookingView));
+        when(bookingLookupPort.findBookingForOrderForUpdate(bookingId)).thenReturn(Optional.of(bookingView));
 
         // Vendor A: 10% commission, Vendor B: 15% commission
         when(commissionPolicyPort.getCommissionRate(vendorA)).thenReturn(new BigDecimal("0.10"));

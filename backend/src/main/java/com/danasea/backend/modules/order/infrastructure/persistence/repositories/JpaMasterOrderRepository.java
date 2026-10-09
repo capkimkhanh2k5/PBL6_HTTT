@@ -3,8 +3,8 @@ package com.danasea.backend.modules.order.infrastructure.persistence.repositorie
 import java.util.Optional;
 import java.util.UUID;
 
-import com.danasea.backend.modules.order.infrastructure.persistence.entities.MasterOrderJpaEntity;
 import jakarta.persistence.LockModeType;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -13,10 +13,16 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import com.danasea.backend.modules.order.infrastructure.persistence.entities.MasterOrderJpaEntity;
+
 @Repository
 public interface JpaMasterOrderRepository extends JpaRepository<MasterOrderJpaEntity, UUID> {
 
     Optional<MasterOrderJpaEntity> findByBookingId(UUID bookingId);
+
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("SELECT o FROM MasterOrderJpaEntity o WHERE o.bookingId = :bookingId")
+    Optional<MasterOrderJpaEntity> findByBookingIdForUpdate(@Param("bookingId") UUID bookingId);
 
     Optional<MasterOrderJpaEntity> findByCustomerIdAndIdempotencyKey(UUID customerId, String idempotencyKey);
 

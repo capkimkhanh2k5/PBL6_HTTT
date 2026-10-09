@@ -1,11 +1,13 @@
 package com.danasea.backend.modules.order.domain.models;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.OffsetDateTime;
 import java.util.UUID;
 
 import com.danasea.backend.modules.order.domain.exceptions.InvalidOrderStateException;
 import com.danasea.backend.shared.core.domain.models.BaseDomainModel;
+
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
@@ -23,6 +25,11 @@ public class SubOrder extends BaseDomainModel {
     private Integer quantity;
     private BigDecimal unitPrice;
     private BigDecimal subtotalAmount;
+    private BigDecimal discountAmount = BigDecimal.ZERO;
+    private BigDecimal vendorDiscountAmount = BigDecimal.ZERO;
+    private BigDecimal platformDiscountAmount = BigDecimal.ZERO;
+    private BigDecimal commissionBasisAmount;
+    private BigDecimal finalAmount;
     private BigDecimal commissionRate;
     private BigDecimal commissionAmount;
     private BigDecimal vendorPayoutAmount;
@@ -37,6 +44,53 @@ public class SubOrder extends BaseDomainModel {
         super();
         this.status = SubOrderStatus.PENDING;
         this.waiverAccepted = false;
+        this.discountAmount = BigDecimal.ZERO;
+        this.vendorDiscountAmount = BigDecimal.ZERO;
+        this.platformDiscountAmount = BigDecimal.ZERO;
+    }
+
+    public BigDecimal getFinalAmount() {
+        if (finalAmount != null) {
+            return finalAmount;
+        }
+        if (subtotalAmount != null) {
+            BigDecimal disc = discountAmount != null ? discountAmount : BigDecimal.ZERO;
+            return subtotalAmount.subtract(disc).max(BigDecimal.ZERO);
+        }
+        return BigDecimal.ZERO;
+    }
+
+    public BigDecimal getCommissionBasisAmount() {
+        if (commissionBasisAmount != null) {
+            return commissionBasisAmount;
+        }
+        if (subtotalAmount != null) {
+            BigDecimal vd = vendorDiscountAmount != null ? vendorDiscountAmount : BigDecimal.ZERO;
+            return subtotalAmount.subtract(vd).max(BigDecimal.ZERO);
+        }
+        return BigDecimal.ZERO;
+    }
+
+    /**
+     * Áp dụng discount và cập nhật lại cơ sở tính hoa hồng, hoa hồng, vendor payout và final amount.
+     * Quy tắc:
+     * - Voucher vendor: vendor chịu giảm giá -> cơ sở hoa hồng = subtotal - vendorDiscount.
+     * - Voucher sàn: sàn trợ giá -> cơ sở hoa hồng = subtotal, vendor nhận đủ (subtotal - commission).
+     * - Final amount (khách trả) = subtotal - (vendorDiscount + platformDiscount).
+     */
+    public void applyDiscount(BigDecimal vendorDiscount, BigDecimal platformDiscount) {
+        this.vendorDiscountAmount = vendorDiscount != null ? vendorDiscount : BigDecimal.ZERO;
+        this.platformDiscountAmount = platformDiscount != null ? platformDiscount : BigDecimal.ZERO;
+        this.discountAmount = this.vendorDiscountAmount.add(this.platformDiscountAmount);
+
+        BigDecimal subtotal = this.subtotalAmount != null ? this.subtotalAmount : BigDecimal.ZERO;
+        this.finalAmount = subtotal.subtract(this.discountAmount).max(BigDecimal.ZERO);
+
+        this.commissionBasisAmount = subtotal.subtract(this.vendorDiscountAmount).max(BigDecimal.ZERO);
+
+        BigDecimal rate = this.commissionRate != null ? this.commissionRate : BigDecimal.ZERO;
+        this.commissionAmount = this.commissionBasisAmount.multiply(rate).setScale(2, RoundingMode.HALF_UP);
+        this.vendorPayoutAmount = this.commissionBasisAmount.subtract(this.commissionAmount);
     }
 
     /**

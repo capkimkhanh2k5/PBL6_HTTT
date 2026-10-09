@@ -22,6 +22,11 @@ public class SubOrderMapper {
         domain.setQuantity(entity.getQuantity());
         domain.setUnitPrice(entity.getUnitPrice());
         domain.setSubtotalAmount(entity.getSubtotalAmount());
+        domain.setDiscountAmount(entity.getDiscountAmount());
+        domain.setVendorDiscountAmount(entity.getVendorDiscountAmount());
+        domain.setPlatformDiscountAmount(entity.getPlatformDiscountAmount());
+        domain.setCommissionBasisAmount(entity.getCommissionBasisAmount());
+        domain.setFinalAmount(entity.getFinalAmount());
         domain.setCommissionRate(entity.getCommissionRate());
         domain.setCommissionAmount(entity.getCommissionAmount());
         domain.setVendorPayoutAmount(entity.getVendorPayoutAmount());
@@ -52,6 +57,11 @@ public class SubOrderMapper {
         entity.setQuantity(domain.getQuantity());
         entity.setUnitPrice(domain.getUnitPrice());
         entity.setSubtotalAmount(domain.getSubtotalAmount());
+        entity.setDiscountAmount(domain.getDiscountAmount());
+        entity.setVendorDiscountAmount(domain.getVendorDiscountAmount());
+        entity.setPlatformDiscountAmount(domain.getPlatformDiscountAmount());
+        entity.setCommissionBasisAmount(domain.getCommissionBasisAmount());
+        entity.setFinalAmount(domain.getFinalAmount());
         entity.setCommissionRate(domain.getCommissionRate());
         entity.setCommissionAmount(domain.getCommissionAmount());
         entity.setVendorPayoutAmount(domain.getVendorPayoutAmount());

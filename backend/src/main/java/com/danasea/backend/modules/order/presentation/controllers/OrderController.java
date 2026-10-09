@@ -5,6 +5,8 @@ import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.UUID;
 
+import jakarta.validation.Valid;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -47,8 +49,6 @@ import com.danasea.backend.modules.order.presentation.dtos.RefundResponse;
 import com.danasea.backend.modules.order.presentation.dtos.SubOrderCancellationPreview;
 import com.danasea.backend.modules.order.presentation.dtos.SubOrderResponse;
 import com.danasea.backend.security.infrastructure.SecurityUtils;
-
-import jakarta.validation.Valid;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -97,7 +97,7 @@ public class OrderController {
             @RequestHeader("Idempotency-Key") String idempotencyKey) {
         UUID userId = currentUserId();
         MasterOrderDetailResult result = createOrderUseCase.execute(
-                new CreateOrderCommand(userId, request.bookingId(), idempotencyKey));
+                new CreateOrderCommand(userId, request.bookingId(), idempotencyKey, request.discountCode()));
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(toOrderResponse(result));
     }
@@ -189,7 +189,9 @@ public class OrderController {
                         s.quantity(),
                         s.unitPrice(),
                         s.subtotalAmount(),
-                        s.status()
+                        s.status(),
+                        s.discountAmount(),
+                        s.finalAmount()
                 )).toList();
         return new OrderResponse(
                 r.id(),

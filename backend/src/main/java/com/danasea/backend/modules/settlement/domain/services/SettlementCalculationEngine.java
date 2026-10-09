@@ -1,5 +1,16 @@
 package com.danasea.backend.modules.settlement.domain.services;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.time.LocalDate;
+import java.time.OffsetDateTime;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.UUID;
+
+import org.springframework.stereotype.Service;
+
 import com.danasea.backend.modules.dispute.domain.models.DisputeStatus;
 import com.danasea.backend.modules.order.domain.models.SubOrderStatus;
 import com.danasea.backend.modules.settlement.domain.exceptions.InvalidCommissionRateException;
@@ -10,17 +21,8 @@ import com.danasea.backend.modules.settlement.domain.models.SettlementCalculatio
 import com.danasea.backend.modules.settlement.domain.models.SettlementLineItem;
 import com.danasea.backend.modules.settlement.domain.models.SettlementStatus;
 import com.danasea.backend.modules.settlement.domain.models.SubOrderCalculationContext;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Service;
 
-import java.math.BigDecimal;
-import java.math.RoundingMode;
-import java.time.LocalDate;
-import java.time.OffsetDateTime;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.UUID;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Service
@@ -63,6 +65,7 @@ public class SettlementCalculationEngine {
             refund = BigDecimal.ZERO;
         }
 
+        BigDecimal customerPaid = context.getEffectiveFinalAmount();
         SubOrderStatus status = context.getStatus();
 
         // 1. Kiểm tra khiếu nại đang mở (Active Dispute) -> Tạm giữ
@@ -85,14 +88,14 @@ public class SettlementCalculationEngine {
         // 2. Kiểm tra hoàn tiền 100% (Full Refund)
         boolean isFullRefund = status == SubOrderStatus.REFUNDED
                 || (context.getRefundPercentage() != null && context.getRefundPercentage().compareTo(new BigDecimal("100")) >= 0)
-                || (subtotal.compareTo(BigDecimal.ZERO) > 0 && refund.compareTo(subtotal) >= 0);
+                || (customerPaid.signum() > 0 && refund.compareTo(customerPaid) >= 0);
 
         if (isFullRefund) {
             return SettlementLineItem.builder()
                     .id(UUID.randomUUID())
                     .subOrderId(context.getSubOrderId())
                     .grossAmount(BigDecimal.ZERO.setScale(SCALE, ROUNDING))
-                    .refundAmount(subtotal.setScale(SCALE, ROUNDING))
+                    .refundAmount(refund.setScale(SCALE, ROUNDING))
                     .commissionRate(rate)
                     .commissionAmount(BigDecimal.ZERO.setScale(SCALE, ROUNDING))
                     .netAmount(BigDecimal.ZERO.setScale(SCALE, ROUNDING))
@@ -114,15 +117,23 @@ public class SettlementCalculationEngine {
                     .build();
         }
 
+        BigDecimal basis = context.getEffectiveCommissionBasis();
+        if (basis == null || basis.compareTo(BigDecimal.ZERO) < 0) {
+            basis = BigDecimal.ZERO;
+        }
+
         // 4. Hoàn tiền một phần (Partial Refund Net Calculation)
         if (status == SubOrderStatus.PARTIALLY_REFUNDED || refund.compareTo(BigDecimal.ZERO) > 0) {
-            BigDecimal netAfterRefund = subtotal.subtract(refund);
+            // Reverse platform funding in the same proportion as refunded customer cash.
+            BigDecimal reversedBasis = customerPaid.signum() > 0
+                    ? basis.multiply(refund).divide(customerPaid, SCALE, ROUNDING) : basis;
+            BigDecimal netAfterRefund = basis.subtract(reversedBasis).max(BigDecimal.ZERO);
             if (netAfterRefund.compareTo(BigDecimal.ZERO) <= 0) {
                 return SettlementLineItem.builder()
                         .id(UUID.randomUUID())
                         .subOrderId(context.getSubOrderId())
                         .grossAmount(BigDecimal.ZERO.setScale(SCALE, ROUNDING))
-                        .refundAmount(subtotal.setScale(SCALE, ROUNDING))
+                        .refundAmount(refund.setScale(SCALE, ROUNDING))
                         .commissionRate(rate)
                         .commissionAmount(BigDecimal.ZERO.setScale(SCALE, ROUNDING))
                         .netAmount(BigDecimal.ZERO.setScale(SCALE, ROUNDING))
@@ -147,9 +158,9 @@ public class SettlementCalculationEngine {
         }
 
         // 5. Đơn hoàn tất chuẩn không có hoàn tiền (COMPLETED / CHECKED_IN)
-        BigDecimal grossAmount = subtotal.setScale(SCALE, ROUNDING);
-        BigDecimal commissionAmount = subtotal.multiply(rate).setScale(SCALE, ROUNDING);
-        BigDecimal netAmount = subtotal.subtract(commissionAmount).setScale(SCALE, ROUNDING);
+        BigDecimal grossAmount = basis.setScale(SCALE, ROUNDING);
+        BigDecimal commissionAmount = basis.multiply(rate).setScale(SCALE, ROUNDING);
+        BigDecimal netAmount = basis.subtract(commissionAmount).setScale(SCALE, ROUNDING);
 
         return SettlementLineItem.builder()
                 .id(UUID.randomUUID())
@@ -203,9 +214,9 @@ public class SettlementCalculationEngine {
             SettlementLineItem item = calculateLineItem(order);
             lineItems.add(item);
 
+            totalRefund = totalRefund.add(item.getRefundAmount());
             if (!item.isExcluded()) {
                 totalGross = totalGross.add(item.getGrossAmount());
-                totalRefund = totalRefund.add(item.getRefundAmount());
                 totalCommission = totalCommission.add(item.getCommissionAmount());
                 totalPayout = totalPayout.add(item.getNetAmount());
             }

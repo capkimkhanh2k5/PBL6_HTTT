@@ -16,6 +16,8 @@ public interface MasterOrderRepositoryPort {
 
     Optional<MasterOrder> findByBookingId(UUID bookingId);
 
+    Optional<MasterOrder> findByBookingIdForUpdate(UUID bookingId);
+
     Optional<MasterOrder> findByCustomerIdAndIdempotencyKey(UUID customerId, String idempotencyKey);
 
     OrderPagedResult<MasterOrder> findByCustomerId(UUID customerId, int page, int size);

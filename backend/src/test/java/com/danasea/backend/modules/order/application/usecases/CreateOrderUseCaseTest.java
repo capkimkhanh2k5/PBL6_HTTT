@@ -103,7 +103,7 @@ class CreateOrderUseCaseTest {
 
             when(masterOrderRepository.findByBookingId(bookingId)).thenReturn(Optional.empty());
             when(masterOrderRepository.findByCustomerIdAndIdempotencyKey(customerId, idempotencyKey)).thenReturn(Optional.empty());
-            when(bookingLookupPort.findBookingForOrder(bookingId)).thenReturn(Optional.of(bookingView));
+            when(bookingLookupPort.findBookingForOrderForUpdate(bookingId)).thenReturn(Optional.of(bookingView));
             when(commissionPolicyPort.getCommissionRate(vendorId)).thenReturn(new BigDecimal("0.10"));
 
             when(masterOrderRepository.save(any(MasterOrder.class))).thenAnswer(invocation -> {
@@ -152,7 +152,7 @@ class CreateOrderUseCaseTest {
 
             // Then
             assertThat(result.id()).isEqualTo(existing.getId());
-            verify(bookingLookupPort, never()).findBookingForOrder(any());
+            verify(bookingLookupPort, never()).findBookingForOrderForUpdate(any());
             verify(masterOrderRepository, never()).save(any());
         }
     }
@@ -176,7 +176,7 @@ class CreateOrderUseCaseTest {
 
             when(masterOrderRepository.findByBookingId(bookingId)).thenReturn(Optional.empty());
             when(masterOrderRepository.findByCustomerIdAndIdempotencyKey(customerId, idempotencyKey)).thenReturn(Optional.empty());
-            when(bookingLookupPort.findBookingForOrder(bookingId)).thenReturn(Optional.of(bookingView));
+            when(bookingLookupPort.findBookingForOrderForUpdate(bookingId)).thenReturn(Optional.of(bookingView));
 
             CreateOrderCommand command = new CreateOrderCommand(customerId, bookingId, idempotencyKey);
 
@@ -198,7 +198,7 @@ class CreateOrderUseCaseTest {
 
             when(masterOrderRepository.findByBookingId(bookingId)).thenReturn(Optional.empty());
             when(masterOrderRepository.findByCustomerIdAndIdempotencyKey(customerId, idempotencyKey)).thenReturn(Optional.empty());
-            when(bookingLookupPort.findBookingForOrder(bookingId)).thenReturn(Optional.of(bookingView));
+            when(bookingLookupPort.findBookingForOrderForUpdate(bookingId)).thenReturn(Optional.of(bookingView));
 
             CreateOrderCommand command = new CreateOrderCommand(customerId, bookingId, idempotencyKey);
 
@@ -221,7 +221,7 @@ class CreateOrderUseCaseTest {
 
             when(masterOrderRepository.findByBookingId(bookingId)).thenReturn(Optional.empty());
             when(masterOrderRepository.findByCustomerIdAndIdempotencyKey(customerId, idempotencyKey)).thenReturn(Optional.empty());
-            when(bookingLookupPort.findBookingForOrder(bookingId)).thenReturn(Optional.of(bookingView));
+            when(bookingLookupPort.findBookingForOrderForUpdate(bookingId)).thenReturn(Optional.of(bookingView));
 
             CreateOrderCommand command = new CreateOrderCommand(customerId, bookingId, idempotencyKey);
 
@@ -260,7 +260,7 @@ class CreateOrderUseCaseTest {
 
             assertThatThrownBy(() -> useCase.execute(command))
                     .isInstanceOf(UnauthorizedOrderAccessException.class);
-            verify(bookingLookupPort, never()).findBookingForOrder(any());
+            verify(bookingLookupPort, never()).findBookingForOrderForUpdate(any());
         }
 
         @Test

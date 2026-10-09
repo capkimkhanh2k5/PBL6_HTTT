@@ -1,12 +1,48 @@
 package com.danasea.backend.modules.order.infrastructure.persistence.repositories;
 
+import java.util.Optional;
 import java.util.UUID;
+
+import jakarta.persistence.LockModeType;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.data.jpa.repository.Lock;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+import org.springframework.stereotype.Repository;
 
 import com.danasea.backend.modules.order.infrastructure.persistence.entities.DiscountCodeJpaEntity;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.stereotype.Repository;
-import java.util.UUID;
 
 @Repository
-public interface JpaDiscountCodeRepository extends JpaRepository<DiscountCodeJpaEntity, UUID> {
+public interface JpaDiscountCodeRepository extends JpaRepository<DiscountCodeJpaEntity, UUID>, JpaSpecificationExecutor<DiscountCodeJpaEntity> {
+
+    Optional<DiscountCodeJpaEntity> findByCodeIgnoreCase(String code);
+
+    boolean existsByCodeIgnoreCase(String code);
+
+    boolean existsByCodeIgnoreCaseAndIdNot(String code, UUID id);
+
+    Page<DiscountCodeJpaEntity> findByVendorId(UUID vendorId, Pageable pageable);
+
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("SELECT d FROM DiscountCodeJpaEntity d WHERE UPPER(d.code) = UPPER(:code)")
+    Optional<DiscountCodeJpaEntity> findByCodeForUpdate(@Param("code") String code);
+
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("SELECT d FROM DiscountCodeJpaEntity d WHERE d.id = :id")
+    Optional<DiscountCodeJpaEntity> findByIdForUpdate(@Param("id") UUID id);
+
+    @Modifying
+    @Query(value = "UPDATE discount_codes SET used_count = used_count + 1, updated_at = CURRENT_TIMESTAMP "
+            + "WHERE id = :id AND (max_uses IS NULL OR used_count < max_uses)", nativeQuery = true)
+    int incrementUsedCount(@Param("id") UUID id);
+
+    @Modifying
+    @Query(value = "UPDATE discount_codes SET used_count = CASE WHEN used_count > 0 THEN used_count - 1 ELSE 0 END, "
+            + "updated_at = CURRENT_TIMESTAMP WHERE id = :id", nativeQuery = true)
+    int decrementUsedCount(@Param("id") UUID id);
 }

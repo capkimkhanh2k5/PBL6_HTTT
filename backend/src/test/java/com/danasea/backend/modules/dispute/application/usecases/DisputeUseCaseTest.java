@@ -492,6 +492,7 @@ class DisputeUseCaseTest {
             SubOrderJpaEntity subOrder = new SubOrderJpaEntity();
             subOrder.setId(subOrderId);
             subOrder.setSubtotalAmount(new BigDecimal("2000000.00"));
+            subOrder.setFinalAmount(new BigDecimal("1600000.00"));
             subOrder.setStatus(SubOrderStatus.COMPLETED);
 
             when(disputeRepository.findById(disputeId)).thenReturn(Optional.of(dispute));
@@ -512,7 +513,7 @@ class DisputeUseCaseTest {
             verify(refundRepository).save(refundCaptor.capture());
             RefundJpaEntity refund = refundCaptor.getValue();
             assertThat(refund.getSubOrderId()).isEqualTo(subOrderId);
-            assertThat(refund.getAmount()).isEqualByComparingTo(new BigDecimal("2000000.00"));
+            assertThat(refund.getAmount()).isEqualByComparingTo(new BigDecimal("1600000.00"));
             assertThat(refund.getRefundPercentage()).isEqualByComparingTo(new BigDecimal("100.0"));
             assertThat(refund.getReason()).isEqualTo(RefundReason.ADMIN_OVERRIDE);
             assertThat(refund.getStatus()).isEqualTo(RefundStatus.PENDING);
@@ -1230,9 +1231,7 @@ class DisputeUseCaseTest {
 
             assertThat(response.status()).isEqualTo(DisputeStatus.RESOLVED_REFUND);
 
-            ArgumentCaptor<RefundJpaEntity> refundCaptor = ArgumentCaptor.forClass(RefundJpaEntity.class);
-            verify(refundRepository).save(refundCaptor.capture());
-            assertThat(refundCaptor.getValue().getAmount()).isEqualByComparingTo(new BigDecimal("0.00"));
+            verify(refundRepository, never()).save(any());
         }
     }
 }

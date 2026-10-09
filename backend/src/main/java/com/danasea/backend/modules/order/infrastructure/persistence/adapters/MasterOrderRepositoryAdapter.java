@@ -52,6 +52,11 @@ public class MasterOrderRepositoryAdapter implements MasterOrderRepositoryPort {
     }
 
     @Override
+    public Optional<MasterOrder> findByBookingIdForUpdate(UUID bookingId) {
+        return jpaMasterOrderRepository.findByBookingIdForUpdate(bookingId).map(mapper::toDomain);
+    }
+
+    @Override
     public Optional<MasterOrder> findByCustomerIdAndIdempotencyKey(UUID customerId, String idempotencyKey) {
         return jpaMasterOrderRepository.findByCustomerIdAndIdempotencyKey(customerId, idempotencyKey)
                 .map(mapper::toDomain);

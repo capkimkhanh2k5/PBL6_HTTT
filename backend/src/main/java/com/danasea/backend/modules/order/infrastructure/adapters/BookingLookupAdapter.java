@@ -26,6 +26,11 @@ public class BookingLookupAdapter implements BookingLookupPort {
         return jpaBookingRepository.findByIdWithItems(bookingId).map(this::toView);
     }
 
+    @Override
+    public Optional<BookingOrderView> findBookingForOrderForUpdate(UUID bookingId) {
+        return jpaBookingRepository.findByIdWithItemsForUpdate(bookingId).map(this::toView);
+    }
+
     private BookingOrderView toView(BookingJpaEntity entity) {
         List<BookingOrderView.BookingItemOrderView> items = entity.getItems() != null
                 ? entity.getItems().stream()
