@@ -89,6 +89,8 @@ Không giảm capacity thấp hơn booked/held; không xóa slot có giao dịch
 
 ### P1 Thống kê và báo cáo
 
+> Cập nhật 09/10/2026: đã triển khai và sửa nghiệp vụ báo cáo trên `implement_admin_reports_dashboard`; xem [hợp đồng hiện tại](reports-dashboard-contract.md). Nội dung dưới đây là phát hiện tại thời điểm audit 06/10.
+
 Yêu cầu học phần bắt buộc có báo cáo theo ngày, tuần, quý, năm và khoảng từ ngày đến ngày. `/api/admin/dashboard` chỉ trả `ADMIN_ACCESS_GRANTED`. Listing settlement có bộ lọc ngày là chức năng đối soát, chưa thay thế báo cáo kinh doanh/phân tích.
 
 - Thay nội dung `GET /api/admin/dashboard` bằng số liệu thật.

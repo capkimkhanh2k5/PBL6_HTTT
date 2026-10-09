@@ -60,7 +60,7 @@ class QrTokenSignerTest {
         String token = signer.generateToken(subOrderId, expiresAt);
 
         // Case A: Sửa đổi payload
-        String tamperedPayload = "a" + token.substring(1);
+        String tamperedPayload = (token.charAt(0) == 'a' ? "b" : "a") + token.substring(1);
         assertThat(signer.verifySignature(tamperedPayload)).isFalse();
 
         // Case B: Sửa đổi signature byte

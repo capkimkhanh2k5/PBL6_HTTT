@@ -21,6 +21,7 @@ import com.danasea.backend.modules.order.domain.models.MasterOrderStatus;
 import com.danasea.backend.modules.order.domain.models.PaymentProvider;
 import com.danasea.backend.modules.order.domain.models.PaymentStatus;
 import com.danasea.backend.modules.order.domain.models.RefundStatus;
+import com.danasea.backend.modules.order.domain.models.RefundReason;
 import com.danasea.backend.modules.order.domain.models.SubOrderStatus;
 import com.danasea.backend.modules.order.domain.ports.GatewayRefundRequest;
 import com.danasea.backend.modules.order.domain.ports.GatewayRefundStatus;
@@ -289,6 +290,10 @@ public class RefundProcessingService {
             MasterOrderJpaEntity masterOrder, PaymentJpaEntity originalPayment) {
         boolean alreadyReleased = subOrder.getStatus() == SubOrderStatus.CANCELLED || subOrder.getStatus() == SubOrderStatus.REJECTED
                 || subOrder.getStatus() == SubOrderStatus.REFUNDED || subOrder.getStatus() == SubOrderStatus.PARTIALLY_REFUNDED;
+        if (subOrder.getCancellationReason() == null && refund.getReason() != RefundReason.COMPENSATION
+                && refund.getReason() != RefundReason.DISPUTE) {
+            subOrder.setCancellationReason(refund.getReason());
+        }
         subOrder.setStatus(refund.getRefundPercentage() != null && refund.getRefundPercentage().compareTo(BigDecimal.valueOf(100)) == 0
                 ? SubOrderStatus.REFUNDED : SubOrderStatus.PARTIALLY_REFUNDED);
         subOrderRepository.save(subOrder);

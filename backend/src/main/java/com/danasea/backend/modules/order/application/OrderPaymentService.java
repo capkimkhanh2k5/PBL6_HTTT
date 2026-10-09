@@ -331,6 +331,7 @@ public class OrderPaymentService {
 
 
         subOrder.setStatus(SubOrderStatus.REJECTED);
+        subOrder.setCancellationReason(RefundReason.VENDOR_FAULT);
         subOrderRepository.save(subOrder);
         if (subOrder.getSlotId() != null && subOrder.getQuantity() != null && subOrder.getQuantity() > 0) {
             serviceSlotRepository.decrementBookedCount(subOrder.getSlotId(), subOrder.getQuantity());
@@ -836,6 +837,10 @@ public class OrderPaymentService {
         refundRepository.save(refund);
 
         if (RefundStatus.PROCESSED.equals(request.status())) {
+            if (subOrder.getCancellationReason() == null && refund.getReason() != RefundReason.COMPENSATION
+                    && refund.getReason() != RefundReason.DISPUTE) {
+                subOrder.setCancellationReason(refund.getReason());
+            }
             subOrder.setStatus(refund.getRefundPercentage().compareTo(BigDecimal.valueOf(100)) == 0
                     ? SubOrderStatus.REFUNDED
                     : SubOrderStatus.PARTIALLY_REFUNDED);

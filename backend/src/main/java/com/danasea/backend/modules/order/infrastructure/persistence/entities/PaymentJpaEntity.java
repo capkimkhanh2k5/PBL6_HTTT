@@ -52,6 +52,15 @@ public class PaymentJpaEntity extends BaseJpaEntity {
     @Enumerated(EnumType.STRING)
     private PaymentStatus status;
 
+    private OffsetDateTime paidAt;
+
+    public void setStatus(PaymentStatus status) {
+        if (status == PaymentStatus.SUCCESS && paidAt == null) {
+            paidAt = OffsetDateTime.now();
+        }
+        this.status = status;
+    }
+
     @Column(columnDefinition = "TEXT")
     private String rawWebhookPayload;
 
