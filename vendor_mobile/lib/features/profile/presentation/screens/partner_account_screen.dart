@@ -1,3 +1,4 @@
+import '../../../../core/auth/auth_session.dart';
 import 'package:vendor_mobile/core/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import '../../../../core/theme/app_colors.dart';
@@ -5,7 +6,6 @@ import '../../../../core/theme/app_shapes.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../core/data/vendor_mock_database.dart';
 import '../../../../core/models/vendor_models.dart';
-import '../../../../core/data/vendor_mock_repositories.dart';
 import '../../../auth/presentation/screens/login_register_screen.dart';
 import '../../../notifications/presentation/screens/notification_safety_screen.dart';
 import 'business_profile_screen.dart';
@@ -27,7 +27,6 @@ class PartnerAccountScreen extends StatefulWidget {
 
 class _PartnerAccountScreenState extends State<PartnerAccountScreen> {
   final VendorMockDatabase _db = VendorMockDatabase.instance;
-  final VendorAuthRepository _authRepo = VendorAuthRepository();
   String get _currentLocale => AppLanguage.instance.code;
 
   @override
@@ -71,7 +70,7 @@ class _PartnerAccountScreenState extends State<PartnerAccountScreen> {
     );
 
     if (confirm == true) {
-      await _authRepo.logout();
+      try { await AuthSession.instance.logout(); } catch (_) {}
       if (!mounted) return;
       Navigator.pushAndRemoveUntil(
         context,
@@ -219,7 +218,7 @@ class _PartnerAccountScreenState extends State<PartnerAccountScreen> {
                   ),
                   const SizedBox(height: 12),
                   LocalizedText(
-                    user.fullName,
+                    (AuthSession.instance.profile?['fullName'] ?? AuthSession.instance.profile?['email'] ?? '').toString(),
                     style: AppTypography.headlineSm.copyWith(
                       color: AppColors.onSurface,
                       fontWeight: FontWeight.bold,
@@ -280,7 +279,7 @@ class _PartnerAccountScreenState extends State<PartnerAccountScreen> {
                             const SizedBox(width: 4),
                             Flexible(
                               child: LocalizedText(
-                                user.email,
+                                (AuthSession.instance.profile?['email'] ?? '').toString(),
                                 style: AppTypography.bodySm.copyWith(color: AppColors.onSurfaceVariant, fontSize: 12),
                                 overflow: TextOverflow.ellipsis,
                               ),

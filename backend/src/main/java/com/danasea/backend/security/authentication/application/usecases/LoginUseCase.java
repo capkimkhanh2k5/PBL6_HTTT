@@ -1,39 +1,42 @@
 package com.danasea.backend.security.authentication.application.usecases;
 
-import java.util.Locale;
-
-import com.danasea.backend.security.authentication.application.ports.PasswordHasher;
-import com.danasea.backend.security.authentication.application.ports.TokenProvider;
-import com.danasea.backend.security.authentication.application.ports.UserAccountPort;
-import com.danasea.backend.security.authentication.application.results.LoginResult;
-import com.danasea.backend.security.authentication.domain.exceptions.InvalidCredentialsException;
-import com.danasea.backend.security.authentication.domain.models.Authentication;
-
-import lombok.RequiredArgsConstructor;
-
-import java.util.UUID;
 import java.time.OffsetDateTime;
+import java.util.Locale;
+import java.util.UUID;
+
+import org.springframework.transaction.annotation.Transactional;
 
 import com.danasea.backend.modules.account.application.api.AccountInternalApi;
 import com.danasea.backend.modules.account.domain.models.RefreshToken;
+import com.danasea.backend.modules.account.domain.models.User;
+import com.danasea.backend.security.authentication.application.ports.PasswordHasher;
+import com.danasea.backend.security.authentication.application.ports.TokenProvider;
+import com.danasea.backend.security.authentication.application.results.LoginResult;
+import com.danasea.backend.security.authentication.domain.exceptions.InvalidCredentialsException;
+import com.danasea.backend.security.authentication.domain.models.Authentication;
 import com.danasea.backend.security.authentication.infrastructure.security.HashUtils;
 import com.danasea.backend.security.authentication.infrastructure.security.JwtProperties;
+
+import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
 public class LoginUseCase {
 
-    private final UserAccountPort userAccountPort;
     private final AccountInternalApi accountInternalApi;
     private final PasswordHasher passwordHasher;
     private final TokenProvider tokenProvider;
     private final JwtProperties jwtProperties;
 
+    @Transactional
     public LoginResult execute(String email, String password) {
         String normalizedEmail = email.trim()
                 .toLowerCase(Locale.ROOT);
 
-        Authentication user = userAccountPort.findByEmail(normalizedEmail)
+        User account = accountInternalApi.findUserByEmailForUpdate(normalizedEmail)
                 .orElseThrow(InvalidCredentialsException::new);
+        Authentication user = new Authentication(account.getId(), account.getEmail(), account.getPasswordHash(),
+                account.getRole().name(), !Boolean.TRUE.equals(account.getIsLocked()),
+                Boolean.TRUE.equals(account.getIsEmailVerified()), account.getLocale(), account.getSessionVersion());
 
         if (!user.enabled()
                 || !user.emailVerified()

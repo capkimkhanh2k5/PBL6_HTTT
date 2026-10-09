@@ -36,6 +36,14 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirements;
 import com.danasea.backend.shared.i18n.SupportedLanguage;
 import org.springframework.context.i18n.LocaleContextHolder;
 
+import com.danasea.backend.security.authentication.application.usecases.ForgotPasswordUseCase;
+import com.danasea.backend.security.authentication.application.usecases.ResetPasswordUseCase;
+import com.danasea.backend.security.authentication.presentation.dtos.AuthMessageResponse;
+import com.danasea.backend.security.authentication.presentation.dtos.ForgotPasswordRequest;
+import com.danasea.backend.security.authentication.presentation.dtos.ResetPasswordRequest;
+import com.danasea.backend.shared.i18n.LocalizedMessageService;
+import org.springframework.beans.factory.annotation.Autowired;
+
 @RestController
 @RequestMapping("/api/auth")
 @RequiredArgsConstructor
@@ -48,7 +56,12 @@ public class AuthenticationController {
     private final SendVerificationOtpUseCase sendVerificationOtpUseCase;
     private final VerifyOtpUseCase verifyOtpUseCase;
     private final GoogleOAuth2LoginUseCase googleOAuth2LoginUseCase;
+    private final ForgotPasswordUseCase forgotPasswordUseCase;
+    private final ResetPasswordUseCase resetPasswordUseCase;
     private final JwtProperties jwtProperties;
+
+    @Autowired(required = false)
+    private LocalizedMessageService messages = LocalizedMessageService.standalone();
 
     @PostMapping("/oauth2/google")
     @SecurityRequirements()
@@ -146,5 +159,23 @@ public class AuthenticationController {
         }
         verifyOtpUseCase.execute(principal.getName(), request.code());
         return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/forgot-password")
+    @SecurityRequirements()
+    public ResponseEntity<AuthMessageResponse> forgotPassword(
+            @Valid @RequestBody ForgotPasswordRequest request) {
+        SupportedLanguage language = SupportedLanguage.fromTag(LocaleContextHolder.getLocale().toLanguageTag())
+                .orElse(SupportedLanguage.DEFAULT);
+        forgotPasswordUseCase.execute(request.email(), language);
+        return ResponseEntity.ok(new AuthMessageResponse(messages.get("auth.forgot_password.success")));
+    }
+
+    @PostMapping("/reset-password")
+    @SecurityRequirements()
+    public ResponseEntity<AuthMessageResponse> resetPassword(
+            @Valid @RequestBody ResetPasswordRequest request) {
+        resetPasswordUseCase.execute(request.email(), request.otp(), request.newPassword());
+        return ResponseEntity.ok(new AuthMessageResponse(messages.get("auth.reset_password.success")));
     }
 }

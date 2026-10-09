@@ -1,19 +1,63 @@
 package com.danasea.backend.modules.service.infrastructure.persistence.repositories;
 
-import java.util.UUID;
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 
-import com.danasea.backend.modules.service.domain.models.SlotStatus;
-import com.danasea.backend.modules.service.infrastructure.persistence.entities.ServiceSlotJpaEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import com.danasea.backend.modules.service.domain.models.SlotStatus;
+import com.danasea.backend.modules.service.infrastructure.persistence.entities.ServiceSlotJpaEntity;
+
+import jakarta.persistence.LockModeType;
+
 @Repository
 public interface JpaServiceSlotRepository extends JpaRepository<ServiceSlotJpaEntity, UUID> {
+
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("SELECT s FROM ServiceSlotJpaEntity s WHERE s.id = :id")
+    Optional<ServiceSlotJpaEntity> findByIdForUpdate(@Param("id") UUID id);
+
+    boolean existsByServiceIdAndDateAndStartTime(UUID serviceId, LocalDate date, LocalTime startTime);
+
+    List<ServiceSlotJpaEntity> findByServiceIdOrderByDateAscStartTimeAsc(UUID serviceId);
+
+    List<ServiceSlotJpaEntity> findByServiceIdAndDateBetweenOrderByDateAscStartTimeAsc(UUID serviceId, LocalDate from, LocalDate to);
+
+    @Modifying(clearAutomatically = true, flushAutomatically = true)
+    @Query(value = """
+            WITH locked_slot AS (
+                SELECT s.id FROM service_slots s JOIN booking_items bi ON bi.slot_id = s.id
+                WHERE bi.id = :itemId FOR UPDATE OF s
+            ), released AS (
+                UPDATE booking_items bi SET capacity_released = TRUE
+                WHERE bi.id = :itemId AND NOT bi.capacity_released
+                  AND EXISTS (SELECT 1 FROM locked_slot)
+                  AND EXISTS (SELECT 1 FROM bookings b WHERE b.id = bi.booking_id
+                              AND b.status IN ('CONFIRMED', 'COMPLETED'))
+                RETURNING bi.id, bi.slot_id, bi.quantity
+            ), allocations AS (
+                SELECT a.slot_id, a.unit_number, SUM(a.allocated_seats)::integer AS seats
+                FROM booking_item_allocations a JOIN released r ON r.id = a.booking_item_id
+                GROUP BY a.slot_id, a.unit_number
+            ), released_units AS (
+                UPDATE service_slot_units u SET booked_count = GREATEST(0, u.booked_count - a.seats)
+                FROM allocations a WHERE u.slot_id = a.slot_id AND u.unit_number = a.unit_number
+                RETURNING u.id
+            )
+            UPDATE service_slots s
+            SET booked_count = GREATEST(0, s.booked_count - COALESCE(
+                (SELECT SUM(a.seats)::integer FROM allocations a), r.quantity))
+            FROM released r WHERE s.id = r.slot_id
+            """, nativeQuery = true)
+    int releaseBookingItemCapacity(@Param("itemId") UUID itemId);
 
     List<ServiceSlotJpaEntity> findByServiceIdAndStatusAndDateGreaterThanEqualOrderByDateAscStartTimeAsc(
             UUID serviceId,

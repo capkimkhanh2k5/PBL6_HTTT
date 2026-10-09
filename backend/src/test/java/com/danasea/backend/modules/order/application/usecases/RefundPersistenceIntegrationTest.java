@@ -33,6 +33,8 @@ import com.danasea.backend.modules.order.domain.models.PaymentStatus;
 import com.danasea.backend.modules.order.domain.models.RefundReason;
 import com.danasea.backend.modules.order.domain.models.RefundStatus;
 import com.danasea.backend.modules.order.domain.models.SubOrderStatus;
+import com.danasea.backend.modules.order.domain.ports.GatewayRefundRequest;
+import com.danasea.backend.modules.order.domain.ports.GatewayRefundStatus;
 import com.danasea.backend.modules.order.domain.ports.PaymentGatewayPort;
 import com.danasea.backend.modules.order.domain.ports.RefundResult;
 import com.danasea.backend.modules.order.infrastructure.persistence.entities.MasterOrderJpaEntity;
@@ -93,9 +95,9 @@ class RefundPersistenceIntegrationTest {
 
     @BeforeEach
     void setUp() {
-        when(paymentGatewayPort.requestRefund(any(com.danasea.backend.modules.order.domain.ports.GatewayRefundRequest.class)))
+        when(paymentGatewayPort.requestRefund(any(GatewayRefundRequest.class)))
                 .thenReturn(new RefundResult(true, "PAYPAL-REF-REAL-01", new BigDecimal("19.31"), "Success",
-                        com.danasea.backend.modules.order.domain.ports.GatewayRefundStatus.COMPLETED, "USD"));
+                        GatewayRefundStatus.COMPLETED, "USD"));
 
         customerId = UUID.randomUUID();
         bookingId = UUID.randomUUID();
@@ -174,7 +176,7 @@ class RefundPersistenceIntegrationTest {
         assertThat(result.subOrderId()).isEqualTo(subOrderId);
         assertThat(result.amount()).isEqualByComparingTo(BigDecimal.valueOf(500000));
         assertThat(result.status()).isEqualTo(RefundStatus.PENDING);
-        org.mockito.Mockito.verify(paymentGatewayPort, org.mockito.Mockito.never()).requestRefund(any(com.danasea.backend.modules.order.domain.ports.GatewayRefundRequest.class));
+        org.mockito.Mockito.verify(paymentGatewayPort, org.mockito.Mockito.never()).requestRefund(any(GatewayRefundRequest.class));
         assertThat(refundProcessingService.processRefund(result.refundId())).isTrue();
 
         // 1. Verify Refund DB Persistence

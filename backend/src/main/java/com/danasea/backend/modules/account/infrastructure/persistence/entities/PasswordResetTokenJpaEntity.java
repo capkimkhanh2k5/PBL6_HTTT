@@ -3,12 +3,10 @@ package com.danasea.backend.modules.account.infrastructure.persistence.entities;
 import java.time.OffsetDateTime;
 import java.util.UUID;
 
+import jakarta.persistence.*;
+
 import com.danasea.backend.shared.core.infrastructure.persistence.entities.BaseJpaEntity;
 
-import java.time.OffsetDateTime;
-import java.util.UUID;
-
-import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -25,5 +23,8 @@ public class PasswordResetTokenJpaEntity extends BaseJpaEntity {
     private OffsetDateTime expiresAt;
 
     private OffsetDateTime usedAt;
+
+    @Column(name = "failed_attempts", nullable = false)
+    private int failedAttempts;
 
 }

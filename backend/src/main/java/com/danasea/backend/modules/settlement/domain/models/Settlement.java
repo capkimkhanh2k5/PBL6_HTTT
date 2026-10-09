@@ -1,5 +1,6 @@
 package com.danasea.backend.modules.settlement.domain.models;
 
+import com.danasea.backend.modules.settlement.domain.exceptions.SettlementAlreadyFinalizedException;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -44,7 +45,7 @@ public class Settlement {
 
     public void finalizeSettlement() {
         if (this.status != null && this.status.isFinalized()) {
-            throw new com.danasea.backend.modules.settlement.domain.exceptions.SettlementAlreadyFinalizedException(
+            throw new SettlementAlreadyFinalizedException(
                     "Settlement is already finalized or paid for vendor " + vendorId + " and period " + periodStart + " to " + periodEnd);
         }
         this.status = SettlementStatus.FINALIZED;

@@ -31,6 +31,11 @@ public class RabbitMQConfig {
     public static final String NOTIFICATION_OTP_EMAIL_DLQ = "notification.otp-email.dlq";
     public static final String USER_OTP_REQUESTED_ROUTING_KEY = "auth.user.otp_requested";
 
+    // Password reset events queue
+    public static final String NOTIFICATION_PASSWORD_RESET_EMAIL_QUEUE = "notification.password-reset-email.queue";
+    public static final String NOTIFICATION_PASSWORD_RESET_EMAIL_DLQ = "notification.password-reset-email.dlq";
+    public static final String USER_PASSWORD_RESET_REQUESTED_ROUTING_KEY = "auth.user.password_reset_requested";
+
     @Bean
     public TopicExchange exchange() {
         return new TopicExchange(EXCHANGE_NAME);
@@ -85,6 +90,29 @@ public class RabbitMQConfig {
     @Bean
     public Binding bindingNotificationOtpEmailDlq(Queue notificationOtpEmailDlq, TopicExchange dlxExchange) {
         return BindingBuilder.bind(notificationOtpEmailDlq).to(dlxExchange).with(NOTIFICATION_OTP_EMAIL_QUEUE + ".dlq");
+    }
+
+    @Bean
+    public Queue notificationPasswordResetEmailQueue() {
+        return QueueBuilder.durable(NOTIFICATION_PASSWORD_RESET_EMAIL_QUEUE)
+                .withArgument("x-dead-letter-exchange", DLX_EXCHANGE_NAME)
+                .withArgument("x-dead-letter-routing-key", NOTIFICATION_PASSWORD_RESET_EMAIL_QUEUE + ".dlq")
+                .build();
+    }
+
+    @Bean
+    public Queue notificationPasswordResetEmailDlq() {
+        return QueueBuilder.durable(NOTIFICATION_PASSWORD_RESET_EMAIL_DLQ).build();
+    }
+
+    @Bean
+    public Binding bindingNotificationPasswordResetEmailQueue(Queue notificationPasswordResetEmailQueue, TopicExchange exchange) {
+        return BindingBuilder.bind(notificationPasswordResetEmailQueue).to(exchange).with(USER_PASSWORD_RESET_REQUESTED_ROUTING_KEY);
+    }
+
+    @Bean
+    public Binding bindingNotificationPasswordResetEmailDlq(Queue notificationPasswordResetEmailDlq, TopicExchange dlxExchange) {
+        return BindingBuilder.bind(notificationPasswordResetEmailDlq).to(dlxExchange).with(NOTIFICATION_PASSWORD_RESET_EMAIL_QUEUE + ".dlq");
     }
 
     @Bean

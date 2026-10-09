@@ -13,9 +13,11 @@ import java.time.Duration;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
+import com.danasea.backend.modules.weather.application.services.WeatherSafetyMessageRenderer;
+import com.danasea.backend.modules.weather.domain.models.CategorySafetyRule;
+import com.danasea.backend.modules.weather.domain.services.WeatherRuleEngine;
 import com.danasea.backend.shared.i18n.LocalizedMessageService;
 import com.danasea.backend.shared.i18n.SupportedLanguage;
-import com.danasea.backend.modules.weather.application.services.WeatherSafetyMessageRenderer;
 
 @Slf4j
 @Component
@@ -24,7 +26,7 @@ public class GetSafetyAlertTool implements ToolExecutor {
     private final GetWeatherInfoUseCase weatherInfoUseCase;
     private final StringRedisTemplate redisTemplate;
     private final ObjectMapper objectMapper;
-    private final com.danasea.backend.modules.weather.domain.services.WeatherRuleEngine weatherRuleEngine;
+    private final WeatherRuleEngine weatherRuleEngine;
     private final boolean coordinateAware;
     private LocalizedMessageService messages = LocalizedMessageService.standalone();
     private WeatherSafetyMessageRenderer weatherMessages = new WeatherSafetyMessageRenderer();
@@ -46,11 +48,11 @@ public class GetSafetyAlertTool implements ToolExecutor {
     public GetSafetyAlertTool(@Autowired(required = false) GetWeatherInfoUseCase weatherInfoUseCase,
                               @Autowired(required = false) StringRedisTemplate redisTemplate,
                               ObjectMapper objectMapper,
-                              @Autowired(required = false) com.danasea.backend.modules.weather.domain.services.WeatherRuleEngine weatherRuleEngine) {
+                              @Autowired(required = false) WeatherRuleEngine weatherRuleEngine) {
         this.weatherInfoUseCase = weatherInfoUseCase;
         this.redisTemplate = redisTemplate;
         this.objectMapper = objectMapper;
-        this.weatherRuleEngine = weatherRuleEngine != null ? weatherRuleEngine : new com.danasea.backend.modules.weather.domain.services.WeatherRuleEngine();
+        this.weatherRuleEngine = weatherRuleEngine != null ? weatherRuleEngine : new WeatherRuleEngine();
         this.coordinateAware = true;
     }
 
@@ -60,12 +62,12 @@ public class GetSafetyAlertTool implements ToolExecutor {
         this.weatherInfoUseCase = weatherInfoUseCase;
         this.redisTemplate = redisTemplate;
         this.objectMapper = objectMapper;
-        this.weatherRuleEngine = new com.danasea.backend.modules.weather.domain.services.WeatherRuleEngine();
+        this.weatherRuleEngine = new WeatherRuleEngine();
         this.coordinateAware = false;
     }
 
     public GetSafetyAlertTool() {
-        this(null, null, new ObjectMapper(), new com.danasea.backend.modules.weather.domain.services.WeatherRuleEngine());
+        this(null, null, new ObjectMapper(), new WeatherRuleEngine());
     }
 
     @Override
@@ -172,7 +174,7 @@ public class GetSafetyAlertTool implements ToolExecutor {
                 Double visibility = weatherInfo.getWeather() != null ? weatherInfo.getWeather().getVisibility() : null;
                 Integer weatherCode = weatherInfo.getWeather() != null ? weatherInfo.getWeather().getWeatherCode() : null;
 
-                var rule = com.danasea.backend.modules.weather.domain.models.CategorySafetyRule.getBySlug(categorySlug);
+                var rule = CategorySafetyRule.getBySlug(categorySlug);
                 var eval = weatherRuleEngine.evaluate(rule, waveHeight, windSpeed, windGust, oceanCurrent, visibility, weatherCode);
 
                 isSafe = eval.isSafe();

@@ -4,6 +4,7 @@ import com.danasea.backend.configs.RabbitMQConfig;
 import com.danasea.backend.security.authentication.application.ports.AuthEventPublisher;
 import com.danasea.backend.security.authentication.domain.events.UserRegisteredEvent;
 import com.danasea.backend.security.authentication.domain.events.OtpEmailRequestedEvent;
+import com.danasea.backend.security.authentication.domain.events.PasswordResetRequestedEvent;
 import lombok.RequiredArgsConstructor;
 
 import org.slf4j.Logger;
@@ -29,6 +30,13 @@ public class RabbitMQAuthEventPublisher implements AuthEventPublisher {
     public void publishOtpRequestedEvent(OtpEmailRequestedEvent event) {
         log.info("Publishing OtpEmailRequestedEvent for user: {}", event.email());
         rabbitTemplate.convertAndSend(RabbitMQConfig.EXCHANGE_NAME, RabbitMQConfig.USER_OTP_REQUESTED_ROUTING_KEY,
+                event);
+    }
+
+    @Override
+    public void publishPasswordResetRequestedEvent(PasswordResetRequestedEvent event) {
+        log.info("Publishing PasswordResetRequestedEvent for user: {}", event.email());
+        rabbitTemplate.convertAndSend(RabbitMQConfig.EXCHANGE_NAME, RabbitMQConfig.USER_PASSWORD_RESET_REQUESTED_ROUTING_KEY,
                 event);
     }
 }

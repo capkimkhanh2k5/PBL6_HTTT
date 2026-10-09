@@ -1,5 +1,12 @@
 package com.danasea.backend.security.authentication.application.usecases;
 
+import java.time.OffsetDateTime;
+import java.util.Locale;
+import java.util.Optional;
+import java.util.UUID;
+
+import org.springframework.transaction.annotation.Transactional;
+
 import com.danasea.backend.modules.account.application.api.AccountInternalApi;
 import com.danasea.backend.modules.account.domain.models.RefreshToken;
 import com.danasea.backend.modules.account.domain.models.Role;
@@ -12,13 +19,9 @@ import com.danasea.backend.security.authentication.domain.models.Authentication;
 import com.danasea.backend.security.authentication.domain.models.GoogleUserInfo;
 import com.danasea.backend.security.authentication.infrastructure.security.HashUtils;
 import com.danasea.backend.security.authentication.infrastructure.security.JwtProperties;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-
-import java.time.OffsetDateTime;
-import java.util.Locale;
-import java.util.Optional;
-import java.util.UUID;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -29,6 +32,7 @@ public class GoogleOAuth2LoginUseCase {
     private final TokenProvider tokenProvider;
     private final JwtProperties jwtProperties;
 
+    @Transactional
     public LoginResult execute(String idToken) {
         if (idToken == null || idToken.isBlank()) {
             throw new InvalidCredentialsException("Google ID token is required");
@@ -37,7 +41,7 @@ public class GoogleOAuth2LoginUseCase {
         GoogleUserInfo googleUser = tokenVerifier.verify(idToken);
         String normalizedEmail = googleUser.email().trim().toLowerCase(Locale.ROOT);
 
-        Optional<User> existingUserOpt = accountInternalApi.findUserByEmail(normalizedEmail);
+        Optional<User> existingUserOpt = accountInternalApi.findUserByEmailForUpdate(normalizedEmail);
         User user;
 
         if (existingUserOpt.isPresent()) {
@@ -83,7 +87,8 @@ public class GoogleOAuth2LoginUseCase {
                 user.getRole() != null ? user.getRole().name() : "CUSTOMER",
                 !Boolean.TRUE.equals(user.getIsLocked()),
                 Boolean.TRUE.equals(user.getIsEmailVerified()),
-                user.getLocale() != null ? user.getLocale() : "vi"
+                user.getLocale() != null ? user.getLocale() : "vi",
+                user.getSessionVersion()
         );
 
         String accessToken = tokenProvider.generateAccessToken(auth);

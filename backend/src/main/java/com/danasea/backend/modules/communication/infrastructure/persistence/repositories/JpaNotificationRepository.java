@@ -1,7 +1,6 @@
 package com.danasea.backend.modules.communication.infrastructure.persistence.repositories;
 
-import java.util.UUID;
-
+import com.danasea.backend.modules.communication.domain.models.NotificationStatus;
 import com.danasea.backend.modules.communication.infrastructure.persistence.entities.NotificationJpaEntity;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -15,5 +14,5 @@ import java.util.UUID;
 public interface JpaNotificationRepository extends JpaRepository<NotificationJpaEntity, UUID> {
     List<NotificationJpaEntity> findByUserIdOrderByCreatedAtDesc(UUID userId);
     Page<NotificationJpaEntity> findByUserIdOrderByCreatedAtDesc(UUID userId, Pageable pageable);
-    long countByUserIdAndStatus(UUID userId, com.danasea.backend.modules.communication.domain.models.NotificationStatus status);
+    long countByUserIdAndStatus(UUID userId, NotificationStatus status);
 }
