@@ -78,9 +78,9 @@ public class GetCancellationPreviewUseCase {
                     ? serviceSlotDepartureLookupPort.findDepartureTime(subOrder.getSlotId()).orElse(null)
                     : null;
 
-            BigDecimal originalAmount = subOrder.getSubtotalAmount() != null
-                    ? subOrder.getSubtotalAmount()
-                    : BigDecimal.ZERO;
+            BigDecimal originalAmount = subOrder.getFinalAmount() != null
+                    ? subOrder.getFinalAmount()
+                    : (subOrder.getSubtotalAmount() != null ? subOrder.getSubtotalAmount() : BigDecimal.ZERO);
 
             RefundEvaluationResult eval = refundPolicyEngine.evaluate(
                     RefundReason.CUSTOMER_REQUEST,

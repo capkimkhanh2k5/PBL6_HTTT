@@ -4,18 +4,27 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
+import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.danasea.backend.modules.order.application.dtos.CreateOrderCommand;
 import com.danasea.backend.modules.order.application.dtos.MasterOrderDetailResult;
 import com.danasea.backend.modules.order.domain.exceptions.BookingNotEligibleForOrderException;
+import com.danasea.backend.modules.order.domain.exceptions.InvalidDiscountException;
 import com.danasea.backend.modules.order.domain.exceptions.InvalidOrderStateException;
 import com.danasea.backend.modules.order.domain.exceptions.OrderNotFoundException;
 import com.danasea.backend.modules.order.domain.exceptions.UnauthorizedOrderAccessException;
+import com.danasea.backend.modules.order.domain.models.DiscountCode;
 import com.danasea.backend.modules.order.domain.models.MasterOrder;
 import com.danasea.backend.modules.order.domain.models.SubOrder;
 import com.danasea.backend.modules.order.domain.models.SubOrderStatus;
@@ -26,6 +35,15 @@ import com.danasea.backend.modules.order.domain.ports.CommissionPolicyPort;
 import com.danasea.backend.modules.order.domain.ports.MasterOrderRepositoryPort;
 import com.danasea.backend.modules.order.domain.ports.OrderEventPublisherPort;
 import com.danasea.backend.modules.order.domain.ports.SubOrderRepositoryPort;
+import com.danasea.backend.modules.order.domain.services.DiscountAllocationEngine.AllocationResult;
+import com.danasea.backend.modules.order.domain.services.DiscountAllocationEngine.CandidateItem;
+import com.danasea.backend.modules.order.domain.services.DiscountAllocationEngine.ItemAllocation;
+import com.danasea.backend.modules.order.domain.services.DiscountAllocationEngine;
+import com.danasea.backend.modules.order.infrastructure.persistence.entities.DiscountCodeJpaEntity;
+import com.danasea.backend.modules.order.infrastructure.persistence.entities.DiscountRedemptionJpaEntity;
+import com.danasea.backend.modules.order.infrastructure.persistence.mappers.DiscountCodeMapper;
+import com.danasea.backend.modules.order.infrastructure.persistence.repositories.JpaDiscountCodeRepository;
+import com.danasea.backend.modules.order.infrastructure.persistence.repositories.JpaDiscountRedemptionRepository;
 
 @Service
 public class CreateOrderUseCase {
@@ -36,6 +54,34 @@ public class CreateOrderUseCase {
     private final BookingStatusUpdatePort bookingStatusUpdatePort;
     private final CommissionPolicyPort commissionPolicyPort;
     private final OrderEventPublisherPort orderEventPublisherPort;
+    private final JpaDiscountCodeRepository discountCodeRepository;
+    private final JpaDiscountRedemptionRepository discountRedemptionRepository;
+    private final DiscountAllocationEngine discountAllocationEngine;
+    private final DiscountCodeMapper discountCodeMapper;
+
+    @Autowired
+    public CreateOrderUseCase(
+            MasterOrderRepositoryPort masterOrderRepository,
+            SubOrderRepositoryPort subOrderRepository,
+            BookingLookupPort bookingLookupPort,
+            BookingStatusUpdatePort bookingStatusUpdatePort,
+            CommissionPolicyPort commissionPolicyPort,
+            OrderEventPublisherPort orderEventPublisherPort,
+            @Autowired(required = false) JpaDiscountCodeRepository discountCodeRepository,
+            @Autowired(required = false) JpaDiscountRedemptionRepository discountRedemptionRepository,
+            @Autowired(required = false) DiscountAllocationEngine discountAllocationEngine,
+            @Autowired(required = false) DiscountCodeMapper discountCodeMapper) {
+        this.masterOrderRepository = masterOrderRepository;
+        this.subOrderRepository = subOrderRepository;
+        this.bookingLookupPort = bookingLookupPort;
+        this.bookingStatusUpdatePort = bookingStatusUpdatePort;
+        this.commissionPolicyPort = commissionPolicyPort;
+        this.orderEventPublisherPort = orderEventPublisherPort;
+        this.discountCodeRepository = discountCodeRepository;
+        this.discountRedemptionRepository = discountRedemptionRepository;
+        this.discountAllocationEngine = discountAllocationEngine;
+        this.discountCodeMapper = discountCodeMapper;
+    }
 
     public CreateOrderUseCase(
             MasterOrderRepositoryPort masterOrderRepository,
@@ -44,12 +90,8 @@ public class CreateOrderUseCase {
             BookingStatusUpdatePort bookingStatusUpdatePort,
             CommissionPolicyPort commissionPolicyPort,
             OrderEventPublisherPort orderEventPublisherPort) {
-        this.masterOrderRepository = masterOrderRepository;
-        this.subOrderRepository = subOrderRepository;
-        this.bookingLookupPort = bookingLookupPort;
-        this.bookingStatusUpdatePort = bookingStatusUpdatePort;
-        this.commissionPolicyPort = commissionPolicyPort;
-        this.orderEventPublisherPort = orderEventPublisherPort;
+        this(masterOrderRepository, subOrderRepository, bookingLookupPort, bookingStatusUpdatePort,
+                commissionPolicyPort, orderEventPublisherPort, null, null, null, null);
     }
 
     @Transactional
@@ -88,8 +130,19 @@ public class CreateOrderUseCase {
         }
 
         // 3. Tra cứu thông tin Booking qua Port
-        BookingOrderView booking = bookingLookupPort.findBookingForOrder(command.bookingId())
+        BookingOrderView booking = bookingLookupPort.findBookingForOrderForUpdate(command.bookingId())
                 .orElseThrow(() -> new OrderNotFoundException("Booking not found with id: " + command.bookingId()));
+
+        // Another request may have created the order while this request waited for the booking lock.
+        Optional<MasterOrder> concurrentOrder = masterOrderRepository.findByBookingId(command.bookingId());
+        if (concurrentOrder.isPresent()) {
+            MasterOrder existing = concurrentOrder.get();
+            if (!existing.getCustomerId().equals(command.customerId())) {
+                throw new UnauthorizedOrderAccessException(command.bookingId(), command.customerId());
+            }
+            existing.setSubOrders(subOrderRepository.findByMasterOrderId(existing.getId()));
+            return MasterOrderDetailResult.fromDomain(existing);
+        }
 
         // 4. Kiểm tra quyền sở hữu (chặn IDOR 403)
         if (!booking.customerId().equals(command.customerId())) {
@@ -114,26 +167,91 @@ public class CreateOrderUseCase {
             throw new BookingNotEligibleForOrderException(command.bookingId(), "Booking contains no items.");
         }
 
-        // 8. Khởi tạo MasterOrder
+        // 8. Đánh giá Voucher / Discount Code (nếu có yêu cầu áp dụng)
+        DiscountCodeJpaEntity appliedCodeEntity = null;
+        AllocationResult allocationResult = null;
+
+        if (command.discountCode() != null && !command.discountCode().isBlank()) {
+            if (discountCodeRepository == null || discountAllocationEngine == null || discountCodeMapper == null) {
+                throw new InvalidOrderStateException("Discount processing is not configured.");
+            }
+
+            String cleanCode = command.discountCode().trim().toUpperCase(Locale.ROOT);
+            appliedCodeEntity = discountCodeRepository.findByCodeForUpdate(cleanCode)
+                    .orElseThrow(() -> new InvalidDiscountException("DISCOUNT_NOT_FOUND", "Discount code was not found."));
+
+            DiscountCode discountCode = discountCodeMapper.toDomain(appliedCodeEntity);
+
+            long userUsageCount = 0;
+            if (discountRedemptionRepository != null) {
+                userUsageCount = discountRedemptionRepository.countByDiscountCodeIdAndCustomerId(appliedCodeEntity.getId(), command.customerId());
+            }
+
+            List<CandidateItem> candidateItems = new ArrayList<>();
+            for (BookingOrderView.BookingItemOrderView item : booking.items()) {
+                BigDecimal rate = commissionPolicyPort != null ? commissionPolicyPort.getCommissionRate(item.vendorId()) : null;
+                if (rate == null) {
+                    rate = CommissionPolicyPort.DEFAULT_COMMISSION_RATE;
+                }
+                BigDecimal subtotal = item.price().multiply(BigDecimal.valueOf(item.quantity()));
+                candidateItems.add(new CandidateItem(
+                        item.bookingItemId(),
+                        item.vendorId(),
+                        item.serviceId(),
+                        subtotal,
+                        rate
+                ));
+            }
+
+            allocationResult = discountAllocationEngine.evaluateAndAllocate(
+                    discountCode,
+                    candidateItems,
+                    now,
+                    userUsageCount
+            );
+
+            if (!allocationResult.valid()) {
+                throw new InvalidDiscountException(allocationResult.errorCode(), allocationResult.message());
+            }
+
+            if (allocationResult.finalPayableAmount().signum() <= 0) {
+                throw new InvalidDiscountException("DISCOUNT_ZERO_PAYABLE_UNSUPPORTED",
+                        "Discount must leave a positive payable amount.");
+            }
+
+            // The voucher lock serializes global and per-customer reservations.
+            int updated = discountCodeRepository.incrementUsedCount(appliedCodeEntity.getId());
+            if (updated == 0) {
+                throw new InvalidDiscountException("DISCOUNT_QUOTA_EXCEEDED", "Discount code usage quota is exhausted.");
+            }
+        }
+
+        // 9. Khởi tạo MasterOrder
         MasterOrder order = MasterOrder.createFromBooking(
                 command.customerId(),
                 command.bookingId(),
-                booking.totalAmount(),
+                allocationResult != null ? allocationResult.finalPayableAmount() : booking.totalAmount(),
                 booking.holdExpiresAt(),
                 command.idempotencyKey()
         );
+        if (allocationResult != null && appliedCodeEntity != null) {
+            order.setDiscountCodeId(appliedCodeEntity.getId());
+            order.setDiscountAmount(allocationResult.totalDiscountAmount());
+        }
         order = masterOrderRepository.save(order);
 
-        // 9. Tách Sub-Orders theo quy tắc 1 SubOrder tương ứng với 1 BookingItem
+        // 10. Tách Sub-Orders theo quy tắc 1 SubOrder tương ứng với 1 BookingItem và phân bổ discount
+        Map<UUID, ItemAllocation> allocMap = allocationResult != null
+                ? allocationResult.itemAllocations().stream().collect(Collectors.toMap(ItemAllocation::itemId, Function.identity()))
+                : Collections.emptyMap();
+
         List<SubOrder> subOrders = new ArrayList<>();
         for (BookingOrderView.BookingItemOrderView item : booking.items()) {
-            BigDecimal rate = commissionPolicyPort.getCommissionRate(item.vendorId());
+            BigDecimal rate = commissionPolicyPort != null ? commissionPolicyPort.getCommissionRate(item.vendorId()) : null;
             if (rate == null) {
                 rate = CommissionPolicyPort.DEFAULT_COMMISSION_RATE;
             }
             BigDecimal subtotal = item.price().multiply(BigDecimal.valueOf(item.quantity()));
-            BigDecimal commission = subtotal.multiply(rate).setScale(2, RoundingMode.HALF_UP);
-            BigDecimal vendorPayout = subtotal.subtract(commission);
 
             SubOrder subOrder = new SubOrder();
             subOrder.setBookingItemId(item.bookingItemId());
@@ -145,8 +263,23 @@ public class CreateOrderUseCase {
             subOrder.setUnitPrice(item.price());
             subOrder.setSubtotalAmount(subtotal);
             subOrder.setCommissionRate(rate);
-            subOrder.setCommissionAmount(commission);
-            subOrder.setVendorPayoutAmount(vendorPayout);
+
+            ItemAllocation alloc = allocMap.get(item.bookingItemId());
+            if (alloc != null && alloc.eligible()) {
+                subOrder.applyDiscount(alloc.vendorDiscountAmount(), alloc.platformDiscountAmount());
+            } else {
+                BigDecimal commission = subtotal.multiply(rate).setScale(2, RoundingMode.HALF_UP);
+                BigDecimal vendorPayout = subtotal.subtract(commission);
+
+                subOrder.setCommissionBasisAmount(subtotal);
+                subOrder.setCommissionAmount(commission);
+                subOrder.setVendorPayoutAmount(vendorPayout);
+                subOrder.setDiscountAmount(BigDecimal.ZERO);
+                subOrder.setVendorDiscountAmount(BigDecimal.ZERO);
+                subOrder.setPlatformDiscountAmount(BigDecimal.ZERO);
+                subOrder.setFinalAmount(subtotal);
+            }
+
             subOrder.setStatus(SubOrderStatus.PENDING);
             subOrder.setWaiverAccepted(false);
             subOrders.add(subOrder);
@@ -154,10 +287,21 @@ public class CreateOrderUseCase {
         subOrders = subOrderRepository.saveAll(subOrders);
         order.setSubOrders(subOrders);
 
-        // 10. Chuyển trạng thái Booking sang PENDING_PAYMENT (trong cùng Transaction)
+        // 11. Ghi nhận Discount Redemption
+        if (allocationResult != null && appliedCodeEntity != null && discountRedemptionRepository != null) {
+            DiscountRedemptionJpaEntity redemption = new DiscountRedemptionJpaEntity();
+            redemption.setId(UUID.randomUUID());
+            redemption.setDiscountCodeId(appliedCodeEntity.getId());
+            redemption.setMasterOrderId(order.getId());
+            redemption.setCustomerId(command.customerId());
+            redemption.setAmountDeducted(allocationResult.totalDiscountAmount());
+            discountRedemptionRepository.save(redemption);
+        }
+
+        // 12. Chuyển trạng thái Booking sang PENDING_PAYMENT (trong cùng Transaction)
         bookingStatusUpdatePort.updateStatusToPendingPayment(command.bookingId());
 
-        // 11. Bắn sự kiện Order Created
+        // 13. Bắn sự kiện Order Created
         orderEventPublisherPort.publishOrderCreatedEvent(order);
 
         return MasterOrderDetailResult.fromDomain(order);

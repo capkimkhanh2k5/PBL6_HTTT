@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import com.danasea.backend.modules.order.domain.exceptions.BookingNotEligibleForOrderException;
+import com.danasea.backend.modules.order.domain.exceptions.InvalidDiscountException;
 import com.danasea.backend.modules.order.domain.exceptions.InvalidOrderStateException;
 import com.danasea.backend.modules.order.domain.exceptions.InvalidWebhookException;
 import com.danasea.backend.modules.order.domain.exceptions.OrderNotFoundException;
@@ -72,5 +73,12 @@ public class OrderExceptionHandler extends LocalizedExceptionHandlerSupport {
     public ResponseEntity<ErrorResponse> handleInvalidWebhook(InvalidWebhookException ex) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                 .body(error("INVALID_WEBHOOK"));
+    }
+
+    @ExceptionHandler(InvalidDiscountException.class)
+    public ResponseEntity<ErrorResponse> handleInvalidDiscount(InvalidDiscountException ex) {
+        String code = ex.getErrorCode() != null ? ex.getErrorCode() : "INVALID_DISCOUNT";
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(error(code));
     }
 }

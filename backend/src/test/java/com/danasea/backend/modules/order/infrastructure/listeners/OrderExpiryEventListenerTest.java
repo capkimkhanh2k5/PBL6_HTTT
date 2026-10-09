@@ -1,5 +1,12 @@
 package com.danasea.backend.modules.order.infrastructure.listeners;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 import java.util.List;
@@ -22,12 +29,9 @@ import com.danasea.backend.modules.order.domain.models.SubOrderStatus;
 import com.danasea.backend.modules.order.domain.ports.MasterOrderRepositoryPort;
 import com.danasea.backend.modules.order.domain.ports.OrderEventPublisherPort;
 import com.danasea.backend.modules.order.domain.ports.SubOrderRepositoryPort;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import com.danasea.backend.modules.order.infrastructure.persistence.entities.DiscountCodeJpaEntity;
+import com.danasea.backend.modules.order.infrastructure.persistence.repositories.JpaDiscountCodeRepository;
+import com.danasea.backend.modules.order.infrastructure.persistence.repositories.JpaDiscountRedemptionRepository;
 
 @ExtendWith(MockitoExtension.class)
 class OrderExpiryEventListenerTest {
@@ -66,7 +70,7 @@ class OrderExpiryEventListenerTest {
         subOrder.setStatus(SubOrderStatus.PENDING);
         subOrder.setSubtotalAmount(new BigDecimal("100000"));
 
-        when(masterOrderRepository.findByBookingId(bookingId)).thenReturn(Optional.of(order));
+        when(masterOrderRepository.findByBookingIdForUpdate(bookingId)).thenReturn(Optional.of(order));
         when(subOrderRepository.findByMasterOrderId(orderId)).thenReturn(List.of(subOrder));
 
         BookingHoldExpiredEvent event = new BookingHoldExpiredEvent(bookingId, OffsetDateTime.now());
@@ -92,7 +96,7 @@ class OrderExpiryEventListenerTest {
         order.setCustomerId(UUID.randomUUID());
         order.setStatus(MasterOrderStatus.PAID);
 
-        when(masterOrderRepository.findByBookingId(bookingId)).thenReturn(Optional.of(order));
+        when(masterOrderRepository.findByBookingIdForUpdate(bookingId)).thenReturn(Optional.of(order));
 
         BookingHoldExpiredEvent event = new BookingHoldExpiredEvent(bookingId, OffsetDateTime.now());
         listener.handleBookingHoldExpired(event);
@@ -107,7 +111,7 @@ class OrderExpiryEventListenerTest {
     @DisplayName("When order is not found for bookingId, does nothing")
     void handleBookingHoldExpired_WhenOrderNotFound_ShouldDoNothing() {
         UUID bookingId = UUID.randomUUID();
-        when(masterOrderRepository.findByBookingId(bookingId)).thenReturn(Optional.empty());
+        when(masterOrderRepository.findByBookingIdForUpdate(bookingId)).thenReturn(Optional.empty());
 
         BookingHoldExpiredEvent event = new BookingHoldExpiredEvent(bookingId, OffsetDateTime.now());
         listener.handleBookingHoldExpired(event);
@@ -115,5 +119,41 @@ class OrderExpiryEventListenerTest {
         verify(masterOrderRepository, never()).save(any());
         verify(subOrderRepository, never()).saveAll(any());
         verify(orderEventPublisher, never()).publishOrderCancelledEvent(any());
+    }
+
+    @Test
+    @DisplayName("When order has discount code, cancelling due to expiry decrements quota and deletes redemption")
+    void handleBookingHoldExpired_WhenDiscountApplied_ShouldRevertQuotaAndRedemption() {
+        UUID bookingId = UUID.randomUUID();
+        UUID orderId = UUID.randomUUID();
+        UUID discountCodeId = UUID.randomUUID();
+
+        MasterOrder order = new MasterOrder();
+        order.setId(orderId);
+        order.setBookingId(bookingId);
+        order.setCustomerId(UUID.randomUUID());
+        order.setStatus(MasterOrderStatus.PENDING_PAYMENT);
+        order.setDiscountCodeId(discountCodeId);
+
+        JpaDiscountCodeRepository discountCodeRepo =
+                mock(JpaDiscountCodeRepository.class);
+        JpaDiscountRedemptionRepository redemptionRepo =
+                mock(JpaDiscountRedemptionRepository.class);
+
+        OrderExpiryEventListener listenerWithDiscount = new OrderExpiryEventListener(
+                masterOrderRepository, subOrderRepository, orderEventPublisher, discountCodeRepo, redemptionRepo
+        );
+
+        when(masterOrderRepository.findByBookingIdForUpdate(bookingId)).thenReturn(Optional.of(order));
+        when(subOrderRepository.findByMasterOrderId(orderId)).thenReturn(List.of());
+
+        when(discountCodeRepo.findByIdForUpdate(discountCodeId)).thenReturn(Optional.of(
+                new DiscountCodeJpaEntity()));
+        when(redemptionRepo.releaseReservation(orderId, discountCodeId)).thenReturn(1);
+        BookingHoldExpiredEvent event = new BookingHoldExpiredEvent(bookingId, OffsetDateTime.now());
+        listenerWithDiscount.handleBookingHoldExpired(event);
+
+        verify(discountCodeRepo).decrementUsedCount(discountCodeId);
+        verify(redemptionRepo).releaseReservation(orderId, discountCodeId);
     }
 }

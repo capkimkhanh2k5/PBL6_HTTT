@@ -25,6 +25,10 @@ public interface JpaMasterOrderRepository extends JpaRepository<MasterOrderJpaEn
 
     Optional<MasterOrderJpaEntity> findByBookingId(UUID bookingId);
 
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("SELECT o FROM MasterOrderJpaEntity o WHERE o.bookingId = :bookingId")
+    Optional<MasterOrderJpaEntity> findByBookingIdForUpdate(@Param("bookingId") UUID bookingId);
+
     Optional<MasterOrderJpaEntity> findByCustomerIdAndIdempotencyKey(UUID customerId, String idempotencyKey);
 
     Page<MasterOrderJpaEntity> findByCustomerId(UUID customerId, Pageable pageable);

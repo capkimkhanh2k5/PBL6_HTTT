@@ -9,4 +9,6 @@ import java.util.UUID;
 public interface BookingLookupPort {
 
     Optional<BookingOrderView> findBookingForOrder(UUID bookingId);
+
+    Optional<BookingOrderView> findBookingForOrderForUpdate(UUID bookingId);
 }

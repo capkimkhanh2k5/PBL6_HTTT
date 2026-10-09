@@ -17,6 +17,10 @@ public record SubOrderDetailResult(
         Integer quantity,
         BigDecimal unitPrice,
         BigDecimal subtotalAmount,
+        BigDecimal discountAmount,
+        BigDecimal vendorDiscountAmount,
+        BigDecimal platformDiscountAmount,
+        BigDecimal finalAmount,
         BigDecimal commissionRate,
         BigDecimal commissionAmount,
         BigDecimal vendorPayoutAmount,
@@ -25,6 +29,29 @@ public record SubOrderDetailResult(
         OffsetDateTime vendorNotifiedAt,
         OffsetDateTime createdAt
 ) {
+    public SubOrderDetailResult(
+            UUID id,
+            UUID bookingItemId,
+            UUID masterOrderId,
+            UUID vendorId,
+            UUID serviceId,
+            UUID slotId,
+            Integer quantity,
+            BigDecimal unitPrice,
+            BigDecimal subtotalAmount,
+            BigDecimal commissionRate,
+            BigDecimal commissionAmount,
+            BigDecimal vendorPayoutAmount,
+            SubOrderStatus status,
+            Boolean waiverAccepted,
+            OffsetDateTime vendorNotifiedAt,
+            OffsetDateTime createdAt
+    ) {
+        this(id, bookingItemId, masterOrderId, vendorId, serviceId, slotId, quantity, unitPrice, subtotalAmount,
+                BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO, subtotalAmount,
+                commissionRate, commissionAmount, vendorPayoutAmount, status, waiverAccepted, vendorNotifiedAt, createdAt);
+    }
+
     public static SubOrderDetailResult fromDomain(SubOrder subOrder) {
         if (subOrder == null) {
             return null;
@@ -39,6 +66,10 @@ public record SubOrderDetailResult(
                 subOrder.getQuantity(),
                 subOrder.getUnitPrice(),
                 subOrder.getSubtotalAmount(),
+                subOrder.getDiscountAmount() != null ? subOrder.getDiscountAmount() : BigDecimal.ZERO,
+                subOrder.getVendorDiscountAmount() != null ? subOrder.getVendorDiscountAmount() : BigDecimal.ZERO,
+                subOrder.getPlatformDiscountAmount() != null ? subOrder.getPlatformDiscountAmount() : BigDecimal.ZERO,
+                subOrder.getFinalAmount(),
                 subOrder.getCommissionRate(),
                 subOrder.getCommissionAmount(),
                 subOrder.getVendorPayoutAmount(),

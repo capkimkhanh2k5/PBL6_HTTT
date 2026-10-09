@@ -22,10 +22,13 @@
 5. Lọc những đơn có ngày trải nghiệm thực tế (`slot.date`) nằm trong khoảng thời gian `[periodStart, periodEnd]`.
 6. Batch query danh sách các khoản hoàn tiền thành công (chỉ lấy trạng thái `PROCESSED`) và các khiếu nại chưa đóng (`OPEN`, `UNDER_REVIEW`).
 7. **Động cơ tính toán đối soát (`SettlementCalculationEngine`):**
-   - Với mỗi SubOrder, tính toán:
-     - `grossAmount = subtotal - refundAmount`
-     - `commissionAmount = grossAmount * commissionRate` (tỷ lệ hoa hồng nền tảng)
-     - `netAmount = grossAmount - commissionAmount` (số tiền thực nhận của Vendor)
+   - Với mỗi SubOrder, trích xuất `effectiveCommissionBasis` (`commissionBasisAmount` đã lưu cố định khi tạo đơn, hoặc `subtotal - vendorDiscountAmount`):
+     - **Voucher Vendor tài trợ (`sponsor_type = VENDOR`):** Vendor chịu chi phí khuyến mãi -> `basis = subtotal - vendorDiscount`, hoa hồng tính trên basis này, payout thực nhận của Vendor giảm tương ứng.
+     - **Voucher Sàn tài trợ (`sponsor_type = PLATFORM`):** Sàn trợ giá kích cầu -> `basis = subtotal` (giá niêm yết gốc), hoa hồng tính trên giá gốc, Vendor nhận đủ 100% payout gốc (`subtotal - commission`), Sàn bù lỗ chi phí voucher từ phần hoa hồng sàn thu được (Xem chi tiết tại [Module Discount](../Discount/docs.md)).
+   - **Xử lý hoàn tiền:**
+     - **Hoàn tiền 100% (`REFUNDED`):** `grossAmount = 0`, `commissionAmount = 0`, `netAmount = 0`, `refundAmount = customerPaid`.
+     - **Hoàn tiền một phần (`PARTIALLY_REFUNDED`):** Đảo ngược trợ giá của sàn theo tỷ lệ tiền khách thực nhận: `reversedBasis = basis * refund / customerPaid`, `grossAmount = basis - reversedBasis`, `commissionAmount = grossAmount * rate`, `netAmount = grossAmount - commissionAmount`.
+     - **Đơn hoàn tất bình thường:** `grossAmount = basis`, `commissionAmount = basis * rate`, `netAmount = basis - commissionAmount`.
    - **Cơ chế phòng vệ tài chính:** Nếu SubOrder có khiếu nại đang mở, dòng đối soát sẽ được đánh dấu trạng thái **`EXCLUDED`** (kèm lý do `ACTIVE_DISPUTE`) và không được cộng dồn vào tổng tiền quyết toán của kỳ này.
 8. Lưu trữ bảng quyết toán chính `SettlementJpaEntity` ở trạng thái `DRAFT` cùng các dòng chi tiết `SettlementLineItemJpaEntity`.
 9. Phản hồi kết quả bảng quyết toán nháp cho Admin kiểm tra.

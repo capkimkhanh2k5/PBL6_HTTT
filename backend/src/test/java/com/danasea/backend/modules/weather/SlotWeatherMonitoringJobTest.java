@@ -493,6 +493,7 @@ class SlotWeatherMonitoringJobTest {
             subOrder.setMasterOrderId(masterOrderId);
             subOrder.setStatus(SubOrderStatus.CONFIRMED);
             subOrder.setSubtotalAmount(BigDecimal.valueOf(1500000));
+            subOrder.setFinalAmount(BigDecimal.valueOf(1200000));
 
             when(subOrderRepository.findBySlotId(slotId)).thenReturn(List.of(subOrder));
 
@@ -514,7 +515,7 @@ class SlotWeatherMonitoringJobTest {
             ArgumentCaptor<RefundJpaEntity> refundCaptor = ArgumentCaptor.forClass(RefundJpaEntity.class);
             verify(refundRepository, times(1)).save(refundCaptor.capture());
             RefundJpaEntity refund = refundCaptor.getValue();
-            assertEquals(BigDecimal.valueOf(1500000), refund.getAmount());
+            assertEquals(BigDecimal.valueOf(1200000), refund.getAmount());
             assertEquals(BigDecimal.valueOf(100.0), refund.getRefundPercentage());
             assertEquals(RefundReason.WEATHER, refund.getReason());
             assertEquals(RefundStatus.PENDING, refund.getStatus());

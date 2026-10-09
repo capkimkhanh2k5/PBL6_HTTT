@@ -347,17 +347,17 @@ public class OrderPaymentService {
         var existingRefund = refundRepository.findBySubOrderIdAndIdempotencyKey(
                 subOrder.getId(), idempotencyKey);
         RefundJpaEntity refundToProcess = null;
-        if (existingRefund.isEmpty()) {
+        if (existingRefund.isEmpty() && subOrder.getFinalAmount().signum() > 0) {
             RefundJpaEntity refund = new RefundJpaEntity();
             refund.setSubOrderId(subOrder.getId());
-            refund.setAmount(subOrder.getSubtotalAmount());
+            refund.setAmount(subOrder.getFinalAmount());
             refund.setRefundPercentage(BigDecimal.valueOf(100));
             refund.setReason(RefundReason.VENDOR_FAULT);
             refund.setStatus(RefundStatus.PENDING);
             refund.setRequestedBy(userId);
             refund.setIdempotencyKey(idempotencyKey);
             refundToProcess = refundRepository.save(refund);
-        } else {
+        } else if (existingRefund.isPresent()) {
             refundToProcess = existingRefund.get();
         }
 
@@ -815,7 +815,7 @@ public class OrderPaymentService {
                     .map(slot -> LocalDateTime.of(slot.getDate(), slot.getStartTime()))
                     .orElse(null);
             RefundEvaluationResult evaluation = refundPolicyEngine.evaluate(
-                    reason, departure, LocalDateTime.now(), subOrder.getSubtotalAmount());
+                    reason, departure, LocalDateTime.now(), subOrder.getFinalAmount());
             if (evaluation.refundAmount().compareTo(BigDecimal.ZERO) <= 0) {
                 throw new InvalidOrderStateException("The cancellation policy does not allow a refund for sub-order "
                         + subOrder.getId() + ".");

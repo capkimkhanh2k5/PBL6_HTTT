@@ -35,8 +35,9 @@
      - `commissionAmount = subtotal * commissionRate`
      - `payoutAmount = subtotal - commissionAmount`
 5. Lưu trữ `MasterOrder` (trạng thái `PENDING_PAYMENT`, `paymentStatus = UNPAID`) và lưu toàn bộ danh sách `SubOrder` (trạng thái `PENDING`).
-6. Cập nhật trạng thái Booking sang `PENDING_PAYMENT` và phát sự kiện `OrderCreatedEvent`.
-7. Phản hồi thông tin đơn hàng `201 Created` cho khách hàng.
+6. **Áp dụng Voucher & Phân bổ chiết khấu (Discount Enhancement):** Nếu đơn hàng có gửi kèm `discountCode`, hệ thống thực thi khóa bi quan (`findByCodeForUpdate`), kiểm tra quota toàn sàn và từng user, phân bổ chiết khấu theo giải thuật Hare-Niemeyer vào từng SubOrder (`finalAmount`, `commissionBasisAmount`), tăng `usedCount` nguyên tử và lưu `DiscountRedemption` (Xem chi tiết tại [Module Discount](../Discount/docs.md)).
+7. Cập nhật trạng thái Booking sang `PENDING_PAYMENT` và phát sự kiện `OrderCreatedEvent`.
+8. Phản hồi thông tin đơn hàng `201 Created` cho khách hàng.
 
 ---
 

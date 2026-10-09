@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.util.UUID;
 
 import com.danasea.backend.shared.core.domain.models.BaseDomainModel;
+
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -12,5 +13,6 @@ import lombok.EqualsAndHashCode;
 public class DiscountRedemption extends BaseDomainModel {
     private UUID discountCodeId;
     private UUID masterOrderId;
+    private UUID customerId;
     private BigDecimal amountDeducted;
 }
