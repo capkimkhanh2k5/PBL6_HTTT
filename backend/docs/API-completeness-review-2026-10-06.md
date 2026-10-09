@@ -14,7 +14,7 @@
 
 Các đường dẫn dưới đây là hợp đồng đề xuất, chưa tồn tại trừ khi ghi rõ mở rộng API có sẵn. Không cần tách endpoint riêng nếu có thể hoàn thiện hợp đồng hiện tại.
 
-### P1 Quản lý lịch và tồn chỗ -> Đang Xử Lý
+### P1 Quản lý lịch và tồn chỗ -> Đã Xử Lý
 
 Có model/repository slot và engine giữ chỗ, nhưng chưa có API vendor tạo/sửa/đóng/mở slot. `capacityPerSlot` trên service không thay thế lịch bán. Public detail hiện trả `availableSlots: List<String>` theo ngày/giờ, thiếu slotId mà `POST /bookings/hold` bắt buộc nhận; thiếu sức chứa, số chỗ trống và trạng thái cho khách lựa chọn.
 
@@ -26,7 +26,7 @@ Có model/repository slot và engine giữ chỗ, nhưng chưa có API vendor t�
 
 Không giảm capacity thấp hơn booked/held; không xóa slot có giao dịch; chặn thao tác vendor khác. Availability chỉ là dữ liệu tham khảo; hold vẫn phải kiểm tra nguyên tử. Cần test cạnh tranh slot cuối bằng Redis/DB thật.
 
-### P1 Thống kê và báo cáo -> Đang xử lý
+### P1 Thống kê và báo cáo -> Đã Xử Lý 
 
 > Cập nhật 09/10/2026: đã triển khai và sửa nghiệp vụ báo cáo trên `implement_admin_reports_dashboard`; xem [hợp đồng hiện tại](reports-dashboard-contract.md). Nội dung dưới đây là phát hiện tại thời điểm audit 06/10.
 
@@ -41,7 +41,7 @@ Yêu cầu học phần bắt buộc có báo cáo theo ngày, tuần, quý, nă
 
 Phân biệt giá trị bán, tiền thu, hoàn tiền, hoa hồng và số thực nhận; thống nhất trạng thái được tính, timezone và các ngày biên. Phần phân tích nên giúp chọn thời gian/dịch vụ/vendor cần cải thiện, không chỉ cộng tổng.
 
-### P1 Đánh giá và chất lượng dịch vụ — ĐÃ TRIỂN KHAI
+### P1 Đánh giá và chất lượng dịch vụ — Đã Xử Lý
 
 Cập nhật 08/10/2026 trên nhánh `implement_review_rating_system`:
 - `POST /api/sub-orders/{id}/reviews`: chỉ chủ đơn COMPLETED; unique constraint theo sub-order; ảnh tối đa 5 HTTP(S) URL, mỗi URL tối đa 2048 ký tự.
@@ -74,7 +74,7 @@ Vendor có thể nhập waiver content, sub-order có waiverAccepted/waiverAccep
 
 Mở rộng public detail trả nội dung điều kiện tham gia/waiver theo ngôn ngữ và version. Mở rộng request tạo order/checkout nhận xác nhận từng service rủi ro; lưu user, thời điểm, version/nội dung snapshot. Có thể dùng endpoint `POST /api/sub-orders/{id}/waiver-acceptance` nếu phù hợp thứ tự checkout. Không cần thêm cả hai cách.
 
-### P1 Quên mật khẩu — ĐÃ XỬ LÝ
+### P1 Quên mật khẩu — Đã Xử Lý
 
 Cập nhật 08/10/2026:
 - `POST /api/auth/forgot-password`: Nhận email, chống User Enumeration bằng phản hồi đồng nhất; tạo mã OTP 6 chữ số băm SHA-256 lưu trong `password_reset_tokens` (hết hạn sau 15 phút, vô hiệu hóa các mã cũ của user); phát sự kiện `PasswordResetRequestedEvent` qua RabbitMQ topic exchange `danasea.exchange.topic` tới queue `notification.password-reset-email.queue` để gửi email bất đồng bộ; áp dụng Rate Limit (5 requests/phút theo IP qua Bucket4j/Redis).
@@ -84,7 +84,7 @@ Cập nhật 08/10/2026:
 
 Bằng chứng: `security/authentication/presentation/AuthenticationController.java`, `ForgotPasswordUseCase.java`, `ResetPasswordUseCase.java`, `PasswordResetEmailConsumer.java`, `configs/RabbitMQConfig.java`.
 
-### P1 Quản trị giao dịch và theo dõi hoàn tiền [ĐÃ KIỂM CHỨNG BACKEND]
+### P1 Quản trị giao dịch và theo dõi hoàn tiền ->
 
 **Kiểm chứng 09/10/2026:** `./mvnw clean verify` → BUILD SUCCESS; 1.711 test cases, 1576 thực chạy, 135 skipped, 0 failures, 0 errors. Trong đó 29 ca `AdminTransactionIntegrationTest` trên PostgreSQL 16/Flyway/Redis 7 riêng và 57 ca tập trung reconciliation/adapter/job. Kiểm kê runtime: 126 method/path; migration mới V23 đã được kiểm tra trên DB mới và nâng từ V20. Gateway được mock; sandbox thật chưa được chạy trong lần này.
 
