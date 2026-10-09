@@ -84,6 +84,7 @@ public class BookingCancellationFinancialAdapter implements BookingCancellationF
             if (existing.isPresent()) {
                 refundTotal = refundTotal.add(existing.get().getAmount());
                 subOrder.setStatus(SubOrderStatus.CANCELLED);
+            subOrder.setCancellationReason(RefundReason.CUSTOMER_CANCEL);
                 continue;
             }
 
@@ -111,6 +112,7 @@ public class BookingCancellationFinancialAdapter implements BookingCancellationF
 
             }
             subOrder.setStatus(SubOrderStatus.CANCELLED);
+            subOrder.setCancellationReason(RefundReason.CUSTOMER_CANCEL);
         }
         subOrderRepository.saveAll(subOrders);
         order.setStatus(MasterOrderStatus.CANCELLED);
@@ -134,7 +136,10 @@ public class BookingCancellationFinancialAdapter implements BookingCancellationF
                 throw new InvalidOrderStateException("Only a pending-payment order can be cancelled without a refund.");
             }
             List<SubOrderJpaEntity> subOrders = subOrderRepository.findByMasterOrderId(order.getId());
-            subOrders.forEach(subOrder -> subOrder.setStatus(SubOrderStatus.CANCELLED));
+            subOrders.forEach(subOrder -> {
+                subOrder.setStatus(SubOrderStatus.CANCELLED);
+                subOrder.setCancellationReason(RefundReason.CUSTOMER_CANCEL);
+            });
             subOrderRepository.saveAll(subOrders);
             order.setStatus(MasterOrderStatus.CANCELLED);
             masterOrderRepository.save(order);

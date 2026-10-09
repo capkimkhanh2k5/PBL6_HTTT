@@ -1,6 +1,6 @@
 # DANASEA — Master API & Test Checklist (EPIC-01 → EPIC-08)
 
-**Cập nhật:** 09/10/2026 — nhánh `admin_transaction_refund_management`; bổ sung quản trị giao dịch, lịch sử payment/refund, đối soát có khóa/transaction, backoff và thông tin theo dõi hoàn tiền.
+**Cập nhật:** 09/10/2026 — nhánh `admin_transaction_refund_management`; bổ sung quản trị giao dịch, lịch sử payment/refund, đối soát có khóa/transaction, backoff và thông tin theo dõi hoàn tiền, đối chiếu controller trên nhánh `implement_admin_reports_dashboard`; bổ sung báo cáo, dashboard và kiểm chứng hồi quy tài chính, đối chiếu nhánh `implement_review_rating_system`; bổ sung API review/rating, kiểm duyệt và bảo vệ thao tác đồng thời,  nhánh `implement_password_reset_api`; bổ sung forgot/reset password, bảo vệ OTP dùng một lần và thu hồi phiên cũ.
 
 **Quy ước:** Với mục API, `[x]` nghĩa là endpoint đã có trong controller; không đồng nghĩa đã kiểm chứng toàn bộ nghiệp vụ hoặc tích hợp cổng thanh toán thật. Với mục Test, hạ tầng và quyết định nghiệp vụ, giữ trạng thái checklist đã ghi nhận; `[ ]` là việc còn thiếu/chưa xác nhận. Lần cập nhật này không đánh dấu các test chưa xác nhận thành đã pass.
 
@@ -75,7 +75,7 @@
 - [x] PATCH /api/admin/users/{id}/unlock
 - [x] GET /api/admin/audit-logs (danh sách có phân trang)
 - [x] GET /api/admin/audit-logs/{id} (chi tiết nhật ký)
-- [x] GET /api/admin/dashboard (hiện chỉ trả ADMIN_ACCESS_GRANTED; chưa có số liệu thống kê)
+- [x] GET /api/admin/dashboard (số liệu thật, bộ lọc ngày/vendor; giữ ADMIN_ACCESS_GRANTED)
 
 ### Admin quản lý tài khoản — Test
 - [x] LockUserUseCaseTest (thành công, không tồn tại, đã lock rồi, self-lock chặn)
@@ -83,6 +83,29 @@
 - [x] Test liên module: refresh token của user vừa bị lock thất bại NGAY (không đợi hết hạn)
 - [x] AdminUserControllerTest (list/filter, 404, role sai → 403)
 - [x] AuditLogServiceTest (ghi đúng field, không rollback hành động chính nếu audit lỗi)
+
+### Thống kê, dashboard và báo cáo — API
+- [x] GET /api/admin/reports/revenue?from=&to=&groupBy=&vendorId=
+- [x] GET /api/admin/reports/bookings?from=&to=&groupBy=&vendorId=
+- [x] GET /api/admin/reports/vendors?from=&to=&vendorId=
+- [x] GET /api/admin/reports/export?type=&from=&to=&groupBy=&vendorId= (CSV)
+- [x] GET /api/vendor/dashboard?from=&to=
+- [x] GET /api/vendor/reports/revenue?from=&to=&groupBy=
+- [x] GET /api/vendor/reports/bookings?from=&to=&groupBy=
+- [x] GET /api/vendor/reports/export?type=&from=&to=&groupBy= (CSV)
+
+### Thống kê, dashboard và báo cáo — Quy ước và kiểm chứng
+- Vendor được lấy từ tài khoản đăng nhập; `vendorId` từ client không thay đổi phạm vi vendor.
+- `groupBy=day|week|quarter|year`, mặc định `day`; khoảng ngày tối đa 3660 ngày, múi giờ `Asia/Ho_Chi_Minh`, cận cuối SQL là đầu ngày sau `to` và không bao gồm cận này.
+- Tiền thu ghi nhận theo `payments.paid_at`; payment đã chuyển `REFUNDED` vẫn giữ sự kiện thu gốc. Refund chỉ ghi nhận `PROCESSED` theo `processed_at`.
+- Hoa hồng hoàn toàn bộ về 0; hoàn một phần điều chỉnh theo tổng refund và tỷ lệ hoa hồng của đơn. Payout/hoa hồng kỳ có thể âm khi điều chỉnh giao dịch kỳ trước.
+- Booking là cohort đơn tạo trong khoảng ngày với trạng thái hiện tại; lý do hủy đếm từng sub-order một lần. `unknownCancellationCount` biểu thị dữ liệu không xác định lý do; compensation không tự coi là hủy đơn.
+- CSV UTF-8 BOM, escape RFC 4180 và trung hòa công thức trong tên vendor; số tiền âm vẫn là số.
+- Migration `V22__report_financial_events.sql`: `payments.paid_at`, `sub_orders.cancellation_reason`, index tài chính. Thời điểm thanh toán của dữ liệu cũ là ước lượng từ timestamp có sẵn; chưa thể coi là đối soát lịch sử chính xác với cổng.
+- [x] ReportFinancialIntegrationTest: PostgreSQL thật, refund qua kỳ, pending/failed, phân bổ tiền, ranh giới ngày, tính nhất quán dashboard/vendor, CSV và lý do hủy.
+- [x] ReportSecurityAdversarialIntegrationTest: phân quyền và vendor isolation qua Spring Security.
+- Kiểm chứng 09/10/2026 tại worktree này: `clean verify` BUILD SUCCESS, 1875 test, 0 failures/errors, 135 skipped; riêng report 288 test không có test bỏ qua. Chưa áp dụng migration lên database ứng dụng đang chạy.
+- Chi tiết hợp đồng và ví dụ: [reports-dashboard-contract.md](reports-dashboard-contract.md).
 
 ### User Module — API
 - [x] GET /api/users/me
@@ -418,6 +441,31 @@ Hai item phải nhận hai đơn vị khác nhau và tính giá hai gói. Nhóm 
 
 ## EPIC-07 · Operations / Settlement / Review
 
+### Review & Rating — API
+- [x] POST /api/sub-orders/{id}/reviews (chủ đơn COMPLETED; một review mỗi sub-order)
+- [x] PUT /api/sub-orders/{id}/reviews (sửa qua sub-order, trong 7 ngày)
+- [x] PUT /api/reviews/{id} (chỉ tác giả, trong 7 ngày)
+- [x] GET /api/services/{id}/reviews (công khai, phân trang, chỉ review visible; không trả metadata nội bộ)
+- [x] GET /api/vendor/reviews (chỉ review của vendor hiện tại)
+- [x] POST /api/vendor/reviews/{id}/reply (chỉ vendor sở hữu review)
+- [x] GET /api/admin/reviews (lọc service/vendor/flag/visibility, phân trang)
+- [x] PATCH /api/admin/reviews/{id}/visibility (chỉ ADMIN; ghi chú kiểm duyệt riêng)
+- [x] POST /api/reviews/{id}/flag (yêu cầu đăng nhập; review visible; response chỉ gồm id/isFlagged)
+
+### Review & Rating — Bảo đảm nghiệp vụ / Test
+- [x] Unique constraint `uq_reviews_sub_order` bảo vệ một review mỗi trải nghiệm; trùng trả 409.
+- [x] Khóa review khi sửa/reply/flag/ẩn/hiện; sửa qua sub-order tra cứu ID bằng scalar trước khi khóa.
+- [x] Khóa vendor trước tổng hợp điểm; tính điểm/count và badge chỉ từ review visible, trong cùng transaction.
+- [x] Tối đa 5 ảnh HTTP(S), mỗi URL tối đa 2048 ký tự; JSON lưu trong TEXT.
+- [x] Validation dùng khóa i18n Anh/Việt; flag không đọc được nội dung review bị ẩn.
+- [x] ReviewUseCaseTest, ReviewControllerTest, ReviewRatingIntegrationTest.
+- [x] ReviewConcurrencyIntegrationTest (PostgreSQL 16 thật: 11 ca unique, tổng điểm, cạnh tranh edit/reply/hide, alias, privacy, ảnh, ownership và badge).
+- [x] Migration `V21__review_enhancements.sql` thay V18 của nhánh review để tránh trùng số với nhánh slot; giữ V18/V19 cho slot và V20 cho password reset.
+
+**Kiểm chứng 08/10/2026:** `./mvnw clean verify` thành công; 1.621 test, 0 failure/error, 135 skipped theo cấu hình suite. Cả 11 test PostgreSQL thật chạy và pass; Flyway áp dụng V21 và Hibernate validate schema thành công.
+
+Chính sách hiện tại: khách sửa review trong 7 ngày; chưa cung cấp API xóa. Admin ẩn/hiện để kiểm duyệt; ẩn loại review khỏi điểm tổng hợp, hiện tính lại điểm.
+
 ### Khiếu nại — Tranh chấp
 - [x] POST /api/orders/{id}/disputes
 - [x] GET /api/admin/disputes
@@ -466,18 +514,9 @@ Hai item phải nhận hai đơn vị khác nhau và tính giá hai gói. Nhóm 
    - `GET/POST /api/vendor/services/{id}/slots`
    - `PATCH /api/vendor/services/{id}/slots/{slotId}`
 
-2. **Thống kê và báo cáo** Cần số liệu theo ngày, tuần, quý, năm và khoảng thời gian; dashboard hiện chưa trả số liệu.
-   - `GET /api/admin/reports/revenue`
-   - `GET /api/admin/reports/bookings`
-   - `GET /api/vendor/reports/revenue`
-   - API xuất CSV với bộ lọc thời gian.
+2. **Thống kê và báo cáo** Đã có API admin/vendor, dashboard thật, nhóm ngày/tuần/quý/năm và CSV trên nhánh `implement_admin_reports_dashboard`. Hợp đồng và giới hạn dữ liệu lịch sử được ghi tại mục Thống kê ở trên; nghiệm thu runtime theo kết quả kiểm chứng của worktree này.
 
-3. **Đánh giá sau trải nghiệm** Hiện có bảng/model nhưng chưa có API đánh giá.
-   - `POST /api/sub-orders/{id}/reviews`
-   - `GET /api/services/{id}/reviews`
-   - `POST /api/vendor/reviews/{id}/reply`
-
-   Chỉ khách đã hoàn thành trải nghiệm được đánh giá; điểm service/vendor phải cập nhật từ dữ liệu này.
+3. **Đánh giá sau trải nghiệm** Đã triển khai 9 endpoint và kiểm thử nghiệp vụ/đồng thời; xem checklist Review & Rating tại EPIC-07.
 
 4. **Chi trả vendor** `FINALIZED` hiện chưa chứng minh vendor đã nhận tiền.
    - `POST/GET /api/vendor/payout-requests`

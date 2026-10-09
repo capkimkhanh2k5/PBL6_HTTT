@@ -1,3 +1,4 @@
+import '../../../../core/models/danasea_models.dart';
 import 'package:mobile/core/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import '../../../../core/theme/app_colors.dart';
@@ -6,10 +7,14 @@ import '../../../../core/theme/app_typography.dart';
 
 class CategoryTabsWidget extends StatefulWidget {
   final ValueChanged<int>? onCategoryChanged;
+  final List<CategoryModel> categories;
+  final VoidCallback? onShowAll;
 
   const CategoryTabsWidget({
     super.key,
     this.onCategoryChanged,
+    this.categories = const [],
+    this.onShowAll,
   });
 
   @override
@@ -19,14 +24,6 @@ class CategoryTabsWidget extends StatefulWidget {
 class _CategoryTabsWidgetState extends State<CategoryTabsWidget> {
   int _selectedIndex = 0;
 
-  final List<Map<String, dynamic>> _categories = const [
-    {'name': 'Chèo SUP', 'icon': Icons.surfing},
-    {'name': 'Cano lướt sóng', 'icon': Icons.speed},
-    {'name': 'Lặn san hô', 'icon': Icons.scuba_diving},
-    {'name': 'Chèo kayak', 'icon': Icons.kayaking},
-    {'name': 'Tour biển đảo', 'icon': Icons.sailing},
-  ];
-
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -34,7 +31,9 @@ class _CategoryTabsWidgetState extends State<CategoryTabsWidget> {
       children: [
         // Section Title
         Padding(
-          padding: const EdgeInsets.symmetric(horizontal: AppShapes.gutterMobile),
+          padding: const EdgeInsets.symmetric(
+            horizontal: AppShapes.gutterMobile,
+          ),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -50,10 +49,13 @@ class _CategoryTabsWidgetState extends State<CategoryTabsWidget> {
               ),
               const SizedBox(width: 8),
               InkWell(
-                onTap: () {},
+                onTap: widget.onShowAll,
                 borderRadius: BorderRadius.circular(8),
                 child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 4,
+                    vertical: 2,
+                  ),
                   child: LocalizedText(
                     'Xem tất cả',
                     style: AppTypography.labelMd(
@@ -71,13 +73,15 @@ class _CategoryTabsWidgetState extends State<CategoryTabsWidget> {
         SizedBox(
           height: 44,
           child: ListView.separated(
-            padding: const EdgeInsets.symmetric(horizontal: AppShapes.gutterMobile),
+            padding: const EdgeInsets.symmetric(
+              horizontal: AppShapes.gutterMobile,
+            ),
             scrollDirection: Axis.horizontal,
-            itemCount: _categories.length,
+            itemCount: widget.categories.length,
             separatorBuilder: (context, index) => const SizedBox(width: 8),
             itemBuilder: (context, index) {
               final isSelected = _selectedIndex == index;
-              final item = _categories[index];
+              final item = widget.categories[index];
 
               return InkWell(
                 onTap: () {
@@ -87,7 +91,10 @@ class _CategoryTabsWidgetState extends State<CategoryTabsWidget> {
                 borderRadius: AppShapes.radiusFull,
                 child: AnimatedContainer(
                   duration: const Duration(milliseconds: 200),
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 8,
+                  ),
                   decoration: BoxDecoration(
                     color: isSelected
                         ? AppColors.secondary
@@ -96,7 +103,9 @@ class _CategoryTabsWidgetState extends State<CategoryTabsWidget> {
                     boxShadow: isSelected
                         ? [
                             BoxShadow(
-                              color: AppColors.secondary.withValues(alpha: 0.25),
+                              color: AppColors.secondary.withValues(
+                                alpha: 0.25,
+                              ),
                               blurRadius: 8,
                               offset: const Offset(0, 3),
                             ),
@@ -107,7 +116,7 @@ class _CategoryTabsWidgetState extends State<CategoryTabsWidget> {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Icon(
-                        item['icon'] as IconData,
+                        Icons.explore_outlined,
                         size: 18,
                         color: isSelected
                             ? AppColors.onSecondary
@@ -115,7 +124,10 @@ class _CategoryTabsWidgetState extends State<CategoryTabsWidget> {
                       ),
                       const SizedBox(width: 8),
                       LocalizedText(
-                        item['name'] as String,
+                        AppLanguage.instance.code == 'en' &&
+                                item.nameEn.isNotEmpty
+                            ? item.nameEn
+                            : item.name,
                         style: AppTypography.labelMd(
                           color: isSelected
                               ? AppColors.onSecondary

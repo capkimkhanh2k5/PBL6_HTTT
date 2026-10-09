@@ -28,6 +28,8 @@ Không giảm capacity thấp hơn booked/held; không xóa slot có giao dịch
 
 ### P1 Thống kê và báo cáo -> Đang xử lý
 
+> Cập nhật 09/10/2026: đã triển khai và sửa nghiệp vụ báo cáo trên `implement_admin_reports_dashboard`; xem [hợp đồng hiện tại](reports-dashboard-contract.md). Nội dung dưới đây là phát hiện tại thời điểm audit 06/10.
+
 Yêu cầu học phần bắt buộc có báo cáo theo ngày, tuần, quý, năm và khoảng từ ngày đến ngày. `/api/admin/dashboard` chỉ trả `ADMIN_ACCESS_GRANTED`. Listing settlement có bộ lọc ngày là chức năng đối soát, chưa thay thế báo cáo kinh doanh/phân tích.
 
 - Thay nội dung `GET /api/admin/dashboard` bằng số liệu thật.
@@ -39,16 +41,21 @@ Yêu cầu học phần bắt buộc có báo cáo theo ngày, tuần, quý, nă
 
 Phân biệt giá trị bán, tiền thu, hoàn tiền, hoa hồng và số thực nhận; thống nhất trạng thái được tính, timezone và các ngày biên. Phần phân tích nên giúp chọn thời gian/dịch vụ/vendor cần cải thiện, không chỉ cộng tổng.
 
-### P1 Đánh giá và chất lượng dịch vụ -> Đang xử lý
+### P1 Đánh giá và chất lượng dịch vụ — ĐÃ TRIỂN KHAI
 
-`Review`, JPA entity và repository đã có; chưa có usecase/controller ghi và đọc đánh giá. Trường averageRating/reviewCount trên catalog chưa chứng minh vòng đời đánh giá hoạt động.
+Cập nhật 08/10/2026 trên nhánh `implement_review_rating_system`:
+- `POST /api/sub-orders/{id}/reviews`: chỉ chủ đơn COMPLETED; unique constraint theo sub-order; ảnh tối đa 5 HTTP(S) URL, mỗi URL tối đa 2048 ký tự.
+- `PUT /api/sub-orders/{id}/reviews` và `PUT /api/reviews/{id}`: chỉ tác giả, sửa trong 7 ngày. Nhánh sub-order lấy scalar ID trước khi khóa để không lưu lại snapshot cũ.
+- `GET /api/services/{id}/reviews`: phân trang, chỉ review visible; không trả order/customer ID, flag reason hoặc moderation note.
+- `GET /api/vendor/reviews`, `POST /api/vendor/reviews/{id}/reply`: giới hạn theo vendor hiện tại.
+- `GET /api/admin/reviews`, `PATCH /api/admin/reviews/{id}/visibility`: chỉ ADMIN; lọc vendor/service/flag/visibility; ghi chú kiểm duyệt tách khỏi lý do báo cáo.
+- `POST /api/reviews/{id}/flag`: yêu cầu đăng nhập và review visible; trả xác nhận id/isFlagged, không trả nội dung review.
 
-- `POST /api/sub-orders/{id}/reviews`: chỉ chủ đơn đã hoàn thành; một đánh giá cho một trải nghiệm, hỗ trợ ảnh nếu giữ phạm vi đã đăng ký.
-- `GET /api/services/{id}/reviews` có phân trang.
-- `GET /api/vendor/reviews`, `POST /api/vendor/reviews/{id}/reply`.
-- `GET /api/admin/reviews`, `PATCH /api/admin/reviews/{id}/visibility`; báo cáo nội dung nếu cần.
+Các thao tác sửa/reply/flag/ẩn/hiện khóa review; tổng điểm được bảo vệ bằng khóa vendor, service. Tạo review giữ khóa vendor trước kiểm tra trùng và insert. Rating/count service/vendor và badge suy ra từ review visible được cập nhật trong cùng transaction. Hiện chưa có API xóa; admin ẩn/hiện và khách sửa theo chính sách trên.
 
-Cập nhật điểm service/vendor từ đánh giá hợp lệ; xử lý điểm khi ẩn đánh giá và khi người dùng sửa/xóa theo chính sách. Badge uy tín nên suy ra từ dữ liệu này.
+Migration `V21__review_enhancements.sql` bổ sung visibility/moderation, unique constraint, rating constraint và TEXT cho JSON ảnh. V18/V19 dành cho slot, V20 dành cho password reset; nhánh review không giữ migration V18 trùng số. Không tự xóa dữ liệu trùng khi áp dụng unique constraint.
+
+Bằng chứng kiểm thử: `ReviewUseCaseTest`, `ReviewControllerTest`, `ReviewRatingIntegrationTest` và `ReviewConcurrencyIntegrationTest` với PostgreSQL 16 thật (11 ca kiểm tra cạnh tranh, privacy, ảnh, ownership và badge). Validation dùng bundle Anh/Việt; inventory của nhánh là 124 endpoint.
 
 ### P1 Chi trả vendor và cấu hình hoa hồng
 
@@ -138,7 +145,7 @@ Conversation/Message của communication mới có persistence, chưa có API nh
 
 Đề tài nêu đình chỉ/tái xác minh vendor; admin vendor hiện chỉ list/detail/approve/reject. Khóa user đã có nhưng chưa thay thế rõ ràng trạng thái kinh doanh và việc ẩn dịch vụ khi đình chỉ. Có thể bổ sung suspend/reactivate/resubmit và vòng đời giấy tờ nếu giữ phạm vi này.
 
-Checklist `danasea-api-tracking.md` hiện ghi nhiều API weather/AI/check-in/dispute/settlement chưa xong dù code đã có; ngược lại thiếu module reviews/promotions/messaging/reporting/payout. Workflow refund mô tả persist/cancel/release slot nhưng đường HTTP hiện tại chưa làm các bước đó. Cần cập nhật cả hợp đồng API, workflow và tiêu chí nghiệm thu từ code cuối cùng.
+Checklist `danasea-api-tracking.md` hiện ghi nhiều API weather/AI/check-in/dispute/settlement chưa xong dù code đã có; ngược lại thiếu module promotions/messaging/reporting/payout. Workflow refund mô tả persist/cancel/release slot nhưng đường HTTP hiện tại chưa làm các bước đó. Cần cập nhật cả hợp đồng API, workflow và tiêu chí nghiệm thu từ code cuối cùng.
 
 Giỏ hàng không bắt buộc cần CRUD backend riêng: yêu cầu học phần cho phép có hoặc không tùy ứng dụng. Client cart cộng với hold nhiều item có thể đáp ứng MVP; chỉ cần API cart nếu muốn lưu bền vững/đồng bộ nhiều thiết bị. Ba cổng thanh toán cũng không cần hoàn thiện đồng thời nếu một cổng nội địa và một cổng quốc tế đáp ứng phạm vi đã chốt.
 
