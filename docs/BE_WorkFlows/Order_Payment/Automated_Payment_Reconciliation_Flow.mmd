@@ -1,0 +1,59 @@
+sequenceDiagram
+    autonumber
+    participant Job as PaymentReconciliationJob<br/>(@Scheduled every 60s)
+    participant OPS as OrderPaymentService
+    participant Port as PaymentGatewayPort<br/>(VNPay / PayPal Adapters)
+    participant Gateway as Cổng thanh toán bên ngoài<br/>(VNPay Sandbox / PayPal API v2)
+    participant Repo as DB Repositories<br/>(Payment / MasterOrder / SubOrder)
+    participant UseCase as ConfirmBookingUseCase
+    participant Audit as AuditLogInternalApi<br/>(Audit Module)
+
+    Job->>Repo: JpaPaymentRepository.findByStatusAndCreatedAtBeforeOrderByCreatedAtAsc(PENDING, now - 2m)
+    Repo-->>Job: List<PaymentJpaEntity> (Các thanh toán pending chưa nhận được webhook)
+
+    loop Xử lý từng giao dịch (Bọc try-catch độc lập)
+        Job->>OPS: reconcilePayment(paymentId)
+
+        alt Cổng là VNPay (provider == VNPAY)
+            OPS->>Port: queryPayment(VNPAY, providerOrderId, providerTransactionDate)
+            Note over Port: VNPayPaymentAdapter: Tạo request querydr,<br/>băm HMAC-SHA512(vnp_HashSecret)
+            Port->>Gateway: POST https://sandbox.vnpayment.vn/merchant_webapi/api/transaction (querydr)
+            Gateway-->>Port: JSON: vnp_ResponseCode, vnp_TransactionStatus, vnp_TransactionNo
+
+            alt Giao dịch Thành công (ResponseCode="00" & TransactionStatus="00")
+                Port-->>OPS: PaymentCaptureResult(success=true, status="COMPLETED", captureId=vnp_TransactionNo)
+                Note over OPS: ĐỒNG BỘ TRẠNG THÁI LIÊN HOÀN (FULL FULFILLMENT)
+                OPS->>Repo: Payment.setStatus(SUCCESS), setProviderTransactionId(captureId)
+                OPS->>Repo: MasterOrder.setStatus(PAID)
+                OPS->>Repo: SubOrders.setStatus(CONFIRMED)
+                OPS->>UseCase: execute(ConfirmBookingCommand(bookingId, customerId))
+                Note over UseCase: Chuyển Booking sang CONFIRMED
+                OPS->>Audit: recordAuditLog(null, "RECONCILE_PAYMENT_SUCCESS", "PAYMENT", paymentId, metadataJson)
+            else Giao dịch Thất bại tại ngân hàng / Khách hủy (TransactionStatus != "00")
+                Port-->>OPS: PaymentCaptureResult(success=false, status="FAILED", message="...")
+                OPS->>Repo: Payment.setStatus(FAILED), setLastError("VNPAY_STATUS_FAILED: ...")
+                OPS->>Audit: recordAuditLog(null, "RECONCILE_PAYMENT_FAILED", "PAYMENT", paymentId, metadataJson)
+            end
+
+        else Cổng là PayPal (provider == PAYPAL)
+            OPS->>Port: queryPayment(PAYPAL, providerOrderId, null)
+            Port->>Gateway: GET https://api-m.sandbox.paypal.com/v2/checkout/orders/{id}
+            Gateway-->>Port: PayPal Order Details: status ("COMPLETED" / "VOIDED")
+
+            alt PayPal đã COMPLETED
+                Port-->>OPS: PaymentCaptureResult(success=true, status="COMPLETED", captureId=...)
+                OPS->>Repo: Payment.setStatus(SUCCESS), MasterOrder.setStatus(PAID), SubOrders.setStatus(CONFIRMED)
+                OPS->>UseCase: execute(ConfirmBookingCommand)
+                OPS->>Audit: recordAuditLog(null, "RECONCILE_PAYMENT_SUCCESS", "PAYMENT", paymentId, metadataJson)
+            else PayPal bị hủy / VOIDED
+                Port-->>OPS: PaymentCaptureResult(success=false, status="VOIDED")
+                OPS->>Repo: Payment.setStatus(FAILED), setLastError("PAYPAL_ORDER_VOIDED")
+                OPS->>Audit: recordAuditLog(null, "RECONCILE_PAYMENT_FAILED", "PAYMENT", paymentId, metadataJson)
+            end
+
+        else Giao dịch PENDING đã quá hạn (expiresAt < now)
+            Note over OPS: Quá thời hạn giữ chỗ thanh toán
+            OPS->>Repo: Payment.setStatus(FAILED), setLastError("PAYMENT_EXPIRED_UNPAID")
+            OPS->>Audit: recordAuditLog(null, "RECONCILE_PAYMENT_EXPIRED", "PAYMENT", paymentId, metadataJson)
+        end
+    end

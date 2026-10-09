@@ -38,6 +38,10 @@ public interface PaymentGatewayPort {
         throw new UnsupportedOperationException("Capture lookup is not supported for provider: " + provider);
     }
 
+    default PaymentCaptureResult queryPayment(PaymentProvider provider, String providerOrderId, String transactionDate) {
+        return queryCapture(provider, providerOrderId);
+    }
+
     default RefundResult requestRefund(GatewayRefundRequest request) {
         throw new UnsupportedOperationException("Refund context is not supported for provider: " + request.provider());
     }

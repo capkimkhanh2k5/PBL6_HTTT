@@ -1,0 +1,38 @@
+sequenceDiagram
+    autonumber
+    actor Admin as Quản trị viên (Admin Portal)
+    participant AC as Admin Controllers<br/>(AdminOrder / AdminPayment / AdminRefund)
+    participant OPS as OrderPaymentService
+    participant Repo as JPA Repositories<br/>(MasterOrder / Payment / Refund / SubOrder)
+    participant DB as PostgreSQL Database
+
+    Note over Admin,DB: 1. TRA CỨU ĐƠN HÀNG TOÀN SÀN (GET /api/admin/orders)
+    Admin->>AC: GET /api/admin/orders?status=PENDING_PAYMENT&vendorId=...&page=0&size=20
+    AC->>OPS: getAdminOrders(status, paymentStatus, customerId, vendorId, from, to, pageable)
+    OPS->>Repo: JpaMasterOrderRepository.findByAdminFilters(status, paymentStatus, customerId, vendorId, from, to, pageable)
+    Repo->>DB: SELECT m.* FROM master_orders m WHERE ... AND EXISTS(SELECT 1 FROM sub_orders WHERE vendor_id = :vendorId) ORDER BY created_at DESC
+    DB-->>Repo: Page<MasterOrderJpaEntity>
+    OPS->>Repo: JpaSubOrderRepository.findByMasterOrderIdIn(orderIds)
+    Repo->>DB: SELECT * FROM sub_orders WHERE master_order_id IN (:orderIds)
+    DB-->>Repo: List<SubOrderJpaEntity>
+    Note over OPS: Gom nhóm vendorIds và tính totalItems theo từng orderId trên RAM (Tránh N+1)
+    OPS-->>AC: Page<AdminOrderSummaryResponse>
+    AC-->>Admin: HTTP 200 OK (Danh sách đơn hàng phân trang)
+
+    Note over Admin,DB: 2. TRA CỨU GIAO DỊCH THANH TOÁN (GET /api/admin/payments)
+    Admin->>AC: GET /api/admin/payments?status=SUCCESS&provider=VNPAY&vendorId=...
+    AC->>OPS: getAdminPayments(status, provider, orderId, customerId, vendorId, from, to, pageable)
+    OPS->>Repo: JpaPaymentRepository.findByAdvancedFilters(...)
+    Repo->>DB: SELECT p.* FROM payments p WHERE ... AND EXISTS(SELECT 1 FROM sub_orders WHERE vendor_id = :vendorId)
+    DB-->>Repo: Page<PaymentJpaEntity>
+    OPS-->>AC: Page<PaymentResponse>
+    AC-->>Admin: HTTP 200 OK (Danh sách thanh toán toàn sàn)
+
+    Note over Admin,DB: 3. TRA CỨU YÊU CẦU HOÀN TIỀN (GET /api/admin/refunds)
+    Admin->>AC: GET /api/admin/refunds?status=PROCESSED&reason=CUSTOMER_CANCEL&vendorId=...
+    AC->>OPS: getAdminRefunds(status, reason, subOrderId, provider, vendorId, customerId, orderId, from, to, pageable)
+    OPS->>Repo: JpaRefundRepository.findByAdvancedFilters(...)
+    Repo->>DB: SELECT r.* FROM refunds r WHERE ... AND EXISTS(SELECT 1 FROM sub_orders WHERE vendor_id = :vendorId)
+    DB-->>Repo: Page<RefundJpaEntity>
+    OPS-->>AC: Page<RefundDetailResponse>
+    AC-->>Admin: HTTP 200 OK (Danh sách hoàn tiền toàn sàn)
