@@ -1,0 +1,48 @@
+sequenceDiagram
+    autonumber
+    actor Client as Người Dùng (Admin / Vendor)
+    participant Sec as Spring Security (RBAC / Auth)
+    participant Ctrl as ReportController (Admin / Vendor)
+    participant TR as TimeRange (Domain Model)
+    participant UC as ReportUseCase (Revenue / Booking)
+    participant Port as ReportDataPort / JpaReportDataAdapter
+    participant DB as Database (PostgreSQL / H2)
+    participant Helper as TimeSeriesPeriodHelper (Application)
+
+    Note over Client, Ctrl: 1. Gửi yêu cầu báo cáo chuỗi thời gian (Time-series)
+    Client->>Sec: GET /api/{role}/reports/revenue (hoặc /bookings)<br/>?from=2026-09-01&to=2026-09-30&groupBy=day
+    Sec->>Sec: Xác thực JWT & Kiểm tra @PreAuthorize('ROLE_ADMIN' hoặc 'ROLE_VENDOR')
+    alt Nếu là Vendor
+        Sec->>Ctrl: Trích xuất an toàn vendorId từ SecurityContext + VendorInternalApi
+    else Nếu là Admin
+        Sec->>Ctrl: Cho phép truyền vendorId tùy chọn (hoặc null để xem toàn sàn)
+    end
+
+    Note over Ctrl, TR: 2. Chuẩn hóa khoảng thời gian & Múi giờ UTC+7
+    Ctrl->>TR: TimeRange.of(from, to)
+    TR->>TR: Validate: from <= to (nếu không -> ném 400 Bad Request)
+    TR->>TR: Chuyển đổi startDateTime = from 00:00:00+07:00 (Asia/Ho_Chi_Minh)
+    TR->>TR: Chuyển đổi endDateTime = to 23:59:59.999999+07:00 (Asia/Ho_Chi_Minh)
+
+    Note over Ctrl, UC: 3. Điều phối tính toán nghiệp vụ
+    Ctrl->>UC: execute(timeRange, period, vendorId)
+    UC->>Port: findSubOrders(timeRange, vendorId) / findPayments / findRefunds
+    Port->>DB: Truy vấn JPQL các đơn hàng, thanh toán và hoàn tiền trong kỳ
+    DB-->>Port: Trả về tập thực thể SubOrders, Payments, Refunds
+    Port-->>UC: Trả về danh sách Records bất biến
+
+    Note over UC, Helper: 4. Phân rã công thức tài chính / đơn đặt & Gom nhóm chu kỳ
+    alt Xử lý Báo cáo Doanh thu (GetRevenueReportUseCase)
+        UC->>UC: Phân rã 5 chỉ số tài chính:<br/>1. GMV = sum(subtotal)<br/>2. Tiền thu = GMV - Discount<br/>3. Hoàn tiền = sum(refunds thành công)<br/>4. Hoa hồng sàn = sum(commissionAmount)<br/>5. Thực nhận Vendor = Tiền thu - Hoa hồng - Hoàn tiền
+    else Xử lý Báo cáo Đơn đặt (GetBookingReportUseCase)
+        UC->>UC: Đếm tổng số đơn, đơn COMPLETED, đơn CANCELLED/REFUNDED<br/>Phân loại chi tiết theo RefundReason (WEATHER, CUSTOMER_CANCEL, VENDOR_FAULT...)
+    end
+
+    UC->>Helper: buildBuckets(timeRange, periodKeyFormat)
+    Helper->>Helper: Khởi tạo danh sách chu kỳ (day, week, quarter, year) liên tục
+    UC->>Helper: aggregateAndZeroFill(items, buckets)
+    Helper->>Helper: Tự động điền giá trị 0 (Zero-filling) cho các mốc thời gian không có giao dịch
+    Helper-->>UC: Trả về danh sách hoàn chỉnh liên tục thời gian
+
+    UC-->>Ctrl: Trả về List<RevenueReportItem> hoặc List<BookingReportItem>
+    Ctrl-->>Client: HTTP 200 OK + JSON Response (Data points + Metadata TimeRange)
