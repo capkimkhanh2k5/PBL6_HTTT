@@ -47,7 +47,8 @@
 ### Giai đoạn 1: Xem trước mức hoàn tiền (Cancel Preview)
 1. Khách hàng gọi `GET /api/orders/sub-orders/{id}/cancel-preview`.
 2. `GetCancellationPreviewUseCase` nạp thông tin đơn phụ, thực hiện **IDOR check** xác thực quyền sở hữu.
-3. Gọi `RefundPolicyEngine.evaluate(CUSTOMER_REQUEST, startTime, now, subtotal)` để tính toán mức hoàn:
+3. Gọi `RefundPolicyEngine.evaluate(CUSTOMER_REQUEST, startTime, now, originalAmount)` để tính toán mức hoàn:
+   - `originalAmount` được lấy chính xác từ `subOrder.finalAmount` (số tiền thực trả sau khi đã áp dụng voucher giảm giá). Tuyệt đối không hoàn phần voucher trợ giá bằng tiền mặt (Xem chi tiết tại [Module Discount](../Discount/docs.md)).
    - **> 48 giờ:** Hoàn lại 100%.
    - **24 đến 48 giờ:** Hoàn lại 70%.
    - **2 đến 24 giờ:** Hoàn lại 30%.
