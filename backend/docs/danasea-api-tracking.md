@@ -1,10 +1,10 @@
 # DANASEA — Master API & Test Checklist (EPIC-01 → EPIC-08)
 
-**Cập nhật:** 08/10/2026 — nhánh `implement_password_reset_api`; bổ sung forgot/reset password, bảo vệ OTP dùng một lần và thu hồi phiên cũ.
+**Cập nhật:** 08/10/2026 — đối chiếu nhánh `implement_review_rating_system`; bổ sung API review/rating, kiểm duyệt và bảo vệ thao tác đồng thời,  nhánh `implement_password_reset_api`; bổ sung forgot/reset password, bảo vệ OTP dùng một lần và thu hồi phiên cũ.
 
 **Quy ước:** Với mục API, `[x]` nghĩa là endpoint đã có trong controller; không đồng nghĩa đã kiểm chứng toàn bộ nghiệp vụ hoặc tích hợp cổng thanh toán thật. Với mục Test, hạ tầng và quyết định nghiệp vụ, giữ trạng thái checklist đã ghi nhận; `[ ]` là việc còn thiếu/chưa xác nhận. Lần cập nhật này không đánh dấu các test chưa xác nhận thành đã pass.
 
-**Phạm vi kiểm kê:** 117 tổ hợp HTTP method/path từ 38 controller trong profile `test`, gồm 4 đường dẫn alias, 4 endpoint chẩn đoán ở profile `dev/test` và 1 webhook nội bộ chỉ ở `test`. Swagger/Actuator do thư viện cung cấp không nằm trong số API controller này. Các API cần hoàn thiện nghiệp vụ được ghi chú tại mục tương ứng; xem thêm [báo cáo rà soát](API-completeness-review-2026-10-06.md) và [kết quả sandbox](payment-sandbox-verification-2026-10-06.md).
+**Phạm vi kiểm kê:** 124 tổ hợp HTTP method/path từ 42 controller trong profile `test`, gồm 4 đường dẫn alias, 4 endpoint chẩn đoán ở profile `dev/test` và 1 webhook nội bộ chỉ ở `test`. Swagger/Actuator do thư viện cung cấp không nằm trong số API controller này. Các API cần hoàn thiện nghiệp vụ được ghi chú tại mục tương ứng; xem thêm [báo cáo rà soát](API-completeness-review-2026-10-06.md) và [kết quả sandbox](payment-sandbox-verification-2026-10-06.md).
 
 ---
 
@@ -398,6 +398,31 @@ Hai item phải nhận hai đơn vị khác nhau và tính giá hai gói. Nhóm 
 
 ## EPIC-07 · Operations / Settlement / Review
 
+### Review & Rating — API
+- [x] POST /api/sub-orders/{id}/reviews (chủ đơn COMPLETED; một review mỗi sub-order)
+- [x] PUT /api/sub-orders/{id}/reviews (sửa qua sub-order, trong 7 ngày)
+- [x] PUT /api/reviews/{id} (chỉ tác giả, trong 7 ngày)
+- [x] GET /api/services/{id}/reviews (công khai, phân trang, chỉ review visible; không trả metadata nội bộ)
+- [x] GET /api/vendor/reviews (chỉ review của vendor hiện tại)
+- [x] POST /api/vendor/reviews/{id}/reply (chỉ vendor sở hữu review)
+- [x] GET /api/admin/reviews (lọc service/vendor/flag/visibility, phân trang)
+- [x] PATCH /api/admin/reviews/{id}/visibility (chỉ ADMIN; ghi chú kiểm duyệt riêng)
+- [x] POST /api/reviews/{id}/flag (yêu cầu đăng nhập; review visible; response chỉ gồm id/isFlagged)
+
+### Review & Rating — Bảo đảm nghiệp vụ / Test
+- [x] Unique constraint `uq_reviews_sub_order` bảo vệ một review mỗi trải nghiệm; trùng trả 409.
+- [x] Khóa review khi sửa/reply/flag/ẩn/hiện; sửa qua sub-order tra cứu ID bằng scalar trước khi khóa.
+- [x] Khóa vendor trước tổng hợp điểm; tính điểm/count và badge chỉ từ review visible, trong cùng transaction.
+- [x] Tối đa 5 ảnh HTTP(S), mỗi URL tối đa 2048 ký tự; JSON lưu trong TEXT.
+- [x] Validation dùng khóa i18n Anh/Việt; flag không đọc được nội dung review bị ẩn.
+- [x] ReviewUseCaseTest, ReviewControllerTest, ReviewRatingIntegrationTest.
+- [x] ReviewConcurrencyIntegrationTest (PostgreSQL 16 thật: 11 ca unique, tổng điểm, cạnh tranh edit/reply/hide, alias, privacy, ảnh, ownership và badge).
+- [x] Migration `V21__review_enhancements.sql` thay V18 của nhánh review để tránh trùng số với nhánh slot; giữ V18/V19 cho slot và V20 cho password reset.
+
+**Kiểm chứng 08/10/2026:** `./mvnw clean verify` thành công; 1.621 test, 0 failure/error, 135 skipped theo cấu hình suite. Cả 11 test PostgreSQL thật chạy và pass; Flyway áp dụng V21 và Hibernate validate schema thành công.
+
+Chính sách hiện tại: khách sửa review trong 7 ngày; chưa cung cấp API xóa. Admin ẩn/hiện để kiểm duyệt; ẩn loại review khỏi điểm tổng hợp, hiện tính lại điểm.
+
 ### Khiếu nại — Tranh chấp
 - [x] POST /api/orders/{id}/disputes
 - [x] GET /api/admin/disputes
@@ -452,12 +477,7 @@ Hai item phải nhận hai đơn vị khác nhau và tính giá hai gói. Nhóm 
    - `GET /api/vendor/reports/revenue`
    - API xuất CSV với bộ lọc thời gian.
 
-3. **Đánh giá sau trải nghiệm** Hiện có bảng/model nhưng chưa có API đánh giá.
-   - `POST /api/sub-orders/{id}/reviews`
-   - `GET /api/services/{id}/reviews`
-   - `POST /api/vendor/reviews/{id}/reply`
-
-   Chỉ khách đã hoàn thành trải nghiệm được đánh giá; điểm service/vendor phải cập nhật từ dữ liệu này.
+3. **Đánh giá sau trải nghiệm** Đã triển khai 9 endpoint và kiểm thử nghiệp vụ/đồng thời; xem checklist Review & Rating tại EPIC-07.
 
 4. **Chi trả vendor** `FINALIZED` hiện chưa chứng minh vendor đã nhận tiền.
    - `POST/GET /api/vendor/payout-requests`

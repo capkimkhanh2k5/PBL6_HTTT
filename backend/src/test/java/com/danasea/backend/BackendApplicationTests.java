@@ -35,7 +35,7 @@ class BackendApplicationTests {
 								.map(method -> method.name() + " " + pattern)))
 				.collect(Collectors.toSet());
 
-		assertEquals(117, endpoints.size(),
+		assertEquals(124, endpoints.size(),
 				() -> "Backend API inventory changed; discovered " + endpoints.size() + " endpoints");
 	}
 
