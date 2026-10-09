@@ -1,3 +1,4 @@
+import '../../../../core/data/library_store.dart';
 import 'package:mobile/core/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import '../../../../core/data/catalog_repository.dart';
@@ -39,6 +40,7 @@ class _HomeScreenState extends State<HomeScreen> {
   List<ExperienceItem> _experiences = [];
   List<CategoryModel> _categories = [];
   final _catalog = CatalogRepository();
+  final _library = LibraryStore.instance;
   bool _loading = true;
   String? _error;
 
@@ -82,13 +84,36 @@ class _HomeScreenState extends State<HomeScreen> {
   void initState() {
     super.initState();
     _loadCatalog();
+    _library.addListener(_libraryChanged);
   }
 
-  void _toggleFavorite(int index) {
-    setState(() {
-      final item = _experiences[index];
-      _experiences[index] = item.copyWith(isFavorite: !item.isFavorite);
-    });
+  void _libraryChanged() {
+    if (mounted) setState(() {});
+  }
+
+  @override
+  void dispose() {
+    _library.removeListener(_libraryChanged);
+    super.dispose();
+  }
+
+  Future<void> _toggleFavorite(int index) async {
+    final item = _experiences[index];
+    try {
+      await _library.toggle(
+        SavedService(
+          serviceId: item.id,
+          name: item.title,
+          imageUrl: item.imageUrl,
+        ),
+      );
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(e.toString())));
+      }
+    }
   }
 
   void _openDetail(ExperienceItem item) {
@@ -224,8 +249,10 @@ class _HomeScreenState extends State<HomeScreen> {
                   itemBuilder: (context, index) {
                     final exp = _experiences[index];
                     return ExperienceCard(
-                      item: exp,
-                      onFavoriteToggle: () => _toggleFavorite(index),
+                      item: exp.copyWith(isFavorite: _library.contains(exp.id)),
+                      onFavoriteToggle: _library.busy(exp.id)
+                          ? null
+                          : () => _toggleFavorite(index),
                       onTap: () => _openDetail(exp),
                     );
                   },
@@ -311,16 +338,13 @@ class _HomeScreenState extends State<HomeScreen> {
 
           // 8. RECENTLY VIEWED CAROUSEL
           RecentlyViewedSection(
-            onItemTap: (recent) {
-              final matching = _experiences
-                  .where((e) => e.title == recent.title)
-                  .toList();
-              if (matching.isNotEmpty) {
-                _openDetail(matching.first);
-              } else {
-                _openSearch(recent.title);
-              }
-            },
+            store: _library,
+            onItemTap: (item) => Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => CatalogDetailScreen(serviceId: item.serviceId),
+              ),
+            ),
           ),
           const SizedBox(height: AppShapes.spaceLg),
 

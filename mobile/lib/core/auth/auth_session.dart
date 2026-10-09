@@ -36,6 +36,7 @@ class AuthSession {
   bool remember = true;
   bool pendingVerification = false;
   Map<String, dynamic>? profile;
+  final accountVersion = ValueNotifier<int>(0);
   Future<void>? _refreshing;
   String get _key => 'auth.session.$baseUrl';
 
@@ -234,7 +235,9 @@ class AuthSession {
   }
 
   Future<void> loadProfile() async {
+    final previousId = profile?['id'];
     profile = await request('/api/users/me');
+    if (previousId != profile?['id']) accountVersion.value++;
     if (pendingName?.isNotEmpty == true) {
       profile = await request(
         '/api/users/me',
@@ -274,6 +277,7 @@ class AuthSession {
     _access = null;
     _refresh = null;
     profile = null;
+    accountVersion.value++;
     pendingName = null;
     pendingEmail = null;
     pendingVerification = false;

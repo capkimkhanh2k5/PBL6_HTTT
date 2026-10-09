@@ -1,6 +1,12 @@
 // English UI catalog. Vietnamese source phrases are stable lookup keys.
 // Numbered placeholders retain values from the existing presentation layer.
 const englishTranslations = <String, String>{
+  "Không tải được danh sách yêu thích.": "Unable to load favorites.",
+  "Chưa có trải nghiệm yêu thích.": "No favorite experiences yet.",
+  "Bạn chưa xem trải nghiệm nào.": "You have not viewed any experiences yet.",
+  "Bỏ yêu thích": "Remove from favorites",
+  "Thêm yêu thích": "Add to favorites",
+  "Tải lại": "Refresh",
   "Dữ liệu máy chủ không hợp lệ.": "Invalid server response.",
   "Chi tiết trải nghiệm": "Experience details",
   "Đặt chỗ hiện chưa khả dụng.": "Booking will be available soon.",
