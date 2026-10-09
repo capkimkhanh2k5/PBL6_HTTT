@@ -1,6 +1,8 @@
 // English UI catalog. Vietnamese source phrases are stable lookup keys.
 // Numbered placeholders retain values from the existing presentation layer.
 const englishTranslations = <String, String>{
+  "Họ và tên phải có từ 1 đến 255 ký tự.": "Full name must contain 1 to 255 characters.",
+  "Email chưa xác minh": "Email not verified",
   " / khách": " / guest",
   " / {0} khách": " / {0} guests",
   " lúc 5:00 sáng tại Mỹ Khê (280.000đ/người) có huấn luyện viên kèm và chụp ảnh lưu niệm.": " at 5:00 AM at Mỹ Khê (280,000 VND/person), with an instructor and souvenir photos.",

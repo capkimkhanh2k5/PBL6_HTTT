@@ -51,6 +51,9 @@ void main() {
         rotation++;
         req.response.cookies.add(Cookie('refresh_token', 'rotated'));
         req.response.write(jsonEncode({'accessToken': 'new-access'}));
+      } else if (path == '/api/users/me' && body['fullName'] == 'Rejected') {
+        req.response.statusCode = 400;
+        req.response.write(jsonEncode({'message': 'Invalid profile'}));
       } else if (path == '/api/users/me') {
         expect(req.headers.value('Authorization'), startsWith('Bearer '));
         req.response.write(
@@ -70,6 +73,19 @@ void main() {
     auth.client.close(force: true);
     await server.close(force: true);
   });
+  test('Profile PATCH updates session only after backend accepts it', () async {
+    await auth.login('test@example.com', 'Strong123!');
+    await auth.updateProfile(fullName: '  Updated Name  ');
+    expect(requests.last, 'PATCH /api/users/me');
+    expect(auth.profile?['fullName'], 'Updated Name');
+    expect(auth.profile?['email'], 'test@example.com');
+    await expectLater(
+      auth.updateProfile(fullName: 'Rejected'),
+      throwsA(isA<AuthFailure>()),
+    );
+    expect(auth.profile?['fullName'], 'Updated Name');
+  });
+
   test('Failed login cannot create a session', () async {
     await expectLater(
       auth.login('test@example.com', 'wrong'),

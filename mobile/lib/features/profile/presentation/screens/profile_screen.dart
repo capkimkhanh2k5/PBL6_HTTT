@@ -1,7 +1,6 @@
 import '../../../../core/auth/auth_session.dart';
 import 'package:mobile/core/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
-import '../../../../core/data/mock_database_data.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_shapes.dart';
 import '../../../../core/theme/app_typography.dart';
@@ -23,6 +22,37 @@ class ProfileScreen extends StatefulWidget {
 
 class _ProfileScreenState extends State<ProfileScreen> {
   String get _locale => AppLanguage.instance.code;
+
+  bool _loading = true;
+  String? _error;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadProfile();
+  }
+
+  Future<void> _loadProfile() async {
+    setState(() {
+      _loading = true;
+      _error = null;
+    });
+    try {
+      await AuthSession.instance.loadProfile();
+    } catch (e) {
+      if (mounted) _error = e.toString();
+    } finally {
+      if (mounted) setState(() => _loading = false);
+    }
+  }
+
+  Future<void> _editProfile() async {
+    await Navigator.push<bool>(
+      context,
+      MaterialPageRoute(builder: (_) => const EditProfileScreen()),
+    );
+    if (mounted) setState(() {});
+  }
 
   void _showLogoutDialog() {
     showDialog(
@@ -53,7 +83,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 ),
               ),
               onPressed: () async {
-                try { await AuthSession.instance.logout(); } catch (_) {}
+                try {
+                  await AuthSession.instance.logout();
+                } catch (_) {}
                 if (!context.mounted) return;
                 Navigator.pop(context);
                 Navigator.pushAndRemoveUntil(
@@ -64,7 +96,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   (_) => false,
                 );
               },
-              child: const LocalizedText('Đăng xuất', style: TextStyle(color: Colors.white)),
+              child: const LocalizedText(
+                'Đăng xuất',
+                style: TextStyle(color: Colors.white),
+              ),
             ),
           ],
         );
@@ -75,7 +110,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
   @override
   Widget build(BuildContext context) {
     Localizations.localeOf(context);
-    final user = MockDatabaseData.currentUser;
+    final user = AuthSession.instance.profile ?? <String, dynamic>{};
+    final avatar = user['avatarUrl']?.toString();
+    final hasAvatar = avatar != null && avatar.isNotEmpty;
+    final name = user['fullName']?.toString() ?? '';
+    final email = user['email']?.toString() ?? '';
+    final verified = user['isEmailVerified'] == true;
 
     return Scaffold(
       backgroundColor: AppColors.surface,
@@ -93,6 +133,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            if (_loading) const LinearProgressIndicator(),
+            if (_error != null) ...[
+              Text(_error!, style: const TextStyle(color: Colors.red)),
+              TextButton(
+                onPressed: _loadProfile,
+                child: const LocalizedText('Thử lại'),
+              ),
+            ],
             // USER PROFILE CARD
             Container(
               padding: const EdgeInsets.all(AppShapes.spaceMd),
@@ -112,27 +160,35 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           CircleAvatar(
                             radius: 32,
                             backgroundColor: AppColors.secondaryContainer,
-                            backgroundImage: user.avatarUrl != null
-                                ? NetworkImage(user.avatarUrl!)
+                            backgroundImage: hasAvatar
+                                ? NetworkImage(avatar)
                                 : null,
-                            child: user.avatarUrl == null
-                                ? LocalizedText((AuthSession.instance.profile?['fullName']?.toString().isNotEmpty == true ? AuthSession.instance.profile!['fullName'].toString()[0] : '?'),
-                                    style: const TextStyle(fontSize: 24))
+                            child: !hasAvatar
+                                ? Text(
+                                    name.isNotEmpty
+                                        ? name.characters.first
+                                        : '?',
+                                    style: const TextStyle(fontSize: 24),
+                                  )
                                 : null,
                           ),
-                          Positioned(
-                            bottom: 0,
-                            right: 0,
-                            child: Container(
-                              padding: const EdgeInsets.all(2),
-                              decoration: const BoxDecoration(
-                                color: AppColors.secondary,
-                                shape: BoxShape.circle,
+                          if (verified)
+                            Positioned(
+                              bottom: 0,
+                              right: 0,
+                              child: Container(
+                                padding: const EdgeInsets.all(2),
+                                decoration: const BoxDecoration(
+                                  color: AppColors.secondary,
+                                  shape: BoxShape.circle,
+                                ),
+                                child: const Icon(
+                                  Icons.check,
+                                  size: 14,
+                                  color: Colors.white,
+                                ),
                               ),
-                              child: const Icon(Icons.check,
-                                  size: 14, color: Colors.white),
                             ),
-                          ),
                         ],
                       ),
                       const SizedBox(width: 14),
@@ -140,15 +196,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            LocalizedText(
-                              (AuthSession.instance.profile?['fullName'] ?? AuthSession.instance.profile?['email'] ?? '').toString(),
+                            Text(
+                              name.isNotEmpty ? name : email,
                               style: AppTypography.headlineSm(
                                 color: AppColors.onSurface,
                               ),
                             ),
                             const SizedBox(height: 2),
-                            LocalizedText(
-                              (AuthSession.instance.profile?['email'] ?? '').toString(),
+                            Text(
+                              email,
                               style: AppTypography.bodySm(
                                 color: AppColors.onSurfaceVariant,
                               ),
@@ -164,16 +220,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         ),
                       ),
                       IconButton(
-                        icon: const Icon(Icons.edit_outlined,
-                            color: AppColors.secondary),
-                        onPressed: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) => const EditProfileScreen(),
-                            ),
-                          );
-                        },
+                        icon: const Icon(
+                          Icons.edit_outlined,
+                          color: AppColors.secondary,
+                        ),
+                        onPressed: _loading || _error != null
+                            ? null
+                            : _editProfile,
                       ),
                     ],
                   ),
@@ -184,21 +237,29 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       Flexible(
                         child: Container(
                           padding: const EdgeInsets.symmetric(
-                              horizontal: 10, vertical: 4),
+                            horizontal: 10,
+                            vertical: 4,
+                          ),
                           decoration: BoxDecoration(
-                            color: AppColors.secondaryContainer
-                                .withValues(alpha: 0.4),
+                            color: AppColors.secondaryContainer.withValues(
+                              alpha: 0.4,
+                            ),
                             borderRadius: BorderRadius.circular(12),
                           ),
                           child: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              const Icon(Icons.verified,
-                                  size: 14, color: AppColors.secondary),
+                              const Icon(
+                                Icons.verified,
+                                size: 14,
+                                color: AppColors.secondary,
+                              ),
                               const SizedBox(width: 4),
                               Flexible(
                                 child: LocalizedText(
-                                  'Email đã xác minh',
+                                  verified
+                                      ? 'Email đã xác minh'
+                                      : 'Email chưa xác minh',
                                   overflow: TextOverflow.ellipsis,
                                   style: AppTypography.labelSm(
                                     color: AppColors.secondary,
@@ -212,16 +273,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       ),
                       const SizedBox(width: 8),
                       TextButton.icon(
-                        onPressed: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) => const EditProfileScreen(),
-                            ),
-                          );
-                        },
-                        icon: const Icon(Icons.arrow_forward,
-                            size: 14, color: AppColors.secondary),
+                        onPressed: _loading || _error != null
+                            ? null
+                            : _editProfile,
+                        icon: const Icon(
+                          Icons.arrow_forward,
+                          size: 14,
+                          color: AppColors.secondary,
+                        ),
                         label: LocalizedText(
                           'Hồ sơ chi tiết',
                           style: AppTypography.labelSm(
@@ -252,8 +311,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       color: AppColors.secondaryFixed,
                       shape: BoxShape.circle,
                     ),
-                    child: const Icon(Icons.water_drop,
-                        size: 18, color: AppColors.onSecondaryFixed),
+                    child: const Icon(
+                      Icons.water_drop,
+                      size: 18,
+                      color: AppColors.onSecondaryFixed,
+                    ),
                   ),
                   const SizedBox(width: 10),
                   Expanded(
@@ -277,8 +339,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     ),
                   ),
                   Container(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 2,
+                    ),
                     decoration: BoxDecoration(
                       color: AppColors.surfaceContainerHigh,
                       borderRadius: BorderRadius.circular(8),
@@ -329,15 +393,20 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   const Divider(height: 1),
                   Padding(
                     padding: const EdgeInsets.symmetric(
-                        horizontal: 14, vertical: 10),
+                      horizontal: 14,
+                      vertical: 10,
+                    ),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Expanded(
                           child: Row(
                             children: [
-                              const Icon(Icons.translate,
-                                  size: 20, color: AppColors.secondary),
+                              const Icon(
+                                Icons.translate,
+                                size: 20,
+                                color: AppColors.secondary,
+                              ),
                               const SizedBox(width: 10),
                               Expanded(
                                 child: Column(
