@@ -42,12 +42,12 @@ class NativeOptionBookingTest {
     private ConfirmationCard card;
     @BeforeEach void setup() {
         var option = new Option(optionId, "Private package", "PER_PACKAGE", unitPrice, 2, new BigDecimal("1000000"), "Guide",
-                List.of(new Slot(slotId, date, LocalTime.of(9, 0), LocalTime.of(10, 0), 10)));
+                List.of(new Slot(slotId, date, LocalTime.of(9, 0), LocalTime.of(10, 0), 10)), 2);
         var svc = new PublishedService(serviceId, null, "Kayak", "Trip", null, "Kayak", "kayak", "Da Nang", 16.1, 108.2, 60,
                 false, null, 0, List.of(option));
         when(catalog.find(eq(serviceId), any())).thenReturn(svc);
         card = ConfirmationCard.builder().id("card").conversationId(conversation).serviceId(serviceId).optionId(optionId).slotId(slotId)
-                .participantsCount(3).quantity(2).price(unitPrice).date(LocalDateTime.of(date, LocalTime.of(9, 0)).toString())
+                .participantsCount(3).quantity(2).participantsPerPackage(List.of(2, 1)).price(unitPrice).date(LocalDateTime.of(date, LocalTime.of(9, 0)).toString())
                 .status(ConfirmationCard.STATUS_PENDING).createdAt(LocalDateTime.now()).build();
         confirm = new ConfirmBookingUseCase(store, null, null, holds, cancel, null, catalog);
     }
@@ -74,7 +74,7 @@ class NativeOptionBookingTest {
         assertThat(confirm.execute("card", user, "session", conversation).get("bookingId")).isEqualTo(bookingId);
         var command = ArgumentCaptor.forClass(CreateBookingHoldCommand.class);
         verify(holds).execute(command.capture());
-        assertThat(command.getValue().items()).containsExactly(new BookingHoldItemDto(slotId, 2, optionId, 3));
+        assertThat(command.getValue().items()).containsExactly(new BookingHoldItemDto(slotId, 1, optionId, 2), new BookingHoldItemDto(slotId, 1, optionId, 1));
         verifyNoInteractions(cancel);
     }
     @Test void priceRaceCompensatesHoldAndRequiresNewCustomerConfirmation() {

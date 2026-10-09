@@ -29,18 +29,18 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class AiExecutionBudgetFilter extends OncePerRequestFilter {
     private final ObjectProvider<MeterRegistry> metrics;
-    private final ObjectMapper mapper;
-    private final LocalizedMessageService messages;
+    private final ObjectProvider<ObjectMapper> mapper;
+    private final ObjectProvider<LocalizedMessageService> messages;
     private final Semaphore concurrentRequests = new Semaphore(8);
 
     @Override protected boolean shouldNotFilter(HttpServletRequest request) {
         String path = request.getRequestURI();
-        return !(path.startsWith("/api/ai/") || path.equals("/api/assistant/chat") || path.equals("/api/admin/ai/risk-cases"));
+        return !(path.startsWith("/api/ai/") || path.equals("/api/assistant/chat") || path.matches("/api/assistant/conversations/[^/]+/confirm") || path.equals("/api/admin/ai/risk-cases"));
     }
     @Override protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain) throws ServletException, IOException {
         if (!concurrentRequests.tryAcquire()) {
             response.setStatus(429); response.setHeader("Retry-After", "2"); response.setContentType(MediaType.APPLICATION_JSON_VALUE);
-            mapper.writeValue(response.getWriter(), new ErrorResponse("AI_RATE_LIMIT_EXCEEDED", messages.get("error.ai_rate_limit_exceeded")));
+            mapper.getIfAvailable(ObjectMapper::new).writeValue(response.getWriter(), new ErrorResponse("AI_RATE_LIMIT_EXCEEDED", messages.getIfAvailable(LocalizedMessageService::standalone).get("error.ai_rate_limit_exceeded")));
             return;
         }
         MeterRegistry registry = metrics.getIfAvailable();

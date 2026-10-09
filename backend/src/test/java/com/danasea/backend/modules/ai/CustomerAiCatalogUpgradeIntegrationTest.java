@@ -111,6 +111,33 @@ class CustomerAiCatalogUpgradeIntegrationTest extends BaseSecurityIntegrationTes
         assertThat(result.path("candidates").get(0).path("relevance").path("available").asBoolean()).isFalse();
     }
 
+    @Test void weatherFilteredPageRemainsPartialAndExposesNextCatalogPage() throws Exception {
+        for (int index=0; index<15; index++) service("Unsafe ranked service " + index, 10, 16.1, 108.2, 5, false);
+        UUID acceptable = service("Acceptable older service", 10, 16.1, 108.2, 1, true);
+        jdbc.update("update services set weather_sensitive=true where category_id=?", category);
+        when(weather.assess(any(), any())).thenAnswer(call -> {
+            var candidate = (com.danasea.backend.modules.service.application.api.AiCatalogReadApi.PublishedService) call.getArgument(0);
+            boolean safe = candidate.id().equals(acceptable);
+            return new TravelWeatherPort.Assessment(safe ? "ACCEPTABLE" : "UNSAFE", safe, false, null, null, "FULL");
+        });
+        JsonNode first = discover("/api/ai/search", request(",\"weatherSafeOnly\":true"));
+        assertThat(first.path("status").asText()).isEqualTo("PARTIAL");
+        assertThat(first.path("candidates")).isEmpty();
+        assertThat(first.path("nextOffset").asInt()).isEqualTo(15);
+        JsonNode next = discover("/api/ai/search", request(",\"weatherSafeOnly\":true,\"offset\":15"));
+        assertThat(next.path("candidates")).hasSize(1);
+        assertThat(next.path("candidates").get(0).path("service").path("id").asText()).isEqualTo(acceptable.toString());
+    }
+
+    @Test void excludedActivityMentionInDescriptionDoesNotMisclassifyDeclaredKayakService() throws Exception {
+        UUID kayak = service("Kayak", 10, 16.1, 108.2, 4, false);
+        service("SUP", 10, 16.1, 108.2, 4, false);
+        jdbc.update("update services set description='Kayak trip; this service does not include SUP' where id=?", kayak);
+        JsonNode result = discover("/api/ai/search", request(",\"query\":\"kayak, không SUP\""));
+        assertThat(result.path("candidates")).hasSize(1);
+        assertThat(result.path("candidates").get(0).path("service").path("id").asText()).isEqualTo(kayak.toString());
+    }
+
     @Test void malformedNaturalDateIsRejectedAsBadInput() throws Exception {
         mvc.perform(post("/api/ai/search").with(user(owner.toString()).roles("CUSTOMER"))
                 .contentType(MediaType.APPLICATION_JSON).content(request(",\"query\":\"kayak on 2026-99-40\"")))

@@ -20,7 +20,12 @@ public interface AiCatalogReadApi {
         }
     }
     record Option(UUID id, String name, String pricingUnit, BigDecimal unitPrice, int quantity,
-                  BigDecimal partyTotal, String benefits, List<Slot> slots) {}
+                  BigDecimal partyTotal, String benefits, List<Slot> slots, Integer maxPaxPerPackage) {
+        public Option(UUID id, String name, String pricingUnit, BigDecimal unitPrice, int quantity,
+                      BigDecimal partyTotal, String benefits, List<Slot> slots) {
+            this(id, name, pricingUnit, unitPrice, quantity, partyTotal, benefits, slots, null);
+        }
+    }
     record Slot(UUID id, LocalDate date, LocalTime start, LocalTime end, int availableQuantity) {}
     record PublishedService(UUID id, UUID vendorId, String name, String description, UUID categoryId,
                             String categoryName, String categorySlug, String address, Double latitude,

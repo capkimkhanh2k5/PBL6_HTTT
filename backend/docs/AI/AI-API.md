@@ -1,5 +1,7 @@
 # Tổng hợp các tính năng AI cho hệ thống DANASEA
 
+> Backend khách hàng đã được nâng cấp; UI thật chưa nối theo yêu cầu. Xem [contract hiện tại](AI-CUSTOMER-COMPLETION.md) và [bằng chứng kiểm thử](AI-VALIDATION.md). Mười nhóm tương ứng 32 endpoint khách hàng; các API xác nhận không tự trở thành tool được model phép thực thi.
+
 DANASEA là sàn thương mại điện tử đa nhà cung cấp chuyên về trải nghiệm du lịch biển tại Đà Nẵng. AI sẽ hỗ trợ 3 nhóm đối tượng: Khách hàng, Nhà cung cấp và Quản trị viên (Admin).
 
 ## 1. AI dành cho khách hàng
@@ -82,4 +84,4 @@ Chat trả thêm `cards`, `sources`, `actions`, `requiredInputs`, `context` và 
 
 Review summary tách thống kê toàn bộ review public hợp lệ khỏi mẫu NLP đại diện, invalidation theo fingerprint nguồn. Support có preview và request hỗ trợ thủ công với trạng thái/idempotency; admin xử lý queue. Không có AI tự đổi lịch, hoàn tiền hay thay trạng thái đơn.
 
-Xem [API, hành vi và giới hạn thực tế](AI-IMPLEMENTATION.md), [cấu hình worker local](../ai-decision/README.md) và [bằng chứng kiểm tra](AI-VALIDATION.md). Recommendation hiện dùng baseline theo context với Quyet hỗ trợ; replan là API theo yêu cầu; kiểm duyệt/fraud là gợi ý cho người duyệt, không tự thay trạng thái nguồn hoặc tiền.
+Xem [API, hành vi và giới hạn thực tế](AI-IMPLEMENTATION.md), [cấu hình worker local](../../ai-decision/README.md) và [bằng chứng kiểm tra](AI-VALIDATION.md). Recommendation hiện dùng baseline theo context với Quyet hỗ trợ; replan là API theo yêu cầu; kiểm duyệt/fraud là gợi ý cho người duyệt, không tự thay trạng thái nguồn hoặc tiền.

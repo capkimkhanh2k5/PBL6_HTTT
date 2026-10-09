@@ -35,6 +35,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 @AutoConfigureMockMvc
 @Transactional
 class CustomerEvidenceHttpIntegrationTest extends BaseSecurityIntegrationTest {
+    @Autowired jakarta.persistence.EntityManager entityManager;
     @Autowired MockMvc mvc;
     @Autowired JdbcTemplate jdbc;
     @Autowired ObjectMapper mapper;
@@ -118,7 +119,9 @@ class CustomerEvidenceHttpIntegrationTest extends BaseSecurityIntegrationTest {
         var request = mapper.readTree(mvc.perform(post("/api/ai/support/requests").with(user(owner.toString()).roles("CUSTOMER"))
                 .header("Idempotency-Key", "manual-handoff").contentType(MediaType.APPLICATION_JSON).content(body)).andExpect(status().isOk()).andReturn().getResponse().getContentAsString());
         String id = request.path("id").asText();
+        entityManager.flush();
         assertThat(jdbc.queryForObject("select count(*) from notifications where user_id=? and related_entity_id=?", Integer.class, owner, UUID.fromString(id))).isEqualTo(1);
+        entityManager.flush();
         assertThat(jdbc.queryForObject("select count(*) from notifications where user_id=? and related_entity_id=?", Integer.class, admin, UUID.fromString(id))).isEqualTo(1);
         mvc.perform(get("/api/admin/support/requests").with(user(owner.toString()).roles("CUSTOMER"))).andExpect(status().isForbidden());
         mvc.perform(post("/api/admin/support/requests/" + id + "/handle").with(user(admin.toString()).roles("ADMIN"))
@@ -132,6 +135,7 @@ class CustomerEvidenceHttpIntegrationTest extends BaseSecurityIntegrationTest {
                 .andExpect(status().isOk()).andExpect(jsonPath("$.financialActionPerformed").value(false));
         mvc.perform(get("/api/ai/support/requests/" + id).with(user(owner.toString()).roles("CUSTOMER")))
                 .andExpect(status().isOk()).andExpect(jsonPath("$.status").value("RESOLVED")).andExpect(jsonPath("$.responseNote").value("We have answered your payment question"));
+        entityManager.flush();
         assertThat(jdbc.queryForObject("select count(*) from notifications where user_id=? and related_entity_id=?", Integer.class, owner, UUID.fromString(id))).isEqualTo(3);
         assertThat(jdbc.queryForObject("select status from master_orders where id=?", String.class, order)).isEqualTo("PENDING_PAYMENT");
     }

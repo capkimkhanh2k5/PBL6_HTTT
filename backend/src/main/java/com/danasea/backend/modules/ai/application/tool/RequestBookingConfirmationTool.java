@@ -13,6 +13,7 @@ import org.springframework.stereotype.Component;
 import com.danasea.backend.modules.ai.application.port.ConfirmationCardStorePort;
 import com.danasea.backend.modules.ai.domain.models.ConfirmationCard;
 import com.danasea.backend.modules.ai.domain.models.TravelContext;
+import com.danasea.backend.modules.ai.domain.models.ParticipantGrouping;
 import com.danasea.backend.modules.service.application.api.AiCatalogReadApi;
 import com.danasea.backend.modules.service.application.dtos.ServiceDetailResult;
 import com.danasea.backend.modules.service.application.usecases.GetPublicServiceDetailUseCase;
@@ -186,15 +187,18 @@ public class RequestBookingConfirmationTool implements ConversationAwareToolExec
         var slot = option.slots().stream().filter(item -> item.id().equals(slotId)).findFirst().orElse(null);
         if (slot == null) return error("SLOT_UNAVAILABLE", "The selected slot is not currently bookable for the party");
         String canonicalDate = LocalDateTime.of(slot.date(), slot.start()).toString();
+        List<Integer> grouping = "PER_PACKAGE".equals(option.pricingUnit())
+                ? ParticipantGrouping.propose(participants, option.maxPaxPerPackage(), option.quantity()) : List.of();
         ConfirmationCard card = ConfirmationCard.builder().id(UUID.randomUUID().toString()).conversationId(conversationId).ownerId(ownerId)
                 .serviceId(serviceId).optionId(optionId).slotId(slotId).participantsCount(participants)
-                .price(option.unitPrice()).quantity(option.quantity()).date(canonicalDate)
+                .price(option.unitPrice()).quantity(option.quantity()).participantsPerPackage(grouping).date(canonicalDate)
                 .status(ConfirmationCard.STATUS_PENDING).createdAt(LocalDateTime.now()).locale(language.code()).build();
         cardStorePort.save(card);
         return objectMapper.writeValueAsString(Map.ofEntries(
                 Map.entry("status", STATUS_CONFIRMATION_PENDING), Map.entry("cardId", card.getId()),
                 Map.entry("serviceId", serviceId), Map.entry("optionId", optionId), Map.entry("slotId", slotId),
                 Map.entry("date", canonicalDate), Map.entry("participants", participants), Map.entry("quantity", option.quantity()),
+                Map.entry("participantsPerPackage", grouping), Map.entry("groupingRequiresConfirmation", !grouping.isEmpty()),
                 Map.entry("unitPrice", option.unitPrice()), Map.entry("price", option.unitPrice()),
                 Map.entry("partyTotal", option.partyTotal()), Map.entry("expiresInSeconds", 900),
                 Map.entry("message", messages.get("ai.booking.confirmation", language))));

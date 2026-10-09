@@ -91,7 +91,7 @@ public class DiscoverServicesUseCase {
                             .filter(slot -> slot.start() != null && !slot.start().isBefore(context.dayStart()))
                             .filter(slot -> endTime(slot.end(), slot.start(), service.durationMinutes()) != null)
                             .filter(slot -> !endTime(slot.end(), slot.start(), service.durationMinutes()).isAfter(context.dayEnd()))
-                            .filter(slot -> !context.weatherSafeOnly() || weatherAcceptable(service, slot, weatherCache)).toList()))
+                            .filter(slot -> !context.weatherSafeOnly() || weatherAcceptable(service, slot, weatherCache)).toList(), option.maxPaxPerPackage()))
                     .filter(option -> !option.slots().isEmpty()).toList();
             if (validOptions.isEmpty()) continue;
             Double distance = distance(context, service);

@@ -53,10 +53,12 @@ public class AiCatalogCandidateReader implements AiCatalogCandidateReadApi {
             }
             sql.append(String.join(" or ", predicates)).append(')');
         }
+        String exclusionText = "lower(coalesce(s.name,'') || ' ' || coalesce(s.name_en,'') || ' ' || coalesce(c.name,'') || ' ' || coalesce(c.slug,''))";
+        if (postgres) exclusionText = "translate(" + exclusionText + ", '" + ACCENTS + "', '" + ASCII + "')";
         if (criteria.excludedActivities() != null) {
             for (int index = 0; index < criteria.excludedActivities().size(); index++) {
                 String key = "exclude" + index;
-                sql.append(" and ").append(text).append(" not like :").append(key);
+                sql.append(" and ").append(exclusionText).append(" not like :").append(key);
                 params.put(key, "%" + escape(normalize(criteria.excludedActivities().get(index))) + "%");
             }
         }

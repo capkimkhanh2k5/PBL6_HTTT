@@ -108,7 +108,7 @@ public class AiCatalogReader implements AiCatalogReadApi {
                                 return end != null && slot.start() != null && end.isAfter(slot.start()) && (query.dayEnd() == null || !end.isAfter(query.dayEnd()));
                             }).toList();
                     return new Option(option.getId(), option.getName(), option.getPricingUnit().name(), option.getPrice(),
-                            quantity, option.getPrice().multiply(BigDecimal.valueOf(quantity)), option.getBenefits(), slots);
+                            quantity, option.getPrice().multiply(BigDecimal.valueOf(quantity)), option.getBenefits(), slots, option.getMaxPaxPerPackage());
                 }).filter(option -> query.totalBudget() == null || option.partyTotal().compareTo(query.totalBudget()) <= 0).toList();
         boolean english = query.language() == SupportedLanguage.EN;
         return new PublishedService(service.getId(), service.getVendorId(),

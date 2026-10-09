@@ -1,0 +1,58 @@
+{
+  "modelQualityEvaluation": false,
+  "isolatedData": true,
+  "checks": [
+    {
+      "check": "JWT_AND_REAL_QUYET_CLASSIFICATION",
+      "httpStatus": 200,
+      "model": "chinhnc/Quyet-1.0-Small",
+      "revision": "233167bba5df61b5375a522bf8a042d8d2189379"
+    },
+    {
+      "check": "CURRENT_PACKAGE_QUOTE_AND_REAL_QUYET_RANKING",
+      "partyTotal": 300000,
+      "intentAvailable": true,
+      "relevanceAvailable": true
+    },
+    {
+      "check": "PERSISTED_PLAN_AND_FOREIGN_OWNER_BLOCKED",
+      "foreignReadStatus": 404
+    },
+    {
+      "check": "REAL_QUYET_MODERATION_AND_ADMIN_REVIEW",
+      "publicationAuthorized": false,
+      "modelSuggestionReasons": [
+        "MODEL_SUGGESTS_EXTERNAL_PAYMENT",
+        "MODEL_SUGGESTS_SPAM"
+      ]
+    },
+    {
+      "check": "RECOMMENDATION_BOUND_FEEDBACK_REPLAY_AND_OWNERSHIP"
+    },
+    {
+      "check": "PERSISTED_EXPLICIT_PREFERENCE_CONSENT"
+    },
+    {
+      "check": "NEARBY_CURRENT_INVENTORY_MAXIMUM_FIFTEEN"
+    },
+    {
+      "check": "SERVICE_COMPARISON_NORMALIZED_LIVE_PARTY_QUOTES"
+    },
+    {
+      "check": "WEATHER_BACKEND_RULES_WITHOUT_BOOKING_AUTHORIZATION"
+    },
+    {
+      "check": "NO_REVIEW_EVIDENCE_NO_INVENTED_SUMMARY"
+    },
+    {
+      "check": "CUSTOMER_HANDOFF_MANUAL_QUEUE_TRACKING_AND_REPLAY"
+    },
+    {
+      "check": "PLANNER_PREVIEW_SAVE_ACCEPT_REPLAN_PROPOSAL_NO_AUTOMATIC_OVERWRITE"
+    },
+    {
+      "check": "AI_READS_PRESERVE_VIEW_COUNT",
+      "viewCount": 7
+    }
+  ]
+}

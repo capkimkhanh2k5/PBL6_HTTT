@@ -1,6 +1,7 @@
 package com.danasea.backend.modules.ai.presentation.controllers;
 
 import org.springframework.core.Ordered;
+import org.springframework.dao.PessimisticLockingFailureException;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -36,7 +37,7 @@ public class AiFeatureExceptionHandler extends LocalizedExceptionHandlerSupport 
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error("AI_SOURCE_NOT_FOUND"));
     }
 
-    @ExceptionHandler({ObjectOptimisticLockingFailureException.class, AiStateConflictException.class})
+    @ExceptionHandler({ObjectOptimisticLockingFailureException.class, AiStateConflictException.class, PessimisticLockingFailureException.class})
     public ResponseEntity<ErrorResponse> conflict(Exception exception) {
         return ResponseEntity.status(HttpStatus.CONFLICT).body(error("AI_STATE_CONFLICT"));
     }

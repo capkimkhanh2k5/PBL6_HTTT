@@ -15,7 +15,9 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
 import com.danasea.backend.modules.ai.application.port.ConfirmationCardStorePort;
+import com.danasea.backend.modules.ai.application.port.ConfirmationOutcomePort;
 import com.danasea.backend.modules.ai.domain.models.ConfirmationCard;
+import com.danasea.backend.modules.ai.domain.models.ParticipantGrouping;
 import com.danasea.backend.modules.booking.application.dtos.BookingHoldItemDto;
 import com.danasea.backend.modules.booking.application.dtos.BookingHoldResult;
 import com.danasea.backend.modules.booking.application.dtos.CancelBookingHoldCommand;
@@ -42,12 +44,16 @@ public class ConfirmBookingUseCase {
     private final CancelBookingHoldUseCase cancelBookingHoldUseCase;
     private final ServiceAvailabilityPort serviceAvailabilityPort;
     private final AiCatalogReadApi catalog;
+    private ConfirmationOutcomePort durableOutcomes;
     private LocalizedMessageService messages = LocalizedMessageService.standalone();
 
     @Autowired
     void setLocalizedMessageService(LocalizedMessageService messages) {
         this.messages = messages;
     }
+
+    @Autowired(required = false)
+    public void setDurableOutcomes(ConfirmationOutcomePort durableOutcomes) { this.durableOutcomes = durableOutcomes; }
 
     private static final String RETRY_KEY_PREFIX = "ai:booking:retries:";
     private static final Duration HOLD_TTL = Duration.ofMinutes(15);
@@ -98,6 +104,19 @@ public class ConfirmBookingUseCase {
             String cardId,
             UUID userId,
             String sessionId,
+            UUID expectedConversationId) {
+        if (durableOutcomes != null && createBookingHoldUseCase != null && catalog != null) {
+            var completed = durableOutcomes.completed(cardId, userId, expectedConversationId);
+            if (completed.isPresent()) return completed.get();
+            ConfirmationCard card = cardStorePort.findById(cardId)
+                    .orElseThrow(() -> new IllegalArgumentException("Confirmation card not found or expired"));
+            return durableOutcomes.execute(card, userId, expectedConversationId,
+                    () -> executeWithProcessingLock(cardId, userId, sessionId, expectedConversationId));
+        }
+        return executeWithProcessingLock(cardId, userId, sessionId, expectedConversationId);
+    }
+
+    private Map<String, Object> executeWithProcessingLock(String cardId, UUID userId, String sessionId,
             UUID expectedConversationId) {
         String processingLockToken = null;
         if (createBookingHoldUseCase != null) {
@@ -167,6 +186,16 @@ public class ConfirmBookingUseCase {
         }
 
         BigDecimal cardPrice = card.getPrice() != null ? card.getPrice() : BigDecimal.ZERO;
+        if (currentOption != null && "PER_PACKAGE".equals(currentOption.pricingUnit())) {
+            List<Integer> grouping = card.getParticipantsPerPackage();
+            if (grouping == null && card.getQuantity() == 1) grouping = List.of(card.getParticipantsCount());
+            if (!ParticipantGrouping.valid(grouping, card.getParticipantsCount(), currentOption.maxPaxPerPackage(), card.getQuantity())) {
+                card.markCancelled(); cardStorePort.save(card);
+                return Map.of("status", "refresh_required", "message",
+                        "Request a new confirmation card showing the participants in each private package.");
+            }
+            card.setParticipantsPerPackage(grouping);
+        }
         boolean priceChanged = currentPrice.compareTo(cardPrice) != 0
                 || currentOption != null && currentOption.quantity() != card.getQuantity();
         
@@ -232,6 +261,8 @@ public class ConfirmBookingUseCase {
                     .price(currentPrice)
                     .date(alternativeDate)
                     .quantity(currentOption == null ? card.getQuantity() : currentOption.quantity())
+                    .participantsPerPackage(currentOption != null && "PER_PACKAGE".equals(currentOption.pricingUnit())
+                            ? ParticipantGrouping.propose(card.getParticipantsCount(), currentOption.maxPaxPerPackage(), currentOption.quantity()) : List.of())
                     .status(ConfirmationCard.STATUS_PENDING)
                     .createdAt(LocalDateTime.now())
                     .retryCount(nextRetry)
@@ -260,9 +291,11 @@ public class ConfirmBookingUseCase {
             if (card.getSlotId() == null) {
                 throw new IllegalStateException("Confirmation card does not reference an available service slot");
             }
-            hold = createBookingHoldUseCase.execute(new CreateBookingHoldCommand(
-                    userId,
-                    List.of(new BookingHoldItemDto(card.getSlotId(), card.getQuantity(), card.getOptionId(), card.getParticipantsCount()))));
+            List<BookingHoldItemDto> items = currentOption != null && "PER_PACKAGE".equals(currentOption.pricingUnit())
+                    ? ParticipantGrouping.counts(card.getParticipantsPerPackage()).entrySet().stream().map(group ->
+                            new BookingHoldItemDto(card.getSlotId(), group.getValue(), card.getOptionId(), group.getKey())).toList()
+                    : List.of(new BookingHoldItemDto(card.getSlotId(), card.getQuantity(), card.getOptionId(), card.getParticipantsCount()));
+            hold = createBookingHoldUseCase.execute(new CreateBookingHoldCommand(userId, items));
             if (catalog != null && hold.totalAmount().compareTo(card.getPrice().multiply(BigDecimal.valueOf(card.getQuantity()))) != 0) {
                 cancelBookingHoldUseCase.execute(new CancelBookingHoldCommand(hold.bookingId(), userId));
                 card.markCancelled(); cardStorePort.save(card);

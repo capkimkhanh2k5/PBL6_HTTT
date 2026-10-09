@@ -41,6 +41,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 @AutoConfigureMockMvc
 @Transactional
 class ItineraryLifecycleHttpIntegrationTest extends BaseSecurityIntegrationTest {
+    @Autowired jakarta.persistence.EntityManager entityManager;
     @Autowired MockMvc mvc;
     @Autowired JdbcTemplate jdbc;
     @Autowired ObjectMapper mapper;
@@ -145,6 +146,7 @@ class ItineraryLifecycleHttpIntegrationTest extends BaseSecurityIntegrationTest 
         assertThat(proposed.getFirst().plan().items()).containsExactly(original.items().stream().filter(item -> item.slotId().equals(secondSlot)).findFirst().orElseThrow());
         job.check();
         assertThat(planner.proposals(id, owner)).hasSize(1);
+        entityManager.flush();
         assertThat(jdbc.queryForObject("select count(*) from notifications where user_id=? and type='AI_ITINERARY_SOURCE_CHANGED'", Integer.class, owner)).isEqualTo(1);
         assertThat(jdbc.queryForObject("select status from master_orders where id=?", String.class, orderId)).isEqualTo("PAID");
         assertThat(jdbc.queryForObject("select total_amount from master_orders where id=?", java.math.BigDecimal.class, orderId)).isEqualByComparingTo("200000");

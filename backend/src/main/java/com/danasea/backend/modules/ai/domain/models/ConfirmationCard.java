@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.UUID;
 import java.util.Map;
+import java.util.List;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -30,6 +31,7 @@ public class ConfirmationCard {
     private BigDecimal price; // The price when the card was generated
     private String date; // Booking date/slot
     private Integer quantity;
+    private List<Integer> participantsPerPackage;
     private String status; // PENDING, CONFIRMED, EXPIRED, CANCELLED
     private LocalDateTime createdAt;
     private String reason;

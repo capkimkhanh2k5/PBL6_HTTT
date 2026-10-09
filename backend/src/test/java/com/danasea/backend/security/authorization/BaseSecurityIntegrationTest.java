@@ -33,6 +33,9 @@ public abstract class BaseSecurityIntegrationTest {
         registry.add("spring.datasource.url", () -> dbUrl);
         registry.add("spring.datasource.username", () -> "test");
         registry.add("spring.datasource.password", () -> "test");
+        registry.add("spring.datasource.hikari.maximum-pool-size", () -> "3");
+        registry.add("spring.datasource.hikari.minimum-idle", () -> "1");
+        registry.add("app.scheduler.enabled", () -> "false");
         registry.add("spring.datasource.driver-class-name", () -> "org.postgresql.Driver");
         registry.add("spring.jpa.database-platform", () -> "org.hibernate.dialect.PostgreSQLDialect");
 

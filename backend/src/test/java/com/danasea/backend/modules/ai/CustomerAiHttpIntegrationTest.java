@@ -38,13 +38,16 @@ class CustomerAiHttpIntegrationTest extends BaseSecurityIntegrationTest {
     @MockitoBean TravelWeatherPort weather;
     @MockitoBean ReviewHighlightPort highlights;
     @MockitoBean RateLimiterPort limiter;
-    private UUID owner, other, admin, serviceId, slotId, optionId;
+    private UUID owner, other, admin, serviceId, slotId, optionId, categoryId;
 
     @BeforeEach void setup() {
         owner = account("CUSTOMER"); other = account("CUSTOMER"); admin = account("ADMIN");
+        categoryId = UUID.randomUUID();
+        jdbc.update("insert into categories(id,name,slug,is_active,requires_safety_cert,created_at,updated_at) values(?,'AI HTTP regression',?,true,false,now(),now())", categoryId, "http-test-" + categoryId);
         serviceId = UUID.randomUUID(); slotId = UUID.randomUUID(); optionId = UUID.randomUUID();
         jdbc.update("insert into services(id,name,description,status,weather_sensitive,duration_minutes,view_count,created_at,updated_at) values(?,?,?,'PUBLISHED',false,60,7,now(),now())",
                 serviceId, "Kayak test", "Coastal kayaking");
+        jdbc.update("update services set category_id=? where id=?", categoryId, serviceId);
         jdbc.update("insert into service_options(id,service_id,name,option_type,pricing_unit,price,max_pax_per_package,status) values(?,?,?,'PRIVATE','PER_PACKAGE',300000,2,'ACTIVE')",
                 optionId, serviceId, "Private kayak");
         jdbc.update("insert into service_slots(id,service_id,date,start_time,end_time,capacity,booked_count,status,created_at,updated_at) values(?,?,?,?,?,10,0,'OPEN',now(),now())",
@@ -62,7 +65,7 @@ class CustomerAiHttpIntegrationTest extends BaseSecurityIntegrationTest {
                 id, id + "@example.test", role, "AI test account");
         return id;
     }
-    private String request() { return "{\"query\":\"Kayak test\",\"partySize\":3,\"from\":\"" + LocalDate.now(TravelContext.ZONE).plusDays(1) + "\"}"; }
+    private String request() { return "{\"categoryId\":\"" + categoryId + "\",\"query\":\"Kayak test\",\"partySize\":3,\"from\":\"" + LocalDate.now(TravelContext.ZONE).plusDays(1) + "\"}"; }
 
     @Test void flywayMigratesThroughV21AndCatalogReadsPreserveViews() throws Exception {
         assertThat(jdbc.queryForObject("select count(*) from flyway_schema_history where version='21' and success=true", Integer.class)).isEqualTo(1);
