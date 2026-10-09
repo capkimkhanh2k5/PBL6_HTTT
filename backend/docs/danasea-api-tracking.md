@@ -1,10 +1,10 @@
 # DANASEA — Master API & Test Checklist (EPIC-01 → EPIC-08)
 
-**Cập nhật:** 08/10/2026 — đối chiếu nhánh `implement_review_rating_system`; bổ sung API review/rating, kiểm duyệt và bảo vệ thao tác đồng thời,  nhánh `implement_password_reset_api`; bổ sung forgot/reset password, bảo vệ OTP dùng một lần và thu hồi phiên cũ.
+**Cập nhật:** 09/10/2026 — đối chiếu controller trên nhánh `implement_admin_reports_dashboard`; bổ sung báo cáo, dashboard và kiểm chứng hồi quy tài chính, đối chiếu nhánh `implement_review_rating_system`; bổ sung API review/rating, kiểm duyệt và bảo vệ thao tác đồng thời,  nhánh `implement_password_reset_api`; bổ sung forgot/reset password, bảo vệ OTP dùng một lần và thu hồi phiên cũ.
 
 **Quy ước:** Với mục API, `[x]` nghĩa là endpoint đã có trong controller; không đồng nghĩa đã kiểm chứng toàn bộ nghiệp vụ hoặc tích hợp cổng thanh toán thật. Với mục Test, hạ tầng và quyết định nghiệp vụ, giữ trạng thái checklist đã ghi nhận; `[ ]` là việc còn thiếu/chưa xác nhận. Lần cập nhật này không đánh dấu các test chưa xác nhận thành đã pass.
 
-**Phạm vi kiểm kê:** 124 tổ hợp HTTP method/path từ 42 controller trong profile `test`, gồm 4 đường dẫn alias, 4 endpoint chẩn đoán ở profile `dev/test` và 1 webhook nội bộ chỉ ở `test`. Swagger/Actuator do thư viện cung cấp không nằm trong số API controller này. Các API cần hoàn thiện nghiệp vụ được ghi chú tại mục tương ứng; xem thêm [báo cáo rà soát](API-completeness-review-2026-10-06.md) và [kết quả sandbox](payment-sandbox-verification-2026-10-06.md).
+**Phạm vi kiểm kê:** 123 tổ hợp HTTP method/path từ 41 controller trong profile `test`, gồm 4 đường dẫn alias, 4 endpoint chẩn đoán ở profile `dev/test` và 1 webhook nội bộ chỉ ở `test`. Swagger/Actuator do thư viện cung cấp không nằm trong số API controller này. Các API cần hoàn thiện nghiệp vụ được ghi chú tại mục tương ứng; xem thêm [báo cáo rà soát](API-completeness-review-2026-10-06.md) và [kết quả sandbox](payment-sandbox-verification-2026-10-06.md).
 
 ---
 
@@ -75,7 +75,7 @@
 - [x] PATCH /api/admin/users/{id}/unlock
 - [x] GET /api/admin/audit-logs (danh sách có phân trang)
 - [x] GET /api/admin/audit-logs/{id} (chi tiết nhật ký)
-- [x] GET /api/admin/dashboard (hiện chỉ trả ADMIN_ACCESS_GRANTED; chưa có số liệu thống kê)
+- [x] GET /api/admin/dashboard (số liệu thật, bộ lọc ngày/vendor; giữ ADMIN_ACCESS_GRANTED)
 
 ### Admin quản lý tài khoản — Test
 - [x] LockUserUseCaseTest (thành công, không tồn tại, đã lock rồi, self-lock chặn)
@@ -83,6 +83,29 @@
 - [x] Test liên module: refresh token của user vừa bị lock thất bại NGAY (không đợi hết hạn)
 - [x] AdminUserControllerTest (list/filter, 404, role sai → 403)
 - [x] AuditLogServiceTest (ghi đúng field, không rollback hành động chính nếu audit lỗi)
+
+### Thống kê, dashboard và báo cáo — API
+- [x] GET /api/admin/reports/revenue?from=&to=&groupBy=&vendorId=
+- [x] GET /api/admin/reports/bookings?from=&to=&groupBy=&vendorId=
+- [x] GET /api/admin/reports/vendors?from=&to=&vendorId=
+- [x] GET /api/admin/reports/export?type=&from=&to=&groupBy=&vendorId= (CSV)
+- [x] GET /api/vendor/dashboard?from=&to=
+- [x] GET /api/vendor/reports/revenue?from=&to=&groupBy=
+- [x] GET /api/vendor/reports/bookings?from=&to=&groupBy=
+- [x] GET /api/vendor/reports/export?type=&from=&to=&groupBy= (CSV)
+
+### Thống kê, dashboard và báo cáo — Quy ước và kiểm chứng
+- Vendor được lấy từ tài khoản đăng nhập; `vendorId` từ client không thay đổi phạm vi vendor.
+- `groupBy=day|week|quarter|year`, mặc định `day`; khoảng ngày tối đa 3660 ngày, múi giờ `Asia/Ho_Chi_Minh`, cận cuối SQL là đầu ngày sau `to` và không bao gồm cận này.
+- Tiền thu ghi nhận theo `payments.paid_at`; payment đã chuyển `REFUNDED` vẫn giữ sự kiện thu gốc. Refund chỉ ghi nhận `PROCESSED` theo `processed_at`.
+- Hoa hồng hoàn toàn bộ về 0; hoàn một phần điều chỉnh theo tổng refund và tỷ lệ hoa hồng của đơn. Payout/hoa hồng kỳ có thể âm khi điều chỉnh giao dịch kỳ trước.
+- Booking là cohort đơn tạo trong khoảng ngày với trạng thái hiện tại; lý do hủy đếm từng sub-order một lần. `unknownCancellationCount` biểu thị dữ liệu không xác định lý do; compensation không tự coi là hủy đơn.
+- CSV UTF-8 BOM, escape RFC 4180 và trung hòa công thức trong tên vendor; số tiền âm vẫn là số.
+- Migration `V22__report_financial_events.sql`: `payments.paid_at`, `sub_orders.cancellation_reason`, index tài chính. Thời điểm thanh toán của dữ liệu cũ là ước lượng từ timestamp có sẵn; chưa thể coi là đối soát lịch sử chính xác với cổng.
+- [x] ReportFinancialIntegrationTest: PostgreSQL thật, refund qua kỳ, pending/failed, phân bổ tiền, ranh giới ngày, tính nhất quán dashboard/vendor, CSV và lý do hủy.
+- [x] ReportSecurityAdversarialIntegrationTest: phân quyền và vendor isolation qua Spring Security.
+- Kiểm chứng 09/10/2026 tại worktree này: `clean verify` BUILD SUCCESS, 1875 test, 0 failures/errors, 135 skipped; riêng report 288 test không có test bỏ qua. Chưa áp dụng migration lên database ứng dụng đang chạy.
+- Chi tiết hợp đồng và ví dụ: [reports-dashboard-contract.md](reports-dashboard-contract.md).
 
 ### User Module — API
 - [x] GET /api/users/me
@@ -471,11 +494,7 @@ Chính sách hiện tại: khách sửa review trong 7 ngày; chưa cung cấp A
    - `GET/POST /api/vendor/services/{id}/slots`
    - `PATCH /api/vendor/services/{id}/slots/{slotId}`
 
-2. **Thống kê và báo cáo** Cần số liệu theo ngày, tuần, quý, năm và khoảng thời gian; dashboard hiện chưa trả số liệu.
-   - `GET /api/admin/reports/revenue`
-   - `GET /api/admin/reports/bookings`
-   - `GET /api/vendor/reports/revenue`
-   - API xuất CSV với bộ lọc thời gian.
+2. **Thống kê và báo cáo** Đã có API admin/vendor, dashboard thật, nhóm ngày/tuần/quý/năm và CSV trên nhánh `implement_admin_reports_dashboard`. Hợp đồng và giới hạn dữ liệu lịch sử được ghi tại mục Thống kê ở trên; nghiệm thu runtime theo kết quả kiểm chứng của worktree này.
 
 3. **Đánh giá sau trải nghiệm** Đã triển khai 9 endpoint và kiểm thử nghiệp vụ/đồng thời; xem checklist Review & Rating tại EPIC-07.
 

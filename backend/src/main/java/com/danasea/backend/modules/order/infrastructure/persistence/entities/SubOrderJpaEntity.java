@@ -1,5 +1,7 @@
 package com.danasea.backend.modules.order.infrastructure.persistence.entities;
 
+import com.danasea.backend.modules.order.domain.models.RefundReason;
+
 import com.danasea.backend.modules.order.domain.models.SubOrderStatus;
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
@@ -41,6 +43,9 @@ public class SubOrderJpaEntity extends BaseJpaEntity {
 
     @Enumerated(EnumType.STRING)
     private SubOrderStatus status;
+
+    @Enumerated(EnumType.STRING)
+    private RefundReason cancellationReason;
 
     private Boolean waiverAccepted;
 

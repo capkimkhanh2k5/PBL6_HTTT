@@ -535,7 +535,7 @@ public class FullLifecycleEmpiricalChallengerTest {
         ServiceSlotJpaEntity slot = new ServiceSlotJpaEntity();
         slot.setId(slotId);
         slot.setServiceId(serviceId);
-        slot.setDate(LocalDate.now());
+        slot.setDate(LocalDate.now().minusDays(1));
         slot.setStartTime(LocalTime.of(9, 0));
         slot.setEndTime(LocalTime.of(12, 0));
         slot.setStatus(SlotStatus.OPEN);

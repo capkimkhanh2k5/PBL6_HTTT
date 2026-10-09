@@ -35,14 +35,27 @@ class PostgreSqlMigrationIntegrationTest {
                 .locations("classpath:db/migration")
                 .load();
 
+        Flyway legacy = Flyway.configure()
+                .dataSource(jdbcUrl, "migration_user", "migration_password")
+                .locations("classpath:db/migration").target("17").load();
+        legacy.migrate();
+        java.util.UUID legacyPayment = java.util.UUID.randomUUID();
+        try (var connection = DriverManager.getConnection(jdbcUrl, "migration_user", "migration_password");
+             var statement = connection.prepareStatement("INSERT INTO payments(id, status, created_at, updated_at) VALUES (?, 'REFUNDED', TIMESTAMPTZ '2026-09-01 10:00:00+07', TIMESTAMPTZ '2026-09-02 10:00:00+07')")) {
+            statement.setObject(1, legacyPayment);
+            statement.executeUpdate();
+        }
         var migrationResult = flyway.migrate();
         assertTrue(migrationResult.success);
         assertNotNull(flyway.info().current());
-        assertEquals("21", flyway.info().current().getVersion().getVersion());
+        assertEquals("22", flyway.info().current().getVersion().getVersion());
         assertTrue(flyway.validateWithResult().validationSuccessful);
 
         try (var connection = DriverManager.getConnection(jdbcUrl, "migration_user", "migration_password");
              var statement = connection.createStatement()) {
+            try (var row = statement.executeQuery("SELECT paid_at IS NOT NULL FROM payments WHERE id = '" + legacyPayment + "'")) {
+                assertTrue(row.next() && row.getBoolean(1));
+            }
             assertTrue(tableExists(statement, "refunds"));
             assertTrue(tableExists(statement, "settlements"));
             assertTrue(tableExists(statement, "checkin_tokens"));
