@@ -1,5 +1,7 @@
 package com.danasea.backend.modules.order.domain.models;
 
+import com.danasea.backend.modules.order.domain.models.RefundReason;
+
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.OffsetDateTime;
@@ -34,6 +36,8 @@ public class SubOrder extends BaseDomainModel {
     private BigDecimal commissionAmount;
     private BigDecimal vendorPayoutAmount;
     private SubOrderStatus status;
+
+    private RefundReason cancellationReason;
     private Boolean waiverAccepted;
     private OffsetDateTime waiverAcceptedAt;
     private UUID qrSecret;

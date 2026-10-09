@@ -75,7 +75,7 @@
 - [x] PATCH /api/admin/users/{id}/unlock
 - [x] GET /api/admin/audit-logs (danh sách có phân trang)
 - [x] GET /api/admin/audit-logs/{id} (chi tiết nhật ký)
-- [x] GET /api/admin/dashboard (hiện chỉ trả ADMIN_ACCESS_GRANTED; chưa có số liệu thống kê)
+- [x] GET /api/admin/dashboard (số liệu thật, bộ lọc ngày/vendor; giữ ADMIN_ACCESS_GRANTED)
 
 ### Admin quản lý tài khoản — Test
 - [x] LockUserUseCaseTest (thành công, không tồn tại, đã lock rồi, self-lock chặn)
@@ -83,6 +83,29 @@
 - [x] Test liên module: refresh token của user vừa bị lock thất bại NGAY (không đợi hết hạn)
 - [x] AdminUserControllerTest (list/filter, 404, role sai → 403)
 - [x] AuditLogServiceTest (ghi đúng field, không rollback hành động chính nếu audit lỗi)
+
+### Thống kê, dashboard và báo cáo — API
+- [x] GET /api/admin/reports/revenue?from=&to=&groupBy=&vendorId=
+- [x] GET /api/admin/reports/bookings?from=&to=&groupBy=&vendorId=
+- [x] GET /api/admin/reports/vendors?from=&to=&vendorId=
+- [x] GET /api/admin/reports/export?type=&from=&to=&groupBy=&vendorId= (CSV)
+- [x] GET /api/vendor/dashboard?from=&to=
+- [x] GET /api/vendor/reports/revenue?from=&to=&groupBy=
+- [x] GET /api/vendor/reports/bookings?from=&to=&groupBy=
+- [x] GET /api/vendor/reports/export?type=&from=&to=&groupBy= (CSV)
+
+### Thống kê, dashboard và báo cáo — Quy ước và kiểm chứng
+- Vendor được lấy từ tài khoản đăng nhập; `vendorId` từ client không thay đổi phạm vi vendor.
+- `groupBy=day|week|quarter|year`, mặc định `day`; khoảng ngày tối đa 3660 ngày, múi giờ `Asia/Ho_Chi_Minh`, cận cuối SQL là đầu ngày sau `to` và không bao gồm cận này.
+- Tiền thu ghi nhận theo `payments.paid_at`; payment đã chuyển `REFUNDED` vẫn giữ sự kiện thu gốc. Refund chỉ ghi nhận `PROCESSED` theo `processed_at`.
+- Hoa hồng hoàn toàn bộ về 0; hoàn một phần điều chỉnh theo tổng refund và tỷ lệ hoa hồng của đơn. Payout/hoa hồng kỳ có thể âm khi điều chỉnh giao dịch kỳ trước.
+- Booking là cohort đơn tạo trong khoảng ngày với trạng thái hiện tại; lý do hủy đếm từng sub-order một lần. `unknownCancellationCount` biểu thị dữ liệu không xác định lý do; compensation không tự coi là hủy đơn.
+- CSV UTF-8 BOM, escape RFC 4180 và trung hòa công thức trong tên vendor; số tiền âm vẫn là số.
+- Migration `V22__report_financial_events.sql`: `payments.paid_at`, `sub_orders.cancellation_reason`, index tài chính. Thời điểm thanh toán của dữ liệu cũ là ước lượng từ timestamp có sẵn; chưa thể coi là đối soát lịch sử chính xác với cổng.
+- [x] ReportFinancialIntegrationTest: PostgreSQL thật, refund qua kỳ, pending/failed, phân bổ tiền, ranh giới ngày, tính nhất quán dashboard/vendor, CSV và lý do hủy.
+- [x] ReportSecurityAdversarialIntegrationTest: phân quyền và vendor isolation qua Spring Security.
+- Kiểm chứng 09/10/2026 tại worktree này: `clean verify` BUILD SUCCESS, 1875 test, 0 failures/errors, 135 skipped; riêng report 288 test không có test bỏ qua. Chưa áp dụng migration lên database ứng dụng đang chạy.
+- Chi tiết hợp đồng và ví dụ: [reports-dashboard-contract.md](reports-dashboard-contract.md).
 
 ### User Module — API
 - [x] GET /api/users/me
@@ -284,13 +307,15 @@ Hai item phải nhận hai đơn vị khác nhau và tính giá hai gói. Nhóm 
 - [x] POST /api/payments/webhook/internal/{provider} (chỉ profile `test`, cần ADMIN và HMAC; không tồn tại ở dev/production)
 - [x] POST /api/payments/webhook/paypal/refund (xác minh đủ 5 transmission headers; không dùng HMAC/fallback nội bộ)
 - [x] POST /api/orders/{id}/refund-request (yêu cầu hoàn theo policy; đã hoàn thiện persistence, idempotency và provider transaction ID)
-- [x] GET /api/orders/{id}/refunds (danh sách yêu cầu hoàn tiền theo đơn hàng cho khách sở hữu)
+- [x] GET /api/orders/{id}/payments (lịch sử intent/giao dịch, chỉ chủ đơn hoặc admin)
+- [x] GET /api/orders/{id}/refunds (danh sách yêu cầu hoàn tiền theo đơn hàng cho chủ đơn hoặc admin)
 - [x] GET /api/payments/{orderId}/status (truy vấn trạng thái thanh toán theo đơn hàng cho khách)
 - [x] GET /api/payments/{orderId}/payments (alias danh sách thanh toán theo đơn)
 - [x] GET /api/payments/detail/{paymentId} (chi tiết thanh toán cho khách)
-- [x] GET /api/admin/payments (danh sách giao dịch thanh toán toàn sàn cho admin, lọc theo status/provider/orderId, có phân trang)
+- [x] GET /api/admin/orders (danh sách đơn hàng toàn sàn cho admin, lọc theo status/paymentStatus/vendorId/customerId/thời gian, có phân trang)
+- [x] GET /api/admin/payments (danh sách giao dịch thanh toán toàn sàn cho admin, lọc theo status/provider/orderId/vendorId/customerId/thời gian, có phân trang)
 - [x] GET /api/admin/payments/{id} (chi tiết giao dịch thanh toán cho admin)
-- [x] GET /api/admin/refunds (danh sách yêu cầu hoàn tiền toàn sàn cho admin, lọc theo status/reason/subOrderId, có phân trang)
+- [x] GET /api/admin/refunds (danh sách yêu cầu hoàn tiền toàn sàn cho admin, lọc theo status/reason/subOrderId/orderId/provider/vendorId/customerId/thời gian, có phân trang)
 - [x] GET /api/admin/refunds/{id} (chi tiết yêu cầu hoàn tiền cho admin)
 - [x] GET /api/admin/discount-codes (danh sách mã khuyến mãi toàn sàn cho admin, lọc theo code/scope/vendorId/isActive)
 - [x] GET /api/admin/discount-codes/{id} (chi tiết mã giảm giá cho admin)
@@ -371,6 +396,24 @@ Hai item phải nhận hai đơn vị khác nhau và tính giá hai gói. Nhóm 
 - [x] OrderExpiryEventListenerTest (4 unit test: hủy khi pending, giữ nguyên paid, không có đơn, trả reservation khi hết hạn)
 - [x] SettlementCalculationTest (15 unit test: tính settlement, loại trừ, hoa hồng và snapshot giảm giá; trường hợp đồng tài trợ ở mức engine, API hiện chỉ có PLATFORM hoặc VENDOR)
 
+
+### Quản trị giao dịch — hợp đồng đối soát ngày 09/10/2026
+
+**Kiểm chứng 09/10/2026:** `./mvnw clean verify` → BUILD SUCCESS; 1.711 test cases, 1576 thực chạy, 135 skipped, 0 failures, 0 errors. Trong đó 29 ca `AdminTransactionIntegrationTest` trên PostgreSQL 16/Flyway/Redis 7 riêng và 57 ca tập trung reconciliation/adapter/job. Kiểm kê runtime: 126 method/path; migration mới V23 đã được kiểm tra trên DB mới và nâng từ V20. Gateway được mock; sandbox thật chưa được chạy trong lần này.
+
+- Ba danh sách `/api/admin/orders`, `/api/admin/payments`, `/api/admin/refunds` dùng bộ lọc động, chạy với PostgreSQL khi bỏ trống ngày hoặc chỉ có một cận. Ngày bao gồm cả hai biên, so sánh theo instant; `from > to` trả 400. Lọc vendor dùng `EXISTS` để không nhân bản đơn nhiều sub-order.
+- Query cổng chạy ngoài transaction áp dụng kết quả. Sau query, khóa payment rồi master order, đọc lại trạng thái và đối chiếu intent đã lưu. Webhook/capture thắng trước thì đối soát no-op, không ghi đè trạng thái cuối.
+- Chỉ nhận `SUCCESS` khi ID giao dịch, số tiền và tiền tệ cổng hợp lệ. VNPay phải có checksum/merchant đúng, `querydr` thành công, TxnRef khớp và TransactionType=01. Response refund 02/03 không chứng minh thanh toán thành công.
+- Timeout, UNKNOWN, trạng thái VNPay đảo/nghi ngờ/hoàn trả không tự chuyển payment thành FAILED; local `expiresAt` không chứng minh chưa thu tiền. Query chưa rõ lưu `GATEWAY_QUERY_AWAITING_VERIFICATION`. Dấu hiệu capture đã gửi, kể cả marker timeout của dữ liệu cũ thiếu operation ID, vẫn giữ `GATEWAY_TIMEOUT_AWAITING_VERIFICATION` và không gửi lại capture.
+- PayPal chưa approve/capture vẫn cho phép khách thực hiện capture đầu tiên sau approval; tra cứu trước approval không chặn thao tác này.
+- Nếu xác nhận booking hoặc ghi audit thất bại, transaction kết quả rollback; payment tiếp tục PENDING với `RECONCILIATION_APPLY_REQUIRES_REVIEW` và lịch đối soát tiếp theo. Không tự xác nhận hold hết hạn/bán vượt tồn; trường hợp này cần kiểm tra vận hành, không tự gửi một lệnh tài chính mới.
+- Job lấy tối đa 50 payment PAYPAL/VNPAY đến hạn mỗi lượt, không quét trùng capture trong cùng lượt. Claim được commit trước query; backoff 30/60/120/240/300 giây. Payment chưa giải quyết không chiếm mãi batch đầu.
+- Audit `RECONCILE_PAYMENT_SUCCESS`, `RECONCILE_PAYMENT_FAILED`, `RECONCILE_PAYMENT_PENDING`, `RECONCILE_PAYMENT_SKIPPED` ghi cùng transaction trạng thái, gồm cả nhánh phục hồi capture. Metadata JSON dùng TEXT; không phát audit SUCCESS cho transaction bị rollback.
+- `paymentStatus` chuyển PAID sau thanh toán, REFUNDED khi hoàn toàn bộ; hoàn một phần vẫn PAID vì enum hiện không có PARTIALLY_REFUNDED. Hủy không hoàn chuyển NO_REFUND; hủy có refund PENDING chưa được ghi REFUNDED.
+- Payment response bổ sung `lastError`, `reconciliationAttempts`, `reconciliationNextAttemptAt`, `lastReconciledAt`. Refund detail bổ sung `verificationAttempts`, `nextAttemptAt`, `gatewayRequestedAt`, `paymentId`; `retryCount` không thay thế số lần query xác minh.
+- Migration `V23__admin_transaction_reconciliation.sql` bổ sung lịch đối soát/index, metadata TEXT và backfill PAID/REFUNDED từ payment cũ. Không sửa migration đã phát hành; V21/V22 đã được dùng ở các nhánh AI/review/reporting khác.
+- Bộ kiểm chứng: `AdminTransactionIntegrationTest` dùng PostgreSQL 16/Flyway và Redis 7 riêng; HTTP/RBAC/owner, lọc kết hợp/phân trang/biên ngày, query cạnh tranh với webhook, rollback booking/audit, money mismatch, đổi intent khi query, capture đầu tiên, marker timeout legacy, IPN chưa rõ, hoàn toàn phần/một phần, backoff/batch và nâng DB V20→V23. Gateway/confirm booking được mock; không thay thế giao dịch sandbox thật.
+
 ---
 
 ## EPIC-05 · Weather & Safety Rules
@@ -429,6 +472,31 @@ Hai item phải nhận hai đơn vị khác nhau và tính giá hai gói. Nhóm 
 
 ## EPIC-07 · Operations / Settlement / Review
 
+### Review & Rating — API
+- [x] POST /api/sub-orders/{id}/reviews (chủ đơn COMPLETED; một review mỗi sub-order)
+- [x] PUT /api/sub-orders/{id}/reviews (sửa qua sub-order, trong 7 ngày)
+- [x] PUT /api/reviews/{id} (chỉ tác giả, trong 7 ngày)
+- [x] GET /api/services/{id}/reviews (công khai, phân trang, chỉ review visible; không trả metadata nội bộ)
+- [x] GET /api/vendor/reviews (chỉ review của vendor hiện tại)
+- [x] POST /api/vendor/reviews/{id}/reply (chỉ vendor sở hữu review)
+- [x] GET /api/admin/reviews (lọc service/vendor/flag/visibility, phân trang)
+- [x] PATCH /api/admin/reviews/{id}/visibility (chỉ ADMIN; ghi chú kiểm duyệt riêng)
+- [x] POST /api/reviews/{id}/flag (yêu cầu đăng nhập; review visible; response chỉ gồm id/isFlagged)
+
+### Review & Rating — Bảo đảm nghiệp vụ / Test
+- [x] Unique constraint `uq_reviews_sub_order` bảo vệ một review mỗi trải nghiệm; trùng trả 409.
+- [x] Khóa review khi sửa/reply/flag/ẩn/hiện; sửa qua sub-order tra cứu ID bằng scalar trước khi khóa.
+- [x] Khóa vendor trước tổng hợp điểm; tính điểm/count và badge chỉ từ review visible, trong cùng transaction.
+- [x] Tối đa 5 ảnh HTTP(S), mỗi URL tối đa 2048 ký tự; JSON lưu trong TEXT.
+- [x] Validation dùng khóa i18n Anh/Việt; flag không đọc được nội dung review bị ẩn.
+- [x] ReviewUseCaseTest, ReviewControllerTest, ReviewRatingIntegrationTest.
+- [x] ReviewConcurrencyIntegrationTest (PostgreSQL 16 thật: 11 ca unique, tổng điểm, cạnh tranh edit/reply/hide, alias, privacy, ảnh, ownership và badge).
+- [x] Migration `V21__review_enhancements.sql` thay V18 của nhánh review để tránh trùng số với nhánh slot; giữ V18/V19 cho slot và V20 cho password reset.
+
+**Kiểm chứng 08/10/2026:** `./mvnw clean verify` thành công; 1.621 test, 0 failure/error, 135 skipped theo cấu hình suite. Cả 11 test PostgreSQL thật chạy và pass; Flyway áp dụng V21 và Hibernate validate schema thành công.
+
+Chính sách hiện tại: khách sửa review trong 7 ngày; chưa cung cấp API xóa. Admin ẩn/hiện để kiểm duyệt; ẩn loại review khỏi điểm tổng hợp, hiện tính lại điểm.
+
 ### Khiếu nại — Tranh chấp
 - [x] POST /api/orders/{id}/disputes
 - [x] GET /api/admin/disputes
@@ -477,25 +545,16 @@ Hai item phải nhận hai đơn vị khác nhau và tính giá hai gói. Nhóm 
    - `GET/POST /api/vendor/services/{id}/slots`
    - `PATCH /api/vendor/services/{id}/slots/{slotId}`
 
-2. **Thống kê và báo cáo** Cần số liệu theo ngày, tuần, quý, năm và khoảng thời gian; dashboard hiện chưa trả số liệu.
-   - `GET /api/admin/reports/revenue`
-   - `GET /api/admin/reports/bookings`
-   - `GET /api/vendor/reports/revenue`
-   - API xuất CSV với bộ lọc thời gian.
+2. **Thống kê và báo cáo** Đã có API admin/vendor, dashboard thật, nhóm ngày/tuần/quý/năm và CSV trên nhánh `implement_admin_reports_dashboard`. Hợp đồng và giới hạn dữ liệu lịch sử được ghi tại mục Thống kê ở trên; nghiệm thu runtime theo kết quả kiểm chứng của worktree này.
 
-3. **Đánh giá sau trải nghiệm** Hiện có bảng/model nhưng chưa có API đánh giá.
-   - `POST /api/sub-orders/{id}/reviews`
-   - `GET /api/services/{id}/reviews`
-   - `POST /api/vendor/reviews/{id}/reply`
-
-   Chỉ khách đã hoàn thành trải nghiệm được đánh giá; điểm service/vendor phải cập nhật từ dữ liệu này.
+3. **Đánh giá sau trải nghiệm** Đã triển khai 9 endpoint và kiểm thử nghiệp vụ/đồng thời; xem checklist Review & Rating tại EPIC-07.
 
 4. **Chi trả vendor** `FINALIZED` hiện chưa chứng minh vendor đã nhận tiền.
    - `POST/GET /api/vendor/payout-requests`
    - API Admin duyệt và xác nhận chi trả.
    - Cấu hình hoa hồng thay cho tỷ lệ mặc định cố định.
 
-5. **Theo dõi và quản trị giao dịch** Khách cần biết hoàn tiền đang xử lý hay đã hoàn tất; Admin cần tìm giao dịch toàn sàn.
+5. **Theo dõi và quản trị giao dịch [ĐÃ KIỂM CHỨNG BACKEND]** Khách xem được lịch sử payment/refund của đơn; admin tìm và lọc giao dịch toàn sàn. Đối soát chỉ tra cứu, kiểm tra identity/money, cập nhật dưới khóa và ghi audit cùng transaction. Gateway trong test được mô phỏng; nghiệm thu sandbox thật vẫn là mục riêng.
    - `GET /api/orders/{id}/payments`
    - `GET /api/orders/{id}/refunds`
    - `GET /api/admin/orders`, `/payments`, `/refunds`

@@ -22,24 +22,25 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.danasea.backend.configs.properties.PaymentProperties;
-import com.danasea.backend.modules.order.application.usecases.CreatePaymentIntentUseCase;
 import com.danasea.backend.modules.booking.application.dtos.ConfirmBookingCommand;
 import com.danasea.backend.modules.booking.application.usecases.ConfirmBookingUseCase;
 import com.danasea.backend.modules.booking.domain.models.BookingStatus;
 import com.danasea.backend.modules.booking.infrastructure.persistence.entities.BookingItemJpaEntity;
 import com.danasea.backend.modules.booking.infrastructure.persistence.entities.BookingJpaEntity;
 import com.danasea.backend.modules.booking.infrastructure.persistence.repositories.JpaBookingRepository;
+import com.danasea.backend.modules.order.application.usecases.CreatePaymentIntentUseCase;
 import com.danasea.backend.modules.order.domain.exceptions.InvalidWebhookException;
 import com.danasea.backend.modules.order.domain.models.MasterOrderStatus;
+import com.danasea.backend.modules.order.domain.models.PaymentOrderStatus;
 import com.danasea.backend.modules.order.domain.models.PaymentProvider;
 import com.danasea.backend.modules.order.domain.models.PaymentStatus;
-import com.danasea.backend.modules.order.domain.models.SubOrderStatus;
 import com.danasea.backend.modules.order.domain.models.RefundStatus;
+import com.danasea.backend.modules.order.domain.models.SubOrderStatus;
 import com.danasea.backend.modules.order.domain.services.RefundPolicyEngine;
 import com.danasea.backend.modules.order.infrastructure.persistence.entities.MasterOrderJpaEntity;
 import com.danasea.backend.modules.order.infrastructure.persistence.entities.PaymentJpaEntity;
-import com.danasea.backend.modules.order.infrastructure.persistence.entities.SubOrderJpaEntity;
 import com.danasea.backend.modules.order.infrastructure.persistence.entities.RefundJpaEntity;
+import com.danasea.backend.modules.order.infrastructure.persistence.entities.SubOrderJpaEntity;
 import com.danasea.backend.modules.order.infrastructure.persistence.repositories.JpaMasterOrderRepository;
 import com.danasea.backend.modules.order.infrastructure.persistence.repositories.JpaPaymentRepository;
 import com.danasea.backend.modules.order.infrastructure.persistence.repositories.JpaRefundRepository;
@@ -197,6 +198,9 @@ class OrderPaymentServiceTest {
         PaymentJpaEntity payment = payment(UUID.randomUUID(), orderId);
         payment.setStatus(PaymentStatus.SUCCESS);
 
+        MasterOrderJpaEntity order = order(orderId, UUID.randomUUID(), UUID.randomUUID());
+        when(masterOrderRepository.findByIdForUpdate(orderId)).thenReturn(Optional.of(order));
+
         String payload = "{\"eventId\":\"refund-event-1\",\"refundId\":\"" + refundId
                 + "\",\"providerRefundId\":\"provider-refund-1\",\"status\":\"PROCESSED\","
                 + "\"amount\":250000}";
@@ -212,6 +216,7 @@ class OrderPaymentServiceTest {
         RefundWebhookResponse response = service.processRefundWebhook(
                 PaymentProvider.VNPAY, payload, signer.sign(payload));
 
+        assertThat(order.getPaymentStatus()).isEqualTo(PaymentOrderStatus.REFUNDED);
         assertThat(response.status()).isEqualTo(RefundStatus.PROCESSED);
         assertThat(response.alreadyProcessed()).isFalse();
         assertThat(refund.getProviderRefundId()).isEqualTo("provider-refund-1");

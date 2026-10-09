@@ -8,8 +8,10 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.UUID;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -24,6 +26,7 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionTemplate;
 
+import com.danasea.backend.modules.audit.application.api.AuditLogInternalApi;
 import com.danasea.backend.modules.booking.application.dtos.ConfirmBookingCommand;
 import com.danasea.backend.modules.booking.application.usecases.ConfirmBookingUseCase;
 import com.danasea.backend.modules.booking.domain.exceptions.BookingHoldExpiredException;
@@ -41,6 +44,7 @@ import com.danasea.backend.modules.order.domain.exceptions.OrderNotFoundExceptio
 import com.danasea.backend.modules.order.domain.exceptions.PaymentGatewayException;
 import com.danasea.backend.modules.order.domain.exceptions.RefundNotFoundException;
 import com.danasea.backend.modules.order.domain.models.MasterOrderStatus;
+import com.danasea.backend.modules.order.domain.models.PaymentOrderStatus;
 import com.danasea.backend.modules.order.domain.models.PaymentProvider;
 import com.danasea.backend.modules.order.domain.models.PaymentStatus;
 import com.danasea.backend.modules.order.domain.models.RefundEvaluationResult;
@@ -59,6 +63,7 @@ import com.danasea.backend.modules.order.infrastructure.persistence.repositories
 import com.danasea.backend.modules.order.infrastructure.persistence.repositories.JpaPaymentRepository;
 import com.danasea.backend.modules.order.infrastructure.persistence.repositories.JpaRefundRepository;
 import com.danasea.backend.modules.order.infrastructure.persistence.repositories.JpaSubOrderRepository;
+import com.danasea.backend.modules.order.presentation.dtos.AdminOrderSummaryResponse;
 import com.danasea.backend.modules.order.presentation.dtos.OrderPageResponse;
 import com.danasea.backend.modules.order.presentation.dtos.OrderResponse;
 import com.danasea.backend.modules.order.presentation.dtos.PaymentIntentResponse;
@@ -77,6 +82,9 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 @Service
 public class OrderPaymentService {
 
@@ -98,6 +106,7 @@ public class OrderPaymentService {
     private final RefundProcessingService refundProcessingService;
     private final PaymentGatewayPort paymentGatewayPort;
     private final TransactionTemplate gatewayTransaction;
+    private final AuditLogInternalApi auditLogInternalApi;
 
     @Autowired
     public OrderPaymentService(
@@ -115,7 +124,8 @@ public class OrderPaymentService {
             CreatePaymentIntentUseCase createPaymentIntentUseCase,
             @Autowired(required = false) RefundProcessingService refundProcessingService,
             @Autowired(required = false) PaymentGatewayPort paymentGatewayPort,
-            PlatformTransactionManager transactionManager) {
+            PlatformTransactionManager transactionManager,
+            @Autowired(required = false) AuditLogInternalApi auditLogInternalApi) {
         this.bookingRepository = bookingRepository;
         this.masterOrderRepository = masterOrderRepository;
         this.subOrderRepository = subOrderRepository;
@@ -130,10 +140,32 @@ public class OrderPaymentService {
         this.createPaymentIntentUseCase = createPaymentIntentUseCase;
         this.refundProcessingService = refundProcessingService;
         this.paymentGatewayPort = paymentGatewayPort;
+        this.auditLogInternalApi = auditLogInternalApi;
         this.gatewayTransaction = transactionManager == null ? null : new TransactionTemplate(transactionManager);
         if (gatewayTransaction != null) {
             gatewayTransaction.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
         }
+    }
+
+    public OrderPaymentService(
+            JpaBookingRepository bookingRepository,
+            JpaMasterOrderRepository masterOrderRepository,
+            JpaSubOrderRepository subOrderRepository,
+            JpaPaymentRepository paymentRepository,
+            JpaRefundRepository refundRepository,
+            JpaServiceSlotRepository serviceSlotRepository,
+            VendorInternalApi vendorInternalApi,
+            RefundPolicyEngine refundPolicyEngine,
+            PaymentWebhookSigner webhookSigner,
+            ConfirmBookingUseCase confirmBookingUseCase,
+            ObjectMapper objectMapper,
+            CreatePaymentIntentUseCase createPaymentIntentUseCase,
+            RefundProcessingService refundProcessingService,
+            PaymentGatewayPort paymentGatewayPort,
+            PlatformTransactionManager transactionManager) {
+        this(bookingRepository, masterOrderRepository, subOrderRepository, paymentRepository, refundRepository,
+                serviceSlotRepository, vendorInternalApi, refundPolicyEngine, webhookSigner, confirmBookingUseCase,
+                objectMapper, createPaymentIntentUseCase, refundProcessingService, paymentGatewayPort, transactionManager, null);
     }
 
     public OrderPaymentService(
@@ -331,6 +363,7 @@ public class OrderPaymentService {
 
 
         subOrder.setStatus(SubOrderStatus.REJECTED);
+        subOrder.setCancellationReason(RefundReason.VENDOR_FAULT);
         subOrderRepository.save(subOrder);
         if (subOrder.getSlotId() != null && subOrder.getQuantity() != null && subOrder.getQuantity() > 0) {
             if (subOrder.getBookingItemId() != null) {
@@ -426,7 +459,8 @@ public class OrderPaymentService {
                 return false;
             }
             requirePendingPayment(payment, order);
-            if (payment.getCaptureRequestId() != null || payment.getLastError() != null) {
+            if (payment.getCaptureRequestId() != null || payment.getCaptureRequestedAt() != null
+                    || (payment.getLastError() != null && !payment.getLastError().startsWith("GATEWAY_QUERY_AWAITING_VERIFICATION"))) {
                 return false;
             }
             if ((payment.getExpiresAt() != null && payment.getExpiresAt().isBefore(OffsetDateTime.now()))
@@ -478,13 +512,7 @@ public class OrderPaymentService {
 
     @Transactional(propagation = Propagation.NOT_SUPPORTED)
     public void reconcilePayPalCapture(UUID paymentId) {
-        PaymentJpaEntity payment = paymentRepository.findById(paymentId).orElse(null);
-        if (payment == null || payment.getProvider() != PaymentProvider.PAYPAL || payment.getStatus() != PaymentStatus.PENDING
-                || payment.getCaptureRequestedAt() == null || payment.getCaptureRequestId() == null) {
-            return;
-        }
-        MasterOrderJpaEntity order = masterOrderRepository.findById(payment.getMasterOrderId()).orElseThrow();
-        capturePayPalOrder(order.getCustomerId(), paymentId, payment.getProviderOrderId(), "capture-reconciliation");
+        reconcilePayment(paymentId);
     }
 
     private record CaptureOutcome(PaymentResponse response, String error) { }
@@ -513,8 +541,10 @@ public class OrderPaymentService {
     private void validateCaptureResult(PaymentJpaEntity payment, PaymentCaptureResult result) {
         if (result == null || !result.success() || !"COMPLETED".equalsIgnoreCase(result.status())
                 || result.captureId() == null || result.captureId().isBlank()
-                || result.amount() == null || payment.getProviderAmount().compareTo(result.amount()) != 0
-                || !payment.getProviderCurrency().equals(result.currency())) {
+                || result.amount() == null || payment.getProviderAmount() == null
+                || payment.getProviderAmount().signum() <= 0
+                || payment.getProviderAmount().compareTo(result.amount()) != 0
+                || payment.getProviderCurrency() == null || !payment.getProviderCurrency().equals(result.currency())) {
             throw new PaymentGatewayException("Capture ID, amount, currency, or status does not match the payment intent.");
         }
     }
@@ -684,11 +714,19 @@ public class OrderPaymentService {
             applyPaymentSuccess(payment, masterOrder, transactionNo, transactionNo, params.toString());
             return Map.of("RspCode", "00", "Message", "Confirm Success");
         } else {
-            payment.setStatus(PaymentStatus.FAILED);
             payment.setProviderTransactionId(transactionNo);
             payment.setRawWebhookPayload(params.toString());
+            if ("02".equals(params.get("vnp_TransactionStatus"))) {
+                payment.setStatus(PaymentStatus.FAILED);
+                payment.setLastError("GATEWAY_PAYMENT_FAILED: " + responseCode);
+                payment.setReconciliationNextAttemptAt(null);
+                paymentRepository.save(payment);
+                return Map.of("RspCode", "00", "Message", "Confirm Success");
+            }
+            payment.setLastError("GATEWAY_QUERY_AWAITING_VERIFICATION: VNPay transaction status "
+                    + params.get("vnp_TransactionStatus"));
             paymentRepository.save(payment);
-            return Map.of("RspCode", "00", "Message", "Confirm Success");
+            return Map.of("RspCode", "99", "Message", "Payment requires reconciliation");
         }
     }
 
@@ -705,6 +743,7 @@ public class OrderPaymentService {
         }
         payment.setLastError(null);
         payment.setStatus(PaymentStatus.SUCCESS);
+        payment.setReconciliationNextAttemptAt(null);
         if (providerTransactionId != null && !providerTransactionId.isBlank()) {
             payment.setProviderTransactionId(providerTransactionId);
         }
@@ -718,6 +757,7 @@ public class OrderPaymentService {
 
         if (MasterOrderStatus.PENDING_PAYMENT.equals(order.getStatus())) {
             order.setStatus(MasterOrderStatus.PAID);
+            order.setPaymentStatus(PaymentOrderStatus.PAID);
             masterOrderRepository.save(order);
 
             List<SubOrderJpaEntity> subOrders = subOrderRepository.findByMasterOrderId(order.getId());
@@ -840,6 +880,10 @@ public class OrderPaymentService {
         refundRepository.save(refund);
 
         if (RefundStatus.PROCESSED.equals(request.status())) {
+            if (subOrder.getCancellationReason() == null && refund.getReason() != RefundReason.COMPENSATION
+                    && refund.getReason() != RefundReason.DISPUTE) {
+                subOrder.setCancellationReason(refund.getReason());
+            }
             subOrder.setStatus(refund.getRefundPercentage().compareTo(BigDecimal.valueOf(100)) == 0
                     ? SubOrderStatus.REFUNDED
                     : SubOrderStatus.PARTIALLY_REFUNDED);
@@ -855,6 +899,9 @@ public class OrderPaymentService {
             if (processedTotal.compareTo(originalPayment.getAmount()) >= 0) {
                 originalPayment.setStatus(PaymentStatus.REFUNDED);
                 paymentRepository.save(originalPayment);
+                MasterOrderJpaEntity refundedOrder = lockPaymentOrder(originalPayment);
+                refundedOrder.setPaymentStatus(PaymentOrderStatus.REFUNDED);
+                masterOrderRepository.save(refundedOrder);
             }
         }
 
@@ -944,13 +991,88 @@ public class OrderPaymentService {
     }
 
     @Transactional(readOnly = true)
+    public Page<AdminOrderSummaryResponse> getAdminOrders(
+            MasterOrderStatus status,
+            PaymentOrderStatus paymentStatus,
+            UUID customerId,
+            UUID vendorId,
+            OffsetDateTime fromDate,
+            OffsetDateTime toDate,
+            Pageable pageable) {
+        validateDateRange(fromDate, toDate);
+        Page<MasterOrderJpaEntity> ordersPage = masterOrderRepository.findByAdminFilters(
+                status, paymentStatus, customerId, vendorId, fromDate, toDate, pageable);
+
+        if (ordersPage.isEmpty()) {
+            return ordersPage.map(o -> null);
+        }
+
+        List<UUID> orderIds = ordersPage.getContent().stream()
+                .map(MasterOrderJpaEntity::getId)
+                .toList();
+
+        List<SubOrderJpaEntity> subOrders = subOrderRepository.findByMasterOrderIdIn(orderIds);
+        Map<UUID, List<SubOrderJpaEntity>> subOrdersByOrder = subOrders.stream()
+                .collect(Collectors.groupingBy(SubOrderJpaEntity::getMasterOrderId));
+
+        return ordersPage.map(order -> {
+            List<SubOrderJpaEntity> items = subOrdersByOrder.getOrDefault(order.getId(), List.of());
+            List<UUID> vendorIds = items.stream()
+                    .map(SubOrderJpaEntity::getVendorId)
+                    .filter(Objects::nonNull)
+                    .distinct()
+                    .toList();
+            return new AdminOrderSummaryResponse(
+                    order.getId(),
+                    order.getBookingId(),
+                    order.getCustomerId(),
+                    order.getStatus(),
+                    order.getPaymentStatus(),
+                    order.getTotalAmount(),
+                    order.getDiscountAmount(),
+                    items.size(),
+                    vendorIds,
+                    order.getPaymentDeadline(),
+                    order.getCreatedAt(),
+                    order.getUpdatedAt()
+            );
+        });
+    }
+
+    @Transactional(readOnly = true)
+    public List<PaymentResponse> getOrderPayments(UUID userId, UUID orderId, boolean isAdmin) {
+        MasterOrderJpaEntity order = findOrder(orderId);
+        if (!isAdmin) {
+            assertOwner(order.getCustomerId(), userId);
+        }
+        return paymentRepository.findByMasterOrderIdOrderByCreatedAtDesc(orderId).stream()
+                .map(this::toPaymentResponse)
+                .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public Page<PaymentResponse> getAdminPayments(
+            PaymentStatus status,
+            PaymentProvider provider,
+            UUID orderId,
+            UUID customerId,
+            UUID vendorId,
+            OffsetDateTime fromDate,
+            OffsetDateTime toDate,
+            Pageable pageable) {
+        validateDateRange(fromDate, toDate);
+        return paymentRepository.findByAdvancedFilters(
+                status, provider, orderId, customerId, vendorId, fromDate, toDate, pageable)
+                .map(this::toPaymentResponse);
+    }
+
+    @Transactional(readOnly = true)
     public Page<PaymentResponse> getAdminPayments(
             PaymentStatus status,
             PaymentProvider provider,
             UUID orderId,
             Pageable pageable) {
-        return paymentRepository.findByFilters(status, provider, orderId, pageable)
-                .map(this::toPaymentResponse);
+        return getAdminPayments(status, provider, orderId, null, null, null, null, pageable);
     }
 
     @Transactional(readOnly = true)
@@ -975,7 +1097,11 @@ public class OrderPaymentService {
                 payment.getExpiresAt(),
                 payment.getCreatedAt(),
                 payment.getUpdatedAt(),
-                payment.getProviderOrderId()
+                payment.getProviderOrderId(),
+                payment.getLastError(),
+                payment.getReconciliationAttempts(),
+                payment.getReconciliationNextAttemptAt(),
+                payment.getLastReconciledAt()
         );
     }
 
@@ -1007,9 +1133,26 @@ public class OrderPaymentService {
             RefundStatus status,
             RefundReason reason,
             UUID subOrderId,
+            PaymentProvider provider,
+            UUID vendorId,
+            UUID customerId,
+            UUID orderId,
+            OffsetDateTime fromDate,
+            OffsetDateTime toDate,
             Pageable pageable) {
-        return refundRepository.findByFilters(status, reason, subOrderId, pageable)
+        validateDateRange(fromDate, toDate);
+        return refundRepository.findByAdvancedFilters(
+                status, reason, subOrderId, provider, vendorId, customerId, orderId, fromDate, toDate, pageable)
                 .map(RefundDetailResponse::fromEntity);
+    }
+
+    @Transactional(readOnly = true)
+    public Page<RefundDetailResponse> getAdminRefunds(
+            RefundStatus status,
+            RefundReason reason,
+            UUID subOrderId,
+            Pageable pageable) {
+        return getAdminRefunds(status, reason, subOrderId, null, null, null, null, null, null, pageable);
     }
 
     @Transactional(readOnly = true)
@@ -1017,6 +1160,141 @@ public class OrderPaymentService {
         RefundJpaEntity refund = refundRepository.findById(refundId)
                 .orElseThrow(() -> new RefundNotFoundException(refundId));
         return RefundDetailResponse.fromEntity(refund);
+    }
+
+    @Transactional(propagation = Propagation.NOT_SUPPORTED)
+    public boolean reconcilePayment(UUID paymentId) {
+        if (paymentGatewayPort == null || gatewayTransaction == null) {
+            throw new IllegalStateException("Transactional payment gateway is not configured.");
+        }
+        PaymentJpaEntity snapshot = gatewayTransaction.execute(tx -> {
+            PaymentJpaEntity payment = paymentRepository.findByIdForUpdate(paymentId).orElse(null);
+            OffsetDateTime now = OffsetDateTime.now();
+            if (payment == null || payment.getStatus() != PaymentStatus.PENDING
+                    || (payment.getProvider() != PaymentProvider.PAYPAL && payment.getProvider() != PaymentProvider.VNPAY)
+                    || (payment.getReconciliationNextAttemptAt() != null && payment.getReconciliationNextAttemptAt().isAfter(now))) {
+                return null;
+            }
+            int attempts = Math.min(20, payment.getReconciliationAttempts() + 1);
+            payment.setReconciliationAttempts(attempts);
+            payment.setReconciliationNextAttemptAt(now.plusSeconds(Math.min(300, 30L << Math.min(4, attempts - 1))));
+            paymentRepository.saveAndFlush(payment);
+            return payment;
+        });
+        if (snapshot == null) {
+            return false;
+        }
+
+        PaymentCaptureResult result;
+        try {
+            if (snapshot.getProviderOrderId() == null || snapshot.getProviderOrderId().isBlank()
+                    || (snapshot.getProvider() == PaymentProvider.VNPAY && snapshot.getProviderTransactionDate() == null)) {
+                throw new PaymentGatewayException("Persisted gateway reference and transaction date are required.");
+            }
+            result = snapshot.getProvider() == PaymentProvider.PAYPAL && snapshot.getCaptureRequestedAt() != null
+                    ? paymentGatewayPort.queryCapture(PaymentProvider.PAYPAL, snapshot.getProviderOrderId())
+                    : paymentGatewayPort.queryPayment(snapshot.getProvider(), snapshot.getProviderOrderId(), snapshot.getProviderTransactionDate());
+        } catch (Exception ex) {
+            return recordReconciliationFailure(snapshot, "GATEWAY_QUERY_AWAITING_VERIFICATION: " + ex.getMessage());
+        }
+
+        try {
+            return Boolean.TRUE.equals(gatewayTransaction.execute(tx -> {
+                PaymentJpaEntity payment = lockPayment(paymentId);
+                MasterOrderJpaEntity order = lockPaymentOrder(payment);
+                if (payment.getStatus() != PaymentStatus.PENDING) {
+                    recordReconciliationAudit(payment, "RECONCILE_PAYMENT_SKIPPED");
+                    return false;
+                }
+                if (!samePaymentIntent(payment, snapshot)) {
+                    throw new PaymentGatewayException("The persisted payment intent changed during reconciliation.");
+                }
+                payment.setLastReconciledAt(OffsetDateTime.now());
+                if (result != null && result.success() && "COMPLETED".equalsIgnoreCase(result.status())) {
+                    validateCaptureResult(payment, result);
+                    applyPaymentSuccess(payment, order, result.captureId(), null, null);
+                    recordReconciliationAudit(payment, "RECONCILE_PAYMENT_SUCCESS");
+                    return true;
+                }
+                boolean failed = result != null && !result.success()
+                        && ((payment.getProvider() == PaymentProvider.VNPAY && "FAILED".equalsIgnoreCase(result.status()))
+                        || (payment.getProvider() == PaymentProvider.PAYPAL
+                        && ("VOIDED".equalsIgnoreCase(result.status()) || "EXPIRED".equalsIgnoreCase(result.status())
+                        || "DECLINED".equalsIgnoreCase(result.status()))));
+                if (failed) {
+                    payment.setStatus(PaymentStatus.FAILED);
+                    payment.setLastError("GATEWAY_PAYMENT_FAILED: " + result.status());
+                    payment.setReconciliationNextAttemptAt(null);
+                    paymentRepository.save(payment);
+                    recordReconciliationAudit(payment, "RECONCILE_PAYMENT_FAILED");
+                    return true;
+                }
+                // Local URL expiry does not prove that the gateway has not collected money.
+                setReconciliationError(payment, "GATEWAY_QUERY_AWAITING_VERIFICATION: "
+                        + (result == null ? "No gateway result." : result.status()));
+                paymentRepository.save(payment);
+                recordReconciliationAudit(payment, "RECONCILE_PAYMENT_PENDING");
+                return false;
+            }));
+        } catch (RuntimeException ex) {
+            return recordReconciliationFailure(snapshot, "RECONCILIATION_APPLY_REQUIRES_REVIEW: " + ex.getMessage());
+        }
+    }
+
+    private boolean samePaymentIntent(PaymentJpaEntity payment, PaymentJpaEntity snapshot) {
+        return payment.getProvider() == snapshot.getProvider()
+                && Objects.equals(payment.getMasterOrderId(), snapshot.getMasterOrderId())
+                && Objects.equals(payment.getProviderOrderId(), snapshot.getProviderOrderId())
+                && Objects.equals(payment.getProviderTransactionDate(), snapshot.getProviderTransactionDate())
+                && Objects.equals(payment.getProviderAmount(), snapshot.getProviderAmount())
+                && Objects.equals(payment.getProviderCurrency(), snapshot.getProviderCurrency())
+                && Objects.equals(payment.getAmount(), snapshot.getAmount());
+    }
+
+    private boolean recordReconciliationFailure(PaymentJpaEntity snapshot, String error) {
+        gatewayTransaction.executeWithoutResult(tx -> {
+            PaymentJpaEntity payment = paymentRepository.findByIdForUpdate(snapshot.getId()).orElse(null);
+            if (payment != null && payment.getStatus() == PaymentStatus.PENDING) {
+                setReconciliationError(payment, error);
+                payment.setLastReconciledAt(OffsetDateTime.now());
+                paymentRepository.save(payment);
+                recordReconciliationAudit(payment, "RECONCILE_PAYMENT_PENDING");
+            }
+        });
+        return false;
+    }
+
+    private void setReconciliationError(PaymentJpaEntity payment, String error) {
+        String queryMarker = "GATEWAY_QUERY_AWAITING_VERIFICATION";
+        String captureMarker = "GATEWAY_TIMEOUT_AWAITING_VERIFICATION";
+        boolean captureUnresolved = payment.getProvider() == PaymentProvider.PAYPAL
+                && (payment.getCaptureRequestId() != null || payment.getCaptureRequestedAt() != null
+                || (payment.getLastError() != null && payment.getLastError().startsWith(captureMarker)));
+        payment.setLastError(captureUnresolved && error.startsWith(queryMarker)
+                ? captureMarker + error.substring(queryMarker.length()) : error);
+    }
+
+    private void recordReconciliationAudit(PaymentJpaEntity payment, String action) {
+        if (auditLogInternalApi != null) {
+            Map<String, Object> metadata = new HashMap<>();
+            metadata.put("provider", payment.getProvider());
+            metadata.put("status", payment.getStatus());
+            metadata.put("transactionId", payment.getProviderTransactionId());
+            metadata.put("lastError", payment.getLastError());
+            metadata.put("attempts", payment.getReconciliationAttempts());
+            try {
+                auditLogInternalApi.recordTransactionalAuditLog(null, action, "PAYMENT", payment.getId(),
+                        objectMapper.writeValueAsString(metadata));
+            } catch (JsonProcessingException ex) {
+                throw new IllegalStateException("Payment reconciliation audit could not be serialized.", ex);
+            }
+        }
+    }
+
+    private void validateDateRange(OffsetDateTime from, OffsetDateTime to) {
+        if (from != null && to != null && from.isAfter(to)) {
+            throw new IllegalArgumentException("From date must not be after to date.");
+        }
     }
 
     private void assertOwner(UUID ownerId, UUID userId) {

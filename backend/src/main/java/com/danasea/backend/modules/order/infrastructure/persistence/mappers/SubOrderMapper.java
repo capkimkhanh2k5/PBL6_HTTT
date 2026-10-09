@@ -31,6 +31,7 @@ public class SubOrderMapper {
         domain.setCommissionAmount(entity.getCommissionAmount());
         domain.setVendorPayoutAmount(entity.getVendorPayoutAmount());
         domain.setStatus(entity.getStatus());
+        domain.setCancellationReason(entity.getCancellationReason());
         domain.setWaiverAccepted(entity.getWaiverAccepted());
         domain.setWaiverAcceptedAt(entity.getWaiverAcceptedAt());
         domain.setQrSecret(entity.getQrSecret());
@@ -66,6 +67,7 @@ public class SubOrderMapper {
         entity.setCommissionAmount(domain.getCommissionAmount());
         entity.setVendorPayoutAmount(domain.getVendorPayoutAmount());
         entity.setStatus(domain.getStatus());
+        entity.setCancellationReason(domain.getCancellationReason());
         entity.setWaiverAccepted(domain.getWaiverAccepted());
         entity.setWaiverAcceptedAt(domain.getWaiverAcceptedAt());
         entity.setQrSecret(domain.getQrSecret());

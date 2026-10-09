@@ -1,3 +1,5 @@
+import '../../../../core/auth/auth_session.dart';
+import 'verify_email_screen.dart';
 import 'package:vendor_mobile/core/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import '../../../../core/theme/app_colors.dart';
@@ -6,9 +8,8 @@ import '../../../../core/theme/app_typography.dart';
 import '../../../../core/widgets/vendor_button.dart';
 import '../../../../core/widgets/vendor_text_field.dart';
 import '../../../../core/widgets/toast_notification.dart';
-import '../../../../core/data/vendor_mock_repositories.dart';
 import 'forgot_password_screen.dart';
-import '../../../navigation/presentation/screens/main_navigation_screen.dart';
+import 'vendor_access_screen.dart';
 
 class LoginRegisterScreen extends StatefulWidget {
   const LoginRegisterScreen({super.key});
@@ -18,13 +19,13 @@ class LoginRegisterScreen extends StatefulWidget {
 }
 
 class _LoginRegisterScreenState extends State<LoginRegisterScreen> {
-  final _authRepo = VendorAuthRepository();
+  final _authRepo = AuthSession.instance;
   bool _isLoginTab = true;
 
   // Login form
   final _loginFormKey = GlobalKey<FormState>();
-  final _loginEmailController = TextEditingController(text: 'partner@danangoceanclub.com');
-  final _loginPasswordController = TextEditingController(text: '12345678');
+  final _loginEmailController = TextEditingController();
+  final _loginPasswordController = TextEditingController();
   bool _rememberMe = true;
   bool _hideLoginPassword = true;
   bool _isLoadingLogin = false;
@@ -33,7 +34,6 @@ class _LoginRegisterScreenState extends State<LoginRegisterScreen> {
   final _registerFormKey = GlobalKey<FormState>();
   final _regNameController = TextEditingController();
   final _regEmailController = TextEditingController();
-  final _regPhoneController = TextEditingController();
   final _regPasswordController = TextEditingController();
   final _regConfirmPasswordController = TextEditingController();
   bool _termsAgreed = false;
@@ -50,28 +50,32 @@ class _LoginRegisterScreenState extends State<LoginRegisterScreen> {
     _loginPasswordController.dispose();
     _regNameController.dispose();
     _regEmailController.dispose();
-    _regPhoneController.dispose();
     _regPasswordController.dispose();
     _regConfirmPasswordController.dispose();
     super.dispose();
   }
 
   Future<void> _handleLogin() async {
-    if (!_loginFormKey.currentState!.validate()) return;
+    if (_isLoadingLogin || !_loginFormKey.currentState!.validate()) return;
     setState(() => _isLoadingLogin = true);
     try {
+      _authRepo.remember = _rememberMe;
       await _authRepo.login(
         _loginEmailController.text,
         _loginPasswordController.text,
       );
       if (mounted) {
         Navigator.of(context).pushReplacement(
-          MaterialPageRoute(builder: (_) => const MainNavigationScreen()),
+          MaterialPageRoute(builder: (_) => const VendorAccessScreen()),
         );
       }
     } catch (e) {
       if (mounted) {
-        showVendorToast(context, message: e.toString().replaceAll('Exception: ', ''), isError: true);
+        showVendorToast(
+          context,
+          message: e.toString().replaceAll('Exception: ', ''),
+          isError: true,
+        );
       }
     } finally {
       if (mounted) setState(() => _isLoadingLogin = false);
@@ -79,30 +83,51 @@ class _LoginRegisterScreenState extends State<LoginRegisterScreen> {
   }
 
   Future<void> _handleRegister() async {
-    if (!_registerFormKey.currentState!.validate()) return;
+    if (_isLoadingRegister || !_registerFormKey.currentState!.validate())
+      return;
     if (!_termsAgreed) {
-      showVendorToast(context, message: 'Vui lòng đồng ý với điều khoản hợp tác đối tác.', isError: true);
+      showVendorToast(
+        context,
+        message: 'Vui lòng đồng ý với điều khoản hợp tác đối tác.',
+        isError: true,
+      );
       return;
     }
     setState(() => _isLoadingRegister = true);
     try {
-      await _authRepo.register(
-        fullName: _regNameController.text,
-        email: _regEmailController.text,
-        phone: _regPhoneController.text.isNotEmpty ? _regPhoneController.text : null,
-        password: _regPasswordController.text,
+      if (!AuthSession.strongPassword(_regPasswordController.text)) {
+        throw AuthFailure(
+          'Mật khẩu 8–100 ký tự, gồm chữ hoa, chữ thường, số và ký tự đặc biệt.',
+        );
+      }
+      _authRepo.remember = true;
+      if (!_authRepo.pendingVerification ||
+          _authRepo.pendingEmail?.toLowerCase() !=
+              _regEmailController.text.trim().toLowerCase()) {
+        await _authRepo.register(
+          _regNameController.text,
+          _regEmailController.text,
+          _regPasswordController.text,
+        );
+      }
+      if (!mounted) return;
+      final verified = await Navigator.push<bool>(
+        context,
+        MaterialPageRoute(builder: (_) => const VerifyEmailScreen()),
       );
-      if (mounted) {
-        showVendorToast(context, message: 'Đăng ký thành công! Vui lòng xác minh email để bắt đầu.');
-        setState(() {
-          _isLoginTab = true;
-          _loginEmailController.text = _regEmailController.text;
-          _statusBannerMessage = 'Vui lòng xác minh địa chỉ email ${_regEmailController.text} để tiếp tục.';
-        });
+      if (verified == true && mounted) {
+        Navigator.of(context).pushAndRemoveUntil(
+          MaterialPageRoute(builder: (_) => const VendorAccessScreen()),
+          (_) => false,
+        );
       }
     } catch (e) {
       if (mounted) {
-        showVendorToast(context, message: e.toString().replaceAll('Exception: ', ''), isError: true);
+        showVendorToast(
+          context,
+          message: e.toString().replaceAll('Exception: ', ''),
+          isError: true,
+        );
       }
     } finally {
       if (mounted) setState(() => _isLoadingRegister = false);
@@ -137,21 +162,34 @@ class _LoginRegisterScreenState extends State<LoginRegisterScreen> {
                       decoration: BoxDecoration(
                         color: AppColors.secondaryContainer.withAlpha(120),
                         borderRadius: BorderRadius.circular(14),
-                        border: Border.all(color: AppColors.secondary.withAlpha(80)),
+                        border: Border.all(
+                          color: AppColors.secondary.withAlpha(80),
+                        ),
                       ),
                       child: Row(
                         children: [
-                          const Icon(Icons.info_outline, color: AppColors.secondary, size: 20),
+                          const Icon(
+                            Icons.info_outline,
+                            color: AppColors.secondary,
+                            size: 20,
+                          ),
                           const SizedBox(width: 8),
                           Expanded(
                             child: LocalizedText(
                               _statusBannerMessage!,
-                              style: AppTypography.bodySm(color: AppColors.onSecondaryContainer),
+                              style: AppTypography.bodySm(
+                                color: AppColors.onSecondaryContainer,
+                              ),
                             ),
                           ),
                           InkWell(
-                            onTap: () => setState(() => _statusBannerMessage = null),
-                            child: const Icon(Icons.close, size: 18, color: AppColors.secondary),
+                            onTap: () =>
+                                setState(() => _statusBannerMessage = null),
+                            child: const Icon(
+                              Icons.close,
+                              size: 18,
+                              color: AppColors.secondary,
+                            ),
                           ),
                         ],
                       ),
@@ -202,20 +240,35 @@ class _LoginRegisterScreenState extends State<LoginRegisterScreen> {
                       color: AppColors.secondary,
                       shape: BoxShape.circle,
                     ),
-                    child: const Icon(Icons.sailing_rounded, color: AppColors.onSecondary, size: 22),
+                    child: const Icon(
+                      Icons.sailing_rounded,
+                      color: AppColors.onSecondary,
+                      size: 22,
+                    ),
                   ),
                   const SizedBox(width: 10),
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      LocalizedText('DANASEA', style: AppTypography.headlineSm(color: AppColors.secondary)),
-                      LocalizedText('VENDOR PORTAL', style: AppTypography.labelSm(color: AppColors.tertiary)),
+                      LocalizedText(
+                        'DANASEA',
+                        style: AppTypography.headlineSm(
+                          color: AppColors.secondary,
+                        ),
+                      ),
+                      LocalizedText(
+                        'VENDOR PORTAL',
+                        style: AppTypography.labelSm(color: AppColors.tertiary),
+                      ),
                     ],
                   ),
                 ],
               ),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 4,
+                ),
                 decoration: BoxDecoration(
                   color: AppColors.secondaryContainer,
                   borderRadius: BorderRadius.circular(9999),
@@ -234,7 +287,9 @@ class _LoginRegisterScreenState extends State<LoginRegisterScreen> {
                     const SizedBox(width: 6),
                     LocalizedText(
                       'Hệ thống trực tuyến',
-                      style: AppTypography.labelSm(color: AppColors.onSecondaryContainer),
+                      style: AppTypography.labelSm(
+                        color: AppColors.onSecondaryContainer,
+                      ),
                     ),
                   ],
                 ),
@@ -259,47 +314,58 @@ class _LoginRegisterScreenState extends State<LoginRegisterScreen> {
                       height: 120,
                       width: double.infinity,
                       color: AppColors.secondary.withAlpha(30),
-                      child: const Icon(Icons.beach_access, size: 40, color: AppColors.secondary),
+                      child: const Icon(
+                        Icons.beach_access,
+                        size: 40,
+                        color: AppColors.secondary,
+                      ),
                     ),
                   ),
-                Positioned.fill(
-                  child: Container(
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        begin: Alignment.topCenter,
-                        end: Alignment.bottomCenter,
-                        colors: [
-                          Colors.transparent,
-                          AppColors.onSurface.withAlpha(180),
+                  Positioned.fill(
+                    child: Container(
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          begin: Alignment.topCenter,
+                          end: Alignment.bottomCenter,
+                          colors: [
+                            Colors.transparent,
+                            AppColors.onSurface.withAlpha(180),
+                          ],
+                        ),
+                      ),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 8,
+                      ),
+                      alignment: Alignment.bottomLeft,
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          LocalizedText(
+                            'CỔNG KẾT NỐI DỊCH VỤ BIỂN',
+                            style: AppTypography.labelSm(
+                              color: AppColors.secondaryContainer,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          LocalizedText(
+                            'Đồng hành phát triển du lịch biển Đà Nẵng',
+                            style: AppTypography.headlineSm(
+                              color: Colors.white,
+                            ).copyWith(fontSize: 15),
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                          ),
                         ],
                       ),
                     ),
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-                    alignment: Alignment.bottomLeft,
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        LocalizedText(
-                          'CỔNG KẾT NỐI DỊCH VỤ BIỂN',
-                          style: AppTypography.labelSm(color: AppColors.secondaryContainer),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        LocalizedText(
-                          'Đồng hành phát triển du lịch biển Đà Nẵng',
-                          style: AppTypography.headlineSm(color: Colors.white).copyWith(fontSize: 15),
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ],
-                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
-        ),
         ],
       ),
     );
@@ -334,14 +400,18 @@ class _LoginRegisterScreenState extends State<LoginRegisterScreen> {
                     Icon(
                       Icons.lock_open_rounded,
                       size: 16,
-                      color: _isLoginTab ? AppColors.onSecondary : AppColors.tertiary,
+                      color: _isLoginTab
+                          ? AppColors.onSecondary
+                          : AppColors.tertiary,
                     ),
                     const SizedBox(width: 6),
                     Flexible(
                       child: LocalizedText(
                         'Đăng nhập',
                         style: AppTypography.labelLg(
-                          color: _isLoginTab ? AppColors.onSecondary : AppColors.tertiary,
+                          color: _isLoginTab
+                              ? AppColors.onSecondary
+                              : AppColors.tertiary,
                         ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
@@ -360,7 +430,9 @@ class _LoginRegisterScreenState extends State<LoginRegisterScreen> {
                 duration: const Duration(milliseconds: 200),
                 padding: const EdgeInsets.symmetric(vertical: 10),
                 decoration: BoxDecoration(
-                  color: !_isLoginTab ? AppColors.secondary : Colors.transparent,
+                  color: !_isLoginTab
+                      ? AppColors.secondary
+                      : Colors.transparent,
                   borderRadius: BorderRadius.circular(9999),
                 ),
                 alignment: Alignment.center,
@@ -371,14 +443,18 @@ class _LoginRegisterScreenState extends State<LoginRegisterScreen> {
                     Icon(
                       Icons.storefront_rounded,
                       size: 16,
-                      color: !_isLoginTab ? AppColors.onSecondary : AppColors.tertiary,
+                      color: !_isLoginTab
+                          ? AppColors.onSecondary
+                          : AppColors.tertiary,
                     ),
                     const SizedBox(width: 6),
                     Flexible(
                       child: LocalizedText(
                         'Đăng ký đối tác',
                         style: AppTypography.labelLg(
-                          color: !_isLoginTab ? AppColors.onSecondary : AppColors.tertiary,
+                          color: !_isLoginTab
+                              ? AppColors.onSecondary
+                              : AppColors.tertiary,
                         ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
@@ -407,7 +483,10 @@ class _LoginRegisterScreenState extends State<LoginRegisterScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            LocalizedText('Chào mừng trở lại!', style: AppTypography.headlineSm(color: AppColors.onSurface)),
+            LocalizedText(
+              'Chào mừng trở lại!',
+              style: AppTypography.headlineSm(color: AppColors.onSurface),
+            ),
             const SizedBox(height: 4),
             LocalizedText(
               'Truy cập trung tâm điều hành & quản trị đơn dịch vụ biển DANASEA.',
@@ -422,7 +501,8 @@ class _LoginRegisterScreenState extends State<LoginRegisterScreen> {
               keyboardType: TextInputType.emailAddress,
               isRequired: true,
               validator: (v) {
-                if (v == null || v.trim().isEmpty) return 'Vui lòng nhập email.';
+                if (v == null || v.trim().isEmpty)
+                  return 'Vui lòng nhập email.';
                 if (!v.contains('@')) return 'Email không hợp lệ.';
                 return null;
               },
@@ -437,11 +517,14 @@ class _LoginRegisterScreenState extends State<LoginRegisterScreen> {
               isRequired: true,
               suffixIcon: IconButton(
                 icon: Icon(
-                  _hideLoginPassword ? Icons.visibility_outlined : Icons.visibility_off_outlined,
+                  _hideLoginPassword
+                      ? Icons.visibility_outlined
+                      : Icons.visibility_off_outlined,
                   color: AppColors.tertiary,
                   size: 20,
                 ),
-                onPressed: () => setState(() => _hideLoginPassword = !_hideLoginPassword),
+                onPressed: () =>
+                    setState(() => _hideLoginPassword = !_hideLoginPassword),
               ),
               validator: (v) {
                 if (v == null || v.isEmpty) return 'Vui lòng nhập mật khẩu.';
@@ -463,19 +546,27 @@ class _LoginRegisterScreenState extends State<LoginRegisterScreen> {
                       height: 24,
                       child: Checkbox(
                         value: _rememberMe,
-                        onChanged: (v) => setState(() => _rememberMe = v ?? true),
+                        onChanged: (v) =>
+                            setState(() => _rememberMe = v ?? true),
                         activeColor: AppColors.secondary,
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(4),
+                        ),
                       ),
                     ),
                     const SizedBox(width: 8),
-                    LocalizedText('Ghi nhớ đăng nhập', style: AppTypography.bodySm(color: AppColors.tertiary)),
+                    LocalizedText(
+                      'Ghi nhớ đăng nhập',
+                      style: AppTypography.bodySm(color: AppColors.tertiary),
+                    ),
                   ],
                 ),
                 InkWell(
                   onTap: () {
                     Navigator.of(context).push(
-                      MaterialPageRoute(builder: (_) => const ForgotPasswordScreen()),
+                      MaterialPageRoute(
+                        builder: (_) => const ForgotPasswordScreen(),
+                      ),
                     );
                   },
                   child: Padding(
@@ -514,7 +605,10 @@ class _LoginRegisterScreenState extends State<LoginRegisterScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            LocalizedText('Gia nhập Mạng lưới Đối tác', style: AppTypography.headlineSm(color: AppColors.onSurface)),
+            LocalizedText(
+              'Gia nhập Mạng lưới Đối tác',
+              style: AppTypography.headlineSm(color: AppColors.onSurface),
+            ),
             const SizedBox(height: 4),
             LocalizedText(
               'Mở rộng kinh doanh tour ca nô, lướt sóng, lặn ngắm san hô & thuyền buồm.',
@@ -536,7 +630,11 @@ class _LoginRegisterScreenState extends State<LoginRegisterScreen> {
                       color: AppColors.secondaryContainer,
                       shape: BoxShape.circle,
                     ),
-                    child: const Icon(Icons.verified_rounded, size: 16, color: AppColors.secondary),
+                    child: const Icon(
+                      Icons.verified_rounded,
+                      size: 16,
+                      color: AppColors.secondary,
+                    ),
                   ),
                   const SizedBox(width: 8),
                   Expanded(
@@ -555,7 +653,9 @@ class _LoginRegisterScreenState extends State<LoginRegisterScreen> {
               hint: 'Nguyễn Văn A',
               prefixIcon: Icons.badge_outlined,
               isRequired: true,
-              validator: (v) => (v == null || v.trim().isEmpty) ? 'Vui lòng nhập họ tên.' : null,
+              validator: (v) => (v == null || v.trim().isEmpty)
+                  ? 'Vui lòng nhập họ tên.'
+                  : null,
             ),
             const SizedBox(height: 14),
             VendorTextField(
@@ -566,19 +666,11 @@ class _LoginRegisterScreenState extends State<LoginRegisterScreen> {
               keyboardType: TextInputType.emailAddress,
               isRequired: true,
               validator: (v) {
-                if (v == null || v.trim().isEmpty) return 'Vui lòng nhập email.';
+                if (v == null || v.trim().isEmpty)
+                  return 'Vui lòng nhập email.';
                 if (!v.contains('@')) return 'Email không đúng định dạng.';
                 return null;
               },
-            ),
-            const SizedBox(height: 14),
-            VendorTextField(
-              label: 'Số điện thoại liên hệ (tùy chọn)',
-              controller: _regPhoneController,
-              hint: '+84 905 xxx xxx',
-              prefixIcon: Icons.call_outlined,
-              keyboardType: TextInputType.phone,
-              isRequired: false,
             ),
             const SizedBox(height: 14),
             VendorTextField(
@@ -590,11 +682,14 @@ class _LoginRegisterScreenState extends State<LoginRegisterScreen> {
               isRequired: true,
               suffixIcon: IconButton(
                 icon: Icon(
-                  _hideRegPassword ? Icons.visibility_outlined : Icons.visibility_off_outlined,
+                  _hideRegPassword
+                      ? Icons.visibility_outlined
+                      : Icons.visibility_off_outlined,
                   color: AppColors.tertiary,
                   size: 20,
                 ),
-                onPressed: () => setState(() => _hideRegPassword = !_hideRegPassword),
+                onPressed: () =>
+                    setState(() => _hideRegPassword = !_hideRegPassword),
               ),
               validator: (v) {
                 if (v == null || v.isEmpty) return 'Vui lòng nhập mật khẩu.';
@@ -612,14 +707,19 @@ class _LoginRegisterScreenState extends State<LoginRegisterScreen> {
               isRequired: true,
               suffixIcon: IconButton(
                 icon: Icon(
-                  _hideRegConfirmPassword ? Icons.visibility_outlined : Icons.visibility_off_outlined,
+                  _hideRegConfirmPassword
+                      ? Icons.visibility_outlined
+                      : Icons.visibility_off_outlined,
                   color: AppColors.tertiary,
                   size: 20,
                 ),
-                onPressed: () => setState(() => _hideRegConfirmPassword = !_hideRegConfirmPassword),
+                onPressed: () => setState(
+                  () => _hideRegConfirmPassword = !_hideRegConfirmPassword,
+                ),
               ),
               validator: (v) {
-                if (v != _regPasswordController.text) return 'Mật khẩu xác nhận không khớp.';
+                if (v != _regPasswordController.text)
+                  return 'Mật khẩu xác nhận không khớp.';
                 return null;
               },
             ),
@@ -634,7 +734,9 @@ class _LoginRegisterScreenState extends State<LoginRegisterScreen> {
                     value: _termsAgreed,
                     onChanged: (v) => setState(() => _termsAgreed = v ?? false),
                     activeColor: AppColors.secondary,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(4),
+                    ),
                   ),
                 ),
                 const SizedBox(width: 8),
@@ -672,7 +774,11 @@ class _LoginRegisterScreenState extends State<LoginRegisterScreen> {
         children: [
           Row(
             children: [
-              const Icon(Icons.security_rounded, color: AppColors.secondary, size: 20),
+              const Icon(
+                Icons.security_rounded,
+                color: AppColors.secondary,
+                size: 20,
+              ),
               const SizedBox(width: 8),
               Expanded(
                 child: LocalizedText(
@@ -699,20 +805,32 @@ class _LoginRegisterScreenState extends State<LoginRegisterScreen> {
               Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const Icon(Icons.support_agent_rounded, size: 18, color: AppColors.secondary),
+                  const Icon(
+                    Icons.support_agent_rounded,
+                    size: 18,
+                    color: AppColors.secondary,
+                  ),
                   const SizedBox(width: 6),
-                  LocalizedText('Hotline: 1900 8899', style: AppTypography.labelMd(color: AppColors.onSurface)),
+                  LocalizedText(
+                    'Hotline: 1900 8899',
+                    style: AppTypography.labelMd(color: AppColors.onSurface),
+                  ),
                 ],
               ),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 4,
+                ),
                 decoration: BoxDecoration(
                   color: AppColors.secondaryContainer,
                   borderRadius: BorderRadius.circular(9999),
                 ),
                 child: LocalizedText(
                   'Trợ giúp 24/7',
-                  style: AppTypography.labelSm(color: AppColors.onSecondaryContainer),
+                  style: AppTypography.labelSm(
+                    color: AppColors.onSecondaryContainer,
+                  ),
                 ),
               ),
             ],

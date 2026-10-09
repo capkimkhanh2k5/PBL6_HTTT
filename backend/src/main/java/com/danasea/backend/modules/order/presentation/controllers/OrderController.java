@@ -43,6 +43,7 @@ import com.danasea.backend.modules.order.presentation.dtos.CancellationPreviewRe
 import com.danasea.backend.modules.order.presentation.dtos.CreateOrderRequest;
 import com.danasea.backend.modules.order.presentation.dtos.OrderPageResponse;
 import com.danasea.backend.modules.order.presentation.dtos.OrderResponse;
+import com.danasea.backend.modules.order.presentation.dtos.PaymentResponse;
 import com.danasea.backend.modules.order.presentation.dtos.RefundDetailResponse;
 import com.danasea.backend.modules.order.presentation.dtos.RefundRequest;
 import com.danasea.backend.modules.order.presentation.dtos.RefundResponse;
@@ -156,6 +157,16 @@ public class OrderController {
                 ))
                 .toList();
         return ResponseEntity.status(HttpStatus.ACCEPTED).body(responses);
+    }
+
+    @GetMapping("/{id}/payments")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<List<PaymentResponse>> getOrderPayments(@PathVariable("id") UUID id) {
+        if (orderPaymentService == null) {
+            return ResponseEntity.ok(List.of());
+        }
+        List<PaymentResponse> responses = orderPaymentService.getOrderPayments(currentUserId(), id, isAdmin());
+        return ResponseEntity.ok(responses);
     }
 
     @GetMapping("/{id}/refunds")

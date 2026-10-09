@@ -1,0 +1,109 @@
+import '../auth/auth_session.dart';
+import '../models/danasea_models.dart';
+
+class CatalogPage {
+  final List<ServiceModel> items;
+  final int page;
+  final int total;
+  const CatalogPage(this.items, this.page, this.total);
+}
+
+class CatalogRepository {
+  CatalogRepository({AuthSession? session})
+    : session = session ?? AuthSession.instance;
+  final AuthSession session;
+
+  Future<List<CategoryModel>> categories() async {
+    final json = await session.requestJson('/api/categories');
+    if (json is! List) throw AuthFailure('Dữ liệu máy chủ không hợp lệ.');
+    final result = <CategoryModel>[];
+    void visit(List nodes) {
+      for (final node in nodes) {
+        final map = node as Map<String, dynamic>;
+        if (map['isActive'] == false) continue;
+        result.add(
+          CategoryModel(
+            id: map['id'] as String,
+            name: map['name'] as String,
+            nameEn: map['nameEn'] as String? ?? '',
+            slug: map['slug'] as String? ?? '',
+            parentId: map['parentId'] as String?,
+            iconUrl: map['iconUrl'] as String?,
+          ),
+        );
+        visit(map['children'] as List? ?? []);
+      }
+    }
+
+    visit(json);
+    return result;
+  }
+
+  Future<CatalogPage> search({
+    String? keyword,
+    String? categoryId,
+    int? maxPrice,
+    int page = 0,
+  }) async {
+    final query = <String, String>{
+      'page': '$page',
+      'size': '20',
+      if (keyword != null && keyword.trim().isNotEmpty)
+        'keyword': keyword.trim(),
+      'categoryId': ?categoryId,
+      if (maxPrice != null) 'maxPrice': '$maxPrice',
+    };
+    final path = Uri(path: '/api/services', queryParameters: query).toString();
+    final json = await session.request(path);
+    if (json['content'] is! List || json['totalElements'] is! num) {
+      throw AuthFailure('Dữ liệu máy chủ không hợp lệ.');
+    }
+    return CatalogPage(
+      (json['content'] as List)
+          .map((e) => serviceFromJson(e as Map<String, dynamic>))
+          .toList(),
+      (json['page'] as num).toInt(),
+      (json['totalElements'] as num).toInt(),
+    );
+  }
+
+  Future<ServiceModel> detail(String id) async => serviceFromJson(
+    await session.request('/api/services/${Uri.encodeComponent(id)}'),
+  );
+
+  static ServiceModel serviceFromJson(Map<String, dynamic> json) {
+    num number(String key) => json[key] is num ? json[key] as num : 0;
+    final address = json['address'] as String? ?? '';
+    final primary = json['primaryImageUrl'] as String?;
+    return ServiceModel(
+      id: json['id'] as String,
+      name: json['name'] as String,
+      vendorId: '',
+      vendorName: '',
+      vendorBadge: VendorBadgeTier.none,
+      categoryId: json['categoryId'] as String? ?? '',
+      categoryName: json['categoryName'] as String? ?? '',
+      slug: '',
+      description:
+          (json['description'] ?? json['shortDescription'] ?? '') as String,
+      price: (json['promotionalPrice'] as num? ?? number('price')).round(),
+      durationMinutes: 0,
+      capacityPerSlot: 0,
+      locationName: address,
+      address: address,
+      latitude: number('latitude').toDouble(),
+      longitude: number('longitude').toDouble(),
+      waiverContent: '',
+      weatherSensitive: false,
+      avgRating: number('averageRating').toDouble(),
+      ratingCount: number('reviewCount').toInt(),
+      viewCount: number('viewCount').toInt(),
+      imageUrls: json['imageUrls'] is List
+          ? (json['imageUrls'] as List)
+                .whereType<String>()
+                .where((s) => s.isNotEmpty)
+                .toList()
+          : [if (primary != null && primary.isNotEmpty) primary],
+    );
+  }
+}

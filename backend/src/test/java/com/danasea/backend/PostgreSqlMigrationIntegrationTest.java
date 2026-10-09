@@ -35,6 +35,16 @@ class PostgreSqlMigrationIntegrationTest {
                 .locations("classpath:db/migration")
                 .load();
 
+        Flyway legacy = Flyway.configure()
+                .dataSource(jdbcUrl, "migration_user", "migration_password")
+                .locations("classpath:db/migration").target("17").load();
+        legacy.migrate();
+        java.util.UUID legacyPayment = java.util.UUID.randomUUID();
+        try (var connection = DriverManager.getConnection(jdbcUrl, "migration_user", "migration_password");
+             var statement = connection.prepareStatement("INSERT INTO payments(id, status, created_at, updated_at) VALUES (?, 'REFUNDED', TIMESTAMPTZ '2026-09-01 10:00:00+07', TIMESTAMPTZ '2026-09-02 10:00:00+07')")) {
+            statement.setObject(1, legacyPayment);
+            statement.executeUpdate();
+        }
         var migrationResult = flyway.migrate();
         assertTrue(migrationResult.success);
         assertNotNull(flyway.info().current());
@@ -43,6 +53,9 @@ class PostgreSqlMigrationIntegrationTest {
 
         try (var connection = DriverManager.getConnection(jdbcUrl, "migration_user", "migration_password");
              var statement = connection.createStatement()) {
+            try (var row = statement.executeQuery("SELECT paid_at IS NOT NULL FROM payments WHERE id = '" + legacyPayment + "'")) {
+                assertTrue(row.next() && row.getBoolean(1));
+            }
             assertTrue(tableExists(statement, "refunds"));
             assertTrue(tableExists(statement, "settlements"));
             assertTrue(tableExists(statement, "checkin_tokens"));
@@ -102,8 +115,8 @@ class PostgreSqlMigrationIntegrationTest {
                     """);
         }
         Flyway upgrade = Flyway.configure().dataSource(url,"migration_user","migration_password")
-                .schemas("inventory_upgrade").defaultSchema("inventory_upgrade").locations("classpath:db/migration").load();
-        assertEquals(3,upgrade.migrate().migrationsExecuted);
+                .schemas("inventory_upgrade").defaultSchema("inventory_upgrade").locations("classpath:db/migration").target("19").load();
+        assertEquals(1,upgrade.migrate().migrationsExecuted);
         assertTrue(upgrade.validateWithResult().validationSuccessful);
         try (var connection = DriverManager.getConnection(url,"migration_user","migration_password");
              var statement = connection.createStatement()) {

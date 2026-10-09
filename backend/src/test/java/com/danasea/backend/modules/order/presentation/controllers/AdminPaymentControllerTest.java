@@ -89,6 +89,66 @@ class AdminPaymentControllerTest {
     }
 
     @Test
+    @DisplayName("GET /api/admin/payments with advanced filters (vendor, customer, dates)")
+    void getPayments_WithAdvancedFilters_ShouldReturnFilteredList() throws Exception {
+        UUID paymentId = UUID.randomUUID();
+        UUID orderId = UUID.randomUUID();
+        UUID customerId = UUID.randomUUID();
+        UUID vendorId = UUID.randomUUID();
+
+        PaymentResponse response = new PaymentResponse(
+                paymentId,
+                orderId,
+                PaymentProvider.VNPAY,
+                "vnp-tx-999",
+                new BigDecimal("350000"),
+                PaymentStatus.SUCCESS,
+                "idem-9",
+                "wh-event-9",
+                "https://payment.url",
+                "https://qr.url",
+                OffsetDateTime.now().plusMinutes(15),
+                OffsetDateTime.now(),
+                OffsetDateTime.now()
+        );
+
+        when(orderPaymentService.getAdminPayments(
+                eq(PaymentStatus.SUCCESS),
+                eq(PaymentProvider.VNPAY),
+                eq(orderId),
+                eq(customerId),
+                eq(vendorId),
+                any(),
+                any(),
+                any()))
+                .thenReturn(new PageImpl<>(List.of(response), PageRequest.of(0, 20), 1));
+
+        mockMvc.perform(get("/api/admin/payments")
+                        .param("status", "SUCCESS")
+                        .param("provider", "VNPAY")
+                        .param("orderId", orderId.toString())
+                        .param("customerId", customerId.toString())
+                        .param("vendorId", vendorId.toString())
+                        .param("fromDate", "2026-10-01T00:00:00Z")
+                        .param("toDate", "2026-10-09T23:59:59Z")
+                        .param("page", "0")
+                        .param("size", "20"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content[0].id").value(paymentId.toString()))
+                .andExpect(jsonPath("$.content[0].status").value("SUCCESS"));
+
+        verify(orderPaymentService).getAdminPayments(
+                eq(PaymentStatus.SUCCESS),
+                eq(PaymentProvider.VNPAY),
+                eq(orderId),
+                eq(customerId),
+                eq(vendorId),
+                any(),
+                any(),
+                any());
+    }
+
+    @Test
     @DisplayName("GET /api/admin/payments/{id} returns payment detail")
     void getPaymentDetail_ShouldReturnDetail() throws Exception {
         UUID paymentId = UUID.randomUUID();

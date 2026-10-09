@@ -17,6 +17,7 @@ import com.danasea.backend.modules.order.application.DiscountReservationService;
 import com.danasea.backend.modules.order.application.RefundProcessingService;
 import com.danasea.backend.modules.order.domain.exceptions.InvalidOrderStateException;
 import com.danasea.backend.modules.order.domain.models.MasterOrderStatus;
+import com.danasea.backend.modules.order.domain.models.PaymentOrderStatus;
 import com.danasea.backend.modules.order.domain.models.RefundEvaluationResult;
 import com.danasea.backend.modules.order.domain.models.RefundReason;
 import com.danasea.backend.modules.order.domain.models.RefundStatus;
@@ -95,6 +96,7 @@ public class BookingCancellationFinancialAdapter implements BookingCancellationF
             if (existing.isPresent()) {
                 refundTotal = refundTotal.add(existing.get().getAmount());
                 subOrder.setStatus(SubOrderStatus.CANCELLED);
+            subOrder.setCancellationReason(RefundReason.CUSTOMER_CANCEL);
                 continue;
             }
 
@@ -122,9 +124,11 @@ public class BookingCancellationFinancialAdapter implements BookingCancellationF
 
             }
             subOrder.setStatus(SubOrderStatus.CANCELLED);
+            subOrder.setCancellationReason(RefundReason.CUSTOMER_CANCEL);
         }
         subOrderRepository.saveAll(subOrders);
         order.setStatus(MasterOrderStatus.CANCELLED);
+        order.setPaymentStatus(refundTotal.signum() == 0 ? PaymentOrderStatus.NO_REFUND : PaymentOrderStatus.PAID);
         masterOrderRepository.save(order);
 
         int percentage = originalTotal.compareTo(BigDecimal.ZERO) == 0
@@ -148,7 +152,10 @@ public class BookingCancellationFinancialAdapter implements BookingCancellationF
                 throw new InvalidOrderStateException("Only a pending-payment order can be cancelled without a refund.");
             }
             List<SubOrderJpaEntity> subOrders = subOrderRepository.findByMasterOrderId(order.getId());
-            subOrders.forEach(subOrder -> subOrder.setStatus(SubOrderStatus.CANCELLED));
+            subOrders.forEach(subOrder -> {
+                subOrder.setStatus(SubOrderStatus.CANCELLED);
+                subOrder.setCancellationReason(RefundReason.CUSTOMER_CANCEL);
+            });
             subOrderRepository.saveAll(subOrders);
             if (reservations != null) {
                 reservations.release(order.getId(), order.getDiscountCodeId());
