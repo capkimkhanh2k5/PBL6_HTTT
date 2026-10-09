@@ -207,7 +207,10 @@ class JpaReportDataAdapterIntegrationTest {
         entityManager.persist(vendor);
 
         ReviewJpaEntity review = new ReviewJpaEntity();
+        review.setSubOrderId(UUID.randomUUID());
+        review.setCustomerId(userId);
         review.setVendorId(vendor.getId());
+        review.setServiceId(UUID.randomUUID());
         review.setRating((short) 5);
         entityManager.persist(review);
         entityManager.flush();
