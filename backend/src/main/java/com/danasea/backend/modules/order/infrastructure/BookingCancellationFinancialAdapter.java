@@ -15,6 +15,7 @@ import com.danasea.backend.modules.booking.domain.ports.BookingCancellationFinan
 import com.danasea.backend.modules.order.application.RefundProcessingService;
 import com.danasea.backend.modules.order.domain.exceptions.InvalidOrderStateException;
 import com.danasea.backend.modules.order.domain.models.MasterOrderStatus;
+import com.danasea.backend.modules.order.domain.models.PaymentOrderStatus;
 import com.danasea.backend.modules.order.domain.models.RefundEvaluationResult;
 import com.danasea.backend.modules.order.domain.models.RefundReason;
 import com.danasea.backend.modules.order.domain.models.RefundStatus;
@@ -113,6 +114,7 @@ public class BookingCancellationFinancialAdapter implements BookingCancellationF
         }
         subOrderRepository.saveAll(subOrders);
         order.setStatus(MasterOrderStatus.CANCELLED);
+        order.setPaymentStatus(refundTotal.signum() == 0 ? PaymentOrderStatus.NO_REFUND : PaymentOrderStatus.PAID);
         masterOrderRepository.save(order);
 
         int percentage = originalTotal.compareTo(BigDecimal.ZERO) == 0

@@ -11,6 +11,10 @@ import com.danasea.backend.modules.audit.domain.models.AuditLog;
 public interface AuditLogInternalApi {
     void recordAuditLog(UUID actorUserId, String action, String entityType, UUID entityId, String metadata);
 
+    default void recordTransactionalAuditLog(UUID actorUserId, String action, String entityType, UUID entityId, String metadata) {
+        recordAuditLog(actorUserId, action, entityType, entityId, metadata);
+    }
+
     Page<AuditLog> getAuditLogs(Pageable pageable);
 
     Optional<AuditLog> getAuditLogById(UUID id);

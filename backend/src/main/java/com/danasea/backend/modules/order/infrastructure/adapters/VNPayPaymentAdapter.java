@@ -17,7 +17,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
-
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 
@@ -31,6 +30,7 @@ import com.danasea.backend.modules.order.domain.exceptions.PaymentGatewayExcepti
 import com.danasea.backend.modules.order.domain.models.PaymentProvider;
 import com.danasea.backend.modules.order.domain.ports.GatewayRefundRequest;
 import com.danasea.backend.modules.order.domain.ports.GatewayRefundStatus;
+import com.danasea.backend.modules.order.domain.ports.PaymentCaptureResult;
 import com.danasea.backend.modules.order.domain.ports.PaymentGatewayPort;
 import com.danasea.backend.modules.order.domain.ports.PaymentIntentResult;
 import com.danasea.backend.modules.order.domain.ports.RefundResult;
@@ -205,6 +205,69 @@ public class VNPayPaymentAdapter implements PaymentGatewayPort {
         JsonNode root = exchange(payload);
         verifyApiResponse(root, false);
         return verifiedRefund(root, request, null);
+    }
+
+    @Override
+    public PaymentCaptureResult queryPayment(PaymentProvider provider, String providerOrderId, String transactionDate) {
+        if (provider != PaymentProvider.VNPAY || providerOrderId == null || transactionDate == null) {
+            throw new PaymentGatewayException("VNPay reference and transaction date are required for query.");
+        }
+        String createDate = VNPAY_DATE_FORMAT.format(ZonedDateTime.now(VIETNAM_ZONE));
+        String queryId = UUID.randomUUID().toString().replace("-", "");
+        String info = "DANASea payment lookup " + providerOrderId;
+        Map<String, Object> payload = new HashMap<>();
+        payload.put("vnp_RequestId", queryId);
+        payload.put("vnp_Version", "2.1.0");
+        payload.put("vnp_Command", "querydr");
+        payload.put("vnp_TmnCode", vnpayProperties.tmnCode());
+        payload.put("vnp_TxnRef", providerOrderId);
+        payload.put("vnp_TransactionDate", transactionDate);
+        payload.put("vnp_CreateDate", createDate);
+        payload.put("vnp_IpAddr", vnpayProperties.ipAddress());
+        payload.put("vnp_OrderInfo", info);
+        payload.put("vnp_SecureHash", hmacSHA512(vnpayProperties.hashSecret(), String.join("|", queryId,
+                "2.1.0", "querydr", vnpayProperties.tmnCode(), providerOrderId, transactionDate,
+                createDate, vnpayProperties.ipAddress(), info)));
+
+        JsonNode root = exchange(payload);
+        verifyApiResponse(root, true);
+
+        String code = root.path("vnp_ResponseCode").asText("");
+        if (!"00".equals(code)) {
+            return new PaymentCaptureResult(false, null, null, "VND", "UNKNOWN", "VNPay lookup failed: " + code);
+        }
+        if (!providerOrderId.equals(root.path("vnp_TxnRef").asText())) {
+            throw new PaymentGatewayException("VNPay transaction reference does not match the requested payment.");
+        }
+        if (!"01".equals(root.path("vnp_TransactionType").asText())) {
+            return new PaymentCaptureResult(false, null, null, "VND", "UNKNOWN", "VNPay response is not a payment transaction.");
+        }
+        String state = root.path("vnp_TransactionStatus").asText("");
+        String transactionNo = root.path("vnp_TransactionNo").asText(null);
+        BigDecimal amount = root.hasNonNull("vnp_Amount")
+                ? new BigDecimal(root.path("vnp_Amount").asText()).divide(BigDecimal.valueOf(100))
+                : null;
+
+        boolean success = "00".equals(code) && "00".equals(state);
+        String status;
+        if (success) {
+            status = "COMPLETED";
+        } else if ("02".equals(state)) {
+            status = "FAILED";
+        } else if ("01".equals(state) || "05".equals(state) || "06".equals(state)) {
+            status = "PENDING";
+        } else {
+            status = "UNKNOWN";
+        }
+
+        return new PaymentCaptureResult(
+                success,
+                transactionNo,
+                amount,
+                "VND",
+                status,
+                "VNPay querydr responseCode: " + code + ", status: " + state
+        );
     }
 
     @Override

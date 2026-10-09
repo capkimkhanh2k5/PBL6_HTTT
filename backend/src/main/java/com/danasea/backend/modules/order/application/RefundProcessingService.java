@@ -18,6 +18,7 @@ import com.danasea.backend.modules.booking.domain.models.BookingStatus;
 import com.danasea.backend.modules.booking.infrastructure.persistence.repositories.JpaBookingRepository;
 import com.danasea.backend.modules.order.domain.exceptions.InvalidWebhookException;
 import com.danasea.backend.modules.order.domain.models.MasterOrderStatus;
+import com.danasea.backend.modules.order.domain.models.PaymentOrderStatus;
 import com.danasea.backend.modules.order.domain.models.PaymentProvider;
 import com.danasea.backend.modules.order.domain.models.PaymentStatus;
 import com.danasea.backend.modules.order.domain.models.RefundStatus;
@@ -307,6 +308,8 @@ public class RefundProcessingService {
         if (processedTotal.compareTo(originalPayment.getAmount()) >= 0) {
             originalPayment.setStatus(PaymentStatus.REFUNDED);
             paymentRepository.save(originalPayment);
+            masterOrder.setPaymentStatus(PaymentOrderStatus.REFUNDED);
+            masterOrderRepository.save(masterOrder);
         }
         boolean allTerminal = !allSubOrders.isEmpty() && allSubOrders.stream().allMatch(s -> s.getStatus() == SubOrderStatus.REFUNDED
                 || s.getStatus() == SubOrderStatus.CANCELLED || s.getStatus() == SubOrderStatus.REJECTED);

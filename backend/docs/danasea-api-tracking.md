@@ -1,10 +1,10 @@
 # DANASEA — Master API & Test Checklist (EPIC-01 → EPIC-08)
 
-**Cập nhật:** 08/10/2026 — nhánh `implement_password_reset_api`; bổ sung forgot/reset password, bảo vệ OTP dùng một lần và thu hồi phiên cũ.
+**Cập nhật:** 09/10/2026 — nhánh `admin_transaction_refund_management`; bổ sung quản trị giao dịch, lịch sử payment/refund, đối soát có khóa/transaction, backoff và thông tin theo dõi hoàn tiền.
 
 **Quy ước:** Với mục API, `[x]` nghĩa là endpoint đã có trong controller; không đồng nghĩa đã kiểm chứng toàn bộ nghiệp vụ hoặc tích hợp cổng thanh toán thật. Với mục Test, hạ tầng và quyết định nghiệp vụ, giữ trạng thái checklist đã ghi nhận; `[ ]` là việc còn thiếu/chưa xác nhận. Lần cập nhật này không đánh dấu các test chưa xác nhận thành đã pass.
 
-**Phạm vi kiểm kê:** 117 tổ hợp HTTP method/path từ 38 controller trong profile `test`, gồm 4 đường dẫn alias, 4 endpoint chẩn đoán ở profile `dev/test` và 1 webhook nội bộ chỉ ở `test`. Swagger/Actuator do thư viện cung cấp không nằm trong số API controller này. Các API cần hoàn thiện nghiệp vụ được ghi chú tại mục tương ứng; xem thêm [báo cáo rà soát](API-completeness-review-2026-10-06.md) và [kết quả sandbox](payment-sandbox-verification-2026-10-06.md).
+**Phạm vi kiểm kê:** 126 tổ hợp HTTP method/path từ các controller trong profile `test`, gồm 4 đường dẫn alias, 4 endpoint chẩn đoán ở profile `dev/test` và 1 webhook nội bộ chỉ ở `test`. Swagger/Actuator do thư viện cung cấp không nằm trong số API controller này. Các API cần hoàn thiện nghiệp vụ được ghi chú tại mục tương ứng; xem thêm [báo cáo rà soát](API-completeness-review-2026-10-06.md) và [kết quả sandbox](payment-sandbox-verification-2026-10-06.md).
 
 ---
 
@@ -284,13 +284,15 @@ Hai item phải nhận hai đơn vị khác nhau và tính giá hai gói. Nhóm 
 - [x] POST /api/payments/webhook/internal/{provider} (chỉ profile `test`, cần ADMIN và HMAC; không tồn tại ở dev/production)
 - [x] POST /api/payments/webhook/paypal/refund (xác minh đủ 5 transmission headers; không dùng HMAC/fallback nội bộ)
 - [x] POST /api/orders/{id}/refund-request (yêu cầu hoàn theo policy; đã hoàn thiện persistence, idempotency và provider transaction ID)
-- [x] GET /api/orders/{id}/refunds (danh sách yêu cầu hoàn tiền theo đơn hàng cho khách sở hữu)
+- [x] GET /api/orders/{id}/payments (lịch sử intent/giao dịch, chỉ chủ đơn hoặc admin)
+- [x] GET /api/orders/{id}/refunds (danh sách yêu cầu hoàn tiền theo đơn hàng cho chủ đơn hoặc admin)
 - [x] GET /api/payments/{orderId}/status (truy vấn trạng thái thanh toán theo đơn hàng cho khách)
 - [x] GET /api/payments/{orderId}/payments (alias danh sách thanh toán theo đơn)
 - [x] GET /api/payments/detail/{paymentId} (chi tiết thanh toán cho khách)
-- [x] GET /api/admin/payments (danh sách giao dịch thanh toán toàn sàn cho admin, lọc theo status/provider/orderId, có phân trang)
+- [x] GET /api/admin/orders (danh sách đơn hàng toàn sàn cho admin, lọc theo status/paymentStatus/vendorId/customerId/thời gian, có phân trang)
+- [x] GET /api/admin/payments (danh sách giao dịch thanh toán toàn sàn cho admin, lọc theo status/provider/orderId/vendorId/customerId/thời gian, có phân trang)
 - [x] GET /api/admin/payments/{id} (chi tiết giao dịch thanh toán cho admin)
-- [x] GET /api/admin/refunds (danh sách yêu cầu hoàn tiền toàn sàn cho admin, lọc theo status/reason/subOrderId, có phân trang)
+- [x] GET /api/admin/refunds (danh sách yêu cầu hoàn tiền toàn sàn cho admin, lọc theo status/reason/subOrderId/orderId/provider/vendorId/customerId/thời gian, có phân trang)
 - [x] GET /api/admin/refunds/{id} (chi tiết yêu cầu hoàn tiền cho admin)
 
 **Thay đổi callback:** bỏ hai endpoint mô phỏng `/webhook/vnpay/refund` và `/webhook/momo/refund`. VNPay refund được worker xác minh qua response API/querydr có checksum; PayPal refund dùng callback chuẩn có chữ ký. Hợp đồng cổng được đối chiếu với [PayPal Payments v2](https://developer.paypal.com/api/payments/v2/captures-refund) và [VNPay querydr/refund](https://sandbox.vnpayment.vn/apis/docs/truy-van-hoan-tien/querydr%26refund.html).
@@ -339,6 +341,24 @@ Hai item phải nhận hai đơn vị khác nhau và tính giá hai gói. Nhóm 
 - [x] GetCustomerOrdersUseCaseTest (phân trang, IDOR boundary, mapping SubOrders)
 - [x] GetCancellationPreviewUseCaseTest (tính toán preview hoàn tiền, chính sách phân tầng theo giờ)
 - [x] OrderControllerTest (IDOR customer/vendor)
+
+
+### Quản trị giao dịch — hợp đồng đối soát ngày 09/10/2026
+
+**Kiểm chứng 09/10/2026:** `./mvnw clean verify` → BUILD SUCCESS; 1.711 test cases, 1576 thực chạy, 135 skipped, 0 failures, 0 errors. Trong đó 29 ca `AdminTransactionIntegrationTest` trên PostgreSQL 16/Flyway/Redis 7 riêng và 57 ca tập trung reconciliation/adapter/job. Kiểm kê runtime: 126 method/path; migration mới V23 đã được kiểm tra trên DB mới và nâng từ V20. Gateway được mock; sandbox thật chưa được chạy trong lần này.
+
+- Ba danh sách `/api/admin/orders`, `/api/admin/payments`, `/api/admin/refunds` dùng bộ lọc động, chạy với PostgreSQL khi bỏ trống ngày hoặc chỉ có một cận. Ngày bao gồm cả hai biên, so sánh theo instant; `from > to` trả 400. Lọc vendor dùng `EXISTS` để không nhân bản đơn nhiều sub-order.
+- Query cổng chạy ngoài transaction áp dụng kết quả. Sau query, khóa payment rồi master order, đọc lại trạng thái và đối chiếu intent đã lưu. Webhook/capture thắng trước thì đối soát no-op, không ghi đè trạng thái cuối.
+- Chỉ nhận `SUCCESS` khi ID giao dịch, số tiền và tiền tệ cổng hợp lệ. VNPay phải có checksum/merchant đúng, `querydr` thành công, TxnRef khớp và TransactionType=01. Response refund 02/03 không chứng minh thanh toán thành công.
+- Timeout, UNKNOWN, trạng thái VNPay đảo/nghi ngờ/hoàn trả không tự chuyển payment thành FAILED; local `expiresAt` không chứng minh chưa thu tiền. Query chưa rõ lưu `GATEWAY_QUERY_AWAITING_VERIFICATION`. Dấu hiệu capture đã gửi, kể cả marker timeout của dữ liệu cũ thiếu operation ID, vẫn giữ `GATEWAY_TIMEOUT_AWAITING_VERIFICATION` và không gửi lại capture.
+- PayPal chưa approve/capture vẫn cho phép khách thực hiện capture đầu tiên sau approval; tra cứu trước approval không chặn thao tác này.
+- Nếu xác nhận booking hoặc ghi audit thất bại, transaction kết quả rollback; payment tiếp tục PENDING với `RECONCILIATION_APPLY_REQUIRES_REVIEW` và lịch đối soát tiếp theo. Không tự xác nhận hold hết hạn/bán vượt tồn; trường hợp này cần kiểm tra vận hành, không tự gửi một lệnh tài chính mới.
+- Job lấy tối đa 50 payment PAYPAL/VNPAY đến hạn mỗi lượt, không quét trùng capture trong cùng lượt. Claim được commit trước query; backoff 30/60/120/240/300 giây. Payment chưa giải quyết không chiếm mãi batch đầu.
+- Audit `RECONCILE_PAYMENT_SUCCESS`, `RECONCILE_PAYMENT_FAILED`, `RECONCILE_PAYMENT_PENDING`, `RECONCILE_PAYMENT_SKIPPED` ghi cùng transaction trạng thái, gồm cả nhánh phục hồi capture. Metadata JSON dùng TEXT; không phát audit SUCCESS cho transaction bị rollback.
+- `paymentStatus` chuyển PAID sau thanh toán, REFUNDED khi hoàn toàn bộ; hoàn một phần vẫn PAID vì enum hiện không có PARTIALLY_REFUNDED. Hủy không hoàn chuyển NO_REFUND; hủy có refund PENDING chưa được ghi REFUNDED.
+- Payment response bổ sung `lastError`, `reconciliationAttempts`, `reconciliationNextAttemptAt`, `lastReconciledAt`. Refund detail bổ sung `verificationAttempts`, `nextAttemptAt`, `gatewayRequestedAt`, `paymentId`; `retryCount` không thay thế số lần query xác minh.
+- Migration `V23__admin_transaction_reconciliation.sql` bổ sung lịch đối soát/index, metadata TEXT và backfill PAID/REFUNDED từ payment cũ. Không sửa migration đã phát hành; V21/V22 đã được dùng ở các nhánh AI/review/reporting khác.
+- Bộ kiểm chứng: `AdminTransactionIntegrationTest` dùng PostgreSQL 16/Flyway và Redis 7 riêng; HTTP/RBAC/owner, lọc kết hợp/phân trang/biên ngày, query cạnh tranh với webhook, rollback booking/audit, money mismatch, đổi intent khi query, capture đầu tiên, marker timeout legacy, IPN chưa rõ, hoàn toàn phần/một phần, backoff/batch và nâng DB V20→V23. Gateway/confirm booking được mock; không thay thế giao dịch sandbox thật.
 
 ---
 
@@ -464,7 +484,7 @@ Hai item phải nhận hai đơn vị khác nhau và tính giá hai gói. Nhóm 
    - API Admin duyệt và xác nhận chi trả.
    - Cấu hình hoa hồng thay cho tỷ lệ mặc định cố định.
 
-5. **Theo dõi và quản trị giao dịch** Khách cần biết hoàn tiền đang xử lý hay đã hoàn tất; Admin cần tìm giao dịch toàn sàn.
+5. **Theo dõi và quản trị giao dịch [ĐÃ KIỂM CHỨNG BACKEND]** Khách xem được lịch sử payment/refund của đơn; admin tìm và lọc giao dịch toàn sàn. Đối soát chỉ tra cứu, kiểm tra identity/money, cập nhật dưới khóa và ghi audit cùng transaction. Gateway trong test được mô phỏng; nghiệm thu sandbox thật vẫn là mục riêng.
    - `GET /api/orders/{id}/payments`
    - `GET /api/orders/{id}/refunds`
    - `GET /api/admin/orders`, `/payments`, `/refunds`

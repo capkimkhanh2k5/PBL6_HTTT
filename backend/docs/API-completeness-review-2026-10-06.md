@@ -77,13 +77,25 @@ Cập nhật 08/10/2026:
 
 Bằng chứng: `security/authentication/presentation/AuthenticationController.java`, `ForgotPasswordUseCase.java`, `ResetPasswordUseCase.java`, `PasswordResetEmailConsumer.java`, `configs/RabbitMQConfig.java`.
 
-### P1 Quản trị giao dịch và theo dõi hoàn tiền
+### P1 Quản trị giao dịch và theo dõi hoàn tiền [ĐÃ KIỂM CHỨNG BACKEND]
 
-Admin xem detail order/booking nếu đã biết UUID, nhưng chưa có API list giao dịch toàn sàn, lọc đơn và lịch sử refund/payment phục vụ xử lý vấn đề.
+**Kiểm chứng 09/10/2026:** `./mvnw clean verify` → BUILD SUCCESS; 1.711 test cases, 1576 thực chạy, 135 skipped, 0 failures, 0 errors. Trong đó 29 ca `AdminTransactionIntegrationTest` trên PostgreSQL 16/Flyway/Redis 7 riêng và 57 ca tập trung reconciliation/adapter/job. Kiểm kê runtime: 126 method/path; migration mới V23 đã được kiểm tra trên DB mới và nâng từ V20. Gateway được mock; sandbox thật chưa được chạy trong lần này.
 
-- `GET /api/admin/orders`, `GET /api/admin/payments`, `GET /api/admin/refunds`, lọc trạng thái/provider/vendor/customer/thời gian.
-- `GET /api/orders/{id}/payments`, `GET /api/orders/{id}/refunds`, kiểm tra owner.
-- Tra trạng thái cổng khi webhook mất/chậm, retry an toàn và lưu lịch sử; đây là service/job nội bộ, không nhất thiết phải có endpoint công khai.
+Cập nhật 09/10/2026 trên nhánh `admin_transaction_refund_management`:
+
+- Admin: `GET /api/admin/orders`, `/payments`, `/refunds` và detail payment/refund. Có phân trang, bộ lọc trạng thái/provider/vendor/customer/order/thời gian; bộ lọc động chạy trên PostgreSQL với cận ngày rỗng, một cận hoặc đủ hai cận. Ngày sai thứ tự trả 400.
+- Customer/admin: `GET /api/orders/{id}/payments` và `/refunds`; kiểm tra owner hoặc quyền ADMIN.
+- Job tra cứu VNPay querydr/PayPal order-capture, không gửi lại capture/refund. Kiểm tra checksum, reference và loại giao dịch VNPay; kiểm tra transaction ID, provider amount/currency với intent. Kết quả query được áp dụng trong transaction có khóa payment/master order, đọc lại trạng thái sau external request.
+- Timeout/UNKNOWN/local URL hết hạn không kết luận chưa thu tiền. Các trạng thái VNPay đảo/nghi ngờ hoặc liên quan refund giữ chờ xác minh. Lỗi xác nhận booking hoặc audit rollback kết quả và lưu marker cần review; không tự xác nhận hold hết hạn hay vượt tồn.
+- Batch tối đa 50, claim và backoff 30–300 giây, tránh query trùng capture và tránh để payment chưa rõ chiếm batch đầu mãi. Query trước approval không chặn capture đầu tiên; marker capture timeout legacy vẫn chặn gửi lại lệnh.
+- Audit kết quả và phục hồi capture được ghi cùng transaction, metadata JSON lưu TEXT. Chi tiết payment/refund trả lỗi và lịch/số lần xác minh để admin theo dõi.
+- Đồng bộ `paymentStatus`: PAID sau thanh toán, REFUNDED khi hoàn toàn bộ, giữ PAID nếu hoàn một phần, NO_REFUND khi hủy không hoàn. Migration V23 bổ sung lịch đối soát và backfill paymentStatus từ dữ liệu payment cũ.
+
+Bằng chứng mã nguồn: `OrderPaymentService`, `RefundProcessingService`, `AdminTransactionSpecifications`, các controller/repository order-payment-refund, `PaymentReconciliationJob`, `VNPayPaymentAdapter`, API audit đồng bộ và migration V23.
+
+Kiểm thử: `AdminTransactionIntegrationTest` chạy HTTP/RBAC/owner và transaction/concurrency/migration trên PostgreSQL thật; `OrderPaymentReconciliationTest`, `PaymentReconciliationJobTest`, `VNPayPaymentAdapterTest` kiểm tra các nhánh gateway, signed response và lịch quét. Bộ test capture/refund/booking hiện có được chạy hồi quy.
+
+Phạm vi này là backend được kiểm chứng với gateway mô phỏng. Giao dịch capture/refund/webhook trên sandbox thật vẫn cần nghiệm thu riêng. Với giao dịch đã thu tiền nhưng booking không thể xác nhận, hệ thống giữ dấu hiệu cần review để xử lý vận hành; không tự bỏ qua guard tồn hoặc gửi một lệnh thu/hoàn tiền khác.
 
 ### P1/P2 Đổi lịch do thời tiết và lý do vận hành
 
@@ -184,13 +196,20 @@ Giỏ hàng không bắt buộc cần CRUD backend riêng: yêu cầu học ph�
 - **PATCH `/api/admin/disputes/{id}/resolve`** — Admin xử lý dispute; refund PENDING cần luồng thực thi. [Mã nguồn](/Users/capkimkhanh/Documents/DUT4_1/PBL6/backend/src/main/java/com/danasea/backend/modules/dispute/presentation/controllers/AdminDisputeController.java:43).
 - **POST `/api/orders/{id}/disputes`** — Customer tạo dispute gắn sub-order; cần API theo dõi/bổ sung phản hồi. [Mã nguồn](/Users/capkimkhanh/Documents/DUT4_1/PBL6/backend/src/main/java/com/danasea/backend/modules/dispute/presentation/controllers/CustomerDisputeController.java:24).
 
-### Order và payment (13 method/path)
+### Order và payment (20 method/path)
 
-- **POST `/api/orders`** — Tạo master/sub-orders từ booking; nhánh trả order cũ cần kiểm tra owner. [Mã nguồn](/Users/capkimkhanh/Documents/DUT4_1/PBL6/backend/src/main/java/com/danasea/backend/modules/order/presentation/controllers/OrderController.java:77).
+- **GET `/api/admin/orders`** — Danh sách đơn hàng toàn sàn cho Admin, phân trang và lọc đa tiêu chí (status, paymentStatus, customerId, vendorId, khoảng thời gian). [Mã nguồn](/Users/capkimkhanh/Documents/DUT4_1/PBL6/backend/src/main/java/com/danasea/backend/modules/order/presentation/controllers/AdminOrderController.java:31).
+- **GET `/api/admin/payments`** — Danh sách giao dịch thanh toán toàn sàn cho Admin, lọc status, provider, orderId, vendorId, customerId, thời gian. [Mã nguồn](/Users/capkimkhanh/Documents/DUT4_1/PBL6/backend/src/main/java/com/danasea/backend/modules/order/presentation/controllers/AdminPaymentController.java:38).
+- **GET `/api/admin/payments/{id}`** — Chi tiết giao dịch thanh toán cho Admin. [Mã nguồn](/Users/capkimkhanh/Documents/DUT4_1/PBL6/backend/src/main/java/com/danasea/backend/modules/order/presentation/controllers/AdminPaymentController.java:68).
+- **GET `/api/admin/refunds`** — Danh sách yêu cầu hoàn tiền toàn sàn cho Admin, lọc status, reason, subOrderId, orderId, provider, vendorId, customerId, thời gian. [Mã nguồn](/Users/capkimkhanh/Documents/DUT4_1/PBL6/backend/src/main/java/com/danasea/backend/modules/order/presentation/controllers/AdminRefundController.java:38).
+- **GET `/api/admin/refunds/{id}`** — Chi tiết yêu cầu hoàn tiền cho Admin. [Mã nguồn](/Users/capkimkhanh/Documents/DUT4_1/PBL6/backend/src/main/java/com/danasea/backend/modules/order/presentation/controllers/AdminRefundController.java:71).
+- **POST `/api/orders`** — Tạo master/sub-orders từ booking; nhánh trả order cũ kiểm tra owner. [Mã nguồn](/Users/capkimkhanh/Documents/DUT4_1/PBL6/backend/src/main/java/com/danasea/backend/modules/order/presentation/controllers/OrderController.java:77).
 - **GET `/api/orders`** — Danh sách đơn customer; chưa có các bộ lọc kinh doanh/time/status. [Mã nguồn](/Users/capkimkhanh/Documents/DUT4_1/PBL6/backend/src/main/java/com/danasea/backend/modules/order/presentation/controllers/OrderController.java:89).
-- **GET `/api/orders/{id}`** — Chi tiết order của owner hoặc admin; chưa trả lịch sử payment/refund. [Mã nguồn](/Users/capkimkhanh/Documents/DUT4_1/PBL6/backend/src/main/java/com/danasea/backend/modules/order/presentation/controllers/OrderController.java:108).
-- **POST `/api/orders/{id}/refund-request`** — Yêu cầu hoàn; hiện cần sửa persist/idempotency/providerTransactionId. [Mã nguồn](/Users/capkimkhanh/Documents/DUT4_1/PBL6/backend/src/main/java/com/danasea/backend/modules/order/presentation/controllers/OrderController.java:116).
-- **GET `/api/orders/{id}/cancellation-preview`** — Tính mức hoàn trước hủy; cần đồng nhất với lệnh hủy/refund. [Mã nguồn](/Users/capkimkhanh/Documents/DUT4_1/PBL6/backend/src/main/java/com/danasea/backend/modules/order/presentation/controllers/OrderController.java:145).
+- **GET `/api/orders/{id}`** — Chi tiết order của owner hoặc admin. [Mã nguồn](/Users/capkimkhanh/Documents/DUT4_1/PBL6/backend/src/main/java/com/danasea/backend/modules/order/presentation/controllers/OrderController.java:108).
+- **GET `/api/orders/{id}/payments`** — Lịch sử giao dịch thanh toán theo đơn hàng, kiểm tra quyền owner hoặc admin. [Mã nguồn](/Users/capkimkhanh/Documents/DUT4_1/PBL6/backend/src/main/java/com/danasea/backend/modules/order/presentation/controllers/OrderController.java:115).
+- **GET `/api/orders/{id}/refunds`** — Lịch sử hoàn tiền theo đơn hàng, kiểm tra quyền owner hoặc admin. [Mã nguồn](/Users/capkimkhanh/Documents/DUT4_1/PBL6/backend/src/main/java/com/danasea/backend/modules/order/presentation/controllers/OrderController.java:124).
+- **POST `/api/orders/{id}/refund-request`** — Yêu cầu hoàn; hiện cần sửa persist/idempotency/providerTransactionId. [Mã nguồn](/Users/capkimkhanh/Documents/DUT4_1/PBL6/backend/src/main/java/com/danasea/backend/modules/order/presentation/controllers/OrderController.java:133).
+- **GET `/api/orders/{id}/cancellation-preview`** — Tính mức hoàn trước hủy; cần đồng nhất với lệnh hủy/refund. [Mã nguồn](/Users/capkimkhanh/Documents/DUT4_1/PBL6/backend/src/main/java/com/danasea/backend/modules/order/presentation/controllers/OrderController.java:162).
 - **POST `/api/payments/{orderId}/create-intent`** — Tạo intent; cần lưu payment và idempotency để webhook dùng được. [Mã nguồn](/Users/capkimkhanh/Documents/DUT4_1/PBL6/backend/src/main/java/com/danasea/backend/modules/order/presentation/controllers/PaymentController.java:60).
 - **POST `/api/payments/webhook/vnpay`** — Nhận webhook vnpay; raw route dùng HMAC/payload nội bộ, cần kết nối đúng callback của cổng. [Mã nguồn](/Users/capkimkhanh/Documents/DUT4_1/PBL6/backend/src/main/java/com/danasea/backend/modules/order/presentation/controllers/PaymentController.java:85).
 - **POST `/api/payments/webhook/momo`** — Nhận webhook momo; raw route dùng HMAC/payload nội bộ, cần kết nối đúng callback của cổng. [Mã nguồn](/Users/capkimkhanh/Documents/DUT4_1/PBL6/backend/src/main/java/com/danasea/backend/modules/order/presentation/controllers/PaymentController.java:92).

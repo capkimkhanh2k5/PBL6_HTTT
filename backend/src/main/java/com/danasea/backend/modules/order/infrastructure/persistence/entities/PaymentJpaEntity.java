@@ -31,6 +31,11 @@ public class PaymentJpaEntity extends BaseJpaEntity {
     @Column(columnDefinition = "TEXT")
     private String lastError;
 
+    @Column(nullable = false)
+    private Integer reconciliationAttempts = 0;
+    private OffsetDateTime reconciliationNextAttemptAt;
+    private OffsetDateTime lastReconciledAt;
+
     private UUID masterOrderId;
 
     @Enumerated(EnumType.STRING)

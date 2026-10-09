@@ -1,5 +1,6 @@
 package com.danasea.backend.modules.order.infrastructure.persistence.repositories;
 
+import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -7,6 +8,7 @@ import java.util.UUID;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -15,14 +17,26 @@ import org.springframework.stereotype.Repository;
 import com.danasea.backend.modules.order.domain.models.PaymentProvider;
 import com.danasea.backend.modules.order.domain.models.PaymentStatus;
 import com.danasea.backend.modules.order.infrastructure.persistence.entities.PaymentJpaEntity;
+import com.danasea.backend.modules.order.infrastructure.persistence.specifications.AdminTransactionSpecifications;
 
 import jakarta.persistence.LockModeType;
 
 @Repository
-public interface JpaPaymentRepository extends JpaRepository<PaymentJpaEntity, UUID> {
+public interface JpaPaymentRepository extends JpaRepository<PaymentJpaEntity, UUID>, JpaSpecificationExecutor<PaymentJpaEntity> {
 
     List<PaymentJpaEntity> findTop50ByProviderAndStatusAndCaptureRequestedAtIsNotNullOrderByCaptureRequestedAtAsc(
             PaymentProvider provider, PaymentStatus status);
+
+    List<PaymentJpaEntity> findByStatusAndCreatedAtBeforeOrderByCreatedAtAsc(
+            PaymentStatus status, OffsetDateTime before);
+
+    @Query("SELECT p FROM PaymentJpaEntity p WHERE p.status = :status AND p.provider IN :providers "
+            + "AND (p.createdAt <= :threshold OR p.captureRequestedAt IS NOT NULL) "
+            + "AND (p.reconciliationNextAttemptAt IS NULL OR p.reconciliationNextAttemptAt <= :now) "
+            + "ORDER BY p.createdAt ASC, p.id ASC")
+    List<PaymentJpaEntity> findReconciliationCandidates(
+            @Param("status") PaymentStatus status, @Param("providers") List<PaymentProvider> providers,
+            @Param("threshold") OffsetDateTime threshold, @Param("now") OffsetDateTime now, Pageable pageable);
 
     Optional<PaymentJpaEntity> findByMasterOrderIdAndIdempotencyKey(UUID masterOrderId, String idempotencyKey);
 
@@ -57,4 +71,16 @@ public interface JpaPaymentRepository extends JpaRepository<PaymentJpaEntity, UU
             @Param("provider") PaymentProvider provider,
             @Param("masterOrderId") UUID masterOrderId,
             Pageable pageable);
+
+    default Page<PaymentJpaEntity> findByAdvancedFilters(
+            PaymentStatus status,
+            PaymentProvider provider,
+            UUID masterOrderId,
+            UUID customerId,
+            UUID vendorId,
+            OffsetDateTime fromDate,
+            OffsetDateTime toDate,
+            Pageable pageable) {
+        return findAll(AdminTransactionSpecifications.payments(status, provider, masterOrderId, customerId, vendorId, fromDate, toDate), pageable);
+    }
 }

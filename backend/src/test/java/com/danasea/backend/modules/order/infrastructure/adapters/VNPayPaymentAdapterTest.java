@@ -12,12 +12,13 @@ import java.util.HexFormat;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.UUID;
-
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.client.MockRestServiceServer;
@@ -154,5 +155,42 @@ class VNPayPaymentAdapterTest {
         Mac mac = Mac.getInstance("HmacSHA512");
         mac.init(new SecretKeySpec(SECRET.getBytes(StandardCharsets.UTF_8), "HmacSHA512"));
         return HexFormat.of().formatHex(mac.doFinal(data.getBytes(StandardCharsets.UTF_8)));
+    }
+    @Test
+    void reviewSignedResponseForAnotherReferenceCannotCompletePayment() throws Exception {
+        server.expect(requestTo(API)).andRespond(withSuccess(response("querydr", "01", "00", "00", "987654321"), MediaType.APPLICATION_JSON));
+        assertThatThrownBy(() -> adapter.queryPayment(PaymentProvider.VNPAY, "different-request-reference", "20261005123045"))
+            .isInstanceOf(PaymentGatewayException.class);
+    }
+
+    @Test
+    void reviewSignedRefundResponseCannotProvePaymentCompletion() throws Exception {
+        server.expect(requestTo(API)).andRespond(withSuccess(response("querydr", "03", "00", "00", "REFUND999"), MediaType.APPLICATION_JSON));
+        assertThat(adapter.queryPayment(PaymentProvider.VNPAY, request.orderId(), request.transactionDate()).success()).isFalse();
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"04", "07", "09"})
+    void ambiguousOrRefundRelatedTransactionStatusesDoNotFailAPayment(String status) throws Exception {
+        server.expect(requestTo(API)).andRespond(withSuccess(response("querydr", "01", "00", status, "987654321"), MediaType.APPLICATION_JSON));
+        var result = adapter.queryPayment(PaymentProvider.VNPAY, request.orderId(), request.transactionDate());
+        assertThat(result.success()).isFalse();
+        assertThat(result.status()).isEqualTo("UNKNOWN");
+    }
+
+    @Test
+    void failedLookupCannotBeMistakenForFailedPayment() throws Exception {
+        server.expect(requestTo(API)).andRespond(withSuccess(response("querydr", "01", "94", "02", "987654321"), MediaType.APPLICATION_JSON));
+        assertThat(adapter.queryPayment(PaymentProvider.VNPAY, request.orderId(), request.transactionDate()).status()).isEqualTo("UNKNOWN");
+    }
+
+    @Test
+    void matchingPaymentQueryReturnsGatewayMoney() throws Exception {
+        server.expect(requestTo(API)).andRespond(withSuccess(response("querydr", "01", "00", "00", "987654321"), MediaType.APPLICATION_JSON));
+        var result = adapter.queryPayment(PaymentProvider.VNPAY, request.orderId(), request.transactionDate());
+        assertThat(result.success()).isTrue();
+        assertThat(result.amount()).isEqualByComparingTo("200000");
+        assertThat(result.currency()).isEqualTo("VND");
+        server.verify();
     }
 }

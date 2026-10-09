@@ -5,14 +5,15 @@ import java.util.UUID;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
-import lombok.RequiredArgsConstructor;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.danasea.backend.modules.audit.application.api.AuditLogInternalApi;
 import com.danasea.backend.modules.audit.application.ports.AuditLogPort;
 import com.danasea.backend.modules.audit.domain.models.AuditLog;
 
-import org.springframework.scheduling.annotation.Async;
+import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
@@ -23,6 +24,12 @@ public class AuditLogInternalService implements AuditLogInternalApi {
     @Async
     @Override
     public void recordAuditLog(UUID actorUserId, String action, String entityType, UUID entityId, String metadata) {
+        recordTransactionalAuditLog(actorUserId, action, entityType, entityId, metadata);
+    }
+
+    @Transactional
+    @Override
+    public void recordTransactionalAuditLog(UUID actorUserId, String action, String entityType, UUID entityId, String metadata) {
         AuditLog auditLog = new AuditLog();
         auditLog.setActorUserId(actorUserId);
         auditLog.setAction(action);
