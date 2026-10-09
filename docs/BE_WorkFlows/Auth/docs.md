@@ -1,12 +1,12 @@
 # 📖 TÓM TẮT CÁC SƠ ĐỒ — MODULE AUTHENTICATION & IAM
 
-> Module IAM & Authentication chịu trách nhiệm quản lý định danh người dùng, xác thực đăng nhập (Local & Google OAuth2 SSO), cấp phát/thu hồi JWT (Access/Refresh Token) và xử lý quy trình phục hồi tài khoản (Quên mật khẩu / Đặt lại mật khẩu) an toàn với nhiều lớp phòng vệ (Anti-Enumeration, Brute-force Protection, Rate Limiting).
+> Module IAM & Authentication chịu trách nhiệm quản lý định danh người dùng, xác thực đăng nhập (Local & Google OAuth2 SSO), cấp phát/thu hồi JWT (Access/Refresh Token) và xử lý quy trình phục hồi tài khoản (Quên mật khẩu / Đặt lại mật khẩu) an toàn với nhiều lớp phòng vệ (Anti-Enumeration, Pessimistic Row Lock, Brute-force Defense, Token Versioning & Complete Session Revocation).
 
 | # | Sơ đồ | Loại | Nội dung |
 |---|-------|------|----------|
 | 1 | `Google_OAuth2_Login_Flow` | Sequence Diagram | Quy trình xác thực Google ID Token, kiểm tra tài khoản hoặc tự động đăng ký (Auto-Provisioning) và phát hành cặp Access/Refresh Token Danasea |
-| 2 | `Auth_ForgotPassword_Flow` | Sequence Diagram | Quy trình yêu cầu cấp mã OTP quên mật khẩu: Giới hạn tần suất IP (Rate Limiting), phòng vệ chống lộ người dùng (Anti-Enumeration Defense), sinh mã OTP băm SHA-256 (hết hạn 15 phút), phát sự kiện RabbitMQ và gửi email nền song ngữ qua SMTP |
-| 3 | `Auth_ResetPassword_Flow` | Sequence Diagram | Quy trình đặt lại mật khẩu mới: Khóa bi quan (Pessimistic Lock), phòng thủ chống tấn công Brute-force OTP (giới hạn 5 lần thử), cập nhật mật khẩu mã hóa BCrypt, tăng session version, thu hồi toàn bộ Refresh Token của các phiên cũ và ghi nhận Audit Log |
+| 2 | `Auth_ForgotPassword_Flow` | Sequence Diagram | Quy trình yêu cầu cấp mã OTP quên mật khẩu: Giới hạn tần suất IP (`Bucket4j`/Redis), phòng vệ chống lộ người dùng (**Anti-Enumeration Defense**), sinh mã OTP băm SHA-256 (hết hạn 15 phút), bọc try-catch sự kiện RabbitMQ tránh rò rỉ khi broker lỗi và gửi email nền song ngữ qua SMTP |
+| 3 | `Auth_ResetPassword_Flow` | Sequence Diagram | Quy trình đặt lại mật khẩu mới: Khóa bi quan hàng người dùng (**Pessimistic Row Lock** `SELECT ... FOR UPDATE`), phòng thủ chống tấn công Brute-force OTP với giao dịch `noRollbackFor` (giới hạn 5 lần thử sai), cập nhật mật khẩu BCrypt, tăng `sessionVersion` vô hiệu hóa toàn bộ Access Token, thu hồi toàn bộ Refresh Token của các phiên cũ và ghi nhận Audit Log an ninh |
 
 ---
 
@@ -62,7 +62,7 @@
 
 3. **Tra cứu tài khoản & Cơ chế chống rò rỉ người dùng (Anti-Enumeration Defense):**
    - Chuyển tiếp request đến `ForgotPasswordUseCase`.
-   - Chuẩn hóa email (`trim().toLowerCase(Locale.ROOT)`) và tra cứu người dùng qua `AccountInternalApi.findUserByEmailForUpdate(normalizedEmail)`.
+   - Chuẩn hóa email (`trim().toLowerCase(Locale.ROOT)`) và tra cứu người dùng với khóa bi quan qua `AccountInternalApi.findUserByEmailForUpdate(normalizedEmail)`.
    - **Phòng vệ an ninh:**
      - Nếu email không tồn tại trong hệ thống: Ghi log info nội bộ và **Silent Return** (kết thúc xử lý trong im lặng).
      - Nếu tài khoản tồn tại nhưng đang bị khóa (`isLocked == true`): Ghi log warn nội bộ và **Silent Return**.
@@ -76,9 +76,10 @@
      - Thiết lập thời gian hết hạn là **15 phút** (`expiresAt = now() + 15 minutes`).
      - Lưu trữ bản ghi token mới vào bảng `password_reset_tokens` (`used = false, failed_attempts = 0`).
 
-5. **Phát sự kiện và Xử lý gửi Email nền (Event-Driven & Asynchronous Worker):**
-   - `ForgotPasswordUseCase` gọi `AuthEventPublisher.publishPasswordResetRequestedEvent(...)` để phát sự kiện `PasswordResetRequestedEvent(userId, email, rawOtp, locale)` lên RabbitMQ exchange `auth.events` với routing key `auth.user.password_reset_requested`.
-   - Quá trình publish bất đồng bộ giúp API phản hồi về Client gần như tức thì mà không bị trễ do tác vụ mạng của SMTP.
+5. **Phát sự kiện an toàn & Xử lý gửi Email nền (Event-Driven & Failure Resilience):**
+   - `ForgotPasswordUseCase` bọc việc phát sự kiện trong khối `try-catch (RuntimeException)`. Nếu Message Broker RabbitMQ gặp sự cố, hệ thống ghi log lỗi nội bộ nhưng **không ném ngoại lệ ra ngoài**, nhằm ngăn chặn việc kẻ tấn công lợi dụng lỗi broker để suy đoán sự tồn tại của tài khoản (`publisherFailureDoesNotRevealAccountExistence`).
+   - Sự kiện `PasswordResetRequestedEvent(userId, email, rawOtp, locale)` được đẩy lên RabbitMQ exchange `auth.events` với routing key `auth.user.password_reset_requested`.
+   - Quá trình phát sự kiện bất đồng bộ giúp API phản hồi về Client gần như tức thì mà không bị trễ do tác vụ mạng của SMTP.
    - Worker `PasswordResetEmailConsumer` lắng nghe queue `notification.password-reset-email.queue`:
      - Phân giải ngôn ngữ dựa vào trường `locale` để tải thông điệp email tương ứng (`email.password_reset.subject`, `email.password_reset.body`).
      - Điền mã OTP 6 số vào nội dung thư và chuyển giao cho `JavaMailSender` thực hiện gửi email qua giao thức SMTP.
@@ -96,36 +97,37 @@
 1. **Khách hàng gửi mã xác nhận và mật khẩu mới:**
    - Người dùng nhập mã OTP 6 số nhận được từ email và nhập mật khẩu mới.
    - Client gửi `POST /api/auth/reset-password` kèm payload: `{ email, otp, newPassword }`.
-   - `RateLimitFilter` kiểm tra giới hạn tần suất trên endpoint (`5 requests / phút`).
+   - `RateLimitFilter` kiểm tra giới hạn tần suất trên endpoint (`keyPrefix = "reset-pw:" + IP`).
 
-2. **Tra cứu tài khoản với Khóa Bi Quan (Pessimistic Lock):**
+2. **Khóa Bi Quan Hàng Người Dùng (Pessimistic Row Lock):**
    - `ResetPasswordUseCase` thực thi trong một `@Transactional(noRollbackFor = {OtpInvalidException.class, OtpMaxAttemptsExceededException.class})`.
-   - Tìm kiếm người dùng qua `accountInternalApi.findUserByEmailForUpdate(normalizedEmail)` với mệnh đề SQL `SELECT ... FOR UPDATE`.
-   - Khóa hàng (row-level lock) này bảo vệ hệ thống trước tình trạng tranh chấp dữ liệu (Race Condition) khi người dùng hoặc kẻ tấn công gửi nhiều request đổi mật khẩu đồng thời.
+   - Tìm kiếm người dùng qua `accountInternalApi.findUserByEmailForUpdate(normalizedEmail)` với mệnh đề SQL `SELECT ... FROM users WHERE email = ? FOR UPDATE`.
+   - Khóa hàng này bắt buộc các tác vụ đồng thời (như làm mới token `refresh.execute()` hoặc các request reset password song song) phải xếp hàng chờ đợi cho đến khi giao dịch reset hoàn tất (`refreshWaitingOnResetLockReadsCommittedRevocation`), loại bỏ triệt để nguy cơ Race Condition.
    - Nếu tài khoản không tồn tại hoặc `isLocked == true`: Ném ngoại lệ `OtpInvalidException` (trả về mã lỗi chung `AUTH_007`) để che giấu trạng thái thực tế của người dùng.
 
 3. **Tra cứu Token OTP & Kiểm tra vòng đời:**
    - Gọi `accountInternalApi.findLatestActivePasswordResetToken(userId)` để tìm token mới nhất có `used = false` và `expiresAt > now()`.
    - Nếu không tìm thấy hoặc token đã quá hạn 15 phút: Ném ngoại lệ `OtpExpiredException` (mã lỗi `AUTH_007: Mã xác nhận không hợp lệ hoặc đã hết hạn`).
 
-4. **Cơ chế phòng thủ tấn công Brute-force OTP (Brute-force Defense):**
+4. **Cơ chế phòng thủ tấn công Brute-force OTP (Database-backed Brute-force Defense):**
    - **Bước kiểm tra trước (Pre-check):** Nếu token đã ghi nhận `failedAttempts >= 5`, UseCase lập tức gọi `markPasswordResetTokenUsed(tokenId)` để hủy token ngay và ném `OtpMaxAttemptsExceededException` (mã lỗi `AUTH_008`).
    - **Xác thực mã băm SHA-256:** Tính toán `HashUtils.sha256(rawOtp)` và đối chiếu với `token.getTokenHash()`.
    - **Trường hợp OTP không chính xác:**
-     - Gọi `accountInternalApi.recordFailedPasswordResetAttempt(tokenId)` tăng bộ đếm `failed_attempts` lên 1 trong cơ sở dữ liệu.
-     - Nhờ cấu hình `noRollbackFor`, giao dịch vẫn commit thành công giá trị tăng số lần thử sai dù ngoại lệ được ném ra.
+     - Gọi `accountInternalApi.recordFailedPasswordResetAttempt(tokenId)` tăng bộ đếm `failed_attempts = min(5, failed_attempts + 1)`. Nếu số lần thử chạm mốc 5, trường `used_at` được cập nhật ngay thành thời điểm hiện tại để khóa vĩnh viễn token.
+     - Nhờ cấu hình `noRollbackFor`, giao dịch vẫn commit thành công giá trị tăng số lần thử sai dù ngoại lệ được ném ra (`fifthWrongAttemptCommitsTokenInvalidationAndCorrectOtpIsRejected`).
      - Nếu sau khi tăng, số lần thử sai đạt mốc **5 lần**: Ném `OtpMaxAttemptsExceededException` (`AUTH_008`). Kẻ tấn công bị chặn hoàn toàn và buộc phải yêu cầu lại mã mới từ đầu.
      - Nếu chưa vượt quá 5 lần: Ném `OtpInvalidException` (`AUTH_007`).
    - **Trường hợp OTP hoàn toàn chính xác:** Chuyển sang bước đổi mật khẩu.
 
-5. **Cập nhật Mật khẩu & Thu hồi bảo mật phiên (Session Revocation):**
+5. **Cập nhật Mật khẩu & Thu hồi bảo mật phiên toàn diện (Complete Session Revocation):**
    - Băm mật khẩu mới bằng `PasswordHasher.hash(newPassword)` (thuật toán an toàn BCrypt với độ phức tạp cao).
-   - Cập nhật phiên bản phiên làm việc: `user.sessionVersion = user.sessionVersion + 1`. Cơ chế này khiến tất cả các Access Token (JWT) hiện có trên các thiết bị lập tức bị vô hiệu hóa khi gọi các API yêu cầu xác thực.
-   - Lưu thông tin người dùng mới: `accountInternalApi.saveUser(user)`.
-   - Đánh dấu token OTP đã sử dụng: `accountInternalApi.markPasswordResetTokenUsed(tokenId)` (`used = true`, `usedAt = now()`), đảm bảo tính chất **One-Time Use**.
-   - Thu hồi toàn bộ Refresh Tokens: Gọi `accountInternalApi.revokeAllRefreshTokensByUserId(userId)` để vô hiệu hóa tất cả token làm mới trong Redis/PostgreSQL. Mọi thiết bị đã đăng nhập trước đó bắt buộc phải đăng nhập lại bằng mật khẩu mới.
+   - **Tăng phiên bản phiên (Session Versioning):** `user.sessionVersion = user.sessionVersion + 1`. Bộ lọc `JwtAuthenticationFilter` đối chiếu claim `session_version` trong token với database, khiến tất cả Access Token (JWT) hiện có trên các thiết bị lập tức bị vô hiệu hóa (`401 Unauthorized`), kể cả các token cũ chưa hết hạn thời gian (`legacyJwtWithoutVersionWorksOnlyUntilFirstReset`).
+   - **Bảo vệ Stale Profile Save:** Hàm `saveUser()` trong `AccountInternalService` đối chiếu `Math.max(current.getSessionVersion(), user.getSessionVersion())`, đảm bảo không một tiến trình cập nhật profile cũ nào có thể khôi phục lại mật khẩu cũ hoặc hạ thấp `sessionVersion`.
+   - **Vô hiệu hóa Token OTP:** Gọi `accountInternalApi.markPasswordResetTokenUsed(tokenId)` (`used = true`, `usedAt = now()`), đảm bảo tính chất **One-Time Use**.
+   - **Thu hồi toàn bộ Refresh Tokens:** Gọi `accountInternalApi.revokeAllRefreshTokensByUserId(userId)` cập nhật `revoked_at = now()` cho toàn bộ token làm mới trong database. Mọi thiết bị đã đăng nhập trước đó bắt buộc phải đăng nhập lại bằng mật khẩu mới.
 
-6. **Ghi nhận Nhật ký kiểm toán (Audit Logging) & Phản hồi:**
-   - Gọi `AuditLogInternalApi.recordAuditLog(userId, "PASSWORD_RESET", "USER", userId, "User reset password via OTP")` để lưu vết lịch sử đổi mật khẩu phục vụ an ninh và thanh tra.
+6. **Ghi nhận Nhật ký kiểm toán (Audit Logging) & Đảm bảo toàn vẹn giao dịch:**
+   - Gọi `AuditLogInternalApi.recordAuditLog(user.getId(), "PASSWORD_RESET", "USER", user.getId(), "User reset password via OTP")`.
+   - Nếu dịch vụ Audit Log gặp lỗi, toàn bộ giao dịch đổi mật khẩu sẽ bị rollback (`auditFailureRollsBackPasswordChangeAndLeavesExistingTokensValid`), mật khẩu cũ và các token hiện hành vẫn được bảo toàn nguyên vẹn.
    - Phản hồi `HTTP 200 OK` kèm thông điệp: *"Đặt lại mật khẩu thành công. Vui lòng đăng nhập lại bằng mật khẩu mới."*
    - Client điều hướng người dùng quay trở lại màn hình Đăng nhập.
