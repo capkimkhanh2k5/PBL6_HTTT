@@ -1,7 +1,7 @@
 graph TB
     %% ==========================================
-    %% DANASEA AI HYBRID ARCHITECTURE
-    %% Groq Cloud LLM + Quyet Small + Core Backend + Postgres V21 + Redis
+    %% 6. DANASEA AI HYBRID ARCHITECTURE (COMPREHENSIVE)
+    %% Groq Cloud LLM + Quyet Small + Core Backend + Postgres V21-V25 + Redis
     %% ==========================================
 
     subgraph ClientLayer["🖥️ TẦNG GIAO DIỆN (CLIENT APPS)"]
@@ -11,28 +11,41 @@ graph TB
 
     subgraph SecurityGateway["🛡️ BẢO MẬT & ĐIỀU PHỐI (GATEWAY & SECURITY)"]
         SecurityContext["Spring Security Context<br/>(JWT Auth & User Ownership)"]
-        LocaleContextFilter["LocaleContextFilter<br/>(Accept-Language: VI / EN)"]
+        LocaleFilter["LocaleContextFilter<br/>(Accept-Language: VI / EN)"]
+        BudgetFilter["AiExecutionBudgetFilter<br/>(X-Execution-Budget-Ms, 8s Deadline,<br/>Max 8 Concurrent AI Requests/JVM)"]
         RateLimiter["RedisRateLimiter<br/>(Token Bucket + TrustTier)"]
     end
 
     subgraph ControllerLayer["🎮 TẦNG BỘ ĐIỀU KHIỂN (API CONTROLLERS)"]
         AssistantCtrl["AssistantController<br/>/api/assistant/**"]
-        CustomerAiCtrl["CustomerAiController<br/>/api/ai/**"]
-        AssessmentCtrl["AiAssessmentController<br/>/api/ai/**"]
-        AdminAiCtrl["AdminAiController<br/>/api/admin/ai/**"]
+        CustomerAiCtrl["CustomerAiController<br/>/api/ai/** (Search, Nearby, Compare, Weather)"]
+        ItineraryCtrl["ItineraryLifecycleController<br/>/api/ai/itineraries/** (Preview, Save, Proposals)"]
+        PrefCtrl["CustomerPreferenceController<br/>/api/ai/preferences & feedback"]
+        SupportWorkflowCtrl["CustomerSupportWorkflowController<br/>/api/ai/support/requests/**"]
+        AssessmentCtrl["AiAssessmentController<br/>/api/ai/content-assessments & categories"]
+        AdminAiCtrl["AdminAiController<br/>/api/admin/ai/** (Risk Cases & Assessments)"]
+        ManualSupportCtrl["ManualSupportController<br/>/api/admin/support/requests/**"]
     end
 
     subgraph CoreApplicationLayer["⚙️ TẦNG NGHIỆP VỤ LÕI (APPLICATION USE CASES)"]
         ChatUC["ChatUseCase<br/>(Hội thoại đa lượt)"]
+        IdemService["ChatIdempotencyService<br/>(Chống submit trùng)"]
+        ArtifactMapper["AssistantArtifactMapper<br/>(Typed UI Cards)"]
         DiscoveryUC["DiscoverServicesUseCase<br/>(Search, Recommend, Nearby)"]
-        ItineraryUC["PlanItineraryUseCase<br/>(Lập lịch & Tái lập lịch)"]
+        ItineraryUC["PlanItineraryUseCase<br/>(Preview, Save, Accept, Replan)"]
         ComparisonUC["CompareServicesUseCase<br/>(So sánh 2-4 dịch vụ)"]
         ReviewUC["ReviewSummaryUseCase<br/>(Tóm tắt đánh giá thực tế)"]
         WeatherUC["WeatherAwareUseCase<br/>(Đánh giá an toàn thời tiết)"]
         SupportUC["CustomerSupportUseCase<br/>(Tra cứu đơn & Preview hủy)"]
+        SupportRequestUC["CustomerSupportRequestUseCase<br/>(Hàng đợi đổi lịch & hỗ trợ)"]
+        PrefUC["CustomerPreferenceUseCase<br/>(Sở thích & Phản hồi gợi ý)"]
         AssessTextUC["AssessTextUseCase<br/>(Regex + Text Moderation)"]
         RiskUC["AnalyzeTransactionRiskUseCase<br/>(Quy tắc Velocity 3/5/3)"]
-        ConfirmBookingUC["ConfirmBookingUseCase<br/>(Re-validation & Tạo Hold)"]
+        ConfirmBookingUC["ConfirmBookingUseCase<br/>(Re-validation, Hold & Bù trừ)"]
+    end
+
+    subgraph BackgroundJobsLayer["⏰ TẦNG TÁC VỤ NỀN (BACKGROUND JOBS)"]
+        MonitoringJob["ItinerarySourceMonitoringJob<br/>(Quét thay đổi ca & cảnh báo thời tiết mỗi 60s<br/>-> Tự động sinh Re-plan Proposal & In-app Alert)"]
     end
 
     subgraph ToolRegistryLayer["🧰 BỘ CÔNG CỤ TRỢ LÝ (AI TOOL REGISTRY - 15 TOOLS)"]
@@ -50,23 +63,26 @@ graph TB
 
         subgraph QuyetLocal["⚡ QUYET SMALL INFERENCE WORKER (Offline / Local CPU)"]
             QuyetClient["QuyetDecisionAdapter<br/>(REST Client /decide)"]
-            QuyetTasks["Fast Decision Tasks:<br/>• INTENT (Phân loại ý định)<br/>• RELEVANCE (Chấm điểm gợi ý)<br/>• SERVICE_CATEGORY (Phân loại dịch vụ)<br/>• MODERATION (Spam, Abuse, Ext. Payment)<br/>• RISK (Tín hiệu rủi ro giao dịch)<br/>• REVIEW (Khía cạnh & cảm xúc)"]
+            QuyetTasks["Fast Decision Tasks:<br/>• INTENT (Phân loại ý định tìm kiếm)<br/>• RELEVANCE (Chấm điểm gợi ý top 5)<br/>• SERVICE_CATEGORY (Phân loại dịch vụ)<br/>• MODERATION (Spam, Abuse, Ext. Payment)<br/>• RISK (Tín hiệu rủi ro giao dịch)<br/>• REVIEW (Tách khía cạnh & cảm xúc)"]
         end
     end
 
     subgraph StorageLayer["💾 TẦNG LƯU TRỮ & HẠ TẦNG DỮ LIỆU"]
-        subgraph PostgreSQL["🐘 POSTGRESQL DATABASE"]
-        DB_Services["Catalog Dịch Vụ<br/>(services, options, slots)"]
-        DB_Orders["Đơn Hàng & Đánh Giá<br/>(orders, refunds, reviews)"]
-        DB_Conversations["Lịch Sử Chat AI<br/>(ai_conversations, ai_messages)"]
-        DB_V21["Flyway Migration V21:<br/>• ai_itineraries (@Version, JSON)<br/>• ai_assessment_cases (Evidence, Audit)"]
-    end
+        subgraph PostgreSQL["🐘 POSTGRESQL DATABASE (FLYWAY MIGRATIONS V21 - V25)"]
+            DB_Core["Dữ Liệu Vận Hành:<br/>• services, options, slots (Catalog)<br/>• orders, refunds, reviews (Kinh doanh)"]
+            DB_V21["Flyway V21:<br/>• ai_itineraries (@Version, JSON)<br/>• ai_assessment_cases (Evidence)"]
+            DB_V22["Flyway V22:<br/>• ai_chat_requests (Idempotency)<br/>• ai_conversations, ai_messages"]
+            DB_V23["Flyway V23 (Lifecycle):<br/>• ai_itinerary_proposals (Diff)<br/>• ai_itinerary_previews (15m)<br/>• ai_itinerary_revisions (History)<br/>• ai_itinerary_items"]
+            DB_V24["Flyway V24 (Customer Preferences & Support):<br/>• ai_customer_preferences (Consent)<br/>• ai_recommendations & feedbacks<br/>• ai_customer_support_requests"]
+            DB_V25["Flyway V25:<br/>• ai_confirmation_outcomes (Durable)"]
+        end
 
         subgraph RedisCache["⚡ REDIS IN-MEMORY"]
             Redis_Rate["Token Bucket Quota"]
-            Redis_Cards["Draft Confirmation Cards<br/>(TTL 15 phút)"]
-            Redis_Locks["Distributed Locks<br/>(Lua Script, TTL 30s)"]
-            Redis_Keys["Groq Key States Pool"]
+            Redis_Cards["Draft Confirmation Cards (15p)"]
+            Redis_Locks["Distributed Locks (Lua Script 30s)"]
+            Redis_Keys["Groq Key Pool (5 Keys)"]
+            Redis_Idem["Idempotency Claim Locks"]
         end
     end
 
@@ -75,20 +91,25 @@ graph TB
     MobileClient --> SecurityGateway
     SecurityGateway --> ControllerLayer
 
+    AssistantCtrl --> IdemService
     AssistantCtrl --> ChatUC
     AssistantCtrl --> ConfirmBookingUC
     CustomerAiCtrl --> DiscoveryUC
-    CustomerAiCtrl --> ItineraryUC
     CustomerAiCtrl --> ComparisonUC
     CustomerAiCtrl --> ReviewUC
     CustomerAiCtrl --> WeatherUC
     CustomerAiCtrl --> SupportUC
+    ItineraryCtrl --> ItineraryUC
+    PrefCtrl --> PrefUC
+    SupportWorkflowCtrl --> SupportRequestUC
     AssessmentCtrl --> AssessTextUC
     AdminAiCtrl --> RiskUC
+    ManualSupportCtrl --> SupportRequestUC
 
     ChatUC --> GroqModeration
     ChatUC --> GroqClient
     ChatUC --> ToolRegistryLayer
+    ChatUC --> ArtifactMapper
     GroqClient --> GroqRotator
 
     ToolRegistryLayer --> CoreApplicationLayer
@@ -98,27 +119,35 @@ graph TB
     ReviewUC --> QuyetClient
     ReviewUC --> GroqHighlight
 
+    MonitoringJob --> ItineraryUC
+    MonitoringJob --> PostgreSQL
+
     CoreApplicationLayer --> PostgreSQL
     CoreApplicationLayer --> RedisCache
+    ConfirmBookingUC --> DB_V25
     ConfirmBookingUC --> Redis_Cards
     ConfirmBookingUC --> Redis_Locks
-    ChatUC --> DB_Conversations
     ItineraryUC --> DB_V21
-    AssessTextUC --> DB_V21
-    RiskUC --> DB_V21
+    ItineraryUC --> DB_V23
+    PrefUC --> DB_V24
+    SupportRequestUC --> DB_V24
+    IdemService --> DB_V22
+    IdemService --> Redis_Idem
 
     classDef client fill:#e1f5fe,stroke:#0288d1,stroke-width:2px;
     classDef security fill:#fff3e0,stroke:#f57c00,stroke-width:2px;
     classDef controller fill:#f3e5f5,stroke:#7b1fa2,stroke-width:2px;
     classDef core fill:#e8f5e9,stroke:#388e3c,stroke-width:2px;
+    classDef jobs fill:#e0f2f1,stroke:#00897b,stroke-width:2px;
     classDef groq fill:#fbe9e7,stroke:#d84315,stroke-width:2px;
     classDef quyet fill:#ede7f6,stroke:#512da8,stroke-width:2px;
     classDef storage fill:#eceff1,stroke:#455a64,stroke-width:2px;
 
     class WebClient,MobileClient client;
-    class SecurityContext,LocaleContextFilter,RateLimiter security;
-    class AssistantCtrl,CustomerAiCtrl,AssessmentCtrl,AdminAiCtrl controller;
-    class ChatUC,DiscoveryUC,ItineraryUC,ComparisonUC,ReviewUC,WeatherUC,SupportUC,AssessTextUC,RiskUC,ConfirmBookingUC core;
+    class SecurityContext,LocaleFilter,BudgetFilter,RateLimiter security;
+    class AssistantCtrl,CustomerAiCtrl,ItineraryCtrl,PrefCtrl,SupportWorkflowCtrl,AssessmentCtrl,AdminAiCtrl,ManualSupportCtrl controller;
+    class ChatUC,IdemService,ArtifactMapper,DiscoveryUC,ItineraryUC,ComparisonUC,ReviewUC,WeatherUC,SupportUC,SupportRequestUC,PrefUC,AssessTextUC,RiskUC,ConfirmBookingUC core;
+    class MonitoringJob jobs;
     class GroqClient,GroqRotator,GroqModeration,GroqHighlight groq;
     class QuyetClient,QuyetTasks quyet;
-    class DB_Services,DB_Orders,DB_Conversations,DB_V21,Redis_Rate,Redis_Cards,Redis_Locks,Redis_Keys storage;
+    class DB_Core,DB_V21,DB_V22,DB_V23,DB_V24,DB_V25,Redis_Rate,Redis_Cards,Redis_Locks,Redis_Keys,Redis_Idem storage;

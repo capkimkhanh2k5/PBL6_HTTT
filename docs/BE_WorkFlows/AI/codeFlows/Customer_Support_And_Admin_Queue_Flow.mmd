@@ -1,0 +1,105 @@
+sequenceDiagram
+    autonumber
+    %% ==========================================
+    %% 12. CUSTOMER SUPPORT WORKFLOW & ADMIN MANUAL QUEUE FLOW
+    %% Tra cứu đơn hàng, AI Preview hủy, Tạo yêu cầu hỗ trợ có Idempotency & Hàng đợi Admin xử lý
+    %% ==========================================
+
+    actor Client as 📱 Khách Hàng (Customer)
+    actor Admin as 👨‍💼 Quản Trị Viên (Admin)
+    participant SupportCtrl as 🎮 CustomerSupportWorkflowController
+    participant ManualCtrl as 🎮 ManualSupportController
+    participant SupportUC as ⚙️ CustomerSupportUseCase
+    participant RequestUC as ⚙️ CustomerSupportRequestUseCase
+    participant PolicyEngine as 📜 CustomerRefundEligibilityPolicy
+    participant OrderModule as 📦 Core Order Module (Postgres)
+    participant Quyet as ⚡ Quyet Small Worker (/decide)
+    participant DB as 🐘 ai_customer_support_requests (Postgres V24)
+    participant Notif as 🔔 In-App Notification Service
+
+    %% ----------------------------------------------------
+    %% PHẦN 1: TRA CỨU ĐƠN & PREVIEW HỦY VÉ AI (POST /api/ai/support)
+    %% ----------------------------------------------------
+    rect rgb(240, 248, 255)
+        Note over Client, Quyet: PHẦN 1: TRA CỨU ĐƠN & PREVIEW HỦY VÉ (POST /api/ai/support)
+        Client->>SupportCtrl: POST /api/ai/support<br/>Body: { "orderId": "uuid-order", "message": "Tôi muốn hủy vé do có việc bận", "includeCancellationPreview": true }
+        activate SupportCtrl
+
+        SupportCtrl->>SupportUC: execute(userId, orderId, message, includePreview)
+        activate SupportUC
+
+        Note over SupportUC, OrderModule: 🛡️ BẢO VỆ QUYỀN SỞ HỮU ĐƠN HÀNG: order.customerId == userId (Chặn 403)
+        SupportUC->>OrderModule: getOrderDetail(orderId, userId)
+        activate OrderModule
+        OrderModule-->>SupportUC: OrderFacts (status: PAID, items, bookingDate, totalAmount)
+        deactivate OrderModule
+
+        SupportUC->>Quyet: POST /decide (Task: INTENT/TOPIC, message)
+        activate Quyet
+        Quyet-->>SupportUC: DecisionResult (topic: "CANCELLATION", urgency: "MEDIUM")
+        deactivate Quyet
+
+        opt includeCancellationPreview == true
+            SupportUC->>PolicyEngine: calculateCancellationPreview(orderId, userId)
+            activate PolicyEngine
+            Note over PolicyEngine: Tính toán điều kiện hoàn tiền theo thời gian hủy so với giờ khởi hành:<br/>• Trước 48h: Hoàn 100%<br/>• Từ 24h - 48h: Hoàn 70% (Phí hủy 30%)<br/>• Dưới 24h: Không hoàn tiền (Phí hủy 100%)
+            PolicyEngine-->>SupportUC: CancellationPreviewResult (eligible: true, refundAmount, feeAmount, deadline)
+            deactivate PolicyEngine
+        end
+
+        Note over SupportUC: NGUYÊN TẮC BẤT BIẾN: AI chỉ tính toán trước số tiền,<br/>TUYỆT ĐỐI KHÔNG TỰ Ý HỦY VÉ HAY HOÀN TIỀN TRONG DATABASE
+        SupportUC-->>SupportCtrl: SupportResult (orderSummary, topic, previewResult, actions: ["CREATE_REQUEST"])
+        deactivate SupportUC
+        SupportCtrl-->>Client: HTTP 200 OK (Chi tiết đơn & bản tính toán xem trước số tiền hoàn)
+        deactivate SupportCtrl
+    end
+
+    %% ----------------------------------------------------
+    %% PHẦN 2: TẠO YÊU CẦU HỖ TRỢ / ĐỔI LỊCH (CREATE SUPPORT REQUEST)
+    %% ----------------------------------------------------
+    rect rgb(255, 250, 240)
+        Note over Client, DB: PHẦN 2: TẠO TICKET HỖ TRỢ THỦ CÔNG CÓ IDEMPOTENCY
+        Client->>SupportCtrl: POST /api/ai/support/requests<br/>Headers: Idempotency-Key: "idem_req_123"<br/>Body: { "orderId": "uuid-order", "kind": "CHANGE_REQUEST", "desiredDate": "2026-10-15", "message": "Đổi sang ngày 15 giúp tôi", "confirmed": true }
+        activate SupportCtrl
+
+        SupportCtrl->>RequestUC: createRequest(userId, requestCommand, idempotencyKey)
+        activate RequestUC
+        Note over RequestUC: Kiểm tra Idempotency-Key chống tạo ticket trùng lặp
+        RequestUC->>DB: Lưu bản ghi vào ai_customer_support_requests (V24)<br/>(status: 'WAITING_REVIEW', version: 0)
+        RequestUC-->>SupportCtrl: SupportRequest (requestId, status: "WAITING_REVIEW")
+        deactivate RequestUC
+        SupportCtrl-->>Client: HTTP 200 OK (Yêu cầu đã được gửi vào hàng đợi xử lý của nhân viên)
+        deactivate SupportCtrl
+    end
+
+    %% ----------------------------------------------------
+    %% PHẦN 3: HÀNG ĐỢI XỬ LÝ THỦ CÔNG CỦA ADMIN (ADMIN MANUAL QUEUE)
+    %% ----------------------------------------------------
+    rect rgb(240, 255, 240)
+        Note over Admin, Notif: PHẦN 3: NHÂN VIÊN / ADMIN DUYỆT YÊU CẦU THỦ CÔNG
+        Admin->>ManualCtrl: GET /api/admin/support/requests?status=WAITING_REVIEW
+        activate ManualCtrl
+        ManualCtrl->>DB: Truy vấn danh sách ticket WAITING_REVIEW
+        activate DB
+        DB-->>ManualCtrl: List<SupportRequest>
+        deactivate DB
+        ManualCtrl-->>Admin: HTTP 200 OK (Danh sách yêu cầu khách hàng cần xử lý)
+        deactivate ManualCtrl
+
+        Admin->>ManualCtrl: POST /api/admin/support/requests/{id}/handle<br/>Body: { "expectedVersion": 0, "status": "RESOLVED", "responseNote": "Đã đổi ca dịch vụ sang 09:00 ngày 15/10 cho khách" }
+        activate ManualCtrl
+        ManualCtrl->>RequestUC: handleRequest(adminId, requestId, handleCommand)
+        activate RequestUC
+        Note over RequestUC: Kiểm tra Optimistic Locking (version == expectedVersion) chống 2 Admin duyệt trùng
+        RequestUC->>DB: Cập nhật ai_customer_support_requests (status: 'RESOLVED', version: 1)
+
+        RequestUC->>Notif: Gửi thông báo kết quả cho khách hàng
+        activate Notif
+        Notif-->>Client: 🔔 "Yêu cầu đổi lịch của bạn đã được Admin chấp thuận!"
+        deactivate Notif
+
+        RequestUC-->>ManualCtrl: SupportRequest (status: "RESOLVED")
+        deactivate RequestUC
+        ManualCtrl-->>Admin: HTTP 200 OK (Xử lý ticket thành công)
+        deactivate ManualCtrl
+    end

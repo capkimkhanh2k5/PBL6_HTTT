@@ -1,0 +1,116 @@
+sequenceDiagram
+    autonumber
+    %% ==========================================
+    %% 3. REVALIDATION BOOKING SEQUENCE
+    %% Xác nhận đặt chỗ: Khóa phân tán, Bền vững V25, Phân nhóm gói riêng & Bù trừ thất bại
+    %% ==========================================
+
+    actor Client as 📱 Khách Hàng (User)
+    participant Ctrl as 🎮 AssistantController
+    participant History as 📜 ChatHistoryService
+    participant ConfirmUC as ⚙️ ConfirmBookingUseCase
+    participant Durable as 🏛️ ConfirmationOutcomeAdapter (V25)
+    participant CardStore as ⚡ RedisConfirmationCardStore
+    participant Catalog as 🐘 AiCatalogReadApi (Postgres)
+    participant HoldUC as 📦 CreateBookingHoldUseCase
+    participant CancelUC as 🔄 CancelBookingHoldUseCase
+
+    Client->>Ctrl: POST /api/assistant/conversations/{id}/confirm<br/>Body: { "cardId": "card_abc" }
+    activate Ctrl
+
+    Note over Ctrl, History: BƯỚC 1: XÁC THỰC QUYỀN SỞ HỮU HỘI THOẠI (OWNERSHIP GUARD)
+    Ctrl->>History: getConversationForUser(id, currentUserId)
+    activate History
+    alt Hội thoại không tồn tại
+        History-->>Ctrl: Optional.empty()
+        Ctrl-->>Client: HTTP 404 Not Found
+    else Thuộc về người dùng khác
+        History-->>Ctrl: ném AccessDeniedException
+        Ctrl-->>Client: HTTP 403 Forbidden
+    end
+    History-->>Ctrl: AiConversationEntity
+    deactivate History
+
+    Ctrl->>ConfirmUC: execute(cardId, userId, sessionId, expectedConversationId = id)
+    activate ConfirmUC
+
+    Note over ConfirmUC, Durable: BƯỚC 2: KIỂM TRA OUTCOME BỀN VỮNG (FLYWAY V25 IDEMPOTENCY)
+    ConfirmUC->>Durable: completed(cardId, userId, expectedConversationId)
+    activate Durable
+    alt Đã hoàn thành trước đó (Kể cả khi Redis bị mất key)
+        Durable-->>ConfirmUC: Optional.of(cachedOutcome)
+        ConfirmUC-->>Ctrl: Map (bookingId, holdExpiresAt, totalAmount)
+        Ctrl-->>Client: HTTP 200 OK (Replay outcome, không tạo hold trùng)
+    end
+    Durable-->>ConfirmUC: Optional.empty()
+    deactivate Durable
+
+    Note over ConfirmUC, CardStore: BƯỚC 3: THIẾT LẬP KHÓA PHÂN TÁN (DISTRIBUTED LOCK 30S)
+    ConfirmUC->>CardStore: tryAcquireProcessingLock(cardId, TTL: 30s)
+    activate CardStore
+    alt Thẻ đang được xử lý bởi tiến trình khác
+        CardStore-->>ConfirmUC: Optional.empty()
+        ConfirmUC-->>Ctrl: IllegalStateException (Đang xử lý)
+        Ctrl-->>Client: HTTP 409 Conflict
+    end
+    CardStore-->>ConfirmUC: Optional.of(lockToken)
+    deactivate CardStore
+
+    ConfirmUC->>CardStore: findById(cardId)
+    activate CardStore
+    CardStore-->>ConfirmUC: ConfirmationCard
+    deactivate CardStore
+
+    Note over ConfirmUC: BƯỚC 4: RÀNG BUỘC 3 BÊN (CARD — CONVERSATION — USER)<br/>• card.conversationId == expectedConversationId (Chặn 403)<br/>• card.ownerId == userId (Chặn 403)<br/>• card.status == PENDING (Chặn lặp)
+
+    opt Gói riêng (PER_PACKAGE)
+        Note over ConfirmUC: BƯỚC 5: KIỂM TRA PHÂN NHÓM GÓI RIÊNG (PARTICIPANT GROUPING)<br/>Xác thực participantsPerPackage (Ví dụ 3 người chọn gói max 2 -> chia [2, 1])
+    end
+
+    Note over ConfirmUC, Catalog: BƯỚC 6: TÁI THẨM ĐỊNH THỜI GIAN THỰC (LIVE RE-VALIDATION)
+    ConfirmUC->>Catalog: find(serviceId, query)
+    activate Catalog
+    Catalog-->>ConfirmUC: PublishedService (giá hiện tại, slots thực tế)
+    deactivate Catalog
+
+    alt Hết chỗ hoàn toàn (!hasSlots)
+        Note over ConfirmUC: Card -> CANCELLED (out_of_stock)
+        ConfirmUC->>CardStore: save(card)
+        ConfirmUC-->>Ctrl: { status: "out_of_stock", message }
+    else Giá thay đổi HOẶC Slot không còn khả dụng
+        Note over ConfirmUC: Kiểm tra số lần thử lại (Redis retryCount TTL 15m)
+        alt retryCount >= 2
+            Note over ConfirmUC: Card -> CANCELLED (too_many_changes)
+            ConfirmUC->>CardStore: save(card)
+            ConfirmUC-->>Ctrl: { status: "error", message: "Quá nhiều biến động" }
+        else retryCount < 2
+            Note over ConfirmUC: Tăng retryCount + 1 -> Hủy Card cũ -> Tạo Alternative Card mới
+            ConfirmUC->>CardStore: save(newCard)
+            ConfirmUC-->>Ctrl: { status: "alternative_needed", newCard, reason }
+        end
+    else Dữ liệu hoàn toàn khớp (Validation Success)
+        Note over ConfirmUC, HoldUC: BƯỚC 7: TẠO GIỮ CHỖ VÀ KHÓA TỒN KHO NGUYÊN TỬ
+        ConfirmUC->>HoldUC: execute(CreateBookingHoldCommand(userId, items))
+        activate HoldUC
+        Note over HoldUC: Redis Lua lock + Lưu DB Booking HOLD (15 phút)
+        HoldUC-->>ConfirmUC: BookingHoldResult(bookingId, holdExpiresAt, totalAmount)
+        deactivate HoldUC
+
+        Note over ConfirmUC, Durable: BƯỚC 8: LƯU OUTCOME BỀN VỮNG VÀO POSTGRESQL (V25)
+        alt Lưu Outcome thành công
+            ConfirmUC->>Durable: recordOutcome(card, outcome)
+            ConfirmUC->>CardStore: markConfirmed(card)
+            ConfirmUC-->>Ctrl: { status: "success", bookingId, holdExpiresAt }
+        else Gặp lỗi hệ thống khi lưu Outcome (System Crash / Network Fail)
+            Note over ConfirmUC, CancelUC: CƠ CHẾ BÙ TRỪ TỰ ĐỘNG (COMPENSATION ROLLBACK)
+            ConfirmUC->>CancelUC: execute(CancelBookingHoldCommand(bookingId, userId))
+            Note over CancelUC: Giải phóng tồn kho và hủy booking hold ngay lập tức
+            ConfirmUC-->>Ctrl: Ném ngoại lệ đã xử lý bồi hoàn
+        end
+    end
+
+    ConfirmUC->>CardStore: releaseProcessingLock(cardId, lockToken)
+    ConfirmUC-->>Ctrl: Result
+    deactivate ConfirmUC
+    Ctrl-->>Client: HTTP 200 OK (Chuyển sang màn hình thanh toán)
+    deactivate Ctrl

@@ -1,7 +1,7 @@
 sequenceDiagram
     autonumber
     %% ==========================================
-    %% CONTENT ASSESSMENT AND TRANSACTION RISK FLOW
+    %% 9. CONTENT ASSESSMENT AND TRANSACTION RISK FLOW
     %% Content Moderation, Risk Velocity Rules & Admin Queue Resolution
     %% ==========================================
 
@@ -26,7 +26,7 @@ sequenceDiagram
         AssessCtrl->>AssessUC: execute(actorId, text, persist: true)
         activate AssessUC
 
-        Note over AssessUC: 1. Kiểm tra độ dài: 1 <= text.length <= 2500 ký tự<br/>2. Quét biểu thức chính quy (Regex Scan):<br/>- Số điện thoại VN ((+84|0)...)<br/>- Đường dẫn URL ngoài (http://, https://)<br/>- Địa chỉ Email cá nhân
+        Note over AssessUC: 1. Kiểm tra độ dài: 1 <= text.length <= 2500 ký tự<br/>2. Quét biểu thức chính quy (Regex Scan):<br/>• Số điện thoại VN ((+84|0)...)<br/>• Đường dẫn URL ngoài (http://, https://)<br/>• Địa chỉ Email cá nhân
 
         par Gọi song song Quyet Worker
             AssessUC->>Quyet: POST /decide (Task: SERVICE_CATEGORY, content: text)
@@ -36,7 +36,7 @@ sequenceDiagram
             Quyet-->>AssessUC: Moderation Result (xác suất external_payment, spam, abuse)
         end
 
-        Note over AssessUC: Đánh giá tín hiệu rủi ro (Rule Engine):<br/>• Nếu tìm thấy số ĐT / link ngoài -> Thêm EXTERNAL_CONTACT_DETECTED<br/>• Nếu xác suất hazard >= 0.5 -> Thêm MODEL_SUGGESTS_{HAZARD}<br/>• Nếu Quyet offline -> Thêm MODEL_UNAVAILABLE
+        Note over AssessUC: Đánh giá tín hiệu rủi ro (Rule Engine):<br/>• Nếu tìm thấy số ĐT / link ngoài -> EXTERNAL_CONTACT_DETECTED<br/>• Nếu xác suất hazard >= 0.5 -> MODEL_SUGGESTS_{HAZARD}<br/>• Nếu Quyet offline -> MODEL_UNAVAILABLE
 
         alt Có tín hiệu vi phạm (reasons không rỗng)
             Note over AssessUC: Trạng thái: NEEDS_REVIEW
@@ -46,7 +46,7 @@ sequenceDiagram
 
         AssessUC->>CaseStore: create("TEXT_MODERATION", targetId=null, actorId, status, evidence, models)
         activate CaseStore
-        CaseStore->>CaseStore: Ghi bản ghi vào bảng ai_assessment_cases (Flyway V21)
+        CaseStore->>CaseStore: Ghi bản ghi vào ai_assessment_cases (Flyway V21)<br/>(evidenceType: TEXT_ONLY, publicationAuthorized: false)
         CaseStore-->>AssessUC: AssessmentCase (id, status, evidence snapshot)
         deactivate CaseStore
 
@@ -72,7 +72,7 @@ sequenceDiagram
         OrderPort-->>RiskUC: ObservedFacts (failedPayments24h, orders1h, refundRequests7d, paymentStatus)
         deactivate OrderPort
 
-        Note over RiskUC: Kiểm tra ngưỡng quy tắc Velocity (Rule-based Signals):<br/>• failedPayments24h >= 3 -> THREE_FAILED_PAYMENTS_IN_24H<br/>• orders1h >= 5 -> FIVE_ORDERS_IN_1H<br/>• refundRequests7d >= 3 -> THREE_REFUND_REQUESTS_IN_7D
+        Note over RiskUC: Kiểm tra ngưỡng quy tắc Velocity 3/5/3 (Rule-based Signals):<br/>• failedPayments24h >= 3 -> THREE_FAILED_PAYMENTS_IN_24H<br/>• orders1h >= 5 -> FIVE_ORDERS_IN_1H<br/>• refundRequests7d >= 3 -> THREE_REFUND_REQUESTS_IN_7D
 
         RiskUC->>Quyet: POST /decide (Task: RISK, risk_signals, complaint, payment_status)
         activate Quyet
@@ -87,7 +87,7 @@ sequenceDiagram
 
         RiskUC->>CaseStore: create("TRANSACTION_RISK", orderId, adminId, status, evidence, models)
         activate CaseStore
-        CaseStore->>CaseStore: Lưu case vào bảng ai_assessment_cases
+        CaseStore->>CaseStore: Lưu case vào bảng ai_assessment_cases (V21)
         CaseStore-->>RiskUC: AssessmentCase
         deactivate CaseStore
 

@@ -1,0 +1,82 @@
+sequenceDiagram
+    autonumber
+    %% ==========================================
+    %% 2. CHAT MODERATION & SECURITY FLOW
+    %% Chi tiết bảo vệ 2 tầng: Cắt chuỗi 1800 ký tự chống Padding, Tool Loop 5 lượt & Policy Guard thu hồi
+    %% ==========================================
+
+    actor Client as 📱 Khách Hàng
+    participant Ctrl as 🎮 AssistantController
+    participant Limiter as ⚡ RedisRateLimiter (2 Tầng)
+    participant ChatUC as ⚙️ ChatUseCase
+    participant Guard as 🛡️ GroqModerationClient (Prompt Guard)
+    participant Groq as ☁️ GroqLlmClient (5 Keys Rotator)
+    participant ToolExec as 🔧 ToolExecutor [ConversationAware]
+    participant PolicyGuard as 📜 PolicyGuard
+    participant DB as 🐘 PostgreSQL & Redis
+
+    Client->>Ctrl: POST /api/assistant/chat<br/>Body: { "conversationId": "...", "message": "..." }
+    activate Ctrl
+
+    Note over Ctrl, Limiter: TẦNG 1: KIỂM SOÁT TẦN SUẤT & ĐỘ TIN CẬY (2-LAYER RATE LIMITING)
+    Ctrl->>Limiter: checkQuota(ClientIP, UserID, TrustTier)
+    activate Limiter
+    alt Vượt quota IP hoặc User bị RESTRICTED
+        Limiter-->>Ctrl: Denied (Quota Exceeded)
+        Ctrl-->>Client: HTTP 429 Too Many Requests
+    end
+    Limiter-->>Ctrl: Allowed (Token Bucket hợp lệ)
+    deactivate Limiter
+
+    Note over Ctrl: TẦNG 2: CHỐNG PADDING ATTACK & KIỂM DUYỆT NỘI DUNG (INPUT MODERATION)
+    Ctrl->>Ctrl: Cắt chuỗi max 1800 ký tự (Truncate raw text)<br/>(Chặn đứng Padding Attack làm tràn context window)
+
+    Ctrl->>Guard: isSafe(truncatedContent)
+    activate Guard
+    alt Nội dung vi phạm (Prompt Injection, Jailbreak, Ngôn từ độc hại)
+        Guard-->>Ctrl: Unsafe (Threat Detected)
+        Ctrl->>DB: Ghi AssistantAuditLog (ACTION_BLOCKED, violation_type)
+        Ctrl-->>Client: HTTP 400 Bad Request ("ai.moderation.blocked")
+    end
+    Guard-->>Ctrl: Benign (An toàn)
+    deactivate Guard
+
+    Ctrl->>ChatUC: processMessage(...)
+    activate ChatUC
+    ChatUC->>DB: Lưu User Message vào DB
+
+    Note over ChatUC, ToolExec: VÒNG LẶP THỰC THI TOOL AN TOÀN (TỐI ĐA 5 LƯỢT)
+    loop Vòng lặp gọi Tool (Tối đa 5 lượt)
+        ChatUC->>Groq: generateResponse(history, tools, language)
+        activate Groq
+        Groq-->>ChatUC: Response (ToolCall HOẶC Final Text)
+        deactivate Groq
+
+        alt LLM trả ToolCall
+            ChatUC->>ToolExec: execute(toolCall, ToolExecutionContext{language, convId, userId})
+            activate ToolExec
+            Note over ToolExec: Thực thi nghiệp vụ nội bộ chuẩn hóa theo ngữ cảnh người dùng
+            ToolExec-->>ChatUC: ToolResult (JSON)
+            deactivate ToolExec
+            Note over ChatUC: Thêm ToolResult vào context history và lặp tiếp
+        else LLM trả Final Text
+            Note over ChatUC, PolicyGuard: TẦNG 3: BẢO VỆ CHÍNH SÁCH HỆ THỐNG (POLICY GUARD)
+            ChatUC->>PolicyGuard: verifyPolicyAdherence(history, finalResponse)
+            activate PolicyGuard
+            alt LLM phát ngôn về chính sách/hoàn tiền nhưng CHƯA gọi tool `get_policy`
+                Note over PolicyGuard: Phát hiện Hallucination chính sách không căn cứ!
+                PolicyGuard-->>ChatUC: THU HỒI & THAY THẾ bằng Canonical Policy chuẩn từ hệ thống
+            else Tuân thủ hoặc không liên quan chính sách
+                PolicyGuard-->>ChatUC: Giữ nguyên phản hồi
+            end
+            deactivate PolicyGuard
+            Note over ChatUC: Thoát vòng lặp Tool
+        end
+    end
+
+    ChatUC->>DB: Lưu Assistant Message & Audit Log
+    ChatUC-->>Ctrl: Hoàn tất phản hồi chuẩn hóa
+    deactivate ChatUC
+
+    Ctrl-->>Client: HTTP 200 OK (Kèm dữ liệu kiểm chứng và thẻ tương tác)
+    deactivate Ctrl

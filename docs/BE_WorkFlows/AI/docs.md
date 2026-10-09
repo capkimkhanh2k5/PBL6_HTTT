@@ -1,191 +1,253 @@
 # 📖 TÓM TẮT CÁC SƠ ĐỒ — HỆ THỐNG DANASEA AI (HYBRID ARCHITECTURE & WORKFLOWS)
 
-> Thư mục này chứa **10 sơ đồ kỹ thuật** mô tả toàn diện kiến trúc AI Lai (Groq LLM + Quyet Small Worker), luồng Chat Assistant, cơ chế bảo mật Moderation, quy trình đặt chỗ Re-validation, và toàn bộ 10 tính năng Customer AI mới cùng hệ thống thẩm định rủi ro giao dịch/kiểm duyệt của Quản trị viên.
+> Thư mục này chứa **12 sơ đồ kỹ thuật chuẩn UML** mô tả toàn diện kiến trúc AI Lai (Groq LLM + Quyet Small Inference Worker), luồng Chat Assistant đa công cụ, cơ chế bảo vệ Moderation & Idempotency, chu trình đặt chỗ Re-validation bền vững (Flyway V25), vòng đời Lập lịch trình 3 giai đoạn (V23), hệ thống quản lý sở thích & phản hồi gợi ý (V24), luồng hỗ trợ khách hàng và hàng đợi thẩm định của Quản trị viên.
 
-| # | Sơ đồ | Loại | Nội dung cốt lõi |
-|---|-------|------|-------------------|
-| 1 | `AI_Chat` | Sequence Diagram | Luồng tổng quan Chat AI (Rate Limit → LlamaGuard Moderation → LLM → Tool Calling → DB) |
-| 2 | `Chat_ModerationFlow` | Sequence Diagram | Chi tiết bảo vệ: cắt chuỗi 1800 ký tự chống Padding, Tool Calling loop 5 lượt, Policy Guard thu hồi câu trả lời sai |
-| 3 | `RevalidBooking` | Sequence Diagram | Xác nhận đặt chỗ: lấy Draft Card từ Redis → so sánh giá/slot thực tế → Alternative Card hoặc Success |
-| 4 | `RevalidBookingFlow` | Flowchart | Logic phân nhánh chi tiết: PENDING check → slot check → price change → retry count ≥ 2 |
-| 5 | `RollKeys_ModelFallBack` | Flowchart | Xoay 5 API Key Groq (ACTIVE/COOLDOWN/DISABLED) + Fallback Model khi lỗi 429/401/5xx |
-| 6 | `AI_Hybrid_Architecture` | Architecture Diagram | Kiến trúc phân tầng 3 lớp Hybrid AI: Groq Cloud LLM + Quyet Offline Worker + Spring Boot Backend + PostgreSQL V21 + Redis |
-| 7 | `Customer_AI_Discovery_Flow` | Sequence Diagram | Luồng Smart Search, Recommendation & Nearby Discovery: Query Parser, Pre-filter catalog, Quyet Intent/Relevance, Weather Check |
-| 8 | `Itinerary_Planning_And_Replan_Flow` | Sequence Diagram | Lập lịch trình du lịch thông minh: Bounded Greedy, đệm di chuyển 15m + 25km/h, Re-plan với Optimistic Locking (`@Version`) |
-| 9 | `Content_Assessment_And_Transaction_Risk_Flow` | Sequence Diagram | Kiểm duyệt văn bản (Regex + Quyet Moderation), Đánh giá rủi ro giao dịch (Velocity 3/5/3), Hàng đợi xét duyệt Admin |
-| 10 | `AI_Travel_Assistant_MultiTool_Flow` | Sequence Diagram | Trợ lý du lịch đa công cụ (15 tools), tạo phiếu đặt chỗ Native Option Card trên Redis & Re-validation 3 chiều |
+| # | Sơ đồ | Loại | Mã Nguồn (.mmd) | Nội dung cốt lõi |
+|---|-------|------|-----------------|-------------------|
+| 1 | `AI_Chat` | Sequence Diagram | `codeFlows/AI_Chat.mmd` | Luồng tổng quan Chat AI (AiExecutionBudgetFilter 8s → Idempotency → LlamaGuard → LLM Tool Loop → ArtifactMapper → DB) |
+| 2 | `Chat_ModerationFlow` | Sequence Diagram | `codeFlows/Chat_ModerationFlow.mmd` | Chi tiết bảo vệ: Rate Limit 2 tầng, cắt chuỗi 1800 ký tự chống Padding, Tool Calling 5 lượt, Policy Guard thu hồi câu trả lời không có căn cứ |
+| 3 | `RevalidBooking` | Sequence Diagram | `codeFlows/RevalidBooking.mmd` | Xác nhận đặt chỗ thời gian thực: Outcome bền vững V25, Khóa phân tán Redis 30s, Ràng buộc 3 bên, Grouping gói riêng, Tái thẩm định giá/slot & Bù trừ rollback |
+| 4 | `RevalidBookingFlow` | Flowchart | `codeFlows/RevalidBookingFlow.mmd` | Cây quyết định phân nhánh Re-validation chi tiết: Outcome replay → PENDING check → Package grouping → Slot/Price check → Retry count < 2 → Khóa tồn kho nguyên tử |
+| 5 | `RollKeys_ModelFallBack` | Flowchart | `codeFlows/RollKeys_ModelFallBack.mmd` | Xoay 5 API Key Groq (ACTIVE / COOLDOWN 1p / DISABLED) + Fallback Model tức thời khi gặp lỗi 429/401/5xx |
+| 6 | `AI_Hybrid_Architecture` | Architecture Diagram | `codeFlows/AI_Hybrid_Architecture.mmd` | Bức tranh kiến trúc phân tầng 3 lớp Hybrid AI toàn diện: 8 Controllers, AiExecutionBudgetFilter, 14 Use Cases, Monitoring Job, 15 Tools, Dual-Brain AI, Postgres V21-V25 & Redis |
+| 7 | `Customer_AI_Discovery_Flow` | Sequence Diagram | `codeFlows/Customer_AI_Discovery_Flow.mmd` | Khám phá Dịch vụ Thông minh (Search, Recommend, Nearby): Quét Catalog 10k items budget 8s, Preferences Consented, Lọc thời tiết 20 slot, Quyet Relevance top 5, Tracking recommendationId |
+| 8 | `Itinerary_Planning_And_Replan_Flow` | Sequence Diagram | `codeFlows/Itinerary_Planning_And_Replan_Flow.mmd` | Chu trình Lập lịch 3 giai đoạn: (1) Preview → Save Draft → Accept tái kiểm tra giá/thời tiết; (2) Re-plan tạo Proposal PENDING (diff); (3) Job nền giám sát nguồn tự động mỗi 60s |
+| 9 | `Content_Assessment_And_Transaction_Risk_Flow` | Sequence Diagram | `codeFlows/Content_Assessment_And_Transaction_Risk_Flow.mmd` | Kiểm duyệt văn bản (Regex + Quyet Moderation/Category), Phân tích rủi ro giao dịch (Quy tắc vận tốc 3/5/3), Hàng đợi xét duyệt Admin có khóa lạc quan |
+| 10 | `AI_Travel_Assistant_MultiTool_Flow` | Sequence Diagram | `codeFlows/AI_Travel_Assistant_MultiTool_Flow.mmd` | Trợ lý du lịch đa công cụ (15 tools), Structured Artifacts (typed cards), Tạo thẻ Native Option Card trên Redis & Re-validation bền vững |
+| 11 | `Customer_Preference_And_Feedback_Flow` | Sequence Diagram | `codeFlows/Customer_Preference_And_Feedback_Flow.mmd` | Quản lý sở thích cá nhân hóa (Consent bật/tắt, Exclusions, Version), Vòng lặp phản hồi gợi ý (SHOWN, CLICK, POSITIVE, NEGATIVE) & Tác động điểm xếp hạng |
+| 12 | `Customer_Support_And_Admin_Queue_Flow` | Sequence Diagram | `codeFlows/Customer_Support_And_Admin_Queue_Flow.mmd` | Hỗ trợ khách hàng AI (Tra cứu đơn của chính mình, Quyet Topic/Urgency, AI Cancellation Preview tính phí hoàn), Tạo ticket có Idempotency & Hàng đợi Admin xử lý thủ công |
 
 ---
 
 ## 1. AI_Chat.png — Luồng tổng quan AI Chat
 
-**Thành phần:** `User (Frontend)` → `LocaleContextFilter` → `AssistantController` → `RedisRateLimiter` → `ModerationPort (LlamaGuard)` → `SystemPromptBuilder` → `ChatUseCase` → `GroqLlmClient` → `PostgreSQL`
+**Thành phần:** `User (Client)` → `AiExecutionBudgetFilter` → `LocaleContextFilter` → `AssistantController` → `RedisRateLimiter` → `ChatIdempotencyService` → `GroqModerationClient (Prompt Guard)` → `ChatHistoryService` → `ChatUseCase` → `GroqLlmClient` → `AIToolRegistry (15 Tools)` → `AssistantArtifactMapper` → `PostgreSQL`
 
-**Luồng:**
-1. Khách gửi tin nhắn qua `POST /api/assistant/chat` kèm header `Accept-Language: vi`.
-2. `LocaleContextFilter` trích xuất và thiết lập ngữ cảnh ngôn ngữ (`SupportedLanguage.VI`).
-3. `RedisRateLimiter` kiểm tra tần suất theo **Token Bucket + TrustTier**:
-   - Vượt quota → HTTP 429 Too Many Requests.
-   - Cho phép → tiếp tục.
-4. `ModerationPort (LlamaGuard)` quét `isSafe(truncatedContent)` — phát hiện Prompt Injection / Jailbreak:
-   - Độc hại → Ném `LocalizedException("ai.moderation.blocked")` trả về HTTP 400 với thông báo chuẩn hóa theo ngôn ngữ người dùng.
-   - An toàn → tiếp tục.
-5. `SystemPromptBuilder.buildBasePrompt(language)` nạp System Prompt tương ứng với ngôn ngữ đã phân giải.
-6. `ChatUseCase`:
-   - Load/Tạo Conversation History từ PostgreSQL theo ngôn ngữ.
-   - Gọi `GroqLlmClient.generateResponse(history, language)`.
-   - LLM trả văn bản hoặc **Lệnh gọi Tool**.
-7. Lưu `AiMessage` & `AuditLog` → trả HTTP 200 cho User.
+**Luồng xử lý:**
+1. Khách gửi tin nhắn qua `POST /api/assistant/chat` kèm các headers: `Accept-Language: vi`, `Idempotency-Key` (tùy chọn) và `X-Execution-Budget-Ms: 8000`.
+2. `AiExecutionBudgetFilter` thiết lập deadline xử lý tối đa 8000ms, đồng thời kiểm soát tối đa 8 request AI đồng thời trên mỗi JVM (vượt quá trả về HTTP 429 Retry-After).
+3. `LocaleContextFilter` trích xuất và thiết lập ngôn ngữ chuẩn hóa (`SupportedLanguage.VI`).
+4. `RedisRateLimiter` kiểm tra hạn mức tần suất theo **Token Bucket + TrustTier** (VERIFIED / UNVERIFIED).
+5. `ChatIdempotencyService` kiểm tra khóa gửi trùng:
+   - Nếu tìm thấy yêu cầu cùng `Idempotency-Key` hoặc hash câu hỏi đã hoàn tất trước đó trong bảng `ai_chat_requests` (V22) → Trả lại ngay kết quả đã lưu (`replay = true`), không tốn chi phí gọi LLM.
+6. `ChatHistoryService.getOrCreateConversation`: Đọc hoặc tạo hội thoại. Kiểm tra ràng buộc ngôn ngữ: nếu ngôn ngữ header khác ngôn ngữ đã khởi tạo hội thoại → Ném `AiConversationLocaleMismatchException` (HTTP 400).
+7. `GroqModerationClient (Prompt Guard)` quét `isSafe(truncatedContent max 1800 chars)`:
+   - Phát hiện Prompt Injection / Tấn công bẻ khóa (Jailbreak) → Ghi log vi phạm và ném ngoại lệ trả về HTTP 400.
+8. `ChatUseCase` nạp lịch sử tin nhắn từ PostgreSQL, gửi ngữ cảnh tới `GroqLlmClient` kèm danh sách 15 công cụ kỹ thuật.
+9. Vòng lặp Tool Calling: Nếu Groq yêu cầu gọi công cụ, backend thực thi và trả kết quả để Groq hoàn thiện câu trả lời tự nhiên.
+10. `AssistantArtifactMapper` ánh xạ các kết quả tool thực tế thành các thẻ dữ liệu có cấu trúc (`AssistantArtifact`): `BOOKING_CONFIRMATION_CARD`, `ITINERARY_PREVIEW`, `DISCOVERY_SUGGESTION`, `SERVICE_COMPARISON`, `REVIEW_HIGHLIGHT`, `CANONICAL_POLICY`, `SUPPORT_ACTION`.
+11. Lưu `AiMessage` và ghi `AssistantAuditLog`, hoàn tất claim idempotency và trả về HTTP 200 kèm cờ `generatedTextVerified = false` (văn bản do AI sinh không tự động trở thành sự thật nguồn).
 
 ---
 
-## 2. Chat_ModerationFlow.png — Chi tiết Moderation + Tool Calling
+## 2. Chat_ModerationFlow.png — Chi tiết Moderation & Tool Calling
 
-**Thành phần:** `Khách Hàng` → `AssistantController` → `RedisRateLimiter (2-Layer)` → `ChatUseCase` → `GroqModerationClient (Prompt Guard)` → `GroqLlmClient (Rotator 5 Keys)` → `ToolExecutor [ConversationAware]` → `Postgres & Redis`
+**Thành phần:** `Khách Hàng` → `AssistantController` → `RedisRateLimiter (2-Layer)` → `GroqModerationClient` → `ChatUseCase` → `GroqLlmClient (Rotator 5 Keys)` → `ToolExecutor [ConversationAware]` → `PolicyGuard` → `Postgres & Redis`
 
 **Luồng chi tiết:**
-1. Kiểm tra hạn mức `IP + TrustTier` (2 tầng):
-   - Bị từ chối / RESTRICTED → HTTP 429 Rate Limited.
-   - Cho phép → tiếp tục.
-2. **Cắt chuỗi max 1800 ký tự** — chống Padding Attack làm cạn kiệt tài nguyên xử lý ngữ cảnh.
-3. `isSafe(truncatedContent)`:
-   - **Unsafe:** Ghi Audit Log vi phạm → Ném `LocalizedException` trả về thông báo lỗi đa ngôn ngữ.
-   - **Benign:** Lưu User message vào DB → tiếp tục.
-4. **Vòng lặp Tool Calling (tối đa 5 lượt):**
-   - LLM trả `ToolCall` → Backend thực thi Tool thông qua `ToolExecutor.execute(args, ToolExecutionContext{language, convId})` để đảm bảo kết quả truy vấn hoặc thông báo được chuẩn hóa đúng ngôn ngữ người dùng.
-   - **Policy Guard:** Nếu LLM trả lời về chính sách mà chưa gọi `get_policy` → **THU HỒI & THAY THẾ** bằng thông báo chuẩn từ hệ thống.
-   - LLM trả văn bản → lưu Assistant message & Audit Log.
-5. Trả HTTP 200 OK + nội dung phản hồi hoàn chỉnh.
+1. **Kiểm soát 2 tầng (2-Layer Rate Limiting):** Kiểm tra hạn mức theo IP và cấp độ tin cậy `TrustTier`. Khách chưa xác thực hoặc bị hạn chế nếu vượt quota sẽ nhận HTTP 429.
+2. **Cắt chuỗi max 1800 ký tự (Input Truncation):** Chặn đứng kỹ thuật Padding Attack làm tràn context window của mô hình ngôn ngữ lớn.
+3. **Quét an toàn nội dung (Input Moderation):**
+   - Unsafe: Ghi nhận vi phạm vào `AssistantAuditLog`, trả về mã lỗi chuẩn hóa `ai.moderation.blocked`.
+   - Benign: Lưu câu hỏi của User vào cơ sở dữ liệu và tiếp tục.
+4. **Vòng lặp Tool Calling (Tối đa 5 lượt):**
+   - Groq LLM trả `ToolCall` → Backend thực thi công cụ thông qua `ToolExecutor` với đầy đủ ngữ cảnh `ToolExecutionContext{language, convId, userId}` để đảm bảo dữ liệu truy vấn tuân thủ quyền hạn và ngôn ngữ của người dùng.
+5. **Bộ bảo vệ chính sách (Policy Guard):**
+   - Nếu LLM tự ý trả lời các câu hỏi về chính sách hủy vé, hoàn tiền hoặc quy chuẩn thời tiết mà **CHƯA** gọi tool `get_policy` → Hệ thống tự động **THU HỒI & THAY THẾ** phản hồi bằng văn bản chính sách quy chuẩn (`CANONICAL_POLICY`) từ hệ thống.
+6. Hoàn tất phản hồi và lưu vết kiểm toán.
 
 ---
 
-## 3. RevalidBooking.png — Xác nhận đặt chỗ (Sequence & Ràng buộc bảo mật)
+## 3. RevalidBooking.png — Xác nhận đặt chỗ thời gian thực (Sequence & Bảo mật)
 
-**Thành phần:** `User` → `AssistantController` → `ChatHistoryService` → `ConfirmBookingUseCase` → `ConfirmationCardStorePort (Redis)` → `GetPublicServiceDetailUseCase (PostgreSQL)` → `CreateBookingHoldUseCase`
+**Thành phần:** `User` → `AssistantController` → `ChatHistoryService` → `ConfirmBookingUseCase` → `ConfirmationOutcomeAdapter (V25)` → `RedisConfirmationCardStore` → `AiCatalogReadApi` → `CreateBookingHoldUseCase` → `CancelBookingHoldUseCase`
 
-**Luồng:**
-1. Khách bấm xác nhận → `POST /api/assistant/conversations/{id}/confirm` gửi kèm `{"cardId": "..."}`.
-2. **Kiểm tra quyền sở hữu hội thoại (Ownership Guard):**
-   - Controller gọi `ChatHistoryService.getConversationForUser(id, currentUserId)`.
-   - Nếu hội thoại không tồn tại → HTTP 404 Not Found.
-   - Nếu hội thoại thuộc người dùng khác → ném `AccessDeniedException` trả về **HTTP 403 Forbidden** (`ACCESS_DENIED`).
-3. **Ràng buộc 3 bên (Card — Conversation — User):**
-   - Controller gọi `confirmBookingUseCase.execute(cardId, userId, sessionId, expectedConversationId = id)`.
-   - Lấy **Draft Card** từ Redis qua `cardStorePort.findById(cardId)`.
-   - Kiểm tra: `card.getConversationId().equals(expectedConversationId)`. Nếu không khớp → ném `AccessDeniedException` (**HTTP 403 Forbidden**), chặn đứng tấn công dùng Card của hội thoại khác (Cross-conversation card hijacking).
-4. **Truy vấn giá & chỗ trống thực tế** từ DB qua `GetPublicServiceDetailUseCase` → so sánh với Card:
-
-| Kết quả so sánh | Xử lý |
-|---|---|
-| **Giá thay đổi / Hết chỗ** | Hủy Card cũ → Tạo Alternative Card (đề xuất thay thế) → trả `alternative_needed` |
-| **Dữ liệu khớp** | Kích hoạt `CreateBookingHoldUseCase` tạo giữ chỗ phân tán (Redis Lua lock + DB Booking `HOLD` TTL 15p) → Đánh dấu Card `CONFIRMED` → Ghi Audit Log → trả `success` kèm `bookingId`, `holdExpiresAt` |
-| **Lỗi bù trừ (Compensation)** | Nếu lưu Card thất bại sau khi tạo Hold, tự động gọi `CancelBookingHoldUseCase` giải phóng tồn kho ngay lập tức |
+**Luồng xử lý:**
+1. Khách bấm xác nhận trên giao diện chat → `POST /api/assistant/conversations/{id}/confirm` gửi kèm `{"cardId": "card_abc"}`.
+2. **Xác thực quyền sở hữu hội thoại (Ownership Guard):**
+   - `ChatHistoryService.getConversationForUser(id, currentUserId)`.
+   - Hội thoại không tồn tại → HTTP 404 Not Found.
+   - Hội thoại thuộc tài khoản khác → Ném `AccessDeniedException` trả về **HTTP 403 Forbidden**.
+3. **Kiểm tra Outcome bền vững (Flyway V25 Durable Outcome):**
+   - `durableOutcomes.completed(cardId, userId, expectedConversationId)`.
+   - Nếu đã hoàn tất trước đó (kể cả khi Redis bị restart hoặc mất key cache) → Replay ngay kết quả đã lưu (`bookingId`, `holdExpiresAt`), đảm bảo tính Idempotent tuyệt đối và không tạo booking hold kép.
+4. **Thiết lập Khóa phân tán (Distributed Lock):**
+   - Gọi `tryAcquireProcessingLock(cardId, TTL: 30s)` trên Redis. Nếu thẻ đang được xử lý bởi tiến trình khác → Ném `IllegalStateException` trả về **HTTP 409 Conflict**.
+5. **Ràng buộc 3 bên (Card — Conversation — User):**
+   - Đọc Draft Card từ Redis.
+   - Kiểm tra: `card.getConversationId().equals(expectedConversationId)` và `card.getOwnerId().equals(userId)`. Nếu sai lệch → **HTTP 403 Forbidden**, ngăn chặn triệt để tấn công đánh cắp thẻ giữa các hội thoại (Card Hijacking).
+   - Kiểm tra trạng thái: `card.getStatus().equals(STATUS_PENDING)`.
+6. **Kiểm tra phân nhóm gói riêng (Participant Grouping):**
+   - Nếu tùy chọn là `PER_PACKAGE`, xác thực danh sách `participantsPerPackage` (ví dụ: nhóm 3 người chọn cano tối đa 2 người/gói → phân bổ `[2, 1]` tương ứng `quantity = 2`).
+7. **Tái thẩm định thời gian thực (Live Re-validation):**
+   - Truy vấn giá và slot thực tế từ CSDL qua `AiCatalogReadApi`.
+   - Nếu hết chỗ hoàn toàn → Đánh dấu card `CANCELLED` → trả `out_of_stock`.
+   - Nếu giá thay đổi hoặc slot không còn:
+     - `retryCount >= 2` → Hủy card → trả `error` ("Biến động quá nhiều lần").
+     - `retryCount < 2` → Tăng retryCount (Redis TTL 15m), hủy card cũ, tạo thẻ đề xuất thay thế `AlternativeCard` → trả `alternative_needed`.
+8. **Khóa tồn kho nguyên tử & Lưu Outcome:**
+   - Kích hoạt `CreateBookingHoldUseCase`: Chạy script Redis Lua khóa số chỗ và tạo bản ghi Booking trạng thái `HOLD` (15 phút) trong PostgreSQL.
+   - Kiểm tra đối chiếu tổng tiền: nếu tổng tiền tính toán lệch với card → Tự động hủy hold và yêu cầu tạo thẻ mới.
+   - Lưu outcome vào bảng `ai_confirmation_outcomes` (V25) và cập nhật card `CONFIRMED`.
+9. **Cơ chế bù trừ tự động (Compensation Rollback):**
+   - Nếu quá trình lưu outcome bền vững gặp sự cố hệ thống, tự động kích hoạt `CancelBookingHoldUseCase` giải phóng tồn kho ngay lập tức để tránh tình trạng treo slot ảo.
+10. Giải phóng ProcessingLock trên Redis và trả về HTTP 200 OK.
 
 ---
 
-## 4. RevalidBookingFlow.png — Logic phân nhánh Re-validation (Flowchart)
+## 4. RevalidBookingFlow.png — Cây quyết định phân nhánh Re-validation (Flowchart)
 
 **Cây quyết định chi tiết:**
-1. **Xác thực quyền sở hữu Conversation:** `conversation.userId == currentUserId`?
-   - Sai → **403 Forbidden**
-   - Không tìm thấy → **404 Not Found**
-   - Đúng → tiếp
-2. **Tìm ConfirmationCard** theo cardId:
-   - Không tìm thấy / hết hạn → ném `IllegalArgumentException`
-   - Tìm thấy → tiếp
-3. **Card thuộc về Conversation hiện tại?** (`card.conversationId == expectedConversationId`):
-   - Sai → **403 Forbidden** (`AccessDeniedException`)
-   - Đúng → tiếp
-4. **Trạng thái Card = PENDING?**
-   - Không → *"Thẻ không ở trạng thái PENDING"*
-   - Có → tiếp
-5. **Còn slot trống?**
-   - Hết hẳn → `CANCELLED` → *"out_of_stock, gợi ý ngày khác"*
-   - Còn → tiếp
-6. **Giá/Slot có thay đổi?**
-   - Không → Gọi `CreateBookingHoldUseCase` giữ chỗ → `CONFIRMED` → HTTP 200 thành công (`bookingId`, `holdExpiresAt`)
-   - Có → kiểm tra retry
-7. **Retry count ≥ 2?**
-   - ≥ 2 → `CANCELLED` → *"Thay đổi quá nhiều lần, vui lòng đặt lại"*
-   - < 2 → Tăng `retryCount` (Redis TTL:15p) → Tạo Card mới `PRICE_CHANGED / SLOT_UNAVAILABLE` → Hủy Card cũ → trả `alternative_needed`
+1. Khách gửi yêu cầu `POST /conversations/{id}/confirm` → Kiểm tra `conversation.userId == currentUserId`:
+   - Không tìm thấy → **HTTP 404**
+   - Thuộc người khác → **HTTP 403**
+2. Kiểm tra Outcome bền vững trong bảng `ai_confirmation_outcomes` (PostgreSQL V25):
+   - Đã tồn tại → Replay kết quả cũ thành công (HTTP 200: `bookingId`, `holdExpiresAt`)
+3. Lấy khóa phân tán `tryAcquireProcessingLock` (TTL 30s) trên Redis:
+   - Thất bại → **HTTP 409 Conflict** (Đang có luồng khác xử lý thẻ)
+4. Đọc `ConfirmationCard` từ Redis:
+   - Không tìm thấy / Hết hạn 15 phút → **HTTP 400 Bad Request**
+5. Kiểm tra ràng buộc kép: `card.conversationId == id` và `card.ownerId == userId`:
+   - Sai lệch → **HTTP 403 Forbidden** (Card Hijacking)
+6. Trạng thái thẻ `card.status == PENDING`:
+   - Sai → Báo lỗi trạng thái
+7. Kiểm tra loại giá:
+   - Nếu `PER_PACKAGE`: Xác thực phân nhóm khách trong từng gói `participantsPerPackage`. Nếu không hợp lệ → Hủy thẻ, trả về `refresh_required`.
+8. Truy vấn giá và slot thực tế từ Database:
+   - Hết chỗ hoàn toàn → Đánh dấu `CANCELLED` → trả `out_of_stock`.
+   - Giá đổi hoặc ca yêu cầu bị đầy:
+     - `retryCount >= 2` → Đánh dấu `CANCELLED` → trả `error` ("Biến động quá nhiều lần").
+     - `retryCount < 2` → Tăng retryCount (Redis TTL 15m), tạo thẻ thay thế mới → trả `alternative_needed`.
+9. Khớp dữ liệu 100% → Gọi `CreateBookingHoldUseCase` (Redis Lua lock + Booking HOLD 15m).
+10. Kiểm tra giá giữ chỗ có khớp với card:
+    - Lệch giá → Kích hoạt bù trừ `CancelBookingHoldUseCase`, hủy thẻ, trả `refresh_required`.
+11. Lưu Outcome bền vững vào PostgreSQL V25 và đánh dấu Card `CONFIRMED`.
+    - Lỗi khi lưu → Kích hoạt **Bù trừ tự động (Compensation)** gọi `CancelBookingHoldUseCase` giải phóng tồn kho.
+12. Giải phóng khóa phân tán và trả về kết quả thành công (HTTP 200 OK).
 
 ---
 
-## 5. RollKeys_ModelFallBack.png — Xoay API Key & Fallback Model
+## 5. RollKeys_ModelFallBack.png — Xoay API Key & Fallback Model Groq
 
-**Xử lý theo mã HTTP từ Groq API:**
+**Chiến lược độ tin cậy dịch vụ (Zero-Downtime Resilience):**
+- Quản lý **5 API Key Groq** trong Redis Key Pool với 3 trạng thái:
+  - `ACTIVE`: Sẵn sàng phục vụ.
+  - `COOLDOWN`: Tạm ngưng trong 1 phút khi bị Rate Limit (HTTP 429).
+  - `DISABLED`: Khóa vĩnh viễn khi Key sai hoặc bị thu hồi (HTTP 401).
 
-| Mã HTTP | Ý nghĩa | Hành động |
+**Xử lý mã phản hồi HTTP:**
+
+| Mã HTTP | Ý nghĩa | Hành vi xử lý của Hệ thống |
 |:---:|---|---|
-| **200** | Thành công | Trả kết quả cho User |
-| **429** | Quá tải | Key → **`COOLDOWN`** (1 phút) → KeyRotator lấy Key ACTIVE khác từ Redis → gửi lại |
-| **401** | Sai/Hủy Key | Key → **`DISABLED`** vĩnh viễn → KeyRotator lấy Key khác → gửi lại |
-| **5xx** | Lỗi Server Groq | Đổi sang **`GROQ_FALLBACK_MODEL`** → gửi lại |
+| **200** | Thành công | Trả kết quả sinh văn bản / gọi tool cho người dùng |
+| **429** | Quá tải tần suất | Đánh dấu Key → `COOLDOWN` (1 phút) → `GroqKeyRotator` lấy Key ACTIVE tiếp theo → Gửi lại request |
+| **401** | Sai mã / Khóa Key | Đánh dấu Key → `DISABLED` vĩnh viễn, phát cảnh báo quản trị viên → Lấy Key khác gửi lại |
+| **5xx** | Lỗi Server Groq Cloud | Tự động chuyển model sang **`GROQ_FALLBACK_MODEL`** (Llama 3.1 8B Instant Fallback) → Gửi lại request |
 
-**KeyRotator:** Quản lý 5 API Key Groq trên Redis, mỗi Key có 3 trạng thái: `ACTIVE` / `COOLDOWN` / `DISABLED`. Khi hết Key ACTIVE → chuyển fallback model đảm bảo dịch vụ **không bao giờ gián đoạn**.
+Khi cạn toàn bộ 5 Key trong pool hoặc vượt quá ngân sách thời gian xử lý: Hệ thống chuyển sang **Baseline Mode** an toàn và trả thông báo hệ thống chuẩn hóa, không để lộ stack trace.
 
 ---
 
-## 6. AI_Hybrid_Architecture.png — Kiến trúc phân tầng 3 lớp Hybrid AI
+## 6. AI_Hybrid_Architecture.png — Kiến trúc phân tầng 3 lớp Hybrid AI (Toàn diện)
 
-**Thành phần:** `Client Apps (React/Flutter)` → `Security Gateway (JWT, Locale, RateLimiter)` → `Controllers (Assistant, CustomerAi, Assessment, AdminAi)` → `Core Use Cases (Clean Architecture)` → `Hybrid AI Engine (Groq Cloud LLM + Quyet Small Worker)` → `Storage (PostgreSQL V21 + Redis)`
-
-**Ý nghĩa thiết kế:**
-1. **Phân định rõ trách nhiệm 2 mô hình AI (Dual-Brain Architecture):**
-   - **Groq Cloud LLM (Llama 3.3/3.1):** Đảm nhiệm sinh văn bản hội thoại, tương tác ngôn ngữ tự nhiên và trích dẫn bằng chứng từ review có ID nguồn thực tế.
-   - **Quyet Small Offline Worker (Fast Inference trên Local CPU/Container):** Chịu trách nhiệm thực thi các tác vụ quyết định có cấu trúc theo chuẩn phân loại cố định (rubrics): Phân loại ý định (`INTENT`), Chấm điểm tương quan gợi ý (`RELEVANCE`), Phân loại danh mục dịch vụ (`SERVICE_CATEGORY`), Phát hiện nội dung vi phạm (`MODERATION`), Đánh giá rủi ro (`RISK`), Tách khía cạnh review (`REVIEW`).
-2. **Quy tắc Bất biến Tài chính & Tồn kho:** AI (kể cả Groq và Quyet) **không bao giờ có quyền ghi đè DB** hay tự ý trừ tiền, tạo booking, hủy đơn hàng hoặc phê duyệt thanh toán. Mọi quyết định cốt lõi do Spring Boot Business Logic kiểm soát.
-3. **PostgreSQL Migration V21:** Bổ sung 2 bảng chuyên dụng:
-   - `ai_itineraries`: Lưu kế hoạch lịch trình với cơ chế khóa lạc quan `@Version`, JSON snapshot, lập chỉ mục theo `owner_id`.
-   - `ai_assessment_cases`: Lưu trữ toàn bộ bằng chứng kiểm duyệt văn bản, hồ sơ rủi ro giao dịch, mã nguyên nhân (`reasonCodes`), mô hình AI đã xử lý và trạng thái thẩm định của Admin.
-4. **Redis Cache:** Lưu trữ trạng thái Key Rotator, Token Bucket theo cấp độ tin cậy (`TrustTier`), phiếu đặt chỗ nháp (`ConfirmationCard`) TTL 15 phút, và khóa phân tán (`Distributed Lock`) xử lý đặt vé chống Race Condition.
+**Sự kết hợp hoàn chỉnh của hệ thống AI DANASEA:**
+1. **Tầng Giao Diện (Client Apps):** Web App (React / Vite) và Mobile App (Flutter).
+2. **Tầng Bảo Mật & Điều Phối (Security Gateway):**
+   - Spring Security Context (JWT Authentication & Actor Ownership).
+   - `LocaleContextFilter` (Phân giải đa ngôn ngữ VI/EN).
+   - **`AiExecutionBudgetFilter`**: Kiểm soát ngân sách thực thi (`X-Execution-Budget-Ms`, deadline tối đa 8000ms), giới hạn tối đa 8 request AI đồng thời trên mỗi JVM để bảo vệ tài nguyên hệ thống.
+   - `RedisRateLimiter`: Kiểm soát hạn mức tần suất theo `TrustTier`.
+3. **Tầng Bộ Điều Khiển (8 API Controllers):**
+   - `AssistantController`: Hội thoại trợ lý ảo, quản lý ngữ cảnh và xác nhận đặt vé.
+   - `CustomerAiController`: Tìm kiếm thông minh, gợi ý, so sánh dịch vụ và đánh giá thời tiết.
+   - `ItineraryLifecycleController`: Chu trình lập lịch trình (Preview, Save Draft, Accept, Revisions, Proposals).
+   - `CustomerPreferenceController`: Quản lý sở thích cá nhân hóa và tiếp nhận phản hồi gợi ý.
+   - `CustomerSupportWorkflowController`: Quy trình tiếp nhận yêu cầu đổi lịch và hỗ trợ khách hàng.
+   - `AiAssessmentController`: Kiểm duyệt nội dung văn bản và phân loại danh mục dịch vụ.
+   - `AdminAiController`: Phân tích rủi ro giao dịch (Velocity 3/5/3) và thẩm định hồ sơ vi phạm.
+   - `ManualSupportController`: Hàng đợi xử lý thủ công các yêu cầu đổi lịch/hỗ trợ của Admin.
+4. **Tầng Nghiệp Vụ Lõi (14 Application Use Cases):**
+   - Các use case được thiết kế theo nguyên lý Clean Architecture, đảm bảo logic nghiệp vụ kiểm soát 100% quyết định, không phụ thuộc vào độ tin cậy của AI.
+5. **Tầng Tác Vụ Nền (Background Jobs):**
+   - `ItinerarySourceMonitoringJob`: Quét định kỳ mỗi 60s các biến động slot và cảnh báo thời tiết để tự động đề xuất phương án thay thế mà không can thiệp vào tài chính.
+6. **Tầng Trí Tuệ Nhân Tạo Lai (Dual-Brain Hybrid Engine):**
+   - **Groq Cloud LLM (Online):** Mô hình Llama 3.3 / 3.1 đảm nhiệm tương tác tự nhiên, Prompt Guard và trích dẫn bằng chứng từ review có ID nguồn thực tế.
+   - **Quyet Small Inference Worker (Offline / Local CPU):** Máy chủ suy luận siêu tốc thực hiện 6 nhiệm vụ quyết định có cấu trúc: `INTENT`, `RELEVANCE` (top 5), `SERVICE_CATEGORY`, `MODERATION`, `RISK`, `REVIEW`.
+7. **Tầng Lưu Trữ & Hạ Tầng Dữ Liệu:**
+   - **PostgreSQL Database:** Bao gồm dữ liệu nghiệp vụ cốt lõi và chuỗi Migrations Flyway chuyên dụng:
+     - `V21`: `ai_itineraries` (@Version, JSON snapshot), `ai_assessment_cases`.
+     - `V22`: `ai_chat_requests` (Idempotency cache), `ai_conversations`, `ai_messages`.
+     - `V23`: `ai_itinerary_proposals` (Diff), `ai_itinerary_previews` (TTL 15m), `ai_itinerary_revisions` (Lịch sử phiên bản), `ai_itinerary_items`.
+     - `V24`: `ai_customer_preferences` (Consent), `ai_recommendations`, `ai_recommendation_feedbacks`, `ai_customer_support_requests`.
+     - `V25`: `ai_confirmation_outcomes` (Lưu trữ bền vững kết quả xác nhận đặt vé).
+   - **Redis Cache:** Quản lý Token Bucket, Draft Confirmation Cards (TTL 15m), Khóa phân tán Lua Script (TTL 30s), Groq Key Pool và Idempotency Locks.
 
 ---
 
 ## 7. Customer_AI_Discovery_Flow.png — Khám phá Dịch vụ Thông minh (Search, Recommend, Nearby)
 
-**Thành phần:** `Client` → `CustomerAiController` → `TravelQueryParser` → `DiscoverServicesUseCase` → `AiCatalogReadApi` → `Quyet Small Worker` → `TravelWeatherPort`
+**Thành phần:** `Client` → `CustomerAiController` → `TravelQueryParser` → `CustomerPreferenceReadApi` → `DiscoverServicesUseCase` → `AiCatalogReader (Postgres)` → `Quyet Small Worker` → `TravelWeatherPort` → `ai_recommendations`
 
-**Quy trình xử lý:**
-1. **Phân giải yêu cầu:** Client gửi `TravelRequest` vào `POST /api/ai/search`, `/recommendations` hoặc `/nearby`. Bộ lọc `TravelContext.validateCurrentDates()` xác thực: partySize (1–50), ngân sách tổng (0–1 tỷ VND), khoảng thời gian không quá 14 ngày và không thuộc quá khứ.
-2. **Xử lý ngôn ngữ tự nhiên (NLP Query Parsing):** `TravelQueryParser` bóc tách từ khóa hoạt động, ngân sách, số người, và danh sách các hoạt động người dùng muốn loại trừ (ví dụ: "không thích lặn", "trừ cano").
-3. **Truy vấn Danh mục Thực tế (Hard Filtering):** Hệ thống lấy mẫu tối đa 50 dịch vụ `PUBLISHED` từ DB.
-   - Loại bỏ các dịch vụ thuộc danh mục nằm trong danh sách loại trừ.
-   - Kiểm tra ngân sách cho cả nhóm: tính toán chuẩn xác theo `PER_PERSON` (`unitPrice * partySize`) hoặc `PER_PACKAGE` (`unitPrice * ceil(partySize / maxPax)`).
-   - Lọc các slot thời gian khớp với khung giờ hoạt động trong ngày (`dayStart` đến `dayEnd`).
-4. **Kiểm tra An toàn Thời tiết:** Nếu `weatherSafeOnly = true`, kiểm tra tối đa 20 slot nhạy cảm với thời tiết (có cache theo `slot.id`). Slot không đạt điều kiện an toàn sẽ bị loại khỏi danh sách có thể đặt.
-5. **Định vị & Khoảng cách (Haversine Distance):** Với chế độ `NEARBY` hoặc khi có bán kính `radiusKm`, tính khoảng cách địa lý đường chim bay. Nếu vượt bán kính $\rightarrow$ bỏ qua.
-6. **Xếp hạng Thông minh (Quyet Relevance Scoring):**
-   - Với `SEARCH`: Quyet dự đoán `INTENT` của người dùng để trả về kèm kết quả.
-   - Với `RECOMMENDATION`: Lấy tối đa 10 ứng viên hàng đầu, gọi Quyet tính điểm tương đồng `RELEVANCE` giữa sở thích người dùng và mô tả dịch vụ $\rightarrow$ cộng dồn vào Baseline Score.
-7. **Sắp xếp Kết quả:**
-   - Chế độ `NEARBY`: Sắp xếp theo khoảng cách tăng dần $\rightarrow$ giá tổng tăng dần.
-   - Chế độ `SEARCH / RECOMMENDATION`: Sắp xếp theo tổng điểm Score giảm dần $\rightarrow$ Service ID tăng dần.
+**Quy trình chi tiết:**
+1. **Phân giải yêu cầu:** Client gửi `TravelRequest` vào `/api/ai/search`, `/recommendations` hoặc `/nearby`. Bộ lọc `TravelContext.validateCurrentDates()` xác thực partySize (1–50), tổng ngân sách (0–1 tỷ VND), thời gian trong 14 ngày và không thuộc quá khứ.
+2. **Xử lý thiếu thông tin (Clarification / NEEDS_INPUT):** Nếu câu hỏi cần làm rõ số người trong câu gia đình hoặc thiếu tọa độ khi tìm kiếm quanh đây → Trả về `NEEDS_INPUT` kèm danh sách câu hỏi cần người dùng bổ sung.
+3. **Nạp sở thích cá nhân hóa (Consent Signals):** Nếu `useSavedPreferences == true` và khách đã đăng nhập, nạp tín hiệu sở thích đã đồng ý: danh sách sở thích, mục yêu thích (wishlist), dịch vụ đã xem gần đây, phản hồi tích cực/tiêu cực và danh mục loại trừ.
+4. **NLP Query Parsing:** `TravelQueryParser` bóc tách từ khóa hoạt động, ngân sách (tự động nhân số người nếu câu gốc nêu giá mỗi người), và từ khóa loại trừ.
+5. **Quét Catalog Thực Tế (Scan Budget 10.000 items):**
+   - `AiCatalogReader` quét tối đa 10.000 ứng viên với deadline ngân sách 8 giây, phân trang qua `offset` và `nextOffset`.
+   - Lọc bỏ các dịch vụ thuộc danh mục loại trừ (`exclusions`).
+   - Lọc Option theo ngân sách cả nhóm (`PER_PERSON` hoặc `PER_PACKAGE`).
+   - Lọc Slot theo khung giờ hoạt động trong ngày (`dayStart` đến `dayEnd`).
+6. **Kiểm tra An toàn Thời tiết:** Nếu `weatherSafeOnly = true`, kiểm tra tối đa 20 slot nhạy cảm thời tiết (có cache theo `slotId`). Slot không đạt chuẩn sẽ bị loại khỏi danh sách có thể đặt.
+7. **Định vị & Khoảng cách (Haversine Distance):** Tính khoảng cách địa lý đường chim bay. Nếu vượt bán kính `radiusKm` → bỏ qua.
+8. **Chấm điểm Tương quan Quyet (Relevance Scoring):**
+   - Với chế độ `RECOMMENDATION`: Lấy tối đa **5 ứng viên hàng đầu**, gọi Quyet tính điểm tương quan `RELEVANCE` (0..3 điểm) → cộng dồn vào điểm Baseline.
+   - Dự đoán `INTENT` của người dùng để trả kèm kết quả.
+9. **Sắp xếp & Giới hạn Kết quả:**
+   - Chế độ `NEARBY`: Sắp xếp theo khoảng cách tăng dần → giá tổng tăng dần.
+   - Chế độ `SEARCH / RECOMMENDATION`: Sắp xếp theo điểm Score giảm dần → Service ID tăng dần.
+   - Giới hạn tối đa **15 kết quả** (không trả tràn lan).
+10. **Ghi nhận Khuyến nghị (Recommendation Feedback ID):** Với gợi ý thành công, hệ thống lưu bản ghi vào bảng `ai_recommendations` (V24) và trả về `recommendationId` (UUID) để phục vụ vòng lặp thu thập phản hồi.
 
 ---
 
-## 8. Itinerary_Planning_And_Replan_Flow.png — Lập Lịch Trình & Tái Lập Lịch (Re-plan)
+## 8. Itinerary_Planning_And_Replan_Flow.png — Lập Lịch Trình, Vòng Đời & Tái Lập Lịch (3 Giai Đoạn)
 
-**Thành phần:** `Client` → `CustomerAiController` → `PlanItineraryUseCase` → `DiscoverServicesUseCase` → `TravelWeatherPort` → `ItineraryStorePort (PostgreSQL V21)`
+**Thành phần:** `Client` → `ItineraryLifecycleController` → `PlanItineraryUseCase` → `DiscoverServicesUseCase` → `TravelWeatherPort` → `ItinerarySourceMonitoringJob` → `PostgreSQL (V21 & V23)` → `In-App Notification`
 
-**Hai chu trình cốt lõi:**
-1. **Khởi tạo Kế hoạch (`POST /api/ai/itineraries`):**
-   - Gọi `DiscoverServicesUseCase` chế độ `RECOMMENDATION` để lấy danh sách ứng viên có chỗ trống và mức giá thực tế.
-   - Lấy tối đa 10 candidate, mở rộng tối đa 5 slot/option, sắp xếp theo thời gian bắt đầu (`slot.start`) và giá.
-   - **Thuật toán Tham lam Có giới hạn (Bounded Chronological Greedy):**
-     - Đảm bảo mỗi dịch vụ chỉ xuất hiện tối đa 1 lần trong cả chuyến đi.
-     - Kiểm soát tổng ngân sách cả nhóm: `total + nextOption.partyTotal <= effectiveBudget`.
-     - **Ước lượng chuyển tiếp (Estimated Transfers):** Nếu có hoạt động trước đó, tính khoảng cách Haversine giữa 2 tọa độ GPS. Thời gian di chuyển yêu cầu:
-       $$\text{transitMinutes} = 15 \text{ (phút đệm)} + \left\lceil \frac{\text{distanceKm}}{25} \times 60 \right\rceil \text{ phút}$$
-       Nếu giờ bắt đầu của ca sau sớm hơn $(\text{kết thúc ca trước} + \text{transitMinutes}) \rightarrow$ Bỏ qua slot này để tránh bể lịch trình.
-     - Đánh giá thời tiết qua `TravelWeatherPort`: nếu thời tiết không thuận lợi $\rightarrow$ bỏ qua slot và ghi nhận mã cảnh báo.
-   - Lưu kế hoạch vào bảng `ai_itineraries` với `version = 0`, gán chủ sở hữu `owner_id`.
-2. **Tái lập Lịch trình khi có biến động (`POST /api/ai/itineraries/{id}/replan`):**
-   - Khách yêu cầu đổi lịch (do hủy slot, thời tiết đổi, hoặc đổi sở thích), gửi `expectedVersion`, danh sách `excludedServiceIds`, `excludedSlotIds`, và `trigger`.
-   - **Kiểm tra quyền sở hữu:** Lịch trình phải thuộc về người dùng đang đăng nhập (chặn 404/403).
-   - **Kiểm soát đồng thời (Optimistic Locking Guard):** Đối chiếu `expectedVersion == old.version()`. Nếu phiên bản trong DB đã thay đổi $\rightarrow$ ném `AiStateConflictException` trả về **HTTP 409 Conflict**.
-   - Tính toán kế hoạch mới loại bỏ các slot/dịch vụ bị hủy, lưu đè và tăng `@Version` lên $+1$.
-   - Trả về chi tiết chênh lệch: `removedSlotIds`, `addedSlotIds`, `changedItems` với cờ `bookingChanged = false` (không tự ý sửa booking đã chốt).
+**Chu trình 3 giai đoạn hoàn chỉnh:**
+
+### Giai đoạn 1: Vòng đời Khởi tạo (Preview → Save Draft → Accept)
+1. **Khởi tạo phương án xem trước (`POST /api/ai/itineraries/preview`):**
+   - Gọi `DiscoverServicesUseCase` lấy các ứng viên thực tế còn slot.
+   - Chạy thuật toán **Bounded Chronological Greedy** với đệm di chuyển:
+     $$\text{transitMinutes} = 15 \text{ phút} + \left\lceil \frac{\text{distanceKm}}{25} \times 60 \right\rceil \text{ phút}$$
+   - Đánh giá thời tiết qua `TravelWeatherPort`.
+   - Sinh tối đa **3 phương án thay thế (alternatives)** theo từng ngày, lưu vào bảng `ai_itinerary_previews` (TTL 15 phút).
+2. **Lưu phương án đã chọn (`POST /api/ai/itineraries/previews/{previewId}/save`):**
+   - Khách chọn 1 alternative, gửi kèm header `Idempotency-Key`.
+   - Lưu vào bảng `ai_itineraries` với trạng thái `DRAFT` và `version = 0`.
+3. **Chấp thuận lịch trình (`POST /api/ai/itineraries/{id}/accept`):**
+   - Khách bấm chốt lịch kèm `expectedVersion = 0`.
+   - Hệ thống tái kiểm tra (re-validate) lại giá và slot thời gian thực từ CSDL để đảm bảo không bị book mất chỗ.
+   - Cập nhật trạng thái thành `ACCEPTED`, tăng `version = 1`.
+
+### Giai đoạn 2: Tái lập lịch trình qua Đề xuất (Re-planning with Proposal Diff)
+1. Khách gửi yêu cầu đổi lịch: `POST /api/ai/itineraries/{id}/replan` kèm `expectedVersion`, `excludedSlotIds`, `trigger`.
+2. Kiểm tra quyền sở hữu và Optimistic Locking (nếu phiên bản DB đã đổi → HTTP 409 Conflict).
+3. Chạy lại thuật toán tính phương án thay thế, tính toán chi tiết chênh lệch (**Diff**): `removedSlotIds`, `addedSlotIds`, `changedItems`.
+4. **Tạo bản ghi Proposal PENDING:** Lưu vào bảng `ai_itinerary_proposals` (V23). **Tuyệt đối không tự ý ghi đè lịch đang chạy trong `ai_itineraries`**.
+5. Khách hàng xem trước đề xuất:
+   - Nếu đồng ý: Gửi `POST /api/ai/itineraries/{id}/proposals/{proposalId}/accept`.
+   - Hệ thống tái kiểm tra slot & thời tiết, lưu bản chụp lịch cũ vào bảng `ai_itinerary_revisions` (V23), cập nhật `ai_itineraries` với lịch mới, tăng `@Version` lên +1 và đánh dấu proposal thành `ACCEPTED`.
+
+### Giai đoạn 3: Giám sát nguồn tự động bằng Job nền (ItinerarySourceMonitoringJob)
+1. Job nền chạy định kỳ mỗi 60 giây, quét toàn bộ lịch trình ở trạng thái `ACCEPTED` hoặc `STALE` có hoạt động trong tương lai.
+2. Kiểm tra trạng thái từng slot trong catalog và cảnh báo thời tiết mới nhất từ trạm khí tượng.
+3. Nếu phát hiện slot bị nhà cung cấp hủy hoặc thời tiết chuyển biến nguy hiểm (`UNSAFE`):
+   - Tự động sinh `Proposal` trạng thái `PENDING` trong bảng `ai_itinerary_proposals`.
+   - Gửi thông báo trong ứng dụng (**In-App Notification**) với cơ chế chống trùng lặp (dedup) để báo cho khách hàng biết.
+   - **Quy tắc bất biến:** Không tự ý hủy booking đã thanh toán hoặc trừ tiền của khách hàng.
 
 ---
 
@@ -193,74 +255,135 @@
 
 **Thành phần:** `User/Vendor/Admin` → `AiAssessmentController` / `AdminAiController` → `AssessTextUseCase` / `AnalyzeTransactionRiskUseCase` → `TransactionRiskReadPort` → `Quyet Small Worker` → `AssessmentCaseStorePort (PostgreSQL V21)`
 
-**Ba giai đoạn thẩm định:**
+**Ba phân hệ thẩm định:**
 1. **Kiểm duyệt nội dung văn bản (`POST /api/ai/content-assessments`):**
-   - Quét Regex phát hiện thông tin liên lạc ngoài luồng: số điện thoại (+84/0...), link web http/https, địa chỉ email.
+   - Nhận chuỗi văn bản (1–2500 ký tự).
+   - Quét Regex phát hiện thông tin liên hệ lén lút: Số điện thoại Việt Nam ((+84|0)...), liên kết ngoài (http/https), địa chỉ email.
    - Gọi song song Quyet Worker thực hiện 2 task:
-     - `SERVICE_CATEGORY`: Gợi ý danh mục trải nghiệm (SUP, KAYAK, DIVING...).
-     - `MODERATION`: Đánh giá xác suất rủi ro (`external_payment`, `spam`, `abuse`).
-   - Nếu phát hiện số điện thoại ngoài hoặc xác suất vi phạm $\ge 0.5 \rightarrow$ Đưa vào trạng thái `NEEDS_REVIEW`; ngược lại `NO_RULE_SIGNAL`.
-   - Lưu hồ sơ vào bảng `ai_assessment_cases` với đầy đủ bằng chứng bằng văn bản (`evidenceType = TEXT_ONLY`).
-2. **Phân tích rủi ro giao dịch của Admin (`POST /api/admin/ai/risk-cases`):**
-   - Quản trị viên nhập `orderId` và khiếu nại của khách.
-   - Backend truy vấn dữ liệu vận tốc giao dịch thực tế qua `TransactionRiskReadPort`:
+     - `SERVICE_CATEGORY`: Phân loại danh mục trải nghiệm (SUP, KAYAK, DIVING...).
+     - `MODERATION`: Đánh giá xác suất rủi ro giao dịch ngoài luồng (`external_payment`), thư rác (`spam`), quấy rối/xúc phạm (`abuse`).
+   - Nếu phát hiện số điện thoại hoặc xác suất rủi ro $\ge 0.5$ hoặc Quyet offline → Gán trạng thái `NEEDS_REVIEW`; ngược lại `NO_RULE_SIGNAL`.
+   - Lưu hồ sơ vào bảng `ai_assessment_cases` với `evidenceType = TEXT_ONLY` và `publicationAuthorized = false`.
+2. **Phân tích rủi ro giao dịch Admin (`POST /api/admin/ai/risk-cases`):**
+   - Admin nhập `orderId` và khiếu nại của khách.
+   - Đọc dữ liệu vận tốc giao dịch thực tế qua `TransactionRiskReadPort`:
      - Số lần thanh toán thất bại trong 24 giờ (`failedPayments24h >= 3`).
      - Tần suất tạo đơn trong 1 giờ gần nhất (`orders1h >= 5`).
      - Số yêu cầu hoàn tiền trong 7 ngày qua (`refundRequests7d >= 3`).
-   - Gọi Quyet Worker task `RISK` kết hợp các tín hiệu hành vi và khiếu nại.
-   - Nếu vi phạm bất kỳ ngưỡng quy tắc nào hoặc Quyet đánh giá xác suất $\ge 0.5 \rightarrow$ Tạo case trạng thái `NEEDS_REVIEW`.
-3. **Hàng đợi xét duyệt & Giải quyết case của Admin:**
-   - Admin xem danh sách hồ sơ cần thẩm định qua `GET /api/admin/ai/assessment-cases?status=NEEDS_REVIEW&limit=50`.
-   - Admin xử lý hồ sơ qua `POST /api/admin/ai/assessment-cases/{id}/resolve` với `resolution` (`RESOLVED`, `DISMISSED`) và ghi chú giải trình (1–1000 ký tự).
-   - Kiểm soát bằng khóa lạc quan: Chặn đứng tình huống 2 Admin duyệt trùng một case.
+   - Gọi Quyet Worker task `RISK` kết hợp tín hiệu hành vi và nội dung khiếu nại.
+   - Nếu thỏa mãn bất kỳ ngưỡng vận tốc nào hoặc xác suất rủi ro $\ge 0.5$ → Tạo case `NEEDS_REVIEW` lưu vào `ai_assessment_cases`.
+3. **Hàng đợi Admin giải quyết Case:**
+   - Admin truy vấn danh sách hồ sơ cần thẩm định qua `GET /api/admin/ai/assessment-cases?status=NEEDS_REVIEW&limit=50`.
+   - Admin xử lý qua `POST /api/admin/ai/assessment-cases/{id}/resolve` với `resolution` (`RESOLVED`, `DISMISSED`) và ghi chú giải trình (1–1000 ký tự).
+   - Kiểm soát bằng khóa lạc quan chống 2 Admin duyệt trùng một hồ sơ.
 
 ---
 
-## 10. AI_Travel_Assistant_MultiTool_Flow.png — Trợ Lý Du Lịch Đa Công Cụ (15 Tools & Native Option Booking)
+## 10. AI_Travel_Assistant_MultiTool_Flow.png — Trợ Lý Du Lịch Đa Công Cụ (15 Tools & Structured Artifacts)
 
-**Thành phần:** `Client` → `AssistantController` → `ChatUseCase` → `GroqLlmClient` → `AIToolRegistry (15 Tools)` → `CustomerFeatureTool` → `ConfirmBookingUseCase` → `CreateBookingHoldUseCase`
+**Thành phần:** `Client` → `AiExecutionBudgetFilter` → `AssistantController` → `ChatIdempotencyService` → `GroqLlmClient` → `AIToolRegistry (15 Tools)` → `CustomerFeatureTool` → `AssistantArtifactMapper` → `ConfirmBookingUseCase` → `CreateBookingHoldUseCase`
 
 **Luồng thực thi:**
 1. **Hội thoại & Vòng lặp gọi Tool (Tối đa 5 lượt):**
-   - Groq LLM nhận danh sách **15 công cụ** đã đăng ký trong `AIToolRegistry`:
-     - 6 công cụ truyền thống: `search_services`, `get_service_detail`, `get_policy`, `get_weather_forecast`, `get_safety_alert`, `request_booking_confirmation`.
-     - 9 công cụ khách hàng mới: `ai_smart_search`, `ai_recommend_services`, `ai_nearby_services`, `ai_compare_services`, `ai_plan_itinerary`, `ai_replan_itinerary`, `ai_review_summary`, `ai_weather_slot`, `ai_customer_support`.
-   - Khi LLM yêu cầu gọi Tool, `CustomerFeatureTool` thực thi logic nghiệp vụ thật từ Backend, đảm bảo kiểm tra quyền truy cập (yêu cầu đăng nhập với các tool riêng tư như lịch trình hay hỗ trợ đơn hàng).
-2. **Khởi tạo Phiếu Đặt Chỗ Native Option (Draft Card trên Redis):**
-   - Khách chốt lịch $\rightarrow$ LLM gọi `request_booking_confirmation(service_id, option_id, slot_id, date, participants)`.
-   - `RequestBookingConfirmationTool` xác thực Option và Slot thực tế còn tồn tại và còn chỗ.
-   - Sinh thẻ `ConfirmationCard` dạng Native Option chứa `optionId`, `slotId`, `unitPrice`, `participantsCount`, lưu vào Redis với TTL 15 phút.
-   - Trả giao diện Thẻ Đặt Chỗ kèm nút bấm **[Xác Nhận Đặt Chỗ]** cho khách hàng.
-3. **Xác nhận Đặt chỗ & Khóa Giữ Chỗ Phân Tán (Re-validation Guard):**
-   - Khách bấm xác nhận $\rightarrow$ Frontend gọi `POST /api/assistant/conversations/{id}/confirm` kèm `cardId`.
-   - **Khóa phân tán:** Xác lập `tryAcquireProcessingLock` trên Redis (TTL 30 giây) chống xử lý lặp.
-   - **Xác thực quyền sở hữu kép:** Hội thoại phải thuộc về User hiện tại, và Card phải thuộc đúng Hội thoại đó (`card.conversationId == expectedConversationId`). Chặn đứng tấn công giả mạo Card (403 Forbidden).
-   - **Tái thẩm định thời gian thực (Native Re-validation):** Đọc lại giá và slot từ CSDL. Nếu có biến động hoặc hết chỗ $\rightarrow$ quản lý số lần retry (tối đa 2 lần) và tạo thẻ đề xuất thay thế (`alternative_needed`).
-   - Nếu dữ liệu hoàn toàn hợp lệ $\rightarrow$ kích hoạt `CreateBookingHoldUseCase`, thực hiện khóa tồn kho nguyên tử qua Redis Lua script và lưu bản ghi Booking trạng thái `HOLD` (15 phút) trong PostgreSQL.
-   - Đánh dấu Card thành `CONFIRMED`, trả mã `bookingId` và thời gian hết hạn giữ chỗ `holdExpiresAt` để chuyển hướng sang thanh toán chính thức.
+   - Groq LLM nhận danh sách **15 công cụ kỹ thuật** đã đăng ký:
+     - 6 công cụ cơ bản: `search_services`, `get_service_detail`, `get_policy`, `get_weather_forecast`, `get_safety_alert`, `request_booking_confirmation`.
+     - 9 công cụ khách hàng mở rộng: `ai_smart_search`, `ai_recommend_services`, `ai_nearby_services`, `ai_compare_services`, `ai_plan_itinerary`, `ai_replan_itinerary`, `ai_review_summary`, `ai_weather_slot`, `ai_customer_support`.
+   - Khi LLM gọi Tool, `CustomerFeatureTool` thực thi nghiệp vụ thật từ CSDL, đảm bảo kiểm tra quyền truy cập của người dùng.
+   - `AssistantArtifactMapper` bóc tách kết quả công cụ thành các thẻ giao diện tương tác (`cards`), nguồn dẫn chứng (`sources`) và hành động (`actions`).
+2. **Khởi tạo Phiếu Đặt Chỗ Native Option (Draft Card):**
+   - Khách chốt lịch → LLM gọi `request_booking_confirmation(service_id, option_id, slot_id, date, participants)`.
+   - Xác thực Option ID và Slot ID khả dụng trong CSDL.
+   - Tính toán phân nhóm gói riêng `participantsPerPackage` nếu là hình thức `PER_PACKAGE`.
+   - Lưu thẻ `ConfirmationCard` vào Redis với TTL 15 phút và hiển thị thẻ lên giao diện chat kèm nút bấm **[Xác Nhận Đặt Chỗ]**.
+3. **Xác nhận Đặt chỗ & Khóa Giữ Chỗ Re-validation Bền Vững:**
+   - Khách bấm xác nhận → Frontend gọi `POST /api/assistant/conversations/{id}/confirm` kèm `cardId`.
+   - Kiểm tra kết quả trong bảng `ai_confirmation_outcomes` (V25). Nếu đã xử lý trước đó → Replay ngay lập tức.
+   - Thiết lập khóa phân tán Redis 30s chống xử lý trùng.
+   - Kiểm tra ràng buộc kép: Hội thoại và Card phải thuộc về User hiện tại (chặn 403).
+   - Tái thẩm định giá và slot từ CSDL. Nếu có biến động → Quản lý số lần retry (tối đa 2 lần) và tạo thẻ thay thế.
+   - Khớp dữ liệu → Kích hoạt `CreateBookingHoldUseCase` thực hiện khóa tồn kho nguyên tử Redis Lua và lưu Booking `HOLD` (15 phút) vào PostgreSQL.
+   - Lưu kết quả bền vững vào bảng `ai_confirmation_outcomes` và đánh dấu card `CONFIRMED`.
+   - Nếu gặp sự cố khi lưu outcome: Tự động kích hoạt cơ chế bù trừ `CancelBookingHoldUseCase` giải phóng tồn kho ngay lập tức.
 
 ---
 
-## 🔗 Bản Đồ Liên Kết Giữa Các Sơ Đồ
+## 11. Customer_Preference_And_Feedback_Flow.png — Quản Lý Sở Thích Cá Nhân Hóa & Phản Hồi Gợi Ý
+
+**Thành phần:** `Khách Hàng (User)` → `CustomerPreferenceController` → `CustomerPreferenceUseCase` → `DiscoverServicesUseCase` → `PostgreSQL (V24 Preferences & Recommendations)`
+
+**Ba giai đoạn cá nhân hóa:**
+1. **Cấu hình Sở Thích & Quyền Riêng Tư (Consent Management):**
+   - Khách xem cấu hình: `GET /api/ai/preferences`.
+   - Khách cập nhật: `PUT /api/ai/preferences` gửi kèm `enabled` (Bật/tắt sự đồng thuận), danh sách `interests` (vd: lặn san hô, chèo sup), danh sách `exclusions` (vd: cano cao tốc, dù bay) và `expectedVersion` chống ghi đè.
+   - Dữ liệu được lưu trong bảng `ai_customer_preferences` (Flyway V24) với cơ chế khóa lạc quan.
+2. **Thu thập Phản hồi Gợi ý (Recommendation Feedback Loop):**
+   - Khi nhận danh sách gợi ý kèm `recommendationId`, khách tương tác trên giao diện (Xem, Click, Thích, Bỏ qua).
+   - Frontend gửi `POST /api/ai/recommendations/{recommendationId}/feedback` kèm header bắt buộc `Idempotency-Key` và body: `{ serviceId, action: "CLICK" | "POSITIVE" | "NEGATIVE" | "SHOWN" }`.
+   - Backend xác thực:
+     - `recommendationId` phải do chính User tạo ra trong vòng 24 giờ qua.
+     - `serviceId` phải thực sự nằm trong danh sách các dịch vụ đã gợi ý trong lần đó (chống spam/fake feedback).
+   - Lưu bản ghi vào bảng `ai_recommendation_feedbacks` (Flyway V24).
+3. **Tác động Cá nhân hóa trong Lần Tìm kiếm Kế tiếp:**
+   - Khi khách gọi `/api/ai/recommendations` hoặc `/api/ai/search` với cờ `useSavedPreferences = true`:
+   - Hệ thống nạp Signals và tự động điều chỉnh:
+     - **Loại bỏ hoàn toàn** các dịch vụ thuộc `exclusions`.
+     - **Cộng điểm Baseline:** Khớp từ khóa sở thích (+0.5/từ), nằm trong Wishlist (+0.35), đã xem gần đây (+0.1), đã đánh giá POSITIVE (+0.25).
+     - **Trừ điểm Baseline:** Dịch vụ bị đánh giá NEGATIVE (-0.5 điểm, hạ xếp hạng).
+
+---
+
+## 12. Customer_Support_And_Admin_Queue_Flow.png — Luồng Hỗ Trợ Khách Hàng AI & Hàng Đợi Admin
+
+**Thành phần:** `Khách Hàng (Customer)` → `Quản Trị Viên (Admin)` → `CustomerSupportWorkflowController` → `ManualSupportController` → `CustomerSupportUseCase` → `CustomerSupportRequestUseCase` → `CustomerRefundEligibilityPolicy` → `Core Order Module` → `Quyet Worker` → `PostgreSQL V24` → `In-App Notification`
+
+**Chu trình hỗ trợ 3 bước:**
+1. **Tra cứu Đơn hàng & Xem trước Hủy vé AI (`POST /api/ai/support`):**
+   - Khách gửi yêu cầu kèm `orderId` và câu hỏi (ví dụ: "Tôi bận việc muốn hủy chuyến đi ngày mai").
+   - **Xác thực quyền sở hữu:** Đơn hàng bắt buộc phải thuộc về tài khoản khách hàng đang đăng nhập (chặn 403 Forbidden nếu xem trộm đơn của người khác).
+   - Đọc trạng thái thanh toán và thông tin ca dịch vụ từ Core Order Module.
+   - Gọi Quyet Worker phân loại chủ đề (`topic = CANCELLATION`) và mức độ khẩn cấp (`urgency = MEDIUM`).
+   - Nếu khách yêu cầu xem trước điều kiện hủy (`includeCancellationPreview = true`):
+     - Kích hoạt `CustomerRefundEligibilityPolicy` đối chiếu mốc giờ hủy với giờ khởi hành:
+       - Trước 48 giờ: Hoàn 100%.
+       - Từ 24–48 giờ: Hoàn 70% (Phí hủy 30%).
+       - Dưới 24 giờ: Không hoàn tiền (Phí hủy 100%).
+     - Trả về `CancellationPreviewResult` chứa số tiền hoàn, phí hủy và hạn chót.
+     - **Nguyên tắc bất biến:** AI chỉ đóng vai trò tư vấn và tính toán trước, **tuyệt đối không tự ý hủy vé hoặc hoàn tiền trong CSDL**.
+2. **Tạo Ticket Yêu cầu Hỗ trợ / Đổi lịch có Idempotency (`POST /api/ai/support/requests`):**
+   - Khách bấm xác nhận gửi yêu cầu hỗ trợ hoặc đổi lịch sang ngày mới.
+   - Frontend gửi kèm header `Idempotency-Key` chống tạo trùng đơn hỗ trợ.
+   - Lưu bản ghi vào bảng `ai_customer_support_requests` (Flyway V24) với trạng thái ban đầu `WAITING_REVIEW`.
+3. **Hàng đợi Xử lý Thủ công của Admin (`ManualSupportController`):**
+   - Nhân viên/Admin truy cập hàng đợi qua `GET /api/admin/support/requests?status=WAITING_REVIEW`.
+   - Admin tiếp nhận và xử lý qua `POST /api/admin/support/requests/{id}/handle`:
+     - Gửi kèm `expectedVersion`, trạng thái mới (`RESOLVED` hoặc `DECLINED`) và ghi chú giải trình `responseNote`.
+     - Kiểm soát bằng khóa lạc quan `@Version` chống 2 Admin duyệt trùng một yêu cầu.
+     - Hệ thống tự động gửi **In-App Notification** báo kết quả xử lý cho khách hàng.
+     - Mọi thay đổi về đơn hàng hoặc hoàn tiền thực tế đều do nhân viên thực hiện qua API nghiệp vụ Core.
+
+---
+
+## 🔗 Bản Đồ Liên Kết Giữa 12 Sơ Đồ Hệ Thống
 
 ```
-               [Sơ đồ 6: AI_Hybrid_Architecture] (Bức tranh tổng thể toàn hệ thống)
-                                      |
-         +----------------------------+----------------------------+
-         |                                                         |
-[TƯ VẤN & TRỢ LÝ ẢO]                                     [TÍNH NĂNG KHÁCH HÀNG & ADMIN]
-         |                                                         |
- +-------+-------------------+                    +----------------+----------------+
- |                           |                    |                |                |
-[Sơ đồ 1 & 2]          [Sơ đồ 10]            [Sơ đồ 7]        [Sơ đồ 8]        [Sơ đồ 9]
-Luồng Chat &          Chatbot Đa Năng      Khám Phá Dịch Vụ  Lập Lịch Trình   Kiểm Duyệt &
-Moderation 2 tầng      15 Tools & Đặt Vé    (Search/Nearby)   & Re-plan        Rủi Ro Giao Dịch
-         |                   |
-         +---------+---------+
-                   |
-         [Sơ đồ 3 & 4: Re-validation]
-         (Xác thực tồn kho & khóa giữ chỗ)
-                   |
-         [Sơ đồ 5: RollKeys & Fallback]
-         (Độ tin cậy hạ tầng Groq Cloud)
+                                [Sơ đồ 6: AI_Hybrid_Architecture]
+                             (Bức tranh tổng thể toàn hệ thống AI)
+                                               │
+             ┌─────────────────────────────────┴─────────────────────────────────┐
+             │                                                                   │
+    [TƯ VẤN & TRỢ LÝ ẢO]                                                [TÍNH NĂNG KHÁCH HÀNG & ADMIN]
+             │                                                                   │
+    ┌────────┴────────┐                                                 ┌────────┼────────┬────────┐
+    │                 │                                                 │        │        │        │
+[Sơ đồ 1 & 2]    [Sơ đồ 10]                                         [Sơ đồ 7] [Sơ đồ 8] [Sơ đồ 11] [Sơ đồ 12]
+Luồng Chat &    Chatbot Đa Năng                                     Khám Phá  Lập Lịch  Sở Thích  Hỗ Trợ &
+Moderation      15 Tools & Card                                     Dịch Vụ   3 Bước    Feedback  Queue Admin
+    │                 │                                                 │        │                 │
+    └────────┬────────┘                                                 └────────┼─────────────────┘
+             │                                                                   │
+    [Sơ đồ 3 & 4: Re-validation]                                                 │
+    (Xác thực tồn kho & khóa giữ chỗ V25)                                [Sơ đồ 9: Thẩm Định]
+             │                                                           (Kiểm duyệt & Rủi ro 3/5/3)
+    [Sơ đồ 5: RollKeys & Fallback]
+    (Độ tin cậy hạ tầng Groq Cloud)
 ```
