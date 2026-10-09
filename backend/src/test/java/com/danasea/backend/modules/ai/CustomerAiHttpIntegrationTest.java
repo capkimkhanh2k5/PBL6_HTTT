@@ -84,10 +84,19 @@ class CustomerAiHttpIntegrationTest extends BaseSecurityIntegrationTest {
         assertThat(saved.path("plan").path("items")).hasSize(1);
         mvc.perform(get("/api/ai/itineraries/" + id).with(user(other.toString()).roles("CUSTOMER"))).andExpect(status().isNotFound());
         mvc.perform(get("/api/ai/itineraries/" + id).with(user(owner.toString()).roles("CUSTOMER"))).andExpect(status().isOk());
+        UUID alternativeSlot = UUID.randomUUID();
+        jdbc.update("insert into service_slots(id,service_id,date,start_time,end_time,capacity,booked_count,status,inventory_type,created_at,updated_at) values(?,?,?,?,?,10,0,'OPEN','SHARED_CAPACITY_UNITS',now(),now())",
+                alternativeSlot, serviceId, LocalDate.now(TravelContext.ZONE).plusDays(1), LocalTime.of(11, 0), LocalTime.of(12, 0));
+        for (int number=1; number<=3; number++) jdbc.update("insert into service_slot_units(id,slot_id,unit_number,capacity,booked_count) values(?,?,?,2,0)", UUID.randomUUID(), alternativeSlot, number);
         String change = "{\"expectedVersion\":0,\"excludedSlotIds\":[\"" + slotId + "\"]}";
-        mvc.perform(post("/api/ai/itineraries/" + id + "/replan").with(user(owner.toString()).roles("CUSTOMER"))
-                .contentType(MediaType.APPLICATION_JSON).content(change)).andExpect(status().isOk()).andExpect(jsonPath("$.itinerary.version").value(1))
-                .andExpect(jsonPath("$.bookingChanged").value(false));
+        var preview = mapper.readTree(mvc.perform(post("/api/ai/itineraries/" + id + "/replan").with(user(owner.toString()).roles("CUSTOMER"))
+                .contentType(MediaType.APPLICATION_JSON).content(change)).andExpect(status().isOk()).andExpect(jsonPath("$.itinerary.version").value(0))
+                .andExpect(jsonPath("$.bookingChanged").value(false)).andReturn().getResponse().getContentAsString());
+        mvc.perform(get("/api/ai/itineraries/" + id).with(user(owner.toString()).roles("CUSTOMER")))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.plan.items").isNotEmpty());
+        mvc.perform(post("/api/ai/itineraries/" + id + "/proposals/" + preview.path("proposal").path("id").asText() + "/accept")
+                .with(user(owner.toString()).roles("CUSTOMER")).contentType(MediaType.APPLICATION_JSON).content("{\"expectedVersion\":0}"))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.version").value(1));
         mvc.perform(post("/api/ai/itineraries/" + id + "/replan").with(user(owner.toString()).roles("CUSTOMER"))
                 .contentType(MediaType.APPLICATION_JSON).content(change)).andExpect(status().isConflict());
     }

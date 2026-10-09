@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.danasea.backend.modules.ai.application.dtos.TravelRequest;
@@ -49,7 +50,7 @@ public class CustomerAiController {
     public DiscoverServicesUseCase.Result search(@RequestBody TravelRequest request) { return discovery.execute(request.context(), "SEARCH", language()); }
 
     @PostMapping("/recommendations")
-    public DiscoverServicesUseCase.Result recommendations(@RequestBody TravelRequest request) { return discovery.execute(request.context(), "RECOMMENDATION", language()); }
+    public DiscoverServicesUseCase.Result recommendations(@RequestBody TravelRequest request) { return discovery.execute(request.context(), "RECOMMENDATION", language(), userId()); }
 
     @PostMapping("/nearby")
     public DiscoverServicesUseCase.Result nearby(@RequestBody TravelRequest request) { return discovery.execute(request.context(), "NEARBY", language()); }
@@ -73,7 +74,7 @@ public class CustomerAiController {
     }
 
     @PostMapping("/itineraries")
-    public Saved plan(@RequestBody TravelRequest request) { return itineraries.create(userId(), request.context(), language()); }
+    public Saved plan(@RequestBody TravelRequest request, @RequestHeader(value = "Idempotency-Key", required = false) String key) { return itineraries.create(userId(), request.context(), language(), key); }
 
     @GetMapping("/itineraries")
     public List<Saved> plans() { return itineraries.list(userId()); }

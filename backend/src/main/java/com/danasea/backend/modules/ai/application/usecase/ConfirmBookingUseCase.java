@@ -125,6 +125,17 @@ public class ConfirmBookingUseCase {
             throw new AccessDeniedException("Confirmation card does not belong to this conversation");
         }
 
+        if (card.getOwnerId() != null && !card.getOwnerId().equals(userId)) {
+            throw new AccessDeniedException("Confirmation card does not belong to this user");
+        }
+
+        if (ConfirmationCard.STATUS_CONFIRMED.equals(card.getStatus()) && card.getConfirmationOutcome() != null) {
+            if (card.getConfirmedBy() != null && !card.getConfirmedBy().equals(userId)) {
+                throw new AccessDeniedException("Confirmation outcome does not belong to this user");
+            }
+            return new HashMap<>(card.getConfirmationOutcome());
+        }
+
         if (!ConfirmationCard.STATUS_PENDING.equals(card.getStatus())) {
             throw new IllegalStateException("Card is not in PENDING state");
         }
@@ -213,6 +224,7 @@ public class ConfirmBookingUseCase {
             ConfirmationCard newCard = ConfirmationCard.builder()
                     .id(UUID.randomUUID().toString())
                     .conversationId(card.getConversationId())
+                    .ownerId(card.getOwnerId())
                     .serviceId(card.getServiceId())
                     .slotId(alternativeSlotId)
                     .optionId(card.getOptionId())
@@ -258,7 +270,21 @@ public class ConfirmBookingUseCase {
             }
         }
 
+        Map<String, Object> response = new HashMap<>();
+        response.put("status", "success");
+        response.put("message", localizedOrLegacy("ai.booking.success",
+                hold == null ? "Booking confirmation accepted."
+                        : "Booking inventory is held. Complete payment before the hold expires.", language));
+        response.put("cardId", cardId);
+        if (hold != null) {
+            response.put("bookingId", hold.bookingId());
+            response.put("bookingStatus", hold.status());
+            response.put("holdExpiresAt", hold.holdExpiresAt());
+            response.put("totalAmount", hold.totalAmount());
+        }
         try {
+            card.setConfirmedBy(userId);
+            card.setConfirmationOutcome(response);
             card.markConfirmed();
             cardStorePort.save(card);
         } catch (RuntimeException exception) {
@@ -272,20 +298,6 @@ public class ConfirmBookingUseCase {
             throw exception;
         }
 
-        Map<String, Object> response = new HashMap<>();
-        response.put("status", "success");
-        response.put("message", localizedOrLegacy("ai.booking.success",
-                hold == null
-                        ? "Booking confirmation accepted."
-                        : "Booking inventory is held. Complete payment before the hold expires.",
-                language));
-        response.put("cardId", cardId);
-        if (hold != null) {
-            response.put("bookingId", hold.bookingId());
-            response.put("bookingStatus", hold.status());
-            response.put("holdExpiresAt", hold.holdExpiresAt());
-            response.put("totalAmount", hold.totalAmount());
-        }
         return response;
     }
 

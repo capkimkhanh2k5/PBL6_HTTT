@@ -1,6 +1,7 @@
 package com.danasea.backend.modules.ai.application.tool;
 
 import com.danasea.backend.modules.order.domain.services.RefundPolicyEngine;
+import com.danasea.backend.modules.ai.application.port.TravelPolicyPort;
 import com.danasea.backend.modules.systemconfig.infrastructure.persistence.entities.SystemConfigJpaEntity;
 import com.danasea.backend.modules.systemconfig.infrastructure.persistence.repositories.JpaSystemConfigRepository;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -22,12 +23,16 @@ public class GetPolicyTool implements ToolExecutor {
     private final JpaSystemConfigRepository systemConfigRepository;
     private final ObjectMapper objectMapper;
     private final RefundPolicyEngine refundPolicyEngine;
+    private TravelPolicyPort canonicalPolicy;
     private LocalizedMessageService messages = LocalizedMessageService.standalone();
 
     @Autowired
     void setLocalizedMessageService(LocalizedMessageService messages) {
         this.messages = messages;
     }
+
+    @Autowired
+    public void setCanonicalPolicy(TravelPolicyPort policy) { this.canonicalPolicy = policy; }
 
     @Autowired
     public GetPolicyTool(
@@ -78,6 +83,17 @@ public class GetPolicyTool implements ToolExecutor {
             log.warn("Failed to parse arguments for get_policy: {}", argumentsJson, e);
         }
 
+        if (canonicalPolicy != null && java.util.Set.of("CANCELLATION", "REFUND", "WEATHER_CANCELLATION")
+                .contains(policyType.toUpperCase(java.util.Locale.ROOT))) {
+            try {
+                return objectMapper.writeValueAsString(Map.of("status", "AVAILABLE", "policy_type", policyType,
+                        "policy", canonicalPolicy.current(), "eligibilitySource", "OWNED_ORDER_CANCELLATION_PREVIEW",
+                        "orderSpecificEligibilityChecked", false, "rescheduleSupported", false,
+                        "changeRequestRequiresHumanApproval", true));
+            } catch (Exception exception) {
+                return "{\"errorCode\":\"POLICY_UNAVAILABLE\"}";
+            }
+        }
         String policyText = fetchPolicyText(policyType, requestedLanguage);
 
         Map<String, Object> response = new HashMap<>();

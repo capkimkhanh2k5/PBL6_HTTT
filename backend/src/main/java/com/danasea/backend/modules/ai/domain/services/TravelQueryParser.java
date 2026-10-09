@@ -3,6 +3,9 @@ package com.danasea.backend.modules.ai.domain.services;
 import java.math.BigDecimal;
 import java.text.Normalizer;
 import java.time.LocalDate;
+import java.time.LocalTime;
+import java.time.DayOfWeek;
+import java.time.temporal.TemporalAdjusters;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -26,31 +29,25 @@ public final class TravelQueryParser {
     }
 
     public static String activityKeyword(String text) {
-        String normalized = normalize(text);
+        List<String> unique = includedActivities(text);
+        return unique.size() == 1 ? unique.getFirst() : null;
+    }
+
+    public static List<String> includedActivities(String text) { return activities(text, false); }
+    public static List<String> excludedActivities(String text) { return activities(text, true); }
+
+    private static List<String> activities(String text, boolean negative) {
+        String normalized = normalize(text).replaceAll("\\b(nhung|but|ma|instead|chon|tim|choose|find)\\b", ",");
         List<String> found = new ArrayList<>();
         for (var entry : ACTIVITIES.entrySet()) {
             var matcher = Pattern.compile("(?<![a-z])" + Pattern.quote(entry.getKey()) + "(?![a-z])").matcher(normalized);
             while (matcher.find()) {
                 int clause = Math.max(normalized.lastIndexOf(',', matcher.start()), normalized.lastIndexOf('.', matcher.start())) + 1;
-                String prefix = normalized.substring(clause, matcher.start());
-                if (!prefix.matches(".*\\b(khong|tranh|not|except|no)\\b.*")) found.add(entry.getValue());
+                boolean excluded = normalized.substring(clause, matcher.start()).matches(".*\\b(khong|tranh|not|except|no|without)\\b.*");
+                if (excluded == negative) found.add(normalize(entry.getValue()));
             }
         }
-        List<String> unique = found.stream().distinct().toList();
-        return unique.size() == 1 ? unique.get(0) : null;
-    }
-
-    public static List<String> excludedActivities(String text) {
-        String normalized = normalize(text);
-        List<String> excluded = new ArrayList<>();
-        for (var entry : ACTIVITIES.entrySet()) {
-            var matcher = Pattern.compile("(?<![a-z])" + Pattern.quote(entry.getKey()) + "(?![a-z])").matcher(normalized);
-            while (matcher.find()) {
-                int clause = Math.max(normalized.lastIndexOf(',', matcher.start()), normalized.lastIndexOf('.', matcher.start())) + 1;
-                if (normalized.substring(clause, matcher.start()).matches(".*\\b(khong|tranh|not|except|no)\\b.*")) excluded.add(normalize(entry.getValue()));
-            }
-        }
-        return excluded.stream().distinct().toList();
+        return found.stream().distinct().sorted().toList();
     }
 
     public static Integer partySize(String text) {
@@ -58,12 +55,51 @@ public final class TravelQueryParser {
         return matcher.find() ? Integer.parseInt(matcher.group(1)) : null;
     }
 
-    public static LocalDate date(String text) {
+    public static LocalDate date(String text) { return dates(text)[0]; }
+
+    public static LocalDate[] dates(String text) {
         String normalized = normalize(text);
         LocalDate today = LocalDate.now(TravelContext.ZONE);
-        if (normalized.contains("ngay mai") || normalized.contains("tomorrow")) return today.plusDays(1);
-        if (normalized.contains("hom nay") || normalized.contains("today")) return today;
-        return null;
+        var iso = Pattern.compile("(?<!\\d)(20\\d{2}-\\d{2}-\\d{2})(?!\\d)").matcher(normalized);
+        List<LocalDate> explicit = new ArrayList<>();
+        while (iso.find()) explicit.add(LocalDate.parse(iso.group(1)));
+        if (!explicit.isEmpty()) return new LocalDate[]{explicit.getFirst(), explicit.getLast()};
+        var local = Pattern.compile("(?<!\\d)(\\d{1,2})/(\\d{1,2})(?:/(20\\d{2}))?(?!\\d)").matcher(normalized);
+        if (local.find()) {
+            LocalDate date = LocalDate.of(local.group(3) == null ? today.getYear() : Integer.parseInt(local.group(3)),
+                    Integer.parseInt(local.group(2)), Integer.parseInt(local.group(1)));
+            return new LocalDate[]{date, date};
+        }
+        if (normalized.contains("ngay kia") || normalized.contains("day after tomorrow")) return new LocalDate[]{today.plusDays(2), today.plusDays(2)};
+        if (normalized.contains("ngay mai") || normalized.contains("tomorrow")) return new LocalDate[]{today.plusDays(1), today.plusDays(1)};
+        if (normalized.contains("hom nay") || normalized.contains("today")) return new LocalDate[]{today, today};
+        if (normalized.contains("cuoi tuan") || normalized.contains("weekend")) {
+            LocalDate saturday = today.with(TemporalAdjusters.nextOrSame(DayOfWeek.SATURDAY));
+            if (today.getDayOfWeek() == DayOfWeek.SUNDAY) saturday = today;
+            if (normalized.contains("tuan sau") || normalized.contains("next weekend")) saturday = today.with(TemporalAdjusters.next(DayOfWeek.MONDAY)).with(TemporalAdjusters.nextOrSame(DayOfWeek.SATURDAY));
+            return new LocalDate[]{saturday, saturday.getDayOfWeek() == DayOfWeek.SUNDAY ? saturday : saturday.plusDays(1)};
+        }
+        String[] days = {"thu hai", "thu ba", "thu tu", "thu nam", "thu sau", "thu bay", "chu nhat"};
+        String[] english = {"monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"};
+        for (int index = 0; index < days.length; index++) {
+            if (normalized.contains(days[index]) || normalized.contains(english[index])) {
+                LocalDate date = today.with(TemporalAdjusters.nextOrSame(DayOfWeek.of(index + 1)));
+                return new LocalDate[]{date, date};
+            }
+        }
+        return new LocalDate[]{null, null};
+    }
+
+    public static LocalTime[] times(String text) {
+        String normalized = normalize(text);
+        var matcher = Pattern.compile("(?<!\\d)(\\d{1,2})(?:h|gio|:)(\\d{2})?(?!\\d)").matcher(normalized);
+        List<LocalTime> found = new ArrayList<>();
+        while (matcher.find()) found.add(LocalTime.of(Integer.parseInt(matcher.group(1)), matcher.group(2) == null ? 0 : Integer.parseInt(matcher.group(2))));
+        if (found.size() >= 2) return new LocalTime[]{found.getFirst(), found.get(1)};
+        if (!found.isEmpty()) return normalized.matches(".*\\b(truoc|before)\\b.*") ? new LocalTime[]{null, found.getFirst()} : new LocalTime[]{found.getFirst(), null};
+        if (normalized.contains("buoi sang") || normalized.contains("morning")) return new LocalTime[]{LocalTime.of(8, 0), LocalTime.NOON};
+        if (normalized.contains("buoi chieu") || normalized.contains("afternoon")) return new LocalTime[]{LocalTime.of(13, 0), LocalTime.of(18, 0)};
+        return new LocalTime[]{null, null};
     }
 
     public static boolean perPersonBudget(String text) {

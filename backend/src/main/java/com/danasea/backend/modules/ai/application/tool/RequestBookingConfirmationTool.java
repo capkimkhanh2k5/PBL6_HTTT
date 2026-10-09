@@ -88,15 +88,16 @@ public class RequestBookingConfirmationTool implements ConversationAwareToolExec
         SupportedLanguage language = context == null || context.language() == null
                 ? SupportedLanguage.VI
                 : context.language();
-        return executeInternal(argumentsJson, context == null ? null : context.conversationId(), language);
+        return executeInternal(argumentsJson, context == null ? null : context.conversationId(), language,
+                context == null ? null : context.userId());
     }
 
     @Override
     public String execute(String argumentsJson, UUID conversationId) {
-        return executeInternal(argumentsJson, conversationId, SupportedLanguage.VI);
+        return executeInternal(argumentsJson, conversationId, SupportedLanguage.VI, null);
     }
 
-    private String executeInternal(String argumentsJson, UUID conversationId, SupportedLanguage language) {
+    private String executeInternal(String argumentsJson, UUID conversationId, SupportedLanguage language, UUID ownerId) {
         if (conversationId == null || cardStorePort == null || catalog == null && (serviceDetailUseCase == null
                 || serviceAvailabilityPort == null)) {
             return error("CONFIRMATION_UNAVAILABLE", "Booking confirmation is temporarily unavailable");
@@ -111,7 +112,7 @@ public class RequestBookingConfirmationTool implements ConversationAwareToolExec
             UUID serviceId = parseServiceId(arguments);
             String date = requiredText(arguments, "date", 100);
             int participants = requiredParticipants(arguments);
-            if (catalog != null) return nativeConfirmation(arguments, conversationId, language, serviceId, participants, date);
+            if (catalog != null) return nativeConfirmation(arguments, conversationId, language, serviceId, participants, date, ownerId);
             ServiceDetailResult service = serviceDetailUseCase.execute(serviceId, null, null);
             List<String> availableSlots = service.getAvailableSlots() == null ? List.of() : service.getAvailableSlots();
             if (!availableSlots.contains(date)) {
@@ -136,6 +137,7 @@ public class RequestBookingConfirmationTool implements ConversationAwareToolExec
             ConfirmationCard card = ConfirmationCard.builder()
                     .id(UUID.randomUUID().toString())
                     .conversationId(conversationId)
+                    .ownerId(ownerId)
                     .serviceId(serviceId)
                     .slotId(slotId)
                     .price(price)
@@ -167,7 +169,7 @@ public class RequestBookingConfirmationTool implements ConversationAwareToolExec
     }
 
     private String nativeConfirmation(JsonNode args, UUID conversationId, SupportedLanguage language,
-                                      UUID serviceId, int participants, String requestedDate) throws Exception {
+                                      UUID serviceId, int participants, String requestedDate, UUID ownerId) throws Exception {
         if (!args.hasNonNull("option_id") || !args.hasNonNull("slot_id")) {
             return error("OPTION_AND_SLOT_REQUIRED", "Choose an active option and a current slot before requesting confirmation");
         }
@@ -184,7 +186,7 @@ public class RequestBookingConfirmationTool implements ConversationAwareToolExec
         var slot = option.slots().stream().filter(item -> item.id().equals(slotId)).findFirst().orElse(null);
         if (slot == null) return error("SLOT_UNAVAILABLE", "The selected slot is not currently bookable for the party");
         String canonicalDate = LocalDateTime.of(slot.date(), slot.start()).toString();
-        ConfirmationCard card = ConfirmationCard.builder().id(UUID.randomUUID().toString()).conversationId(conversationId)
+        ConfirmationCard card = ConfirmationCard.builder().id(UUID.randomUUID().toString()).conversationId(conversationId).ownerId(ownerId)
                 .serviceId(serviceId).optionId(optionId).slotId(slotId).participantsCount(participants)
                 .price(option.unitPrice()).quantity(option.quantity()).date(canonicalDate)
                 .status(ConfirmationCard.STATUS_PENDING).createdAt(LocalDateTime.now()).locale(language.code()).build();

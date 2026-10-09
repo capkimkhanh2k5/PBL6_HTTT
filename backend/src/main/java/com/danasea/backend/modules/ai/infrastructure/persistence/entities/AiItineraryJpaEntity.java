@@ -18,5 +18,9 @@ import lombok.Setter;
 public class AiItineraryJpaEntity extends BaseJpaEntity {
     @Column(nullable = false) private UUID ownerId;
     @Column(nullable = false, columnDefinition = "TEXT") private String planJson;
+    @Column(nullable = false, length = 20) private String lifecycle = "DRAFT";
+    @Column(nullable = false, length = 5) private String locale = "vi";
+    @Column(length = 128) private String idempotencyKey;
+    @Column(columnDefinition = "TEXT") private String requestFingerprint;
     @Version private Long version;
 }

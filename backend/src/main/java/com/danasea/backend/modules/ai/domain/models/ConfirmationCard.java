@@ -3,6 +3,7 @@ package com.danasea.backend.modules.ai.domain.models;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.UUID;
+import java.util.Map;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -33,6 +34,9 @@ public class ConfirmationCard {
     private LocalDateTime createdAt;
     private String reason;
     private String locale;
+    private UUID ownerId;
+    private UUID confirmedBy;
+    private Map<String, Object> confirmationOutcome;
 
     @Builder.Default
     private int retryCount = 0; // Number of times this card has been re-generated

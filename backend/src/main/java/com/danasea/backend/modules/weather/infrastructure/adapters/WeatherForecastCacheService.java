@@ -38,8 +38,12 @@ public class WeatherForecastCacheService {
         private final Instant expiresAt;
 
         public CacheEntry(T data, Duration ttl) {
+            this(data, Instant.now().plus(ttl));
+        }
+
+        public CacheEntry(T data, Instant expiresAt) {
             this.data = data;
-            this.expiresAt = Instant.now().plus(ttl);
+            this.expiresAt = expiresAt;
         }
 
         public boolean isExpired() {
@@ -77,8 +81,11 @@ public class WeatherForecastCacheService {
                 String cachedJson = redisTemplate.opsForValue().get(key);
                 if (cachedJson != null && !cachedJson.isBlank()) {
                     OpenMeteoWeatherResponse parsed = objectMapper.readValue(cachedJson, OpenMeteoWeatherResponse.class);
-                    localWeatherCache.put(key, new CacheEntry<>(parsed, ttl));
-                    return parsed;
+                    Long fetchedAt = parsed.getSourceFetchedAtEpochMillis();
+                    if (fetchedAt != null && Instant.ofEpochMilli(fetchedAt).plus(ttl).isAfter(Instant.now())) {
+                        localWeatherCache.put(key, new CacheEntry<>(parsed, Instant.ofEpochMilli(fetchedAt).plus(ttl)));
+                        return parsed;
+                    }
                 }
             } catch (Exception e) {
                 log.warn("Redis read failed for {}: {}", key, e.getMessage());
@@ -88,6 +95,7 @@ public class WeatherForecastCacheService {
         // 3. Fetch from API
         OpenMeteoWeatherResponse fetched = fetcher.get();
         if (fetched != null) {
+            fetched.setSourceFetchedAtEpochMillis(Instant.now().toEpochMilli());
             localWeatherCache.put(key, new CacheEntry<>(fetched, ttl));
             if (redisTemplate != null) {
                 try {
@@ -117,8 +125,11 @@ public class WeatherForecastCacheService {
                 String cachedJson = redisTemplate.opsForValue().get(key);
                 if (cachedJson != null && !cachedJson.isBlank()) {
                     OpenMeteoMarineResponse parsed = objectMapper.readValue(cachedJson, OpenMeteoMarineResponse.class);
-                    localMarineCache.put(key, new CacheEntry<>(parsed, ttl));
-                    return parsed;
+                    Long fetchedAt = parsed.getSourceFetchedAtEpochMillis();
+                    if (fetchedAt != null && Instant.ofEpochMilli(fetchedAt).plus(ttl).isAfter(Instant.now())) {
+                        localMarineCache.put(key, new CacheEntry<>(parsed, Instant.ofEpochMilli(fetchedAt).plus(ttl)));
+                        return parsed;
+                    }
                 }
             } catch (Exception e) {
                 log.warn("Redis read failed for {}: {}", key, e.getMessage());
@@ -128,6 +139,7 @@ public class WeatherForecastCacheService {
         // 3. Fetch from API
         OpenMeteoMarineResponse fetched = fetcher.get();
         if (fetched != null) {
+            fetched.setSourceFetchedAtEpochMillis(Instant.now().toEpochMilli());
             localMarineCache.put(key, new CacheEntry<>(fetched, ttl));
             if (redisTemplate != null) {
                 try {

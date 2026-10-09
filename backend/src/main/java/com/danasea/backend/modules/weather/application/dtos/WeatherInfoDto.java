@@ -69,6 +69,10 @@ public class WeatherInfoDto {
     @NoArgsConstructor
     @AllArgsConstructor
     public static class TimeWindowForecast {
+        private java.time.Instant sourceFetchedAt;
+        private java.time.Instant validUntil;
+        private String provider;
+        private String timezone;
         private Double peakWaveHeight;
         private Double peakWindSpeed;
         private Double peakWindGust;

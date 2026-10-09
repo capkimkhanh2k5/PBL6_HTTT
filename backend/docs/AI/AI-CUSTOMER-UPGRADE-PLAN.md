@@ -1,16 +1,16 @@
 # Kế hoạch nâng cấp 10 tính năng AI khách hàng DANASEA
 
-Ngày rà soát: 09/10/2026. Trạng thái: **đề xuất để chốt phạm vi; chưa sửa application code**. Nguồn: controller, use case, read adapters và màn hình chat hiện tại của checkout PBL6. Sáu nhóm Vendor/Admin chưa triển khai tiếp theo yêu cầu. Quyet phục vụ quyết định text/JSON; Groq phục vụ hội thoại/trích dữ kiện/diễn đạt; không bổ sung Florence, Jev hoặc vision.
+Ngày rà soát: 09/10/2026. Trạng thái: **phạm vi backend đã được chấp thuận và đang triển khai; giao diện thật ngoài phạm vi**. Nguồn: controller, use case, read adapters và màn hình chat hiện tại của checkout PBL6. Sáu nhóm Vendor/Admin chưa triển khai tiếp theo yêu cầu. Quyet phục vụ quyết định text/JSON; Groq phục vụ hội thoại/trích dữ kiện/diễn đạt; không bổ sung Florence, Jev hoặc vision.
 
 ## Định nghĩa hoàn chỉnh trong phạm vi này
 
-Khách thực hiện được cả luồng từ câu hỏi → hỏi rõ → kết quả có nguồn → chọn/lưu/so sánh → preview/xác nhận → API nghiệp vụ và theo dõi trạng thái. API nhất quán, nội dung không vượt dữ liệu, model lỗi có fallback, UI web/mobile gọi backend thật. Đây không phải yêu cầu giải quyết mọi câu ngôn ngữ tự nhiên hay một thuật toán tối ưu toàn cục.
+Khách thực hiện được cả luồng từ câu hỏi → hỏi rõ → kết quả có nguồn → chọn/lưu/so sánh → preview/xác nhận → API nghiệp vụ và theo dõi trạng thái. API nhất quán, nội dung không vượt dữ liệu, model lỗi có fallback, Contract sẵn sàng cho client kiểm thử; không nối UI web/mobile theo yêu cầu đã chốt. Đây không phải yêu cầu giải quyết mọi câu ngôn ngữ tự nhiên hay một thuật toán tối ưu toàn cục.
 
 10 nhóm đều cần nâng cấp, nhưng không cần thay toàn bộ endpoint. Phần lớn giữ route, mở rộng contract và use case. Các route mới dưới đây chỉ là đề xuất.
 
 ## Các phát hiện dùng chung cần xử lý đầu tiên
 
-1. AssistantController trả chỉ status/conversationId/message; tool JSON nằm trong history, chưa thành typed cards/sources/actions cho UI. Web AiAssistant dùng setTimeout và mobile AiAssistantScreen dùng Future.delayed/mock, kèm lời khuyên thời tiết cố định. Cần thay bằng kết quả backend thật, không hiển thị các số sóng/tầm nhìn mock như forecast.
+1. AssistantController trả chỉ status/conversationId/message; tool JSON nằm trong history, chưa thành typed cards/sources/actions cho UI. Web AiAssistant dùng setTimeout và mobile AiAssistantScreen dùng Future.delayed/mock, kèm lời khuyên thời tiết cố định. UI mock được giữ nguyên theo yêu cầu; payload backend phải trả dữ kiện nguồn thật cho lần tích hợp UI sau.
 2. AiCatalogReader lấy tối đa 50 dịch vụ trước khi lọc giá/options/slots; repository ORDER BY createdAt DESC. Hệ quả: search có thể bỏ nguồn hợp lệ, Nearby không phải nearest toàn catalog, planner/ranking kế thừa pool sai lệch.
 3. Có search_vector song ngữ và GIN ở V11, nhưng luồng mới dùng catalog keyword LIKE. Adapter search cũ dùng FTS nhưng giá service legacy và limit 5. Cần thống nhất retrieval và quote option, không chỉ chuyển tool cũ vào use case mới một cách cơ học.
 4. Input có giá trị mặc định nhưng chưa đủ clarification/context. Output cần resolvedCriteria, source/freshness, coverage, reasons, warnings và actions; internal model probabilities không nên trở thành thông tin khách phải hiểu.
@@ -51,7 +51,7 @@ Cần cải thiện:
 - Có pipeline trích criteria có schema: ngày cụ thể/cuối tuần, giờ, nhiều category, địa điểm, budget cả nhóm/mỗi người và exclusions; Groq hỗ trợ trích dữ kiện, Quyet hỗ trợ intent, code resolve/validate.
 - Trả resolvedCriteria, applied/defaulted/unsupported constraints và clarificationQuestions; không âm thầm áp số người/ngày khi câu yêu cầu mơ hồ.
 - Tận dụng search_vector song ngữ hiện có, bổ sung từ đồng nghĩa/không dấu/địa điểm; thống nhất với catalog active-option để không quay lại giá service legacy.
-- Lọc theo option và slot trước khi cắt pool; pagination/cursor, coverage và total đủ nghĩa; bổ sung metadata có nguồn cho trẻ em, kỹ năng bơi hoặc thiết bị trước khi hứa lọc các thuộc tính đó.
+- Lọc theo option và slot trước khi trả tối đa 15 dịch vụ; pagination/cursor, coverage và total đủ nghĩa; bổ sung metadata có nguồn cho trẻ em, kỹ năng bơi hoặc thiết bị trước khi hứa lọc các thuộc tính đó.
 
 Tiêu chí nghiệm thu:
 
@@ -241,10 +241,10 @@ Nguồn code: [CustomerSupportUseCase.java](/Users/capkimkhanh/Documents/DUT4_1/
 
 ## Thứ tự triển khai
 
-1. Nền tảng: typed chat cards/actions, persisted context, criteria schema/clarification, canonical retrieval/quotes, status/freshness và idempotency; nối một luồng UI thật trước. Bảo vệ quyền/giá/slot/weather/refund đang có.
+1. Nền tảng: typed chat cards/actions, persisted context, criteria schema/clarification, canonical retrieval/quotes, status/freshness và idempotency; kiểm thử một luồng backend thật trước; không nối UI. Bảo vệ quyền/giá/slot/weather/refund đang có.
 2. Discovery: hoàn thiện Smart Search + Nearby + Weather + Comparison. Các thuật toán sau chỉ tốt khi lấy đúng pool dữ liệu; chưa thêm embedding/model khác khi dữ liệu và baseline chưa được đo.
 3. Nội dung và lập kế hoạch: Recommendation theo preferences/feedback + Planner nhiều phương án/ngày + Review Summary có claims/source/coverage. Đánh giá model riêng với fixture kỹ thuật.
-4. Vòng đời và thao tác: Replan event → preview → accept; Customer Support preview → confirm → native request/handoff; nối các màn hình còn lại và chạy E2E xuyên suốt.
+4. Vòng đời và thao tác: Replan event → preview → accept; Customer Support preview → confirm → native request/handoff; kiểm thử HTTP xuyên suốt, giữ nguyên các màn hình hiện tại.
 
 ## Quyết định kiến trúc đề xuất
 
@@ -260,5 +260,5 @@ Nguồn code: [CustomerSupportUseCase.java](/Users/capkimkhanh/Documents/DUT4_1/
 - Semantic evaluation: labelled queries cho criteria; relevance labels cho top-K (so baseline); aspect/sentiment labels và claim support cho summary. Chốt thresholds trước test, không tune trên tập dùng để báo cáo kết quả.
 - Sáu tính năng đang hoãn vẫn ngoài scope. Các dữ liệu service/preferences/workflow cần bổ sung phục vụ 10 tính năng khách hàng, không mở rộng thành Vendor/Admin AI.
 
-Đây là rà soát code và kế hoạch, chưa chạy lại backend test/load test, chưa sửa API hoặc giao diện. Không dùng kết quả test cũ để gọi các nâng cấp đề xuất là đã hoàn thành.
+Kế hoạch gốc này mô tả mục tiêu nâng cấp. Kết quả triển khai và kiểm thử hiện tại ghi riêng trong AI-CUSTOMER-COMPLETION.md; các kiểm thử UI/load/hiệu quả trên dữ liệu thực tế không được suy ra từ kiểm thử backend.
 

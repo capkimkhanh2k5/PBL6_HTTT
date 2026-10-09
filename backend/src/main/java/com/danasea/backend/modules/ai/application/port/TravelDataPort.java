@@ -10,6 +10,9 @@ import com.danasea.backend.shared.i18n.SupportedLanguage;
 
 public interface TravelDataPort {
     List<PublishedService> search(Query query);
+    default com.danasea.backend.modules.service.application.api.AiCatalogReadApi.SearchPage searchPage(Query query) {
+        return new com.danasea.backend.modules.service.application.api.AiCatalogReadApi.SearchPage(search(query), null, false, 0, List.of("LEGACY_RETRIEVAL_COVERAGE_UNKNOWN"));
+    }
     PublishedService find(UUID id, Query query);
     PublishedService metadata(UUID id, SupportedLanguage language);
     List<ReviewEvidence> reviews(UUID serviceId, int limit);

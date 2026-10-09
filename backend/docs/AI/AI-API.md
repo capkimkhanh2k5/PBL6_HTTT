@@ -74,6 +74,12 @@ Quan trọng nhất: AI phải sử dụng dữ liệu thực từ DANASEA; hệ
 
 ## 5. Phạm vi triển khai đã chốt (08/10/2026)
 
-Backend đã triển khai contract cho 10 tính năng khách hàng, phân loại/kiểm duyệt văn bản và hàng chờ dấu hiệu giao dịch bất thường. Quyet Small phục vụ quyết định text/JSON; Groq tiếp tục phục vụ hội thoại. Florence và xử lý ảnh không nằm trong runtime. Các nhóm Vendor/provider-quality còn là đề xuất.
+Backend đã triển khai contract cho 10 tính năng khách hàng, phân loại/kiểm duyệt văn bản và hàng chờ dấu hiệu giao dịch bất thường. Quyet Small phục vụ quyết định text/JSON; Groq tiếp tục phục vụ hội thoại. Florence và xử lý ảnh không nằm trong runtime. Các nhóm Vendor/provider-quality còn là đề xuất. Phần triển khai lần này chỉ sửa backend; web/mobile và các màn hình mô phỏng không được nối vào API thật.
+
+Discovery và recommendation chỉ trả tối đa 15 dịch vụ phù hợp sau khi lọc option ACTIVE, báo giá theo số người và slot còn chỗ. Retrieval có thể trả `PARTIAL`, `nextOffset` và limitation khi chưa quét hết catalog hoặc weather phải revalidate; `NO_MATCHES` không đồng nghĩa toàn hệ thống không có dịch vụ.
+
+Chat trả thêm `cards`, `sources`, `actions`, `requiredInputs`, `context` và `generatedTextVerified=false`; phần văn bản hội thoại không được xem là nguồn dữ kiện. Chat và xác nhận có idempotency theo actor. Planner dùng preview, lifecycle, revision/CAS và proposal replan; không sửa booking, payment hoặc refund.
+
+Review summary tách thống kê toàn bộ review public hợp lệ khỏi mẫu NLP đại diện, invalidation theo fingerprint nguồn. Support có preview và request hỗ trợ thủ công với trạng thái/idempotency; admin xử lý queue. Không có AI tự đổi lịch, hoàn tiền hay thay trạng thái đơn.
 
 Xem [API, hành vi và giới hạn thực tế](AI-IMPLEMENTATION.md), [cấu hình worker local](../ai-decision/README.md) và [bằng chứng kiểm tra](AI-VALIDATION.md). Recommendation hiện dùng baseline theo context với Quyet hỗ trợ; replan là API theo yêu cầu; kiểm duyệt/fraud là gợi ý cho người duyệt, không tự thay trạng thái nguồn hoặc tiền.

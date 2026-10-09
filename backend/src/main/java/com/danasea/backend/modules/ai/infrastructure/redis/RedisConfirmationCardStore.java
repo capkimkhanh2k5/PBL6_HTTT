@@ -11,6 +11,7 @@ import org.springframework.data.redis.core.script.DefaultRedisScript;
 import org.springframework.stereotype.Component;
 
 import java.time.Duration;
+import java.time.Instant;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
@@ -22,9 +23,11 @@ public class RedisConfirmationCardStore implements ConfirmationCardStorePort {
 
     private final StringRedisTemplate redisTemplate;
     private final ObjectMapper objectMapper;
-    private final Map<String, String> inMemoryFallback = new ConcurrentHashMap<>();
+    private record CachedValue(String value, Instant expiresAt) { }
+    private final Map<String, CachedValue> inMemoryFallback = new ConcurrentHashMap<>();
     private static final String KEY_PREFIX = "ai:confirmation:";
-    private static final Duration TTL = Duration.ofMinutes(15); // TTL = hold TTL
+    private static final Duration TTL = Duration.ofMinutes(15);
+    private static final Duration OUTCOME_TTL = Duration.ofDays(1);
 
     @Autowired
     public RedisConfirmationCardStore(
@@ -40,10 +43,14 @@ public class RedisConfirmationCardStore implements ConfirmationCardStorePort {
         String key = KEY_PREFIX + card.getId();
         try {
             String json = objectMapper.writeValueAsString(card);
+            Duration ttl = ConfirmationCard.STATUS_CONFIRMED.equals(card.getStatus()) ? OUTCOME_TTL : TTL;
             if (redisTemplate != null) {
-                redisTemplate.opsForValue().set(key, json, TTL);
+                redisTemplate.opsForValue().set(key, json, ttl);
             } else {
-                inMemoryFallback.put(key, json);
+                removeExpired();
+                if (inMemoryFallback.size() >= 10000 && !inMemoryFallback.containsKey(key))
+                    throw new IllegalStateException("Confirmation cache is full");
+                inMemoryFallback.put(key, new CachedValue(json, Instant.now().plus(ttl)));
             }
         } catch (Exception e) {
             log.error("Failed to save confirmation card", e);
@@ -59,7 +66,9 @@ public class RedisConfirmationCardStore implements ConfirmationCardStorePort {
             if (redisTemplate != null) {
                 json = redisTemplate.opsForValue().get(key);
             } else {
-                json = inMemoryFallback.get(key);
+                CachedValue cached = inMemoryFallback.get(key);
+                if (cached != null && cached.expiresAt().isAfter(Instant.now())) json = cached.value();
+                else { inMemoryFallback.remove(key); json = null; }
             }
             if (json != null) {
                 return Optional.of(objectMapper.readValue(json, ConfirmationCard.class));
@@ -85,7 +94,9 @@ public class RedisConfirmationCardStore implements ConfirmationCardStorePort {
         String key = KEY_PREFIX + id + ":processing";
         String token = UUID.randomUUID().toString();
         if (redisTemplate == null) {
-            return inMemoryFallback.putIfAbsent(key, token) == null ? Optional.of(token) : Optional.empty();
+            removeExpired();
+            return inMemoryFallback.putIfAbsent(key, new CachedValue(token, Instant.now().plus(ttl))) == null
+                    ? Optional.of(token) : Optional.empty();
         }
         try {
             return Boolean.TRUE.equals(redisTemplate.opsForValue().setIfAbsent(key, token, ttl))
@@ -103,7 +114,7 @@ public class RedisConfirmationCardStore implements ConfirmationCardStorePort {
         }
         String key = KEY_PREFIX + id + ":processing";
         if (redisTemplate == null) {
-            inMemoryFallback.remove(key, token);
+            inMemoryFallback.computeIfPresent(key, (ignored, cached) -> cached.value().equals(token) ? null : cached);
             return;
         }
         DefaultRedisScript<Long> script = new DefaultRedisScript<>(
@@ -115,4 +126,9 @@ public class RedisConfirmationCardStore implements ConfirmationCardStorePort {
             log.warn("Failed to release confirmation processing lock for card {}", id, exception);
         }
     }
+    private void removeExpired() {
+        Instant now = Instant.now();
+        inMemoryFallback.entrySet().removeIf(entry -> !entry.getValue().expiresAt().isAfter(now));
+    }
+
 }

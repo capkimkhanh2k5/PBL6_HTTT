@@ -2,6 +2,8 @@ package com.danasea.backend.modules.service.application.api;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.ArrayList;
+import org.springframework.beans.factory.annotation.Autowired;
 import java.util.UUID;
 
 import org.springframework.stereotype.Component;
@@ -27,12 +29,49 @@ public class AiCatalogReader implements AiCatalogReadApi {
     private final CategoryRepositoryPort categories;
     private final GetServiceSlotsAvailabilityUseCase availability;
 
+    private AiCatalogCandidateReadApi candidateReader;
+
+    @Autowired
+    public void setCandidateReader(AiCatalogCandidateReadApi candidateReader) { this.candidateReader = candidateReader; }
+
     @Override
     @Transactional(readOnly = true)
-    public List<PublishedService> search(Query query) {
-        return services.searchPublishedServices(query.categoryId(), query.keyword(), null, null,
-                decimal(query.latitude()), decimal(query.longitude()), query.radiusKm(), 0,
-                Math.min(50, Math.max(1, query.limit()))).stream().map(service -> snapshot(service, query, true)).toList();
+    public List<PublishedService> search(Query query) { return searchPage(query).services(); }
+
+    @Override
+    @Transactional(readOnly = true)
+    public SearchPage searchPage(Query query) {
+        int limit = Math.min(15, Math.max(1, query.limit()));
+        List<PublishedService> selected = new ArrayList<>();
+        int rawOffset = query.offset();
+        int inspected = 0;
+        boolean exhausted = false;
+        long deadline = System.nanoTime() + java.util.concurrent.TimeUnit.SECONDS.toNanos(8);
+        while (rawOffset < 10000 && selected.size() < limit && System.nanoTime() < deadline) {
+            List<Service> batch;
+            if (candidateReader != null) {
+                List<UUID> ids = candidateReader.candidateIds(query, rawOffset, 15);
+                batch = ids.stream().map(services::findPublishedById).flatMap(java.util.Optional::stream).toList();
+                if (ids.isEmpty()) { exhausted = true; break; }
+            } else {
+                batch = services.searchPublishedServices(query.categoryId(), query.keyword(), null, null,
+                        decimal(query.latitude()), decimal(query.longitude()), query.radiusKm(), rawOffset / 15, 15);
+                if (batch.isEmpty()) { exhausted = true; break; }
+            }
+            for (Service service : batch) {
+                if (System.nanoTime() >= deadline) break;
+                rawOffset++; inspected++;
+                PublishedService snapshot = snapshot(service, query, true);
+                if (snapshot.options().stream().noneMatch(option -> !option.slots().isEmpty())) continue;
+                selected.add(snapshot);
+                if (selected.size() >= limit) break;
+            }
+            if (batch.size() < 15 && selected.size() < limit && System.nanoTime() < deadline) { exhausted = true; break; }
+        }
+        List<String> limitations = new ArrayList<>();
+        if (System.nanoTime() >= deadline || rawOffset >= 10000) limitations.add("CATALOG_SCAN_PARTIAL_COVERAGE");
+        if (candidateReader == null) limitations.add("LEGACY_RETRIEVAL_COVERAGE_UNKNOWN");
+        return new SearchPage(List.copyOf(selected), exhausted || rawOffset >= 10000 ? null : rawOffset, exhausted, inspected, List.copyOf(limitations));
     }
 
     @Override
@@ -62,9 +101,15 @@ public class AiCatalogReader implements AiCatalogReadApi {
                     List<Slot> slots = !withSlots ? List.of() : availability.execute(service.getId(), option.getId(), query.from(), query.to(), quantity, false)
                             .stream().filter(slot -> slot.bookable()).map(slot -> new Slot(slot.slotId(), slot.date(),
                                     slot.startTime(), slot.endTime(), slot.availablePaxOrPackages())).toList();
+                    slots = slots.stream().filter(slot -> query.dayStart() == null || slot.start() != null && !slot.start().isBefore(query.dayStart()))
+                            .filter(slot -> {
+                                java.time.LocalTime end = slot.end();
+                                if (end == null && slot.start() != null && service.getDurationMinutes() != null && service.getDurationMinutes() > 0) end = slot.start().plusMinutes(service.getDurationMinutes());
+                                return end != null && slot.start() != null && end.isAfter(slot.start()) && (query.dayEnd() == null || !end.isAfter(query.dayEnd()));
+                            }).toList();
                     return new Option(option.getId(), option.getName(), option.getPricingUnit().name(), option.getPrice(),
                             quantity, option.getPrice().multiply(BigDecimal.valueOf(quantity)), option.getBenefits(), slots);
-                }).toList();
+                }).filter(option -> query.totalBudget() == null || option.partyTotal().compareTo(query.totalBudget()) <= 0).toList();
         boolean english = query.language() == SupportedLanguage.EN;
         return new PublishedService(service.getId(), service.getVendorId(),
                 localize(service.getName(), service.getNameEn(), english),

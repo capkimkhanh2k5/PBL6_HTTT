@@ -23,4 +23,9 @@ public class AiConversationJpaEntity extends BaseJpaEntity {
     @Column(nullable = false, length = 2)
     private String locale = "vi";
 
+    @Column(columnDefinition = "TEXT")
+    private String structuredContext;
+    private UUID processingToken;
+    private OffsetDateTime processingUntil;
+
 }

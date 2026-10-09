@@ -229,7 +229,17 @@ public class WeatherProviderAdapter implements WeatherProviderPort {
             }
         }
 
+        Long fetchedAt = weatherResp == null ? null : weatherResp.getSourceFetchedAtEpochMillis();
+        if (peakWave != null) {
+            fetchedAt = marineResp == null || marineResp.getSourceFetchedAtEpochMillis() == null || fetchedAt == null ? null
+                    : Math.min(fetchedAt, marineResp.getSourceFetchedAtEpochMillis());
+        }
+        java.time.Instant sourceFetchedAt = fetchedAt == null ? null : java.time.Instant.ofEpochMilli(fetchedAt);
         return WeatherInfoDto.TimeWindowForecast.builder()
+                .sourceFetchedAt(sourceFetchedAt)
+                .validUntil(sourceFetchedAt == null ? null : sourceFetchedAt.plus(cacheService.getTtl()))
+                .provider("OPEN_METEO_WEATHER_AND_MARINE")
+                .timezone(weatherResp == null || weatherResp.getTimezone() == null ? "Asia/Ho_Chi_Minh" : weatherResp.getTimezone())
                 .peakWaveHeight(peakWave)
                 .peakWindSpeed(peakWind)
                 .peakWindGust(peakGust)

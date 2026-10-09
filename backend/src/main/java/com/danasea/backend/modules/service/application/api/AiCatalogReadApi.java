@@ -10,7 +10,15 @@ import com.danasea.backend.shared.i18n.SupportedLanguage;
 
 public interface AiCatalogReadApi {
     record Query(String keyword, UUID categoryId, LocalDate from, LocalDate to, int partySize,
-                 Double latitude, Double longitude, Double radiusKm, int limit, SupportedLanguage language) {}
+                 Double latitude, Double longitude, Double radiusKm, int limit, SupportedLanguage language,
+                 BigDecimal totalBudget, LocalTime dayStart, LocalTime dayEnd, List<String> includedActivities,
+                 List<String> excludedActivities, String mode, int offset, List<String> rankingInterests) {
+        public Query(String keyword, UUID categoryId, LocalDate from, LocalDate to, int partySize,
+                     Double latitude, Double longitude, Double radiusKm, int limit, SupportedLanguage language) {
+            this(keyword, categoryId, from, to, partySize, latitude, longitude, radiusKm, limit, language,
+                    null, null, null, List.of(), List.of(), "SEARCH", 0, List.of());
+        }
+    }
     record Option(UUID id, String name, String pricingUnit, BigDecimal unitPrice, int quantity,
                   BigDecimal partyTotal, String benefits, List<Slot> slots) {}
     record Slot(UUID id, LocalDate date, LocalTime start, LocalTime end, int availableQuantity) {}
@@ -19,7 +27,14 @@ public interface AiCatalogReadApi {
                             Double longitude, Integer durationMinutes, boolean weatherSensitive,
                             BigDecimal averageRating, int reviewCount, List<Option> options) {}
 
+    record SearchPage(List<PublishedService> services, Integer nextOffset, boolean exhausted,
+                      int inspectedCandidates, List<String> limitations) {}
     List<PublishedService> search(Query query);
+    default SearchPage searchPage(Query query) {
+        List<PublishedService> items = search(query);
+        return new SearchPage(items, items.size() >= query.limit() ? query.offset() + items.size() : null,
+                false, items.size(), List.of("LEGACY_RETRIEVAL_COVERAGE_UNKNOWN"));
+    }
     PublishedService find(UUID id, Query query);
     PublishedService metadata(UUID id, SupportedLanguage language);
 }

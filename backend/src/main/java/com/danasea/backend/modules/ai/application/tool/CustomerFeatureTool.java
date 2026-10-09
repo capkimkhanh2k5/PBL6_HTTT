@@ -51,10 +51,10 @@ public class CustomerFeatureTool implements ToolExecutor {
             }
             Object result = switch (name) {
                 case "ai_smart_search" -> discovery.execute(criteria(args), "SEARCH", language);
-                case "ai_recommend_services" -> discovery.execute(criteria(args), "RECOMMENDATION", language);
+                case "ai_recommend_services" -> discovery.execute(criteria(args), "RECOMMENDATION", language, userId);
                 case "ai_nearby_services" -> discovery.execute(criteria(args), "NEARBY", language);
                 case "ai_compare_services" -> comparisons.execute(ids(args, "serviceIds"), criteria(args), language);
-                case "ai_plan_itinerary" -> plans.create(userId, criteria(args), language);
+                case "ai_plan_itinerary" -> plans.preview(userId, criteria(args), language);
                 case "ai_replan_itinerary" -> plans.replan(id(args, "itineraryId"), userId,
                         version(args), args.hasNonNull("criteria") ? criteria(args) : null,
                         Set.copyOf(optionalIds(args, "excludedServiceIds")), Set.copyOf(optionalIds(args, "excludedSlotIds")),

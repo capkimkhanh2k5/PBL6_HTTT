@@ -18,17 +18,16 @@ import com.danasea.backend.modules.order.domain.exceptions.InvalidOrderStateExce
 import com.danasea.backend.modules.order.domain.exceptions.OrderNotFoundException;
 import com.danasea.backend.modules.order.domain.exceptions.UnauthorizedOrderAccessException;
 import com.danasea.backend.modules.order.domain.models.MasterOrder;
-import com.danasea.backend.modules.order.domain.models.MasterOrderStatus;
 import com.danasea.backend.modules.order.domain.models.PaymentStatus;
 import com.danasea.backend.modules.order.domain.models.RefundEvaluationResult;
 import com.danasea.backend.modules.order.domain.models.RefundReason;
 import com.danasea.backend.modules.order.domain.models.RefundStatus;
 import com.danasea.backend.modules.order.domain.models.SubOrder;
-import com.danasea.backend.modules.order.domain.models.SubOrderStatus;
 import com.danasea.backend.modules.order.domain.ports.MasterOrderRepositoryPort;
 import com.danasea.backend.modules.order.domain.ports.PaymentGatewayPort;
 import com.danasea.backend.modules.order.domain.ports.ServiceSlotDepartureLookupPort;
 import com.danasea.backend.modules.order.domain.ports.SubOrderRepositoryPort;
+import com.danasea.backend.modules.order.domain.services.CustomerRefundEligibilityPolicy;
 import com.danasea.backend.modules.order.domain.services.RefundPolicyEngine;
 import com.danasea.backend.modules.order.infrastructure.persistence.entities.PaymentJpaEntity;
 import com.danasea.backend.modules.order.infrastructure.persistence.entities.RefundJpaEntity;
@@ -138,9 +137,7 @@ public class RequestRefundUseCase {
         }
 
         // Chỉ cho phép yêu cầu hoàn tiền khi đơn đã thanh toán
-        if (order.getStatus() != MasterOrderStatus.PAID
-                && order.getStatus() != MasterOrderStatus.PARTIALLY_COMPLETED
-                && order.getStatus() != MasterOrderStatus.COMPLETED) {
+        if (!CustomerRefundEligibilityPolicy.paidOrder(order.getStatus())) {
             throw new InvalidOrderStateException("Refunds can only be requested for a paid order; current: " + order.getStatus());
         }
 
@@ -157,9 +154,7 @@ public class RequestRefundUseCase {
         List<OrderRefundResult> results = new ArrayList<>();
 
         for (SubOrder subOrder : subOrders) {
-            if (subOrder.getStatus() == SubOrderStatus.CANCELLED
-                    || subOrder.getStatus() == SubOrderStatus.REFUNDED
-                    || subOrder.getStatus() == SubOrderStatus.REJECTED) {
+            if (!CustomerRefundEligibilityPolicy.refundableItem(subOrder.getStatus())) {
                 throw new InvalidOrderStateException("Sub-order " + subOrder.getId() + " is already in terminal state: " + subOrder.getStatus());
             }
 

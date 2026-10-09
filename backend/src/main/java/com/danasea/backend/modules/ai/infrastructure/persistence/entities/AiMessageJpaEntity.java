@@ -23,4 +23,7 @@ public class AiMessageJpaEntity extends BaseJpaEntity {
 
     private String toolCalls;
 
+    @Column(columnDefinition = "TEXT")
+    private String responsePayload;
+
 }

@@ -85,6 +85,17 @@ class NativeOptionBookingTest {
         verify(cancel).execute(new CancelBookingHoldCommand(bookingId, user));
         assertThat(card.getStatus()).isEqualTo(ConfirmationCard.STATUS_CANCELLED);
     }
+    @Test void successfulConfirmationRetryReturnsStoredHoldAndNeverCreatesAnotherHold() {
+        stored(); UUID bookingId = UUID.randomUUID();
+        when(holds.execute(any())).thenReturn(new BookingHoldResult(bookingId, user, BookingStatus.HOLD, new BigDecimal("1000000"),
+                OffsetDateTime.now().plusMinutes(15), List.of(), OffsetDateTime.now()));
+        var first = confirm.execute("card", user, "session", conversation);
+        var retry = confirm.execute("card", user, "session", conversation);
+        assertThat(retry).isEqualTo(first);
+        verify(holds, times(1)).execute(any());
+        assertThatThrownBy(() -> confirm.execute("card", UUID.randomUUID(), "session", conversation))
+                .isInstanceOf(org.springframework.security.access.AccessDeniedException.class);
+    }
     @Test void legacyCardWithoutOptionCannotHoldInventoryInProductionPath() {
         stored(); card.setOptionId(null);
         assertThat(confirm.execute("card", user, "session", conversation).get("status")).isEqualTo("refresh_required");

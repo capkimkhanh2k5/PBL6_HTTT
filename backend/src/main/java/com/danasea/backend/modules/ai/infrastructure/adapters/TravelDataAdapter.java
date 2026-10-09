@@ -21,6 +21,7 @@ public class TravelDataAdapter implements TravelDataPort {
     private final AiCatalogReadApi catalog;
     private final AiReviewReadApi reviews;
 
+    @Override public AiCatalogReadApi.SearchPage searchPage(Query query) { return catalog.searchPage(query); }
     @Override public List<PublishedService> search(Query query) { return catalog.search(query); }
     @Override public PublishedService find(UUID id, Query query) { return catalog.find(id, query); }
     @Override public PublishedService metadata(UUID id, SupportedLanguage language) { return catalog.metadata(id, language); }

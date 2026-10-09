@@ -1,12 +1,12 @@
-# Bằng chứng kiểm tra AI backend (08/10/2026)
+# Bằng chứng kiểm tra AI backend (09/10/2026)
 
 Checkout: `/Users/capkimkhanh/Documents/DUT4_1/PBL6`, branch `feat/AI`. Các kết quả dưới đây thuộc code hiện tại trong checkout này, không dùng lại số test hoặc migration từ worktree cũ.
 
 | Kiểm tra | Kết quả |
 | --- | --- |
-| `./mvnw -q clean test` | 1698 tests được inventory; **1562 chạy thành công**, 136 skipped, 0 failures, 0 errors. Có test model local tùy chọn trong nhóm skipped. |
+| `./mvnw -q clean test` | Đang chạy lại sau khi thêm V22–V24 và contract customer AI; số cuối cùng được ghi sau khi lệnh hoàn tất. |
 | `./mvnw -q -DskipTests package` | Build JAR thành công. |
-| PostgreSQL 16/Testcontainers | Flyway chạy đến V21, validate thành công; V19 upgrade inventory được kiểm tra riêng với target 19. Hibernate context/schema validation và hai bảng AI mới được kiểm tra. |
+| PostgreSQL 16/Testcontainers | Flyway chạy đến V24, gồm context/idempotency assistant, lifecycle/revision itinerary và preferences/support. |
 | API inventory/context | 140 endpoint trong application context; các test MVC/security cũ tiếp tục pass. |
 | Python worker | 7/7 boundary tests: auth, rubric cố định, reject client questions, input/task sai, NaN, body quá lớn, inference đồng thời trả 429. |
 | Python style/syntax | Ruff check, Ruff format --check và parse Python source đều pass. |
@@ -28,6 +28,9 @@ Chi tiết suite mới và tổng số: [backend-test-results.json](../ai-decisi
 - Backend risk signals không bị model NO xóa; kiểm thử API admin với payment FAILED lưu trong PostgreSQL. Không đổi trạng thái payment/refund/order.
 - Case moderation lưu bền; admin mới resolve, không resolve hai lần, không tự authorize publication. Rate limit dùng actor và remote address.
 - Card đặt dịch vụ giữ optionId/slotId/quantity/participants riêng; xác nhận mới tạo hold; đổi giá khi tạo hold có compensation và yêu cầu xác nhận lại. Card legacy thiếu option cần refresh.
+- Chat retry theo actor + Idempotency-Key không chạy lại tool/hold; replan retry tạo proposal idempotent; feedback chỉ nhận service thuộc recommendation đã trả.
+- Catalog fixture kiểm tra dịch vụ hợp lệ cũ hơn 65 nguồn không phù hợp, nearby ngoài nhóm dịch vụ mới, giới hạn 15 và `PARTIAL/nextOffset` khi chưa quét đủ.
+- Review cache fingerprint đổi khi review bị flag/sửa/xóa; support request và admin queue dùng version/idempotency, chỉ tạo human-review notice.
 - JSON chat có conversationId không hợp lệ trả 400 trước khi gọi chat hoặc rate limiter; error contract Việt/Anh tiếp tục qua source guard.
 
 ## Smoke runtime thật

@@ -16,6 +16,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
 
 import com.danasea.backend.modules.ai.application.port.DecisionModelPort;
+import com.danasea.backend.modules.ai.application.port.AiExecutionBudget;
 import com.danasea.backend.modules.ai.domain.models.DecisionResult.Answer;
 import com.danasea.backend.modules.ai.domain.models.DecisionResult;
 import com.danasea.backend.modules.ai.domain.models.DecisionTask;
@@ -52,6 +53,7 @@ public class QuyetDecisionAdapter implements DecisionModelPort {
             return DecisionResult.unavailable(task, "QUYET_NOT_CONFIGURED");
         }
         if (System.nanoTime() < retryAfterNanos.get()) return DecisionResult.unavailable(task, "QUYET_COOLDOWN");
+        if (!AiExecutionBudget.permitDecision(properties.connectTimeout().plus(properties.readTimeout()))) return DecisionResult.unavailable(task, "REQUEST_DECISION_BUDGET_EXHAUSTED");
         try {
             String request = mapper.writeValueAsString(Map.of("task", task.wireName(), "state", state));
             if (request.getBytes(StandardCharsets.UTF_8).length > 32768) {

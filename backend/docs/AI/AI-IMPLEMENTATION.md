@@ -1,5 +1,7 @@
 # AI DANASEA: backend với Quyet Small
 
+> Cập nhật 09/10/2026. Contract backend đã nâng cấp cho 10 tính năng khách hàng. Không nối web/mobile thật trong phạm vi này; sáu nhóm Vendor/Admin còn lại vẫn hoãn.
+
 Phạm vi đã chốt ngày 08/10/2026: 10 tính năng khách hàng trong `AI-API.md`, phân loại văn bản, kiểm duyệt văn bản và dấu hiệu giao dịch bất thường. Groq dùng cho hội thoại/chọn trích đoạn review; Quyet Small dùng cho quyết định có cấu trúc. Không tích hợp Florence, Jev hoặc xử lý ảnh. API và tool backend đã triển khai; giao diện React/Flutter cần gọi các contract này.
 
 ## Tính năng và nguồn dữ liệu
@@ -17,7 +19,13 @@ Phạm vi đã chốt ngày 08/10/2026: 10 tính năng khách hàng trong `AI-AP
 | Nearby Discovery | `POST /api/ai/nearby` | Cần lat/lon; loại nguồn thiếu tọa độ, kiểm tra bán kính Haversine, sắp xếp khoảng cách với slot còn chỗ. |
 | Customer Support | `POST /api/ai/support` | Đơn của chính khách, trạng thái thanh toán và preview hủy theo chính sách hiện tại; Quyet phân loại topic/urgency. Đổi lịch/hủy/hoàn tiền vẫn qua API nghiệp vụ với xác nhận. |
 
-Đọc AI không tăng view_count và không tạo lịch sử xem gần đây. Giá legacy trên service không được dùng thay giá option cho tìm kiếm/lập lịch/confirmation card mới. `PER_PERSON`: quantity = partySize; `PER_PACKAGE`: quantity = ceil(partySize/maxPaxPerPackage); `partyTotal = unitPrice * quantity`. Inventory dùng API availability hiện có, bao gồm Redis hold, đơn vị sức chứa và option riêng/chung, không cho chia nhóm ngầm.
+Đọc AI không tăng view_count và không tạo lịch sử xem gần đây. Giá legacy trên service không được dùng thay giá option cho tìm kiếm/lập lịch/confirmation card mới. `PER_PERSON`: quantity = partySize; `PER_PACKAGE`: quantity = ceil(partySize/maxPaxPerPackage); `partyTotal = unitPrice * quantity`. Inventory dùng API availability hiện có, bao gồm Redis hold, đơn vị sức chứa và option riêng/chung, không cho chia nhóm ngầm. Retrieval lọc và xếp hạng trước khi trả tối đa 15 dịch vụ; khi chưa quét hết catalog trả `PARTIAL`/`nextOffset` thay vì kết luận toàn hệ thống không có kết quả.
+
+Chat trả typed `cards`, `sources`, `actions`, `requiredInputs`, context criteria và đánh dấu `generatedTextVerified=false`; câu chữ Groq không tự trở thành sự thật nguồn. `Idempotency-Key` được giới hạn theo actor cho chat, confirmation, itinerary save và support/feedback. Recommendation chỉ dùng wishlist/recent views/feedback sau khi khách bật consent; feedback phải thuộc `recommendationId` đã trả.
+
+Planner có preview → save → accept, lifecycle `DRAFT/ACCEPTED/STALE/ARCHIVED`, revision/CAS và replan proposal. Job nền chỉ đọc event slot/weather xác thực, chống trùng event và tạo in-app notification; không tự sửa booking hoặc payment. Weather trả provider, forecast/checked/valid-until, coverage và uncertainty; stale/unknown không acceptable. Comparison trả matrix và best-fit theo quote, luôn `bookingAuthorized=false`.
+
+Review summary aggregate toàn bộ review public hợp lệ, dùng sample cân bằng cho Quyet/Groq và exact evidence IDs; cache gắn fingerprint để invalidation khi review flag/sửa/xóa. Support request được lưu thành hàng chờ human review; admin chỉ chuyển trạng thái bằng version check. Không có AI tự đổi lịch, hủy, hoàn tiền hoặc authorize publication.
 
 ## Contract chung
 

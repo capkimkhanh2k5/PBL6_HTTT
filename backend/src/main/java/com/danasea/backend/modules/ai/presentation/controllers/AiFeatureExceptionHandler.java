@@ -19,7 +19,7 @@ import com.danasea.backend.shared.presentation.ErrorResponse;
 import com.danasea.backend.shared.presentation.LocalizedExceptionHandlerSupport;
 
 @Order(Ordered.HIGHEST_PRECEDENCE)
-@RestControllerAdvice(assignableTypes = {CustomerAiController.class, AiAssessmentController.class, AdminAiController.class})
+@RestControllerAdvice(basePackageClasses = CustomerAiController.class)
 public class AiFeatureExceptionHandler extends LocalizedExceptionHandlerSupport {
     @ExceptionHandler({IllegalArgumentException.class, HttpMessageNotReadableException.class})
     public ResponseEntity<ErrorResponse> invalid(Exception exception) {

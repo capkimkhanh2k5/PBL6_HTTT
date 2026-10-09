@@ -10,11 +10,20 @@ import java.util.UUID;
 public record TravelContext(String query, UUID categoryId, BigDecimal totalBudget, int partySize,
                             LocalDate from, LocalDate to, LocalTime dayStart, LocalTime dayEnd,
                             Double latitude, Double longitude, Double radiusKm,
-                            List<String> interests, int limit, int maxActivities, boolean weatherSafeOnly) {
+                            List<String> interests, int limit, int maxActivities, boolean weatherSafeOnly, TravelCriteria criteria) {
     public static final ZoneId ZONE = ZoneId.of("Asia/Ho_Chi_Minh");
+
+    public TravelContext(String query, UUID categoryId, BigDecimal totalBudget, int partySize,
+                         LocalDate from, LocalDate to, LocalTime dayStart, LocalTime dayEnd,
+                         Double latitude, Double longitude, Double radiusKm, List<String> interests,
+                         int limit, int maxActivities, boolean weatherSafeOnly) {
+        this(query, categoryId, totalBudget, partySize, from, to, dayStart, dayEnd, latitude, longitude,
+                radiusKm, interests, limit, maxActivities, weatherSafeOnly, TravelCriteria.empty());
+    }
 
     public TravelContext {
         query = query == null ? "" : query.trim();
+        criteria = criteria == null ? TravelCriteria.empty() : criteria;
         if (interests != null && interests.stream().anyMatch(interest -> interest == null)) throw new IllegalArgumentException("Interests must not contain null values");
         interests = interests == null ? List.of() : List.copyOf(interests);
         LocalDate today = LocalDate.now(ZONE);
@@ -26,7 +35,7 @@ public record TravelContext(String query, UUID categoryId, BigDecimal totalBudge
                 || interests.stream().anyMatch(interest -> interest == null || interest.length() > 100)) {
             throw new IllegalArgumentException("Query or interests exceed their length limits");
         }
-        if (partySize < 1 || partySize > 50 || limit < 1 || limit > 20 || maxActivities < 1 || maxActivities > 5) {
+        if (partySize < 1 || partySize > 50 || limit < 1 || limit > 15 || maxActivities < 1 || maxActivities > 5) {
             throw new IllegalArgumentException("Invalid party size, result limit or activity count");
         }
         if (totalBudget != null && (totalBudget.signum() < 0 || totalBudget.compareTo(new BigDecimal("1000000000")) > 0)) {

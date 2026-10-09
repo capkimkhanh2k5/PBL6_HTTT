@@ -1,10 +1,12 @@
 package com.danasea.backend.modules.ai.presentation.controllers;
 
 import java.util.List;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -14,6 +16,7 @@ import org.springframework.web.bind.annotation.*;
 
 import com.danasea.backend.modules.ai.application.port.RateLimiterPort;
 import com.danasea.backend.modules.ai.application.usecase.ChatUseCase;
+import com.danasea.backend.modules.ai.application.usecase.ChatIdempotencyService;
 import com.danasea.backend.modules.ai.application.usecase.ConfirmBookingUseCase;
 import com.danasea.backend.modules.ai.domain.TrustTier;
 import com.danasea.backend.modules.ai.domain.exceptions.AiConversationLocaleMismatchException;
@@ -47,6 +50,10 @@ public class AssistantController {
     private final JpaAiConversationRepository conversationRepository;
     private final RateLimiterPort rateLimiter;
     private final LocalizedMessageService messages;
+    private ChatIdempotencyService chatIdempotency;
+
+    @Autowired
+    public void setChatIdempotencyService(ChatIdempotencyService service) { this.chatIdempotency = service; }
 
     @PostMapping("/chat")
     public ResponseEntity<?> chat(@Valid @RequestBody ChatRequest request, HttpServletRequest httpRequest) {
@@ -65,31 +72,34 @@ public class AssistantController {
                     .body(new ErrorResponse("RATE_LIMIT_EXCEEDED", messages.get("ai.rate_limit", language)));
         }
 
-        UUID requestedConversationId = request.conversationId();
-
-        AiConversationJpaEntity conversation = chatHistoryService
-                .getOrCreateConversation(requestedConversationId, userId, language);
-        SupportedLanguage conversationLanguage = SupportedLanguage
-                .fromTag(conversation.getLocale())
-                .orElse(SupportedLanguage.VI);
-        if (conversationLanguage != language) {
-            throw new AiConversationLocaleMismatchException();
+        String key = httpRequest == null ? null : httpRequest.getHeader("Idempotency-Key");
+        ChatIdempotencyService.Claim claim = key == null || chatIdempotency == null ? null
+                : chatIdempotency.begin(userId, key, request.conversationId(), request.message(), language);
+        if (claim != null && claim.replay()) return ResponseEntity.ok(claim.response());
+        try {
+            AiConversationJpaEntity conversation = chatHistoryService
+                    .getOrCreateConversation(request.conversationId(), userId, language);
+            SupportedLanguage conversationLanguage = SupportedLanguage
+                    .fromTag(conversation.getLocale()).orElse(SupportedLanguage.VI);
+            if (conversationLanguage != language) throw new AiConversationLocaleMismatchException();
+            UUID conversationId = conversation.getId();
+            if (chatIdempotency != null) chatIdempotency.bind(claim, conversationId);
+            var response = chatUseCase.processMessage(conversationId, request.message(), conversationLanguage, userId);
+            auditLogService.logChatAction(conversationId, userId, request.message(), response.getContent(), response.getKeyMasked());
+            Map<String, Object> body = new LinkedHashMap<>();
+            body.put("status", "success"); body.put("conversationId", conversationId.toString());
+            body.put("message", response.getContent() == null ? "" : response.getContent());
+            body.put("responseStatus", response.getResponseStatus()); body.put("cards", response.getCards());
+            body.put("sources", response.getCards().stream().flatMap(card -> card.sources().stream()).toList());
+            body.put("actions", response.getCards().stream().flatMap(card -> card.actions().stream()).toList());
+            body.put("requiredInputs", response.getRequiredInputs()); body.put("context", response.getConversationContext());
+            body.put("generatedTextVerified", false);
+            if (chatIdempotency != null) chatIdempotency.complete(claim, body);
+            return ResponseEntity.ok(body);
+        } catch (RuntimeException exception) {
+            if (chatIdempotency != null) chatIdempotency.fail(claim);
+            throw exception;
         }
-        UUID conversationId = conversation.getId();
-
-        String userMessage = request.message();
-        
-        var llmResponse = chatUseCase.processMessage(conversationId, userMessage, conversationLanguage, userId);
-        String responseContent = llmResponse.getContent();
-        
-        // Log chat action
-        auditLogService.logChatAction(conversationId, userId, userMessage, responseContent, llmResponse.getKeyMasked());
-
-        return ResponseEntity.ok(Map.of(
-            "status", "success",
-            "conversationId", conversationId.toString(),
-            "message", responseContent
-        ));
     }
 
     private String extractClientIp(HttpServletRequest request) {
