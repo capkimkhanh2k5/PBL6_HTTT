@@ -1,0 +1,48 @@
+sequenceDiagram
+    autonumber
+    actor Client as Khách hàng / Quản trị viên
+    participant OC as OrderController
+    participant OPS as OrderPaymentService
+    participant MOR as JpaMasterOrderRepository
+    participant PR as JpaPaymentRepository
+    participant RR as JpaRefundRepository
+    participant DB as PostgreSQL Database
+
+    Client->>OC: GET /api/orders/{orderId}/payments (hoặc /refunds)
+    Note over OC: Trích xuất currentUserId và quyền ROLE_ADMIN từ SecurityContext
+    OC->>OPS: getOrderPayments(currentUserId, orderId, isAdmin) (hoặc getOrderRefunds)
+
+    OPS->>MOR: findById(orderId)
+    MOR->>DB: SELECT * FROM master_orders WHERE id = :orderId
+    alt Không tìm thấy đơn hàng
+        DB-->>MOR: Optional.empty()
+        MOR-->>OPS: empty
+        OPS-->>OC: Ném OrderNotFoundException
+        OC-->>Client: HTTP 404 Not Found
+    else Tìm thấy đơn hàng
+        DB-->>MOR: MasterOrderJpaEntity
+        MOR-->>OPS: order
+
+        Note over OPS: BẢO VỆ QUYỀN SỞ HỮU (IDOR GUARD CHECK)
+        alt !isAdmin VÀ order.customerId != currentUserId
+            Note over OPS: Người dùng khác cố tình đọc trộm đơn hàng
+            OPS-->>OC: Ném AccessDeniedException("User does not have permission")
+            OC-->>Client: HTTP 403 Forbidden (Từ chối truy cập)
+        else Hợp lệ: Là chủ đơn hàng (Owner) HOẶC là Quản trị viên (Admin)
+            alt Yêu cầu tra cứu Payments
+                OPS->>PR: findByMasterOrderIdOrderByCreatedAtDesc(orderId)
+                PR->>DB: SELECT * FROM payments WHERE master_order_id = :orderId ORDER BY created_at DESC
+                DB-->>PR: List<PaymentJpaEntity>
+                PR-->>OPS: payments
+                OPS-->>OC: List<PaymentResponse>
+                OC-->>Client: HTTP 200 OK (Danh sách lịch sử thanh toán)
+            else Yêu cầu tra cứu Refunds
+                OPS->>RR: findByMasterOrderId(orderId)
+                RR->>DB: SELECT r.* FROM refunds r JOIN sub_orders s ON r.sub_order_id = s.id WHERE s.master_order_id = :orderId
+                DB-->>RR: List<RefundJpaEntity>
+                RR-->>OPS: refunds
+                OPS-->>OC: List<RefundDetailResponse>
+                OC-->>Client: HTTP 200 OK (Danh sách lịch sử hoàn tiền)
+            end
+        end
+    end
