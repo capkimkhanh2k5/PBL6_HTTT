@@ -1,8 +1,8 @@
+import 'features/auth/presentation/screens/session_gate.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'core/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'core/theme/app_theme.dart';
-import 'features/auth/presentation/screens/login_register_screen.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -24,7 +24,7 @@ class DanaSeaApp extends StatelessWidget {
         title: 'DanaSea',
         debugShowCheckedModeBanner: false,
         theme: AppTheme.lightTheme,
-        home: const LoginRegisterScreen(),
+        home: const SessionGate(),
       ),
     );
   }

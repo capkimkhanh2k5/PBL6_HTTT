@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mobile/main.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:mobile/features/auth/presentation/screens/login_register_screen.dart';
 
 void main() {
@@ -9,7 +10,10 @@ void main() {
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.resetPhysicalSize);
     addTearDown(tester.view.resetDevicePixelRatio);
+    FlutterSecureStorage.setMockInitialValues({});
     await tester.pumpWidget(const DanaSeaApp());
+    await tester.pump();
+    await tester.pump();
     expect(find.byType(LoginRegisterScreen), findsOneWidget);
     expect(find.text('DANASEA'), findsOneWidget);
     expect(find.byKey(const ValueKey('login-brand-symbol')), findsOneWidget);
