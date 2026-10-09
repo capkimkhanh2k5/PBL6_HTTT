@@ -50,7 +50,7 @@ class GetServiceDetailToolTest {
                 .imageUrls(List.of("https://cdn.example/service.jpg"))
                 .availableSlots(List.of("2026-09-24T08:00:00+07:00"))
                 .build();
-        when(getPublicServiceDetailUseCase.execute(serviceId, null, null)).thenReturn(detail);
+        when(getPublicServiceDetailUseCase.readOnlySnapshot(serviceId)).thenReturn(detail);
 
         var result = objectMapper.readTree(tool.execute("{\"service_id\":\"" + serviceId + "\"}"));
 
@@ -58,7 +58,7 @@ class GetServiceDetailToolTest {
         assertThat(result.get("name").asText()).contains("[REDACTED]");
         assertThat(result.get("price").decimalValue()).isEqualByComparingTo("450000");
         assertThat(result.get("availableSlots").size()).isEqualTo(1);
-        verify(getPublicServiceDetailUseCase).execute(serviceId, null, null);
+        verify(getPublicServiceDetailUseCase).readOnlySnapshot(serviceId);
     }
 
     @Test

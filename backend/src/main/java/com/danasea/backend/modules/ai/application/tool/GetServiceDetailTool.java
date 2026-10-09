@@ -1,18 +1,20 @@
 package com.danasea.backend.modules.ai.application.tool;
 
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+
+import org.springframework.stereotype.Component;
+
 import com.danasea.backend.modules.ai.domain.services.SanitizationService;
 import com.danasea.backend.modules.service.application.dtos.ServiceDetailResult;
 import com.danasea.backend.modules.service.application.usecases.GetPublicServiceDetailUseCase;
 import com.danasea.backend.modules.service.domain.exceptions.ServiceNotFoundException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Component;
 
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import lombok.RequiredArgsConstructor;
 
 @Component
 @RequiredArgsConstructor
@@ -31,7 +33,7 @@ public class GetServiceDetailTool implements ToolExecutor {
     public String execute(String argumentsJson) {
         try {
             UUID serviceId = parseServiceId(argumentsJson);
-            ServiceDetailResult detail = getPublicServiceDetailUseCase.execute(serviceId, null, null);
+            ServiceDetailResult detail = getPublicServiceDetailUseCase.readOnlySnapshot(serviceId);
 
             Map<String, Object> result = new LinkedHashMap<>();
             result.put("serviceId", detail.getId());
@@ -48,6 +50,13 @@ public class GetServiceDetailTool implements ToolExecutor {
             result.put("categoryName", sanitize(detail.getCategoryName()));
             result.put("imageUrls", sanitize(detail.getImageUrls()));
             result.put("availableSlots", sanitize(detail.getAvailableSlots()));
+            result.put("options", detail.getOptions() == null ? List.of() : detail.getOptions().stream().map(option -> {
+                Map<String, Object> value = new LinkedHashMap<>();
+                value.put("id", option.id()); value.put("name", sanitize(option.name()));
+                value.put("pricingUnit", option.pricingUnit()); value.put("unitPrice", option.price());
+                value.put("maxPaxPerPackage", option.maxPaxPerPackage()); value.put("benefits", sanitize(option.benefits()));
+                return value;
+            }).toList());
             return objectMapper.writeValueAsString(result);
         } catch (IllegalArgumentException exception) {
             return error("INVALID_ARGUMENTS", exception.getMessage());

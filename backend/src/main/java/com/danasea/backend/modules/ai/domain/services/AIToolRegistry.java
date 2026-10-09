@@ -1,15 +1,15 @@
 package com.danasea.backend.modules.ai.domain.services;
 
-import org.springframework.stereotype.Service;
-
 import java.util.List;
 import java.util.Map;
+
+import org.springframework.stereotype.Service;
 
 @Service
 public class AIToolRegistry {
 
     public List<Map<String, Object>> getToolDefinitions() {
-        return List.of(
+        List<Map<String, Object>> legacy = List.of(
             Map.of(
                 "name", "search_services",
                 "description", "Search for travel and marine services based on user criteria",
@@ -85,11 +85,14 @@ public class AIToolRegistry {
                     "properties", Map.of(
                         "service_id", Map.of("type", "string", "description", "The ID of the service to book"),
                         "date", Map.of("type", "string", "description", "Booking date"),
+                        "option_id", Map.of("type", "string", "description", "Active option ID from current service data"),
+                        "slot_id", Map.of("type", "string", "description", "Current bookable slot ID from AI search data"),
                         "participants", Map.of("type", "integer", "description", "Number of participants")
                     ),
-                    "required", List.of("service_id", "date", "participants")
+                    "required", List.of("service_id", "option_id", "slot_id", "date", "participants")
                 )
             )
         );
+        return java.util.stream.Stream.concat(legacy.stream(), CustomerFeatureToolDefinitions.definitions().stream()).toList();
     }
 }

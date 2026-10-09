@@ -77,7 +77,7 @@ Cập nhật 08/10/2026:
 
 Bằng chứng: `security/authentication/presentation/AuthenticationController.java`, `ForgotPasswordUseCase.java`, `ResetPasswordUseCase.java`, `PasswordResetEmailConsumer.java`, `configs/RabbitMQConfig.java`.
 
-### P1 Quản trị giao dịch và theo dõi hoàn tiền
+### P1 Quản trị giao dịch và theo dõi hoàn tiền -> Đang Xử Lý
 
 Admin xem detail order/booking nếu đã biết UUID, nhưng chưa có API list giao dịch toàn sàn, lọc đơn và lịch sử refund/payment phục vụ xử lý vấn đề.
 
@@ -96,7 +96,7 @@ Chưa thấy API chuyển booking/sub-order sang slot mới. Action DISMISSED �
 
 Mức P1 nếu giữ cam kết đổi lịch trong đề tài; có thể tạm giảm phạm vi sang hủy/hoàn minh bạch nếu được chấp nhận.
 
-### P2 Khuyến mãi
+### P2 Khuyến mãi -> Đang Xử Lý
 
 Có DiscountCode/DiscountRedemption nhưng chưa có API quản lý, kiểm tra/apply voucher; tạo order đặt discount bằng 0.
 

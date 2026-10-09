@@ -13,3 +13,6 @@
 .worktrees/
 *.zip
 private/
+__pycache__/
+*.py[cod]
+.ruff_cache/

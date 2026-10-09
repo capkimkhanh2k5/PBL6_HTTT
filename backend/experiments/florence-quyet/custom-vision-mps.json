@@ -1,0 +1,143 @@
+{
+  "metadata": {
+    "model_id": "microsoft/Florence-2-base-ft",
+    "revision": "f6c1a25888ffc1d945ee8a1a77ac833c7303d46e",
+    "model_dir": "/Users/capkimkhanh/.cache/danasea/florence-base-ft/models/f6c1a25888ffc1d945ee8a1a77ac833c7303d46e",
+    "device": "mps",
+    "dtype": "float32",
+    "parameters": 231414016,
+    "cpu_threads": 4,
+    "python": "3.11.16",
+    "machine": "arm64",
+    "versions": {
+      "torch": "2.14.1",
+      "transformers": "4.49.0",
+      "timm": "1.0.20",
+      "pillow": "12.3.0",
+      "einops": "0.8.1"
+    },
+    "offline_mode": true,
+    "load_seconds": 1.101,
+    "generation": {
+      "max_new_tokens": 512,
+      "num_beams": 3,
+      "do_sample": false,
+      "use_cache": true
+    }
+  },
+  "summary": {
+    "images": 1,
+    "task_calls": 5,
+    "task_latency_ms": {
+      "median": 420.69,
+      "min": 251.08,
+      "max": 846.23
+    },
+    "timing_note": "One sequential pass, including first invocation; not a warmed production benchmark",
+    "peak_process_rss_mib": 1721.7
+  },
+  "images": [
+    {
+      "id": "custom",
+      "path": "/Users/capkimkhanh/Documents/DUT4_1/PBL6/backend/experiments/florence-quyet/inputs/sup.jpg",
+      "image_sha256": "992d7f1e899f86fbb81a804a686164d41f856700b4a64bc44755de6cd8d0511f",
+      "size": [
+        3737,
+        2491
+      ],
+      "tasks": {
+        "<CAPTION>": {
+          "prompt": "<CAPTION>",
+          "raw": "</s><s>A man in red trunks paddling on a blue surfboard.</s>",
+          "parsed": "A man in red trunks paddling on a blue surfboard.",
+          "latency_ms": 794.29,
+          "generated_tokens": 16,
+          "truncated": false
+        },
+        "<MORE_DETAILED_CAPTION>": {
+          "prompt": "<MORE_DETAILED_CAPTION>",
+          "raw": "</s><s>A man stands on a surfboard. The surfboard is blue. The man is holding a paddle. The paddle is black. The water is calm. The sky above the water is gray. There are no clouds in the sky. There is nobody in the picture. The person is wearing a pair of red shorts. The shorts are short. The shirt is white.</s>",
+          "parsed": "A man stands on a surfboard. The surfboard is blue. The man is holding a paddle. The paddle is black. The water is calm. The sky above the water is gray. There are no clouds in the sky. There is nobody in the picture. The person is wearing a pair of red shorts. The shorts are short. The shirt is white.",
+          "latency_ms": 846.23,
+          "generated_tokens": 76,
+          "truncated": false
+        },
+        "<OD>": {
+          "prompt": "<OD>",
+          "raw": "</s><s>bracelet<loc_578><loc_535><loc_592><loc_552>paddle<loc_447><loc_386><loc_630><loc_576>person<loc_543><loc_257><loc_637><loc_578>surfboard<loc_420><loc_546><loc_760><loc_599></s>",
+          "parsed": {
+            "bboxes": [
+              [
+                2161.8544921875,
+                1333.930419921875,
+                2214.172607421875,
+                1376.2774658203125
+              ],
+              [
+                1672.3074951171875,
+                962.771484375,
+                2356.178466796875,
+                1436.0615234375
+              ],
+              [
+                2031.0594482421875,
+                641.4324951171875,
+                2382.33740234375,
+                1441.04345703125
+              ],
+              [
+                1571.408447265625,
+                1361.3314208984375,
+                2841.988525390625,
+                1493.3544921875
+              ]
+            ],
+            "labels": [
+              "bracelet",
+              "paddle",
+              "person",
+              "surfboard"
+            ]
+          },
+          "latency_ms": 420.69,
+          "generated_tokens": 26,
+          "truncated": false,
+          "overlay": "/Users/capkimkhanh/Documents/DUT4_1/PBL6/backend/experiments/florence-quyet/overlays/mps/custom-od.png"
+        },
+        "<OCR>": {
+          "prompt": "<OCR>",
+          "raw": "</s><s>surf</s>",
+          "parsed": "surf",
+          "latency_ms": 251.08,
+          "generated_tokens": 4,
+          "truncated": false
+        },
+        "<OCR_WITH_REGION>": {
+          "prompt": "<OCR_WITH_REGION>",
+          "raw": "</s><s>GURBAY<loc_605><loc_584><loc_648><loc_584><loc_648><loc_595><loc_605><loc_595></s>",
+          "parsed": {
+            "quad_boxes": [
+              [
+                2262.75341796875,
+                1455.989501953125,
+                2423.444580078125,
+                1455.989501953125,
+                2423.444580078125,
+                1483.3905029296875,
+                2262.75341796875,
+                1483.3905029296875
+              ]
+            ],
+            "labels": [
+              "</s>GURBAY"
+            ]
+          },
+          "latency_ms": 323.83,
+          "generated_tokens": 14,
+          "truncated": false,
+          "overlay": "/Users/capkimkhanh/Documents/DUT4_1/PBL6/backend/experiments/florence-quyet/overlays/mps/custom-ocr_with_region.png"
+        }
+      }
+    }
+  ]
+}

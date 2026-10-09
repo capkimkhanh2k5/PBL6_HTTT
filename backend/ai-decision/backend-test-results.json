@@ -1,0 +1,55 @@
+{
+  "command": "./mvnw -q clean test",
+  "checkout": "PBL6 main checkout, feat/AI",
+  "counts": {
+    "tests": 1698,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 136
+  },
+  "newFeatureSuites": {
+    "CustomerAiFeaturesTest": {
+      "tests": 16,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "CustomerAiHttpIntegrationTest": {
+      "tests": 9,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "NativeOptionBookingTest": {
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "QuyetDecisionAdapterTest": {
+      "tests": 6,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 1
+    },
+    "ReviewHighlightSafetyTest": {
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "CustomerFeatureToolIdentityTest": {
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "TravelWeatherAdapterTest": {
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    }
+  },
+  "modelQualityEvaluation": false
+}

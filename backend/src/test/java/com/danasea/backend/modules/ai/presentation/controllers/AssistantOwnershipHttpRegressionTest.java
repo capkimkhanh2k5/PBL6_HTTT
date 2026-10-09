@@ -350,4 +350,12 @@ class AssistantOwnershipHttpRegressionTest {
 
         verify(cardStorePort, never()).findById(any());
     }
+    @Test
+    void malformedTypedConversationIdReturns400BeforeChatOrRateLimit() throws Exception {
+        mockMvc.perform(post("/api/assistant/chat").contentType(MediaType.APPLICATION_JSON)
+                .content("{\"conversationId\":\"invalid-uuid\",\"message\":\"Hello\"}"))
+                .andExpect(status().isBadRequest()).andExpect(jsonPath("$.code").value("INVALID_INPUT"));
+        verifyNoInteractions(chatUseCase, rateLimiter);
+    }
+
 }

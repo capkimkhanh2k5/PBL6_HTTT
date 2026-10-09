@@ -1,0 +1,94 @@
+sequenceDiagram
+    autonumber
+    %% ==========================================
+    %% CUSTOMER AI DISCOVERY FLOW
+    %% Smart Search, Recommendations & Nearby Discovery
+    %% ==========================================
+
+    actor Client as 📱/🌐 Khách Hàng (Client)
+    participant Ctrl as 🎮 CustomerAiController
+    participant Parser as 🔍 TravelQueryParser
+    participant UC as ⚙️ DiscoverServicesUseCase
+    participant DB as 🐘 AiCatalogReadApi (Postgres)
+    participant Quyet as ⚡ Quyet Small Worker (/decide)
+    participant Weather as ⛅ TravelWeatherPort (Weather Engine)
+
+    Note over Client, Ctrl: Khách gửi yêu cầu: POST /api/ai/search, /recommendations, hoặc /nearby
+
+    Client->>Ctrl: POST /api/ai/{mode}<br/>Body: TravelRequest (query, partySize, totalBudget, from, to, lat, lon, radiusKm...)
+    activate Ctrl
+
+    Note over Ctrl: Trích xuất SecurityContext (User ID) & LocaleContext (VI/EN)
+
+    Ctrl->>UC: execute(context, mode, language)
+    activate UC
+
+    UC->>UC: context.validateCurrentDates()<br/>(Party 1-50, Budget 0-1 tỷ, Cửa sổ ngày <= 14 ngày, Không quá khứ)
+
+    alt Chế độ NEARBY mà thiếu tọa độ (lat/lon == null)
+        UC-->>Ctrl: Result(status: "NEEDS_INPUT", requiredInputs: ["latitude", "longitude"])
+        Ctrl-->>Client: HTTP 200 { status: "NEEDS_INPUT", requiredInputs: [...] }
+    end
+
+    UC->>Parser: activityKeyword(query), budget(query), excludedActivities(query)
+    activate Parser
+    Parser-->>UC: Trả keyword, ngân sách parse (x partySize nếu per-person), danh sách từ loại trừ
+    deactivate Parser
+
+    Note over UC, DB: Truy vấn Catalog dịch vụ thực tế (Giới hạn tối đa 50 dịch vụ PUBLISHED)
+    UC->>DB: search(Query: keyword, categoryId, dates, partySize, limit=50)
+    activate DB
+    DB-->>UC: Danh sách 50 PublishedService kèm Options & Slots thực tế
+    deactivate DB
+
+    loop Duyệt qua từng PublishedService và Options
+        UC->>UC: Kiểm tra từ khóa loại trừ trong tên/danh mục dịch vụ
+        UC->>UC: Lọc Option theo ngân sách: option.partyTotal <= effectiveBudget<br/>(PER_PERSON: giá x khách | PER_PACKAGE: giá x ceil(khách/maxPax))
+        UC->>UC: Lọc Slot theo khung giờ: dayStart <= slot.start && slot.end <= dayEnd
+
+        opt Nếu context.weatherSafeOnly == true (Kiểm tra thời tiết, tối đa 20 slot)
+            UC->>Weather: assess(service, slot)
+            activate Weather
+            Weather-->>UC: Assessment (acceptable, status, provisional, message)
+            deactivate Weather
+            Note over UC: Nếu !acceptable -> Loại bỏ slot khỏi danh sách bookable
+        end
+
+        opt Chế độ NEARBY hoặc có radiusKm
+            UC->>UC: Tính khoảng cách Haversine (lat1, lon1, lat2, lon2)<br/>Nếu distance > radiusKm -> Bỏ qua
+        end
+
+        UC->>UC: Tính Baseline Score = (Rating / 5.0) + Matching Interests + 1 / (1 + distance)
+
+        opt Chế độ RECOMMENDATION và số ứng viên < 10
+            UC->>Quyet: POST /decide (Task: RELEVANCE, payload: query, interests, service description)
+            activate Quyet
+            Quyet-->>UC: DecisionResult (score: relevance, confidence)
+            deactivate Quyet
+            Note over UC: Cộng điểm: baseline += (relevance.score / 3.0)
+        end
+
+        UC->>UC: Lưu Candidate(snapshot, minimumPartyTotal, distanceKm, score, reasonCodes)
+    end
+
+    Note over UC: Phân loại ý định người dùng (Intent Classification)
+    opt query không rỗng
+        UC->>Quyet: POST /decide (Task: INTENT, payload: message=query)
+        activate Quyet
+        Quyet-->>UC: DecisionResult (intent: TOUR_SEARCH, BOOKING, COMPLAINT...)
+        deactivate Quyet
+    end
+
+    Note over UC: Sắp xếp xếp hạng (Ranking)
+    alt Chế độ NEARBY
+        UC->>UC: Sort: distanceKm ASC -> minimumPartyTotal ASC
+    else Chế độ SEARCH / RECOMMENDATION
+        UC->>UC: Sort: score DESC -> service.id ASC
+    end
+
+    UC->>UC: Cắt danh sách theo limit (1-20, mặc định 10)
+    UC-->>Ctrl: Result(status: AVAILABLE / NO_MATCHES, candidates, intent, rankingMethod...)
+    deactivate UC
+
+    Ctrl-->>Client: HTTP 200 OK { status, candidates, intent, limitations... }
+    deactivate Ctrl

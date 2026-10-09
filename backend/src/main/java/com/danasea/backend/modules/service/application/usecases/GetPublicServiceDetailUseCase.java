@@ -29,12 +29,21 @@ public class GetPublicServiceDetailUseCase {
     private final ServiceOptionRepositoryPort serviceOptionRepositoryPort;
 
     public ServiceDetailResult execute(UUID id, UUID userId, String sessionId) {
+        return load(id, userId, sessionId, true);
+    }
+
+    public ServiceDetailResult readOnlySnapshot(UUID id) {
+        return load(id, null, null, false);
+    }
+
+    private ServiceDetailResult load(UUID id, UUID userId, String sessionId, boolean recordView) {
         Service service = serviceRepositoryPort.findPublishedById(id)
                 .orElseThrow(() -> new ServiceNotFoundException("Service not found or not published: " + id));
 
-        serviceRepositoryPort.incrementViewCount(id, ServiceStatus.PUBLISHED);
-
-        recordRecentlyViewedUseCase.execute(id, userId, sessionId);
+        if (recordView) {
+            serviceRepositoryPort.incrementViewCount(id, ServiceStatus.PUBLISHED);
+            recordRecentlyViewedUseCase.execute(id, userId, sessionId);
+        }
 
         int viewCount = service.getViewCount() != null ? service.getViewCount() : 0;
         String categoryName = service.getCategoryId() == null ? null
@@ -68,7 +77,7 @@ public class GetPublicServiceDetailUseCase {
                 .longitude(service.getLongitude())
                 .averageRating(service.getAvgRating())
                 .reviewCount(service.getRatingCount() != null ? service.getRatingCount() : 0)
-                .viewCount(viewCount + 1)
+                .viewCount(viewCount + (recordView ? 1 : 0))
                 .categoryId(service.getCategoryId())
                 .categoryName(categoryName)
                 .imageUrls(serviceImageRepositoryPort.findByServiceId(id).stream()

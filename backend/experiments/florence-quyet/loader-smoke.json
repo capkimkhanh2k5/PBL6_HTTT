@@ -1,0 +1,60 @@
+{
+  "metadata": {
+    "model_id": "microsoft/Florence-2-base-ft",
+    "revision": "f6c1a25888ffc1d945ee8a1a77ac833c7303d46e",
+    "model_dir": "/Users/capkimkhanh/.cache/danasea/florence-base-ft/models/f6c1a25888ffc1d945ee8a1a77ac833c7303d46e",
+    "device": "mps",
+    "dtype": "float32",
+    "parameters": 231414016,
+    "cpu_threads": 4,
+    "python": "3.11.16",
+    "machine": "arm64",
+    "versions": {
+      "torch": "2.14.1",
+      "transformers": "4.49.0",
+      "timm": "1.0.20",
+      "pillow": "12.3.0",
+      "einops": "0.8.1"
+    },
+    "offline_mode": true,
+    "load_seconds": 0.756,
+    "generation": {
+      "max_new_tokens": 512,
+      "num_beams": 3,
+      "do_sample": false,
+      "use_cache": true
+    }
+  },
+  "summary": {
+    "images": 1,
+    "task_calls": 1,
+    "task_latency_ms": {
+      "median": 723.88,
+      "min": 723.88,
+      "max": 723.88
+    },
+    "timing_note": "One sequential pass, including first invocation; not a warmed production benchmark",
+    "peak_process_rss_mib": 1730.1
+  },
+  "images": [
+    {
+      "id": "custom",
+      "path": "/Users/capkimkhanh/Documents/DUT4_1/PBL6/backend/experiments/florence-quyet/inputs/car.jpg",
+      "image_sha256": "8cd28b372908bcaa704a438965f8de47238c9514d5efefa89c510b82032f9d18",
+      "size": [
+        640,
+        480
+      ],
+      "tasks": {
+        "<CAPTION>": {
+          "prompt": "<CAPTION>",
+          "raw": "</s><s>A green car parked in front of a yellow building.</s>",
+          "parsed": "A green car parked in front of a yellow building.",
+          "latency_ms": 723.88,
+          "generated_tokens": 13,
+          "truncated": false
+        }
+      }
+    }
+  ]
+}

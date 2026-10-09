@@ -1,0 +1,258 @@
+{
+  "scope": "Real offline HTTP diagnostics, not a quality benchmark",
+  "cases": [
+    {
+      "request": {
+        "task": "intent",
+        "state": {
+          "message": "Tìm dịch vụ chèo SUP cho gia đình vào ngày mai."
+        }
+      },
+      "response": {
+        "model": "chinhnc/Quyet-1.0-Small",
+        "revision": "233167bba5df61b5375a522bf8a042d8d2189379",
+        "rubricVersion": "danasea-2026-10-08-v1",
+        "task": "intent",
+        "latencyMs": 177.38,
+        "answers": {
+          "intent": {
+            "type": "choice",
+            "choice": "SEARCH",
+            "confidence": 0.9859,
+            "probabilities": {
+              "SEARCH": 0.9859,
+              "BOOKING": 0.0063,
+              "WEATHER": 0.0001,
+              "COMPARE": 0.0024,
+              "ITINERARY": 0.0002,
+              "SUPPORT": 0.0001,
+              "REVIEW": 0.0012,
+              "NEARBY": 0.0034,
+              "OTHER": 0.0004
+            }
+          }
+        },
+        "warnings": [],
+        "calibratedOnDanasea": false
+      }
+    },
+    {
+      "request": {
+        "task": "service_category",
+        "state": {
+          "content": "Chèo thuyền kayak ven biển Sơn Trà."
+        }
+      },
+      "response": {
+        "model": "chinhnc/Quyet-1.0-Small",
+        "revision": "233167bba5df61b5375a522bf8a042d8d2189379",
+        "rubricVersion": "danasea-2026-10-08-v1",
+        "task": "service_category",
+        "latencyMs": 52.37,
+        "answers": {
+          "category": {
+            "type": "choice",
+            "choice": "KAYAK",
+            "confidence": 0.9022,
+            "probabilities": {
+              "SUP": 0.0063,
+              "KAYAK": 0.9022,
+              "DIVING": 0.0337,
+              "BOAT": 0.0155,
+              "BEACH": 0.0352,
+              "OTHER": 0.007
+            }
+          }
+        },
+        "warnings": [],
+        "calibratedOnDanasea": false
+      }
+    },
+    {
+      "request": {
+        "task": "review",
+        "state": {
+          "review": "Hướng dẫn viên tận tình, áo phao đầy đủ."
+        }
+      },
+      "response": {
+        "model": "chinhnc/Quyet-1.0-Small",
+        "revision": "233167bba5df61b5375a522bf8a042d8d2189379",
+        "rubricVersion": "danasea-2026-10-08-v1",
+        "task": "review",
+        "latencyMs": 54.15,
+        "answers": {
+          "aspect": {
+            "type": "choice",
+            "choice": "GUIDE",
+            "confidence": 0.6567,
+            "probabilities": {
+              "GUIDE": 0.6567,
+              "SAFETY": 0.241,
+              "PUNCTUALITY": 0.0107,
+              "VALUE": 0.0458,
+              "OTHER": 0.0458
+            }
+          },
+          "positive": {
+            "type": "noul",
+            "noul": 0.8681,
+            "confidence": 0.8681
+          }
+        },
+        "warnings": [],
+        "calibratedOnDanasea": false
+      }
+    },
+    {
+      "request": {
+        "task": "moderation",
+        "state": {
+          "content": "Không chuyển tiền ngoài nền tảng DANASEA."
+        }
+      },
+      "response": {
+        "model": "chinhnc/Quyet-1.0-Small",
+        "revision": "233167bba5df61b5375a522bf8a042d8d2189379",
+        "rubricVersion": "danasea-2026-10-08-v1",
+        "task": "moderation",
+        "latencyMs": 61.18,
+        "answers": {
+          "external_payment": {
+            "type": "noul",
+            "noul": 0.7213,
+            "confidence": 0.7213
+          },
+          "spam": {
+            "type": "noul",
+            "noul": 0.5933,
+            "confidence": 0.5933
+          },
+          "abuse": {
+            "type": "noul",
+            "noul": 0.1945,
+            "confidence": 0.8055
+          }
+        },
+        "warnings": [],
+        "calibratedOnDanasea": false
+      }
+    },
+    {
+      "request": {
+        "task": "relevance",
+        "state": {
+          "context": {
+            "query": "chèo SUP cho gia đình"
+          },
+          "service": {
+            "name": "Chèo SUP Mân Thái",
+            "description": "Có hướng dẫn viên và áo phao."
+          }
+        }
+      },
+      "response": {
+        "model": "chinhnc/Quyet-1.0-Small",
+        "revision": "233167bba5df61b5375a522bf8a042d8d2189379",
+        "rubricVersion": "danasea-2026-10-08-v1",
+        "task": "relevance",
+        "latencyMs": 40.74,
+        "answers": {
+          "relevance": {
+            "type": "score",
+            "score": 1.5727,
+            "confidence": 0.3327,
+            "legend": {
+              "0": "Không liên quan.",
+              "1": "Liên quan ít.",
+              "2": "Phù hợp với một phần nhu cầu.",
+              "3": "Phù hợp rõ ràng với nhu cầu."
+            },
+            "probabilities": {
+              "0": 0.3327,
+              "1": 0.0654,
+              "2": 0.2984,
+              "3": 0.3035
+            }
+          }
+        },
+        "warnings": [],
+        "calibratedOnDanasea": false
+      }
+    },
+    {
+      "request": {
+        "task": "complaint",
+        "state": {
+          "complaint": "Tôi đang ở điểm tập trung nhưng không có người đón."
+        }
+      },
+      "response": {
+        "model": "chinhnc/Quyet-1.0-Small",
+        "revision": "233167bba5df61b5375a522bf8a042d8d2189379",
+        "rubricVersion": "danasea-2026-10-08-v1",
+        "task": "complaint",
+        "latencyMs": 57.81,
+        "answers": {
+          "topic": {
+            "type": "choice",
+            "choice": "SCHEDULE",
+            "confidence": 0.7458,
+            "probabilities": {
+              "PAYMENT": 0.0076,
+              "REFUND": 0.0071,
+              "SCHEDULE": 0.7458,
+              "SAFETY": 0.0566,
+              "QUALITY": 0.0719,
+              "OTHER": 0.111
+            }
+          },
+          "urgency": {
+            "type": "score",
+            "score": 1.562,
+            "confidence": 0.5902,
+            "legend": {
+              "0": "Câu hỏi chung, không có sự cố.",
+              "1": "Có vấn đề cần xử lý trước chuyến đi.",
+              "2": "Đang gặp nguy hiểm hoặc mắc kẹt tại thời điểm sử dụng dịch vụ."
+            },
+            "probabilities": {
+              "0": 0.0282,
+              "1": 0.3816,
+              "2": 0.5902
+            }
+          }
+        },
+        "warnings": [],
+        "calibratedOnDanasea": false
+      }
+    },
+    {
+      "request": {
+        "task": "risk",
+        "state": {
+          "risk_signals": [
+            "THREE_FAILED_PAYMENTS_IN_24H"
+          ],
+          "complaint": "Tôi bị thu tiền hai lần."
+        }
+      },
+      "response": {
+        "model": "chinhnc/Quyet-1.0-Small",
+        "revision": "233167bba5df61b5375a522bf8a042d8d2189379",
+        "rubricVersion": "danasea-2026-10-08-v1",
+        "task": "risk",
+        "latencyMs": 37.65,
+        "answers": {
+          "needs_review": {
+            "type": "noul",
+            "noul": 0.7119,
+            "confidence": 0.7119
+          }
+        },
+        "warnings": [],
+        "calibratedOnDanasea": false
+      }
+    }
+  ]
+}

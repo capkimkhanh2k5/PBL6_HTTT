@@ -1,0 +1,115 @@
+sequenceDiagram
+    autonumber
+    %% ==========================================
+    %% ITINERARY PLANNING AND REPLAN FLOW
+    %% Greedy Algorithm, Transit Constraints & Optimistic Locking
+    %% ==========================================
+
+    actor Client as 📱/🌐 Khách Hàng (Client)
+    participant Ctrl as 🎮 CustomerAiController
+    participant PlanUC as ⚙️ PlanItineraryUseCase
+    participant DiscUC as 🔍 DiscoverServicesUseCase
+    participant Weather as ⛅ TravelWeatherPort
+    participant Store as 💾 ItineraryStorePort (Postgres V21)
+
+    %% ----------------------------------------------------
+    %% PHẦN 1: KHỞI TẠO LỊCH TRÌNH MỚI (CREATE ITINERARY)
+    %% ----------------------------------------------------
+    rect rgb(240, 248, 255)
+        Note over Client, Store: PHẦN 1: KHỞI TẠO LỊCH TRÌNH MỚI (POST /api/ai/itineraries)
+        Client->>Ctrl: POST /api/ai/itineraries<br/>Body: TravelRequest (context: dates, partySize, totalBudget, maxActivities)
+        activate Ctrl
+
+        Note over Ctrl: SecurityUtils.getCurrentUserId() -> actorId (Bắt buộc xác thực)
+        Ctrl->>PlanUC: create(ownerId, context, language)
+        activate PlanUC
+
+        PlanUC->>DiscUC: execute(context, "RECOMMENDATION", language)
+        activate DiscUC
+        DiscUC-->>PlanUC: Result (top candidates kèm options & slots)
+        deactivate DiscUC
+
+        Note over PlanUC: 1. Lọc lấy top 10 candidates<br/>2. Lấy tối đa 5 slot/option<br/>3. Sort: slot.date + slot.start ASC -> partyTotal ASC -> service.id ASC
+
+        Note over PlanUC: Thuật toán: Bounded Chronological Greedy với Estimated Transfers
+        loop Duyệt từng Slot ứng viên (đến khi đủ maxActivities hoặc hết slot)
+            PlanUC->>PlanUC: Kiểm tra: Dịch vụ đã xuất hiện trong lịch trình chưa? (Mỗi service max 1 lần)
+            PlanUC->>PlanUC: Kiểm tra: nextTotal <= effectiveBudget? (Không vượt ngân sách tổng)
+            
+            opt Nếu đã có hoạt động trước đó trong lịch
+                PlanUC->>PlanUC: Tính khoảng cách Haversine giữa 2 địa điểm: distanceKm
+                PlanUC->>PlanUC: Tính thời gian di chuyển: transitMinutes = 15 + ceil(distanceKm / 25 * 60)
+                PlanUC->>PlanUC: Kiểm tra: start.isBefore(previous.end + transitMinutes)?<br/>(Nếu trùng giờ / không kịp di chuyển -> BỎ QUA SLOT NÀY)
+            end
+
+            PlanUC->>Weather: assess(service, slot)
+            activate Weather
+            Weather-->>PlanUC: Assessment (acceptable, status, provisional)
+            deactivate Weather
+
+            alt Thời tiết không an toàn (!acceptable)
+                PlanUC->>PlanUC: Ghi nhận unresolved: "WEATHER_" + status -> Bỏ qua slot
+            else Thời tiết an toàn / chấp nhận được
+                PlanUC->>PlanUC: Thêm vào danh sách items (kèm thông tin transit, vị trí, giá)
+                PlanUC->>PlanUC: Cập nhật total = nextTotal, đánh dấu usedServices.add(serviceId)
+            end
+        end
+
+        Note over PlanUC: Xác định trạng thái: items.isEmpty ? NEEDS_REVIEW : (provisionalWeather ? PROVISIONAL : PROPOSED)
+        PlanUC->>Store: create(ownerId, ItineraryPlan)
+        activate Store
+        Store->>Store: Lưu bảng ai_itineraries (owner_id, plan JSON, version=0)
+        Store-->>PlanUC: Saved(id, ownerId, plan, version: 0, createdAt)
+        deactivate Store
+
+        PlanUC-->>Ctrl: Saved (Kế hoạch chi tiết, inventoryReserved=false)
+        deactivate PlanUC
+        Ctrl-->>Client: HTTP 200 OK (Chi tiết lịch trình kèm thời gian di chuyển, version: 0)
+        deactivate Ctrl
+    end
+
+    %% ----------------------------------------------------
+    %% PHẦN 2: TÁI LẬP LỊCH TRÌNH (REPLAN ITINERARY)
+    %% ----------------------------------------------------
+    rect rgb(255, 245, 238)
+        Note over Client, Store: PHẦN 2: TÁI LẬP LỊCH TRÌNH KHI CÓ BIẾN ĐỘNG (POST /api/ai/itineraries/{id}/replan)
+        Client->>Ctrl: POST /api/ai/itineraries/{id}/replan<br/>Body: ReplanRequest (expectedVersion: 0, excludedServiceIds, excludedSlotIds, trigger, context)
+        activate Ctrl
+
+        Ctrl->>PlanUC: replan(id, userId, expectedVersion, replacementContext, excludedServices, excludedSlots, trigger, language)
+        activate PlanUC
+
+        PlanUC->>Store: find(id, ownerId)
+        activate Store
+        Store-->>PlanUC: Saved (oldItinerary)
+        deactivate Store
+
+        alt Lịch trình không tìm thấy hoặc không thuộc ownerId
+            PlanUC-->>Ctrl: ném AiResourceNotFoundException
+            Ctrl-->>Client: HTTP 404 Not Found ("Itinerary not found")
+        end
+
+        Note over PlanUC: KIỂM SOÁT ĐỒNG THỜI (OPTIMISTIC LOCKING GUARD)
+        alt old.version() != expectedVersion
+            PlanUC-->>Ctrl: ném AiStateConflictException
+            Ctrl-->>Client: HTTP 409 Conflict ("Itinerary version has changed")
+        end
+
+        Note over PlanUC: Ràng buộc an toàn: excludedServices <= 20, excludedSlots <= 50, trigger <= 100 chars
+        PlanUC->>PlanUC: propose(replacementContext, excludedServices, excludedSlots, language)<br/>(Chạy lại thuật toán Greedy loại bỏ các slot/dịch vụ bị hủy)
+
+        PlanUC->>Store: replace(id, ownerId, expectedVersion, nextPlan)
+        activate Store
+        Store->>Store: Cập nhật ai_itineraries, tăng version = expectedVersion + 1
+        Store-->>PlanUC: Saved (newItinerary với version mới)
+        deactivate Store
+
+        Note over PlanUC: So sánh chênh lệch giữa lịch cũ và lịch mới (Diff calculation)
+        PlanUC->>PlanUC: removedSlotIds = oldIds - newIds<br/>addedSlotIds = newIds - oldIds<br/>changedItems = các item thay đổi giá/option
+
+        PlanUC-->>Ctrl: Replanned(itinerary, removedSlotIds, addedSlotIds, changedItems, trigger, bookingChanged: false)
+        deactivate PlanUC
+
+        Ctrl-->>Client: HTTP 200 OK (Lịch mới đã cập nhật, danh sách slot đã loại bỏ/thêm mới)
+        deactivate Ctrl
+    end

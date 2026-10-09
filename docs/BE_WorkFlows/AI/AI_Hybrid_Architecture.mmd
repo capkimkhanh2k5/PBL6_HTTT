@@ -1,0 +1,124 @@
+graph TB
+    %% ==========================================
+    %% DANASEA AI HYBRID ARCHITECTURE
+    %% Groq Cloud LLM + Quyet Small + Core Backend + Postgres V21 + Redis
+    %% ==========================================
+
+    subgraph ClientLayer["🖥️ TẦNG GIAO DIỆN (CLIENT APPS)"]
+        WebClient["🌐 Web App (React / Vite)"]
+        MobileClient["📱 Mobile App (Flutter)"]
+    end
+
+    subgraph SecurityGateway["🛡️ BẢO MẬT & ĐIỀU PHỐI (GATEWAY & SECURITY)"]
+        SecurityContext["Spring Security Context<br/>(JWT Auth & User Ownership)"]
+        LocaleContextFilter["LocaleContextFilter<br/>(Accept-Language: VI / EN)"]
+        RateLimiter["RedisRateLimiter<br/>(Token Bucket + TrustTier)"]
+    end
+
+    subgraph ControllerLayer["🎮 TẦNG BỘ ĐIỀU KHIỂN (API CONTROLLERS)"]
+        AssistantCtrl["AssistantController<br/>/api/assistant/**"]
+        CustomerAiCtrl["CustomerAiController<br/>/api/ai/**"]
+        AssessmentCtrl["AiAssessmentController<br/>/api/ai/**"]
+        AdminAiCtrl["AdminAiController<br/>/api/admin/ai/**"]
+    end
+
+    subgraph CoreApplicationLayer["⚙️ TẦNG NGHIỆP VỤ LÕI (APPLICATION USE CASES)"]
+        ChatUC["ChatUseCase<br/>(Hội thoại đa lượt)"]
+        DiscoveryUC["DiscoverServicesUseCase<br/>(Search, Recommend, Nearby)"]
+        ItineraryUC["PlanItineraryUseCase<br/>(Lập lịch & Tái lập lịch)"]
+        ComparisonUC["CompareServicesUseCase<br/>(So sánh 2-4 dịch vụ)"]
+        ReviewUC["ReviewSummaryUseCase<br/>(Tóm tắt đánh giá thực tế)"]
+        WeatherUC["WeatherAwareUseCase<br/>(Đánh giá an toàn thời tiết)"]
+        SupportUC["CustomerSupportUseCase<br/>(Tra cứu đơn & Preview hủy)"]
+        AssessTextUC["AssessTextUseCase<br/>(Regex + Text Moderation)"]
+        RiskUC["AnalyzeTransactionRiskUseCase<br/>(Quy tắc Velocity 3/5/3)"]
+        ConfirmBookingUC["ConfirmBookingUseCase<br/>(Re-validation & Tạo Hold)"]
+    end
+
+    subgraph ToolRegistryLayer["🧰 BỘ CÔNG CỤ TRỢ LÝ (AI TOOL REGISTRY - 15 TOOLS)"]
+        LegacyTools["6 Công cụ cơ bản<br/>search_services, get_service_detail,<br/>get_policy, get_weather_forecast,<br/>get_safety_alert, request_booking_confirmation"]
+        CustomerTools["9 Công cụ mở rộng (CustomerFeatureTool)<br/>ai_smart_search, ai_recommend_services,<br/>ai_nearby_services, ai_compare_services,<br/>ai_plan_itinerary, ai_replan_itinerary,<br/>ai_review_summary, ai_weather_slot,<br/>ai_customer_support"]
+    end
+
+    subgraph AiInferenceLayer["🧠 TẦNG TRÍ TUỆ NHÂN TẠO LAI (HYBRID AI ENGINE)"]
+        subgraph GroqCloud["☁️ GROQ CLOUD LLM (Online)"]
+            GroqClient["GroqLlmClient<br/>(Llama 3.3 / Llama 3.1)"]
+            GroqRotator["GroqKeyRotator<br/>(5 API Keys: ACTIVE / COOLDOWN / DISABLED)"]
+            GroqModeration["GroqModerationClient<br/>(Prompt Guard - Max 1800 ký tự)"]
+            GroqHighlight["GroqReviewHighlightAdapter<br/>(Trích xuất ID review có nguồn thật)"]
+        end
+
+        subgraph QuyetLocal["⚡ QUYET SMALL INFERENCE WORKER (Offline / Local CPU)"]
+            QuyetClient["QuyetDecisionAdapter<br/>(REST Client /decide)"]
+            QuyetTasks["Fast Decision Tasks:<br/>• INTENT (Phân loại ý định)<br/>• RELEVANCE (Chấm điểm gợi ý)<br/>• SERVICE_CATEGORY (Phân loại dịch vụ)<br/>• MODERATION (Spam, Abuse, Ext. Payment)<br/>• RISK (Tín hiệu rủi ro giao dịch)<br/>• REVIEW (Khía cạnh & cảm xúc)"]
+        end
+    end
+
+    subgraph StorageLayer["💾 TẦNG LƯU TRỮ & HẠ TẦNG DỮ LIỆU"]
+        subgraph PostgreSQL["🐘 POSTGRESQL DATABASE"]
+        DB_Services["Catalog Dịch Vụ<br/>(services, options, slots)"]
+        DB_Orders["Đơn Hàng & Đánh Giá<br/>(orders, refunds, reviews)"]
+        DB_Conversations["Lịch Sử Chat AI<br/>(ai_conversations, ai_messages)"]
+        DB_V21["Flyway Migration V21:<br/>• ai_itineraries (@Version, JSON)<br/>• ai_assessment_cases (Evidence, Audit)"]
+    end
+
+        subgraph RedisCache["⚡ REDIS IN-MEMORY"]
+            Redis_Rate["Token Bucket Quota"]
+            Redis_Cards["Draft Confirmation Cards<br/>(TTL 15 phút)"]
+            Redis_Locks["Distributed Locks<br/>(Lua Script, TTL 30s)"]
+            Redis_Keys["Groq Key States Pool"]
+        end
+    end
+
+    %% Flows & Interactions
+    WebClient --> SecurityGateway
+    MobileClient --> SecurityGateway
+    SecurityGateway --> ControllerLayer
+
+    AssistantCtrl --> ChatUC
+    AssistantCtrl --> ConfirmBookingUC
+    CustomerAiCtrl --> DiscoveryUC
+    CustomerAiCtrl --> ItineraryUC
+    CustomerAiCtrl --> ComparisonUC
+    CustomerAiCtrl --> ReviewUC
+    CustomerAiCtrl --> WeatherUC
+    CustomerAiCtrl --> SupportUC
+    AssessmentCtrl --> AssessTextUC
+    AdminAiCtrl --> RiskUC
+
+    ChatUC --> GroqModeration
+    ChatUC --> GroqClient
+    ChatUC --> ToolRegistryLayer
+    GroqClient --> GroqRotator
+
+    ToolRegistryLayer --> CoreApplicationLayer
+    DiscoveryUC --> QuyetClient
+    AssessTextUC --> QuyetClient
+    RiskUC --> QuyetClient
+    ReviewUC --> QuyetClient
+    ReviewUC --> GroqHighlight
+
+    CoreApplicationLayer --> PostgreSQL
+    CoreApplicationLayer --> RedisCache
+    ConfirmBookingUC --> Redis_Cards
+    ConfirmBookingUC --> Redis_Locks
+    ChatUC --> DB_Conversations
+    ItineraryUC --> DB_V21
+    AssessTextUC --> DB_V21
+    RiskUC --> DB_V21
+
+    classDef client fill:#e1f5fe,stroke:#0288d1,stroke-width:2px;
+    classDef security fill:#fff3e0,stroke:#f57c00,stroke-width:2px;
+    classDef controller fill:#f3e5f5,stroke:#7b1fa2,stroke-width:2px;
+    classDef core fill:#e8f5e9,stroke:#388e3c,stroke-width:2px;
+    classDef groq fill:#fbe9e7,stroke:#d84315,stroke-width:2px;
+    classDef quyet fill:#ede7f6,stroke:#512da8,stroke-width:2px;
+    classDef storage fill:#eceff1,stroke:#455a64,stroke-width:2px;
+
+    class WebClient,MobileClient client;
+    class SecurityContext,LocaleContextFilter,RateLimiter security;
+    class AssistantCtrl,CustomerAiCtrl,AssessmentCtrl,AdminAiCtrl controller;
+    class ChatUC,DiscoveryUC,ItineraryUC,ComparisonUC,ReviewUC,WeatherUC,SupportUC,AssessTextUC,RiskUC,ConfirmBookingUC core;
+    class GroqClient,GroqRotator,GroqModeration,GroqHighlight groq;
+    class QuyetClient,QuyetTasks quyet;
+    class DB_Services,DB_Orders,DB_Conversations,DB_V21,Redis_Rate,Redis_Cards,Redis_Locks,Redis_Keys storage;

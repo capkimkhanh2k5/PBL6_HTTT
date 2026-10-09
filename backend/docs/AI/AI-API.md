@@ -30,7 +30,7 @@ DANASEA là sàn thương mại điện tử đa nhà cung cấp chuyên về tr
 
 | Tính năng                        | Mô tả ngắn gọn                                                                                   |
 | -------------------------------- | ------------------------------------------------------------------------------------------------ |
-| 15. AI Content Moderation        | Phát hiện nội dung dịch vụ, hình ảnh và đánh giá có dấu hiệu vi phạm.                            |
+| 15. AI Content Moderation        | Phát hiện văn bản dịch vụ và đánh giá có dấu hiệu vi phạm; chuyển admin duyệt.                            |
 | 16. AI Fraud Detection           | Phát hiện dấu hiệu bất thường trong giao dịch, tài khoản, nhà cung cấp hoặc đánh giá.            |
 | 17. AI Complaint Analysis        | Tự động phân loại, tóm tắt khiếu nại và đề xuất hướng xử lý để admin xem xét.                    |
 | 18. AI Provider Quality Analysis | Phân tích chất lượng nhà cung cấp dựa trên đánh giá, khiếu nại, tỷ lệ hủy và hiệu suất vận hành. |
@@ -67,28 +67,13 @@ Giai đoạn 1 — AI cốt lõi
 - AI Complaint Analysis
 - AI Provider Quality Analysis
 
-## 5. Mô hình hoạt động tổng thể
-
-DANASEA AI Platform
-
-LLM + RAG + Tool Calling + Recommendation Engine
-
-Khách hàng
-
-Tìm kiếm Gợi ý Lịch trình Hỗ trợ
-
-Nhà cung cấp
-
-Tạo nội dung Trả lời khách Phân tích Kinh doanh
-
-Admin
-
-Kiểm duyệt Phát hiện rủi ro Khiếu nại Chất lượng
-
-Dữ liệu thực của DANASEA
-
-Dịch vụ · Nhà cung cấp · Giá · Lịch trống · Đơn hàng · Đánh giá · Thời tiết · Bản đồ
 
 Kết luận: DANASEA có thể phát triển 18 tính năng AI chính, nhưng không cần triển khai toàn bộ ngay. Bộ 6 tính năng AI cốt lõi ở giai đoạn 1 là đủ để tạo ra một hệ thống có giá trị thực tế và thể hiện rõ sự khác biệt so với website đặt dịch vụ truyền thống.
 
 Quan trọng nhất: AI phải sử dụng dữ liệu thực từ DANASEA; hệ thống nghiệp vụ vẫn là nơi quyết định tồn chỗ, thanh toán, quyền truy cập và điều kiện an toàn.
+
+## 5. Phạm vi triển khai đã chốt (08/10/2026)
+
+Backend đã triển khai contract cho 10 tính năng khách hàng, phân loại/kiểm duyệt văn bản và hàng chờ dấu hiệu giao dịch bất thường. Quyet Small phục vụ quyết định text/JSON; Groq tiếp tục phục vụ hội thoại. Florence và xử lý ảnh không nằm trong runtime. Các nhóm Vendor/provider-quality còn là đề xuất.
+
+Xem [API, hành vi và giới hạn thực tế](AI-IMPLEMENTATION.md), [cấu hình worker local](../ai-decision/README.md) và [bằng chứng kiểm tra](AI-VALIDATION.md). Recommendation hiện dùng baseline theo context với Quyet hỗ trợ; replan là API theo yêu cầu; kiểm duyệt/fraud là gợi ý cho người duyệt, không tự thay trạng thái nguồn hoặc tiền.

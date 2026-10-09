@@ -1,5 +1,19 @@
 package com.danasea.backend.modules.ai.application.usecase;
 
+import java.math.BigDecimal;
+import java.time.Duration;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.stereotype.Service;
+
 import com.danasea.backend.modules.ai.application.port.ConfirmationCardStorePort;
 import com.danasea.backend.modules.ai.domain.models.ConfirmationCard;
 import com.danasea.backend.modules.booking.application.dtos.BookingHoldItemDto;
@@ -8,23 +22,14 @@ import com.danasea.backend.modules.booking.application.dtos.CancelBookingHoldCom
 import com.danasea.backend.modules.booking.application.dtos.CreateBookingHoldCommand;
 import com.danasea.backend.modules.booking.application.usecases.CancelBookingHoldUseCase;
 import com.danasea.backend.modules.booking.application.usecases.CreateBookingHoldUseCase;
+import com.danasea.backend.modules.service.application.api.AiCatalogReadApi;
 import com.danasea.backend.modules.service.application.dtos.ServiceDetailResult;
 import com.danasea.backend.modules.service.application.usecases.GetPublicServiceDetailUseCase;
 import com.danasea.backend.modules.service.domain.ports.ServiceAvailabilityPort;
 import com.danasea.backend.shared.i18n.LocalizedMessageService;
 import com.danasea.backend.shared.i18n.SupportedLanguage;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.redis.core.StringRedisTemplate;
-import org.springframework.security.access.AccessDeniedException;
-import org.springframework.stereotype.Service;
 
-import java.math.BigDecimal;
-import java.time.Duration;
-import java.time.LocalDateTime;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Service("aiConfirmBookingUseCase")
@@ -36,6 +41,7 @@ public class ConfirmBookingUseCase {
     private final CreateBookingHoldUseCase createBookingHoldUseCase;
     private final CancelBookingHoldUseCase cancelBookingHoldUseCase;
     private final ServiceAvailabilityPort serviceAvailabilityPort;
+    private final AiCatalogReadApi catalog;
     private LocalizedMessageService messages = LocalizedMessageService.standalone();
 
     @Autowired
@@ -56,13 +62,21 @@ public class ConfirmBookingUseCase {
                                  @Autowired(required = false) StringRedisTemplate redisTemplate,
                                  CreateBookingHoldUseCase createBookingHoldUseCase,
                                  CancelBookingHoldUseCase cancelBookingHoldUseCase,
-                                 ServiceAvailabilityPort serviceAvailabilityPort) {
+                                 ServiceAvailabilityPort serviceAvailabilityPort,
+                                 AiCatalogReadApi catalog) {
         this.cardStorePort = cardStorePort;
         this.getServiceDetailUseCase = getServiceDetailUseCase;
         this.redisTemplate = redisTemplate;
         this.createBookingHoldUseCase = createBookingHoldUseCase;
         this.cancelBookingHoldUseCase = cancelBookingHoldUseCase;
         this.serviceAvailabilityPort = serviceAvailabilityPort;
+        this.catalog = catalog;
+    }
+
+    public ConfirmBookingUseCase(ConfirmationCardStorePort store, GetPublicServiceDetailUseCase details,
+                                 StringRedisTemplate redis, CreateBookingHoldUseCase holds,
+                                 CancelBookingHoldUseCase cancel, ServiceAvailabilityPort slots) {
+        this(store, details, redis, holds, cancel, slots, null);
     }
 
     public ConfirmBookingUseCase(ConfirmationCardStorePort cardStorePort,
@@ -116,22 +130,39 @@ public class ConfirmBookingUseCase {
         }
         SupportedLanguage language = SupportedLanguage.fromTag(card.getLocale()).orElse(null);
 
-        // Re-validate price and slot via get_service_detail
-        ServiceDetailResult serviceDetail = getServiceDetailUseCase.execute(card.getServiceId(), userId, sessionId);
-
-        BigDecimal currentPrice = serviceDetail.getPromotionalPrice() != null 
-                ? serviceDetail.getPromotionalPrice() 
-                : serviceDetail.getPrice();
+        if (catalog != null && (card.getOptionId() == null || card.getParticipantsCount() == null || card.getParticipantsCount() < 1 || card.getParticipantsCount() > 50 || card.getQuantity() == null || card.getQuantity() < 1 || card.getDate() == null || card.getDate().length() < 10)) {
+            card.markCancelled(); cardStorePort.save(card);
+            return Map.of("status", "refresh_required", "message", "Select an active option and request a new confirmation card.");
+        }
+        AiCatalogReadApi.Option currentOption = null;
+        ServiceDetailResult serviceDetail = null;
+        List<String> availableDates;
+        BigDecimal currentPrice;
+        if (catalog != null) {
+            LocalDate from = LocalDate.parse(card.getDate().substring(0, 10));
+            var snapshot = catalog.find(card.getServiceId(), new AiCatalogReadApi.Query(null, null, from, from.plusDays(7),
+                    card.getParticipantsCount(), null, null, null, 1, language == null ? SupportedLanguage.VI : language));
+            currentOption = snapshot.options().stream().filter(option -> option.id().equals(card.getOptionId())).findFirst().orElse(null);
+            currentPrice = currentOption == null ? null : currentOption.unitPrice();
+            availableDates = currentOption == null ? List.of() : currentOption.slots().stream()
+                    .map(slot -> LocalDateTime.of(slot.date(), slot.start()).toString()).toList();
+        } else {
+            serviceDetail = getServiceDetailUseCase.execute(card.getServiceId(), userId, sessionId);
+            currentPrice = serviceDetail.getPromotionalPrice() != null ? serviceDetail.getPromotionalPrice() : serviceDetail.getPrice();
+            availableDates = serviceDetail.getAvailableSlots() == null ? List.of() : serviceDetail.getAvailableSlots();
+        }
         if (currentPrice == null) {
             currentPrice = BigDecimal.ZERO;
         }
 
         BigDecimal cardPrice = card.getPrice() != null ? card.getPrice() : BigDecimal.ZERO;
-        boolean priceChanged = currentPrice.compareTo(cardPrice) != 0;
+        boolean priceChanged = currentPrice.compareTo(cardPrice) != 0
+                || currentOption != null && currentOption.quantity() != card.getQuantity();
         
         // Slot validation (if date/slot is in availableSlots)
-        boolean hasSlots = serviceDetail.getAvailableSlots() != null && !serviceDetail.getAvailableSlots().isEmpty();
-        boolean slotAvailable = hasSlots && card.getDate() != null && serviceDetail.getAvailableSlots().contains(card.getDate());
+        boolean hasSlots = !availableDates.isEmpty();
+        boolean slotAvailable = hasSlots && card.getDate() != null && availableDates.contains(card.getDate());
+        if (currentOption != null) slotAvailable = slotAvailable && currentOption.slots().stream().anyMatch(slot -> slot.id().equals(card.getSlotId()));
 
         // Check if slots are completely exhausted
         if (!hasSlots) {
@@ -168,9 +199,11 @@ public class ConfirmBookingUseCase {
             card.markCancelled();
             cardStorePort.save(card); // Update old card status
 
-            String alternativeDate = !slotAvailable && hasSlots ? serviceDetail.getAvailableSlots().get(0) : card.getDate();
+            String alternativeDate = !slotAvailable && hasSlots ? availableDates.get(0) : card.getDate();
             UUID alternativeSlotId = card.getSlotId();
-            if (!slotAvailable && serviceAvailabilityPort != null) {
+            if (!slotAvailable && currentOption != null) {
+                alternativeSlotId = currentOption.slots().get(0).id();
+            } else if (!slotAvailable && serviceAvailabilityPort != null) {
                 alternativeSlotId = serviceAvailabilityPort
                         .findAvailableSlotId(card.getServiceId(), alternativeDate)
                         .orElse(null);
@@ -182,9 +215,11 @@ public class ConfirmBookingUseCase {
                     .conversationId(card.getConversationId())
                     .serviceId(card.getServiceId())
                     .slotId(alternativeSlotId)
+                    .optionId(card.getOptionId())
+                    .participantsCount(card.getParticipantsCount())
                     .price(currentPrice)
                     .date(alternativeDate)
-                    .quantity(card.getQuantity())
+                    .quantity(currentOption == null ? card.getQuantity() : currentOption.quantity())
                     .status(ConfirmationCard.STATUS_PENDING)
                     .createdAt(LocalDateTime.now())
                     .retryCount(nextRetry)
@@ -215,7 +250,12 @@ public class ConfirmBookingUseCase {
             }
             hold = createBookingHoldUseCase.execute(new CreateBookingHoldCommand(
                     userId,
-                    java.util.List.of(new BookingHoldItemDto(card.getSlotId(), card.getQuantity()))));
+                    List.of(new BookingHoldItemDto(card.getSlotId(), card.getQuantity(), card.getOptionId(), card.getParticipantsCount()))));
+            if (catalog != null && hold.totalAmount().compareTo(card.getPrice().multiply(BigDecimal.valueOf(card.getQuantity()))) != 0) {
+                cancelBookingHoldUseCase.execute(new CancelBookingHoldCommand(hold.bookingId(), userId));
+                card.markCancelled(); cardStorePort.save(card);
+                return Map.of("status", "refresh_required", "message", "The quote changed while inventory was checked. Request a new confirmation card.");
+            }
         }
 
         try {

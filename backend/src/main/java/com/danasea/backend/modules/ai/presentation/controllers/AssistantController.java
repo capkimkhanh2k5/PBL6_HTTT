@@ -1,31 +1,36 @@
 package com.danasea.backend.modules.ai.presentation.controllers;
 
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.UUID;
+
+import org.springframework.context.i18n.LocaleContextHolder;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.*;
+
+import com.danasea.backend.modules.ai.application.port.RateLimiterPort;
 import com.danasea.backend.modules.ai.application.usecase.ChatUseCase;
 import com.danasea.backend.modules.ai.application.usecase.ConfirmBookingUseCase;
+import com.danasea.backend.modules.ai.domain.TrustTier;
+import com.danasea.backend.modules.ai.domain.exceptions.AiConversationLocaleMismatchException;
 import com.danasea.backend.modules.ai.domain.services.AssistantAuditLogService;
 import com.danasea.backend.modules.ai.domain.services.ChatHistoryService;
 import com.danasea.backend.modules.ai.infrastructure.persistence.entities.AiConversationJpaEntity;
 import com.danasea.backend.modules.ai.infrastructure.persistence.entities.AiMessageJpaEntity;
 import com.danasea.backend.modules.ai.infrastructure.persistence.repositories.JpaAiConversationRepository;
+import com.danasea.backend.modules.ai.presentation.dtos.ChatRequest;
 import com.danasea.backend.security.infrastructure.SecurityUtils;
-import com.danasea.backend.modules.ai.application.port.RateLimiterPort;
-import com.danasea.backend.modules.ai.domain.TrustTier;
-import com.danasea.backend.modules.ai.domain.exceptions.AiConversationLocaleMismatchException;
 import com.danasea.backend.shared.i18n.LocalizedMessageService;
 import com.danasea.backend.shared.i18n.SupportedLanguage;
 import com.danasea.backend.shared.presentation.ErrorResponse;
-import jakarta.servlet.http.HttpServletRequest;
-import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.UUID;
-import org.springframework.context.i18n.LocaleContextHolder;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequestMapping("/api/assistant")
@@ -33,7 +38,6 @@ import org.springframework.context.i18n.LocaleContextHolder;
 public class AssistantController {
 
     private static final String DEFAULT_CLIENT_IP = "127.0.0.1";
-    private static final String HEADER_X_FORWARDED_FOR = "X-Forwarded-For";
     private static final String DEFAULT_SESSION_PREFIX = "session-";
 
     private final ChatHistoryService chatHistoryService;
@@ -45,7 +49,7 @@ public class AssistantController {
     private final LocalizedMessageService messages;
 
     @PostMapping("/chat")
-    public ResponseEntity<?> chat(@RequestBody Map<String, Object> request, HttpServletRequest httpRequest) {
+    public ResponseEntity<?> chat(@Valid @RequestBody ChatRequest request, HttpServletRequest httpRequest) {
         String clientIp = extractClientIp(httpRequest);
         Optional<UUID> currentUserIdOpt = SecurityUtils.getCurrentUserId();
         UUID userId = currentUserIdOpt.orElse(null);
@@ -61,8 +65,7 @@ public class AssistantController {
                     .body(new ErrorResponse("RATE_LIMIT_EXCEEDED", messages.get("ai.rate_limit", language)));
         }
 
-        UUID requestedConversationId = request.containsKey("conversationId") && request.get("conversationId") != null
-                ? UUID.fromString((String) request.get("conversationId")) : null;
+        UUID requestedConversationId = request.conversationId();
 
         AiConversationJpaEntity conversation = chatHistoryService
                 .getOrCreateConversation(requestedConversationId, userId, language);
@@ -74,9 +77,9 @@ public class AssistantController {
         }
         UUID conversationId = conversation.getId();
 
-        String userMessage = (String) request.getOrDefault("message", "");
+        String userMessage = request.message();
         
-        var llmResponse = chatUseCase.processMessage(conversationId, userMessage, conversationLanguage);
+        var llmResponse = chatUseCase.processMessage(conversationId, userMessage, conversationLanguage, userId);
         String responseContent = llmResponse.getContent();
         
         // Log chat action
@@ -92,10 +95,6 @@ public class AssistantController {
     private String extractClientIp(HttpServletRequest request) {
         if (request == null) {
             return DEFAULT_CLIENT_IP;
-        }
-        String xf = request.getHeader(HEADER_X_FORWARDED_FOR);
-        if (xf != null && !xf.isBlank()) {
-            return xf.split(",")[0].trim();
         }
         return request.getRemoteAddr() != null ? request.getRemoteAddr() : DEFAULT_CLIENT_IP;
     }
@@ -144,4 +143,9 @@ public class AssistantController {
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity<ErrorResponse> invalidChatBody(HttpMessageNotReadableException exception) {
+        return ResponseEntity.badRequest().body(new ErrorResponse("INVALID_INPUT", messages.get("error.invalid_input")));
+    }
+
 }

@@ -1,13 +1,13 @@
 package com.danasea.backend.modules.ai.domain.models;
 
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.util.UUID;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import java.math.BigDecimal;
-import java.time.LocalDateTime;
-import java.util.UUID;
 
 @Data
 @Builder
@@ -24,6 +24,8 @@ public class ConfirmationCard {
     private UUID conversationId;
     private UUID serviceId;
     private UUID slotId;
+    private UUID optionId;
+    private Integer participantsCount;
     private BigDecimal price; // The price when the card was generated
     private String date; // Booking date/slot
     private Integer quantity;

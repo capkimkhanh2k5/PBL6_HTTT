@@ -1,0 +1,143 @@
+sequenceDiagram
+    autonumber
+    %% ==========================================
+    %% AI TRAVEL ASSISTANT MULTI-TOOL FLOW
+    %% 15 Tools, Native Option Booking Card & Re-validation
+    %% ==========================================
+
+    actor Client as 📱/🌐 Khách Hàng (User)
+    participant Ctrl as 🎮 AssistantController
+    participant Guard as 🛡️ GroqModerationClient (Prompt Guard)
+    participant ChatUC as ⚙️ ChatUseCase
+    participant Groq as ☁️ GroqLlmClient (Rotator 5 Keys)
+    participant Registry as 🧰 AIToolRegistry (15 Tools)
+    participant ToolExec as 🔧 ToolExecutor / CustomerFeatureTool
+    participant DB as 🐘 PostgreSQL (Catalog, Orders, Itineraries)
+    participant Redis as ⚡ Redis (Cards, Locks, Retries)
+    participant ConfirmUC as ⚙️ ConfirmBookingUseCase
+    participant HoldUC as 📦 CreateBookingHoldUseCase
+
+    %% ----------------------------------------------------
+    %% GIAI ĐOẠN 1: HỘI THOẠI & GỌI CÔNG CỤ (MULTI-TOOL LOOP)
+    %% ----------------------------------------------------
+    rect rgb(245, 245, 255)
+        Note over Client, DB: GIAI ĐOẠN 1: HỘI THOẠI & GỌI CÔNG CỤ (15 TOOLS)
+        Client->>Ctrl: POST /api/assistant/chat<br/>Headers: Accept-Language: vi | Body: { "message": "Tìm tour lặn Cù Lao Chàm ngày mai cho 2 người" }
+        activate Ctrl
+
+        Note over Ctrl: Kiểm tra Rate Limit (Token Bucket + TrustTier)
+        Ctrl->>Guard: isSafe(truncatedText max 1800 ký tự)
+        activate Guard
+        Guard-->>Ctrl: Safe = true (Không phát hiện Prompt Injection / Jailbreak)
+        deactivate Guard
+
+        Ctrl->>ChatUC: chat(userId, conversationId, message, language)
+        activate ChatUC
+
+        ChatUC->>Registry: getToolDefinitions() -> Cung cấp 15 công cụ (6 legacy + 9 CustomerFeatureTools)
+        activate Registry
+        Registry-->>ChatUC: Danh sách 15 Tool Schemas
+        deactivate Registry
+
+        ChatUC->>Groq: generateResponse(history, tools, language)
+        activate Groq
+        Groq-->>ChatUC: Trả về Lệnh Gọi Tool: name = "ai_smart_search", args = { criteria: {...} }
+        deactivate Groq
+
+        Note over ChatUC, ToolExec: Vòng lặp Tool Calling (Tối đa 5 lượt gọi công cụ)
+        ChatUC->>ToolExec: execute(argumentsJson, ToolExecutionContext{userId, convId, lang})
+        activate ToolExec
+        ToolExec->>DB: Thực thi truy vấn logic Backend an toàn (Catalog, Slots, Weather...)
+        activate DB
+        DB-->>ToolExec: Dữ liệu thực tế từ Database
+        deactivate DB
+        ToolExec-->>ChatUC: Kết quả JSON của công cụ
+        deactivate ToolExec
+
+        ChatUC->>Groq: generateResponse(history + tool_result, tools, language)
+        activate Groq
+        Groq-->>ChatUC: Trả lời tự nhiên: "Dạ tour lặn san hô Cù Lao Chàm ngày mai giá 500k/người, bạn có muốn đặt vé không?"
+        deactivate Groq
+
+        ChatUC-->>Ctrl: ChatResponse (message, conversationId)
+        deactivate ChatUC
+        Ctrl-->>Client: HTTP 200 OK
+        deactivate Ctrl
+    end
+
+    %% ----------------------------------------------------
+    %% GIAI ĐOẠN 2: CHỐT PHIẾU ĐẶT CHỖ NATIVE OPTION (DRAFT CARD)
+    %% ----------------------------------------------------
+    rect rgb(255, 250, 240)
+        Note over Client, Redis: GIAI ĐOẠN 2: TẠO PHIẾU ĐẶT CHỖ NATIVE OPTION TRÊN REDIS
+        Client->>Ctrl: POST /api/assistant/chat<br/>Body: { "message": "Ok, đặt giúp mình 2 vé gói Tour Ghép ca 08:00 nhé" }
+        activate Ctrl
+        Ctrl->>ChatUC: chat(...)
+        activate ChatUC
+        ChatUC->>Groq: generateResponse(...)
+        activate Groq
+        Groq-->>ChatUC: ToolCall: request_booking_confirmation(service_id, option_id, slot_id, date, participants: 2)
+        deactivate Groq
+
+        ChatUC->>ToolExec: execute("request_booking_confirmation", args, context)
+        activate ToolExec
+        Note over ToolExec: nativeConfirmation:<br/>• Xác thực Option ID & Slot ID còn khả dụng<br/>• Kiểm tra số khách: 1 <= participants <= 50<br/>• Ngày đi không ở quá khứ
+        ToolExec->>Redis: Lưu ConfirmationCard (cardId, convId, serviceId, optionId, slotId, unitPrice, participants, status: PENDING, TTL: 15p)
+        activate Redis
+        Redis-->>ToolExec: OK
+        deactivate Redis
+        ToolExec-->>ChatUC: Card JSON (cardId, price, participants, expiresInSeconds: 900)
+        deactivate ToolExec
+
+        ChatUC-->>Ctrl: ChatResponse kèm giao diện Thẻ Đặt Chỗ (ConfirmationCard)
+        deactivate ChatUC
+        Ctrl-->>Client: HTTP 200 OK (Hiển thị nút [Xác Nhận Đặt Chỗ])
+        deactivate Ctrl
+    end
+
+    %% ----------------------------------------------------
+    %% GIAI ĐOẠN 3: XÁC NHẬN ĐẶT CHỖ & TẠO BOOKING HOLD (RE-VALIDATION)
+    %% ----------------------------------------------------
+    rect rgb(240, 255, 240)
+        Note over Client, HoldUC: GIAI ĐOẠN 3: XÁC NHẬN ĐẶT CHỖ (POST /conversations/{id}/confirm)
+        Client->>Ctrl: POST /api/assistant/conversations/{id}/confirm<br/>Body: { "cardId": "card_123" }
+        activate Ctrl
+
+        Note over Ctrl: 🛡️ KIỂM TRA QUYỀN SỞ HỮU CONVERSATION: conversation.userId == currentUserId (Chặn 403)
+        Ctrl->>ConfirmUC: execute(cardId, userId, sessionId, expectedConversationId = id)
+        activate ConfirmUC
+
+        Note over ConfirmUC: 🔒 Khóa phân tán: tryAcquireProcessingLock(cardId, TTL 30s)
+        ConfirmUC->>Redis: Lấy ConfirmationCard theo cardId
+        activate Redis
+        Redis-->>ConfirmUC: ConfirmationCard
+        deactivate Redis
+
+        Note over ConfirmUC: 🛡️ RÀNG BUỘC 3 BÊN: card.conversationId == expectedConversationId (Chặn 403)
+        Note over ConfirmUC: 🛡️ Kiểm tra trạng thái: card.status == PENDING
+
+        Note over ConfirmUC, DB: Kiểm tra lại giá & chỗ trống thực tế từ Database (Native Re-validation)
+        ConfirmUC->>DB: Truy vấn Option & Slot thực tế
+        activate DB
+        DB-->>ConfirmUC: Dữ liệu thời gian thực (giá hiện tại, slot còn khả dụng)
+        deactivate DB
+
+        alt Hết chỗ hoặc Giá thay đổi
+            Note over ConfirmUC: Kiểm tra số lần retry (Redis TTL 15m):<br/>• Nếu retry >= 2 -> Hủy card, trả về status: "error"<br/>• Nếu retry < 2 -> Tăng retry, hủy card cũ, tạo alternative card mới
+            ConfirmUC-->>Ctrl: Trả về { status: "alternative_needed", newCardId: "..." }
+            Ctrl-->>Client: HTTP 200 (Thông báo thay đổi giá/slot để khách xác nhận lại)
+        else Dữ liệu hoàn toàn khớp (Validation Success)
+            ConfirmUC->>HoldUC: createHold(serviceId, optionId, slotId, participants, userId)
+            activate HoldUC
+            Note over HoldUC: Thực hiện khóa tồn kho nguyên tử (Redis Lua lock) + Lưu Booking trạng thái HOLD (TTL 15p) vào PostgreSQL
+            HoldUC-->>ConfirmUC: BookingHoldResult(bookingId, holdExpiresAt)
+            deactivate HoldUC
+
+            ConfirmUC->>Redis: Cập nhật card.status = CONFIRMED
+            ConfirmUC->>Redis: Giải phóng ProcessingLock
+            ConfirmUC-->>Ctrl: Result(status: "success", bookingId, holdExpiresAt)
+            deactivate ConfirmUC
+            Ctrl-->>Client: HTTP 200 OK (Chuyển sang trang thanh toán Order trong 15 phút)
+        end
+        deactivate Ctrl
+    end

@@ -1,31 +1,33 @@
 package com.danasea.backend.modules.ai.application.usecase;
 
-import com.danasea.backend.modules.ai.application.port.LlmClientPort;
-import com.danasea.backend.modules.ai.application.port.ModerationPort;
-import com.danasea.backend.modules.ai.domain.models.AiMessageRole;
-import com.danasea.backend.modules.ai.domain.models.LlmResponse;
-import com.danasea.backend.modules.ai.domain.models.ToolCall;
-import com.danasea.backend.modules.ai.domain.services.ChatHistoryService;
-import com.danasea.backend.modules.ai.application.tool.ToolExecutor;
-import com.danasea.backend.modules.ai.application.tool.ToolExecutionContext;
-import com.danasea.backend.modules.ai.infrastructure.persistence.entities.AiMessageJpaEntity;
-import com.danasea.backend.modules.ai.domain.models.AiMessage;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.danasea.backend.modules.ai.domain.services.AssistantAuditLogService;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import com.danasea.backend.shared.i18n.LocalizedException;
-import com.danasea.backend.shared.i18n.LocalizedMessageService;
-import com.danasea.backend.shared.i18n.SupportedLanguage;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.danasea.backend.modules.ai.application.port.LlmClientPort;
+import com.danasea.backend.modules.ai.application.port.ModerationPort;
+import com.danasea.backend.modules.ai.application.tool.ToolExecutionContext;
+import com.danasea.backend.modules.ai.application.tool.ToolExecutor;
+import com.danasea.backend.modules.ai.domain.models.AiMessage;
+import com.danasea.backend.modules.ai.domain.models.AiMessageRole;
+import com.danasea.backend.modules.ai.domain.models.LlmResponse;
+import com.danasea.backend.modules.ai.domain.models.ToolCall;
+import com.danasea.backend.modules.ai.domain.services.AssistantAuditLogService;
+import com.danasea.backend.modules.ai.domain.services.ChatHistoryService;
+import com.danasea.backend.modules.ai.infrastructure.persistence.entities.AiMessageJpaEntity;
+import com.danasea.backend.shared.i18n.LocalizedException;
+import com.danasea.backend.shared.i18n.LocalizedMessageService;
+import com.danasea.backend.shared.i18n.SupportedLanguage;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Service
@@ -81,17 +83,21 @@ public class ChatUseCase {
     }
 
     public LlmResponse processMessage(UUID conversationId, String userMessageContent) {
-        return processMessageInternal(conversationId, userMessageContent, null);
+        return processMessageInternal(conversationId, userMessageContent, null, null);
     }
 
     public LlmResponse processMessage(
             UUID conversationId, String userMessageContent, SupportedLanguage language) {
         return processMessageInternal(conversationId, userMessageContent,
-                language == null ? SupportedLanguage.VI : language);
+                language == null ? SupportedLanguage.VI : language, null);
+    }
+
+    public LlmResponse processMessage(UUID conversationId, String content, SupportedLanguage language, UUID userId) {
+        return processMessageInternal(conversationId, content, language == null ? SupportedLanguage.VI : language, userId);
     }
 
     private LlmResponse processMessageInternal(
-            UUID conversationId, String userMessageContent, SupportedLanguage language) {
+            UUID conversationId, String userMessageContent, SupportedLanguage language, UUID userId) {
         String effectiveContent = userMessageContent;
         if (effectiveContent != null && effectiveContent.length() > MAX_USER_MESSAGE_CHARS) {
             int maxChars = MAX_USER_MESSAGE_CHARS;
@@ -117,10 +123,10 @@ public class ChatUseCase {
 
         chatHistoryService.appendMessage(conversationId, AiMessageRole.USER, effectiveContent, null);
 
-        return executeChatLoop(conversationId, language);
+        return executeChatLoop(conversationId, language, userId);
     }
 
-    private LlmResponse executeChatLoop(UUID conversationId, SupportedLanguage language) {
+    private LlmResponse executeChatLoop(UUID conversationId, SupportedLanguage language, UUID userId) {
         LlmResponse lastResponse = null;
         boolean policyToolCalled = false;
 
@@ -150,7 +156,7 @@ public class ChatUseCase {
                     if (executor != null) {
                         result = language == null
                                 ? executor.execute(tc.getArguments())
-                                : executor.execute(tc.getArguments(), new ToolExecutionContext(language, conversationId));
+                                : executor.execute(tc.getArguments(), new ToolExecutionContext(language, conversationId, userId));
                     } else {
                         result = "{\"errorCode\":\"AI_TOOL_UNKNOWN\"}";
                     }

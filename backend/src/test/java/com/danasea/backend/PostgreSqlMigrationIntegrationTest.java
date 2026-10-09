@@ -38,7 +38,7 @@ class PostgreSqlMigrationIntegrationTest {
         var migrationResult = flyway.migrate();
         assertTrue(migrationResult.success);
         assertNotNull(flyway.info().current());
-        assertEquals("20", flyway.info().current().getVersion().getVersion());
+        assertEquals("21", flyway.info().current().getVersion().getVersion());
         assertTrue(flyway.validateWithResult().validationSuccessful);
 
         try (var connection = DriverManager.getConnection(jdbcUrl, "migration_user", "migration_password");
@@ -47,6 +47,8 @@ class PostgreSqlMigrationIntegrationTest {
             assertTrue(tableExists(statement, "settlements"));
             assertTrue(tableExists(statement, "checkin_tokens"));
             assertTrue(tableExists(statement, "category_safety_rules"));
+            assertTrue(tableExists(statement, "ai_itineraries"));
+            assertTrue(tableExists(statement, "ai_assessment_cases"));
         }
     }
 
@@ -102,7 +104,7 @@ class PostgreSqlMigrationIntegrationTest {
                     """);
         }
         Flyway upgrade = Flyway.configure().dataSource(url,"migration_user","migration_password")
-                .schemas("inventory_upgrade").defaultSchema("inventory_upgrade").locations("classpath:db/migration").load();
+                .schemas("inventory_upgrade").defaultSchema("inventory_upgrade").locations("classpath:db/migration").target("19").load();
         assertEquals(1,upgrade.migrate().migrationsExecuted);
         assertTrue(upgrade.validateWithResult().validationSuccessful);
         try (var connection = DriverManager.getConnection(url,"migration_user","migration_password");
