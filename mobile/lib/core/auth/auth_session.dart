@@ -46,6 +46,26 @@ class AuthSession {
     bool retry = true,
     bool authenticated = true,
   }) async {
+    final body = await requestJson(
+      path,
+      method: method,
+      data: data,
+      retry: retry,
+      authenticated: authenticated,
+    );
+    if (body is! Map<String, dynamic>) {
+      throw AuthFailure('Dữ liệu máy chủ không hợp lệ.');
+    }
+    return body;
+  }
+
+  Future<dynamic> requestJson(
+    String path, {
+    String method = 'GET',
+    Map<String, dynamic>? data,
+    bool retry = true,
+    bool authenticated = true,
+  }) async {
     final uri = Uri.parse('$baseUrl$path');
     if (kReleaseMode && uri.scheme != 'https')
       throw AuthFailure('Backend phải dùng HTTPS.');
@@ -68,20 +88,32 @@ class AuthSession {
           .bind(response)
           .join()
           .timeout(const Duration(seconds: 20));
-      Map<String, dynamic> body = {};
+      dynamic body;
       try {
-        if (text.isNotEmpty) body = jsonDecode(text) as Map<String, dynamic>;
-      } catch (_) {}
+        body = text.isEmpty ? <String, dynamic>{} : jsonDecode(text);
+      } catch (_) {
+        if (response.statusCode < 300) {
+          throw AuthFailure('Dữ liệu máy chủ không hợp lệ.');
+        }
+      }
       if (response.statusCode == 401 &&
+          authenticated &&
+          _access != null &&
           retry &&
           !pendingVerification &&
           !path.startsWith('/api/auth/')) {
         await refresh();
-        return request(path, method: method, data: data, retry: false);
+        return requestJson(
+          path,
+          method: method,
+          data: data,
+          retry: false,
+          authenticated: authenticated,
+        );
       }
       if (response.statusCode >= 300) {
         throw AuthFailure(
-          body['message']?.toString() ??
+          (body is Map ? body['message']?.toString() : null) ??
               'Không thể thực hiện yêu cầu. Vui lòng thử lại.',
           response.statusCode,
         );
@@ -90,7 +122,8 @@ class AuthSession {
         if (cookie.name == 'refresh_token' && cookie.value.isNotEmpty)
           _refresh = cookie.value;
       }
-      if (body['accessToken'] is String) _access = body['accessToken'];
+      if (body is Map && body['accessToken'] is String)
+        _access = body['accessToken'];
       return body;
     } on SocketException {
       throw AuthFailure(
