@@ -333,7 +333,11 @@ public class OrderPaymentService {
         subOrder.setStatus(SubOrderStatus.REJECTED);
         subOrderRepository.save(subOrder);
         if (subOrder.getSlotId() != null && subOrder.getQuantity() != null && subOrder.getQuantity() > 0) {
-            serviceSlotRepository.decrementBookedCount(subOrder.getSlotId(), subOrder.getQuantity());
+            if (subOrder.getBookingItemId() != null) {
+                serviceSlotRepository.releaseBookingItemCapacity(subOrder.getBookingItemId());
+            } else {
+                serviceSlotRepository.decrementBookedCount(subOrder.getSlotId(), subOrder.getQuantity());
+            }
         }
         return toSubOrderResponse(subOrder);
     }

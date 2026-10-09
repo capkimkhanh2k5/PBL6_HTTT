@@ -185,7 +185,7 @@ class AdminCategorySafetyRuleControllerTest {
                     .build();
 
             when(safetyRuleService.updateRule(eq(categoryId), any(UpdateCategorySafetyRuleRequest.class)))
-                    .thenThrow(new InvalidSafetyRuleThresholdException("Ngưỡng sóng vàng (1.50m) không được vượt quá ngưỡng sóng đỏ (0.80m)"));
+                    .thenThrow(new InvalidSafetyRuleThresholdException("Caution wave height (1.50m) cannot exceed maximum wave height (0.80m)"));
 
             mockMvc.perform(patch("/api/admin/category-safety-rules/{categoryId}", categoryId)
                             .header("Accept-Language", "vi")
@@ -219,7 +219,7 @@ class AdminCategorySafetyRuleControllerTest {
                     .build();
 
             when(safetyRuleService.updateRule(eq(unknownId), any(UpdateCategorySafetyRuleRequest.class)))
-                    .thenThrow(new CategorySafetyRuleNotFoundException("Không tìm thấy quy chuẩn an toàn cho danh mục với ID: " + unknownId));
+                    .thenThrow(new CategorySafetyRuleNotFoundException("Category safety rule not found for ID: " + unknownId));
 
             mockMvc.perform(patch("/api/admin/category-safety-rules/{categoryId}", unknownId)
                             .header("Accept-Language", "vi")

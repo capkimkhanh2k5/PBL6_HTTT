@@ -26,6 +26,8 @@ import com.danasea.backend.modules.order.infrastructure.persistence.entities.Ref
 import com.danasea.backend.modules.order.infrastructure.persistence.entities.SubOrderJpaEntity;
 import com.danasea.backend.modules.order.infrastructure.persistence.repositories.JpaRefundRepository;
 import com.danasea.backend.modules.order.infrastructure.persistence.repositories.JpaSubOrderRepository;
+import com.danasea.backend.modules.service.infrastructure.persistence.entities.ServiceJpaEntity;
+import com.danasea.backend.modules.service.infrastructure.persistence.entities.ServiceSlotJpaEntity;
 import com.danasea.backend.modules.service.infrastructure.persistence.repositories.JpaServiceRepository;
 import com.danasea.backend.modules.service.infrastructure.persistence.repositories.JpaServiceSlotRepository;
 import com.danasea.backend.modules.weather.infrastructure.persistence.entities.SafetyRuleEvaluationJpaEntity;
@@ -129,23 +131,23 @@ public class AdminWeatherAlertController {
                 List.of("AWAITING_ADMIN_RESOLUTION", "MONITORING_YELLOW"));
         alerts = alerts == null ? List.of() : alerts;
 
-        Map<UUID, com.danasea.backend.modules.service.infrastructure.persistence.entities.ServiceJpaEntity> services =
+        Map<UUID, ServiceJpaEntity> services =
                 serviceRepository.findAllById(alerts.stream()
                                 .map(SafetyRuleEvaluationJpaEntity::getServiceId)
                                 .filter(java.util.Objects::nonNull)
                                 .collect(Collectors.toSet()))
                         .stream()
                         .collect(Collectors.toMap(
-                                com.danasea.backend.modules.service.infrastructure.persistence.entities.ServiceJpaEntity::getId,
+                                ServiceJpaEntity::getId,
                                 Function.identity()));
-        Map<UUID, com.danasea.backend.modules.service.infrastructure.persistence.entities.ServiceSlotJpaEntity> slots =
+        Map<UUID, ServiceSlotJpaEntity> slots =
                 slotRepository.findAllById(alerts.stream()
                                 .map(SafetyRuleEvaluationJpaEntity::getSlotId)
                                 .filter(java.util.Objects::nonNull)
                                 .collect(Collectors.toSet()))
                         .stream()
                         .collect(Collectors.toMap(
-                                com.danasea.backend.modules.service.infrastructure.persistence.entities.ServiceSlotJpaEntity::getId,
+                                ServiceSlotJpaEntity::getId,
                                 Function.identity()));
 
         List<WeatherAlertResponse> response = alerts.stream().map(alert -> {

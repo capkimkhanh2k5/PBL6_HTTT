@@ -131,7 +131,7 @@ class SettlementControllerTest {
         );
 
         when(generateSettlementUseCase.execute(any()))
-                .thenThrow(new SettlementAlreadyFinalizedException("Kỳ đối soát đã ở trạng thái FINALIZED. Không thể tạo lại."));
+                .thenThrow(new SettlementAlreadyFinalizedException("Settlement is already in FINALIZED status. Cannot regenerate."));
 
         mockMvcAdmin.perform(post("/api/admin/settlements/generate")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -150,7 +150,7 @@ class SettlementControllerTest {
         );
 
         when(generateSettlementUseCase.execute(any()))
-                .thenThrow(new InvalidSettlementPeriodException("Ngày bắt đầu phải trước hoặc bằng ngày kết thúc"));
+                .thenThrow(new InvalidSettlementPeriodException("Start date must be before or equal to end date"));
 
         mockMvcAdmin.perform(post("/api/admin/settlements/generate")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -179,7 +179,7 @@ class SettlementControllerTest {
     @DisplayName("Admin: GET /api/admin/settlements/{id} không tìm thấy trả về 404 Not Found")
     void testAdminGetDetailNotFound() throws Exception {
         when(getSettlementsUseCase.getAdminSettlementById(settlementId))
-                .thenThrow(new SettlementNotFoundException("Không tìm thấy kỳ đối soát: " + settlementId));
+                .thenThrow(new SettlementNotFoundException("Settlement not found: " + settlementId));
 
         mockMvcAdmin.perform(get("/api/admin/settlements/{id}", settlementId))
                 .andExpect(status().isNotFound())

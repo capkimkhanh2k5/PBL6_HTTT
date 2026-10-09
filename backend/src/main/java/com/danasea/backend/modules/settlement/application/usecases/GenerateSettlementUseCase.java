@@ -3,6 +3,7 @@ package com.danasea.backend.modules.settlement.application.usecases;
 import com.danasea.backend.modules.dispute.domain.models.DisputeStatus;
 import com.danasea.backend.modules.dispute.infrastructure.persistence.entities.DisputeJpaEntity;
 import com.danasea.backend.modules.dispute.infrastructure.persistence.repositories.JpaDisputeRepository;
+import com.danasea.backend.modules.order.domain.models.RefundStatus;
 import com.danasea.backend.modules.order.domain.models.SubOrderStatus;
 import com.danasea.backend.modules.order.infrastructure.persistence.entities.RefundJpaEntity;
 import com.danasea.backend.modules.order.infrastructure.persistence.entities.SubOrderJpaEntity;
@@ -148,7 +149,7 @@ public class GenerateSettlementUseCase {
                     refundRepository.findBySubOrderIdIn(subOrderIds),
                     "Refund repository returned null.");
             for (RefundJpaEntity refund : batchRefunds) {
-                if (refund.getStatus() == com.danasea.backend.modules.order.domain.models.RefundStatus.PROCESSED) {
+                if (refund.getStatus() == RefundStatus.PROCESSED) {
                     refundMap.computeIfAbsent(refund.getSubOrderId(), key -> new ArrayList<>()).add(refund);
                 }
             }

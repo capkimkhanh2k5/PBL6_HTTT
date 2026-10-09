@@ -31,6 +31,12 @@ public class ServiceRepositoryAdapter implements ServiceRepositoryPort {
 
     @Override
     @Transactional
+    public Optional<Service> findByIdForUpdate(UUID id) {
+        return jpaServiceRepository.findByIdForUpdate(id).map(serviceMapper::toDomain);
+    }
+
+    @Override
+    @Transactional
     public Service save(Service service) {
         ServiceJpaEntity entity = serviceMapper.toEntity(service);
         ServiceJpaEntity saved = jpaServiceRepository.save(entity);

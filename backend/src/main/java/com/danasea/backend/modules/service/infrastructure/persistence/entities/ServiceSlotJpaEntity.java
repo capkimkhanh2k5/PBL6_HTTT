@@ -1,5 +1,6 @@
 package com.danasea.backend.modules.service.infrastructure.persistence.entities;
 
+import com.danasea.backend.modules.service.domain.models.InventoryType;
 import com.danasea.backend.modules.service.domain.models.SlotStatus;
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -31,4 +32,7 @@ public class ServiceSlotJpaEntity extends BaseJpaEntity {
     @Enumerated(EnumType.STRING)
     private SlotStatus status;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "inventory_type")
+    private InventoryType inventoryType = InventoryType.PERSON_LIMIT;
 }

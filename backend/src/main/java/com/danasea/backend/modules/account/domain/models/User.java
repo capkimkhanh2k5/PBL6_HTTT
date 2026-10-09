@@ -1,6 +1,7 @@
 package com.danasea.backend.modules.account.domain.models;
 
 import com.danasea.backend.shared.core.domain.models.BaseDomainModel;
+
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -15,5 +16,6 @@ public class User extends BaseDomainModel {
     private String avatarUrl;
     private Boolean isEmailVerified;
     private Boolean isLocked;
+    private long sessionVersion;
     private String locale = "vi";
 }

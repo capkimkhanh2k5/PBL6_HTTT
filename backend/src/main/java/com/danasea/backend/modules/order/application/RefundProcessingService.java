@@ -293,7 +293,11 @@ public class RefundProcessingService {
                 ? SubOrderStatus.REFUNDED : SubOrderStatus.PARTIALLY_REFUNDED);
         subOrderRepository.save(subOrder);
         if (!alreadyReleased && subOrder.getSlotId() != null && subOrder.getQuantity() != null && subOrder.getQuantity() > 0) {
-            serviceSlotRepository.decrementBookedCount(subOrder.getSlotId(), subOrder.getQuantity());
+            if (subOrder.getBookingItemId() != null) {
+                serviceSlotRepository.releaseBookingItemCapacity(subOrder.getBookingItemId());
+            } else {
+                serviceSlotRepository.decrementBookedCount(subOrder.getSlotId(), subOrder.getQuantity());
+            }
         }
         List<SubOrderJpaEntity> allSubOrders = subOrderRepository.findByMasterOrderId(masterOrder.getId());
         List<UUID> subOrderIds = allSubOrders.stream().map(SubOrderJpaEntity::getId).toList();

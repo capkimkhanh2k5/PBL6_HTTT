@@ -3,22 +3,19 @@ package com.danasea.backend.security.authentication.application.usecases;
 import java.time.OffsetDateTime;
 import java.util.UUID;
 
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.danasea.backend.modules.account.application.api.AccountInternalApi;
 import com.danasea.backend.modules.account.domain.models.RefreshToken;
 import com.danasea.backend.modules.account.domain.models.User;
 import com.danasea.backend.security.authentication.application.ports.TokenProvider;
-import com.danasea.backend.security.authentication.domain.exceptions.InvalidCredentialsException;
 import com.danasea.backend.security.authentication.application.results.LoginResult;
+import com.danasea.backend.security.authentication.domain.exceptions.InvalidCredentialsException;
 import com.danasea.backend.security.authentication.domain.models.Authentication;
+import com.danasea.backend.security.authentication.infrastructure.security.HashUtils;
 import com.danasea.backend.security.authentication.infrastructure.security.JwtProperties;
 
 import lombok.RequiredArgsConstructor;
-
-import com.danasea.backend.security.authentication.infrastructure.security.HashUtils;
 
 @RequiredArgsConstructor
 public class RefreshTokenUseCase {
@@ -31,6 +28,10 @@ public class RefreshTokenUseCase {
     public LoginResult execute(String rawRefreshToken) {
         String tokenHash = HashUtils.sha256(rawRefreshToken);
 
+        UUID userId = accountApi.findRefreshTokenUserIdByHash(tokenHash)
+                .orElseThrow(() -> new InvalidCredentialsException("Invalid refresh token"));
+        // Account first, then refresh token: the same lock order used by password reset.
+        var lockedUser = accountApi.findUserByIdForUpdate(userId);
         RefreshToken refreshToken = accountApi.findRefreshTokenByHashForUpdate(tokenHash)
                 .orElseThrow(() -> new InvalidCredentialsException("Invalid refresh token"));
 
@@ -46,7 +47,7 @@ public class RefreshTokenUseCase {
             throw new InvalidCredentialsException("Refresh token expired");
         }
 
-        User user = accountApi.findUserById(refreshToken.getUserId())
+        User user = lockedUser
                 .orElseThrow(() -> new InvalidCredentialsException("User not found"));
 
         if (Boolean.TRUE.equals(user.getIsLocked())) {
@@ -58,7 +59,7 @@ public class RefreshTokenUseCase {
         }
 
         Authentication auth = new Authentication(user.getId(), user.getEmail(), null, user.getRole().name(), true,
-                true);
+                true, user.getLocale(), user.getSessionVersion());
 
         String newAccessToken = tokenProvider.generateAccessToken(auth);
         String newRawRefreshToken = tokenProvider.generateRefreshToken(auth);

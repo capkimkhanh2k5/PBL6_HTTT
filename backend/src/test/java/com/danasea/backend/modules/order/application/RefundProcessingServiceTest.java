@@ -93,6 +93,17 @@ class RefundProcessingServiceTest {
     }
 
     @Test
+    void completedAllocatedRefundReleasesTheBookingItemOnce() {
+        sub.setBookingItemId(UUID.randomUUID());
+        when(gateway.requestRefund(any(GatewayRefundRequest.class)))
+                .thenAnswer(inv -> result(GatewayRefundStatus.COMPLETED));
+        assertThat(service.processRefund(refund.getId())).isTrue();
+        assertThat(service.processRefund(refund.getId())).isTrue();
+        verify(slots, times(1)).releaseBookingItemCapacity(sub.getBookingItemId());
+        verify(slots, never()).decrementBookedCount(any(), anyInt());
+    }
+
+    @Test
     void gatewayPendingRemainsPendingAndReconcilesUsingTheSameOperation() {
         when(gateway.requestRefund(any(GatewayRefundRequest.class))).thenAnswer(inv -> result(GatewayRefundStatus.PENDING));
         assertThat(service.processRefund(refund.getId())).isFalse();

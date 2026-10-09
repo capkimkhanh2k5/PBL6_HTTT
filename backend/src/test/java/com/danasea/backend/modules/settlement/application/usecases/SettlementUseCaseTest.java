@@ -27,6 +27,7 @@ import com.danasea.backend.modules.settlement.infrastructure.persistence.mappers
 import com.danasea.backend.modules.settlement.infrastructure.persistence.repositories.JpaSettlementLineItemRepository;
 import com.danasea.backend.modules.settlement.infrastructure.persistence.repositories.JpaSettlementRepository;
 import com.danasea.backend.modules.vendor.application.api.VendorInternalApi;
+import com.danasea.backend.security.authorization.domain.models.AuthorizationSubject;
 import com.danasea.backend.security.infrastructure.SecurityUtils;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -335,8 +336,8 @@ class SettlementUseCaseTest {
         @DisplayName("Vendor xem chi tiết kỳ đối soát của chính mình -> thành công")
         void testVendorViewOwnSettlementSuccess() {
             UUID userId = UUID.randomUUID();
-            com.danasea.backend.security.authorization.domain.models.AuthorizationSubject subject =
-                    new com.danasea.backend.security.authorization.domain.models.AuthorizationSubject(
+            AuthorizationSubject subject =
+                    new AuthorizationSubject(
                             userId, "vendor@example.com", java.util.Set.of("VENDOR"), java.util.Set.of("READ")
                     );
             org.springframework.security.authentication.UsernamePasswordAuthenticationToken auth =
@@ -366,8 +367,8 @@ class SettlementUseCaseTest {
         @DisplayName("Vendor A xem chi tiết kỳ đối soát của Vendor B -> ném UnauthorizedSettlementAccessException (403)")
         void testVendorACannotViewVendorBSettlement() {
             UUID userId = UUID.randomUUID();
-            com.danasea.backend.security.authorization.domain.models.AuthorizationSubject subject =
-                    new com.danasea.backend.security.authorization.domain.models.AuthorizationSubject(
+            AuthorizationSubject subject =
+                    new AuthorizationSubject(
                             userId, "vendorA@example.com", java.util.Set.of("VENDOR"), java.util.Set.of("READ")
                     );
             org.springframework.security.authentication.UsernamePasswordAuthenticationToken auth =

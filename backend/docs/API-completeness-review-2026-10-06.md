@@ -1,23 +1,4 @@
-# Đánh giá mức độ đầy đủ của API DANASEA
-
-Ngày rà soát: 06/10/2026. Checkout: `main`, commit `0a236ec7a44d6db56e9f4c8d56e1ba9962145cee`.
-
-## Kết luận
-
-Backend đã có API cho phần lớn luồng giao dịch của sàn trải nghiệm biển đa nhà cung cấp: tài khoản, xác minh vendor, danh mục/dịch vụ, giữ chỗ, đơn tổng/đơn thành phần, thanh toán, hủy/hoàn, thời tiết, AI, check-in, tranh chấp và đối soát. Tuy nhiên, chưa thể kết luận đã đầy đủ theo đề tài hoặc đủ để vận hành xuyên suốt. Có cả chức năng chưa triển khai và các API đã có nhưng chưa nối đúng nghiệp vụ/persistence.
-
-Ba việc cần ưu tiên là sửa luồng payment/refund và quyền truy cập; bổ sung quản lý lịch/tồn chỗ; bổ sung thống kê/báo cáo phục vụ yêu cầu học phần. Sau đó hoàn thiện đánh giá, chi trả vendor, cam kết an toàn và các chức năng hỗ trợ.
-
-Không quy đổi số endpoint thành phần trăm hoàn thành: một API tồn tại không chứng minh luồng nghiệp vụ đã hoạt động đúng.
-
-## Cơ sở và giới hạn
-
-- Đọc `docs/DANASEA.docx`, `docs/DANASEA_Plan.docx`, `docs/YeuCau_PBL6_HTTT.docx.pdf`, tài liệu workflow và checklist API.
-- Kiểm kê tất cả controller HTTP, đọc hợp đồng request/response, `SecurityConfig`, và theo các luồng trọng yếu tới usecase/adapter/repository.
-- Phát hiện 35 controller, 102 handler HTTP tương ứng 106 tổ hợp method/path vì catalog và weather có alias. Số này gồm 4 đường dẫn kiểm tra phân quyền chỉ bật ở profile dev/test và dashboard hiện là placeholder. Không tính Actuator/Swagger do thư viện cung cấp.
-- Test kiểm kê Spring trong suite cũng phát hiện 106 endpoint ở profile test, khớp kiểm kê mã nguồn.
-- Nhận xét bảo mật/payment bên dưới dựa vào đường gọi trong code; chưa thực hiện giao dịch sandbox thực hoặc khai thác trên môi trường triển khai.
-- Rà soát chức năng backend; không nghiệm thu Web/Flutter, SEO, trải nghiệm giao diện, tải thực hoặc chất lượng tư vấn AI.
+# ĐÁNH GIÁ TOÀN BỘ API 08/10/2026
 
 ## Phần đã có
 
@@ -29,53 +10,11 @@ Không quy đổi số endpoint thành phần trăm hoàn thành: một API tồ
 - Thời tiết/AI: thời tiết khí tượng và biển, kiểm tra an toàn trước booking, rule theo danh mục, giám sát slot, cảnh báo và xử lý admin; AI chat/tool calling, confirmation card, lưu hội thoại, rate limit và nội dung Việt/Anh.
 - Thông báo: lưu và đọc thông báo, có hạ tầng gửi email qua hàng đợi. Chat AI khác với nhắn tin customer-vendor.
 
-## Những vấn đề cần sửa ở API đã có
-
-### P0 Thanh toán chưa nối đủ payment intent với webhook — ĐÃ XỬ LÝ
-
-Cập nhật 06/10/2026: `CreatePaymentIntentUseCase` lưu và commit payment trước khi gọi gateway. Một transaction tiếp theo khóa payment rồi order để tuần tự hóa các request cùng key; khi gateway timeout, payment PENDING vẫn tồn tại và retry dùng lại cùng UUID. PayPal nhận `PayPal-Request-Id` bằng UUID đó. Entry point cũ trong `OrderPaymentService` cũng ủy quyền cho cùng use case.
-
-Payment SUCCESS/FAILED/REFUNDED không được trả lại thành intent PENDING. Intent hết hạn được chuyển FAILED và commit trước khi trả HTTP 409. Customer/admin đã có API danh sách/chi tiết payment trong tracking. `PaymentIntentPersistenceIntegrationTest` kiểm tra PostgreSQL và Flyway thật, gateway/booking confirmation được mock; test webhook ở đây dùng HMAC/DTO nội bộ, không chứng minh callback của nhà cung cấp.
-
-Lõi nối payment ID trong hệ thống đã được sửa. Tích hợp provider hoàn chỉnh vẫn còn các việc ở mục cổng thanh toán bên dưới. Xem [kết quả kiểm tra sandbox](payment-sandbox-verification-2026-10-06.md).
-
-### P0 Hoàn tiền chưa thống nhất persistence và thực thi -> ĐÃ XỬ LÝ
-
-`OrderController.requestRefund()` gọi `RequestRefundUseCase`. Usecase truyền `subOrderId.toString()` vào tham số `providerTransactionId`, bỏ qua kết quả gateway, tạo UUID refund trong response, nhưng không lưu refund, không tra idempotency đã xử lý và không cập nhật/nhả chỗ trong luồng đó. Webhook refund lại cần tìm refund đã lưu. Hệ quả: ID phản hồi không có lifecycle bền vững và gọi lặp chưa được bảo vệ bằng việc chỉ yêu cầu header.
-
-Các luồng hủy booking, vendor reject, weather và dispute có tạo refund PENDING trong DB, nhưng không thấy worker/job/consumer gửi các bản ghi PENDING này tới cổng gốc. PENDING là trạng thái đúng trước khi có xác nhận của cổng; còn thiếu bước gửi, đối chiếu kết quả và thử lại có kiểm soát.
-
-Cần dùng payment thành công gốc để lấy provider và transaction/capture ID; persist yêu cầu trước khi gọi ngoài; worker có idempotency, retry và trạng thái lỗi; chỉ đánh dấu PROCESSED khi có xác nhận; đồng bộ master/sub-order, booking và inventory. Cung cấp lịch sử/trạng thái refund cho customer/admin.
-
-Bằng chứng: `modules/order/application/usecases/RequestRefundUseCase.java:140`, `modules/order/application/OrderPaymentService.java:416`, `modules/order/infrastructure/BookingCancellationFinancialAdapter.java`, `modules/dispute/application/usecases/ResolveDisputeUseCase.java`, `modules/weather/presentation/controllers/AdminWeatherAlertController.java`.
-
-### P0 Kiểm tra quyền sở hữu còn thiếu ở một số nhánh — ĐÃ XỬ LÝ
-
-Cập nhật 08/10/2026:
-- `GET /api/assistant/conversations/{id}` và `GET .../{id}/history`: `AssistantController` đã chuyển sang gọi `ChatHistoryService.getConversationForUser()` và `getRecentMessagesForUser()`, kiểm tra quyền sở hữu của user đã đăng nhập. Trả về 403 Forbidden (`ACCESS_DENIED`) nếu hội thoại thuộc user khác, 404 Not Found nếu không tồn tại.
-- `POST /api/assistant/conversations/{id}/confirm`: `AssistantController` đã kiểm tra quyền sở hữu hội thoại trước và truyền `id` vào overload `confirmBookingUseCase.execute(cardId, userId, sessionId, id)`. Ràng buộc chặt chẽ Card, Conversation và User trước khi tạo hold; trả về 403 nếu hội thoại thuộc user khác hoặc card thuộc conversation khác.
-- `POST /api/orders`: `CreateOrderUseCase` đã bổ sung kiểm tra quyền sở hữu `order.getCustomerId().equals(command.customerId())` ở cả hai nhánh idempotency (`findByBookingId` và `findByCustomerIdAndIdempotencyKey`), ném `UnauthorizedOrderAccessException` (403 `UNAUTHORIZED_ORDER_ACCESS`) nếu phát hiện request lặp của user khác.
-- Đã bổ sung 2 bộ test regression ở tầng HTTP với 2 tài khoản A/B: `AssistantOwnershipHttpRegressionTest` (10 test cases) và `OrderOwnershipHttpRegressionTest` (5 test cases), cùng các test case bổ sung trong `CreateOrderUseCaseTest`.
-
-Bằng chứng: `modules/ai/presentation/controllers/AssistantController.java:103`, `:123`, `:131`; `modules/ai/domain/services/ChatHistoryService.java`; `modules/order/application/usecases/CreateOrderUseCase.java:64`; `modules/ai/presentation/controllers/AssistantOwnershipHttpRegressionTest.java`; `modules/order/presentation/controllers/OrderOwnershipHttpRegressionTest.java`.
-
-### P0/P1 Cổng thanh toán có route nhưng tích hợp thực chưa hoàn chỉnh
-
-- Đã chặn MOMO/SEPAY ở use case và PayPal adapter. Chỉ VNPAY/PAYPAL được tạo intent. MoMo chưa có adapter; SePay đã được bỏ khỏi thiết kế nhưng giữ enum/schema cho dữ liệu cũ.
-- Đã bỏ token/URL mô phỏng khi PayPal OAuth/order lỗi; API trả 502 và giữ payment để retry. PayPal refund vẫn trả success mô phỏng khi request thật lỗi, cần sửa ở phạm vi refund. VNPay refund hiện tạo ID ngẫu nhiên và trả success, chưa gửi lệnh hoàn thật.
-- Các HTTP webhook hiện dùng HMAC SHA-256 của DANASEA và payload DTO nội bộ. Nhánh xác minh provider trong gateway không phải nhánh được raw HTTP webhook gọi. Vì vậy test HMAC nội bộ không chứng minh callback thực của VNPay/MoMo/PayPal hoạt động.
-- Đã bỏ nhánh chấp nhận chữ ký PayPal thiếu metadata và sửa `webhook_event` thành object khi gọi API xác minh. Raw HTTP webhook vẫn dùng signer HMAC riêng, chưa nối tới nhánh xác minh provider; cần nối theo hợp đồng PayPal.
-- Không thấy bước capture order PayPal trong backend. Luồng redirect hiện cần bổ sung capture và lưu provider IDs tương ứng.
-
-PayPal công bố riêng bước [capture sau approval](https://developer.paypal.com/api/orders/v2/orders-capture) và [xác minh webhook với bộ transmission headers và webhook event](https://developer.paypal.com/api/webhooks/v1/verify-webhook-signature-post). Adapter/callback cần khớp hợp đồng của cổng. Có thể mô phỏng cho đồ án, nhưng cần tách chế độ mô phỏng rõ ràng và có bằng chứng sandbox cho cổng công bố đã tích hợp.
-
-Bằng chứng: `modules/order/infrastructure/adapters/PayPalPaymentAdapter.java:82`, `:86`, `:175`, `:223`, `:227`; `VNPayPaymentAdapter.java:152`; `modules/order/application/PaymentWebhookSigner.java`; `modules/order/presentation/controllers/PaymentController.java:99`.
-
 ## API và tính năng cần bổ sung theo ưu tiên
 
 Các đường dẫn dưới đây là hợp đồng đề xuất, chưa tồn tại trừ khi ghi rõ mở rộng API có sẵn. Không cần tách endpoint riêng nếu có thể hoàn thiện hợp đồng hiện tại.
 
-### P1 Quản lý lịch và tồn chỗ
+### P1 Quản lý lịch và tồn chỗ -> Đang Xử Lý
 
 Có model/repository slot và engine giữ chỗ, nhưng chưa có API vendor tạo/sửa/đóng/mở slot. `capacityPerSlot` trên service không thay thế lịch bán. Public detail hiện trả `availableSlots: List<String>` theo ngày/giờ, thiếu slotId mà `POST /bookings/hold` bắt buộc nhận; thiếu sức chứa, số chỗ trống và trạng thái cho khách lựa chọn.
 
@@ -87,7 +26,7 @@ Có model/repository slot và engine giữ chỗ, nhưng chưa có API vendor t�
 
 Không giảm capacity thấp hơn booked/held; không xóa slot có giao dịch; chặn thao tác vendor khác. Availability chỉ là dữ liệu tham khảo; hold vẫn phải kiểm tra nguyên tử. Cần test cạnh tranh slot cuối bằng Redis/DB thật.
 
-### P1 Thống kê và báo cáo
+### P1 Thống kê và báo cáo -> Đang xử lý
 
 Yêu cầu học phần bắt buộc có báo cáo theo ngày, tuần, quý, năm và khoảng từ ngày đến ngày. `/api/admin/dashboard` chỉ trả `ADMIN_ACCESS_GRANTED`. Listing settlement có bộ lọc ngày là chức năng đối soát, chưa thay thế báo cáo kinh doanh/phân tích.
 
@@ -133,12 +72,15 @@ Vendor có thể nhập waiver content, sub-order có waiverAccepted/waiverAccep
 
 Mở rộng public detail trả nội dung điều kiện tham gia/waiver theo ngôn ngữ và version. Mở rộng request tạo order/checkout nhận xác nhận từng service rủi ro; lưu user, thời điểm, version/nội dung snapshot. Có thể dùng endpoint `POST /api/sub-orders/{id}/waiver-acceptance` nếu phù hợp thứ tự checkout. Không cần thêm cả hai cách.
 
-### P1 Quên mật khẩu
+### P1 Quên mật khẩu — ĐÃ XỬ LÝ
 
-Có đổi mật khẩu khi đã biết mật khẩu cũ và OTP xác minh email. PasswordResetToken hiện chỉ có model/entity/repository; chưa có API phục hồi tài khoản.
+Cập nhật 08/10/2026:
+- `POST /api/auth/forgot-password`: Nhận email, chống User Enumeration bằng phản hồi đồng nhất; tạo mã OTP 6 chữ số băm SHA-256 lưu trong `password_reset_tokens` (hết hạn sau 15 phút, vô hiệu hóa các mã cũ của user); phát sự kiện `PasswordResetRequestedEvent` qua RabbitMQ topic exchange `danasea.exchange.topic` tới queue `notification.password-reset-email.queue` để gửi email bất đồng bộ; áp dụng Rate Limit (5 requests/phút theo IP qua Bucket4j/Redis).
+- `POST /api/auth/reset-password`: Nhận email, OTP 6 chữ số và mật khẩu mới; kiểm tra active token và giới hạn tối đa 5 lần thử sai bằng `failed_attempts` trong PostgreSQL; lần sai thứ 5 commit trạng thái vô hiệu hóa dù API trả lỗi. Cấp mã, reset, login và refresh dùng khóa bi quan chung trên tài khoản, bảo đảm OTP dùng một lần khi request đồng thời. Reset cập nhật BCrypt password hash, đánh dấu `usedAt`, tăng `users.session_version`, thu hồi mọi refresh token và ghi audit log `PASSWORD_RESET`. JWT có claim `session_version`; filter đọc tài khoản không qua cache và từ chối access token có phiên bản cũ.
+- Migration `V20__password_reset_security.sql` bổ sung trạng thái bảo mật với giá trị mặc định cho dữ liệu cũ; token reset mới để Hibernate tự sinh UUID. V18/V19 được giữ cho nhánh quản lý slot đang triển khai riêng. JWT cũ chưa có claim version được coi là phiên bản 0 và bị vô hiệu hóa sau lần reset đầu tiên.
+- Đã bổ sung bộ test kiểm chứng: `ForgotPasswordUseCaseTest`, `ResetPasswordUseCaseTest`, `PasswordResetEmailConsumerTest`, `AuthenticationControllerTest`; `PasswordResetSecurityIntegrationTest` dùng PostgreSQL 16/Redis thật để kiểm tra migration/schema, HTTP response đồng nhất kể cả publisher lỗi, giới hạn OTP, hết hạn, cấp mã/reset đồng thời, thu hồi access/refresh token, race login/refresh với reset, cache cũ và rollback; cập nhật kiểm kê `BackendApplicationTests` (117 endpoints).
 
-- `POST /api/auth/forgot-password` và `POST /api/auth/reset-password`.
-- Token/OTP riêng mục đích reset, hết hạn, dùng một lần, rate limit; response không tiết lộ email tồn tại; thu hồi phiên cũ khi reset thành công.
+Bằng chứng: `security/authentication/presentation/AuthenticationController.java`, `ForgotPasswordUseCase.java`, `ResetPasswordUseCase.java`, `PasswordResetEmailConsumer.java`, `configs/RabbitMQConfig.java`.
 
 ### P1 Quản trị giao dịch và theo dõi hoàn tiền
 
@@ -192,25 +134,6 @@ Conversation/Message của communication mới có persistence, chưa có API nh
 Checklist `danasea-api-tracking.md` hiện ghi nhiều API weather/AI/check-in/dispute/settlement chưa xong dù code đã có; ngược lại thiếu module promotions/messaging/reporting/payout. Workflow refund mô tả persist/cancel/release slot nhưng đường HTTP hiện tại chưa làm các bước đó. Cần cập nhật cả hợp đồng API, workflow và tiêu chí nghiệm thu từ code cuối cùng.
 
 Giỏ hàng không bắt buộc cần CRUD backend riêng: yêu cầu học phần cho phép có hoặc không tùy ứng dụng. Client cart cộng với hold nhiều item có thể đáp ứng MVP; chỉ cần API cart nếu muốn lưu bền vững/đồng bộ nhiều thiết bị. Ba cổng thanh toán cũng không cần hoàn thiện đồng thời nếu một cổng nội địa và một cổng quốc tế đáp ứng phạm vi đã chốt.
-
-## Đề xuất thứ tự triển khai
-
-1. Sửa quyền truy cập, thống nhất payment intent/webhook và refund lifecycle; loại bỏ success mô phỏng khỏi adapter thật. Có test HTTP tới DB và callback sandbox cho cổng chọn.
-2. Hoàn thiện slot CRUD/availability và dữ liệu detail; test cạnh tranh slot cuối, hold expiry và rollback nhiều item.
-3. Thống kê/báo cáo admin/vendor, lọc khoảng thời gian, CSV; đây là khoảng trống trực tiếp của yêu cầu học phần.
-4. Review, waiver, forgot password, payout/mark-paid, commission và admin quản trị giao dịch.
-5. Đổi lịch, voucher, nhắn tin, tranh chấp đọc/phản hồi, khám phá và thông báo; xếp lại theo phạm vi nghiệm thu và thời gian còn lại.
-
-## Kiểm chứng trong lần rà soát này
-
-Chạy `./mvnw -q test` từ backend. Kết quả tổng hợp Maven: **1497 tests, 1 failure, 27 errors, 136 skipped**, exit code 1. Các test skipped không phải bằng chứng pass.
-
-- Failure: `BackendApplicationTests.allApplicationEndpointsAreDiscoverable` kỳ vọng 105 endpoint nhưng Spring phát hiện 106. Cần cập nhật kiểm kê có chủ đích; đây không tự nó là lỗi nghiệp vụ.
-- 27 errors thuộc các test tích hợp liên quan Testcontainers không tìm được Docker environment và các class phụ thuộc khởi tạo thất bại. Cần chạy lại khi Docker dùng được; chưa thể nghiệm thu các invariant bằng kết quả này.
-- Context test thông thường đã chạy được, nhưng không thay thế full integration context với PostgreSQL/Redis thật.
-- Những vấn đề payment/refund/owner nêu trên là phát hiện từ mã nguồn; suite hiện tại chưa chứng minh đã bao phủ các đường lỗi đó.
-
-Không sửa mã nguồn sản phẩm hoặc test trong lần nhận xét này. Phụ lục dưới đây liệt kê toàn bộ API tìm thấy, gồm alias và endpoint chỉ dùng dev/test.
 
 ## Phụ lục kiểm kê toàn bộ API
 

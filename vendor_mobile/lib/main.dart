@@ -1,3 +1,4 @@
+import 'features/auth/presentation/screens/session_gate.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'core/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
@@ -26,7 +27,6 @@ import 'features/vouchers/presentation/screens/voucher_management_screen.dart';
 import 'features/settlements/presentation/screens/settlement_revenue_screen.dart';
 import 'features/settlements/presentation/screens/payout_detail_screen.dart';
 import 'features/disputes/presentation/screens/dispute_management_screen.dart';
-import 'features/navigation/presentation/screens/main_navigation_screen.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -52,7 +52,7 @@ class DanaSeaVendorApp extends StatelessWidget {
         theme: AppTheme.lightTheme,
         initialRoute: '/',
         routes: {
-          '/': (context) => const MainNavigationScreen(),
+          '/': (context) => const SessionGate(),
           '/login': (context) => const LoginRegisterScreen(),
           '/forgot-password': (context) => const ForgotPasswordScreen(),
           '/dashboard': (context) => const DashboardScreen(),

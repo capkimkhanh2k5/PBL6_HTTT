@@ -9,6 +9,8 @@ import com.danasea.backend.modules.booking.domain.models.SlotValidationDetails;
 
 public interface ServiceSlotPort {
 
+    void lockSlotsForUpdate(List<UUID> slotIds);
+
     Optional<SlotValidationDetails> findSlotDetails(UUID slotId);
 
     List<SlotValidationDetails> findSlotDetailsBatch(List<UUID> slotIds);
@@ -17,4 +19,3 @@ public interface ServiceSlotPort {
 
     void releaseCapacityBatch(List<BookingItem> items);
 }
-

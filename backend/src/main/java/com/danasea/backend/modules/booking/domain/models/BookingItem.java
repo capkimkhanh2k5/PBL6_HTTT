@@ -3,10 +3,14 @@ package com.danasea.backend.modules.booking.domain.models;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
+import com.danasea.backend.modules.service.domain.models.PricingUnit;
 import com.danasea.backend.shared.core.domain.models.BaseDomainModel;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
@@ -22,11 +26,17 @@ public class BookingItem extends BaseDomainModel {
     private UUID serviceId;
     private UUID vendorId;
     private UUID slotId;
+    private UUID optionId;
+    private PricingUnit pricingUnit;
     private Integer quantity;
+    private Integer participantsCount;
     private LocalDate bookingDate;
     private LocalTime bookingTime;
     private BigDecimal price;
     private BookingStatus bookingStatus;
+
+    @Builder.Default
+    private List<BookingItemAllocation> allocations = new ArrayList<>();
 
     public BigDecimal calculateSubtotal() {
         if (price == null || quantity == null) {

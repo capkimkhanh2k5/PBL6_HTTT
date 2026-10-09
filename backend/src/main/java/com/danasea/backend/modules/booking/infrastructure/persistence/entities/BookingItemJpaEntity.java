@@ -3,14 +3,18 @@ package com.danasea.backend.modules.booking.infrastructure.persistence.entities;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 import com.danasea.backend.shared.core.infrastructure.persistence.entities.BaseJpaEntity;
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -40,6 +44,15 @@ public class BookingItemJpaEntity extends BaseJpaEntity {
     @Column(name = "slot_id")
     private UUID slotId;
 
+    @Column(name = "option_id")
+    private UUID optionId;
+
+    @Column(name = "pricing_unit")
+    private String pricingUnit;
+
+    @Column(name = "participants_count")
+    private Integer participantsCount;
+
     @Column(name = "quantity", nullable = false)
     private Integer quantity;
 
@@ -51,4 +64,16 @@ public class BookingItemJpaEntity extends BaseJpaEntity {
 
     @Column(name = "price", nullable = false, precision = 15, scale = 2)
     private BigDecimal price;
+
+    @Builder.Default
+    @OneToMany(mappedBy = "bookingItem", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
+    private List<BookingItemAllocationJpaEntity> allocations = new ArrayList<>();
+
+    public void addAllocation(BookingItemAllocationJpaEntity allocation) {
+        if (allocations == null) {
+            allocations = new ArrayList<>();
+        }
+        allocations.add(allocation);
+        allocation.setBookingItem(this);
+    }
 }

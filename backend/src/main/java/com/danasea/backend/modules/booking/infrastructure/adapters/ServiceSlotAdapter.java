@@ -1,8 +1,10 @@
 package com.danasea.backend.modules.booking.infrastructure.adapters;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Function;
@@ -13,13 +15,21 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.danasea.backend.modules.booking.domain.exceptions.InsufficientInventoryException;
 import com.danasea.backend.modules.booking.domain.models.BookingItem;
+import com.danasea.backend.modules.booking.domain.models.BookingItemAllocation;
 import com.danasea.backend.modules.booking.domain.models.SlotValidationDetails;
 import com.danasea.backend.modules.booking.domain.ports.ServiceSlotPort;
+import com.danasea.backend.modules.service.domain.models.InventoryType;
+import com.danasea.backend.modules.service.domain.models.OptionStatus;
 import com.danasea.backend.modules.service.domain.models.ServiceStatus;
 import com.danasea.backend.modules.service.infrastructure.persistence.entities.ServiceJpaEntity;
+import com.danasea.backend.modules.service.infrastructure.persistence.entities.ServiceOptionJpaEntity;
 import com.danasea.backend.modules.service.infrastructure.persistence.entities.ServiceSlotJpaEntity;
+import com.danasea.backend.modules.service.infrastructure.persistence.entities.ServiceSlotUnitJpaEntity;
+import com.danasea.backend.modules.service.infrastructure.persistence.repositories.JpaServiceOptionRepository;
 import com.danasea.backend.modules.service.infrastructure.persistence.repositories.JpaServiceRepository;
 import com.danasea.backend.modules.service.infrastructure.persistence.repositories.JpaServiceSlotRepository;
+import com.danasea.backend.modules.service.infrastructure.persistence.repositories.JpaServiceSlotUnitRepository;
+
 import lombok.RequiredArgsConstructor;
 
 @Component
@@ -28,6 +38,14 @@ public class ServiceSlotAdapter implements ServiceSlotPort {
 
     private final JpaServiceSlotRepository jpaServiceSlotRepository;
     private final JpaServiceRepository jpaServiceRepository;
+    private final JpaServiceSlotUnitRepository jpaServiceSlotUnitRepository;
+    private final JpaServiceOptionRepository jpaServiceOptionRepository;
+
+    @Override
+    @Transactional
+    public void lockSlotsForUpdate(List<UUID> slotIds) {
+        slotIds.stream().distinct().sorted().forEach(jpaServiceSlotRepository::findByIdForUpdate);
+    }
 
     @Override
     @Transactional(readOnly = true)
@@ -60,10 +78,45 @@ public class ServiceSlotAdapter implements ServiceSlotPort {
         Map<UUID, ServiceJpaEntity> serviceMap = jpaServiceRepository.findAllById(serviceIds).stream()
                 .collect(Collectors.toMap(ServiceJpaEntity::getId, Function.identity()));
 
+        List<ServiceSlotUnitJpaEntity> unitEntities = jpaServiceSlotUnitRepository.findBySlotIdInOrderBySlotIdAscUnitNumberAsc(slotIds);
+        Map<UUID, List<ServiceSlotUnitJpaEntity>> unitsBySlotId = unitEntities.stream()
+                .collect(Collectors.groupingBy(ServiceSlotUnitJpaEntity::getSlotId));
+
+        Map<UUID, List<ServiceOptionJpaEntity>> optionsByServiceId = new HashMap<>();
+        for (UUID serviceId : serviceIds) {
+            List<ServiceOptionJpaEntity> opts = jpaServiceOptionRepository.findByServiceIdAndStatusOrderByCreatedAtAsc(serviceId, OptionStatus.ACTIVE);
+            optionsByServiceId.put(serviceId, opts);
+        }
+
         return slotEntities.stream()
                 .map(slot -> {
                     ServiceJpaEntity service = serviceMap.get(slot.getServiceId());
                     boolean published = service != null && ServiceStatus.PUBLISHED.equals(service.getStatus());
+
+                    List<ServiceSlotUnitJpaEntity> rawUnits = unitsBySlotId.getOrDefault(slot.getId(), Collections.emptyList());
+                    List<SlotValidationDetails.SlotUnitValidationDetails> slotUnits = rawUnits.stream()
+                            .map(u -> SlotValidationDetails.SlotUnitValidationDetails.builder()
+                                    .id(u.getId())
+                                    .unitNumber(u.getUnitNumber())
+                                    .capacity(u.getCapacity())
+                                    .bookedCount(u.getBookedCount() != null ? u.getBookedCount() : 0)
+                                    .build())
+                            .toList();
+
+                    List<ServiceOptionJpaEntity> rawOpts = optionsByServiceId.getOrDefault(slot.getServiceId(), Collections.emptyList());
+                    Map<UUID, SlotValidationDetails.ServiceOptionValidationDetails> optionMap = rawOpts.stream()
+                            .collect(Collectors.toMap(
+                                    ServiceOptionJpaEntity::getId,
+                                    o -> SlotValidationDetails.ServiceOptionValidationDetails.builder()
+                                            .id(o.getId())
+                                            .name(o.getName())
+                                            .optionType(o.getOptionType())
+                                            .pricingUnit(o.getPricingUnit())
+                                            .price(o.getPrice())
+                                            .maxPaxPerPackage(o.getMaxPaxPerPackage())
+                                            .status(o.getStatus())
+                                            .build()
+                            ));
 
                     return SlotValidationDetails.builder()
                             .slotId(slot.getId())
@@ -75,6 +128,10 @@ public class ServiceSlotAdapter implements ServiceSlotPort {
                             .capacity(slot.getCapacity())
                             .bookedCount(slot.getBookedCount())
                             .status(slot.getStatus())
+                            .inventoryType(slot.getInventoryType() != null ? slot.getInventoryType() : InventoryType.PERSON_LIMIT)
+                            .optionsConfigured(jpaServiceOptionRepository.existsByServiceId(slot.getServiceId()))
+                            .units(slotUnits)
+                            .options(optionMap)
                             .price(service != null ? service.getPrice() : null)
                             .servicePublished(published)
                             .build();
@@ -89,10 +146,28 @@ public class ServiceSlotAdapter implements ServiceSlotPort {
             return;
         }
 
+        lockSlotsForUpdate(items.stream().map(BookingItem::getSlotId).toList());
+
         for (BookingItem item : items) {
-            int updated = jpaServiceSlotRepository.incrementBookedCount(item.getSlotId(), item.getQuantity());
-            if (updated == 0) {
-                throw new InsufficientInventoryException(item.getSlotId(), item.getQuantity(), 0);
+            if (item.getAllocations() != null && !item.getAllocations().isEmpty()) {
+                int totalAllocated = 0;
+                for (BookingItemAllocation alloc : item.getAllocations()) {
+                    int updated = jpaServiceSlotUnitRepository.incrementUnitBookedCount(
+                            item.getSlotId(), alloc.getUnitNumber(), alloc.getAllocatedSeats());
+                    if (updated == 0) {
+                        throw new InsufficientInventoryException(item.getSlotId(), alloc.getAllocatedSeats(), 0);
+                    }
+                    totalAllocated += alloc.getAllocatedSeats();
+                }
+                int slotUpdated = jpaServiceSlotRepository.incrementBookedCount(item.getSlotId(), totalAllocated);
+                if (slotUpdated == 0) {
+                    throw new InsufficientInventoryException(item.getSlotId(), totalAllocated, 0);
+                }
+            } else {
+                int updated = jpaServiceSlotRepository.incrementBookedCount(item.getSlotId(), item.getQuantity());
+                if (updated == 0) {
+                    throw new InsufficientInventoryException(item.getSlotId(), item.getQuantity(), 0);
+                }
             }
         }
     }
@@ -104,11 +179,25 @@ public class ServiceSlotAdapter implements ServiceSlotPort {
             return;
         }
 
+        lockSlotsForUpdate(items.stream().map(BookingItem::getSlotId).filter(Objects::nonNull).toList());
         for (BookingItem item : items) {
-            if (item.getSlotId() != null && item.getQuantity() != null && item.getQuantity() > 0) {
-                jpaServiceSlotRepository.decrementBookedCount(item.getSlotId(), item.getQuantity());
+            if (item.getId() != null) {
+                jpaServiceSlotRepository.releaseBookingItemCapacity(item.getId());
+                continue;
+            }
+            if (item.getSlotId() != null) {
+                if (item.getAllocations() != null && !item.getAllocations().isEmpty()) {
+                    int totalAllocated = 0;
+                    for (BookingItemAllocation alloc : item.getAllocations()) {
+                        jpaServiceSlotUnitRepository.decrementUnitBookedCount(
+                                item.getSlotId(), alloc.getUnitNumber(), alloc.getAllocatedSeats());
+                        totalAllocated += alloc.getAllocatedSeats();
+                    }
+                    jpaServiceSlotRepository.decrementBookedCount(item.getSlotId(), totalAllocated);
+                } else if (item.getQuantity() != null && item.getQuantity() > 0) {
+                    jpaServiceSlotRepository.decrementBookedCount(item.getSlotId(), item.getQuantity());
+                }
             }
         }
     }
 }
-

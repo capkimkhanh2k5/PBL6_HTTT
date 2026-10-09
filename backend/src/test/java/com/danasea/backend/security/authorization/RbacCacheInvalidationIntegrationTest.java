@@ -240,17 +240,12 @@ public class RbacCacheInvalidationIntegrationTest extends BaseSecurityIntegratio
                 .andExpect(jsonPath("$.message").value(notNullValue()));
     }
     /**
-     * Kịch bản 3: Chứng minh sự nguy hiểm nếu bypass saveUser (Stale Cache) 
-     * đối lập với cơ chế chuẩn hóa qua saveUser (Evict lập tức).
-     *
-     * Nếu cập nhật trực tiếp DB mà không kích hoạt CacheEvict:
-     * - Cache vẫn chứa trạng thái cũ -> Token vẫn dùng được (200 OK) -> Nguy cơ bảo mật.
-     * Khi chuẩn hóa qua saveUser():
-     * - Cache bị evict lập tức -> Token bị chặn ngay (401 Unauthorized) -> Bảo mật tuyệt đối.
+     * Authentication must read current account security state even if a direct DB
+     * update leaves the general user cache stale. saveUser still evicts that cache.
      */
     @Test
-    @DisplayName("Kịch bản tương phản: Sửa trực tiếp DB không evict cache (stale) vs Chuẩn hóa qua saveUser evict cache lập tức")
-    void demonstrateContrast_directDbBypassLeavesCacheStale_versusNormalizedSaveUserEvicts() throws Exception {
+    @DisplayName("Uncached authentication rejects a locked user even when the general cache is stale")
+    void directDbLockRejectsAuthenticationDespiteStaleCacheAndSaveUserEvicts() throws Exception {
         String email = "contrast_admin@example.com";
 
         // (1) Tạo User đang Active có Role ADMIN
@@ -290,10 +285,10 @@ public class RbacCacheInvalidationIntegrationTest extends BaseSecurityIntegratio
         // Lúc này Cache vẫn còn do bị bypass, chưa evict!
         assertThat(usersByEmailCache.get(email)).isNotNull();
 
-        // Do cache còn, request vẫn pass (200 OK) -> Đây là lỗ hổng nếu bypass xảy ra!
+        // Authentication reads fresh security state and rejects the locked account.
         mockMvc.perform(get("/api/admin/dashboard")
                 .header("Authorization", "Bearer " + token))
-                .andExpect(status().isOk());
+                .andExpect(status().isUnauthorized());
 
         // (4) Bây giờ chuẩn hóa: Thực hiện thay đổi trạng thái thông qua accountInternalApi.saveUser()
         User domainUser = accountInternalApi.findUserByEmail(email).orElseThrow();

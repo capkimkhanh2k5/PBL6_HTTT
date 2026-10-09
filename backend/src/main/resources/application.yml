@@ -135,6 +135,9 @@ app:
     otp:
       capacity: ${APP_OTP_RATE_LIMIT_CAPACITY:1}
       refill-period: ${APP_OTP_RATE_LIMIT_REFILL_PERIOD:1m}
+    forgot-password:
+      capacity: ${APP_FORGOT_PASSWORD_RATE_LIMIT_CAPACITY:5}
+      refill-period: ${APP_FORGOT_PASSWORD_RATE_LIMIT_REFILL_PERIOD:1m}
   scheduler:
     zone: ${APP_TIMEZONE:Asia/Ho_Chi_Minh}
     pool-size: ${APP_SCHEDULER_POOL_SIZE:4}
