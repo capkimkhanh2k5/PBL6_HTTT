@@ -1,4 +1,4 @@
-import type { Category, Service, User, ServiceSlot, ServiceImage, MasterOrder, SubOrder } from './types';
+import type { Service, User, ServiceSlot, ServiceImage, MasterOrder, SubOrder } from './types';
 
 export const CATEGORIES = [
   { id: 'cat-1', name: 'Chèo SUP', icon: 'surfing' },

@@ -1,158 +1,157 @@
-import { FEATURED_SERVICES, CATEGORIES, MOCK_IMAGES } from "../../../mockData";
+import React, { useState, useEffect, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { useState, useEffect, useRef } from "react";
-import { useWishlistStore } from "../../../store/useWishlistStore";
+import { useLanguageStore } from "../../../store/useLanguageStore";
 
+// Rich Customer Home Data
+import {
+  FLASH_SALE_EXPERIENCES,
+  SUP_KAYAK_EXPERIENCES,
+  DIVING_EXPERIENCES,
+  THRILL_EXPERIENCES,
+  COMBO_SUNSET_EXPERIENCES,
+} from "../../../data/customerHomeData";
 
+// Customer Home Subcomponents
+import { FlashSaleSection } from "../../../components/customer/FlashSaleSection";
+import { CategoryExperienceCarousel } from "../../../components/customer/CategoryExperienceCarousel";
+import { ExpandingBaysSection } from "../../../components/customer/ExpandingBaysSection";
+import { OceanSportsShowcase } from "../../../components/customer/OceanSportsShowcase";
+import { SmartOceanPlanner } from "../../../components/customer/SmartOceanPlanner";
+import { GuestGalleryMarquee } from "../../../components/customer/GuestGalleryMarquee";
+import { ScrollToTopButton } from "../../../components/customer/ScrollToTopButton";
+import { CinematicSceneBackdrop } from "../../../components/customer/CinematicSceneBackdrop";
+import { ScrollReveal } from "../../../components/common/ScrollReveal";
+
+// AI Beach Data for Maritime Concierge
+const AI_BEACH_DATA: Record<string, any> = {
+  'Mỹ Khê': {
+    chatPrompt: 'Nhóm mình 4 người muốn chèo SUP sáng mai ở Mỹ Khê, giờ nào biển êm và ánh sáng chụp ảnh đẹp nhất vậy bạn?',
+    chatPromptEn: 'Our group of 4 wants to paddle SUP tomorrow morning at My Khe. What time has the calmest waves and best photoshoot light?',
+    chatReply: 'Chào bạn! Sáng mai tại Mỹ Khê, thủy triều đạt mức đẹp từ 05:15 - 06:45. Sóng chỉ cao 0.3m, mặt nước phẳng như gương và mặt trời ló rạng ngay tầm mắt.',
+    chatReplyEn: 'Hello! Tomorrow at My Khe, optimal tides are 05:15 - 06:45. Swell is only 0.3m, water mirrored calm with morning sun directly on the horizon.',
+    chatTourName: 'SUP Bình Minh Mỹ Khê (Kèm Nhiếp Ảnh)',
+    chatTourNameEn: 'Sunrise SUP My Khe (With Photoshoot)',
+    temp: { val: '28°C', desc: 'Nắng nhẹ, gió biển mát', descEn: 'Mild sun, fresh breeze' },
+    wave: { val: '0.4 m', desc: 'Sóng êm • Lý tưởng cho SUP', descEn: 'Calm swell • Ideal for SUP' },
+    visibility: { val: '8 mét', desc: 'Nước trong ngắm san hô', descEn: 'Clear water visibility' },
+    wind: { val: '12 km/h', desc: 'Hướng Đông Nam đều đặn', descEn: 'Steady SE breeze' },
+    recommendationTitle: 'Rất thích hợp cho Chèo SUP & Lặn biển ngắm san hô',
+    recommendationTitleEn: 'Highly Recommended for Sunrise SUP & Coral Snorkeling',
+    recommendationDesc: 'Biển tĩnh lặng kéo dài đến 10:30 sáng. Hãy trang bị kem chống nắng thân thiện môi trường rạn san hô.',
+    recommendationDescEn: 'Calm water lasts until 10:30 AM. Coral-safe sunscreen recommended.',
+  },
+  'Sơn Trà': {
+    chatPrompt: 'Cho mình xin lịch trình lặn ngắm san hô ở Sơn Trà vào cuối tuần này với?',
+    chatPromptEn: 'Could you recommend an itinerary for scuba diving in Son Tra this weekend?',
+    chatReply: 'Tuyệt vời! Cuối tuần này tại Sơn Trà, nước rất trong với tầm nhìn lên đến 12m. Bạn nên đi tầm 08:30 sáng ở khu vực Bãi Rạng hoặc Mũi Nghê để có trải nghiệm ngắm san hô đẹp nhất nhé.',
+    chatReplyEn: 'Great choice! This weekend at Son Tra, underwater visibility reaches up to 12m. Optimal departure is 08:30 AM at Bai Rang or Mui Nghe.',
+    chatTourName: 'Lặn ngắm san hô Mũi Nghê',
+    chatTourNameEn: 'Mui Nghe Coral Reef Dive',
+    temp: { val: '26°C', desc: 'Mát mẻ, bóng râm từ rừng', descEn: 'Pleasant shade from hills' },
+    wave: { val: '0.2 m', desc: 'Biển cực êm', descEn: 'Ultra calm water' },
+    visibility: { val: '12 mét', desc: 'Tuyệt hảo cho lặn biển', descEn: 'Superb for scuba dive' },
+    wind: { val: '8 km/h', desc: 'Gió rất nhẹ', descEn: 'Gentle breeze' },
+    recommendationTitle: 'Thời điểm vàng để lặn biển và khám phá sinh thái',
+    recommendationTitleEn: 'Prime Window for Coral Diving & Marine Safari',
+    recommendationDesc: 'Hệ sinh thái san hô đang ở trạng thái tốt nhất. Cẩn thận các bãi đá ngầm khi chèo thuyền tiếp cận.',
+    recommendationDescEn: 'Coral ecosystem in top condition. Watch for shallow underwater rocks when approaching.',
+  },
+  'Non Nước': {
+    chatPrompt: 'Mình muốn tìm một hoạt động biển nhẹ nhàng cho gia đình có trẻ nhỏ ở Non Nước.',
+    chatPromptEn: 'Looking for a gentle seaside activity for a family with young kids at Non Nuoc.',
+    chatReply: 'Chào bạn! Bãi Non Nước hiện tại sóng rất êm, bờ cát rộng. Gia đình mình có thể tham gia trải nghiệm dù lượn cano hoặc thuê lều cắm trại ngay trên bãi biển vào buổi chiều tà.',
+    chatReplyEn: 'Non Nuoc beach currently has gentle waves and wide soft sand. Perfect for family seaside relaxation or sunset beach camp.',
+    chatTourName: 'Cắm trại hoàng hôn Non Nước',
+    chatTourNameEn: 'Sunset Beach Camp Non Nuoc',
+    temp: { val: '29°C', desc: 'Nắng ráo, thích hợp tắm biển', descEn: 'Sunny, pleasant for swim' },
+    wave: { val: '0.6 m', desc: 'Sóng vừa phải', descEn: 'Moderate playful waves' },
+    visibility: { val: '6 mét', desc: 'Tầm nhìn khá', descEn: 'Good coastal clarity' },
+    wind: { val: '15 km/h', desc: 'Gió lộng, mát mẻ', descEn: 'Invigorating sea breeze' },
+    recommendationTitle: 'Tuyệt vời cho các hoạt động thể thao nước và gia đình',
+    recommendationTitleEn: 'Perfect for Family Seaside Gatherings & Sunset Watersports',
+    recommendationDesc: 'Bãi biển rộng rãi, an toàn cho trẻ em. Gió lý tưởng để vui chơi và thư giãn cuối ngày.',
+    recommendationDescEn: 'Spacious beach, guarded safe zones. Wonderful afternoon breeze.',
+  }
+};
 
 const CUSTOM_PROMPT_DATA: Record<string, any> = {
   'group': {
     chatPrompt: 'Nhóm mình 6 người muốn đi biển nửa ngày, có hoạt động nào vui mà gắn kết không AI?',
+    chatPromptEn: 'Our group of 6 wants a half-day marine outing. What activities are fun and bonding?',
     chatReply: 'Chào bạn! Với nhóm 6 người đi nửa ngày, tuyệt vời nhất là thuê 3 ván SUP lớn tại Mỹ Khê hoặc lặn ống thở ngắm san hô bãi cạn ở Sơn Trà. Hai hoạt động này đều dễ tham gia và cực vui cho nhóm đông.',
-    chatImage: 'https://lh3.googleusercontent.com/aida-public/AB6AXuCiCinGFFDq1b2aeeARfPVNcgxJgHPdWE9E76EUUhfRGrwK0SCa99hMmNS2u1FTDisuWaW71Z2Kp4xm5Aq1wImxgCGjDR3Jnua7z1N46VgNLxijv4rujwSYudPKQNz2May1ZeHWs_-GIr2UUY1ALZl3lm9riuphJpcK_Wr1224VOcY0Ye857Ssegu0I7w8BP14sSTB2k2aPxBV_eqgWXOEvuyq761zw3TX3hf-lYg6Isj8HhzAMTtzbRw',
+    chatReplyEn: 'For a group of 6, renting 3 tandem SUP boards at My Khe or snorkeling over Son Tra shallow reefs is fantastic and easy for everyone.',
     chatTourName: 'Combo chèo SUP & Snorkeling Nhóm',
+    chatTourNameEn: 'Group SUP & Snorkeling Combo',
   },
   'couple': {
     chatPrompt: 'Vợ chồng mình muốn tìm trải nghiệm thư giãn, nhẹ nhàng vào buổi chiều tối.',
+    chatPromptEn: 'My partner and I want a romantic, tranquil afternoon sea experience.',
     chatReply: 'Tuyệt vời! Buổi chiều mát mẻ ở biển Non Nước rất vắng và êm. Mình gợi ý gói thuê lều cắm trại hoàng hôn, kết hợp set BBQ nhẹ trên bãi biển dành riêng cho 2 người.',
-    chatImage: 'https://lh3.googleusercontent.com/aida-public/AB6AXuAWikUk3u0Fx_6OcE-c9MEtKxAeMexu0wXSQ9gipYr2ehc5uoitY27VJ7uptBz0I-Cn77uuWW0suwxErMe2mNpgRV2mKzNoA54FYC2g5UUMQcK391No6PnAAXLF6VKcjvJMD28IfX9MvogcFIJCCkMrHbIY47lqT3F_avlYlJqLzUL3h2NDKuoeaZoBkOb_Qin9GDgAiF4BZmkSHcFmsCVKOxkMlKsqJd3uBgNE0WYEoOh_8qODy4yCzA',
+    chatReplyEn: 'Non Nuoc beach in late afternoon is serene. I recommend our Sunset Romantic Camp with fresh seaside mocktails & BBQ for two.',
     chatTourName: 'Cắm trại hoàng hôn lãng mạn',
+    chatTourNameEn: 'Romantic Sunset Camp',
   },
   'weather': {
     chatPrompt: 'Dự báo ngày mai trời có nắng gắt không? Nên chơi gì cho mát?',
+    chatPromptEn: 'Is it too hot tomorrow? What sea activity is most refreshing?',
     chatReply: 'Ngày mai Đà Nẵng nắng khá gắt vào buổi trưa. Bạn nên chèo SUP thật sớm lúc 5h30 sáng để đón bình minh, hoặc đợi đến 16h chiều để chơi lướt ván cano trên biển nhé!',
-    chatImage: 'https://lh3.googleusercontent.com/aida-public/AB6AXuADGaSgOa0TU8HJcag0bcjIer9e2oPsjKtc4UaeFqThYpfat8NQ03IMx29A4lViMyGpjSGkiAJGL1YKC0HsmTyPNiPTTXA084KsRSVN8ypOZhH4qsfAhLTOB28dPvIjviUIUalF6uu45GvDC5LyoV4XspXY9k01giKnWByAuX2nTBlB3dXl4Ld5e11jZJBsrzYfIPf-fFOkHD_DE5HqgfKLoeAPpce40CZ6k2yndS2kTCSXWE3FSsZQ8A',
+    chatReplyEn: 'Da Nang will be sunny around noon. Optimal timing is early 05:30 AM sunrise SUP or late 16:00 PM speedboat wakeboarding.',
     chatTourName: 'Lướt ván cano chiều mát',
-  }
-};
-
-const AI_BEACH_DATA: Record<string, any> = {
-  'Mỹ Khê': {
-    chatPrompt: 'Nhóm mình 4 người muốn chèo SUP sáng mai ở Mỹ Khê, giờ nào biển êm và ánh sáng chụp ảnh đẹp nhất vậy bạn?',
-    chatReply: 'Chào bạn! Sáng mai tại Mỹ Khê, thủy triều đạt mức đẹp từ 05:15 - 06:45. Sóng chỉ cao 0.3m, mặt nước phẳng như gương và mặt trời ló rạng ngay tầm mắt.',
-    chatImage: 'https://lh3.googleusercontent.com/aida-public/AB6AXuADGaSgOa0TU8HJcag0bcjIer9e2oPsjKtc4UaeFqThYpfat8NQ03IMx29A4lViMyGpjSGkiAJGL1YKC0HsmTyPNiPTTXA084KsRSVN8ypOZhH4qsfAhLTOB28dPvIjviUIUalF6uu45GvDC5LyoV4XspXY9k01giKnWByAuX2nTBlB3dXl4Ld5e11jZJBsrzYfIPf-fFOkHD_DE5HqgfKLoeAPpce40CZ6k2yndS2kTCSXWE3FSsZQ8A',
-    chatTourName: 'SUP Bình Minh Mỹ Khê (Kèm Nhiếp Ảnh)',
-    temp: { val: '28°C', desc: 'Nắng nhẹ, gió biển mát', percent: '65%' },
-    wave: { val: '0.4 m', desc: 'Sóng êm • Lý tưởng cho SUP', percent: '25%' },
-    visibility: { val: '8 mét', desc: 'Nước trong ngắm san hô', percent: '80%' },
-    wind: { val: '12 km/h', desc: 'Hướng Đông Nam đều đặn', percent: '40%' },
-    recommendationTitle: 'Rất thích hợp cho Chèo SUP & Lặn biển ngắm san hô',
-    recommendationDesc: 'Biển tĩnh lặng kéo dài đến 10:30 sáng. Hãy trang bị kem chống nắng thân thiện môi trường rạn san hô.',
-  },
-  'Sơn Trà': {
-    chatPrompt: 'Cho mình xin lịch trình lặn ngắm san hô ở Sơn Trà vào cuối tuần này với?',
-    chatReply: 'Tuyệt vời! Cuối tuần này tại Sơn Trà, nước rất trong với tầm nhìn lên đến 12m. Bạn nên đi tầm 08:30 sáng ở khu vực Bãi Rạng hoặc Mũi Nghê để có trải nghiệm ngắm san hô đẹp nhất nhé.',
-    chatImage: 'https://lh3.googleusercontent.com/aida-public/AB6AXuCiCinGFFDq1b2aeeARfPVNcgxJgHPdWE9E76EUUhfRGrwK0SCa99hMmNS2u1FTDisuWaW71Z2Kp4xm5Aq1wImxgCGjDR3Jnua7z1N46VgNLxijv4rujwSYudPKQNz2May1ZeHWs_-GIr2UUY1ALZl3lm9riuphJpcK_Wr1224VOcY0Ye857Ssegu0I7w8BP14sSTB2k2aPxBV_eqgWXOEvuyq761zw3TX3hf-lYg6Isj8HhzAMTtzbRw',
-    chatTourName: 'Lặn ngắm san hô Mũi Nghê',
-    temp: { val: '26°C', desc: 'Mát mẻ, bóng râm từ rừng', percent: '60%' },
-    wave: { val: '0.2 m', desc: 'Biển cực êm', percent: '15%' },
-    visibility: { val: '12 mét', desc: 'Tuyệt hảo cho lặn biển', percent: '95%' },
-    wind: { val: '8 km/h', desc: 'Gió rất nhẹ', percent: '20%' },
-    recommendationTitle: 'Thời điểm vàng để lặn biển và khám phá sinh thái',
-    recommendationDesc: 'Hệ sinh thái san hô đang ở trạng thái tốt nhất. Cẩn thận các bãi đá ngầm khi chèo thuyền tiếp cận.',
-  },
-  'Non Nước': {
-    chatPrompt: 'Mình muốn tìm một hoạt động biển nhẹ nhàng cho gia đình có trẻ nhỏ ở Non Nước.',
-    chatReply: 'Chào bạn! Bãi Non Nước hiện tại sóng rất êm, bờ cát rộng. Gia đình mình có thể tham gia trải nghiệm dù lượn cano hoặc thuê lều cắm trại ngay trên bãi biển vào buổi chiều tà.',
-    chatImage: 'https://lh3.googleusercontent.com/aida-public/AB6AXuAWikUk3u0Fx_6OcE-c9MEtKxAeMexu0wXSQ9gipYr2ehc5uoitY27VJ7uptBz0I-Cn77uuWW0suwxErMe2mNpgRV2mKzNoA54FYC2g5UUMQcK391No6PnAAXLF6VKcjvJMD28IfX9MvogcFIJCCkMrHbIY47lqT3F_avlYlJqLzUL3h2NDKuoeaZoBkOb_Qin9GDgAiF4BZmkSHcFmsCVKOxkMlKsqJd3uBgNE0WYEoOh_8qODy4yCzA',
-    chatTourName: 'Cắm trại hoàng hôn Non Nước',
-    temp: { val: '29°C', desc: 'Nắng ráo, thích hợp tắm biển', percent: '75%' },
-    wave: { val: '0.6 m', desc: 'Sóng vừa phải', percent: '40%' },
-    visibility: { val: '6 mét', desc: 'Tầm nhìn khá', percent: '60%' },
-    wind: { val: '15 km/h', desc: 'Gió lộng, mát mẻ', percent: '50%' },
-    recommendationTitle: 'Tuyệt vời cho các hoạt động thể thao nước và gia đình',
-    recommendationDesc: 'Bãi biển rộng rãi, an toàn cho trẻ em. Gió lý tưởng để vui chơi và thư giãn cuối ngày.',
+    chatTourNameEn: 'Late Afternoon Speedboat Boarding',
   }
 };
 
 export function Home() {
-  const { toggleWishlist, isInWishlist } = useWishlistStore();
+  const { language, t } = useLanguageStore();
+  const navigate = useNavigate();
+
+  // AI Concierge State
   const [activeAIBeach, setActiveAIBeach] = useState<string>('Mỹ Khê');
   const [activeCustomPrompt, setActiveCustomPrompt] = useState<string | null>(null);
-  
   const [chatInputValue, setChatInputValue] = useState('');
   const [isChatLoading, setIsChatLoading] = useState(false);
   const [chatHistory, setChatHistory] = useState<any[]>([]);
   const chatContainerRef = useRef<HTMLDivElement>(null);
 
-  const handleChatSubmit = () => {
-    if (!chatInputValue.trim() || isChatLoading) return;
-    const promptText = chatInputValue;
-    setChatHistory(prev => [...prev, { 
-      chatPrompt: promptText, 
-      chatReply: null, 
-      chatImage: '', 
-      chatTourName: '' 
-    }]);
-    setChatInputValue('');
-    setIsChatLoading(true);
-    
-    setTimeout(() => {
-      setChatHistory(prev => {
-        const newHistory = [...prev];
-        newHistory[newHistory.length - 1].chatReply = 'Chào bạn, đây là phiên bản Demo nên mình chưa thể phân tích câu hỏi tự do. Tính năng DANASEA AI chính thức sẽ sớm được ra mắt. Hiện tại bạn có thể bấm các nút gợi ý bên trái để khám phá nhé!';
-        return newHistory;
-      });
-      setIsChatLoading(false);
-    }, 1500);
-  };
+  // Search Capsule State
+  const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
+  const [selectedRegions, setSelectedRegions] = useState<string[]>(['Mỹ Khê']);
+  const [selectedDate, setSelectedDate] = useState<string>(() => {
+    const today = new Date();
+    return today.toISOString().split('T')[0];
+  });
+  const [calendarViewDate, setCalendarViewDate] = useState<Date>(() => new Date());
+  const [selectedTime, setSelectedTime] = useState<string>('05:30');
+  const [guests, setGuests] = useState({ adults: 2, children: 0 });
+  const searchRef = useRef<HTMLDivElement>(null);
 
-  const aiWeatherData = AI_BEACH_DATA[activeAIBeach];
   const baseMessage = activeCustomPrompt ? CUSTOM_PROMPT_DATA[activeCustomPrompt] : AI_BEACH_DATA[activeAIBeach];
   const displayMessages = [baseMessage, ...chatHistory];
+  const currentBeachData = AI_BEACH_DATA[activeAIBeach] || AI_BEACH_DATA['Mỹ Khê'];
 
   useEffect(() => {
     if (chatContainerRef.current) {
       chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
     }
   }, [displayMessages]);
- 
 
-  // State cho Search Capsule
-  const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
-  const [selectedRegions, setSelectedRegions] = useState<string[]>(['Mỹ Khê']);
-  const [selectedTime, setSelectedTime] = useState<string>('05:30');
-  const [guests, setGuests] = useState({ adults: 2, children: 0 });
-
-    const [activeCategory, setActiveCategory] = useState<string | null>(null);
-  const [activeRegionFilter, setActiveRegionFilter] = useState<string | null>(null);
-  const displayTours = FEATURED_SERVICES.filter(t => {
-    const matchCat = activeCategory ? t.categoryId === activeCategory : true;
-    const matchRegion = activeRegionFilter ? t.locationName.includes(activeRegionFilter) : true;
-    return matchCat && matchRegion;
-  });
-
-  const searchRef = useRef<HTMLDivElement>(null);
-  const navigate = useNavigate();
-
-  // Hàm xử lý khi bấm Khám phá vùng biển
-  const handleExploreRegion = (e: React.MouseEvent, regionName: string) => {
-    e.preventDefault();
-    // Use substring to match location in mockData (e.g. 'Sơn Trà', 'Mỹ Khê', 'Non Nước')
-    let filterTerm = regionName;
-    if (regionName.includes('Sơn Trà')) filterTerm = 'Sơn Trà';
-    if (regionName.includes('Mỹ Khê')) filterTerm = 'Mỹ Khê';
-    if (regionName.includes('Non Nước')) filterTerm = 'Non Nước';
-    
-    setActiveRegionFilter(filterTerm);
-    
-    const featuredSection = document.getElementById('featured');
-    if (featuredSection) {
-      featuredSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }
-  };
-
-
-  // Đóng dropdown khi click ra ngoài
+  // Click outside and Escape key to close search dropdown
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
       if (searchRef.current && !searchRef.current.contains(event.target as Node)) {
         setActiveDropdown(null);
       }
     }
+    function handleKeyDown(event: KeyboardEvent) {
+      if (event.key === 'Escape') {
+        setActiveDropdown(null);
+      }
+    }
     document.addEventListener("mousedown", handleClickOutside);
+    document.addEventListener("keydown", handleKeyDown);
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("keydown", handleKeyDown);
     };
   }, []);
 
@@ -160,738 +159,1112 @@ export function Home() {
     setActiveDropdown(activeDropdown === dropdown ? null : dropdown);
   };
 
+  const formatDateDisplay = (isoStr: string) => {
+    if (!isoStr) return language === 'en' ? 'Select date' : 'Chọn ngày';
+    const [y, m, d] = isoStr.split('-').map(Number);
+    const target = new Date(y, m - 1, d);
+    const now = new Date();
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const diffDays = Math.round((target.getTime() - today.getTime()) / (1000 * 3600 * 24));
+    
+    if (diffDays === 0) return language === 'en' ? 'Today' : 'Hôm nay';
+    if (diffDays === 1) return language === 'en' ? 'Tomorrow' : 'Ngày mai';
+    return `${d}/${m}/${y}`;
+  };
+
+  const handleShortcutToday = () => {
+    const today = new Date();
+    setSelectedDate(today.toISOString().split('T')[0]);
+    setActiveDropdown(null);
+  };
+
+  const handleShortcutTomorrow = () => {
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    setSelectedDate(tomorrow.toISOString().split('T')[0]);
+    setActiveDropdown(null);
+  };
+
+  const handleShortcutWeekend = () => {
+    const d = new Date();
+    const day = d.getDay();
+    const diff = (6 - day + 7) % 7 || 7;
+    d.setDate(d.getDate() + diff);
+    setSelectedDate(d.toISOString().split('T')[0]);
+    setActiveDropdown(null);
+  };
+
   const handleRegionChange = (region: string) => {
     if (selectedRegions.includes(region)) {
-      setSelectedRegions(selectedRegions.filter(r => r !== region));
+      if (selectedRegions.length > 1) {
+        setSelectedRegions(selectedRegions.filter(r => r !== region));
+      }
     } else {
       setSelectedRegions([...selectedRegions, region]);
     }
   };
-  const scrollToSection = (e: React.MouseEvent<HTMLAnchorElement>, id: string) => {
+
+  const scrollToSection = (e: React.MouseEvent, id: string) => {
     e.preventDefault();
     const element = document.querySelector(id);
     if (element) {
       const headerHeight = 80;
       const targetPosition = element.getBoundingClientRect().top + window.scrollY - headerHeight;
-      const startPosition = window.scrollY;
-      const distance = targetPosition - startPosition;
-      const duration = 600;
-      let start: number | null = null;
-
-      const easeInOutQuad = (t: number, b: number, c: number, d: number) => {
-        t /= d / 2;
-        if (t < 1) return (c / 2) * t * t + b;
-        t--;
-        return (-c / 2) * (t * (t - 2) - 1) + b;
-      };
-
-      const animation = (currentTime: number) => {
-        if (start === null) start = currentTime;
-        const timeElapsed = currentTime - start;
-        const run = easeInOutQuad(timeElapsed, startPosition, distance, duration);
-        window.scrollTo(0, run);
-        if (timeElapsed < duration) requestAnimationFrame(animation);
-      };
-
-      requestAnimationFrame(animation);
+      window.scrollTo({ top: targetPosition, behavior: 'smooth' });
     }
   };
 
+  // Fixed immutable chat submission handler
+  const handleChatSubmit = () => {
+    if (!chatInputValue.trim() || isChatLoading) return;
+    const promptText = chatInputValue;
+
+    setChatHistory(prev => [
+      ...prev,
+      {
+        chatPrompt: promptText,
+        chatReply: null,
+      }
+    ]);
+    setChatInputValue('');
+    setIsChatLoading(true);
+
+    setTimeout(() => {
+      const replyText = language === 'en'
+        ? `DANASEA Maritime Radar verified: Best conditions at ${activeAIBeach} with ${currentBeachData.temp.val} temperature and ${currentBeachData.wave.val} swell. Would you like to reserve a slot?`
+        : `DANASEA AI đã tra cứu dữ liệu hải văn: Tại ${activeAIBeach}, nhiệt độ hiện tại ${currentBeachData.temp.val}, sóng ${currentBeachData.wave.val}. Bạn có muốn xem thêm lịch khởi hành chi tiết không?`;
+
+      setChatHistory(prev =>
+        prev.map((msg, idx) =>
+          idx === prev.length - 1 ? { ...msg, chatReply: replyText } : msg
+        )
+      );
+      setIsChatLoading(false);
+    }, 1000);
+  };
+
+  const handleSearchExecute = () => {
+    const locParam = selectedRegions.join(',');
+    navigate(`/search?location=${encodeURIComponent(locParam)}&date=${encodeURIComponent(selectedDate)}&time=${encodeURIComponent(selectedTime)}&guests=${guests.adults + guests.children}&adults=${guests.adults}&children=${guests.children}`);
+  };
+
+  const BEACH_OPTIONS = [
+    {
+      name: 'Mỹ Khê',
+      nameEn: 'My Khe',
+      tag: 'Trung tâm • Thể thao',
+      tagEn: 'Central • Watersports',
+      desc: 'Lướt ván SUP, dù lượn, cano sôi động',
+      descEn: 'SUP paddleboard, parasailing, speedboats',
+      img: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=160&auto=format&fit=crop&q=80',
+    },
+    {
+      name: 'Sơn Trà',
+      nameEn: 'Son Tra',
+      tag: 'Bán đảo • San hô',
+      tagEn: 'Peninsula • Coral reef',
+      desc: 'Lặn ngắm rạn san hô hoang sơ pha lê',
+      descEn: 'Crystal waters, vibrant coral reefs',
+      img: 'https://images.unsplash.com/photo-1544551763-46a013bb70d5?w=160&auto=format&fit=crop&q=80',
+    },
+    {
+      name: 'Bãi Rạng',
+      nameEn: 'Bai Rang',
+      tag: 'Lặng sóng • Kayak',
+      tagEn: 'Calm cove • Kayak',
+      desc: 'Vịnh đá ngầm, nước biển trong vắt',
+      descEn: 'Rocky lagoons, tranquil sea breeze',
+      img: 'https://images.unsplash.com/photo-1510414842594-a61c69b5ae57?w=160&auto=format&fit=crop&q=80',
+    },
+    {
+      name: 'Non Nước',
+      nameEn: 'Non Nuoc',
+      tag: 'Gia đình • Hoàng hôn',
+      tagEn: 'Family • Sunset camping',
+      desc: 'Bãi cát thoai thoải, cắm trại chiều tà',
+      descEn: 'Soft white sand, sunset beach camp',
+      img: 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?w=160&auto=format&fit=crop&q=80',
+    },
+  ];
+
+  const TIME_OPTIONS = [
+    {
+      val: '05:30',
+      title: '05:30 • Bình Minh',
+      titleEn: '05:30 • Dawn',
+      desc: 'Mặt biển phẳng lặng, nắng mai êm',
+      descEn: 'Mirror sea, golden dawn',
+      iconSvg: (
+        <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M12 2v6" />
+          <path d="m4.93 10.93 4.24-4.24" />
+          <path d="m19.07 10.93-4.24-4.24" />
+          <path d="M2 18h20" />
+          <path d="M20 22H4" />
+          <path d="M16 18a4 4 0 0 0-8 0" />
+        </svg>
+      ),
+    },
+    {
+      val: '08:30',
+      title: '08:30 • San Hô',
+      titleEn: '08:30 • Coral',
+      desc: 'Nắng chiếu sâu, nước trong vắt',
+      descEn: 'High clarity, radiant sun',
+      iconSvg: (
+        <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <circle cx="12" cy="12" r="4" />
+          <path d="M12 2v2" />
+          <path d="M12 20v2" />
+          <path d="m4.93 4.93 1.41 1.41" />
+          <path d="m17.66 17.66 1.41 1.41" />
+          <path d="M2 12h2" />
+          <path d="M20 12h2" />
+          <path d="m6.34 17.66-1.41 1.41" />
+          <path d="m19.07 4.93-1.41 1.41" />
+        </svg>
+      ),
+    },
+    {
+      val: '14:30',
+      title: '14:30 • Gió Biển',
+      titleEn: '14:30 • Breeze',
+      desc: 'Gió lộng, lướt ván cano sôi động',
+      descEn: 'Strong winds, thrill sports',
+      iconSvg: (
+        <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M17.7 7.7a2.5 2.5 0 1 1 1.8 4.3H2" />
+          <path d="M9.6 4.6A2 2 0 1 1 11 8H2" />
+          <path d="M12.6 19.4A2 2 0 1 0 14 16H2" />
+        </svg>
+      ),
+    },
+    {
+      val: '16:30',
+      title: '16:30 • Hoàng Hôn',
+      titleEn: '16:30 • Sunset',
+      desc: 'Ráng chiều đỏ, chèo SUP chill',
+      descEn: 'Crimson skies, dusk chill',
+      iconSvg: (
+        <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M12 10V2" />
+          <path d="m4.93 6.93 4.24 4.24" />
+          <path d="m19.07 6.93-4.24 4.24" />
+          <path d="M2 18h20" />
+          <path d="M20 22H4" />
+          <path d="M16 18a4 4 0 0 0-8 0" />
+        </svg>
+      ),
+    },
+  ];
+
+  const calendarYear = calendarViewDate.getFullYear();
+  const calendarMonth = calendarViewDate.getMonth();
+  const daysInMonth = new Date(calendarYear, calendarMonth + 1, 0).getDate();
+  const firstDayOfWeek = (new Date(calendarYear, calendarMonth, 1).getDay() + 6) % 7; // Monday is 0
+
+  const handlePrevMonth = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setCalendarViewDate(new Date(calendarYear, calendarMonth - 1, 1));
+  };
+
+  const handleNextMonth = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setCalendarViewDate(new Date(calendarYear, calendarMonth + 1, 1));
+  };
+
+  const handleSelectDay = (day: number) => {
+    const pad = (n: number) => (n < 10 ? `0${n}` : `${n}`);
+    const dateStr = `${calendarYear}-${pad(calendarMonth + 1)}-${pad(day)}`;
+    setSelectedDate(dateStr);
+    setActiveDropdown(null);
+  };
+
+  const isPastDay = (day: number) => {
+    const d = new Date(calendarYear, calendarMonth, day);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    return d < today;
+  };
+
+  const isSelectedDay = (day: number) => {
+    const pad = (n: number) => (n < 10 ? `0${n}` : `${n}`);
+    const dateStr = `${calendarYear}-${pad(calendarMonth + 1)}-${pad(day)}`;
+    return selectedDate === dateStr;
+  };
+
+  const isTodayDay = (day: number) => {
+    const today = new Date();
+    return today.getFullYear() === calendarYear && today.getMonth() === calendarMonth && today.getDate() === day;
+  };
+
+  const selectedTimeObj = TIME_OPTIONS.find((t) => t.val === selectedTime);
+
   return (
-    <main className="w-full pt-20 bg-surface flex-1"><div className="flex flex-col w-full">
-{/* SECTION 1: PANORAMA HERO */}
-<section className="relative w-full -mt-20 bg-on-background">
-{/* Fullscreen Panorama Background */}
-<div className="w-full h-[760px] lg:h-[840px] bg-cover bg-center relative flex items-center justify-center" data-alt="Stunning aerial wide panorama view of Da Nang coastline, My Khe beach golden sand curving gently toward Son Tra peninsula lush green mountains, turquoise crystal calm sea under crisp morning sunlight with distant fishing boats, tropical serene vibe" style={{ backgroundImage: "url('https://lh3.googleusercontent.com/aida-public/AB6AXuAI18BWUCgDObyX8R2qoVNX-0lRA8V1TRPR1nNyc2A-kPzRlRXpQ54POlJk15W6iNxr8NgSnnx5UARCu6rro9bplagw15Dr_ZE6RsLc3l1pFb_GPQFB5Aq4FFrpYw_VdA358fowFouKp0DIiOJP27ZDKh6P6av5S3JsphpebwOe8MwGjiYRt-KZXyi8i6JUMn88JdRxUmaFA8B2qkPzj3F36eNFT_JuDt6H3A9F-u6jhzjBNNLQ7e86KA')" }}>
-{/* Atmospheric Gradients: Coastal Dark Navy Scrim for High Typography Contrast */}
-<div className="absolute inset-0 bg-gradient-to-t from-[#0a1b24] via-[#0a1b24]/40 to-black/35 pointer-events-none"></div>
-<div className="absolute inset-0 bg-radial-gradient from-transparent via-[#006874]/15 to-[#001f24]/50 pointer-events-none"></div>
-{/* Hero Text Content */}
-<div className="relative z-10 max-w-[1280px] w-full mx-auto px-margin-desktop pt-32 pb-36 flex flex-col items-start justify-center">
-{/* Pill Kicker */}
-<div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-surface-container-lowest/20 backdrop-blur-md text-secondary-fixed font-label-md text-label-md tracking-[0.2em] uppercase mb-space-md shadow-sm">
-<span className="w-2 h-2 rounded-full bg-primary-container animate-pulse"></span>
-          Trải nghiệm biển Đà Nẵng
-        </div>
-{/* Headline */}
-<h1 className="font-display-hero text-display-hero text-white tracking-tight max-w-3xl drop-shadow-md text-left mb-space-md">
-          Chạm sóng biển,<br />
-<span className="text-secondary-fixed">mở chuyến đi riêng.</span>
-</h1>
-{/* Subtitle */}
-<p className="font-body-lg text-body-lg text-surface-variant max-w-xl mb-space-xl leading-relaxed text-left">
-          Khám phá những trải nghiệm biển phù hợp với bạn. Chọn hoạt động, đặt lịch và sẵn sàng tận hưởng một Đà Nẵng rực rỡ dưới nắng mai.
-        </p>
-{/* CTA Action Buttons */}
-<div className="flex flex-wrap items-center gap-space-md">
-<a onClick={(e) => scrollToSection(e, '#featured')} className="px-8 py-3.5 rounded-full bg-secondary text-white font-label-lg text-label-lg shadow-[0_8px_24px_rgba(0,104,116,0.4)] hover:bg-secondary/90 hover:scale-[1.02] transition-all flex items-center gap-2 cursor-pointer" href="#featured">
-            Khám phá trải nghiệm
-            <span className="material-symbols-outlined text-[18px]">arrow_forward</span>
-</a>
-<a onClick={(e) => scrollToSection(e, '#ai-concierge')} className="px-8 py-3.5 rounded-full bg-white/10 backdrop-blur-md text-white font-label-lg text-label-lg hover:bg-white/20 transition-all flex items-center gap-2 cursor-pointer" href="#ai-concierge">
-<span className="material-symbols-outlined text-[18px] text-primary-container">auto_awesome</span>
-            Gợi ý lịch trình cho tôi
-          </a>
-</div>
-</div>
-{/* FLOATING SEARCH BAR CAPSULE (Docked at Bottom Edge) */}
-<div className="absolute bottom-6 left-0 right-0 z-20 px-margin-desktop max-w-[1200px] mx-auto w-full">
-  <div id="search-capsule" ref={searchRef} className="bg-surface-container-lowest rounded-[28px] p-3 shadow-[0_18px_40px_-6px_rgba(16,47,58,0.22)] backdrop-blur-2xl relative">
-    <div className="grid grid-cols-1 md:grid-cols-4 items-center gap-2">
-      
-      {/* 1. Vùng biển */}
-      <div className="relative">
-        <div onClick={() => toggleDropdown('region')} className="flex items-center gap-3 px-5 py-2.5 rounded-full hover:bg-surface-container-low transition-colors cursor-pointer group">
-          <span className="material-symbols-outlined text-secondary text-[22px] group-hover:scale-110 transition-transform">location_on</span>
-          <div className="flex flex-col min-w-0 text-left">
-            <span className="font-label-sm text-label-sm text-outline uppercase tracking-wider">Khu vực biển</span>
-            <span className="font-label-lg text-label-lg text-on-surface truncate">
-              {selectedRegions.length > 0 ? selectedRegions.join(', ') : 'Chọn khu vực'}
+    <main className="w-full text-slate-900 min-h-screen relative overflow-x-clip bg-transparent">
+      {/* =========================================================================
+          FULL-PAGE DYNAMIC CINEMATIC SCENE BACKDROP
+         ========================================================================= */}
+      <CinematicSceneBackdrop />
+
+      {/* =========================================================================
+          HERO: BÃI BIỂN TOÀN MÀN HÌNH & THANH TÌM KIẾM TINH GỌN
+         ========================================================================= */}
+      <section
+        id="scene-hero"
+        data-scene="hero"
+        className="relative z-20 w-full min-h-[480px] sm:min-h-[540px] flex flex-col justify-center items-center pt-16 sm:pt-20 pb-12 overflow-visible"
+      >
+        <div className="max-w-6xl w-full mx-auto px-4 sm:px-6 lg:px-8 text-center flex flex-col items-center overflow-visible">
+          {/* Large Headline */}
+          <h1 className="animate-hero-2 text-3xl sm:text-5xl lg:text-6xl font-extrabold text-white tracking-tight drop-shadow-[0_2px_4px_rgba(0,0,0,0.95)] drop-shadow-[0_8px_24px_rgba(0,0,0,0.7)] mb-2.5">
+            {language === 'en' ? 'Touch The Ocean,' : 'Chạm sóng biển,'}{' '}
+            <span className="text-cyan-300">
+              {language === 'en' ? 'Craft Your Journey' : 'mở chuyến đi riêng'}
             </span>
-          </div>
-        </div>
-        {activeDropdown === 'region' && (
-          <div className="absolute top-full left-0 mt-4 w-64 bg-surface-container-lowest rounded-2xl p-4 shadow-xl border border-surface-container animate-fade-in-up z-50">
-            <h4 className="font-label-md text-label-md text-on-surface-variant mb-3">Chọn vùng biển</h4>
-            <div className="flex flex-col gap-2">
-              {['Mỹ Khê', 'Sơn Trà', 'Non Nước'].map(region => (
-                <label key={region} className="flex items-center gap-3 cursor-pointer p-2 hover:bg-surface-container-low rounded-lg transition-colors">
-                  <input 
-                    type="checkbox" 
-                    className="w-4 h-4 rounded text-primary focus:ring-primary accent-primary" 
-                    checked={selectedRegions.includes(region)}
-                    onChange={() => handleRegionChange(region)}
-                  />
-                  <span className="font-body-md text-on-surface">{region}</span>
-                </label>
-              ))}
-            </div>
-          </div>
-        )}
-      </div>
+          </h1>
 
-      {/* 2. Ngày trải nghiệm */}
-      <div className="relative">
-        <div onClick={() => toggleDropdown('time')} className="flex items-center gap-3 px-5 py-2.5 rounded-full hover:bg-surface-container-low transition-colors cursor-pointer group">
-          <span className="material-symbols-outlined text-secondary text-[22px] group-hover:scale-110 transition-transform">schedule</span>
-          <div className="flex flex-col min-w-0 text-left">
-            <span className="font-label-sm text-label-sm text-outline uppercase tracking-wider">Thời gian</span>
-            <span className="font-label-lg text-label-lg text-on-surface truncate">{selectedTime}</span>
-          </div>
-        </div>
-        {activeDropdown === 'time' && (
-          <div className="absolute top-full left-0 mt-4 w-64 bg-surface-container-lowest rounded-2xl p-4 shadow-xl border border-surface-container animate-fade-in-up z-50">
-            <h4 className="font-label-md text-label-md text-on-surface-variant mb-3">Chọn thời gian</h4>
-            <div className="flex flex-col gap-1 max-h-64 overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-surface-container-highest scrollbar-track-transparent">
-              {Array.from({ length: 37 }).map((_, i) => {
-                const hour = Math.floor(i / 2) + 5;
-                const min = i % 2 === 0 ? '00' : '30';
-                const timeString = `${hour.toString().padStart(2, '0')}:${min}`;
-                return (
-                  <div 
-                    key={timeString} 
-                    onClick={() => { setSelectedTime(timeString); setActiveDropdown(null); }}
-                    className={`p-2.5 rounded-lg cursor-pointer transition-colors text-center ${selectedTime === timeString ? 'bg-primary-container text-on-primary-container font-bold' : 'hover:bg-surface-container-low text-on-surface'}`}
-                  >
-                    {timeString}
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        )}
-      </div>
+          {/* Subtitle */}
+          <p className="animate-hero-3 text-sm sm:text-base text-slate-100 max-w-2xl mb-6 drop-shadow-[0_1.5px_3px_rgba(0,0,0,0.95)] drop-shadow-[0_4px_12px_rgba(0,0,0,0.6)] font-medium leading-relaxed">
+            {language === 'en'
+              ? 'Handpicked certified marine adventures. Paddleboarding, scuba diving, island speedboats, and tranquil sunset bays.'
+              : 'Nền tảng đặt tour thể thao biển chính hãng tại Đà Nẵng. Khám phá bình minh Mỹ Khê, san hô Sơn Trà và những vịnh biển ngọc bích.'}
+          </p>
 
-      {/* 3. Số người */}
-      <div className="relative">
-        <div onClick={() => toggleDropdown('guests')} className="flex items-center gap-3 px-5 py-2.5 rounded-full hover:bg-surface-container-low transition-colors cursor-pointer group">
-          <span className="material-symbols-outlined text-secondary text-[22px] group-hover:scale-110 transition-transform">group</span>
-          <div className="flex flex-col min-w-0 text-left">
-            <span className="font-label-sm text-label-sm text-outline uppercase tracking-wider">Số lượng khách</span>
-            <span className="font-label-lg text-label-lg text-on-surface truncate">
-              {guests.adults + guests.children} khách
-            </span>
-          </div>
-        </div>
-        {activeDropdown === 'guests' && (
-          <div className="absolute top-full left-0 mt-4 w-72 bg-surface-container-lowest rounded-2xl p-4 shadow-xl border border-surface-container animate-fade-in-up z-50">
-            <h4 className="font-label-md text-label-md text-on-surface-variant mb-4">Số lượng khách</h4>
-            
-            <div className="flex items-center justify-between mb-4">
-              <div>
-                <div className="font-label-md text-on-surface">Người lớn</div>
-                <div className="font-body-sm text-outline">Từ 13 tuổi trở lên</div>
-              </div>
-              <div className="flex items-center gap-3">
-                <button 
-                  onClick={() => setGuests({...guests, adults: Math.max(1, guests.adults - 1)})}
-                  className="w-8 h-8 rounded-full border border-outline flex items-center justify-center text-outline hover:border-primary hover:text-primary"
-                >-</button>
-                <span className="w-4 text-center font-label-md">{guests.adults}</span>
-                <button 
-                  onClick={() => setGuests({...guests, adults: guests.adults + 1})}
-                  className="w-8 h-8 rounded-full border border-outline flex items-center justify-center text-outline hover:border-primary hover:text-primary"
-                >+</button>
-              </div>
-            </div>
-
-            <div className="flex items-center justify-between">
-              <div>
-                <div className="font-label-md text-on-surface">Trẻ em</div>
-                <div className="font-body-sm text-outline">Dưới 13 tuổi</div>
-              </div>
-              <div className="flex items-center gap-3">
-                <button 
-                  onClick={() => setGuests({...guests, children: Math.max(0, guests.children - 1)})}
-                  className="w-8 h-8 rounded-full border border-outline flex items-center justify-center text-outline hover:border-primary hover:text-primary"
-                >-</button>
-                <span className="w-4 text-center font-label-md">{guests.children}</span>
-                <button 
-                  onClick={() => setGuests({...guests, children: guests.children + 1})}
-                  className="w-8 h-8 rounded-full border border-outline flex items-center justify-center text-outline hover:border-primary hover:text-primary"
-                >+</button>
-              </div>
-            </div>
-
-          </div>
-        )}
-      </div>
-
-      {/* 4. CTA Button */}
-      <div className="p-1 flex justify-end">
-        <button onClick={() => navigate('/search')} className="w-full md:w-auto px-8 py-3.5 rounded-full bg-secondary text-white font-label-lg text-label-lg shadow-[0_8px_20px_rgba(0,104,116,0.3)] hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center gap-2" type="button">
-          <span className="material-symbols-outlined text-[20px]">search</span>
-          <span>Tìm trải nghiệm</span>
-        </button>
-      </div>
-      
-    </div>
-  </div>
-</div>
-</div>
-</section>
-{/* SECTION 2: CATEGORY ROW */}
-<section className="w-full max-w-[1280px] mx-auto px-margin-desktop py-space-xl">
-<div className="flex items-center justify-between gap-4 overflow-x-auto pb-2 scrollbar-none">
-{CATEGORIES.map(cat => (
-  <button 
-    key={cat.id} 
-    onClick={() => setActiveCategory(activeCategory === cat.id ? null : cat.id)}
-    className={`flex items-center gap-3 px-6 py-3 rounded-full font-label-lg text-label-lg flex-shrink-0 transition-all ${activeCategory === cat.id ? 'bg-secondary text-on-secondary shadow-sm hover:scale-[1.03]' : 'bg-surface-container-low hover:bg-surface-container text-on-surface-variant hover:text-on-surface'}`} 
-    type="button"
-  >
-    <span className={`material-symbols-outlined text-[20px] ${activeCategory === cat.id ? '' : 'text-secondary'}`}>{cat.icon}</span>
-    <span>{cat.name}</span>
-  </button>
-))}
-
-</div>
-</section>
-{/* SECTION 3: FEATURED EXPERIENCES (4-COLUMN DESKTOP GRID) */}
-<section className="w-full max-w-[1280px] mx-auto px-margin-desktop py-space-xl" id="featured">
-{/* Header Block */}
-<div className="flex flex-col md:flex-row md:items-end justify-between mb-space-xl gap-4">
-<div>
-<div className="inline-block font-label-sm text-label-sm text-primary uppercase tracking-widest font-bold mb-1">Hoạt động được yêu thích</div>
-<h2 className="font-headline-lg text-headline-lg text-on-surface flex items-center gap-3">
-  Trải nghiệm nổi bật {activeRegionFilter ? `tại ${activeRegionFilter}` : 'tại Đà Nẵng'}
-  {activeRegionFilter && (
-    <button onClick={() => setActiveRegionFilter(null)} className="font-label-sm text-label-sm text-secondary bg-surface-container-low hover:bg-surface-container px-3 py-1 rounded-full transition-colors flex items-center gap-1">
-      <span className="material-symbols-outlined text-[14px]">close</span> Bỏ lọc
-    </button>
-  )}
-</h2>
-<p className="font-body-md text-body-md text-on-surface-variant mt-1">Những hoạt động biển tuyển chọn với tiêu chuẩn an toàn và trải nghiệm tốt nhất</p>
-</div>
-<div className="flex items-center gap-2">
-<button aria-label="Trước" className="w-10 h-10 rounded-full bg-surface-container-low hover:bg-surface-container text-on-surface flex items-center justify-center transition-colors" type="button">
-<span className="material-symbols-outlined text-[20px]">chevron_left</span>
-</button>
-<button aria-label="Sau" className="w-10 h-10 rounded-full bg-secondary text-on-secondary flex items-center justify-center shadow-sm hover:bg-secondary/90 transition-colors" type="button">
-<span className="material-symbols-outlined text-[20px]">chevron_right</span>
-</button>
-</div>
-</div>
-{/* 4 Cards Row */}
-<div key={`${activeRegionFilter}-${activeCategory}`} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-space-lg animate-fade-in-up">
-{displayTours.map(tour => (
-      <Link to={`/tour/${tour.id}`} key={tour.id} className="group bg-surface-container-lowest rounded-2xl overflow-hidden shadow-[0_4px_20px_-2px_rgba(16,47,58,0.06)] hover:shadow-[0_12px_32px_-4px_rgba(16,47,58,0.12)] hover:-translate-y-1 transition-all flex flex-col">
-        <div className="relative aspect-[4/3] w-full overflow-hidden bg-surface-container-high">
-          <img className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" src={(MOCK_IMAGES.find(img => img.serviceId === tour.id && img.isPrimary)?.imageUrl || "https://via.placeholder.com/400")} alt={tour.name} />
-          {(tour.status === "ACTIVE") && (
-            <div className="absolute top-3 left-3 px-3 py-1 rounded-full bg-surface-container-lowest/90 backdrop-blur-md text-secondary font-label-sm text-label-sm flex items-center gap-1">
-              <span className="material-symbols-outlined text-[14px] text-secondary">verified</span>
-              Nhà cung cấp đã xác minh
-            </div>
-          )}
-          {(() => {
-            const isSaved = isInWishlist(tour.id);
-            return (
-              <button
-                aria-label={isSaved ? "Bỏ lưu khỏi yêu thích" : "Lưu vào yêu thích"}
-                className={`absolute top-3 right-3 w-8 h-8 rounded-full backdrop-blur-md flex items-center justify-center transition-all shadow-md cursor-pointer hover:scale-110 active:scale-95 ${
-                  isSaved
-                    ? "bg-white text-red-500 ring-2 ring-red-100"
-                    : "bg-surface-container-lowest/90 text-on-surface-variant hover:text-red-500"
-                }`}
-                onClick={(e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  toggleWishlist(tour.id, tour.name);
-                }}
-              >
-                <span
-                  className={`material-symbols-outlined text-[18px] transition-transform ${isSaved ? "text-red-500" : ""}`}
-                  style={{ fontVariationSettings: isSaved ? "'FILL' 1" : "'FILL' 0" }}
+          {/* Professional Airbnb-style Search Capsule (4 Segments: Địa điểm | Ngày | Khung giờ | Khách) */}
+          <div
+            ref={searchRef}
+            className="animate-hero-4 w-full max-w-4xl bg-white/95 backdrop-blur-xl rounded-3xl sm:rounded-full p-2 sm:p-2 shadow-[0_20px_60px_rgba(0,0,0,0.28)] border border-white/80 ring-1 ring-slate-900/5 transition-all relative z-30"
+          >
+            <div className="flex flex-col sm:flex-row sm:items-center relative">
+              {/* 1. Destination / Địa điểm */}
+              <div className="relative flex-1">
+                <button
+                  type="button"
+                  onClick={() => toggleDropdown('region')}
+                  aria-expanded={activeDropdown === 'region'}
+                  className={`w-full flex flex-col justify-center px-4 py-2.5 sm:px-5 sm:py-2.5 rounded-2xl sm:rounded-full transition-all text-left cursor-pointer ${
+                    activeDropdown === 'region'
+                      ? 'bg-white shadow-[0_4px_16px_rgba(0,0,0,0.1)] ring-1 ring-slate-200'
+                      : activeDropdown !== null
+                      ? 'opacity-60 hover:opacity-90 hover:bg-slate-100/60'
+                      : 'hover:bg-slate-100/80'
+                  }`}
                 >
-                  favorite
-                </span>
-              </button>
-            );
-          })()}
-          <div className="absolute bottom-3 left-3 px-2.5 py-0.5 rounded-full bg-black/60 backdrop-blur-sm text-white font-label-sm text-label-sm flex items-center gap-1">
-            <span className={`material-symbols-outlined text-[13px] ${"text-primary-container"}`}>{"local_fire_department"}</span>
-            {"Best Seller"}
-          </div>
-        </div>
-        <div className="p-space-md flex-1 flex flex-col justify-between">
-          <div>
-            <div className="flex items-center gap-1.5 text-on-surface-variant font-body-sm text-body-sm mb-1">
-              <span className="material-symbols-outlined text-[16px] text-secondary">pin_drop</span>
-              <span>{tour.locationName} • {(tour.durationMinutes + " phút")}</span>
-            </div>
-            <h3 className="font-headline-sm text-headline-sm text-on-surface group-hover:text-secondary transition-colors line-clamp-1">
-              {tour.name}
-            </h3>
-            <div className="flex items-center gap-2 mt-2">
-              <span className="inline-flex items-center gap-1 text-primary font-label-md text-label-md">
-                <span className="material-symbols-outlined text-[16px]" style={{ fontVariationSettings: "'FILL' 1" }}>star</span>
-                {4.9}
-              </span>
-              <span className="font-body-sm text-body-sm text-on-surface-variant">({128} đánh giá)</span>
-            </div>
-          </div>
-          <div className="mt-space-md pt-3 flex items-center justify-between border-t-0 bg-surface-container-low -mx-space-md -mb-space-md px-space-md py-3">
-            <div>
-              <span className="font-label-sm text-label-sm text-outline block">Giá trọn gói</span>
-              <span className="font-headline-sm text-headline-sm text-primary font-bold">
-                {tour.basePrice.toLocaleString('vi-VN')} đ
-              </span>
-              <span className="font-body-sm text-body-sm text-on-surface-variant">/người</span>
-            </div>
-            <button className="px-4 py-2 rounded-full bg-secondary text-white font-label-md text-label-md hover:bg-secondary/90 transition-colors shadow-sm" type="button" onClick={(e) => e.preventDefault()}>
-              Xem chi tiết
-            </button>
-          </div>
-        </div>
-      </Link>
-    ))}
-</div>
-{/* Micro Disclaimer */}
-<div className="mt-space-md text-center">
-<span className="font-body-sm text-body-sm text-outline">
-        * Dữ liệu giá và đánh giá minh họa cho phiên bản thử nghiệm giao diện DANASEA.
-      </span>
-</div>
-</section>
-{/* SECTION 4: EDITORIAL DESTINATION SPLIT */}
-<section className="w-full max-w-[1280px] mx-auto px-margin-desktop py-space-2xl">
-<div className="mb-space-lg text-left">
-<span className="font-label-sm text-label-sm text-primary font-bold uppercase tracking-widest">Bản đồ điểm đến</span>
-<h2 className="font-headline-lg text-headline-lg text-on-surface mt-1">Khám phá Đà Nẵng theo vùng biển</h2>
-<p className="font-body-md text-body-md text-on-surface-variant mt-1">Mỗi bãi biển sở hữu đặc tính thủy triều và cảm xúc phiêu lưu rất riêng</p>
-</div>
-<div className="grid grid-cols-1 lg:grid-cols-12 gap-space-lg">
-{/* Left Heroic Destination: My Khe (7 cols) */}
-<div className="lg:col-span-7 rounded-3xl overflow-hidden relative group min-h-[460px] shadow-sm flex flex-col justify-end p-space-xl">
-<div className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-105" data-alt="Wide perspective of My Khe Beach Da Nang with pristine fine white sand, gentle rhythmic waves rolling in, coconut palms, luxury beach line under clear blue sky" style={{ backgroundImage: "url('https://lh3.googleusercontent.com/aida-public/AB6AXuA5l7HPI_DbDBQ8gWwNpvlydXCJ02X4PVntLdF3OBottnR7rESgxkT6NkNzhWlLZIHdtTzgzMhEqfkYW49v3BY2V5D5tHhgEuQAi3mVrq9w-gArbIE3H_P9pGX5UU1aBlvwVB8c6c7wUIePx9IqK3YKgrd-6m-1bPy50PzZLR9e5KYLgI_EgMVyDMZNHy_r2c0SdkTu5Se27hkh3ZD4Czlk03IbWHb5_dkh1M8LK07Ik_bw4Dph_4mefQ')" }}></div>
-<div className="absolute inset-0 bg-gradient-to-t from-[#0a1f26] via-[#0a1f26]/40 to-transparent"></div>
-<div className="relative z-10 text-white">
-<span className="px-3.5 py-1 rounded-full bg-white/20 backdrop-blur-md text-secondary-fixed font-label-sm text-label-sm uppercase tracking-wider mb-space-xs inline-block">
-            Bãi biển đô thị hàng đầu
-          </span>
-<h3 className="font-headline-md text-headline-md font-bold mb-2">Bãi biển Mỹ Khê</h3>
-<p className="font-body-md text-body-md text-surface-variant/90 max-w-md mb-space-md leading-relaxed">
-            Bờ cát vàng mịn trải dài thoai thoải, mặt nước phẳng lặng buổi sớm lý tưởng cho đón ánh bình minh đầu tiên trên ván chèo SUP.
-          </p>
-<div className="flex items-center justify-between max-w-md">
-<span className="font-label-md text-label-md text-secondary-fixed">14 hoạt động đang mở</span>
-<a onClick={(e) => handleExploreRegion(e, 'Mỹ Khê')} className="inline-flex items-center gap-2 font-label-lg text-label-lg text-white group-hover:text-secondary-fixed transition-colors cursor-pointer" href="/">
-<span>Khám phá vùng biển</span>
-<span className="material-symbols-outlined text-[18px]">arrow_forward</span>
-</a>
-</div>
-</div>
-</div>
-{/* Right 2 Stacked Cards: Son Tra & Non Nuoc (5 cols) */}
-<div className="lg:col-span-5 flex flex-col gap-space-lg">
-{/* Son Tra */}
-<div className="rounded-3xl overflow-hidden relative group h-[220px] shadow-sm flex flex-col justify-end p-space-lg">
-<div className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-105" data-alt="Pristine coastal rocks of Son Tra peninsula with azure ocean waters hitting ancient mossy stones, wild tropical greenery framing the bay" style={{ backgroundImage: "url('https://lh3.googleusercontent.com/aida-public/AB6AXuCiCinGFFDq1b2aeeARfPVNcgxJgHPdWE9E76EUUhfRGrwK0SCa99hMmNS2u1FTDisuWaW71Z2Kp4xm5Aq1wImxgCGjDR3Jnua7z1N46VgNLxijv4rujwSYudPKQNz2May1ZeHWs_-GIr2UUY1ALZl3lm9riuphJpcK_Wr1224VOcY0Ye857Ssegu0I7w8BP14sSTB2k2aPxBV_eqgWXOEvuyq761zw3TX3hf-lYg6Isj8HhzAMTtzbRw')" }}></div>
-<div className="absolute inset-0 bg-gradient-to-t from-[#001f24] via-[#001f24]/50 to-transparent"></div>
-<div className="relative z-10 text-white">
-<div className="flex items-center justify-between mb-1">
-<h3 className="font-headline-sm text-headline-sm font-bold">Bán đảo Sơn Trà</h3>
-<span className="px-2.5 py-0.5 rounded-full bg-white/20 backdrop-blur-sm text-secondary-fixed font-label-sm text-label-sm">9 hoạt động</span>
-</div>
-<p className="font-body-sm text-body-sm text-surface-variant/90 line-clamp-2 mb-2">
-              Vách đá hoang sơ kì vĩ, làn nước ngọc bích cùng những rạn san hô tự nhiên rực rỡ dưới đáy biển.
-            </p>
-<a onClick={(e) => handleExploreRegion(e, 'Bán đảo Sơn Trà')} className="inline-flex items-center gap-1 font-label-md text-label-md text-secondary-fixed hover:underline cursor-pointer" href="/">
-              Khám phá vùng biển →
-            </a>
-</div>
-</div>
-{/* Non Nuoc */}
-<div className="rounded-3xl overflow-hidden relative group h-[220px] shadow-sm flex flex-col justify-end p-space-lg">
-<div className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-105" data-alt="Peaceful wide beach of Non Nuoc Da Nang near Marble Mountains with soft rolling waves, beach umbrellas, clean sand in afternoon warm light" style={{ backgroundImage: "url('https://lh3.googleusercontent.com/aida-public/AB6AXuAWikUk3u0Fx_6OcE-c9MEtKxAeMexu0wXSQ9gipYr2ehc5uoitY27VJ7uptBz0I-Cn77uuWW0suwxErMe2mNpgRV2mKzNoA54FYC2g5UUMQcK391No6PnAAXLF6VKcjvJMD28IfX9MvogcFIJCCkMrHbIY47lqT3F_avlYlJqLzUL3h2NDKuoeaZoBkOb_Qin9GDgAiF4BZmkSHcFmsCVKOxkMlKsqJd3uBgNE0WYEoOh_8qODy4yCzA')" }}></div>
-<div className="absolute inset-0 bg-gradient-to-t from-[#001f24] via-[#001f24]/50 to-transparent"></div>
-<div className="relative z-10 text-white">
-<div className="flex items-center justify-between mb-1">
-<h3 className="font-headline-sm text-headline-sm font-bold">Bãi biển Non Nước</h3>
-<span className="px-2.5 py-0.5 rounded-full bg-white/20 backdrop-blur-sm text-secondary-fixed font-label-sm text-label-sm">6 hoạt động</span>
-</div>
-<p className="font-body-sm text-body-sm text-surface-variant/90 line-clamp-2 mb-2">
-              Sóng êm, bờ rộng thoáng đãng, điểm dừng chân hoàn hảo cho gia đình và nhóm bạn tìm kiếm sự an yên.
-            </p>
-<a onClick={(e) => handleExploreRegion(e, 'Biển Non Nước')} className="inline-flex items-center gap-1 font-label-md text-label-md text-secondary-fixed hover:underline cursor-pointer" href="/">
-              Khám phá vùng biển →
-            </a>
-</div>
-</div>
-</div>
-</div>
-</section>
-{/* SECTION 5: DANASEA SMART CONCIERGE (AI ASSISTANT DUAL SECTION) */}
-<section className="w-full max-w-[1280px] mx-auto px-margin-desktop py-space-xl" id="ai-concierge">
-<div className="bg-[#F0F6F7] rounded-[32px] p-space-xl lg:p-space-2xl shadow-[0_8px_30px_rgba(0,104,116,0.06)] relative overflow-hidden">
-{/* Decorative subtle aquatic glow circle */}
-<div className="absolute -right-20 -bottom-20 w-96 h-96 rounded-full bg-secondary-fixed-dim/30 blur-3xl pointer-events-none"></div>
-<div className="grid grid-cols-1 lg:grid-cols-12 gap-space-xl items-center relative z-10">
-{/* Left Prompt Column (7 cols) */}
-<div className="lg:col-span-7 flex flex-col text-left">
-<div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white shadow-sm text-secondary font-label-md text-label-md mb-space-md w-max">
-<span className="material-symbols-outlined text-[18px] text-primary-container">auto_awesome</span>
-            Trợ lý lịch trình thông minh DANASEA AI
-          </div>
-<h2 className="font-display-hero text-[34px] lg:text-[42px] leading-tight text-on-surface mb-space-md">
-            Một chuyến đi hợp gu,<br />
-<span className="text-secondary">bắt đầu từ bạn.</span>
-</h2>
-<p className="font-body-lg text-body-lg text-on-surface-variant max-w-xl mb-space-lg leading-relaxed">
-            Hệ thống phân tích thời gian thủy triều, hướng sóng và sở thích nhóm bạn để gợi ý khung giờ chèo SUP hay lặn ngắm san hô đẹp nhất trong ngày.
-          </p>
-{/* Quick Prompts Chips */}
-<div className="flex flex-col gap-2.5 mb-space-xl">
-<span className="font-label-sm text-label-sm text-outline uppercase tracking-wider">Chạm nhanh gợi ý lịch trình:</span>
-<div className="flex flex-wrap gap-2">
-<button onClick={() => { setActiveCustomPrompt('group'); setChatHistory([]); }} className={`px-4 py-2.5 rounded-full text-on-surface font-label-md text-label-md shadow-sm transition-all hover:scale-[1.02] flex items-center gap-2 ${activeCustomPrompt === 'group' ? 'bg-secondary text-white' : 'bg-surface-container-lowest hover:bg-white'}`} type="button">
-<span className={`material-symbols-outlined text-[16px] ${activeCustomPrompt === 'group' ? 'text-white' : 'text-secondary'}`}>groups</span>
-                Đi biển nửa ngày cùng nhóm bạn
-              </button>
-<button onClick={() => { setActiveCustomPrompt('couple'); setChatHistory([]); }} className={`px-4 py-2.5 rounded-full text-on-surface font-label-md text-label-md shadow-sm transition-all hover:scale-[1.02] flex items-center gap-2 ${activeCustomPrompt === 'couple' ? 'bg-primary-container text-white' : 'bg-surface-container-lowest hover:bg-white'}`} type="button">
-<span className={`material-symbols-outlined text-[16px] ${activeCustomPrompt === 'couple' ? 'text-white' : 'text-primary'}`}>favorite</span>
-                Tìm trải nghiệm nhẹ nhàng cho hai người
-              </button>
-<button onClick={() => { setActiveCustomPrompt('weather'); setChatHistory([]); }} className={`px-4 py-2.5 rounded-full text-on-surface font-label-md text-label-md shadow-sm transition-all hover:scale-[1.02] flex items-center gap-2 ${activeCustomPrompt === 'weather' ? 'bg-tertiary-container text-white' : 'bg-surface-container-lowest hover:bg-white'}`} type="button">
-<span className={`material-symbols-outlined text-[16px] ${activeCustomPrompt === 'weather' ? 'text-white' : 'text-secondary'}`}>wb_sunny</span>
-                Gợi ý hoạt động theo thời tiết ngày mai
-              </button>
-</div>
-</div>
-
-</div>
-{/* Right Realistic Chat Preview (5 cols) */}
-<div className="lg:col-span-5">
-<div className="bg-surface-container-lowest rounded-2xl p-space-md shadow-[0_12px_32px_rgba(16,47,58,0.08)]">
-{/* Chat Head */}
-<div className="flex items-center justify-between pb-3 border-b-0 mb-3 bg-surface-container-low -mx-space-md -mt-space-md px-space-md pt-3 rounded-t-2xl">
-<div className="flex items-center gap-2.5">
-<div className="w-8 h-8 rounded-full bg-secondary text-white flex items-center justify-center">
-<span className="material-symbols-outlined text-[18px]">waves</span>
-</div>
-<div>
-<h4 className="font-label-lg text-label-lg text-on-surface leading-none">DANASEA Assistant</h4>
-<span className="font-body-sm text-[11px] text-secondary flex items-center gap-1">
-<span className="w-1.5 h-1.5 rounded-full bg-secondary animate-ping"></span>
-                    Sẵn sàng tư vấn theo thời gian thực
+                  <span className="text-[10px] sm:text-[11px] font-bold text-slate-500 uppercase tracking-wider block">
+                    {t.hero.search.destination}
                   </span>
-</div>
-</div>
-<span className="font-label-sm text-label-sm text-outline">05:45 AM</span>
-</div>
-{/* Chat Dialog Messages */}
-<div ref={chatContainerRef} className="flex flex-col gap-5 h-[340px] overflow-y-auto pr-2 custom-scrollbar relative">
-  {displayMessages.map((msg, idx) => (
-    <div key={`${activeCustomPrompt || activeAIBeach}-${idx}`} className="flex flex-col gap-3 animate-fade-in-up">
-      {/* User Message */}
-      <div className="flex justify-end">
-        <div className="bg-secondary text-white rounded-2xl rounded-tr-none px-4 py-2.5 max-w-[85%] font-body-sm text-body-sm shadow-sm">
-          {msg.chatPrompt}
+                  <span className="text-xs sm:text-sm font-semibold text-slate-900 truncate block mt-0.5">
+                    {selectedRegions.length > 0
+                      ? selectedRegions.join(', ')
+                      : (language === 'en' ? 'Select bays' : 'Chọn điểm đến')}
+                  </span>
+                </button>
+
+                {/* Popover: Rich Bay Cards (2x2 Grid) */}
+                {activeDropdown === 'region' && (
+                  <div className="animate-popover-in absolute top-full left-0 sm:left-1/2 sm:-translate-x-1/2 mt-3 w-80 sm:w-[500px] p-3.5 sm:p-4 bg-white border border-slate-200/90 rounded-3xl shadow-2xl z-50 text-left">
+                    <div className="flex items-center justify-between pb-2 mb-2.5 border-b border-slate-100">
+                      <span className="text-xs font-bold text-slate-800 uppercase tracking-wider">
+                        {language === 'en' ? 'Explore Coastal Bays' : 'Khám phá các vịnh biển'}
+                      </span>
+                      <span className="text-[11px] text-slate-400">
+                        {selectedRegions.length} {language === 'en' ? 'selected' : 'đã chọn'}
+                      </span>
+                    </div>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                      {BEACH_OPTIONS.map((bay) => {
+                        const isSelected = selectedRegions.includes(bay.name);
+                        return (
+                          <div
+                            key={bay.name}
+                            onClick={() => handleRegionChange(bay.name)}
+                            className={`flex items-center gap-2.5 p-2 rounded-2xl cursor-pointer transition-all border ${
+                              isSelected
+                                ? 'bg-cyan-50/70 border-cyan-400/80 shadow-xs ring-1 ring-cyan-500/30'
+                                : 'bg-white border-slate-100 hover:bg-slate-50 hover:border-slate-200'
+                            }`}
+                          >
+                            <img
+                              src={bay.img}
+                              alt={bay.name}
+                              className="w-11 h-11 rounded-xl object-cover shrink-0 shadow-xs"
+                            />
+                            <div className="flex-1 min-w-0">
+                              <span className="text-xs font-bold text-slate-900 truncate block">
+                                {language === 'en' ? bay.nameEn : bay.name}
+                              </span>
+                              <p className="text-[10px] text-cyan-700 font-medium truncate mt-0.5">
+                                {language === 'en' ? bay.tagEn : bay.tag}
+                              </p>
+                              <p className="text-[10px] text-slate-400 truncate">
+                                {language === 'en' ? bay.descEn : bay.desc}
+                              </p>
+                            </div>
+                            <div className={`w-4 h-4 rounded-full border flex items-center justify-center shrink-0 ${
+                              isSelected
+                                ? 'bg-cyan-600 border-cyan-600 text-white'
+                                : 'border-slate-300 bg-white'
+                            }`}>
+                              {isSelected && <span className="material-symbols-outlined text-[12px]">check</span>}
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Vertical Divider 1 */}
+              <div
+                className={`hidden sm:block w-px h-7 bg-slate-200 shrink-0 transition-opacity ${
+                  activeDropdown === 'region' || activeDropdown === 'date' ? 'opacity-0' : 'opacity-100'
+                }`}
+              />
+
+              {/* 2. Date / Ngày */}
+              <div className="relative flex-1">
+                <button
+                  type="button"
+                  onClick={() => toggleDropdown('date')}
+                  aria-expanded={activeDropdown === 'date'}
+                  className={`w-full flex flex-col justify-center px-4 py-2.5 sm:px-5 sm:py-2.5 rounded-2xl sm:rounded-full transition-all text-left cursor-pointer ${
+                    activeDropdown === 'date'
+                      ? 'bg-white shadow-[0_4px_16px_rgba(0,0,0,0.1)] ring-1 ring-slate-200'
+                      : activeDropdown !== null
+                      ? 'opacity-60 hover:opacity-90 hover:bg-slate-100/60'
+                      : 'hover:bg-slate-100/80'
+                  }`}
+                >
+                  <span className="text-[10px] sm:text-[11px] font-bold text-slate-500 uppercase tracking-wider block">
+                    {language === 'en' ? 'Date' : 'Ngày đi'}
+                  </span>
+                  <span className="text-xs sm:text-sm font-semibold text-slate-900 truncate block mt-0.5">
+                    {formatDateDisplay(selectedDate)}
+                  </span>
+                </button>
+
+                {/* Popover: Shortcuts & Mini Calendar */}
+                {activeDropdown === 'date' && (
+                  <div className="animate-popover-in absolute top-full left-0 sm:left-1/2 sm:-translate-x-1/2 mt-3 w-80 sm:w-84 p-4 bg-white border border-slate-200/90 rounded-3xl shadow-2xl z-50 text-left">
+                    {/* Quick Shortcuts */}
+                    <div className="flex items-center gap-1.5 pb-3 border-b border-slate-100 mb-3">
+                      <button
+                        type="button"
+                        onClick={handleShortcutToday}
+                        className="flex-1 py-1 px-2 text-[11px] font-semibold rounded-lg bg-slate-100 hover:bg-cyan-50 hover:text-cyan-700 text-slate-700 transition-colors text-center"
+                      >
+                        {language === 'en' ? 'Today' : 'Hôm nay'}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={handleShortcutTomorrow}
+                        className="flex-1 py-1 px-2 text-[11px] font-semibold rounded-lg bg-slate-100 hover:bg-cyan-50 hover:text-cyan-700 text-slate-700 transition-colors text-center"
+                      >
+                        {language === 'en' ? 'Tomorrow' : 'Ngày mai'}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={handleShortcutWeekend}
+                        className="flex-1 py-1 px-2 text-[11px] font-semibold rounded-lg bg-slate-100 hover:bg-cyan-50 hover:text-cyan-700 text-slate-700 transition-colors text-center"
+                      >
+                        {language === 'en' ? 'Weekend' : 'Cuối tuần'}
+                      </button>
+                    </div>
+
+                    {/* Month Header */}
+                    <div className="flex items-center justify-between mb-2 px-1">
+                      <button
+                        type="button"
+                        onClick={handlePrevMonth}
+                        aria-label="Previous month"
+                        className="w-7 h-7 flex items-center justify-center rounded-full hover:bg-slate-100 text-slate-600 transition-colors"
+                      >
+                        <span className="material-symbols-outlined text-[18px]">chevron_left</span>
+                      </button>
+                      <span className="text-xs font-bold text-slate-900">
+                        {language === 'en'
+                          ? calendarViewDate.toLocaleString('en-US', { month: 'long', year: 'numeric' })
+                          : `Tháng ${calendarMonth + 1}, ${calendarYear}`}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={handleNextMonth}
+                        aria-label="Next month"
+                        className="w-7 h-7 flex items-center justify-center rounded-full hover:bg-slate-100 text-slate-600 transition-colors"
+                      >
+                        <span className="material-symbols-outlined text-[18px]">chevron_right</span>
+                      </button>
+                    </div>
+
+                    {/* Days of Week */}
+                    <div className="grid grid-cols-7 gap-1 text-center mb-1">
+                      {['T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'CN'].map((dw) => (
+                        <span key={dw} className="text-[10px] font-bold text-slate-400 py-1">
+                          {dw}
+                        </span>
+                      ))}
+                    </div>
+
+                    {/* Calendar Day Grid */}
+                    <div className="grid grid-cols-7 gap-1 text-center">
+                      {Array.from({ length: firstDayOfWeek }).map((_, i) => (
+                        <div key={`empty-${i}`} className="h-8" />
+                      ))}
+                      {Array.from({ length: daysInMonth }).map((_, i) => {
+                        const day = i + 1;
+                        const past = isPastDay(day);
+                        const selected = isSelectedDay(day);
+                        const isToday = isTodayDay(day);
+
+                        return (
+                          <button
+                            key={`day-${day}`}
+                            type="button"
+                            disabled={past}
+                            onClick={() => handleSelectDay(day)}
+                            className={`h-8 w-8 mx-auto rounded-full text-xs font-semibold flex items-center justify-center transition-all ${
+                              selected
+                                ? 'bg-cyan-600 text-white shadow-md'
+                                : past
+                                ? 'text-slate-300 cursor-not-allowed'
+                                : isToday
+                                ? 'text-cyan-700 bg-cyan-50 font-bold ring-1 ring-cyan-500'
+                                : 'text-slate-700 hover:bg-slate-100'
+                            }`}
+                          >
+                            {day}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Vertical Divider 2 */}
+              <div
+                className={`hidden sm:block w-px h-7 bg-slate-200 shrink-0 transition-opacity ${
+                  activeDropdown === 'date' || activeDropdown === 'time' ? 'opacity-0' : 'opacity-100'
+                }`}
+              />
+
+              {/* 3. Time Slot / Khung giờ */}
+              <div className="relative flex-1">
+                <button
+                  type="button"
+                  onClick={() => toggleDropdown('time')}
+                  aria-expanded={activeDropdown === 'time'}
+                  className={`w-full flex flex-col justify-center px-4 py-2.5 sm:px-5 sm:py-2.5 rounded-2xl sm:rounded-full transition-all text-left cursor-pointer ${
+                    activeDropdown === 'time'
+                      ? 'bg-white shadow-[0_4px_16px_rgba(0,0,0,0.1)] ring-1 ring-slate-200'
+                      : activeDropdown !== null
+                      ? 'opacity-60 hover:opacity-90 hover:bg-slate-100/60'
+                      : 'hover:bg-slate-100/80'
+                  }`}
+                >
+                  <span className="text-[10px] sm:text-[11px] font-bold text-slate-500 uppercase tracking-wider block">
+                    {language === 'en' ? 'Time Slot' : 'Khung giờ'}
+                  </span>
+                  <span className="text-xs sm:text-sm font-semibold text-slate-900 truncate block mt-0.5">
+                    {selectedTimeObj
+                      ? (language === 'en' ? selectedTimeObj.titleEn : selectedTimeObj.title)
+                      : selectedTime}
+                  </span>
+                </button>
+
+                {/* Popover: 4 Large Sun/Ocean Time Chips (2x2 Grid) */}
+                {activeDropdown === 'time' && (
+                  <div className="animate-popover-in absolute top-full left-0 sm:left-1/2 sm:-translate-x-1/2 mt-3 w-80 sm:w-[500px] p-3.5 sm:p-4 bg-white border border-slate-200/90 rounded-3xl shadow-2xl z-50 text-left">
+                    <div className="flex items-center justify-between pb-2 mb-2.5 border-b border-slate-100">
+                      <span className="text-xs font-bold text-slate-800 uppercase tracking-wider">
+                        {language === 'en' ? 'Select Departure Window' : 'Khung giờ trải nghiệm tối ưu'}
+                      </span>
+                      <span className="text-[11px] text-cyan-700 font-semibold">
+                        {language === 'en' ? 'Synced with Radar' : 'Đồng bộ Hải văn'}
+                      </span>
+                    </div>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                      {TIME_OPTIONS.map((opt) => {
+                        const isSelected = selectedTime === opt.val;
+                        return (
+                          <button
+                            key={opt.val}
+                            type="button"
+                            onClick={() => {
+                              setSelectedTime(opt.val);
+                              setActiveDropdown(null);
+                            }}
+                            className={`w-full text-left p-2.5 rounded-2xl transition-all border flex items-center gap-2.5 cursor-pointer ${
+                              isSelected
+                                ? 'bg-cyan-50/70 border-cyan-400/80 ring-2 ring-cyan-500/20 shadow-xs'
+                                : 'bg-white border-slate-100 hover:border-slate-200 hover:bg-slate-50'
+                            }`}
+                          >
+                            <div className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 ${
+                              isSelected ? 'bg-cyan-600 text-white shadow-xs' : 'bg-slate-100 text-slate-600'
+                            }`}>
+                              {opt.iconSvg}
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <span className="text-xs font-bold text-slate-900 block truncate">
+                                {language === 'en' ? opt.titleEn : opt.title}
+                              </span>
+                              <span className="text-[10px] text-slate-500 block truncate mt-0.5">
+                                {language === 'en' ? opt.descEn : opt.desc}
+                              </span>
+                            </div>
+                            {isSelected && (
+                              <span className="material-symbols-outlined text-cyan-600 text-[18px] shrink-0">
+                                check_circle
+                              </span>
+                            )}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Vertical Divider 3 */}
+              <div
+                className={`hidden sm:block w-px h-7 bg-slate-200 shrink-0 transition-opacity ${
+                  activeDropdown === 'time' || activeDropdown === 'guests' ? 'opacity-0' : 'opacity-100'
+                }`}
+              />
+
+              {/* 4. Guests / Khách */}
+              <div className="relative flex-1">
+                <button
+                  type="button"
+                  onClick={() => toggleDropdown('guests')}
+                  aria-expanded={activeDropdown === 'guests'}
+                  className={`w-full flex flex-col justify-center px-4 py-2.5 sm:px-5 sm:py-2.5 rounded-2xl sm:rounded-full transition-all text-left cursor-pointer ${
+                    activeDropdown === 'guests'
+                      ? 'bg-white shadow-[0_4px_16px_rgba(0,0,0,0.1)] ring-1 ring-slate-200'
+                      : activeDropdown !== null
+                      ? 'opacity-60 hover:opacity-90 hover:bg-slate-100/60'
+                      : 'hover:bg-slate-100/80'
+                  }`}
+                >
+                  <span className="text-[10px] sm:text-[11px] font-bold text-slate-500 uppercase tracking-wider block">
+                    {t.hero.search.guests}
+                  </span>
+                  <span className="text-xs sm:text-sm font-semibold text-slate-900 truncate block mt-0.5">
+                    {guests.adults + guests.children} {language === 'en' ? 'Guests' : 'Khách'}
+                  </span>
+                </button>
+
+                {/* Popover: 2-Row Stepper for Adults & Children with age annotations */}
+                {activeDropdown === 'guests' && (
+                  <div className="animate-popover-in absolute top-full right-0 mt-3 w-72 sm:w-80 p-4 bg-white border border-slate-200/90 rounded-3xl shadow-2xl z-50 text-left space-y-4">
+                    {/* Row 1: Adults */}
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <span className="text-xs font-bold text-slate-900 block">
+                          {language === 'en' ? 'Adults' : 'Người lớn'}
+                        </span>
+                        <span className="text-[11px] text-slate-400 block">
+                          {language === 'en' ? 'Age 12 and above' : 'Từ 12 tuổi trở lên'}
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-2.5">
+                        <button
+                          type="button"
+                          disabled={guests.adults <= 1}
+                          onClick={() => setGuests({ ...guests, adults: Math.max(1, guests.adults - 1) })}
+                          aria-label="Decrease adults"
+                          className="w-8 h-8 rounded-full border border-slate-300 hover:border-slate-400 bg-white text-slate-700 font-bold flex items-center justify-center transition-all disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer"
+                        >
+                          −
+                        </button>
+                        <span className="text-sm font-bold w-5 text-center text-slate-800">
+                          {guests.adults}
+                        </span>
+                        <button
+                          type="button"
+                          disabled={guests.adults >= 20}
+                          onClick={() => setGuests({ ...guests, adults: guests.adults + 1 })}
+                          aria-label="Increase adults"
+                          className="w-8 h-8 rounded-full border border-slate-300 hover:border-slate-400 bg-white text-slate-700 font-bold flex items-center justify-center transition-all disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer"
+                        >
+                          +
+                        </button>
+                      </div>
+                    </div>
+
+                    <div className="w-full h-px bg-slate-100" />
+
+                    {/* Row 2: Children */}
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <span className="text-xs font-bold text-slate-900 block">
+                          {language === 'en' ? 'Children' : 'Trẻ em'}
+                        </span>
+                        <span className="text-[11px] text-slate-400 block">
+                          {language === 'en' ? 'Age 2 – 11' : 'Từ 2 – 11 tuổi'}
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-2.5">
+                        <button
+                          type="button"
+                          disabled={guests.children <= 0}
+                          onClick={() => setGuests({ ...guests, children: Math.max(0, guests.children - 1) })}
+                          aria-label="Decrease children"
+                          className="w-8 h-8 rounded-full border border-slate-300 hover:border-slate-400 bg-white text-slate-700 font-bold flex items-center justify-center transition-all disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer"
+                        >
+                          −
+                        </button>
+                        <span className="text-sm font-bold w-5 text-center text-slate-800">
+                          {guests.children}
+                        </span>
+                        <button
+                          type="button"
+                          disabled={guests.children >= 10}
+                          onClick={() => setGuests({ ...guests, children: guests.children + 1 })}
+                          aria-label="Increase children"
+                          className="w-8 h-8 rounded-full border border-slate-300 hover:border-slate-400 bg-white text-slate-700 font-bold flex items-center justify-center transition-all disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer"
+                        >
+                          +
+                        </button>
+                      </div>
+                    </div>
+
+                    <div className="pt-1 border-t border-slate-100 text-[10px] text-slate-400 text-center">
+                      {language === 'en'
+                        ? 'Children under 2 travel free with adult'
+                        : 'Trẻ dưới 2 tuổi miễn phí vé & đi cùng phụ huynh'}
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* 5. Search CTA: Round button expanding when activeDropdown is open */}
+              <div className="p-1 sm:p-0 sm:pr-1 flex justify-end shrink-0">
+                <button
+                  type="button"
+                  onClick={handleSearchExecute}
+                  aria-label="Search"
+                  className={`h-11 sm:h-12 rounded-full bg-gradient-to-r from-cyan-600 to-teal-600 hover:from-cyan-500 hover:to-teal-500 text-white flex items-center justify-center shadow-lg hover:shadow-cyan-500/30 hover:scale-[1.02] active:scale-95 transition-all cursor-pointer ${
+                    activeDropdown !== null
+                      ? 'w-full sm:w-auto px-5 gap-2'
+                      : 'w-full sm:w-12 px-0'
+                  }`}
+                >
+                  <span className="material-symbols-outlined text-[20px]">search</span>
+                  {activeDropdown !== null && (
+                    <span className="text-xs font-bold tracking-wide">
+                      {language === 'en' ? 'Search' : 'Tìm kiếm'}
+                    </span>
+                  )}
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
+      </section>
+
+      {/* =========================================================================
+          KHOẢNG THỞ 01 (BÌNH MINH)
+         ========================================================================= */}
+      <div className="py-20 sm:py-28 text-center max-w-3xl mx-auto px-4 select-none">
+        <span className="text-xs font-mono tracking-widest text-white/80 uppercase block mb-3 drop-shadow-sm">
+          {language === 'en' ? 'Chapter 01 • Dawn Awakening' : 'Chương 01 • Bình Minh Thức Giấc'}
+        </span>
+        <p className="text-lg sm:text-2xl font-medium text-white drop-shadow-[0_3px_12px_rgba(0,0,0,0.65)] leading-relaxed italic">
+          {language === 'en'
+            ? '"When the first golden rays awaken the quiet bay, Da Nang’s ocean breathes in its purest serenity."'
+            : '"Khi ánh bình minh đầu tiên nhuộm vàng mặt vịnh, biển Đà Nẵng thức giấc trong sự tĩnh lặng thuần khiết nhất."'}
+        </p>
       </div>
-      {/* AI Reply */}
-      <div className="flex justify-start items-start gap-2">
-        <div className="w-6 h-6 rounded-full bg-primary-container text-white flex items-center justify-center flex-shrink-0 mt-1">
-          <span className="material-symbols-outlined text-[13px]">auto_awesome</span>
-        </div>
-        <div className="bg-surface-container-low text-on-surface rounded-2xl rounded-tl-none p-3 max-w-[90%] font-body-sm text-body-sm flex flex-col gap-2 shadow-sm">
-          <p className="whitespace-pre-wrap">{msg.chatReply || 'Đang phân tích dữ liệu biển...'}</p>
-          
-          {/* Mini Interactive Activity Suggestion Chip Inside Chat */}
-          {msg.chatTourName && (
-            <>
-              <div className="bg-surface-container-lowest p-2.5 rounded-xl flex items-center gap-3 shadow-xs mt-1">
-                <div className="w-12 h-12 rounded-lg bg-surface-container overflow-hidden flex-shrink-0">
-                  <img className="w-full h-full object-cover" src={msg.chatImage} />
+
+      {/* =========================================================================
+          CHƯƠNG 01: BÌNH MINH & MẶT NƯỚC ÊM (PANEL SÁNG LIỀN KHỐI)
+         ========================================================================= */}
+      <section id="scene-chapter-1" data-scene="hero" className="max-w-[1600px] w-full mx-auto px-3 sm:px-6 lg:px-8">
+        <ScrollReveal>
+          <div className="space-y-12 sm:space-y-16">
+            {/* Flash Sale Section */}
+            <FlashSaleSection experiences={FLASH_SALE_EXPERIENCES} />
+
+            {/* Carousel SUP & Kayak Biển */}
+            <CategoryExperienceCarousel
+              title={t.sections.supKayakTitle}
+              subtitle={language === 'en'
+                ? 'Glide peacefully across mirrored morning waters and greet the sunrise'
+                : 'Lướt êm trên mặt biển phẳng lặng sớm mai, đón ánh bình minh rạng rỡ'}
+              categorySlug="sup"
+              experiences={SUP_KAYAK_EXPERIENCES}
+            />
+          </div>
+        </ScrollReveal>
+      </section>
+
+      {/* =========================================================================
+          KHOẢNG THỞ 02 (CÙNG NHAU)
+         ========================================================================= */}
+      <div className="py-20 sm:py-28 text-center max-w-3xl mx-auto px-4 select-none">
+        <span className="text-xs font-mono tracking-widest text-white/80 uppercase block mb-3 drop-shadow-sm">
+          {language === 'en' ? 'Chapter 02 • Together Over Waves' : 'Chương 02 • Cùng Nhau Vượt Sóng'}
+        </span>
+        <p className="text-lg sm:text-2xl font-medium text-white drop-shadow-[0_3px_12px_rgba(0,0,0,0.65)] leading-relaxed italic">
+          {language === 'en'
+            ? '"The sweetest adventure is not measured in distance, but in the laughter shared over crystal tides."'
+            : '"Hành trình kỳ diệu nhất không phải là đi xa bao nhiêu, mà là cùng ai vượt sóng ngắm nhìn rạn san hô nguyên sơ."'}
+        </p>
+      </div>
+
+      {/* =========================================================================
+          CHƯƠNG 02: CÙNG NHAU & VỊNH ĐẢO (PANEL SÁNG LIỀN KHỐI)
+         ========================================================================= */}
+      <section id="scene-chapter-2" data-scene="bays" className="max-w-[1600px] w-full mx-auto px-3 sm:px-6 lg:px-8">
+        <ScrollReveal>
+          <div className="space-y-12 sm:space-y-16">
+            {/* Vịnh Biển Đà Nẵng */}
+            <ExpandingBaysSection />
+
+            {/* Carousel Lặn biển & San hô Sơn Trà */}
+            <CategoryExperienceCarousel
+              title={t.sections.divingTitle}
+              subtitle={language === 'en'
+                ? 'Immerse into rich coral biodiversity guided by certified master divers'
+                : 'Đắm mình trong làn nước pha lê và quần thể san hô đa dạng sắc màu'}
+              categorySlug="diving"
+              experiences={DIVING_EXPERIENCES}
+            />
+
+            {/* Carousel Combo Trọn Gói & Hoàng Hôn */}
+            <CategoryExperienceCarousel
+              title={t.sections.comboTitle}
+              subtitle={language === 'en'
+                ? 'All-inclusive marine days, sunset luxury yachts & beach camping'
+                : 'Trọn gói trải nghiệm 1 ngày, du thuyền ngắm hoàng hôn và cắm trại ven biển'}
+              categorySlug="combo"
+              experiences={COMBO_SUNSET_EXPERIENCES}
+            />
+          </div>
+        </ScrollReveal>
+      </section>
+
+      {/* =========================================================================
+          KHOẢNG THỞ 03 (SÓNG & NĂNG LƯỢNG ĐẠI DƯƠNG)
+         ========================================================================= */}
+      <div className="py-20 sm:py-28 text-center max-w-3xl mx-auto px-4 select-none">
+        <span className="text-xs font-mono tracking-widest text-white/80 uppercase block mb-3 drop-shadow-sm">
+          {language === 'en' ? 'Chapter 03 • Ocean Pulse & Energy' : 'Chương 03 • Sóng & Năng Lượng Biển'}
+        </span>
+        <p className="text-lg sm:text-2xl font-medium text-white drop-shadow-[0_3px_12px_rgba(0,0,0,0.65)] leading-relaxed italic">
+          {language === 'en'
+            ? '"Let the ocean waves sweep away every hesitation, unleashing boundless energy upon the sea."'
+            : '"Để tiếng sóng cuốn phăng âu lo, đón nhận trọn vẹn sự tự do và cảm giác phấn khích giữa đại dương bao la."'}
+        </p>
+      </div>
+
+      {/* =========================================================================
+          CHƯƠNG 03: SÓNG & THỂ THAO BIỂN (SPLIT STICKY TRÊN PANEL SÁNG)
+         ========================================================================= */}
+      <section id="scene-chapter-3" data-scene="sports" className="max-w-[1600px] w-full mx-auto px-3 sm:px-6 lg:px-8">
+        <ScrollReveal>
+          <div className="space-y-12 sm:space-y-16">
+            {/* Split Sticky Thể Thao Biển */}
+            <OceanSportsShowcase />
+
+            {/* Carousel Thể Thao Cảm Giác Mạnh & Cano */}
+            <CategoryExperienceCarousel
+              title={t.sections.thrillTitle}
+              subtitle={language === 'en'
+                ? 'Parasailing, jet skis and speedboat wave carving with maximum safety'
+                : 'Dù lượn ngắm vịnh biển, mô tô nước 1800cc và cano xé sóng cực phấn khích'}
+              categorySlug="thrill"
+              experiences={THRILL_EXPERIENCES}
+            />
+          </div>
+        </ScrollReveal>
+      </section>
+
+      {/* =========================================================================
+          KHOẢNG THỞ 04 (KHÁM PHÁ & THẤU HIỂU BIỂN)
+         ========================================================================= */}
+      <div className="py-20 sm:py-28 text-center max-w-3xl mx-auto px-4 select-none">
+        <span className="text-xs font-mono tracking-widest text-white/80 uppercase block mb-3 drop-shadow-sm">
+          {language === 'en' ? 'Chapter 04 • Harmony with the Tides' : 'Chương 04 • Thấu Hiểu Nhịp Biển'}
+        </span>
+        <p className="text-lg sm:text-2xl font-medium text-white drop-shadow-[0_3px_12px_rgba(0,0,0,0.65)] leading-relaxed italic">
+          {language === 'en'
+            ? '"A memorable voyage begins with understanding the tides, the breeze, and the heartbeat of the coast."'
+            : '"Một chuyến đi hoàn hảo bắt đầu từ việc thấu hiểu thủy triều, hướng gió và nhịp thở của biển cả."'}
+        </p>
+      </div>
+
+      {/* =========================================================================
+          CHƯƠNG 04: KHÁM PHÁ & TRỢ LÝ HẢI VĂN AI (PANEL SÁNG LIỀN KHỐI)
+         ========================================================================= */}
+      <section id="scene-chapter-4" data-scene="sunset" className="max-w-[1600px] w-full mx-auto px-3 sm:px-6 lg:px-8">
+        <ScrollReveal>
+          <div className="space-y-12 sm:space-y-16">
+            {/* Smart Ocean Planner */}
+            <SmartOceanPlanner />
+
+            {/* AI Maritime Concierge */}
+            <div id="ai-concierge">
+              <div className="mb-6">
+                <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.95)] drop-shadow-[0_8px_20px_rgba(0,0,0,0.7)]">
+                  {t.aiStudio.title}
+                </h2>
+                <p className="text-xs sm:text-sm text-slate-100 mt-1 font-medium drop-shadow-[0_1.5px_3px_rgba(0,0,0,0.95)] drop-shadow-[0_4px_12px_rgba(0,0,0,0.6)]">
+                  {language === 'en'
+                    ? 'Real-time wave, tide, and wind monitoring station paired with instant advisory intelligence.'
+                    : 'Trạm quan trắc thủy triều, độ cao sóng và trợ lý tư vấn lịch trình thể thao biển theo thời gian thực.'}
+                </p>
+              </div>
+
+              {/* Beach Selector Pills */}
+              <div className="flex flex-wrap items-center justify-between gap-3 mb-4 pb-4 border-b border-white/20">
+                <div className="flex items-center gap-2 text-xs font-semibold text-white drop-shadow-sm">
+                  <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                  <span>{language === 'en' ? 'Radar Station:' : 'Trạm quan trắc:'}</span>
                 </div>
-                <div className="flex-1 min-w-0">
-                  <span className="font-label-md text-label-md text-on-surface truncate block font-bold">{msg.chatTourName}</span>
-                  <span className="font-body-sm text-[12px] text-primary font-bold">280.000 đ/người • Còn 6 chỗ</span>
+                <div className="flex items-center gap-2">
+                  {['Mỹ Khê', 'Sơn Trà', 'Non Nước'].map((beach) => (
+                    <button
+                      key={beach}
+                      type="button"
+                      onClick={() => { setActiveAIBeach(beach); setActiveCustomPrompt(null); setChatHistory([]); }}
+                      className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-all cursor-pointer backdrop-blur-md ${
+                        activeAIBeach === beach
+                          ? 'bg-cyan-600 text-white shadow-lg border border-cyan-400 font-bold'
+                          : 'bg-white/15 text-white hover:bg-white/25 border border-white/20 shadow-sm'
+                      }`}
+                    >
+                      {beach}
+                    </button>
+                  ))}
                 </div>
               </div>
-              <div className="flex items-center gap-2 pt-1">
-                <button className="px-3 py-1 rounded-full bg-secondary text-white font-label-sm text-label-sm" type="button">
-                  Chọn khung 05:30
-                </button>
-                <button className="px-3 py-1 rounded-full bg-surface-container text-on-surface-variant font-label-sm text-label-sm" type="button">
-                  Xem lịch khác
-                </button>
+
+              {/* Active Radar Metrics Chips (Transparent Glass Background) */}
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6 p-4 sm:p-5 rounded-2xl bg-white/10 backdrop-blur-md shadow-2xl border border-white/20">
+                <div className="flex flex-col">
+                  <span className="text-[11px] text-white/70 font-semibold uppercase tracking-wider">{language === 'en' ? 'Water Temp' : 'Nhiệt độ'}</span>
+                  <span className="text-lg sm:text-xl font-black text-white mt-0.5 drop-shadow-sm">{currentBeachData.temp.val}</span>
+                  <span className="text-[11px] text-cyan-300 font-medium">{language === 'en' ? currentBeachData.temp.descEn : currentBeachData.temp.desc}</span>
+                </div>
+                <div className="flex flex-col">
+                  <span className="text-[11px] text-white/70 font-semibold uppercase tracking-wider">{language === 'en' ? 'Wave Swell' : 'Độ cao sóng'}</span>
+                  <span className="text-lg sm:text-xl font-black text-cyan-300 mt-0.5 drop-shadow-sm">{currentBeachData.wave.val}</span>
+                  <span className="text-[11px] text-cyan-300 font-medium">{language === 'en' ? currentBeachData.wave.descEn : currentBeachData.wave.desc}</span>
+                </div>
+                <div className="flex flex-col">
+                  <span className="text-[11px] text-white/70 font-semibold uppercase tracking-wider">{language === 'en' ? 'Visibility' : 'Tầm nhìn nước'}</span>
+                  <span className="text-lg sm:text-xl font-black text-emerald-300 mt-0.5 drop-shadow-sm">{currentBeachData.visibility.val}</span>
+                  <span className="text-[11px] text-cyan-300 font-medium">{language === 'en' ? currentBeachData.visibility.descEn : currentBeachData.visibility.desc}</span>
+                </div>
+                <div className="flex flex-col">
+                  <span className="text-[11px] text-white/70 font-semibold uppercase tracking-wider">{language === 'en' ? 'Wind Speed' : 'Tốc độ gió'}</span>
+                  <span className="text-lg sm:text-xl font-black text-amber-300 mt-0.5 drop-shadow-sm">{currentBeachData.wind.val}</span>
+                  <span className="text-[11px] text-cyan-300 font-medium">{language === 'en' ? currentBeachData.wind.descEn : currentBeachData.wind.desc}</span>
+                </div>
               </div>
-            </>
-          )}
-        </div>
-      </div>
-    </div>
-  ))}
-</div>
-{/* Chat Bottom Input Bar Preview */}
-<div className="mt-4 pt-3 border-t-0 flex items-center gap-2">
-<div className="flex-1 bg-surface-container-low rounded-full px-3.5 py-1 text-on-surface font-body-sm text-body-sm flex items-center gap-2 border border-transparent focus-within:border-secondary transition-colors">
-<span className="material-symbols-outlined text-[18px] text-outline">chat</span>
-<input 
-  type="text" 
-  value={chatInputValue}
-  onChange={(e) => setChatInputValue(e.target.value)}
-  onKeyDown={(e) => e.key === 'Enter' && handleChatSubmit()}
-  placeholder="Hỏi bất kỳ điều gì về biển Đà Nẵng..."
-  className="bg-transparent border-none outline-none flex-1 py-1 text-on-surface placeholder:text-outline"
-  disabled={isChatLoading}
-/>
-</div>
-<button onClick={handleChatSubmit} disabled={isChatLoading || !chatInputValue.trim()} className={`w-8 h-8 rounded-full text-white flex items-center justify-center flex-shrink-0 transition-colors ${chatInputValue.trim() && !isChatLoading ? 'bg-secondary hover:bg-secondary/90' : 'bg-surface-container-high text-outline'}`} type="button">
-{isChatLoading ? (
-  <span className="material-symbols-outlined text-[16px] animate-spin">sync</span>
-) : (
-  <span className="material-symbols-outlined text-[16px]">arrow_upward</span>
-)}
-</button>
-</div>
-</div>
-</div>
-</div>
-</div>
-</section>
-{/* SECTION 6: REALTIME OCEAN WEATHER & CONDITIONS */}
-<section className="w-full max-w-[1280px] mx-auto px-margin-desktop py-space-xl">
-<div className="bg-surface-container-lowest rounded-3xl p-space-xl shadow-[0_4px_24px_rgba(16,47,58,0.05)]">
-<div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-space-lg">
-<div>
-<div className="flex items-center gap-2 mb-1">
-<span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
-<span className="font-label-sm text-label-sm text-secondary font-bold uppercase tracking-wider">Trạm quan trắc trực tuyến</span>
-</div>
-<h2 className="font-headline-md text-headline-md text-on-surface">Thông tin thời tiết &amp; điều kiện biển</h2>
-</div>
-{/* Region Selector Tabs */}
-<div className="inline-flex p-1 rounded-full bg-surface-container-low">
-{['Mỹ Khê', 'Sơn Trà', 'Non Nước'].map(beach => (
-  <button 
-    key={beach}
-    onClick={() => { setActiveAIBeach(beach); setActiveCustomPrompt(null); setChatHistory([]); }}
-    className={`px-5 py-1.5 rounded-full font-label-md text-label-md transition-all ${activeAIBeach === beach ? 'bg-surface-container-lowest text-secondary shadow-xs' : 'text-on-surface-variant hover:text-on-surface'}`} 
-    type="button">
-    {beach === 'Mỹ Khê' ? 'Bãi biển Mỹ Khê' : beach === 'Sơn Trà' ? 'Bán đảo Sơn Trà' : 'Bãi Non Nước'}
-  </button>
-))}
-</div>
-</div>
-{/* Live Condition Metric Cards */}
-<div key={activeAIBeach} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-space-md animate-fade-in-up">
-{/* Metric 1: Temp */}
-<div className="p-space-md rounded-2xl bg-surface-container-low flex flex-col justify-between">
-<div className="flex items-center justify-between text-secondary">
-<span className="font-label-sm text-label-sm text-outline uppercase tracking-wider">Nhiệt độ không khí</span>
-<span className="material-symbols-outlined text-[24px]">thermostat</span>
-</div>
-<div className="my-2">
-<span className="font-headline-lg text-headline-lg text-on-surface font-bold">{aiWeatherData.temp.val}</span>
-<span className="font-body-sm text-body-sm text-on-surface-variant block">{aiWeatherData.temp.desc}</span>
-</div>
-<div className="w-full bg-surface-container-highest rounded-full h-1.5 overflow-hidden">
-<div className="bg-primary-container h-full rounded-full transition-all duration-1000" style={{ width: aiWeatherData.temp.percent }}></div>
-</div>
-</div>
-{/* Metric 2: Wave swell */}
-<div className="p-space-md rounded-2xl bg-surface-container-low flex flex-col justify-between">
-<div className="flex items-center justify-between text-secondary">
-<span className="font-label-sm text-label-sm text-outline uppercase tracking-wider">Chiều cao sóng</span>
-<span className="material-symbols-outlined text-[24px]">waves</span>
-</div>
-<div className="my-2">
-<span className="font-headline-lg text-headline-lg text-on-surface font-bold">{aiWeatherData.wave.val}</span>
-<span className="font-body-sm text-body-sm text-secondary font-semibold block">{aiWeatherData.wave.desc}</span>
-</div>
-<div className="w-full bg-surface-container-highest rounded-full h-1.5 overflow-hidden">
-<div className="bg-secondary h-full rounded-full transition-all duration-1000" style={{ width: aiWeatherData.wave.percent }}></div>
-</div>
-</div>
-{/* Metric 3: Underwater Visibility */}
-<div className="p-space-md rounded-2xl bg-surface-container-low flex flex-col justify-between">
-<div className="flex items-center justify-between text-secondary">
-<span className="font-label-sm text-label-sm text-outline uppercase tracking-wider">Tầm nhìn dưới nước</span>
-<span className="material-symbols-outlined text-[24px]">visibility</span>
-</div>
-<div className="my-2">
-<span className="font-headline-lg text-headline-lg text-on-surface font-bold">{aiWeatherData.visibility.val}</span>
-<span className="font-body-sm text-body-sm text-secondary font-semibold block">{aiWeatherData.visibility.desc}</span>
-</div>
-<div className="w-full bg-surface-container-highest rounded-full h-1.5 overflow-hidden">
-<div className="bg-secondary h-full rounded-full transition-all duration-1000" style={{ width: aiWeatherData.visibility.percent }}></div>
-</div>
-</div>
-{/* Metric 4: Wind Speed */}
-<div className="p-space-md rounded-2xl bg-surface-container-low flex flex-col justify-between">
-<div className="flex items-center justify-between text-secondary">
-<span className="font-label-sm text-label-sm text-outline uppercase tracking-wider">Sức gió &amp; Hướng gió</span>
-<span className="material-symbols-outlined text-[24px]">air</span>
-</div>
-<div className="my-2">
-<span className="font-headline-lg text-headline-lg text-on-surface font-bold">{aiWeatherData.wind.val}</span>
-<span className="font-body-sm text-body-sm text-on-surface-variant block">{aiWeatherData.wind.desc}</span>
-</div>
-<div className="w-full bg-surface-container-highest rounded-full h-1.5 overflow-hidden">
-<div className="bg-tertiary-container h-full rounded-full transition-all duration-1000" style={{ width: aiWeatherData.wind.percent }}></div>
-</div>
-</div>
-</div>
-{/* Recommendation Banner */}
-<div key={`banner-${activeAIBeach}`} className="mt-space-md p-4 rounded-2xl bg-[#E6F4F6] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 animate-fade-in-up">
-<div className="flex items-center gap-3">
-<div className="w-10 h-10 rounded-full bg-secondary text-white flex items-center justify-center flex-shrink-0">
-<span className="material-symbols-outlined text-[20px]">check_circle</span>
-</div>
-<div>
-<span className="font-label-lg text-label-lg text-secondary block font-bold">Đánh giá hoạt động hôm nay: {aiWeatherData.recommendationTitle}</span>
-<span className="font-body-sm text-[12px] text-tertiary">{aiWeatherData.recommendationDesc}</span>
-</div>
-</div>
-<div className="font-body-sm text-[11px] text-outline self-end sm:self-center">
-          Cập nhật lúc 06:00 sáng nay • Dữ liệu mô phỏng cho prototype giao diện
-        </div>
-</div>
-</div>
-</section>
-{/* SECTION 7: 3-STEP EASY BOOKING */}
-<section className="w-full max-w-[1280px] mx-auto px-margin-desktop py-space-3xl">
-<div className="text-center max-w-2xl mx-auto mb-space-2xl">
-<span className="font-label-sm text-label-sm text-primary uppercase tracking-widest font-bold">Trải nghiệm thuận tiện</span>
-<h2 className="font-headline-lg text-headline-lg text-on-surface mt-1">Cách đặt trải nghiệm cùng DANASEA</h2>
-<p className="font-body-md text-body-md text-on-surface-variant mt-2">Đơn giản, minh bạch và hoàn toàn bảo đảm quyền lợi với sự đồng hành của đội ngũ bản địa.</p>
-</div>
-<div className="grid grid-cols-1 md:grid-cols-3 gap-space-xl relative">
-{/* Step 1 */}
-<div className="p-space-xl rounded-3xl bg-surface-container flex flex-col items-start relative">
-<span className="font-display-hero text-[64px] text-secondary/30 font-black leading-none mb-2 select-none">01</span>
-<div className="w-12 h-12 rounded-2xl bg-secondary text-white flex items-center justify-center mb-space-md shadow-sm">
-<span className="material-symbols-outlined text-[24px]">explore</span>
-</div>
-<h3 className="font-headline-sm text-headline-sm text-on-surface mb-2 font-bold">Khám phá &amp; Chọn hoạt động</h3>
-<p className="font-body-md text-body-md text-on-surface-variant leading-relaxed">
-          Tìm theo vùng biển yêu thích, lọc theo cấp độ thể lực hoặc tham khảo lịch trình được gợi ý tự động từ AI.
-        </p>
-</div>
-{/* Step 2 */}
-<div className="p-space-xl rounded-3xl bg-surface-container flex flex-col items-start relative">
-<span className="font-display-hero text-[64px] text-secondary/30 font-black leading-none mb-2 select-none">02</span>
-<div className="w-12 h-12 rounded-2xl bg-primary-container text-white flex items-center justify-center mb-space-md shadow-sm">
-<span className="material-symbols-outlined text-[24px]">event_available</span>
-</div>
-<h3 className="font-headline-sm text-headline-sm text-on-surface mb-2 font-bold">Đặt lịch &amp; Thanh toán an toàn</h3>
-<p className="font-body-md text-body-md text-on-surface-variant leading-relaxed">
-          Chọn ngày, khung giờ sóng đẹp và số lượng khách. Xác nhận giữ chỗ tức thời qua các cổng bảo mật.
-        </p>
-</div>
-{/* Step 3 */}
-<div className="p-space-xl rounded-3xl bg-surface-container flex flex-col items-start relative">
-<span className="font-display-hero text-[64px] text-secondary/30 font-black leading-none mb-2 select-none">03</span>
-<div className="w-12 h-12 rounded-2xl bg-tertiary text-white flex items-center justify-center mb-space-md shadow-sm">
-<span className="material-symbols-outlined text-[24px]">qr_code_2</span>
-</div>
-<h3 className="font-headline-sm text-headline-sm text-on-surface mb-2 font-bold">Nhận vé QR &amp; Tận hưởng biển</h3>
-<p className="font-body-md text-body-md text-on-surface-variant leading-relaxed">
-          Vé điện tử gửi thẳng qua ứng dụng và Zalo. Quét mã check-in trực tiếp tại bến tập kết và bắt đầu hành trình.
-        </p>
-</div>
-</div>
-</section>
-{/* SECTION 8: RECENTLY VIEWED ACTIVITIES (HISTORY) */}
-<section className="w-full max-w-[1280px] mx-auto px-margin-desktop py-space-xl mb-space-2xl">
-<div className="flex items-center justify-between mb-space-lg">
-<div className="flex items-center gap-2">
-<span className="material-symbols-outlined text-secondary text-[22px]">history</span>
-<h2 className="font-headline-md text-headline-md text-on-surface">Trải nghiệm bạn vừa xem</h2>
-</div>
-<a className="font-label-md text-label-md text-secondary hover:underline" href="/" onClick={(e) => { e.preventDefault(); }}>Xóa lịch sử xem</a>
-</div>
-<div className="grid grid-cols-1 md:grid-cols-3 gap-space-lg">
-{/* Mini Card 1 */}
-<Link to="/tour/1" className="p-3 bg-surface-container-lowest rounded-2xl shadow-sm flex items-center gap-4 hover:shadow-md hover:-translate-y-1 transition-all cursor-pointer">
-<div className="w-24 h-24 rounded-xl overflow-hidden bg-surface-container flex-shrink-0">
-<img className="w-full h-full object-cover" data-alt="Overhead shot of SUP surfboard paddling at dawn in turquoise blue waters" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAUQYcWnZo3_Kb31_qfroEFXgTerymIKQCOpVaTesW0pBt3yg2CiNGXu2vGlRckKERopIXFerqe-1sAv_OkI5zmzYO_iK7aXukpJ89Oyny7Z8VECdpaEufZqmZucGaCmzQZTiCLwcwXH1COA5JTI42EQeyE0vnRTJvI9enpzD8cKsC5HsI2Cv6MuYVgbn52pZbXVgeex4h-_Vwb6-ZS20BNeUb30ntwL8mB9p5n-EX-6dvp2hzW-l9l7g" />
-</div>
-<div className="flex-1 min-w-0">
-<span className="font-label-sm text-label-sm text-outline block">Mỹ Khê • 2 giờ</span>
-<h4 className="font-label-lg text-label-lg text-on-surface truncate font-bold mt-0.5">Chèo SUP đón bình minh</h4>
-<span className="font-label-lg text-label-lg text-primary font-bold block mt-1">280.000 đ</span>
-<button className="mt-2 text-[12px] font-label-md text-secondary hover:underline font-bold flex items-center gap-1" type="button">
-            Đặt lại ngay
-            <span className="material-symbols-outlined text-[14px]">arrow_forward</span>
-</button>
-</div>
-</Link>
-{/* Mini Card 2 */}
-<Link to="/tour/1" className="p-3 bg-surface-container-lowest rounded-2xl shadow-sm flex items-center gap-4 hover:shadow-md hover:-translate-y-1 transition-all cursor-pointer">
-<div className="w-24 h-24 rounded-xl overflow-hidden bg-surface-container flex-shrink-0">
-<img className="w-full h-full object-cover" data-alt="Speedboat cruising across the bay near coastal cliffs" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD5nmrt_9U0tcvvajAYCF3dMpfZZaJnSNnHT11tVSuhx0cwdhpWYt43LeKGcZqFLS4u5yEKePSYOKj4HN_FWgmqmGGpJGPs9fmPOS99IAlQgJIRYV3GqgO6WnqEc3-Y5HqeNa9GoLKSArL3h08851KK6UOdNy48VvU8rxAhkf70b8bJR-eL0PV_mJ8S-ocMfY0mV03iWeUbZN18JgWL7RJevmsMiCure9fIRVajRJ15V49PC7-Hn_aotw" />
-</div>
-<div className="flex-1 min-w-0">
-<span className="font-label-sm text-label-sm text-outline block">Sơn Trà • 3.5 giờ</span>
-<h4 className="font-label-lg text-label-lg text-on-surface truncate font-bold mt-0.5">Khám phá biển bằng cano</h4>
-<span className="font-label-lg text-label-lg text-primary font-bold block mt-1">450.000 đ</span>
-<button className="mt-2 text-[12px] font-label-md text-secondary hover:underline font-bold flex items-center gap-1" type="button">
-            Đặt lại ngay
-            <span className="material-symbols-outlined text-[14px]">arrow_forward</span>
-</button>
-</div>
-</Link>
-{/* Mini Card 3 */}
-<Link to="/tour/1" className="p-3 bg-surface-container-lowest rounded-2xl shadow-sm flex items-center gap-4 hover:shadow-md hover:-translate-y-1 transition-all cursor-pointer">
-<div className="w-24 h-24 rounded-xl overflow-hidden bg-surface-container flex-shrink-0">
-<img className="w-full h-full object-cover" data-alt="Underwater coral reef with tropical blue and yellow fish" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBZTxAVg6AqtTrMtvnuKot_Clv9n0P7eEgwVGzgb19OmzpF-MggEaLqSFy6_t-FFBtHsqrMF6CRV8n1seIdwURlsk7blYBpD2Uvd6Ics4e5NkLLIv56QBwxKX6U5pqRT-PJ6vCRrUjEM4EZ2aNHmU5W7vq52ttJRUMFmjuX7TGeinu52WsNh6TSLu1EGtIR5RBt2SNedmSuuL8ya3I2wdG70BTfTCERY5RBhGSmscP_kPQA629pXRVVuQ" />
-</div>
-<div className="flex-1 min-w-0">
-<span className="font-label-sm text-label-sm text-outline block">Bán đảo Sơn Trà • 2.5 giờ</span>
-<h4 className="font-label-lg text-label-lg text-on-surface truncate font-bold mt-0.5">Lặn biển ngắm san hô</h4>
-<span className="font-label-lg text-label-lg text-primary font-bold block mt-1">520.000 đ</span>
-<button className="mt-2 text-[12px] font-label-md text-secondary hover:underline font-bold flex items-center gap-1" type="button">
-            Đặt lại ngay
-            <span className="material-symbols-outlined text-[14px]">arrow_forward</span>
-</button>
-</div>
-</Link>
-</div>
-</section>
-</div></main>
+
+              {/* AI Assistant Chat Preview */}
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+                {/* Left Column: Preset Questions */}
+                <div className="lg:col-span-4 space-y-2">
+                  <span className="text-xs font-bold text-white block mb-1 drop-shadow-sm">
+                    {language === 'en' ? 'Quick Questions' : 'Gợi ý câu hỏi nhanh'}
+                  </span>
+                  {[
+                    { id: 'group', icon: 'group', label: language === 'en' ? 'Group of 6, half-day tour?' : 'Nhóm 6 người đi nửa ngày?' },
+                    { id: 'couple', icon: 'favorite', label: language === 'en' ? 'Romantic sunset for couples?' : 'Cặp đôi thư giãn hoàng hôn?' },
+                    { id: 'weather', icon: 'wb_sunny', label: language === 'en' ? 'Best timing for sunny day?' : 'Nắng nóng nên chơi giờ nào?' },
+                  ].map((prompt) => (
+                    <button
+                      key={prompt.id}
+                      type="button"
+                      onClick={() => { setActiveCustomPrompt(prompt.id); }}
+                      className="w-full text-left p-3.5 rounded-xl bg-white/10 backdrop-blur-md border border-white/20 shadow-md hover:border-cyan-300 hover:bg-white/20 text-xs font-semibold text-white flex items-center gap-2.5 transition-all cursor-pointer group"
+                    >
+                      <span className="material-symbols-outlined text-[18px] text-cyan-300 group-hover:scale-110 transition-transform">{prompt.icon}</span>
+                      <span className="drop-shadow-sm">{prompt.label}</span>
+                    </button>
+                  ))}
+                </div>
+
+                {/* Right Column: Interactive Chat Box (Transparent Glass Background) */}
+                <div className="lg:col-span-8 bg-white/10 backdrop-blur-md rounded-2xl p-4 sm:p-5 border border-white/20 shadow-2xl flex flex-col h-[320px]">
+                  <div ref={chatContainerRef} className="flex-1 overflow-y-auto space-y-3 pr-2">
+                    {displayMessages.map((msg, idx) => (
+                      <div key={idx} className="space-y-2 animate-fadeIn">
+                        {/* User message */}
+                        <div className="flex justify-end">
+                          <div className="bg-cyan-600/90 backdrop-blur-sm text-white text-xs font-medium px-4 py-2.5 rounded-2xl rounded-br-none max-w-md shadow-md border border-cyan-400/30">
+                            {language === 'en' ? (msg.chatPromptEn || msg.chatPrompt) : msg.chatPrompt}
+                          </div>
+                        </div>
+
+                        {/* AI response */}
+                        {msg.chatReply && (
+                          <div className="flex justify-start">
+                            <div className="bg-slate-950/70 backdrop-blur-md text-white text-xs leading-relaxed px-4 py-3 rounded-2xl rounded-bl-none max-w-lg border border-white/20 shadow-lg">
+                              <div className="flex items-center gap-1.5 mb-1.5 text-cyan-300 font-bold text-[11px]">
+                                <span className="material-symbols-outlined text-[14px]">smart_toy</span>
+                                <span>DANASEA AI</span>
+                              </div>
+                              <p className="text-white/95">{language === 'en' ? (msg.chatReplyEn || msg.chatReply) : msg.chatReply}</p>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                    {isChatLoading && (
+                      <div className="flex justify-start">
+                        <div className="bg-slate-950/60 backdrop-blur-md text-cyan-300 text-xs px-4 py-2.5 rounded-2xl border border-white/20 animate-pulse">
+                          {language === 'en' ? 'DANASEA AI is analyzing marine data...' : 'DANASEA AI đang phân tích dữ liệu hải văn...'}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Input Bar */}
+                  <div className="pt-3 border-t border-white/20 flex items-center gap-2">
+                    <input
+                      type="text"
+                      value={chatInputValue}
+                      onChange={(e) => setChatInputValue(e.target.value)}
+                      onKeyDown={(e) => e.key === 'Enter' && handleChatSubmit()}
+                      placeholder={language === 'en' ? 'Ask anything about Da Nang beaches & activities...' : 'Hỏi bất kỳ điều gì về biển và hoạt động tại Đà Nẵng...'}
+                      className="flex-1 bg-white/10 backdrop-blur-sm border border-white/25 rounded-xl px-3.5 py-2 text-xs text-white placeholder-white/60 focus:outline-none focus:border-cyan-400 focus:bg-white/20 transition-all"
+                    />
+                    <button
+                      type="button"
+                      onClick={handleChatSubmit}
+                      disabled={isChatLoading || !chatInputValue.trim()}
+                      className="px-4 py-2 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-white font-bold text-xs shadow-md transition-all disabled:opacity-40 cursor-pointer flex items-center gap-1.5 shrink-0"
+                    >
+                      <span>{language === 'en' ? 'Send' : 'Gửi'}</span>
+                      <span className="material-symbols-outlined text-[14px]">send</span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </ScrollReveal>
+      </section>
+
+      {/* =========================================================================
+          PHẦN KẾT: HỒI ỨC, CÁCH ĐẶT TOUR & CTA (PANEL SÁNG LIỀN KHỐI)
+         ========================================================================= */}
+      <section id="scene-footer" data-scene="sunset" className="relative z-20 max-w-[1600px] w-full mx-auto px-3 sm:px-6 lg:px-8 my-12">
+        <ScrollReveal>
+          <div className="space-y-12 sm:space-y-16">
+            {/* Gallery Khách */}
+            <GuestGalleryMarquee />
+
+            {/* 3 Bước Đặt Tour Đơn Giản */}
+            <div>
+              <div className="text-center max-w-xl mx-auto mb-8">
+                <h2 className="text-2xl sm:text-3xl font-extrabold text-white drop-shadow-[0_2px_10px_rgba(0,0,0,0.75)]">
+                  {language === 'en' ? 'How to Book on DANASEA' : 'Cách đặt trải nghiệm cùng DANASEA'}
+                </h2>
+                <p className="text-xs sm:text-sm text-white/90 mt-1 font-medium drop-shadow-[0_1px_6px_rgba(0,0,0,0.65)]">
+                  {language === 'en' ? 'Three quick steps from browsing to hitting the waves' : 'Ba bước nhanh chóng từ lúc chọn tour đến khi bước chân xuống mặt nước'}
+                </p>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 relative z-20">
+                {/* Step 1 */}
+                <div className="relative z-20 p-6 sm:p-7 rounded-3xl bg-transparent border border-white/20 hover:border-white/40 hover:-translate-y-1.5 transition-all group flex flex-col items-start">
+                  <div className="w-full flex items-center justify-between mb-3">
+                    <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-amber-500 to-orange-500 text-white flex items-center justify-center shadow-md">
+                      <span className="material-symbols-outlined text-[24px]">explore</span>
+                    </div>
+                    <span className="text-4xl sm:text-5xl font-mono font-black text-white/30 group-hover:text-white/50 transition-colors select-none">
+                      01
+                    </span>
+                  </div>
+                  <h3 className="text-base sm:text-lg font-bold text-white mb-2 drop-shadow-[0_2px_4px_rgba(0,0,0,0.85)]">
+                    {language === 'en' ? 'Explore & Pick Activity' : 'Khám phá & Chọn hoạt động'}
+                  </h3>
+                  <p className="text-slate-100 text-xs sm:text-sm leading-relaxed font-medium drop-shadow-[0_1.5px_3px_rgba(0,0,0,0.8)]">
+                    {language === 'en'
+                      ? 'Filter by preferred bay, fitness level, or consult our AI marine radar planner.'
+                      : 'Tìm theo vùng biển yêu thích, lọc theo thể loại hoặc tham khảo gợi ý thời tiết từ AI.'}
+                  </p>
+                </div>
+
+                {/* Step 2 */}
+                <div className="relative z-20 p-6 sm:p-7 rounded-3xl bg-transparent border border-white/20 hover:border-white/40 hover:-translate-y-1.5 transition-all group flex flex-col items-start">
+                  <div className="w-full flex items-center justify-between mb-3">
+                    <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-cyan-600 to-teal-600 text-white flex items-center justify-center shadow-md">
+                      <span className="material-symbols-outlined text-[24px]">event_available</span>
+                    </div>
+                    <span className="text-4xl sm:text-5xl font-mono font-black text-white/30 group-hover:text-white/50 transition-colors select-none">
+                      02
+                    </span>
+                  </div>
+                  <h3 className="text-base sm:text-lg font-bold text-white mb-2 drop-shadow-[0_2px_4px_rgba(0,0,0,0.85)]">
+                    {language === 'en' ? 'Select Slot & Instant Pay' : 'Đặt lịch & Giữ chỗ tức thì'}
+                  </h3>
+                  <p className="text-slate-100 text-xs sm:text-sm leading-relaxed font-medium drop-shadow-[0_1.5px_3px_rgba(0,0,0,0.8)]">
+                    {language === 'en'
+                      ? 'Pick the best wave hour, guest count, and receive instant confirmation.'
+                      : 'Chọn ngày, khung giờ sóng đẹp và số lượng khách. Xác nhận giữ chỗ an toàn qua thẻ & ví điện tử.'}
+                  </p>
+                </div>
+
+                {/* Step 3 */}
+                <div className="relative z-20 p-6 sm:p-7 rounded-3xl bg-transparent border border-white/20 hover:border-white/40 hover:-translate-y-1.5 transition-all group flex flex-col items-start">
+                  <div className="w-full flex items-center justify-between mb-3">
+                    <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-slate-800 to-slate-900 text-white flex items-center justify-center shadow-md">
+                      <span className="material-symbols-outlined text-[24px]">qr_code_2</span>
+                    </div>
+                    <span className="text-4xl sm:text-5xl font-mono font-black text-white/30 group-hover:text-white/50 transition-colors select-none">
+                      03
+                    </span>
+                  </div>
+                  <h3 className="text-base sm:text-lg font-bold text-white mb-2 drop-shadow-[0_2px_4px_rgba(0,0,0,0.85)]">
+                    {language === 'en' ? 'Receive QR Pass & Dive In' : 'Nhận vé QR & Chạm sóng biển'}
+                  </h3>
+                  <p className="text-slate-100 text-xs sm:text-sm leading-relaxed font-medium drop-shadow-[0_1.5px_3px_rgba(0,0,0,0.8)]">
+                    {language === 'en'
+                      ? 'Check-in on mobile at the beach harbor station and enjoy your certified marine tour.'
+                      : 'Vé điện tử gửi thẳng qua ứng dụng. Quét mã check-in trực tiếp tại bến tập kết và bắt đầu hành trình.'}
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Final Call to Action */}
+            <div className="rounded-2xl p-6 sm:p-8 bg-gradient-to-r from-cyan-900 to-teal-900 text-white flex flex-col sm:flex-row items-center justify-between gap-6 shadow-lg">
+              <div>
+                <h3 className="text-lg sm:text-xl font-bold mb-1">
+                  {language === 'en' ? 'Ready to Touch Da Nang Waters?' : 'Sẵn sàng chạm sóng biển Đà Nẵng ngay hôm nay?'}
+                </h3>
+                <p className="text-xs sm:text-sm text-cyan-100 max-w-xl">
+                  {language === 'en'
+                    ? 'Explore 20+ certified water sports and marine expeditions tailored for you.'
+                    : 'Hơn 20+ trải nghiệm thể thao biển chuẩn quốc tế với đầy đủ bảo hiểm và thiết bị chuyên nghiệp.'}
+                </p>
+              </div>
+
+              <Link
+                to="/search"
+                className="px-6 py-3 rounded-xl bg-white text-cyan-900 hover:bg-cyan-50 font-bold text-xs shadow-md transition-all shrink-0 hover:scale-[1.02]"
+              >
+                {language === 'en' ? 'Explore All Tours' : 'Xem toàn bộ tour'} →
+              </Link>
+            </div>
+          </div>
+        </ScrollReveal>
+      </section>
+
+      {/* Floating Scroll to Top Button */}
+      <ScrollToTopButton />
+    </main>
   );
 }
+
+export default Home;

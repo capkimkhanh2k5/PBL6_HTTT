@@ -27,33 +27,232 @@ export function Profile() {
   };
 
   return (
-    <main className="w-full pt-20 bg-surface flex-1"><div className="flex flex-col w-full">
-<div className="relative w-full overflow-hidden bg-surface py-space-xl">
-<div className="absolute -top-24 -left-20 w-96 h-96 rounded-full bg-secondary-fixed/30 blur-3xl pointer-events-none"></div>
-<div className="absolute top-1/2 -right-24 w-[28rem] h-[28rem] rounded-full bg-primary-fixed/30 blur-3xl pointer-events-none"></div>
-<div className="max-w-[1280px] mx-auto px-margin-mobile md:px-margin-desktop">
-<div className="flex flex-col md:flex-row md:items-end justify-between gap-space-md mb-space-2xl">
-<div className="flex flex-col gap-space-2xs"><div className="flex items-center gap-space-xs text-secondary font-label-md text-label-md"><span className="material-symbols-outlined text-[16px]">manage_accounts</span><span className="">TÀI KHOẢN KHÁCH HÀNG • DANASEA USER</span></div><h1 className="font-headline-lg text-headline-lg text-on-surface tracking-tight">Hồ sơ &amp; Tài khoản DANASEA</h1><p className="font-body-md text-body-md text-on-surface-variant max-w-2xl">Quản lý thông tin định danh cá nhân, đơn hàng tour biển đã đặt, trợ lý AI và tùy chọn ngôn ngữ hiển thị.</p></div>
-<div className="flex items-center gap-space-xs">
-<button className="px-space-md py-space-xs rounded-full bg-secondary text-on-secondary font-label-lg text-label-lg shadow-sm hover:scale-[1.02] transition-transform flex items-center gap-2" type="button" onClick={() => navigate("/auth")}>
-<span className="material-symbols-outlined text-[18px]">passkey</span>
-<span className="">Trình chuyển đổi Đăng nhập / Đăng ký</span>
-</button>
-</div>
-</div>
-<div className="grid grid-cols-1 lg:grid-cols-12 gap-space-xl items-start">
-<aside className="lg:col-span-4 flex flex-col gap-space-lg"><div className="bg-surface-container-lowest rounded-xl p-space-lg shadow-sm"><div className="flex items-center gap-space-md pb-space-md border-b border-surface-container-high"><div className="relative w-16 h-16 rounded-full overflow-hidden flex-shrink-0 bg-surface-container shadow-inner"><img alt={`Avatar du khách ${user.fullName || "Tên chưa cập nhật"}`} className="w-full h-full object-cover" src={user.avatarUrl || "https://via.placeholder.com/150"}/><span className="absolute bottom-0 right-0 w-4 h-4 rounded-full bg-secondary flex items-center justify-center text-on-secondary text-[10px] shadow-sm"><span className="material-symbols-outlined text-[12px]">check</span></span></div><div className="min-w-0 flex-1"><h2 className="font-headline-sm text-headline-sm text-on-surface truncate">{user.fullName || "Tên chưa cập nhật"}</h2><p className="font-body-sm text-body-sm text-on-surface-variant truncate">{user.email || "Email chưa cập nhật"}</p><div className="inline-flex items-center gap-1 px-space-xs py-0.5 mt-1 rounded-full bg-secondary-fixed/40 text-on-secondary-fixed font-label-sm text-label-sm"><span className="material-symbols-outlined text-[14px] text-secondary">person</span><span className="">Vai trò: CUSTOMER</span></div></div></div><nav aria-label="Menu tài khoản" className="flex flex-col gap-1 mt-space-md"><button onClick={() => navigate("/profile")} className="w-full flex items-center justify-between px-space-md py-space-sm rounded-full bg-surface-container text-on-surface font-label-lg text-label-lg transition-all" type="button"><span className="flex items-center gap-space-xs text-secondary"><span className="material-symbols-outlined text-[20px]">account_circle</span><span className="text-on-surface">Thông tin cá nhân</span></span><span className="w-2 h-2 rounded-full bg-primary-container"></span></button><button onClick={() => navigate("/profile/orders")} className="w-full flex items-center justify-between px-space-md py-space-sm rounded-full hover:bg-surface-container-low text-on-surface-variant hover:text-on-surface font-label-lg text-label-lg transition-all" type="button"><span className="flex items-center gap-space-xs"><span className="material-symbols-outlined text-[20px]">receipt_long</span><span className="">Đơn hàng của tôi (Orders)</span></span><span className="px-space-xs py-0.5 rounded-full bg-surface-container-high text-on-surface-variant font-label-sm text-[11px]">3 đơn</span></button><button onClick={() => navigate("/profile/wishlist")} className="w-full flex items-center justify-between px-space-md py-space-sm rounded-full hover:bg-surface-container-low text-on-surface-variant hover:text-on-surface font-label-lg text-label-lg transition-all" type="button"><span className="flex items-center gap-space-xs"><span className="material-symbols-outlined text-[20px]">favorite</span><span className="">Danh sách yêu thích (Wishlist)</span></span><span className="px-space-xs py-0.5 rounded-full bg-primary-fixed/40 text-primary font-label-sm text-[11px]">{wishlistCount} tour</span></button><button className="w-full flex items-center justify-between px-space-md py-space-sm rounded-full hover:bg-surface-container-low text-on-surface-variant hover:text-on-surface font-label-lg text-label-lg transition-all" type="button" onClick={() => navigate("/profile/ai-assistant")}><span className="flex items-center gap-space-xs"><span className="material-symbols-outlined text-[20px]">auto_awesome</span><span className="">Trợ lý AI Lên lịch trình</span></span><span className="material-symbols-outlined text-[18px] text-secondary">arrow_forward</span></button><button className="w-full flex items-center justify-between px-space-md py-space-sm rounded-full hover:bg-surface-container-low text-on-surface-variant hover:text-on-surface font-label-lg text-label-lg transition-all" type="button" onClick={() => document.getElementById("locale-select")?.focus()}><span className="flex items-center gap-space-xs"><span className="material-symbols-outlined text-[20px]">translate</span><span className="">Cài đặt ngôn ngữ (Locale)</span></span><span className="font-label-sm text-label-sm text-tertiary">Tiếng Việt (vi)</span></button><button className="w-full flex items-center justify-between px-space-md py-space-sm rounded-full hover:bg-surface-container-low text-on-surface-variant hover:text-on-surface font-label-lg text-label-lg transition-all" type="button" onClick={() => navigate("/profile/change-password")}><span className="flex items-center gap-space-xs"><span className="material-symbols-outlined text-[20px]">lock_reset</span><span className="">Đổi mật khẩu</span></span><span className="material-symbols-outlined text-[18px] text-outline">chevron_right</span></button><button onClick={() => { logout(); navigate("/auth"); }} className="w-full flex items-center justify-between px-space-md py-space-sm rounded-full hover:bg-error-container/30 text-error font-label-lg text-label-lg transition-all mt-space-xs" type="button"><span className="flex items-center gap-space-xs"><span className="material-symbols-outlined text-[20px]">logout</span><span className="">Đăng xuất</span></span></button></nav></div></aside>
-<section className="lg:col-span-8 flex flex-col gap-space-lg"><div className="bg-surface-container-lowest rounded-xl p-space-lg md:p-space-xl shadow-sm"><div className="flex flex-col md:flex-row md:items-center justify-between pb-space-lg gap-space-md"><div><h2 className="font-headline-md text-headline-md text-on-surface">Thông tin cá nhân (Users Profile)</h2><p className="font-body-sm text-body-sm text-on-surface-variant">Quản lý thông tin tài khoản người dùng chuẩn hệ thống DANASEA.</p></div><div className="flex items-center gap-2 self-start md:self-auto"><span className="inline-flex items-center gap-1 px-space-sm py-1 rounded-full bg-secondary-fixed text-on-secondary-fixed font-label-sm text-label-sm"><span className="material-symbols-outlined text-[14px]">verified</span><span className="">Tài khoản đã xác minh</span></span></div></div><form className="flex flex-col gap-space-lg" id="profileForm" onSubmit={handleSaveProfile}><div className="flex flex-col sm:flex-row items-center gap-space-lg p-space-md bg-surface-container-low rounded-lg"><div className="relative w-24 h-24 rounded-full overflow-hidden bg-surface-container shadow-sm flex-shrink-0"><img alt={`Avatar du khách ${user.fullName || "Tên chưa cập nhật"}`} className="w-full h-full object-cover" src={user.avatarUrl || "https://via.placeholder.com/150"}/><div className="absolute inset-0 bg-on-surface/20 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity cursor-pointer"><span className="material-symbols-outlined text-on-primary text-[24px]">photo_camera</span></div></div><div className="flex flex-col items-center sm:items-start text-center sm:text-left gap-1"><span className="font-headline-sm text-headline-sm text-on-surface">{user.fullName || "Tên chưa cập nhật"}</span><p className="font-body-sm text-body-sm text-on-surface-variant">Định dạng hỗ trợ: JPG, PNG, WEBP (avatar_url). Tối đa dung lượng tải lên 5MB.</p><div className="flex items-center gap-space-xs mt-space-2xs"><button className="px-space-md py-1.5 rounded-full bg-surface-container-highest text-on-surface font-label-sm text-label-sm hover:bg-surface-dim transition-colors" type="button">Tải ảnh mới</button><button className="px-space-md py-1.5 rounded-full bg-transparent text-outline font-label-sm text-label-sm hover:text-error transition-colors" type="button">Gỡ bỏ</button></div></div></div><div className="grid grid-cols-1 md:grid-cols-2 gap-space-md"><div className="flex flex-col gap-1.5"><label className="font-label-lg text-label-lg text-on-surface flex items-center justify-between"><span className="">Họ và tên (full_name)</span><span className="text-tertiary font-label-sm text-label-sm">Bắt buộc</span></label><div className="relative flex items-center"><span className="material-symbols-outlined absolute left-space-md text-outline text-[20px] pointer-events-none">person</span><input className="w-full pl-11 pr-space-md py-space-sm rounded-full bg-surface font-body-md text-body-md text-on-surface outline-none focus:bg-surface-container-low transition-all" type="text" defaultValue={user.fullName || "Tên chưa cập nhật"}/></div></div><div className="flex flex-col gap-1.5"><label className="font-label-lg text-label-lg text-on-surface flex items-center justify-between"><span className="">Vai trò tài khoản (role)</span><span className="text-secondary font-label-sm text-label-sm font-bold">CUSTOMER</span></label><div className="relative flex items-center"><span className="material-symbols-outlined absolute left-space-md text-outline text-[20px] pointer-events-none">badge</span><input className="w-full pl-11 pr-space-md py-space-sm rounded-full bg-surface-container-low font-body-md text-body-md text-on-surface outline-none cursor-not-allowed" readOnly type="text" defaultValue="Khách hàng (CUSTOMER)"/></div></div><div className="flex flex-col gap-1.5"><label className="font-label-lg text-label-lg text-on-surface flex items-center justify-between"><span className="">Địa chỉ Email (email)</span><span className="text-secondary font-label-sm text-label-sm flex items-center gap-0.5"><span className="material-symbols-outlined text-[13px]">verified</span><span className="">is_email_verified: Đã xác minh</span></span></label><div className="relative flex items-center"><span className="material-symbols-outlined absolute left-space-md text-secondary text-[20px] pointer-events-none">mail</span><input className="w-full pl-11 pr-space-md py-space-sm rounded-full bg-surface font-body-md text-body-md text-on-surface outline-none focus:bg-surface-container-low transition-all" type="email" defaultValue={user.email || "Email chưa cập nhật"}/></div></div><div className="flex flex-col gap-1.5"><label className="font-label-lg text-label-lg text-on-surface flex items-center justify-between"><span className="">Số điện thoại (phone)</span><span className="text-secondary font-label-sm text-label-sm flex items-center gap-0.5"><span className="material-symbols-outlined text-[13px]">check_circle</span><span className="">Đã liên kết</span></span></label><div className="relative flex items-center"><span className="material-symbols-outlined absolute left-space-md text-secondary text-[20px] pointer-events-none">phone_iphone</span><input className="w-full pl-11 pr-24 py-space-sm rounded-full bg-surface font-body-md text-body-md text-on-surface outline-none focus:bg-surface-container-low transition-all" type="tel" defaultValue={user.phone || "SĐT chưa cập nhật"}/><button className="absolute right-2 px-space-sm py-1 rounded-full bg-surface-container text-on-surface-variant font-label-sm text-[11px] hover:bg-surface-container-high transition-colors" type="button">Đổi số</button></div></div><div className="flex flex-col gap-1.5 md:col-span-2"><label className="font-label-lg text-label-lg text-on-surface flex items-center justify-between"><span className="">Ngôn ngữ giao diện (locale)</span><span className="text-tertiary font-label-sm text-label-sm">Tùy chọn hiển thị hệ thống</span></label><div className="relative flex items-center"><span className="material-symbols-outlined absolute left-space-md text-outline text-[20px] pointer-events-none">language</span><select id="locale-select" defaultValue="vi" className="w-full pl-11 pr-space-md py-space-sm rounded-full bg-surface font-body-md text-body-md text-on-surface outline-none focus:bg-surface-container-low transition-all cursor-pointer"><option defaultValue="vi" value="vi">Tiếng Việt (vi) - Ngôn ngữ mặc định</option><option value="en">English (en) - International</option></select></div></div></div><div className="flex flex-col sm:flex-row items-center justify-between pt-space-xs gap-space-md"><div className="flex items-center gap-space-xs text-on-surface-variant font-body-sm text-body-sm"><span className="w-2.5 h-2.5 rounded-full bg-secondary"></span><span className="">Trạng thái tài khoản: Đang hoạt động (Active)</span></div><div className="flex items-center gap-space-sm w-full sm:w-auto"><button className="w-1/2 sm:w-auto px-space-lg py-space-xs rounded-full bg-surface-container text-on-surface font-label-lg text-label-lg hover:bg-surface-container-highest transition-colors" type="reset">Hủy</button><button className="w-1/2 sm:w-auto px-space-xl py-space-xs rounded-full bg-primary-container text-on-primary font-label-lg text-label-lg shadow-[0_8px_20px_rgba(255,115,92,0.3)] hover:scale-[1.02] transition-transform" type="submit">Lưu thay đổi</button></div></div></form></div></section>
-</div>
-</div>
-</div>
-{showToast && (
-  <div className="fixed bottom-6 right-6 z-50 flex items-center gap-space-xs px-space-md py-space-sm rounded-full bg-surface-container-lowest text-on-surface shadow-2xl animate-in slide-in-from-bottom-5">
-    <span className="material-symbols-outlined text-secondary text-[20px]">check_circle</span>
-    <span className="font-label-lg text-label-lg">Đã lưu thông tin hồ sơ an toàn!</span>
-  </div>
-)}
-</div>
-</main>
+    <main className="w-full pt-20 bg-surface flex-1">
+      <div className="flex flex-col w-full">
+        <div className="relative w-full overflow-hidden bg-surface py-8">
+          <div className="w-full max-w-[1440px] mx-auto px-4 sm:px-8 lg:px-12">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
+              <div>
+                <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight">Hồ sơ cá nhân</h1>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start w-full">
+              {/* Left Sidebar */}
+              <aside className="lg:col-span-4 flex flex-col gap-6 w-full">
+                <div className="bg-white rounded-2xl p-6 shadow-sm border border-slate-100">
+                  <div className="flex items-center gap-4 pb-6 border-b border-slate-100">
+                    <div className="relative w-16 h-16 rounded-full overflow-hidden flex-shrink-0 bg-slate-100 shadow-inner">
+                      <img
+                        alt={user.fullName || "Tên người dùng"}
+                        className="w-full h-full object-cover"
+                        src={user.avatarUrl || "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=200&q=80"}
+                      />
+                      <span className="absolute bottom-0 right-0 w-4 h-4 rounded-full bg-emerald-500 flex items-center justify-center text-white text-[10px] shadow-sm">
+                        <span className="material-symbols-outlined text-[12px]">check</span>
+                      </span>
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <h2 className="font-bold text-base text-slate-900 truncate">{user.fullName || "Khách hàng"}</h2>
+                      <p className="text-xs text-slate-500 truncate">{user.email || "Chưa cập nhật email"}</p>
+                      <span className="inline-block mt-1 px-2.5 py-0.5 rounded-full bg-cyan-50 text-cyan-700 text-xs font-semibold">
+                        Khách hàng
+                      </span>
+                    </div>
+                  </div>
+
+                  <nav aria-label="Menu tài khoản" className="flex flex-col gap-1.5 mt-6">
+                    <button
+                      onClick={() => navigate("/profile")}
+                      className="w-full flex items-center justify-between px-4 py-2.5 rounded-xl bg-cyan-50 text-cyan-900 font-semibold text-sm transition-all"
+                      type="button"
+                    >
+                      <span className="flex items-center gap-3">
+                        <span className="material-symbols-outlined text-[20px] text-cyan-600">account_circle</span>
+                        <span>Thông tin cá nhân</span>
+                      </span>
+                      <span className="w-2 h-2 rounded-full bg-cyan-500"></span>
+                    </button>
+
+                    <button
+                      onClick={() => navigate("/profile/orders")}
+                      className="w-full flex items-center justify-between px-4 py-2.5 rounded-xl hover:bg-slate-50 text-slate-700 font-medium text-sm transition-all"
+                      type="button"
+                    >
+                      <span className="flex items-center gap-3">
+                        <span className="material-symbols-outlined text-[20px] text-slate-500">receipt_long</span>
+                        <span>Đơn hàng của tôi</span>
+                      </span>
+                      <span className="px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 text-xs font-semibold">3 đơn</span>
+                    </button>
+
+                    <button
+                      onClick={() => navigate("/profile/wishlist")}
+                      className="w-full flex items-center justify-between px-4 py-2.5 rounded-xl hover:bg-slate-50 text-slate-700 font-medium text-sm transition-all"
+                      type="button"
+                    >
+                      <span className="flex items-center gap-3">
+                        <span className="material-symbols-outlined text-[20px] text-slate-500">favorite</span>
+                        <span>Danh sách yêu thích</span>
+                      </span>
+                      <span className="px-2 py-0.5 rounded-full bg-rose-50 text-rose-600 text-xs font-semibold">{wishlistCount} tour</span>
+                    </button>
+
+                    <button
+                      onClick={() => navigate("/profile/ai-assistant")}
+                      className="w-full flex items-center justify-between px-4 py-2.5 rounded-xl hover:bg-slate-50 text-slate-700 font-medium text-sm transition-all"
+                      type="button"
+                    >
+                      <span className="flex items-center gap-3">
+                        <span className="material-symbols-outlined text-[20px] text-slate-500">auto_awesome</span>
+                        <span>Trợ lý AI Lên lịch trình</span>
+                      </span>
+                      <span className="material-symbols-outlined text-[18px] text-slate-400">chevron_right</span>
+                    </button>
+
+                    <button
+                      onClick={() => navigate("/profile/change-password")}
+                      className="w-full flex items-center justify-between px-4 py-2.5 rounded-xl hover:bg-slate-50 text-slate-700 font-medium text-sm transition-all"
+                      type="button"
+                    >
+                      <span className="flex items-center gap-3">
+                        <span className="material-symbols-outlined text-[20px] text-slate-500">lock_reset</span>
+                        <span>Đổi mật khẩu</span>
+                      </span>
+                      <span className="material-symbols-outlined text-[18px] text-slate-400">chevron_right</span>
+                    </button>
+
+                    <button
+                      onClick={() => { logout(); navigate("/auth"); }}
+                      className="w-full flex items-center justify-between px-4 py-2.5 rounded-xl hover:bg-rose-50 text-rose-600 font-medium text-sm transition-all mt-2"
+                      type="button"
+                    >
+                      <span className="flex items-center gap-3">
+                        <span className="material-symbols-outlined text-[20px]">logout</span>
+                        <span>Đăng xuất</span>
+                      </span>
+                    </button>
+                  </nav>
+                </div>
+              </aside>
+
+              {/* Main Profile Info Form */}
+              <section className="lg:col-span-8 flex flex-col gap-6 w-full">
+                <div className="bg-white rounded-2xl p-6 sm:p-8 shadow-sm border border-slate-100 w-full">
+                  <div className="flex items-center justify-between pb-6 border-b border-slate-100 mb-6">
+                    <div>
+                      <h2 className="text-xl font-bold text-slate-900">Thông tin cá nhân</h2>
+                    </div>
+                    <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 text-xs font-semibold">
+                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                      Đã xác minh
+                    </span>
+                  </div>
+
+                  <form className="flex flex-col gap-6" id="profileForm" onSubmit={handleSaveProfile}>
+                    {/* Avatar Upload Block */}
+                    <div className="flex flex-col sm:flex-row items-center gap-6 p-4 bg-slate-50 rounded-2xl">
+                      <div className="relative w-20 h-20 rounded-full overflow-hidden bg-slate-200 shadow-sm flex-shrink-0">
+                        <img
+                          alt={user.fullName || "Avatar"}
+                          className="w-full h-full object-cover"
+                          src={user.avatarUrl || "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=200&q=80"}
+                        />
+                      </div>
+                      <div className="flex flex-col items-center sm:items-start text-center sm:text-left gap-2">
+                        <span className="font-bold text-base text-slate-900">{user.fullName || "Khách hàng"}</span>
+                        <div className="flex items-center gap-2">
+                          <button className="px-4 py-1.5 rounded-xl bg-white border border-slate-200 text-slate-700 text-xs font-semibold hover:bg-slate-100 transition-colors" type="button">
+                            Tải ảnh mới
+                          </button>
+                          <button className="px-4 py-1.5 rounded-xl text-slate-500 text-xs font-medium hover:text-rose-600 transition-colors" type="button">
+                            Gỡ bỏ
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Form Fields Grid */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                      <div className="flex flex-col gap-1.5">
+                        <label className="text-xs font-bold text-slate-700">Họ và tên</label>
+                        <div className="relative flex items-center">
+                          <span className="material-symbols-outlined absolute left-3.5 text-slate-400 text-[18px]">person</span>
+                          <input
+                            className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-sm text-slate-900 outline-none focus:border-cyan-500 focus:bg-white transition-all font-medium"
+                            type="text"
+                            defaultValue={user.fullName || "Khách hàng"}
+                          />
+                        </div>
+                      </div>
+
+                      <div className="flex flex-col gap-1.5">
+                        <label className="text-xs font-bold text-slate-700">Vai trò</label>
+                        <div className="relative flex items-center">
+                          <span className="material-symbols-outlined absolute left-3.5 text-slate-400 text-[18px]">badge</span>
+                          <input
+                            className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-slate-100 border border-slate-200 text-sm text-slate-600 outline-none cursor-not-allowed font-medium"
+                            readOnly
+                            type="text"
+                            defaultValue="Khách hàng"
+                          />
+                        </div>
+                      </div>
+
+                      <div className="flex flex-col gap-1.5">
+                        <label className="text-xs font-bold text-slate-700">Địa chỉ Email</label>
+                        <div className="relative flex items-center">
+                          <span className="material-symbols-outlined absolute left-3.5 text-slate-400 text-[18px]">mail</span>
+                          <input
+                            className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-sm text-slate-900 outline-none focus:border-cyan-500 focus:bg-white transition-all font-medium"
+                            type="email"
+                            defaultValue={user.email || ""}
+                          />
+                        </div>
+                      </div>
+
+                      <div className="flex flex-col gap-1.5">
+                        <label className="text-xs font-bold text-slate-700">Số điện thoại</label>
+                        <div className="relative flex items-center">
+                          <span className="material-symbols-outlined absolute left-3.5 text-slate-400 text-[18px]">phone_iphone</span>
+                          <input
+                            className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-sm text-slate-900 outline-none focus:border-cyan-500 focus:bg-white transition-all font-medium"
+                            type="tel"
+                            defaultValue={user.phone || ""}
+                          />
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="flex flex-col sm:flex-row items-center justify-end pt-4 border-t border-slate-100 gap-3">
+                      <button
+                        className="w-full sm:w-auto px-6 py-2.5 rounded-xl bg-slate-100 text-slate-700 font-semibold text-sm hover:bg-slate-200 transition-colors"
+                        type="reset"
+                      >
+                        Hủy
+                      </button>
+                      <button
+                        className="w-full sm:w-auto px-8 py-2.5 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-white font-bold text-sm shadow-md transition-all"
+                        type="submit"
+                      >
+                        Lưu thay đổi
+                      </button>
+                    </div>
+                  </form>
+                </div>
+              </section>
+            </div>
+          </div>
+        </div>
+
+        {showToast && (
+          <div className="fixed bottom-6 right-6 z-50 flex items-center gap-2 px-5 py-3 rounded-2xl bg-slate-900 text-white shadow-2xl animate-in slide-in-from-bottom-5">
+            <span className="text-emerald-400 font-bold">✓</span>
+            <span className="text-sm font-semibold">Đã lưu thông tin hồ sơ thành công!</span>
+          </div>
+        )}
+      </div>
+    </main>
   );
 }
+export default Profile;
