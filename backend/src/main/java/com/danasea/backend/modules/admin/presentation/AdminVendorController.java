@@ -25,6 +25,7 @@ import com.danasea.backend.modules.vendor.domain.models.VerificationStatus;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import java.util.Set;
 
 @RestController
 @RequestMapping("/api/admin/vendors")
@@ -46,7 +47,7 @@ public class AdminVendorController {
             throw new IllegalArgumentException("page must be non-negative and size must be between 1 and 100");
         }
         for (Sort.Order order : pageable.getSort()) {
-            if (!java.util.Set.of("createdAt", "updatedAt", "businessName", "verificationStatus")
+            if (!Set.of("createdAt", "updatedAt", "businessName", "verificationStatus")
                     .contains(order.getProperty())) {
                 throw new IllegalArgumentException("Unsupported sort field: " + order.getProperty());
             }

@@ -13,7 +13,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.danasea.backend.modules.ai.application.port.ItineraryStorePort;
+import com.danasea.backend.modules.ai.application.ports.ItineraryStorePort;
 import com.danasea.backend.modules.ai.domain.exceptions.AiResourceNotFoundException;
 import com.danasea.backend.modules.ai.domain.exceptions.AiStateConflictException;
 import com.danasea.backend.modules.ai.domain.models.ItineraryPlan;

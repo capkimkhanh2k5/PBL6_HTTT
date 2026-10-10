@@ -10,6 +10,7 @@ import java.util.UUID;
 import com.danasea.backend.modules.ai.domain.models.TravelContext;
 import com.danasea.backend.modules.ai.domain.models.TravelCriteria;
 import com.danasea.backend.modules.ai.domain.services.TravelQueryParser;
+import java.time.DateTimeException;
 
 public record TravelRequest(String query, UUID categoryId, BigDecimal totalBudget, Integer partySize,
                             LocalDate from, LocalDate to, LocalTime dayStart, LocalTime dayEnd,
@@ -29,7 +30,7 @@ public record TravelRequest(String query, UUID categoryId, BigDecimal totalBudge
         LocalDate[] dates;
         LocalTime[] times;
         try { dates = TravelQueryParser.dates(query); times = TravelQueryParser.times(query); }
-        catch (java.time.DateTimeException exception) { throw new IllegalArgumentException("Invalid date or time in travel criteria", exception); }
+        catch (DateTimeException exception) { throw new IllegalArgumentException("Invalid date or time in travel criteria", exception); }
         List<String> defaults = new ArrayList<>();
         List<String> unsupported = new ArrayList<>();
         List<String> questions = new ArrayList<>();

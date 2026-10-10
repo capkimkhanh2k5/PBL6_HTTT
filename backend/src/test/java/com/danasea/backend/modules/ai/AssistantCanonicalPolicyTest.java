@@ -10,8 +10,8 @@ import java.util.List;
 
 import org.junit.jupiter.api.Test;
 
-import com.danasea.backend.modules.ai.application.port.TravelPolicyPort;
-import com.danasea.backend.modules.ai.application.tool.GetPolicyTool;
+import com.danasea.backend.modules.ai.application.ports.TravelPolicyPort;
+import com.danasea.backend.modules.ai.application.tools.GetPolicyTool;
 import com.danasea.backend.modules.order.application.api.AiPolicyReadApi;
 import com.danasea.backend.modules.systemconfig.infrastructure.persistence.repositories.JpaSystemConfigRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;

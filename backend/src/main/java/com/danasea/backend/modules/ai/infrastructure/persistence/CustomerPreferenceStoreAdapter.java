@@ -10,7 +10,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.stereotype.Component;
 
-import com.danasea.backend.modules.ai.application.port.CustomerPreferenceStorePort;
+import com.danasea.backend.modules.ai.application.ports.CustomerPreferenceStorePort;
 import com.danasea.backend.modules.ai.domain.exceptions.AiStateConflictException;
 import com.danasea.backend.modules.ai.infrastructure.persistence.entities.AiCustomerPreferenceJpaEntity;
 import com.danasea.backend.modules.ai.infrastructure.persistence.entities.AiRecommendationFeedbackJpaEntity;

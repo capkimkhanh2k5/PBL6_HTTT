@@ -37,6 +37,7 @@ import com.danasea.backend.security.infrastructure.SecurityUtils;
 import lombok.Builder;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
+import java.util.Objects;
 
 @Slf4j
 @RestController
@@ -70,7 +71,7 @@ public class AdminWeatherAlertController {
         this.slotRepository = slotRepository;
         this.serviceRepository = serviceRepository;
         this.sendNotificationUseCase = sendNotificationUseCase;
-        this.refundPolicyEngine = java.util.Objects.requireNonNull(refundPolicyEngine, "refundPolicyEngine");
+        this.refundPolicyEngine = Objects.requireNonNull(refundPolicyEngine, "refundPolicyEngine");
         this.refundProcessingService = refundProcessingService;
     }
 
@@ -134,7 +135,7 @@ public class AdminWeatherAlertController {
         Map<UUID, ServiceJpaEntity> services =
                 serviceRepository.findAllById(alerts.stream()
                                 .map(SafetyRuleEvaluationJpaEntity::getServiceId)
-                                .filter(java.util.Objects::nonNull)
+                                .filter(Objects::nonNull)
                                 .collect(Collectors.toSet()))
                         .stream()
                         .collect(Collectors.toMap(
@@ -143,7 +144,7 @@ public class AdminWeatherAlertController {
         Map<UUID, ServiceSlotJpaEntity> slots =
                 slotRepository.findAllById(alerts.stream()
                                 .map(SafetyRuleEvaluationJpaEntity::getSlotId)
-                                .filter(java.util.Objects::nonNull)
+                                .filter(Objects::nonNull)
                                 .collect(Collectors.toSet()))
                         .stream()
                         .collect(Collectors.toMap(

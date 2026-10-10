@@ -1,6 +1,6 @@
 package com.danasea.backend.modules.account.integration;
 
-import com.danasea.backend.modules.account.application.service.AccountInternalService;
+import com.danasea.backend.modules.account.application.services.AccountInternalService;
 import com.danasea.backend.modules.account.application.usecases.ChangePasswordUseCase;
 import com.danasea.backend.modules.account.domain.models.Role;
 import com.danasea.backend.modules.account.domain.models.User;

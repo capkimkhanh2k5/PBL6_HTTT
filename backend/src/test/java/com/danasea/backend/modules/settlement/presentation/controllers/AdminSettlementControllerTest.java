@@ -1,8 +1,8 @@
 package com.danasea.backend.modules.settlement.presentation.controllers;
 
-import com.danasea.backend.modules.settlement.application.dto.GenerateSettlementRequest;
-import com.danasea.backend.modules.settlement.application.dto.SettlementDetailResponse;
-import com.danasea.backend.modules.settlement.application.dto.SettlementResponse;
+import com.danasea.backend.modules.settlement.application.dtos.GenerateSettlementRequest;
+import com.danasea.backend.modules.settlement.application.dtos.SettlementDetailResponse;
+import com.danasea.backend.modules.settlement.application.dtos.SettlementResponse;
 import com.danasea.backend.modules.settlement.application.usecases.FinalizeSettlementUseCase;
 import com.danasea.backend.modules.settlement.application.usecases.GenerateSettlementUseCase;
 import com.danasea.backend.modules.settlement.application.usecases.GetSettlementsUseCase;

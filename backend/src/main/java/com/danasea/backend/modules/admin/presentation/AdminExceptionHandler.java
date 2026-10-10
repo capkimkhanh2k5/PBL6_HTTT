@@ -17,6 +17,7 @@ import com.danasea.backend.modules.admin.domain.exceptions.VendorDocumentsIncomp
 import com.danasea.backend.security.authorization.domain.exceptions.AccessDeniedException;
 import com.danasea.backend.shared.i18n.LocalizedMessageService;
 import com.danasea.backend.shared.presentation.ErrorResponse;
+import java.util.Locale;
 
 @RestControllerAdvice
 public class AdminExceptionHandler {
@@ -102,7 +103,7 @@ public class AdminExceptionHandler {
     }
 
     private ErrorResponse error(String code) {
-        String key = "error." + code.toLowerCase(java.util.Locale.ROOT);
+        String key = "error." + code.toLowerCase(Locale.ROOT);
         return new ErrorResponse(code, messages.getOrDefault(key, messages.get("error.internal")));
     }
 }

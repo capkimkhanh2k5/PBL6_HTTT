@@ -6,7 +6,7 @@ import java.time.Duration;
 
 import org.junit.jupiter.api.Test;
 
-import com.danasea.backend.modules.ai.application.port.AiExecutionBudget;
+import com.danasea.backend.modules.ai.application.ports.AiExecutionBudget;
 
 class AiExecutionBudgetTest {
     @Test void budgetBoundsModelFanoutAndDoesNotLeakAcrossRequests() {

@@ -41,15 +41,15 @@ public interface JpaSettlementRepository extends JpaRepository<SettlementJpaEnti
 
     Page<SettlementJpaEntity> findByVendorIdAndStatus(UUID vendorId, SettlementStatus status, Pageable pageable);
 
-    @org.springframework.data.jpa.repository.Query("SELECT s FROM SettlementJpaEntity s WHERE " +
+    @Query("SELECT s FROM SettlementJpaEntity s WHERE " +
            "(:vendorId IS NULL OR s.vendorId = :vendorId) AND " +
            "(:status IS NULL OR s.status = :status) AND " +
            "(cast(:from as date) IS NULL OR s.periodStart >= :from) AND " +
            "(cast(:to as date) IS NULL OR s.periodEnd <= :to)")
     Page<SettlementJpaEntity> findFiltered(
-            @org.springframework.data.repository.query.Param("vendorId") UUID vendorId,
-            @org.springframework.data.repository.query.Param("status") SettlementStatus status,
-            @org.springframework.data.repository.query.Param("from") LocalDate from,
-            @org.springframework.data.repository.query.Param("to") LocalDate to,
+            @Param("vendorId") UUID vendorId,
+            @Param("status") SettlementStatus status,
+            @Param("from") LocalDate from,
+            @Param("to") LocalDate to,
             Pageable pageable);
 }

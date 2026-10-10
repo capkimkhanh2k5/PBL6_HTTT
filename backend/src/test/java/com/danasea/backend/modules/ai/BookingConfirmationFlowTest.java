@@ -1,7 +1,7 @@
 package com.danasea.backend.modules.ai;
 
-import com.danasea.backend.modules.ai.application.port.ConfirmationCardStorePort;
-import com.danasea.backend.modules.ai.application.usecase.ConfirmBookingUseCase;
+import com.danasea.backend.modules.ai.application.ports.ConfirmationCardStorePort;
+import com.danasea.backend.modules.ai.application.usecases.ConfirmBookingUseCase;
 import com.danasea.backend.modules.ai.domain.models.ConfirmationCard;
 import com.danasea.backend.modules.service.application.dtos.ServiceDetailResult;
 import com.danasea.backend.modules.service.application.usecases.GetPublicServiceDetailUseCase;

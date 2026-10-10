@@ -3,13 +3,13 @@ package com.danasea.backend.modules.ai.infrastructure.quyet;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import com.danasea.backend.modules.ai.application.tool.CustomerFeatureTool;
-import com.danasea.backend.modules.ai.application.usecase.CompareServicesUseCase;
-import com.danasea.backend.modules.ai.application.usecase.CustomerSupportUseCase;
-import com.danasea.backend.modules.ai.application.usecase.DiscoverServicesUseCase;
-import com.danasea.backend.modules.ai.application.usecase.PlanItineraryUseCase;
-import com.danasea.backend.modules.ai.application.usecase.ReviewSummaryUseCase;
-import com.danasea.backend.modules.ai.application.usecase.WeatherAwareUseCase;
+import com.danasea.backend.modules.ai.application.tools.CustomerFeatureTool;
+import com.danasea.backend.modules.ai.application.usecases.CompareServicesUseCase;
+import com.danasea.backend.modules.ai.application.usecases.CustomerSupportUseCase;
+import com.danasea.backend.modules.ai.application.usecases.DiscoverServicesUseCase;
+import com.danasea.backend.modules.ai.application.usecases.PlanItineraryUseCase;
+import com.danasea.backend.modules.ai.application.usecases.ReviewSummaryUseCase;
+import com.danasea.backend.modules.ai.application.usecases.WeatherAwareUseCase;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import lombok.RequiredArgsConstructor;

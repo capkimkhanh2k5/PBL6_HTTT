@@ -14,11 +14,11 @@ import java.util.UUID;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 
-import com.danasea.backend.modules.ai.application.port.LlmClientPort;
-import com.danasea.backend.modules.ai.application.port.ModerationPort;
-import com.danasea.backend.modules.ai.application.tool.ToolExecutionContext;
-import com.danasea.backend.modules.ai.application.tool.ToolExecutor;
-import com.danasea.backend.modules.ai.application.usecase.ChatUseCase;
+import com.danasea.backend.modules.ai.application.ports.LlmClientPort;
+import com.danasea.backend.modules.ai.application.ports.ModerationPort;
+import com.danasea.backend.modules.ai.application.tools.ToolExecutionContext;
+import com.danasea.backend.modules.ai.application.tools.ToolExecutor;
+import com.danasea.backend.modules.ai.application.usecases.ChatUseCase;
 import com.danasea.backend.modules.ai.domain.models.LlmResponse;
 import com.danasea.backend.modules.ai.domain.models.ToolCall;
 import com.danasea.backend.modules.ai.domain.services.ChatHistoryService;

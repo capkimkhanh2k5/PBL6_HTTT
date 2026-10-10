@@ -1,7 +1,7 @@
 package com.danasea.backend.modules.ai.infrastructure.groq;
 
-import com.danasea.backend.modules.ai.application.port.KeyRotatorPort;
-import com.danasea.backend.modules.ai.infrastructure.groq.config.GroqProperties;
+import com.danasea.backend.modules.ai.application.ports.KeyRotatorPort;
+import com.danasea.backend.modules.ai.infrastructure.groq.configs.GroqProperties;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;

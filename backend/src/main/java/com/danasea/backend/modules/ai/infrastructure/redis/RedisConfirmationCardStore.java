@@ -1,6 +1,6 @@
 package com.danasea.backend.modules.ai.infrastructure.redis;
 
-import com.danasea.backend.modules.ai.application.port.ConfirmationCardStorePort;
+import com.danasea.backend.modules.ai.application.ports.ConfirmationCardStorePort;
 import com.danasea.backend.modules.ai.domain.models.ConfirmationCard;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -16,6 +16,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.UUID;
+import java.util.List;
 
 @Slf4j
 @Component
@@ -121,7 +122,7 @@ public class RedisConfirmationCardStore implements ConfirmationCardStorePort {
                 "if redis.call('get', KEYS[1]) == ARGV[1] then return redis.call('del', KEYS[1]) else return 0 end",
                 Long.class);
         try {
-            redisTemplate.execute(script, java.util.List.of(key), token);
+            redisTemplate.execute(script, List.of(key), token);
         } catch (Exception exception) {
             log.warn("Failed to release confirmation processing lock for card {}", id, exception);
         }

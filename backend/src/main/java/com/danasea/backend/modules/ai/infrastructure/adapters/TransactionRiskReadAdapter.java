@@ -4,7 +4,7 @@ import java.util.UUID;
 
 import org.springframework.stereotype.Component;
 
-import com.danasea.backend.modules.ai.application.port.TransactionRiskReadPort;
+import com.danasea.backend.modules.ai.application.ports.TransactionRiskReadPort;
 import com.danasea.backend.modules.order.application.api.AiOrderRiskReadApi;
 
 import lombok.RequiredArgsConstructor;

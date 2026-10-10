@@ -22,12 +22,12 @@ import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import com.danasea.backend.modules.ai.application.port.DecisionModelPort;
-import com.danasea.backend.modules.ai.application.port.ItineraryStorePort;
-import com.danasea.backend.modules.ai.application.port.TravelDataPort;
-import com.danasea.backend.modules.ai.application.port.TravelWeatherPort;
-import com.danasea.backend.modules.ai.application.usecase.DiscoverServicesUseCase;
-import com.danasea.backend.modules.ai.application.usecase.PlanItineraryUseCase;
+import com.danasea.backend.modules.ai.application.ports.DecisionModelPort;
+import com.danasea.backend.modules.ai.application.ports.ItineraryStorePort;
+import com.danasea.backend.modules.ai.application.ports.TravelDataPort;
+import com.danasea.backend.modules.ai.application.ports.TravelWeatherPort;
+import com.danasea.backend.modules.ai.application.usecases.DiscoverServicesUseCase;
+import com.danasea.backend.modules.ai.application.usecases.PlanItineraryUseCase;
 import com.danasea.backend.modules.ai.domain.exceptions.AiStateConflictException;
 import com.danasea.backend.modules.ai.domain.models.DecisionResult;
 import com.danasea.backend.modules.ai.domain.models.ItineraryPlan;

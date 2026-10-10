@@ -16,8 +16,8 @@ import org.junit.jupiter.api.Test;
 
 import com.danasea.backend.modules.ai.application.api.CustomerPreferenceReadApi;
 import com.danasea.backend.modules.ai.application.dtos.TravelRequest;
-import com.danasea.backend.modules.ai.application.port.*;
-import com.danasea.backend.modules.ai.application.usecase.*;
+import com.danasea.backend.modules.ai.application.ports.*;
+import com.danasea.backend.modules.ai.application.usecases.*;
 import com.danasea.backend.modules.ai.domain.models.*;
 import com.danasea.backend.modules.ai.domain.services.TravelQueryParser;
 import com.danasea.backend.modules.ai.infrastructure.adapters.TravelWeatherAdapter;

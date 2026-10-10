@@ -1,12 +1,12 @@
 package com.danasea.backend.modules.ai;
 
-import com.danasea.backend.modules.ai.application.port.ConfirmationCardStorePort;
-import com.danasea.backend.modules.ai.application.port.ServiceSearchPort;
-import com.danasea.backend.modules.ai.application.tool.GetSafetyAlertTool;
-import com.danasea.backend.modules.ai.application.tool.GetWeatherForecastTool;
-import com.danasea.backend.modules.ai.application.tool.RequestBookingConfirmationTool;
-import com.danasea.backend.modules.ai.application.tool.SearchServiceTool;
-import com.danasea.backend.modules.ai.application.usecase.ConfirmBookingUseCase;
+import com.danasea.backend.modules.ai.application.ports.ConfirmationCardStorePort;
+import com.danasea.backend.modules.ai.application.ports.ServiceSearchPort;
+import com.danasea.backend.modules.ai.application.tools.GetSafetyAlertTool;
+import com.danasea.backend.modules.ai.application.tools.GetWeatherForecastTool;
+import com.danasea.backend.modules.ai.application.tools.RequestBookingConfirmationTool;
+import com.danasea.backend.modules.ai.application.tools.SearchServiceTool;
+import com.danasea.backend.modules.ai.application.usecases.ConfirmBookingUseCase;
 import com.danasea.backend.modules.ai.domain.models.ConfirmationCard;
 import com.danasea.backend.modules.booking.application.dtos.BookingHoldResult;
 import com.danasea.backend.modules.booking.application.dtos.CreateBookingHoldCommand;

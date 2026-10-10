@@ -1,6 +1,6 @@
 package com.danasea.backend.modules.ai.infrastructure.redis;
 
-import com.danasea.backend.modules.ai.application.port.RateLimiterPort;
+import com.danasea.backend.modules.ai.application.ports.RateLimiterPort;
 import com.danasea.backend.modules.ai.domain.TrustTier;
 import io.github.bucket4j.Bandwidth;
 import io.github.bucket4j.BucketConfiguration;

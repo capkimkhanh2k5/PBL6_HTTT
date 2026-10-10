@@ -16,6 +16,7 @@ import com.danasea.backend.modules.service.application.api.AiCatalogReadApi.Quer
 
 import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
+import java.time.LocalTime;
 
 @Component
 @RequiredArgsConstructor
@@ -75,8 +76,8 @@ public class AiCatalogCandidateReader implements AiCatalogCandidateReadApi {
         }
         sql.append(" and exists(select 1 from service_slots sl where sl.service_id=s.id and sl.status='OPEN' and sl.date between :fromDate and :toDate and sl.start_time>=:dayStart");
         params.put("fromDate", criteria.from()); params.put("toDate", criteria.to());
-        params.put("dayStart", criteria.dayStart() == null ? java.time.LocalTime.MIN : criteria.dayStart());
-        params.put("dayEnd", criteria.dayEnd() == null ? java.time.LocalTime.MAX : criteria.dayEnd());
+        params.put("dayStart", criteria.dayStart() == null ? LocalTime.MIN : criteria.dayStart());
+        params.put("dayEnd", criteria.dayEnd() == null ? LocalTime.MAX : criteria.dayEnd());
         sql.append(" and (sl.end_time is null or sl.end_time<=:dayEnd)" );
         sql.append("))");
         String preferenceOrder = "";

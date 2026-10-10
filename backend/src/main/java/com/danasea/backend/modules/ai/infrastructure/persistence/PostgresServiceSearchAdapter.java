@@ -1,7 +1,7 @@
 package com.danasea.backend.modules.ai.infrastructure.persistence;
 
-import com.danasea.backend.modules.ai.application.port.ServiceSearchPort;
-import com.danasea.backend.modules.ai.application.port.ServiceSearchResultDto;
+import com.danasea.backend.modules.ai.application.ports.ServiceSearchPort;
+import com.danasea.backend.modules.ai.application.ports.ServiceSearchResultDto;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.Query;
 import lombok.RequiredArgsConstructor;

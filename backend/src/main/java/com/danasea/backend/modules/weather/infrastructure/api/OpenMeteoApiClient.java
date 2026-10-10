@@ -1,7 +1,7 @@
 package com.danasea.backend.modules.weather.infrastructure.api;
 
-import com.danasea.backend.modules.weather.infrastructure.api.dto.OpenMeteoMarineResponse;
-import com.danasea.backend.modules.weather.infrastructure.api.dto.OpenMeteoWeatherResponse;
+import com.danasea.backend.modules.weather.infrastructure.api.dtos.OpenMeteoMarineResponse;
+import com.danasea.backend.modules.weather.infrastructure.api.dtos.OpenMeteoWeatherResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.annotation.Autowired;

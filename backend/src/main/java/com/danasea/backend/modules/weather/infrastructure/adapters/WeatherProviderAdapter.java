@@ -3,8 +3,8 @@ package com.danasea.backend.modules.weather.infrastructure.adapters;
 import com.danasea.backend.modules.weather.application.dtos.WeatherInfoDto;
 import com.danasea.backend.modules.weather.application.ports.output.WeatherProviderPort;
 import com.danasea.backend.modules.weather.infrastructure.api.OpenMeteoApiClient;
-import com.danasea.backend.modules.weather.infrastructure.api.dto.OpenMeteoMarineResponse;
-import com.danasea.backend.modules.weather.infrastructure.api.dto.OpenMeteoWeatherResponse;
+import com.danasea.backend.modules.weather.infrastructure.api.dtos.OpenMeteoMarineResponse;
+import com.danasea.backend.modules.weather.infrastructure.api.dtos.OpenMeteoWeatherResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -12,6 +12,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
+import java.time.Instant;
 
 @Component
 public class WeatherProviderAdapter implements WeatherProviderPort {
@@ -234,7 +235,7 @@ public class WeatherProviderAdapter implements WeatherProviderPort {
             fetchedAt = marineResp == null || marineResp.getSourceFetchedAtEpochMillis() == null || fetchedAt == null ? null
                     : Math.min(fetchedAt, marineResp.getSourceFetchedAtEpochMillis());
         }
-        java.time.Instant sourceFetchedAt = fetchedAt == null ? null : java.time.Instant.ofEpochMilli(fetchedAt);
+        Instant sourceFetchedAt = fetchedAt == null ? null : Instant.ofEpochMilli(fetchedAt);
         return WeatherInfoDto.TimeWindowForecast.builder()
                 .sourceFetchedAt(sourceFetchedAt)
                 .validUntil(sourceFetchedAt == null ? null : sourceFetchedAt.plus(cacheService.getTtl()))

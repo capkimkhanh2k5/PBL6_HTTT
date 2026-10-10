@@ -38,9 +38,9 @@ import com.danasea.backend.modules.order.infrastructure.persistence.repositories
 import com.danasea.backend.modules.service.domain.models.SlotStatus;
 import com.danasea.backend.modules.service.infrastructure.persistence.entities.ServiceSlotJpaEntity;
 import com.danasea.backend.modules.service.infrastructure.persistence.repositories.JpaServiceSlotRepository;
-import com.danasea.backend.modules.settlement.application.dto.SettlementDetailResponse;
-import com.danasea.backend.modules.settlement.application.dto.SettlementLineItemResponse;
-import com.danasea.backend.modules.settlement.application.dto.SettlementResponse;
+import com.danasea.backend.modules.settlement.application.dtos.SettlementDetailResponse;
+import com.danasea.backend.modules.settlement.application.dtos.SettlementLineItemResponse;
+import com.danasea.backend.modules.settlement.application.dtos.SettlementResponse;
 import com.danasea.backend.modules.settlement.application.usecases.FinalizeSettlementUseCase;
 import com.danasea.backend.modules.settlement.application.usecases.GenerateSettlementUseCase;
 import com.danasea.backend.modules.settlement.application.usecases.GetSettlementsUseCase;

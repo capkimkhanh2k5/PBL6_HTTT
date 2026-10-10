@@ -1,7 +1,7 @@
 package com.danasea.backend.modules.weather.infrastructure.api;
 
-import com.danasea.backend.modules.weather.infrastructure.api.dto.OpenMeteoMarineResponse;
-import com.danasea.backend.modules.weather.infrastructure.api.dto.OpenMeteoWeatherResponse;
+import com.danasea.backend.modules.weather.infrastructure.api.dtos.OpenMeteoMarineResponse;
+import com.danasea.backend.modules.weather.infrastructure.api.dtos.OpenMeteoWeatherResponse;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;

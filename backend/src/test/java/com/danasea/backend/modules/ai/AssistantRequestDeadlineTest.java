@@ -10,8 +10,8 @@ import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.springframework.web.client.RestClient;
 
-import com.danasea.backend.modules.ai.application.port.AiExecutionBudget;
-import com.danasea.backend.modules.ai.application.port.KeyRotatorPort;
+import com.danasea.backend.modules.ai.application.ports.AiExecutionBudget;
+import com.danasea.backend.modules.ai.application.ports.KeyRotatorPort;
 import com.danasea.backend.modules.ai.infrastructure.groq.GroqLlmClient;
 import com.danasea.backend.shared.i18n.SupportedLanguage;
 

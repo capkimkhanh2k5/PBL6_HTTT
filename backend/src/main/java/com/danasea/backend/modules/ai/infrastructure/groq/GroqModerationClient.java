@@ -1,9 +1,9 @@
 package com.danasea.backend.modules.ai.infrastructure.groq;
 
-import com.danasea.backend.modules.ai.application.port.KeyRotatorPort;
-import com.danasea.backend.modules.ai.application.port.ModerationPort;
+import com.danasea.backend.modules.ai.application.ports.KeyRotatorPort;
+import com.danasea.backend.modules.ai.application.ports.ModerationPort;
 import com.danasea.backend.configs.properties.HttpClientProperties;
-import com.danasea.backend.modules.ai.infrastructure.groq.config.GroqProperties;
+import com.danasea.backend.modules.ai.infrastructure.groq.configs.GroqProperties;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
@@ -19,6 +19,7 @@ import org.springframework.web.client.RestTemplate;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 @Slf4j
 @Service
@@ -69,7 +70,7 @@ public class GroqModerationClient implements ModerationPort {
             String moderationModel,
             String groqApiUrl) {
         this.restClient = null;
-        this.legacyRestTemplate = java.util.Objects.requireNonNull(restTemplate, "restTemplate");
+        this.legacyRestTemplate = Objects.requireNonNull(restTemplate, "restTemplate");
         this.keyRotator = keyRotator;
         this.moderationModel = moderationModel;
         this.groqApiUrl = groqApiUrl;

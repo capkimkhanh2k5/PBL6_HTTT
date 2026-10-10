@@ -123,7 +123,7 @@ Có DiscountCode/DiscountRedemption nhưng chưa có API quản lý, kiểm tra/
 - `POST /api/checkout/discount-preview` và mở rộng tạo order nhận code.
 - Kiểm tra thời gian, quota, tối thiểu, phạm vi vendor/service, giới hạn mỗi user; phân bổ discount vào sub-order để refund/settlement không sai. PromotionalPrice riêng chưa thay thế voucher.
 
-### P2 Nhắn tin customer-vendor và theo dõi tranh chấp -> Đang Xử Lý
+### P2 Nhắn tin customer-vendor và theo dõi tranh chấp -> Đã Xử Lý
 
 Conversation/Message của communication mới có persistence, chưa có API nhắn tin. Hội thoại AI là module riêng.
 
@@ -132,7 +132,7 @@ Conversation/Message của communication mới có persistence, chưa có API nh
 - Vendor: `GET /api/vendor/disputes`, gửi phản hồi/bằng chứng cho dispute liên quan.
 - Admin detail dispute nếu nội dung/bằng chứng không đủ trong listing. Upload bằng chứng nên giới hạn loại/kích thước và quyền.
 
-### P2 Hoàn thiện khám phá, hồ sơ công khai và thông báo -> Đang Xử Lý
+### P2 Hoàn thiện khám phá, hồ sơ công khai và thông báo -> Đã Xử Lý
 
 - Mở rộng `GET /api/services` nhận ngày/giờ, số người, vendor, minimum rating và sort theo giá/điểm/phổ biến; những tiêu chí này chưa được controller nhận.
 - Mở rộng public service detail trả vendorId/tên công khai/badge, thời lượng, sức chứa, điều kiện tham gia, chính sách và structured slots. Tách public vendor DTO khỏi DTO hồ sơ chứa ngân hàng.

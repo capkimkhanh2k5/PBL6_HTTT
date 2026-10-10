@@ -11,9 +11,9 @@ import com.danasea.backend.modules.order.infrastructure.persistence.entities.Sub
 import com.danasea.backend.modules.order.infrastructure.persistence.repositories.JpaRefundRepository;
 import com.danasea.backend.modules.order.infrastructure.persistence.repositories.JpaSubOrderRepository;
 import com.danasea.backend.modules.service.infrastructure.persistence.repositories.JpaServiceSlotRepository;
-import com.danasea.backend.modules.settlement.application.dto.GenerateSettlementRequest;
-import com.danasea.backend.modules.settlement.application.dto.SettlementDetailResponse;
-import com.danasea.backend.modules.settlement.application.dto.SettlementResponse;
+import com.danasea.backend.modules.settlement.application.dtos.GenerateSettlementRequest;
+import com.danasea.backend.modules.settlement.application.dtos.SettlementDetailResponse;
+import com.danasea.backend.modules.settlement.application.dtos.SettlementResponse;
 import com.danasea.backend.modules.settlement.domain.exceptions.InvalidSettlementPeriodException;
 import com.danasea.backend.modules.settlement.domain.exceptions.SettlementAlreadyFinalizedException;
 import com.danasea.backend.modules.settlement.domain.exceptions.SettlementNotFoundException;
