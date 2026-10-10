@@ -1,11 +1,5 @@
 package com.danasea.backend.modules.booking.infrastructure.persistence.mappers;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
-
-import org.springframework.stereotype.Component;
-
 import com.danasea.backend.modules.booking.domain.models.Booking;
 import com.danasea.backend.modules.booking.domain.models.BookingItem;
 import com.danasea.backend.modules.booking.domain.models.BookingItemAllocation;
@@ -14,6 +8,10 @@ import com.danasea.backend.modules.booking.infrastructure.persistence.entities.B
 import com.danasea.backend.modules.booking.infrastructure.persistence.entities.BookingItemJpaEntity;
 import com.danasea.backend.modules.booking.infrastructure.persistence.entities.BookingJpaEntity;
 import com.danasea.backend.modules.service.domain.models.PricingUnit;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
+import org.springframework.stereotype.Component;
 
 @Component
 public class BookingMapper {
@@ -44,6 +42,8 @@ public class BookingMapper {
                         .optionId(item.getOptionId())
                         .pricingUnit(item.getPricingUnit() != null ? item.getPricingUnit().name() : null)
                         .participantsCount(item.getParticipantsCount())
+                        .maxPaxPerPackage(item.getMaxPaxPerPackage())
+                        .allowSplit(item.isAllowSplit())
                         .quantity(item.getQuantity())
                         .bookingDate(item.getBookingDate())
                         .bookingTime(item.getBookingTime())
@@ -120,6 +120,8 @@ public class BookingMapper {
                 .optionId(itemEntity.getOptionId())
                 .pricingUnit(pUnit)
                 .participantsCount(itemEntity.getParticipantsCount())
+                .maxPaxPerPackage(itemEntity.getMaxPaxPerPackage())
+                .allowSplit(itemEntity.isAllowSplit())
                 .quantity(itemEntity.getQuantity())
                 .bookingDate(itemEntity.getBookingDate())
                 .bookingTime(itemEntity.getBookingTime())

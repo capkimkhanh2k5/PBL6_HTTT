@@ -47,6 +47,9 @@ public class SubOrder extends BaseDomainModel {
     private UUID qrSecret;
     private OffsetDateTime checkedInAt;
     private OffsetDateTime vendorNotifiedAt;
+    private Long rescheduleVersion = 0L;
+    private OffsetDateTime rescheduledAt;
+    private UUID originalSlotId;
 
     public SubOrder() {
         super();

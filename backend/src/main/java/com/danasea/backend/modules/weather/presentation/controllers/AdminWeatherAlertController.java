@@ -1,43 +1,32 @@
 package com.danasea.backend.modules.weather.presentation.controllers;
 
-import java.math.BigDecimal;
-import java.time.LocalDateTime;
-import java.time.OffsetDateTime;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
-import java.util.function.Function;
-import java.util.stream.Collectors;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.*;
-
 import com.danasea.backend.modules.communication.application.usecases.SendNotificationUseCase;
 import com.danasea.backend.modules.order.application.RefundProcessingService;
-import com.danasea.backend.modules.order.domain.models.RefundEvaluationResult;
-import com.danasea.backend.modules.order.domain.models.RefundReason;
-import com.danasea.backend.modules.order.domain.models.RefundStatus;
-import com.danasea.backend.modules.order.domain.models.SubOrderStatus;
 import com.danasea.backend.modules.order.domain.services.RefundPolicyEngine;
-import com.danasea.backend.modules.order.infrastructure.persistence.entities.RefundJpaEntity;
-import com.danasea.backend.modules.order.infrastructure.persistence.entities.SubOrderJpaEntity;
 import com.danasea.backend.modules.order.infrastructure.persistence.repositories.JpaRefundRepository;
 import com.danasea.backend.modules.order.infrastructure.persistence.repositories.JpaSubOrderRepository;
 import com.danasea.backend.modules.service.infrastructure.persistence.entities.ServiceJpaEntity;
 import com.danasea.backend.modules.service.infrastructure.persistence.entities.ServiceSlotJpaEntity;
 import com.danasea.backend.modules.service.infrastructure.persistence.repositories.JpaServiceRepository;
 import com.danasea.backend.modules.service.infrastructure.persistence.repositories.JpaServiceSlotRepository;
+import com.danasea.backend.modules.weather.application.services.WeatherBookingCancellationService;
 import com.danasea.backend.modules.weather.infrastructure.persistence.entities.SafetyRuleEvaluationJpaEntity;
 import com.danasea.backend.modules.weather.infrastructure.persistence.repositories.JpaSafetyRuleEvaluationRepository;
-import com.danasea.backend.security.infrastructure.SecurityUtils;
-
+import java.time.OffsetDateTime;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.UUID;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 import lombok.Builder;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
-import java.util.Objects;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.*;
 
 @Slf4j
 @RestController
@@ -46,6 +35,9 @@ import java.util.Objects;
 public class AdminWeatherAlertController {
 
     private final JpaSafetyRuleEvaluationRepository evaluationRepository;
+    @Autowired
+    private WeatherBookingCancellationService weatherCancellation;
+
     private final JpaSubOrderRepository subOrderRepository;
     private final JpaRefundRepository refundRepository;
     private final JpaServiceSlotRepository slotRepository;
@@ -221,59 +213,13 @@ public class AdminWeatherAlertController {
         int refundedCount = 0;
 
         if ("CANCEL_AND_REFUND".equals(action)) {
-            LocalDateTime now = LocalDateTime.now();
-            LocalDateTime slotStart = now;
             if (alert.getSlotId() != null) {
-                var slotOpt = slotRepository.findById(alert.getSlotId());
-                if (slotOpt.isPresent() && slotOpt.get().getDate() != null && slotOpt.get().getStartTime() != null) {
-                    slotStart = LocalDateTime.of(slotOpt.get().getDate(), slotOpt.get().getStartTime());
-                }
-            }
-
-            // Cancel all sub-orders for this slot and trigger 100% refund
-            if (alert.getSlotId() != null) {
-                List<SubOrderJpaEntity> subOrders = subOrderRepository.findBySlotId(alert.getSlotId());
-                for (SubOrderJpaEntity subOrder : subOrders) {
-                    if (subOrder.getStatus() != SubOrderStatus.CANCELLED
-                            && subOrder.getStatus() != SubOrderStatus.REFUNDED) {
-                        subOrder.setStatus(SubOrderStatus.CANCELLED);
-                        subOrderRepository.save(subOrder);
-
-                        RefundEvaluationResult evalResult = refundPolicyEngine.evaluate(
-                                RefundReason.WEATHER,
-                                slotStart,
-                                now,
-                                subOrder.getFinalAmount()
-                        );
-
-                        String idempotencyKey = "weather-" + evaluationId;
-                        var existingRefund = refundRepository.findBySubOrderIdAndIdempotencyKey(
-                                subOrder.getId(), idempotencyKey);
-                        RefundJpaEntity refund = null;
-                        if (existingRefund.isEmpty() && evalResult.refundAmount().signum() > 0) {
-                            RefundJpaEntity newRefund = new RefundJpaEntity();
-                            newRefund.setSubOrderId(subOrder.getId());
-                            newRefund.setAmount(evalResult.refundAmount());
-                            newRefund.setRefundPercentage(evalResult.refundPercentage());
-                            newRefund.setReason(RefundReason.WEATHER);
-                            newRefund.setStatus(RefundStatus.PENDING);
-                            newRefund.setRequestedBy(SecurityUtils.getCurrentUserId().orElse(null));
-                            newRefund.setIdempotencyKey(idempotencyKey);
-                            refund = refundRepository.save(newRefund);
-                        } else {
-                            refund = existingRefund.orElse(null);
-                        }
-
-
-                        if (evalResult.refundAmount().signum() > 0) {
-                            refundedCount++;
-                        }
-                    }
+                for (var subOrder : subOrderRepository.findBySlotId(alert.getSlotId())) {
+                    if (weatherCancellation.cancel(subOrder.getId(), alert.getSlotId(), evaluationId)) refundedCount++;
                 }
             }
 
             // Mark alert as resolved
-            alert.setIsSafe(true);
             alert.setStatus("RESOLVED_CANCEL_AND_REFUND");
             alert.setWarningMessage(
                     "[ADMIN RESOLVED] Canceled and refunded 100% due to bad weather. Note: "
@@ -289,17 +235,16 @@ public class AdminWeatherAlertController {
                     "refundRequestsCount", refundedCount,
                     "message", "Orders were cancelled and full refund requests are pending provider processing."));
         } else {
-            // Dismiss alert / Reschedule
-            alert.setIsSafe(true);
+            // Dismiss alert: Tách trạng thái xử lý khỏi đánh giá an toàn, KHÔNG đặt isSafe=true
             alert.setStatus("RESOLVED_DISMISSED");
-            alert.setWarningMessage("[ADMIN RESOLVED] Rescheduled or dismissed due to weather. Note: "
+            alert.setWarningMessage("[ADMIN RESOLVED] Alert dismissed by admin without certifying meteorological safety. Note: "
                     + request.resolutionNote());
             evaluationRepository.save(alert);
 
             return ResponseEntity.ok(Map.of(
                     "status", "RESOLVED_DISMISSED",
                     "evaluationId", evaluationId,
-                    "message", "Rescheduled or dismissed due to weather."));
+                    "message", "Alert was dismissed by admin. Meteorological safety status is preserved."));
         }
     }
 }

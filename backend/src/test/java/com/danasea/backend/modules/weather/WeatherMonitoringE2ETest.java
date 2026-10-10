@@ -1,7 +1,11 @@
 package com.danasea.backend.modules.weather;
 
-import com.danasea.backend.modules.communication.application.usecases.SendNotificationUseCase;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.*;
+
 import com.danasea.backend.modules.communication.application.dtos.NotificationCommand;
+import com.danasea.backend.modules.communication.application.usecases.SendNotificationUseCase;
 import com.danasea.backend.modules.order.domain.models.RefundReason;
 import com.danasea.backend.modules.order.domain.models.RefundStatus;
 import com.danasea.backend.modules.order.domain.models.SubOrderStatus;
@@ -29,6 +33,12 @@ import com.danasea.backend.modules.weather.infrastructure.persistence.entities.S
 import com.danasea.backend.modules.weather.infrastructure.persistence.repositories.JpaCategorySafetyRuleRepository;
 import com.danasea.backend.modules.weather.infrastructure.persistence.repositories.JpaSafetyRuleEvaluationRepository;
 import com.danasea.backend.modules.weather.presentation.controllers.AdminWeatherAlertController;
+import java.math.BigDecimal;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.util.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -38,17 +48,6 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.ResponseEntity;
-
-import java.math.BigDecimal;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.time.OffsetDateTime;
-import java.util.*;
-
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.*;
 
 /**
  * Comprehensive, Opaque-Box E2E & Acceptance Test Suite for the DANASEA Marine Weather Monitoring System Upgrade.
@@ -260,7 +259,7 @@ class WeatherMonitoringE2ETest {
             when(serviceRepository.findById(serviceId)).thenReturn(Optional.of(testService));
             when(categoryRepository.findById(categoryId)).thenReturn(Optional.of(testCategory));
 
-            WeatherInfoDto.TimeWindowForecast safeForecast = WeatherInfoDto.TimeWindowForecast.builder()
+            WeatherInfoDto.TimeWindowForecast safeForecast = WeatherInfoDto.TimeWindowForecast.builder().sourceFetchedAt(Instant.now()).validUntil(Instant.now().plusSeconds(1800))
                     .peakWaveHeight(0.3)
                     .peakWindSpeed(10.0)
                     .peakWindGust(14.0)
@@ -317,11 +316,12 @@ class WeatherMonitoringE2ETest {
             AdminWeatherAlertController.ResolveAlertRequest request =
                     new AdminWeatherAlertController.ResolveAlertRequest("CANCEL_AND_REFUND", "Hủy khẩn cấp bảo vệ du khách");
 
+            WeatherCancellationFixture.install(adminWeatherAlertController, subOrderRepository, refundRepository, slotRepository, slotId);
             ResponseEntity<?> response = adminWeatherAlertController.resolveAlert(alertId, request);
 
             assertEquals(200, response.getStatusCode().value());
             assertEquals(SubOrderStatus.CANCELLED, subOrder.getStatus());
-            verify(subOrderRepository, times(1)).save(subOrder);
+            verify(subOrderRepository, times(1)).saveAndFlush(subOrder);
 
             // Kiểm tra bản ghi hoàn tiền 100% được tạo với lý do WEATHER
             ArgumentCaptor<RefundJpaEntity> refundCaptor = ArgumentCaptor.forClass(RefundJpaEntity.class);
@@ -331,7 +331,7 @@ class WeatherMonitoringE2ETest {
             assertEquals(BigDecimal.valueOf(100.0), refund.getRefundPercentage());
             assertEquals(RefundReason.WEATHER, refund.getReason());
             assertEquals(RefundStatus.PENDING, refund.getStatus());
-            assertTrue(alert.getIsSafe());
+            assertFalse(alert.getIsSafe());
         }
 
         @Test
@@ -340,7 +340,7 @@ class WeatherMonitoringE2ETest {
             when(serviceRepository.findById(serviceId)).thenReturn(Optional.of(testService));
             when(categoryRepository.findById(categoryId)).thenReturn(Optional.of(testCategory));
 
-            WeatherInfoDto.TimeWindowForecast safeForecast = WeatherInfoDto.TimeWindowForecast.builder()
+            WeatherInfoDto.TimeWindowForecast safeForecast = WeatherInfoDto.TimeWindowForecast.builder().sourceFetchedAt(Instant.now()).validUntil(Instant.now().plusSeconds(1800))
                     .peakWaveHeight(0.3)
                     .peakWindSpeed(8.0)
                     .peakWindGust(10.0)
@@ -559,6 +559,7 @@ class WeatherMonitoringE2ETest {
             when(evaluationRepository.findByIdForUpdate(alertId)).thenReturn(Optional.of(alert));
             when(subOrderRepository.findBySlotId(slotId)).thenReturn(List.of(cancelledOrder));
 
+            WeatherCancellationFixture.install(adminWeatherAlertController, subOrderRepository, refundRepository, slotRepository, slotId);
             adminWeatherAlertController.resolveAlert(alertId, new AdminWeatherAlertController.ResolveAlertRequest("CANCEL_AND_REFUND", "Hủy"));
 
             // Không gọi save hoàn tiền mới cho đơn đã hủy
@@ -624,7 +625,7 @@ class WeatherMonitoringE2ETest {
             when(serviceRepository.findById(serviceId)).thenReturn(Optional.of(testService));
             when(categoryRepository.findById(categoryId)).thenReturn(Optional.of(testCategory));
 
-            WeatherInfoDto.TimeWindowForecast stormForecast = WeatherInfoDto.TimeWindowForecast.builder()
+            WeatherInfoDto.TimeWindowForecast stormForecast = WeatherInfoDto.TimeWindowForecast.builder().sourceFetchedAt(Instant.now()).validUntil(Instant.now().plusSeconds(1800))
                     .peakWaveHeight(1.5) // Vượt ngưỡng 0.8m của SUP
                     .peakWindSpeed(25.0)
                     .peakWindGust(35.0)
@@ -727,7 +728,7 @@ class WeatherMonitoringE2ETest {
             when(categoryRepository.findById(categoryId)).thenReturn(Optional.of(testCategory));
 
             // Đám mây đối lưu nhiệt phát triển cực nhanh gây giông sét WMO 95 và gió giật 38 km/h
-            WeatherInfoDto.TimeWindowForecast convectiveStorm = WeatherInfoDto.TimeWindowForecast.builder()
+            WeatherInfoDto.TimeWindowForecast convectiveStorm = WeatherInfoDto.TimeWindowForecast.builder().sourceFetchedAt(Instant.now()).validUntil(Instant.now().plusSeconds(1800))
                     .peakWaveHeight(0.95)
                     .peakWindSpeed(24.0)
                     .peakWindGust(38.0)
@@ -760,6 +761,7 @@ class WeatherMonitoringE2ETest {
             savedAlert.setId(alertId);
             when(evaluationRepository.findByIdForUpdate(alertId)).thenReturn(Optional.of(savedAlert));
 
+            WeatherCancellationFixture.install(adminWeatherAlertController, subOrderRepository, refundRepository, slotRepository, slotId);
             adminWeatherAlertController.resolveAlert(alertId,
                     new AdminWeatherAlertController.ResolveAlertRequest("CANCEL_AND_REFUND", "Dông sét mùa hè nguy hiểm"));
 
@@ -846,7 +848,7 @@ class WeatherMonitoringE2ETest {
             when(serviceRepository.findById(serviceId)).thenReturn(Optional.of(testService));
             when(categoryRepository.findById(categoryId)).thenReturn(Optional.of(testCategory));
 
-            WeatherInfoDto.TimeWindowForecast monsoonWeather = WeatherInfoDto.TimeWindowForecast.builder()
+            WeatherInfoDto.TimeWindowForecast monsoonWeather = WeatherInfoDto.TimeWindowForecast.builder().sourceFetchedAt(Instant.now()).validUntil(Instant.now().plusSeconds(1800))
                     .peakWaveHeight(1.3)
                     .peakWindSpeed(26.0)
                     .peakWindGust(36.0)

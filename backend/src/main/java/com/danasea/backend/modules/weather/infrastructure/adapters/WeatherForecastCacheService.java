@@ -3,22 +3,21 @@ package com.danasea.backend.modules.weather.infrastructure.adapters;
 import com.danasea.backend.modules.weather.infrastructure.api.dtos.OpenMeteoMarineResponse;
 import com.danasea.backend.modules.weather.infrastructure.api.dtos.OpenMeteoWeatherResponse;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.redis.core.StringRedisTemplate;
-import org.springframework.stereotype.Service;
-
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Supplier;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.stereotype.Service;
 
 /**
  * High-performance multi-day forecast caching service for Open-Meteo Weather (16 days) and Marine (8 days).
  * Provides two-tier caching:
- * - Tier 1: Fast local thread-safe ConcurrentHashMap in-memory cache with TTL (1-3 hours, default 2 hours).
+ * - Tier 1: Fast local thread-safe ConcurrentHashMap in-memory cache with fresh TTL of 30 minutes and a maximum fallback age of 2 hours.
  * - Tier 2: Redis distributed cache (when available) for cluster-wide consistency across instances.
  * Prevents third-party rate limits and enables rapid 7-14 day advance booking lookups.
  */
@@ -28,7 +27,8 @@ public class WeatherForecastCacheService {
 
     private final StringRedisTemplate redisTemplate;
     private final ObjectMapper objectMapper;
-    private Duration ttl = Duration.ofHours(2);
+    private Duration ttl = Duration.ofMinutes(30);
+    private static final Duration MAX_AGE = Duration.ofHours(2);
 
     private final Map<String, CacheEntry<OpenMeteoWeatherResponse>> localWeatherCache = new ConcurrentHashMap<>();
     private final Map<String, CacheEntry<OpenMeteoMarineResponse>> localMarineCache = new ConcurrentHashMap<>();
@@ -82,9 +82,10 @@ public class WeatherForecastCacheService {
                 if (cachedJson != null && !cachedJson.isBlank()) {
                     OpenMeteoWeatherResponse parsed = objectMapper.readValue(cachedJson, OpenMeteoWeatherResponse.class);
                     Long fetchedAt = parsed.getSourceFetchedAtEpochMillis();
-                    if (fetchedAt != null && Instant.ofEpochMilli(fetchedAt).plus(ttl).isAfter(Instant.now())) {
-                        localWeatherCache.put(key, new CacheEntry<>(parsed, Instant.ofEpochMilli(fetchedAt).plus(ttl)));
-                        return parsed;
+                    if (fetchedAt != null && Instant.ofEpochMilli(fetchedAt).plus(MAX_AGE).isAfter(Instant.now())) {
+                        localEntry = new CacheEntry<>(parsed, Instant.ofEpochMilli(fetchedAt).plus(ttl));
+                        localWeatherCache.put(key, localEntry);
+                        if (!localEntry.isExpired()) return parsed;
                     }
                 }
             } catch (Exception e) {
@@ -92,15 +93,31 @@ public class WeatherForecastCacheService {
             }
         }
 
-        // 3. Fetch from API
-        OpenMeteoWeatherResponse fetched = fetcher.get();
+        // 3. Fetch from API with stale fallback
+        OpenMeteoWeatherResponse fetched;
+        try {
+            fetched = fetcher.get();
+            if (fetched == null) throw new IllegalStateException("Weather provider returned no data.");
+        } catch (Exception e) {
+            log.warn("Failed to fetch weather from provider for {}, checking stale fallback: {}", key, e.getMessage());
+            if (localEntry != null && localEntry.getData() != null) {
+                Long fetchedAt = localEntry.getData().getSourceFetchedAtEpochMillis();
+                if (fetchedAt != null && Instant.ofEpochMilli(fetchedAt).plus(MAX_AGE).isAfter(Instant.now())) {
+                    log.info("Returning stale weather forecast fallback for {}", key);
+                    return localEntry.getData();
+                }
+            }
+            if ("Weather provider returned no data.".equals(e.getMessage())) return null;
+            throw e;
+        }
+
         if (fetched != null) {
             fetched.setSourceFetchedAtEpochMillis(Instant.now().toEpochMilli());
             localWeatherCache.put(key, new CacheEntry<>(fetched, ttl));
             if (redisTemplate != null) {
                 try {
                     String json = objectMapper.writeValueAsString(fetched);
-                    redisTemplate.opsForValue().set(key, json, ttl);
+                    redisTemplate.opsForValue().set(key, json, MAX_AGE);
                 } catch (Exception e) {
                     log.warn("Redis write failed for {}: {}", key, e.getMessage());
                 }
@@ -126,9 +143,10 @@ public class WeatherForecastCacheService {
                 if (cachedJson != null && !cachedJson.isBlank()) {
                     OpenMeteoMarineResponse parsed = objectMapper.readValue(cachedJson, OpenMeteoMarineResponse.class);
                     Long fetchedAt = parsed.getSourceFetchedAtEpochMillis();
-                    if (fetchedAt != null && Instant.ofEpochMilli(fetchedAt).plus(ttl).isAfter(Instant.now())) {
-                        localMarineCache.put(key, new CacheEntry<>(parsed, Instant.ofEpochMilli(fetchedAt).plus(ttl)));
-                        return parsed;
+                    if (fetchedAt != null && Instant.ofEpochMilli(fetchedAt).plus(MAX_AGE).isAfter(Instant.now())) {
+                        localEntry = new CacheEntry<>(parsed, Instant.ofEpochMilli(fetchedAt).plus(ttl));
+                        localMarineCache.put(key, localEntry);
+                        if (!localEntry.isExpired()) return parsed;
                     }
                 }
             } catch (Exception e) {
@@ -136,15 +154,31 @@ public class WeatherForecastCacheService {
             }
         }
 
-        // 3. Fetch from API
-        OpenMeteoMarineResponse fetched = fetcher.get();
+        // 3. Fetch from API with stale fallback
+        OpenMeteoMarineResponse fetched;
+        try {
+            fetched = fetcher.get();
+            if (fetched == null) throw new IllegalStateException("Weather provider returned no data.");
+        } catch (Exception e) {
+            log.warn("Failed to fetch marine from provider for {}, checking stale fallback: {}", key, e.getMessage());
+            if (localEntry != null && localEntry.getData() != null) {
+                Long fetchedAt = localEntry.getData().getSourceFetchedAtEpochMillis();
+                if (fetchedAt != null && Instant.ofEpochMilli(fetchedAt).plus(MAX_AGE).isAfter(Instant.now())) {
+                    log.info("Returning stale marine forecast fallback for {}", key);
+                    return localEntry.getData();
+                }
+            }
+            if ("Weather provider returned no data.".equals(e.getMessage())) return null;
+            throw e;
+        }
+
         if (fetched != null) {
             fetched.setSourceFetchedAtEpochMillis(Instant.now().toEpochMilli());
             localMarineCache.put(key, new CacheEntry<>(fetched, ttl));
             if (redisTemplate != null) {
                 try {
                     String json = objectMapper.writeValueAsString(fetched);
-                    redisTemplate.opsForValue().set(key, json, ttl);
+                    redisTemplate.opsForValue().set(key, json, MAX_AGE);
                 } catch (Exception e) {
                     log.warn("Redis write failed for {}: {}", key, e.getMessage());
                 }

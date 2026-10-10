@@ -1,14 +1,14 @@
 package com.danasea.backend.modules.weather.application.dtos;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-
+import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
 import java.util.UUID;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
 @Builder
@@ -17,6 +17,10 @@ import java.util.UUID;
 public class AdvanceBookingSafetyResponse {
 
     // 1. Core Verdict
+    private Instant fetchedAt;
+    private String source;
+    private Boolean stale;
+
     private boolean isSafe;
     private String alertLevel; // GREEN, YELLOW, RED
     private String safetyStatus; // alias for alertLevel

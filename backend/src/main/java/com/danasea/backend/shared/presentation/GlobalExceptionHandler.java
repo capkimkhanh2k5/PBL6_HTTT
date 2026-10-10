@@ -1,24 +1,21 @@
 package com.danasea.backend.shared.presentation;
 
-import java.util.stream.Collectors;
-
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.MethodArgumentNotValidException;
-import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.bind.annotation.RestControllerAdvice;
-import org.springframework.web.servlet.resource.NoResourceFoundException;
-
 import com.danasea.backend.modules.ai.domain.exceptions.AiConversationLocaleMismatchException;
 import com.danasea.backend.security.authentication.domain.exceptions.InvalidCredentialsException;
 import com.danasea.backend.security.authentication.infrastructure.security.CookieUtils;
 import com.danasea.backend.security.authorization.domain.exceptions.AccessDeniedException;
 import com.danasea.backend.shared.i18n.LocalizedException;
 import com.danasea.backend.shared.i18n.LocalizedMessageService;
-
 import jakarta.servlet.http.HttpServletResponse;
-
+import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.server.ResponseStatusException;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 @RestControllerAdvice
 @Slf4j
@@ -91,6 +88,13 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponse> handleMissingEndpoint(NoResourceFoundException exception) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND)
                 .body(new ErrorResponse("ENDPOINT_NOT_FOUND", messages.get("error.endpoint_not_found")));
+    }
+
+    @ExceptionHandler(ResponseStatusException.class)
+    public ResponseEntity<ErrorResponse> handleResponseStatus(ResponseStatusException exception) {
+        String code = exception.getStatusCode().value() == 409 ? "RESCHEDULE_CONFLICT" : "INVALID_INPUT";
+        return ResponseEntity.status(exception.getStatusCode()).body(new ErrorResponse(code, messages.get(
+                exception.getStatusCode().value() == 409 ? "error.reschedule_conflict" : "error.invalid_input")));
     }
 
     @ExceptionHandler(Exception.class)

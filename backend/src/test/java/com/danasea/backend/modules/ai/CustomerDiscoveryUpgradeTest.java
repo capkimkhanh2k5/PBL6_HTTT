@@ -4,16 +4,6 @@ import static org.assertj.core.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
-import java.math.BigDecimal;
-import java.time.Instant;
-import java.time.LocalDate;
-import java.time.LocalTime;
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
-
-import org.junit.jupiter.api.Test;
-
 import com.danasea.backend.modules.ai.application.api.CustomerPreferenceReadApi;
 import com.danasea.backend.modules.ai.application.dtos.TravelRequest;
 import com.danasea.backend.modules.ai.application.ports.*;
@@ -26,6 +16,14 @@ import com.danasea.backend.modules.weather.application.dtos.AdvanceBookingSafety
 import com.danasea.backend.modules.weather.application.dtos.WeatherInfoDto;
 import com.danasea.backend.modules.weather.application.usecases.CheckAdvanceBookingSafetyUseCase;
 import com.danasea.backend.shared.i18n.SupportedLanguage;
+import java.math.BigDecimal;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.util.List;
+import java.util.Set;
+import java.util.UUID;
+import org.junit.jupiter.api.Test;
 
 class CustomerDiscoveryUpgradeTest {
     private final LocalDate date = LocalDate.now(TravelContext.ZONE).plusDays(1);
@@ -103,7 +101,7 @@ class CustomerDiscoveryUpgradeTest {
     @Test void missingOrExpiredForecastCannotClaimAcceptable() {
         var safety = mock(CheckAdvanceBookingSafetyUseCase.class); var adapter = new TravelWeatherAdapter(safety);
         var service = service("Kayak", "PER_PERSON", "100000", 3, true); var slot = service.options().getFirst().slots().getFirst();
-        var forecast = WeatherInfoDto.TimeWindowForecast.builder().peakWindSpeed(5.0).provider("OPEN_METEO_WEATHER_AND_MARINE")
+        var forecast = WeatherInfoDto.TimeWindowForecast.builder().sourceFetchedAt(Instant.now()).validUntil(Instant.now().plusSeconds(1800)).peakWindSpeed(5.0).provider("OPEN_METEO_WEATHER_AND_MARINE")
                 .sourceFetchedAt(Instant.now().minusSeconds(8000)).validUntil(Instant.now().minusSeconds(1)).build();
         when(safety.checkBySlotId(slot.id())).thenReturn(AdvanceBookingSafetyResponse.builder().isSafe(true).forecast(forecast).build());
         var expired = adapter.assess(service, slot);

@@ -1,7 +1,11 @@
 package com.danasea.backend.modules.weather;
 
-import com.danasea.backend.modules.communication.application.usecases.SendNotificationUseCase;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.*;
+
 import com.danasea.backend.modules.communication.application.dtos.NotificationCommand;
+import com.danasea.backend.modules.communication.application.usecases.SendNotificationUseCase;
 import com.danasea.backend.modules.order.domain.models.RefundReason;
 import com.danasea.backend.modules.order.domain.models.RefundStatus;
 import com.danasea.backend.modules.order.domain.models.SubOrderStatus;
@@ -23,6 +27,13 @@ import com.danasea.backend.modules.weather.domain.services.WeatherRuleEngine;
 import com.danasea.backend.modules.weather.infrastructure.jobs.SlotWeatherMonitoringJob;
 import com.danasea.backend.modules.weather.infrastructure.persistence.entities.SafetyRuleEvaluationJpaEntity;
 import com.danasea.backend.modules.weather.infrastructure.persistence.repositories.JpaSafetyRuleEvaluationRepository;
+import java.math.BigDecimal;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -32,17 +43,6 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
-
-import java.math.BigDecimal;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
-
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.*;
 
 /**
  * Adversarial Stress & Verification Test Suite for Marine Weather Monitoring System.
@@ -318,11 +318,12 @@ class WeatherAdversarialStressTest {
             // Slot starts at 09:00:00, now is 07:59:00 (exact 61 minutes remaining)
             LocalDateTime now = LocalDateTime.of(2026, 9, 20, 7, 59, 0);
 
-            boolean triggered = job.checkAutoEscalationFallback(slot, now);
+            WeatherCancellationFixture.install(job, subOrderRepository, refundRepository, slotRepository, slotId);
+        boolean triggered = job.checkAutoEscalationFallback(slot, now);
 
             assertFalse(triggered, "T=61m must NOT trigger auto-escalation fallback");
             assertEquals(SubOrderStatus.CONFIRMED, subOrder.getStatus());
-            verify(subOrderRepository, never()).save(any());
+            verify(subOrderRepository, never()).saveAndFlush(any());
             verify(refundRepository, never()).save(any());
             verify(sendNotificationUseCase, never()).execute(any(NotificationCommand.class));
         }
@@ -339,11 +340,12 @@ class WeatherAdversarialStressTest {
             when(serviceRepository.findById(serviceId)).thenReturn(Optional.of(service));
             when(masterOrderRepository.findById(masterOrderId)).thenReturn(Optional.of(masterOrder));
 
-            boolean triggered = job.checkAutoEscalationFallback(slot, now);
+            WeatherCancellationFixture.install(job, subOrderRepository, refundRepository, slotRepository, slotId);
+        boolean triggered = job.checkAutoEscalationFallback(slot, now);
 
             assertTrue(triggered, "T=60m MUST trigger auto-escalation fallback");
             assertEquals(SubOrderStatus.CANCELLED, subOrder.getStatus());
-            verify(subOrderRepository, times(1)).save(subOrder);
+            verify(subOrderRepository, times(1)).saveAndFlush(subOrder);
 
             // Verify 100% refund
             ArgumentCaptor<RefundJpaEntity> refundCaptor = ArgumentCaptor.forClass(RefundJpaEntity.class);
@@ -356,7 +358,7 @@ class WeatherAdversarialStressTest {
 
             // Verify alert status updated
             assertEquals("AUTO_CANCELLED_FOR_SAFETY", redAlert.getStatus());
-            assertTrue(redAlert.getIsSafe());
+            assertFalse(redAlert.getIsSafe());
             verify(evaluationRepository, times(1)).save(redAlert);
 
             // Verify tri-party notifications (Admin, Vendor, Customer)
@@ -377,11 +379,12 @@ class WeatherAdversarialStressTest {
             when(serviceRepository.findById(serviceId)).thenReturn(Optional.of(service));
             when(masterOrderRepository.findById(masterOrderId)).thenReturn(Optional.of(masterOrder));
 
-            boolean triggered = job.checkAutoEscalationFallback(slot, now);
+            WeatherCancellationFixture.install(job, subOrderRepository, refundRepository, slotRepository, slotId);
+        boolean triggered = job.checkAutoEscalationFallback(slot, now);
 
             assertTrue(triggered, "T=59m MUST trigger auto-escalation fallback");
             assertEquals(SubOrderStatus.CANCELLED, subOrder.getStatus());
-            verify(subOrderRepository, times(1)).save(subOrder);
+            verify(subOrderRepository, times(1)).saveAndFlush(subOrder);
             verify(refundRepository, times(1)).save(any(RefundJpaEntity.class));
             assertEquals("AUTO_CANCELLED_FOR_SAFETY", redAlert.getStatus());
         }
@@ -392,10 +395,11 @@ class WeatherAdversarialStressTest {
             // Slot started at 09:00, now is 09:05 (5 minutes after start)
             LocalDateTime now = LocalDateTime.of(2026, 9, 20, 9, 5, 0);
 
-            boolean triggered = job.checkAutoEscalationFallback(slot, now);
+            WeatherCancellationFixture.install(job, subOrderRepository, refundRepository, slotRepository, slotId);
+        boolean triggered = job.checkAutoEscalationFallback(slot, now);
 
             assertFalse(triggered, "Past slot must NOT trigger auto-escalation");
-            verify(subOrderRepository, never()).save(any());
+            verify(subOrderRepository, never()).saveAndFlush(any());
             verify(refundRepository, never()).save(any());
         }
     }
@@ -413,7 +417,7 @@ class WeatherAdversarialStressTest {
             when(serviceRepository.findById(serviceId)).thenReturn(Optional.of(service));
             when(categoryRepository.findById(categoryId)).thenReturn(Optional.of(category));
 
-            WeatherInfoDto.TimeWindowForecast redForecastRun1 = WeatherInfoDto.TimeWindowForecast.builder()
+            WeatherInfoDto.TimeWindowForecast redForecastRun1 = WeatherInfoDto.TimeWindowForecast.builder().sourceFetchedAt(Instant.now()).validUntil(Instant.now().plusSeconds(1800))
                     .peakWaveHeight(1.2)
                     .peakWindSpeed(22.0)
                     .peakWindGust(28.0)
@@ -422,7 +426,7 @@ class WeatherAdversarialStressTest {
                     .severeWeatherCode(0)
                     .build();
 
-            WeatherInfoDto.TimeWindowForecast redForecastRun2 = WeatherInfoDto.TimeWindowForecast.builder()
+            WeatherInfoDto.TimeWindowForecast redForecastRun2 = WeatherInfoDto.TimeWindowForecast.builder().sourceFetchedAt(Instant.now()).validUntil(Instant.now().plusSeconds(1800))
                     .peakWaveHeight(1.35) // Metric slightly increased
                     .peakWindSpeed(23.0)
                     .peakWindGust(29.0)
@@ -495,7 +499,7 @@ class WeatherAdversarialStressTest {
             when(serviceRepository.findById(serviceId)).thenReturn(Optional.of(service));
             when(categoryRepository.findById(categoryId)).thenReturn(Optional.of(category));
 
-            WeatherInfoDto.TimeWindowForecast yellowForecast1 = WeatherInfoDto.TimeWindowForecast.builder()
+            WeatherInfoDto.TimeWindowForecast yellowForecast1 = WeatherInfoDto.TimeWindowForecast.builder().sourceFetchedAt(Instant.now()).validUntil(Instant.now().plusSeconds(1800))
                     .peakWaveHeight(0.6)
                     .peakWindSpeed(12.0)
                     .peakWindGust(16.0)
@@ -504,7 +508,7 @@ class WeatherAdversarialStressTest {
                     .severeWeatherCode(0)
                     .build();
 
-            WeatherInfoDto.TimeWindowForecast yellowForecast2 = WeatherInfoDto.TimeWindowForecast.builder()
+            WeatherInfoDto.TimeWindowForecast yellowForecast2 = WeatherInfoDto.TimeWindowForecast.builder().sourceFetchedAt(Instant.now()).validUntil(Instant.now().plusSeconds(1800))
                     .peakWaveHeight(0.7) // Changed caution wave
                     .peakWindSpeed(14.0)
                     .peakWindGust(18.0)
@@ -602,7 +606,7 @@ class WeatherAdversarialStressTest {
                     .thenAnswer(invocation -> Optional.ofNullable(dbStore.get(slotId)));
 
             // STEP 1: Scan at T-24h -> YELLOW Caution
-            WeatherInfoDto.TimeWindowForecast cautionForecast = WeatherInfoDto.TimeWindowForecast.builder()
+            WeatherInfoDto.TimeWindowForecast cautionForecast = WeatherInfoDto.TimeWindowForecast.builder().sourceFetchedAt(Instant.now()).validUntil(Instant.now().plusSeconds(1800))
                     .peakWaveHeight(0.65) // Between caution 0.5m and max 0.8m
                     .peakWindSpeed(12.0)
                     .peakWindGust(16.0)
@@ -629,7 +633,7 @@ class WeatherAdversarialStressTest {
             verify(sendNotificationUseCase, never()).execute(notification(null, "WEATHER_ALERT", "SERVICE_SLOT", slotId));
 
             // STEP 2: Scan at T-2h -> Sudden Squall / Severe Weather (RED)
-            WeatherInfoDto.TimeWindowForecast stormForecast = WeatherInfoDto.TimeWindowForecast.builder()
+            WeatherInfoDto.TimeWindowForecast stormForecast = WeatherInfoDto.TimeWindowForecast.builder().sourceFetchedAt(Instant.now()).validUntil(Instant.now().plusSeconds(1800))
                     .peakWaveHeight(1.5) // Exceeds max 0.8m
                     .peakWindSpeed(28.0)
                     .peakWindGust(40.0)

@@ -2,17 +2,16 @@ package com.danasea.backend.modules.checkin.infrastructure.persistence.repositor
 
 import com.danasea.backend.modules.checkin.infrastructure.persistence.entities.CheckinTokenJpaEntity;
 import jakarta.persistence.LockModeType;
+import java.time.OffsetDateTime;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
-
-import java.time.OffsetDateTime;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
 
 @Repository("checkinJpaCheckinTokenRepository")
 public interface JpaCheckinTokenRepository extends JpaRepository<CheckinTokenJpaEntity, UUID> {
@@ -26,6 +25,8 @@ public interface JpaCheckinTokenRepository extends JpaRepository<CheckinTokenJpa
     List<CheckinTokenJpaEntity> findAllBySubOrderId(UUID subOrderId);
 
     boolean existsByQrTokenHash(String qrTokenHash);
+
+    void deleteBySubOrderIdAndUsedAtIsNull(UUID subOrderId);
 
     /**
      * Cập nhật điều kiện nguyên tử theo ID ngăn chặn Race Condition (Double Check-in).

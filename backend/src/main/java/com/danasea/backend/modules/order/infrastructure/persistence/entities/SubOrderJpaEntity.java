@@ -92,6 +92,15 @@ public class SubOrderJpaEntity extends BaseJpaEntity {
     @Column(name = "vendor_notified_at")
     private OffsetDateTime vendorNotifiedAt;
 
+    @Column(name = "reschedule_version", nullable = false)
+    private Long rescheduleVersion = 0L;
+
+    @Column(name = "rescheduled_at")
+    private OffsetDateTime rescheduledAt;
+
+    @Column(name = "original_slot_id")
+    private UUID originalSlotId;
+
     public BigDecimal getFinalAmount() {
         if (finalAmount != null) {
             return finalAmount;

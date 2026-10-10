@@ -43,6 +43,9 @@ public class SubOrderMapper {
         domain.setQrSecret(entity.getQrSecret());
         domain.setCheckedInAt(entity.getCheckedInAt());
         domain.setVendorNotifiedAt(entity.getVendorNotifiedAt());
+        domain.setRescheduleVersion(entity.getRescheduleVersion());
+        domain.setRescheduledAt(entity.getRescheduledAt());
+        domain.setOriginalSlotId(entity.getOriginalSlotId());
         domain.setCreatedAt(entity.getCreatedAt());
         domain.setUpdatedAt(entity.getUpdatedAt());
         return domain;
@@ -86,6 +89,9 @@ public class SubOrderMapper {
         entity.setQrSecret(domain.getQrSecret());
         entity.setCheckedInAt(domain.getCheckedInAt());
         entity.setVendorNotifiedAt(domain.getVendorNotifiedAt());
+        entity.setRescheduleVersion(domain.getRescheduleVersion() == null ? 0L : domain.getRescheduleVersion());
+        entity.setRescheduledAt(domain.getRescheduledAt());
+        entity.setOriginalSlotId(domain.getOriginalSlotId());
         if (domain.getCreatedAt() != null) {
             entity.setCreatedAt(domain.getCreatedAt());
         }

@@ -1,7 +1,12 @@
 package com.danasea.backend.modules.weather;
 
-import com.danasea.backend.modules.communication.application.usecases.SendNotificationUseCase;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.*;
+
 import com.danasea.backend.modules.communication.application.dtos.NotificationCommand;
+import com.danasea.backend.modules.communication.application.usecases.SendNotificationUseCase;
 import com.danasea.backend.modules.order.domain.models.RefundReason;
 import com.danasea.backend.modules.order.domain.models.RefundStatus;
 import com.danasea.backend.modules.order.domain.models.SubOrderStatus;
@@ -23,6 +28,15 @@ import com.danasea.backend.modules.weather.domain.services.WeatherRuleEngine;
 import com.danasea.backend.modules.weather.infrastructure.jobs.SlotWeatherMonitoringJob;
 import com.danasea.backend.modules.weather.infrastructure.persistence.entities.SafetyRuleEvaluationJpaEntity;
 import com.danasea.backend.modules.weather.infrastructure.persistence.repositories.JpaSafetyRuleEvaluationRepository;
+import java.math.BigDecimal;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -33,20 +47,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
-
-import java.math.BigDecimal;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.UUID;
-
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 @DisplayName("SlotWeatherMonitoringJob Comprehensive Tests")
@@ -244,7 +244,7 @@ class SlotWeatherMonitoringJobTest {
             when(serviceRepository.findById(serviceId)).thenReturn(Optional.of(service));
             when(categoryRepository.findById(categoryId)).thenReturn(Optional.of(category));
 
-            WeatherInfoDto.TimeWindowForecast safeForecast = WeatherInfoDto.TimeWindowForecast.builder()
+            WeatherInfoDto.TimeWindowForecast safeForecast = WeatherInfoDto.TimeWindowForecast.builder().sourceFetchedAt(Instant.now()).validUntil(Instant.now().plusSeconds(1800))
                     .peakWaveHeight(0.3)
                     .peakWindSpeed(10.0)
                     .peakWindGust(15.0)
@@ -269,7 +269,7 @@ class SlotWeatherMonitoringJobTest {
             when(serviceRepository.findById(serviceId)).thenReturn(Optional.of(service));
             when(categoryRepository.findById(categoryId)).thenReturn(Optional.of(category));
 
-            WeatherInfoDto.TimeWindowForecast hazardousForecast = WeatherInfoDto.TimeWindowForecast.builder()
+            WeatherInfoDto.TimeWindowForecast hazardousForecast = WeatherInfoDto.TimeWindowForecast.builder().sourceFetchedAt(Instant.now()).validUntil(Instant.now().plusSeconds(1800))
                     .peakWaveHeight(1.2)
                     .peakWindSpeed(15.0)
                     .peakWindGust(20.0)
@@ -302,7 +302,7 @@ class SlotWeatherMonitoringJobTest {
             when(serviceRepository.findById(serviceId)).thenReturn(Optional.of(service));
             when(categoryRepository.findById(categoryId)).thenReturn(Optional.of(category));
 
-            WeatherInfoDto.TimeWindowForecast cautionForecast = WeatherInfoDto.TimeWindowForecast.builder()
+            WeatherInfoDto.TimeWindowForecast cautionForecast = WeatherInfoDto.TimeWindowForecast.builder().sourceFetchedAt(Instant.now()).validUntil(Instant.now().plusSeconds(1800))
                     .peakWaveHeight(0.6)
                     .peakWindSpeed(10.0)
                     .peakWindGust(15.0)
@@ -341,7 +341,7 @@ class SlotWeatherMonitoringJobTest {
             when(serviceRepository.findById(serviceId)).thenReturn(Optional.of(service));
             when(categoryRepository.findById(categoryId)).thenReturn(Optional.of(category));
 
-            WeatherInfoDto.TimeWindowForecast hazardousForecast = WeatherInfoDto.TimeWindowForecast.builder()
+            WeatherInfoDto.TimeWindowForecast hazardousForecast = WeatherInfoDto.TimeWindowForecast.builder().sourceFetchedAt(Instant.now()).validUntil(Instant.now().plusSeconds(1800))
                     .peakWaveHeight(1.2)
                     .peakWindSpeed(15.0)
                     .peakWindGust(20.0)
@@ -377,7 +377,7 @@ class SlotWeatherMonitoringJobTest {
             when(categoryRepository.findById(categoryId)).thenReturn(Optional.of(category));
 
             // Đợt bão giật cấp 6 (RED)
-            WeatherInfoDto.TimeWindowForecast stormForecast = WeatherInfoDto.TimeWindowForecast.builder()
+            WeatherInfoDto.TimeWindowForecast stormForecast = WeatherInfoDto.TimeWindowForecast.builder().sourceFetchedAt(Instant.now()).validUntil(Instant.now().plusSeconds(1800))
                     .peakWaveHeight(1.4) // Cấm đỏ SUP
                     .peakWindSpeed(25.0)
                     .peakWindGust(35.0)
@@ -431,7 +431,7 @@ class SlotWeatherMonitoringJobTest {
             when(serviceRepository.findById(serviceId)).thenReturn(Optional.of(service));
             when(categoryRepository.findById(categoryId)).thenReturn(Optional.of(category));
 
-            WeatherInfoDto.TimeWindowForecast redForecast = WeatherInfoDto.TimeWindowForecast.builder()
+            WeatherInfoDto.TimeWindowForecast redForecast = WeatherInfoDto.TimeWindowForecast.builder().sourceFetchedAt(Instant.now()).validUntil(Instant.now().plusSeconds(1800))
                     .peakWaveHeight(1.5)
                     .peakWindSpeed(20.0)
                     .peakWindGust(25.0)
@@ -503,13 +503,14 @@ class SlotWeatherMonitoringJobTest {
             when(masterOrderRepository.findById(masterOrderId)).thenReturn(Optional.of(masterOrder));
             when(serviceRepository.findById(serviceId)).thenReturn(Optional.of(service));
 
-            boolean fallbackTriggered = job.checkAutoEscalationFallback(slot, now);
+            WeatherCancellationFixture.install(job, subOrderRepository, refundRepository, slotRepository, slotId);
+        boolean fallbackTriggered = job.checkAutoEscalationFallback(slot, now);
 
             assertTrue(fallbackTriggered);
 
             // 1. SubOrder chuyển sang CANCELLED
             assertEquals(SubOrderStatus.CANCELLED, subOrder.getStatus());
-            verify(subOrderRepository, times(1)).save(subOrder);
+            verify(subOrderRepository, times(1)).saveAndFlush(subOrder);
 
             // 2. Tạo bản ghi hoàn tiền 100% với RefundReason.WEATHER và PROCESSED
             ArgumentCaptor<RefundJpaEntity> refundCaptor = ArgumentCaptor.forClass(RefundJpaEntity.class);
@@ -522,7 +523,7 @@ class SlotWeatherMonitoringJobTest {
 
             // 3. Trạng thái bản ghi sự cố cập nhật sang AUTO_CANCELLED_FOR_SAFETY
             assertEquals("AUTO_CANCELLED_FOR_SAFETY", redAlert.getStatus());
-            assertTrue(redAlert.getIsSafe());
+            assertFalse(redAlert.getIsSafe());
             verify(evaluationRepository, times(1)).save(redAlert);
 
             // 4. Bắn thông báo khẩn cấp đồng thời 3 bên
@@ -544,10 +545,11 @@ class SlotWeatherMonitoringJobTest {
             slot.setDate(LocalDate.of(2026, 9, 20));
             slot.setStartTime(LocalTime.of(8, 0));
 
-            boolean fallbackTriggered = job.checkAutoEscalationFallback(slot, now);
+            WeatherCancellationFixture.install(job, subOrderRepository, refundRepository, slotRepository, slotId);
+        boolean fallbackTriggered = job.checkAutoEscalationFallback(slot, now);
 
             assertFalse(fallbackTriggered);
-            verify(subOrderRepository, never()).save(any());
+            verify(subOrderRepository, never()).saveAndFlush(any());
             verify(refundRepository, never()).save(any());
             verify(sendNotificationUseCase, never()).execute(any(NotificationCommand.class));
         }

@@ -1,12 +1,5 @@
 package com.danasea.backend.modules.booking.infrastructure.persistence.entities;
 
-import java.math.BigDecimal;
-import java.time.LocalDate;
-import java.time.LocalTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
-
 import com.danasea.backend.shared.core.infrastructure.persistence.entities.BaseJpaEntity;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -16,6 +9,12 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -52,6 +51,12 @@ public class BookingItemJpaEntity extends BaseJpaEntity {
 
     @Column(name = "participants_count")
     private Integer participantsCount;
+
+    @Column(name = "max_pax_per_package")
+    private Integer maxPaxPerPackage;
+
+    @Column(name = "allow_split", nullable = false)
+    private boolean allowSplit;
 
     @Column(name = "quantity", nullable = false)
     private Integer quantity;

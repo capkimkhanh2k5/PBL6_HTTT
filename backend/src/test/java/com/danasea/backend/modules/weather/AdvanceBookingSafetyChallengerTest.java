@@ -1,8 +1,9 @@
 package com.danasea.backend.modules.weather;
 
-import com.danasea.backend.modules.service.infrastructure.persistence.entities.CategoryJpaEntity;
-import com.danasea.backend.modules.service.infrastructure.persistence.entities.ServiceJpaEntity;
-import com.danasea.backend.modules.service.infrastructure.persistence.entities.ServiceSlotJpaEntity;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.*;
+
 import com.danasea.backend.modules.service.infrastructure.persistence.repositories.JpaCategoryRepository;
 import com.danasea.backend.modules.service.infrastructure.persistence.repositories.JpaServiceRepository;
 import com.danasea.backend.modules.service.infrastructure.persistence.repositories.JpaServiceSlotRepository;
@@ -19,15 +20,6 @@ import com.danasea.backend.modules.weather.infrastructure.adapters.WeatherProvid
 import com.danasea.backend.modules.weather.infrastructure.api.OpenMeteoApiClient;
 import com.danasea.backend.modules.weather.infrastructure.api.dtos.OpenMeteoMarineResponse;
 import com.danasea.backend.modules.weather.infrastructure.api.dtos.OpenMeteoWeatherResponse;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Nested;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-
-import java.math.BigDecimal;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDate;
@@ -38,10 +30,13 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
-
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.*;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
 @DisplayName("AdvanceBookingSafetyChallengerTest - Adversarial Stress & Empirical Challenge Suite")
@@ -127,7 +122,7 @@ public class AdvanceBookingSafetyChallengerTest {
         void testDay0_SameDay_ProcessedSuccessfully() {
             when(categorySafetyRuleService.getRuleByCategorySlug("cheo-sup-kayak")).thenReturn(supRule);
 
-            WeatherInfoDto.TimeWindowForecast forecast = WeatherInfoDto.TimeWindowForecast.builder()
+            WeatherInfoDto.TimeWindowForecast forecast = WeatherInfoDto.TimeWindowForecast.builder().sourceFetchedAt(Instant.now()).validUntil(Instant.now().plusSeconds(1800))
                     .peakWaveHeight(0.35)
                     .peakWindSpeed(10.0)
                     .peakWindGust(14.0)
@@ -167,7 +162,7 @@ public class AdvanceBookingSafetyChallengerTest {
             for (int daysAhead : testDays) {
                 LocalDate targetDate = today.plusDays(daysAhead);
 
-                WeatherInfoDto.TimeWindowForecast forecast = WeatherInfoDto.TimeWindowForecast.builder()
+                WeatherInfoDto.TimeWindowForecast forecast = WeatherInfoDto.TimeWindowForecast.builder().sourceFetchedAt(Instant.now()).validUntil(Instant.now().plusSeconds(1800))
                         .peakWaveHeight(0.40)
                         .peakWindSpeed(11.0)
                         .peakWindGust(15.0)
@@ -209,7 +204,7 @@ public class AdvanceBookingSafetyChallengerTest {
             when(categorySafetyRuleService.getRuleByCategorySlug("cheo-sup-kayak")).thenReturn(supRule);
 
             // Scenario A: Wave 1.2m > 0.8m max -> RED
-            WeatherInfoDto.TimeWindowForecast highWaveForecast = WeatherInfoDto.TimeWindowForecast.builder()
+            WeatherInfoDto.TimeWindowForecast highWaveForecast = WeatherInfoDto.TimeWindowForecast.builder().sourceFetchedAt(Instant.now()).validUntil(Instant.now().plusSeconds(1800))
                     .peakWaveHeight(1.20)
                     .peakWindSpeed(10.0)
                     .peakWindGust(15.0)
@@ -227,7 +222,7 @@ public class AdvanceBookingSafetyChallengerTest {
             assertTrue(resA.getWarningMessage().contains("Wave height 1.2m exceeds the maximum safe threshold"));
 
             // Scenario B: Wave 0.6m (caution: 0.5m, max: 0.8m) -> YELLOW
-            WeatherInfoDto.TimeWindowForecast cautionWaveForecast = WeatherInfoDto.TimeWindowForecast.builder()
+            WeatherInfoDto.TimeWindowForecast cautionWaveForecast = WeatherInfoDto.TimeWindowForecast.builder().sourceFetchedAt(Instant.now()).validUntil(Instant.now().plusSeconds(1800))
                     .peakWaveHeight(0.60)
                     .peakWindSpeed(10.0)
                     .peakWindGust(15.0)
@@ -255,7 +250,7 @@ public class AdvanceBookingSafetyChallengerTest {
                 LocalDate targetDate = today.plusDays(daysAhead);
 
                 // Beyond day 8, Marine API wave is null; wind speed is 18.0 km/h (safe for parasailing max 28.0)
-                WeatherInfoDto.TimeWindowForecast forecast = WeatherInfoDto.TimeWindowForecast.builder()
+                WeatherInfoDto.TimeWindowForecast forecast = WeatherInfoDto.TimeWindowForecast.builder().sourceFetchedAt(Instant.now()).validUntil(Instant.now().plusSeconds(1800))
                         .peakWaveHeight(null)
                         .peakWindSpeed(18.0)
                         .peakWindGust(25.0)
@@ -299,7 +294,7 @@ public class AdvanceBookingSafetyChallengerTest {
             when(categorySafetyRuleService.getRuleByCategorySlug("cheo-sup-kayak")).thenReturn(supRule);
 
             // Wind = 45 km/h -> Estimated wave = 0.024 * (45^1.15) ≈ 1.90m > 0.8m (SUP max)
-            WeatherInfoDto.TimeWindowForecast forecast = WeatherInfoDto.TimeWindowForecast.builder()
+            WeatherInfoDto.TimeWindowForecast forecast = WeatherInfoDto.TimeWindowForecast.builder().sourceFetchedAt(Instant.now()).validUntil(Instant.now().plusSeconds(1800))
                     .peakWaveHeight(null)
                     .peakWindSpeed(45.0)
                     .peakWindGust(55.0)
@@ -329,7 +324,7 @@ public class AdvanceBookingSafetyChallengerTest {
 
             when(categorySafetyRuleService.getRuleByCategorySlug("cheo-sup-kayak")).thenReturn(supRule);
 
-            WeatherInfoDto.TimeWindowForecast day16Forecast = WeatherInfoDto.TimeWindowForecast.builder()
+            WeatherInfoDto.TimeWindowForecast day16Forecast = WeatherInfoDto.TimeWindowForecast.builder().sourceFetchedAt(Instant.now()).validUntil(Instant.now().plusSeconds(1800))
                     .peakWaveHeight(null)
                     .peakWindSpeed(12.0)
                     .peakWindGust(16.0)
@@ -622,11 +617,11 @@ public class AdvanceBookingSafetyChallengerTest {
 
             assertNotNull(res);
             assertEquals(7, res.getDaysInAdvance());
-            // Since all metrics are null, rule engine evaluates baseline without NPE
-            assertTrue(res.isSafe());
-            assertEquals("ADVISORY", res.getConfidenceLevel());
-            assertEquals("METEOROLOGY_ESTIMATED_MARINE", res.getDataCoverage());
-            assertTrue(res.isEstimatedMarine());
+            // Missing observations cannot certify safety.
+            assertFalse(res.isSafe());
+            assertEquals("LOW", res.getConfidenceLevel());
+            assertEquals("STALE_OR_UNVERIFIED_FORECAST", res.getDataCoverage());
+            assertFalse(res.isEstimatedMarine());
         }
 
         @Test
@@ -675,7 +670,7 @@ public class AdvanceBookingSafetyChallengerTest {
             when(categorySafetyRuleService.getRuleByCategorySlug("corrupted-or-empty"))
                     .thenReturn(CategorySafetyRule.DEFAULT_RULE);
 
-            WeatherInfoDto.TimeWindowForecast forecast = WeatherInfoDto.TimeWindowForecast.builder()
+            WeatherInfoDto.TimeWindowForecast forecast = WeatherInfoDto.TimeWindowForecast.builder().sourceFetchedAt(Instant.now()).validUntil(Instant.now().plusSeconds(1800))
                     .peakWaveHeight(0.40)
                     .peakWindSpeed(10.0)
                     .build();
