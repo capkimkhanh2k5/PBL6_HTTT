@@ -13,6 +13,8 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 import java.security.Principal;
+import java.util.Locale;
+import java.util.Optional;
 
 @Component
 public class LocaleContextFilter extends OncePerRequestFilter {
@@ -50,12 +52,12 @@ public class LocaleContextFilter extends OncePerRequestFilter {
                 .orElse(SupportedLanguage.DEFAULT);
     }
 
-    private java.util.Optional<SupportedLanguage> resolveProfileLanguage(Principal principal) {
+    private Optional<SupportedLanguage> resolveProfileLanguage(Principal principal) {
         if (principal == null || principal.getName() == null) {
-            return java.util.Optional.empty();
+            return Optional.empty();
         }
         if (accountInternalApi == null) {
-            return java.util.Optional.empty();
+            return Optional.empty();
         }
         return accountInternalApi.findUserByEmail(principal.getName())
                 .flatMap(user -> SupportedLanguage.fromTag(user.getLocale()));
@@ -65,7 +67,7 @@ public class LocaleContextFilter extends OncePerRequestFilter {
         if (current == null || current.isBlank()) {
             return "Accept-Language";
         }
-        if (current.toLowerCase(java.util.Locale.ROOT).contains("accept-language")) {
+        if (current.toLowerCase(Locale.ROOT).contains("accept-language")) {
             return current;
         }
         return current + ", Accept-Language";

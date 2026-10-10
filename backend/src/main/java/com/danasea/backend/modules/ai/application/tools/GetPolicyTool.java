@@ -15,6 +15,8 @@ import java.util.Map;
 import java.util.Optional;
 import com.danasea.backend.shared.i18n.LocalizedMessageService;
 import com.danasea.backend.shared.i18n.SupportedLanguage;
+import java.util.Locale;
+import java.util.Set;
 
 @Slf4j
 @Component
@@ -83,8 +85,8 @@ public class GetPolicyTool implements ToolExecutor {
             log.warn("Failed to parse arguments for get_policy: {}", argumentsJson, e);
         }
 
-        if (canonicalPolicy != null && java.util.Set.of("CANCELLATION", "REFUND", "WEATHER_CANCELLATION")
-                .contains(policyType.toUpperCase(java.util.Locale.ROOT))) {
+        if (canonicalPolicy != null && Set.of("CANCELLATION", "REFUND", "WEATHER_CANCELLATION")
+                .contains(policyType.toUpperCase(Locale.ROOT))) {
             try {
                 return objectMapper.writeValueAsString(Map.of("status", "AVAILABLE", "policy_type", policyType,
                         "policy", canonicalPolicy.current(), "eligibilitySource", "OWNED_ORDER_CANCELLATION_PREVIEW",

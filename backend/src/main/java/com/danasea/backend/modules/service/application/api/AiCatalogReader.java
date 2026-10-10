@@ -20,6 +20,8 @@ import com.danasea.backend.modules.service.domain.ports.ServiceRepositoryPort;
 import com.danasea.backend.shared.i18n.SupportedLanguage;
 
 import lombok.RequiredArgsConstructor;
+import java.time.LocalTime;
+import java.util.Optional;
 
 @Component
 @RequiredArgsConstructor
@@ -51,7 +53,7 @@ public class AiCatalogReader implements AiCatalogReadApi {
             List<Service> batch;
             if (candidateReader != null) {
                 List<UUID> ids = candidateReader.candidateIds(query, rawOffset, 15);
-                batch = ids.stream().map(services::findPublishedById).flatMap(java.util.Optional::stream).toList();
+                batch = ids.stream().map(services::findPublishedById).flatMap(Optional::stream).toList();
                 if (ids.isEmpty()) { exhausted = true; break; }
             } else {
                 batch = services.searchPublishedServices(query.categoryId(), query.keyword(), null, null,
@@ -103,7 +105,7 @@ public class AiCatalogReader implements AiCatalogReadApi {
                                     slot.startTime(), slot.endTime(), slot.availablePaxOrPackages())).toList();
                     slots = slots.stream().filter(slot -> query.dayStart() == null || slot.start() != null && !slot.start().isBefore(query.dayStart()))
                             .filter(slot -> {
-                                java.time.LocalTime end = slot.end();
+                                LocalTime end = slot.end();
                                 if (end == null && slot.start() != null && service.getDurationMinutes() != null && service.getDurationMinutes() > 0) end = slot.start().plusMinutes(service.getDurationMinutes());
                                 return end != null && slot.start() != null && end.isAfter(slot.start()) && (query.dayEnd() == null || !end.isAfter(query.dayEnd()));
                             }).toList();

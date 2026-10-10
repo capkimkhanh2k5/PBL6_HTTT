@@ -20,6 +20,8 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import lombok.RequiredArgsConstructor;
+import java.math.BigDecimal;
+import java.time.Instant;
 
 @Component
 @RequiredArgsConstructor
@@ -62,9 +64,9 @@ public class GetServiceDetailTool implements ToolExecutor {
                 result.put("options", service.options()); result.put("priceBasis", "ACTIVE_OPTION_PARTY_TOTAL");
                 result.put("partySize", context.partySize()); result.put("from", context.from()); result.put("to", context.to());
                 result.put("defaultedFields", context.criteria().defaultedFields());
-                result.put("price", service.options().stream().map(AiCatalogReadApi.Option::partyTotal).min(java.math.BigDecimal::compareTo).orElse(null));
+                result.put("price", service.options().stream().map(AiCatalogReadApi.Option::partyTotal).min(BigDecimal::compareTo).orElse(null));
                 result.put("availableSlots", service.options().stream().flatMap(option -> option.slots().stream()).toList());
-                result.put("retrievedAt", java.time.Instant.now()); result.put("inventoryReserved", false);
+                result.put("retrievedAt", Instant.now()); result.put("inventoryReserved", false);
                 return objectMapper.writeValueAsString(result);
             }
             ServiceDetailResult detail = getPublicServiceDetailUseCase.readOnlySnapshot(serviceId);

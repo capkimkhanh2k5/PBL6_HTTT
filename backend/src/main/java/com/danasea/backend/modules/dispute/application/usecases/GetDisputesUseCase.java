@@ -10,6 +10,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import java.util.Set;
+import org.springframework.data.domain.Sort.Order;
 
 @Service
 @RequiredArgsConstructor
@@ -23,8 +25,8 @@ public class GetDisputesUseCase {
                 || pageable.getPageSize() < 1 || pageable.getPageSize() > 100) {
             throw new IllegalArgumentException("page must be non-negative and size must be between 1 and 100");
         }
-        for (org.springframework.data.domain.Sort.Order order : pageable.getSort()) {
-            if (!java.util.Set.of("createdAt", "updatedAt", "status", "reason", "resolvedAt")
+        for (Order order : pageable.getSort()) {
+            if (!Set.of("createdAt", "updatedAt", "status", "reason", "resolvedAt")
                     .contains(order.getProperty())) {
                 throw new IllegalArgumentException("Unsupported sort field: " + order.getProperty());
             }

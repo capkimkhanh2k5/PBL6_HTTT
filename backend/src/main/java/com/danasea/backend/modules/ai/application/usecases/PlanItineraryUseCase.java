@@ -36,6 +36,7 @@ import com.danasea.backend.modules.service.application.api.AiCatalogReadApi.Slot
 import com.danasea.backend.shared.i18n.SupportedLanguage;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.orm.ObjectOptimisticLockingFailureException;
 
 @Service
 @RequiredArgsConstructor
@@ -149,7 +150,7 @@ public class PlanItineraryUseCase {
                         SupportedLanguage.fromTag(stale.locale()).orElse(SupportedLanguage.VI)).getFirst().plan();
                 next = withContext(next, stale.plan().context());
                 store.propose(stale.id(), stale.ownerId(), stale.version(), next, trigger, sourceEventId);
-            } catch (AiStateConflictException | org.springframework.orm.ObjectOptimisticLockingFailureException ignored) {
+            } catch (AiStateConflictException | ObjectOptimisticLockingFailureException ignored) {
                 // A concurrent customer change is authoritative; the next monitoring pass retries.
             }
         }

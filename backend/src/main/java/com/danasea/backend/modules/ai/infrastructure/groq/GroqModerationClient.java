@@ -19,6 +19,7 @@ import org.springframework.web.client.RestTemplate;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 @Slf4j
 @Service
@@ -69,7 +70,7 @@ public class GroqModerationClient implements ModerationPort {
             String moderationModel,
             String groqApiUrl) {
         this.restClient = null;
-        this.legacyRestTemplate = java.util.Objects.requireNonNull(restTemplate, "restTemplate");
+        this.legacyRestTemplate = Objects.requireNonNull(restTemplate, "restTemplate");
         this.keyRotator = keyRotator;
         this.moderationModel = moderationModel;
         this.groqApiUrl = groqApiUrl;

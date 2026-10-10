@@ -12,6 +12,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
+import java.time.Instant;
 
 @Component
 public class WeatherProviderAdapter implements WeatherProviderPort {
@@ -234,7 +235,7 @@ public class WeatherProviderAdapter implements WeatherProviderPort {
             fetchedAt = marineResp == null || marineResp.getSourceFetchedAtEpochMillis() == null || fetchedAt == null ? null
                     : Math.min(fetchedAt, marineResp.getSourceFetchedAtEpochMillis());
         }
-        java.time.Instant sourceFetchedAt = fetchedAt == null ? null : java.time.Instant.ofEpochMilli(fetchedAt);
+        Instant sourceFetchedAt = fetchedAt == null ? null : Instant.ofEpochMilli(fetchedAt);
         return WeatherInfoDto.TimeWindowForecast.builder()
                 .sourceFetchedAt(sourceFetchedAt)
                 .validUntil(sourceFetchedAt == null ? null : sourceFetchedAt.plus(cacheService.getTtl()))

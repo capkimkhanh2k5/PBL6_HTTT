@@ -16,6 +16,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
+import java.util.LinkedHashMap;
 
 @Component
 @RequiredArgsConstructor
@@ -86,7 +87,7 @@ public class SearchServiceTool implements ToolExecutor {
                         context == null || context.language() == null ? SupportedLanguage.VI : context.language(),
                         context == null ? null : context.userId());
                 List<Map<String, Object>> matches = found.candidates().stream().map(candidate -> {
-                    Map<String, Object> match = new java.util.LinkedHashMap<>();
+                    Map<String, Object> match = new LinkedHashMap<>();
                     match.put("serviceId", candidate.service().id()); match.put("name", candidate.service().name());
                     match.put("price", candidate.minimumPartyTotal()); match.put("avgRating", candidate.service().averageRating());
                     match.put("options", candidate.service().options()); match.put("matchType", "CANONICAL_CATALOG");

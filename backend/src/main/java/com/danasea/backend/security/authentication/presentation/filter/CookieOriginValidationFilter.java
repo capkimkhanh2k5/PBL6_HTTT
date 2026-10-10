@@ -18,6 +18,7 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import java.util.List;
 
 @Component
 public class CookieOriginValidationFilter extends OncePerRequestFilter {
@@ -33,7 +34,7 @@ public class CookieOriginValidationFilter extends OncePerRequestFilter {
             ObjectProvider<ObjectMapper> objectMapperProvider,
             ObjectProvider<LocalizedMessageService> messagesProvider) {
         CorsProperties corsProperties = corsPropertiesProvider.getIfAvailable(
-                () -> new CorsProperties(java.util.List.of()));
+                () -> new CorsProperties(List.of()));
         this.allowedOrigins = Set.copyOf(corsProperties.allowedOrigins());
         this.objectMapper = objectMapperProvider.getIfAvailable(ObjectMapper::new);
         this.messages = messagesProvider.getIfAvailable(LocalizedMessageService::standalone);

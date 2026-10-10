@@ -11,6 +11,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Positive;
 
 import io.jsonwebtoken.security.Keys;
+import java.time.Duration;
 
 @Validated
 @ConfigurationProperties(prefix = "app.jwt")
@@ -32,6 +33,6 @@ public record JwtProperties (
     }
 
     public long refreshTokenMaxAgeSeconds() {
-        return java.time.Duration.ofDays(refreshTokenDays).toSeconds();
+        return Duration.ofDays(refreshTokenDays).toSeconds();
     }
 }

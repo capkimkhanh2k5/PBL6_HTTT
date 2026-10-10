@@ -30,6 +30,7 @@ import com.danasea.backend.security.infrastructure.SecurityUtils;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.access.AccessDeniedException;
 
 @Slf4j
 @Service
@@ -71,7 +72,7 @@ public class ResolveDisputeUseCase {
             throw new InvalidDisputeResolutionException("A resolution action is required.");
         }
         if (adminUserId == null) {
-            throw new org.springframework.security.access.AccessDeniedException("Administrator authentication is required.");
+            throw new AccessDeniedException("Administrator authentication is required.");
         }
 
         DisputeJpaEntity dispute = disputeRepository.findByIdForUpdate(disputeId)

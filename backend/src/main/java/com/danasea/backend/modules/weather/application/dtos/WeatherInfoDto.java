@@ -5,6 +5,7 @@ import lombok.Data;
 
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
+import java.time.Instant;
 
 @Data
 @Builder
@@ -69,8 +70,8 @@ public class WeatherInfoDto {
     @NoArgsConstructor
     @AllArgsConstructor
     public static class TimeWindowForecast {
-        private java.time.Instant sourceFetchedAt;
-        private java.time.Instant validUntil;
+        private Instant sourceFetchedAt;
+        private Instant validUntil;
         private String provider;
         private String timezone;
         private Double peakWaveHeight;

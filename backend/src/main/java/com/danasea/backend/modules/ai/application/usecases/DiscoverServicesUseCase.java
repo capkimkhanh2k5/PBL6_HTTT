@@ -30,6 +30,8 @@ import com.danasea.backend.modules.service.application.api.AiCatalogReadApi.Slot
 import com.danasea.backend.shared.i18n.SupportedLanguage;
 
 import lombok.RequiredArgsConstructor;
+import java.time.Duration;
+import java.util.HexFormat;
 
 @Service
 @RequiredArgsConstructor
@@ -73,7 +75,7 @@ public class DiscoverServicesUseCase {
             throw new IllegalArgumentException("Parsed budget exceeds the supported maximum");
         }
         Query query = query(context, keyword, language, mode, budget, signals);
-        long deadline = System.nanoTime() + java.time.Duration.ofSeconds(8).toNanos();
+        long deadline = System.nanoTime() + Duration.ofSeconds(8).toNanos();
         List<Candidate> candidates = new ArrayList<>();
         Map<UUID, TravelWeatherPort.Assessment> weatherCache = new HashMap<>();
         List<String> exclusions = new ArrayList<>(TravelQueryParser.excludedActivities(context.query()));
@@ -212,7 +214,7 @@ public class DiscoverServicesUseCase {
     }
 
     private String fingerprint(String value) {
-        try { return java.util.HexFormat.of().formatHex(java.security.MessageDigest.getInstance("SHA-256").digest(value.getBytes(java.nio.charset.StandardCharsets.UTF_8))); }
+        try { return HexFormat.of().formatHex(java.security.MessageDigest.getInstance("SHA-256").digest(value.getBytes(java.nio.charset.StandardCharsets.UTF_8))); }
         catch (java.security.NoSuchAlgorithmException exception) { throw new IllegalStateException("Criteria fingerprint is unavailable", exception); }
     }
 

@@ -17,6 +17,7 @@ import com.danasea.backend.shared.i18n.SupportedLanguage;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import lombok.RequiredArgsConstructor;
+import java.util.ArrayList;
 
 @Component
 @RequiredArgsConstructor
@@ -39,7 +40,7 @@ public class GroqReviewHighlightAdapter implements ReviewHighlightPort {
             var ids = mapper.readTree(response.getContent()).path("reviewIds");
             if (!ids.isArray() || ids.size() > 6) return List.of();
             Set<UUID> allowed = reviews.stream().map(ReviewEvidence::id).collect(Collectors.toSet());
-            java.util.ArrayList<UUID> selected = new java.util.ArrayList<>();
+            ArrayList<UUID> selected = new ArrayList<>();
             for (var id : ids) {
                 UUID value = UUID.fromString(id.asText());
                 if (!allowed.contains(value)) return List.of();
