@@ -7,6 +7,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+import org.springframework.beans.factory.annotation.Autowired;
+import com.danasea.backend.modules.ai.application.usecase.DiscoverServicesUseCase;
+import com.danasea.backend.modules.ai.application.dtos.TravelRequest;
+import com.danasea.backend.shared.i18n.SupportedLanguage;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -22,6 +27,10 @@ public class SearchServiceTool implements ToolExecutor {
 
     private final ServiceSearchPort serviceSearchPort;
     private final ObjectMapper objectMapper;
+    private DiscoverServicesUseCase discovery;
+
+    @Autowired
+    public void setDiscovery(DiscoverServicesUseCase discovery) { this.discovery = discovery; }
 
     @Override
     public String getName() {
@@ -61,6 +70,32 @@ public class SearchServiceTool implements ToolExecutor {
                 return error("INVALID_ARGUMENTS", "min_price must not exceed max_price");
             }
 
+            if (discovery != null) {
+                if (minPrice != null && minPrice.signum() > 0) return objectMapper.writeValueAsString(Map.of(
+                        "status", "NEEDS_INPUT", "requiredInputs", List.of("MINIMUM_PRICE_FILTER_UNSUPPORTED"),
+                        "results", List.of(), "message", "Use a maximum party budget or compare active options by unit price."));
+                ObjectNode criteria = args.get("criteria") instanceof ObjectNode supplied ? supplied.deepCopy() : objectMapper.createObjectNode();
+                if (query != null) criteria.put("query", query + (category == null ? "" : " " + category));
+                else if (category != null) criteria.put("query", category);
+                if (maxPrice != null) criteria.put("totalBudget", maxPrice);
+                if (args.hasNonNull("partySize")) criteria.set("partySize", args.get("partySize"));
+                if (args.hasNonNull("from")) criteria.set("from", args.get("from"));
+                if (args.hasNonNull("to")) criteria.set("to", args.get("to"));
+                criteria.put("limit", 15);
+                var found = discovery.execute(objectMapper.treeToValue(criteria, TravelRequest.class).context(), "SEARCH",
+                        context == null || context.language() == null ? SupportedLanguage.VI : context.language(),
+                        context == null ? null : context.userId());
+                List<Map<String, Object>> matches = found.candidates().stream().map(candidate -> {
+                    Map<String, Object> match = new java.util.LinkedHashMap<>();
+                    match.put("serviceId", candidate.service().id()); match.put("name", candidate.service().name());
+                    match.put("price", candidate.minimumPartyTotal()); match.put("avgRating", candidate.service().averageRating());
+                    match.put("options", candidate.service().options()); match.put("matchType", "CANONICAL_CATALOG");
+                    return match;
+                }).toList();
+                return objectMapper.writeValueAsString(Map.of("status", found.status(), "results", matches,
+                        "context", found.context(), "requiredInputs", found.requiredInputs(), "limitations", found.limitations(),
+                        "priceBasis", "ACTIVE_OPTION_PARTY_TOTAL", "retrievedAt", found.checkedAt()));
+            }
             List<ServiceSearchResultDto> results = context == null
                     ? serviceSearchPort.exactAndFilterSearch(query, category, minPrice, maxPrice)
                     : serviceSearchPort.exactAndFilterSearch(

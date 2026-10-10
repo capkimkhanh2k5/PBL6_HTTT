@@ -1,0 +1,50 @@
+package com.danasea.backend.modules.ai.application.usecase;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.UUID;
+import java.util.regex.Pattern;
+
+import org.springframework.stereotype.Service;
+
+import com.danasea.backend.modules.ai.application.port.AssessmentCaseStorePort;
+import com.danasea.backend.modules.ai.application.port.DecisionModelPort;
+import com.danasea.backend.modules.ai.domain.models.AssessmentCase;
+import com.danasea.backend.modules.ai.domain.models.DecisionResult;
+import com.danasea.backend.modules.ai.domain.models.DecisionTask;
+
+import lombok.RequiredArgsConstructor;
+
+@Service
+@RequiredArgsConstructor
+public class AssessTextUseCase {
+    private static final Pattern CONTACT = Pattern.compile("(?<!\\d)(?:\\+84|0)(?:[ .-]?\\d){9}(?!\\d)|https?://[^\\s<>]+|[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}");
+    public record Result(String status, List<String> reasonCodes, List<String> contactMatches,
+                         DecisionResult category, DecisionResult moderation, AssessmentCase caseRecord,
+                         boolean publicationAuthorized, String evidenceType) {}
+    private final DecisionModelPort model;
+    private final AssessmentCaseStorePort cases;
+
+    public Result execute(UUID actorId, String text, boolean persist) {
+        if (actorId == null || text == null || text.isBlank() || text.length() > 2500) {
+            throw new IllegalArgumentException("Authenticated text assessment requires 1 to 2500 characters");
+        }
+        DecisionResult category = model.decide(DecisionTask.SERVICE_CATEGORY, Map.of("content", text));
+        DecisionResult moderation = model.decide(DecisionTask.MODERATION, Map.of("content", text));
+        List<String> contacts = CONTACT.matcher(text).results().map(result -> result.group()).distinct().toList();
+        List<String> reasons = new ArrayList<>();
+        if (!contacts.isEmpty()) reasons.add("EXTERNAL_CONTACT_DETECTED");
+        for (String hazard : List.of("external_payment", "spam", "abuse")) {
+            Double probability = moderation.probability(hazard);
+            if (probability != null && probability >= 0.5) reasons.add("MODEL_SUGGESTS_" + hazard.toUpperCase(Locale.ROOT));
+        }
+        if (!moderation.available()) reasons.add("MODEL_UNAVAILABLE");
+        String status = reasons.isEmpty() ? "NO_RULE_SIGNAL" : "NEEDS_REVIEW";
+        AssessmentCase stored = persist ? cases.create("TEXT_MODERATION", null, actorId, status,
+                Map.of("content", text, "sourceType", "USER_SUPPLIED_TEXT", "contactMatches", contacts, "reasonCodes", reasons),
+                Map.of("category", category, "moderation", moderation)) : null;
+        return new Result(status, List.copyOf(reasons), contacts, category, moderation, stored, false, "TEXT_ONLY");
+    }
+}

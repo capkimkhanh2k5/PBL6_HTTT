@@ -1,0 +1,125 @@
+sequenceDiagram
+    autonumber
+    %% ==========================================
+    %% 9. CONTENT ASSESSMENT AND TRANSACTION RISK FLOW
+    %% Content Moderation, Risk Velocity Rules & Admin Queue Resolution
+    %% ==========================================
+
+    actor User as 👤 Người Dùng / Vendor
+    actor Admin as 👨‍💼 Quản Trị Viên (Admin)
+    participant AssessCtrl as 🎮 AiAssessmentController
+    participant AdminCtrl as 🎮 AdminAiController
+    participant AssessUC as ⚙️ AssessTextUseCase
+    participant RiskUC as ⚙️ AnalyzeTransactionRiskUseCase
+    participant OrderPort as 📊 TransactionRiskReadPort
+    participant Quyet as ⚡ Quyet Small Worker (/decide)
+    participant CaseStore as 💾 AssessmentCaseStorePort (Postgres V21)
+
+    %% ----------------------------------------------------
+    %% PHẦN 1: KIỂM DUYỆT NỘI DUNG VĂN BẢN (CONTENT MODERATION)
+    %% ----------------------------------------------------
+    rect rgb(240, 255, 240)
+        Note over User, CaseStore: PHẦN 1: KIỂM DUYỆT NỘI DUNG VĂN BẢN (POST /api/ai/content-assessments)
+        User->>AssessCtrl: POST /api/ai/content-assessments<br/>Body: { "text": "Tour Cù Lao Chàm, liên hệ zalo 0905123456 chuyển cọc trước..." }
+        activate AssessCtrl
+
+        AssessCtrl->>AssessUC: execute(actorId, text, persist: true)
+        activate AssessUC
+
+        Note over AssessUC: 1. Kiểm tra độ dài: 1 <= text.length <= 2500 ký tự<br/>2. Quét biểu thức chính quy (Regex Scan):<br/>• Số điện thoại VN ((+84|0)...)<br/>• Đường dẫn URL ngoài (http://, https://)<br/>• Địa chỉ Email cá nhân
+
+        par Gọi song song Quyet Worker
+            AssessUC->>Quyet: POST /decide (Task: SERVICE_CATEGORY, content: text)
+            Quyet-->>AssessUC: Category Result (SUP, KAYAK, DIVING, BOAT...)
+        and
+            AssessUC->>Quyet: POST /decide (Task: MODERATION, content: text)
+            Quyet-->>AssessUC: Moderation Result (xác suất external_payment, spam, abuse)
+        end
+
+        Note over AssessUC: Đánh giá tín hiệu rủi ro (Rule Engine):<br/>• Nếu tìm thấy số ĐT / link ngoài -> EXTERNAL_CONTACT_DETECTED<br/>• Nếu xác suất hazard >= 0.5 -> MODEL_SUGGESTS_{HAZARD}<br/>• Nếu Quyet offline -> MODEL_UNAVAILABLE
+
+        alt Có tín hiệu vi phạm (reasons không rỗng)
+            Note over AssessUC: Trạng thái: NEEDS_REVIEW
+        else Không phát hiện vi phạm
+            Note over AssessUC: Trạng thái: NO_RULE_SIGNAL
+        end
+
+        AssessUC->>CaseStore: create("TEXT_MODERATION", targetId=null, actorId, status, evidence, models)
+        activate CaseStore
+        CaseStore->>CaseStore: Ghi bản ghi vào ai_assessment_cases (Flyway V21)<br/>(evidenceType: TEXT_ONLY, publicationAuthorized: false)
+        CaseStore-->>AssessUC: AssessmentCase (id, status, evidence snapshot)
+        deactivate CaseStore
+
+        AssessUC-->>AssessCtrl: Result (status, reasonCodes, contactMatches, publicationAuthorized: false)
+        deactivate AssessUC
+        AssessCtrl-->>User: HTTP 200 OK (Chi tiết đánh giá & khuyến nghị kiểm duyệt)
+        deactivate AssessCtrl
+    end
+
+    %% ----------------------------------------------------
+    %% PHẦN 2: PHÂN TÍCH RỦI RO GIAO DỊCH (TRANSACTION RISK)
+    %% ----------------------------------------------------
+    rect rgb(255, 240, 245)
+        Note over Admin, CaseStore: PHẦN 2: PHÂN TÍCH RỦI RO GIAO DỊCH ADMIN (POST /api/admin/ai/risk-cases)
+        Admin->>AdminCtrl: POST /api/admin/ai/risk-cases<br/>Body: { "orderId": "uuid-order", "complaint": "Khách khiếu nại bị trừ tiền nhiều lần" }
+        activate AdminCtrl
+
+        AdminCtrl->>RiskUC: execute(adminId, orderId, complaint)
+        activate RiskUC
+
+        RiskUC->>OrderPort: read(orderId)
+        activate OrderPort
+        OrderPort-->>RiskUC: ObservedFacts (failedPayments24h, orders1h, refundRequests7d, paymentStatus)
+        deactivate OrderPort
+
+        Note over RiskUC: Kiểm tra ngưỡng quy tắc Velocity 3/5/3 (Rule-based Signals):<br/>• failedPayments24h >= 3 -> THREE_FAILED_PAYMENTS_IN_24H<br/>• orders1h >= 5 -> FIVE_ORDERS_IN_1H<br/>• refundRequests7d >= 3 -> THREE_REFUND_REQUESTS_IN_7D
+
+        RiskUC->>Quyet: POST /decide (Task: RISK, risk_signals, complaint, payment_status)
+        activate Quyet
+        Quyet-->>RiskUC: DecisionResult (probability "needs_review")
+        deactivate Quyet
+
+        alt signals không rỗng HOẶC probability >= 0.5 HOẶC Quyet offline
+            Note over RiskUC: Gán trạng thái: NEEDS_REVIEW
+        else An toàn
+            Note over RiskUC: Gán trạng thái: NO_RULE_SIGNAL
+        end
+
+        RiskUC->>CaseStore: create("TRANSACTION_RISK", orderId, adminId, status, evidence, models)
+        activate CaseStore
+        CaseStore->>CaseStore: Lưu case vào bảng ai_assessment_cases (V21)
+        CaseStore-->>RiskUC: AssessmentCase
+        deactivate CaseStore
+
+        RiskUC-->>AdminCtrl: AssessmentCase
+        deactivate RiskUC
+        AdminCtrl-->>Admin: HTTP 200 OK (Hồ sơ ca rủi ro đã tạo kèm tín hiệu hành vi)
+        deactivate AdminCtrl
+    end
+
+    %% ----------------------------------------------------
+    %% PHẦN 3: HÀNG ĐỢI XÉT DUYỆT & XỬ LÝ (QUEUE & RESOLUTION)
+    %% ----------------------------------------------------
+    rect rgb(255, 255, 240)
+        Note over Admin, CaseStore: PHẦN 3: HÀNG ĐỢI XÉT DUYỆT VÀ XỬ LÝ CASE CỦA ADMIN
+        Admin->>AdminCtrl: GET /api/admin/ai/assessment-cases?status=NEEDS_REVIEW&limit=50
+        activate AdminCtrl
+        AdminCtrl->>CaseStore: list("NEEDS_REVIEW", 50)
+        activate CaseStore
+        CaseStore-->>AdminCtrl: Danh sách 50 AssessmentCase chờ duyệt
+        deactivate CaseStore
+        AdminCtrl-->>Admin: HTTP 200 OK (Danh sách hồ sơ cần thẩm định)
+        deactivate AdminCtrl
+
+        Admin->>AdminCtrl: POST /api/admin/ai/assessment-cases/{id}/resolve<br/>Body: { "resolution": "DISMISSED", "note": "Đã gọi điện đối chiếu khách hàng xác nhận" }
+        activate AdminCtrl
+
+        AdminCtrl->>CaseStore: resolve(id, adminId, resolution, note)
+        activate CaseStore
+        Note over CaseStore: Kiểm tra Optimistic Locking:<br/>• Case phải tồn tại và chưa bị resolve trước đó<br/>• Cập nhật status='RESOLVED'/'DISMISSED', resolved_by=adminId, resolution_note=note
+        CaseStore-->>AdminCtrl: AssessmentCase (Trạng thái đã cập nhật)
+        deactivate CaseStore
+
+        AdminCtrl-->>Admin: HTTP 200 OK (Xác nhận xử lý case thành công)
+        deactivate AdminCtrl
+    end

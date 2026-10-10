@@ -7,6 +7,7 @@ import java.util.List;
 
 @Data
 public class OpenMeteoWeatherResponse {
+    private Long sourceFetchedAtEpochMillis;
     private double latitude;
     private double longitude;
     private String timezone;

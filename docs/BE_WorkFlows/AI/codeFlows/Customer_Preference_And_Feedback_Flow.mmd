@@ -1,0 +1,85 @@
+sequenceDiagram
+    autonumber
+    %% ==========================================
+    %% 11. CUSTOMER PREFERENCES & RECOMMENDATION FEEDBACK FLOW
+    %% Quản lý sở thích cá nhân hóa (Consent), Vòng lặp phản hồi gợi ý & Tác động xếp hạng
+    %% ==========================================
+
+    actor Client as 📱/🌐 Khách Hàng (User)
+    participant Ctrl as 🎮 CustomerPreferenceController
+    participant PrefUC as ⚙️ CustomerPreferenceUseCase
+    participant DiscUC as 🔍 DiscoverServicesUseCase
+    participant DB as 🐘 PostgreSQL (ai_customer_preferences, ai_recommendations, ai_recommendation_feedbacks)
+
+    %% ----------------------------------------------------
+    %% PHẦN 1: QUẢN LÝ SỞ THÍCH & ĐỒNG THUẬN (CONSENT MANAGEMENT)
+    %% ----------------------------------------------------
+    rect rgb(240, 248, 255)
+        Note over Client, DB: PHẦN 1: CẤU HÌNH SỞ THÍCH CÁ NHÂN & ĐỒNG THUẬN (CONSENT)
+        Client->>Ctrl: GET /api/ai/preferences
+        activate Ctrl
+        Ctrl->>PrefUC: getPreferences(userId)
+        activate PrefUC
+        PrefUC->>DB: Truy vấn bảng ai_customer_preferences (V24)
+        DB-->>PrefUC: PreferencesEntity (enabled: true, interests, exclusions, version: 1)
+        PrefUC-->>Ctrl: PreferencesDto
+        deactivate PrefUC
+        Ctrl-->>Client: HTTP 200 OK (Cấu hình sở thích hiện tại)
+        deactivate Ctrl
+
+        Client->>Ctrl: PUT /api/ai/preferences<br/>Body: { "enabled": true, "interests": ["lặn biển", "chèo sup"], "exclusions": ["cano tốc độ cao"], "expectedVersion": 1 }
+        activate Ctrl
+        Ctrl->>PrefUC: updatePreferences(userId, updateRequest)
+        activate PrefUC
+        Note over PrefUC: Kiểm soát đồng thời (Optimistic Locking):<br/>Đối chiếu request.expectedVersion == current.version (Nếu lệch -> 409 Conflict)
+        PrefUC->>DB: Cập nhật ai_customer_preferences (tăng version = 2)
+        PrefUC-->>Ctrl: PreferencesDto (version: 2)
+        deactivate PrefUC
+        Ctrl-->>Client: HTTP 200 OK (Đã lưu tùy chọn cá nhân hóa)
+        deactivate Ctrl
+    end
+
+    %% ----------------------------------------------------
+    %% PHẦN 2: THU THẬP PHẢN HỒI GỢI Ý (RECOMMENDATION FEEDBACK LOOP)
+    %% ----------------------------------------------------
+    rect rgb(255, 250, 240)
+        Note over Client, DB: PHẦN 2: VÒNG LẶP THU THẬP PHẢN HỒI GỢI Ý (FEEDBACK)
+        Client->>Ctrl: POST /api/ai/recommendations/{recommendationId}/feedback<br/>Headers: Idempotency-Key: "fb_uuid"<br/>Body: { "serviceId": "uuid-service", "action": "POSITIVE" }
+        activate Ctrl
+
+        Ctrl->>PrefUC: recordFeedback(userId, recommendationId, serviceId, action, idempotencyKey)
+        activate PrefUC
+
+        Note over PrefUC: Xác thực tính toàn vẹn 3 chiều:<br/>1. recommendationId phải do chính User tạo ra trong 24 giờ qua<br/>2. serviceId phải thực sự nằm trong danh sách dịch vụ đã trả về<br/>3. Chống gửi trùng lặp nhờ Idempotency-Key
+
+        PrefUC->>DB: Lưu bản ghi vào bảng ai_recommendation_feedbacks (V24)<br/>(action: SHOWN, CLICK, POSITIVE, NEGATIVE)
+        PrefUC-->>Ctrl: FeedbackResult(status: "RECORDED")
+        deactivate PrefUC
+        Ctrl-->>Client: HTTP 200 OK (Phản hồi gợi ý đã được ghi nhận)
+        deactivate Ctrl
+    end
+
+    %% ----------------------------------------------------
+    %% PHẦN 3: TÁC ĐỘNG CÁ NHÂN HÓA LÊN BỘ LỌC VÀ XẾP HẠNG
+    %% ----------------------------------------------------
+    rect rgb(240, 255, 240)
+        Note over Client, DB: PHẦN 3: TÁC ĐỘNG LÊN LẦN TÌM KIẾM / ĐỀ XUẤT KẾ TIẾP
+        Client->>DiscUC: POST /api/ai/recommendations<br/>Body: { "query": "Gợi ý tour biển cuối tuần", "useSavedPreferences": true }
+        activate DiscUC
+
+        DiscUC->>DB: Đọc consent và danh sách tín hiệu (Signals) của User
+        activate DB
+        DB-->>DiscUC: Signals (interests, wishlist, recentlyViewed, positiveServices, negativeServices, exclusions)
+        deactivate DB
+
+        loop Duyệt từng dịch vụ ứng viên trong Catalog
+            alt Dịch vụ nằm trong danh sách exclusions
+                Note over DiscUC: LOẠI BỎ HOÀN TOÀN KHỎI KẾT QUẢ
+            else Dịch vụ hợp lệ
+                Note over DiscUC: Điều chỉnh điểm xếp hạng cá nhân hóa (Baseline):<br/>• Khớp từ khóa sở thích: +0.5 điểm / từ khóa<br/>• Có trong danh sách Wishlist: +0.35 điểm<br/>• Đã xem gần đây (Recently Viewed): +0.1 điểm<br/>• Đã đánh giá POSITIVE trong quá khứ: +0.25 điểm<br/>• Bị đánh giá NEGATIVE trong quá khứ: -0.5 điểm (Hạ xếp hạng)
+            end
+        end
+
+        DiscUC-->>Client: HTTP 200 OK (Danh sách gợi ý chuẩn hóa riêng biệt theo hành vi của khách hàng)
+        deactivate DiscUC
+    end

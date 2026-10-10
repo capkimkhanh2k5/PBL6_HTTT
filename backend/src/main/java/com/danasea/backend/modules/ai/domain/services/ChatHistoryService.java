@@ -1,6 +1,7 @@
 package com.danasea.backend.modules.ai.domain.services;
 
 import com.danasea.backend.modules.ai.domain.models.AiMessageRole;
+import com.danasea.backend.modules.ai.domain.exceptions.AiStateConflictException;
 import com.danasea.backend.modules.ai.infrastructure.persistence.entities.AiConversationJpaEntity;
 import com.danasea.backend.modules.ai.infrastructure.persistence.entities.AiMessageJpaEntity;
 import com.danasea.backend.modules.ai.infrastructure.persistence.repositories.JpaAiConversationRepository;
@@ -72,6 +73,50 @@ public class ChatHistoryService {
                 conversationId,
                 PageRequest.of(0, limit, Sort.by("createdAt").descending())
         );
+    }
+
+    @Transactional(readOnly = true)
+    public Optional<String> getStructuredContext(UUID conversationId) {
+        return conversationRepository.findById(conversationId)
+                .map(AiConversationJpaEntity::getStructuredContext);
+    }
+
+    @Transactional
+    public UUID beginProcessing(UUID conversationId) {
+        var conversation = conversationRepository.findForUpdate(conversationId).orElseThrow();
+        if (conversation.getProcessingUntil() != null && conversation.getProcessingUntil().isAfter(OffsetDateTime.now()))
+            throw new AiStateConflictException("This conversation is already processing another message");
+        UUID token = UUID.randomUUID();
+        conversation.setProcessingToken(token); conversation.setProcessingUntil(OffsetDateTime.now().plusMinutes(2));
+        conversationRepository.save(conversation);
+        return token;
+    }
+
+    @Transactional
+    public void finishProcessing(UUID conversationId, UUID token) {
+        if (token == null) return;
+        conversationRepository.findForUpdate(conversationId).ifPresent(conversation -> {
+            if (token.equals(conversation.getProcessingToken())) {
+                conversation.setProcessingToken(null); conversation.setProcessingUntil(null);
+                conversationRepository.save(conversation);
+            }
+        });
+    }
+
+    @Transactional
+    public void saveStructuredContext(UUID conversationId, String json) {
+        conversationRepository.findById(conversationId).ifPresent(conversation -> {
+            conversation.setStructuredContext(json);
+            conversationRepository.save(conversation);
+        });
+    }
+
+    @Transactional
+    public void saveResponsePayload(UUID messageId, String json) {
+        if (messageId != null) messageRepository.findById(messageId).ifPresent(message -> {
+            message.setResponsePayload(json);
+            messageRepository.save(message);
+        });
     }
 
     @Transactional(readOnly = true)

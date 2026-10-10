@@ -195,6 +195,15 @@ public class EmpiricalAdversarialChallengerTest {
         @Test
         @DisplayName("Adv-1F: Legacy alias 'get_cancellation_policy' also grants policy authorization")
         void testPolicyAllowed_WhenLegacyAliasCalled() {
+            ToolExecutor alias = mock(ToolExecutor.class);
+            when(alias.getName()).thenReturn("get_cancellation_policy");
+            when(alias.execute(anyString())).thenReturn("""
+                    {"status":"AVAILABLE","policy":{"scope":"PLATFORM","source":"RefundPolicyEngine",
+                    "customerCancellation":[{"condition":"MORE_THAN_48_HOURS","percentage":100}],
+                    "applicability":"CHECK_OWNED_ORDER_CANCELLATION_PREVIEW"}}
+                    """);
+            chatUseCase = new ChatUseCase(llmClientPort, moderationPort, chatHistoryService,
+                    List.of(searchTool, policyTool, alias), objectMapper);
             LlmResponse toolCallResp = new LlmResponse();
             ToolCall tc = new ToolCall("tc-legacy-pol", "get_cancellation_policy", "{}");
             toolCallResp.setToolCalls(List.of(tc));

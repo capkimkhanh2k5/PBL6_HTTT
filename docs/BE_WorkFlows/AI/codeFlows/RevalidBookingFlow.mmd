@@ -1,0 +1,63 @@
+flowchart TD
+    %% ==========================================
+    %% 4. REVALIDATION BOOKING DECISION FLOWCHART
+    %% Cây quyết định phân nhánh Re-validation: Bền vững V25, Khóa phân tán & Compensation
+    %% ==========================================
+
+    Start(["Khách gửi yêu cầu POST /conversations/:id/confirm"]) --> CheckOwner{"Hội thoại thuộc về<br/>User hiện tại?"}
+
+    CheckOwner -- Không tìm thấy --> Resp404["HTTP 404 Not Found"]
+    CheckOwner -- Thuộc User khác --> Resp403_Conv["HTTP 403 Forbidden<br/>AccessDeniedException"]
+    CheckOwner -- Hợp lệ --> CheckDurable{"Đã có Outcome bền vững<br/>trong PostgreSQL V25?"}
+
+    CheckDurable -- Đã có sẵn --> ReplayDurable["Replay Outcome đã lưu<br/>HTTP 200 OK: bookingId, holdExpiresAt"]
+    CheckDurable -- Chưa có --> TryLock{"Lấy khóa phân tán<br/>Redis Processing Lock 30s?"}
+
+    TryLock -- Thất bại (Đang xử lý) --> Resp409["HTTP 409 Conflict<br/>Đang có tiến trình xử lý cardId"]
+    TryLock -- Thành công --> FindCard{"Tìm ConfirmationCard<br/>trong Redis?"}
+
+    FindCard -- Không thấy / Hết hạn --> Resp400_Expire["HTTP 400 Bad Request<br/>Thẻ không tồn tại hoặc đã hết hạn"]
+    FindCard -- Tìm thấy --> CheckBinding{"Ràng buộc 3 bên:<br/>card.convId == id &&<br/>card.ownerId == userId?"}
+
+    CheckBinding -- Sai lệch --> Resp403_Card["HTTP 403 Forbidden<br/>Card Hijacking Detected"]
+    CheckBinding -- Khớp --> CheckPending{"Trạng thái Card<br/>== PENDING?"}
+
+    CheckPending -- Không phải --> RespError_State["Lỗi trạng thái<br/>Thẻ không ở trạng thái PENDING"]
+    CheckPending -- PENDING --> CheckPackage{"Loại giá là<br/>PER_PACKAGE?"}
+
+    CheckPackage -- Đúng --> ValidGrouping{"Phân nhóm gói riêng<br/>participantsPerPackage<br/>hợp lệ?"}
+    ValidGrouping -- Sai --> CancelRefresh1["Hủy Card cũ -> Trả về<br/>status: refresh_required"]
+    ValidGrouping -- Hợp lệ --> FetchLive["Đọc dữ liệu thời gian thực<br/>Option & Slot từ Database"]
+
+    CheckPackage -- Sai (PER_PERSON) --> FetchLive
+
+    FetchLive --> CheckHasSlots{"Còn bất kỳ ca nào<br/>khả dụng trong tuần?"}
+    CheckHasSlots -- Hết hoàn toàn --> CancelOutOfStock["Hủy Card cũ -> Đánh dấu CANCELLED<br/>Trả về status: out_of_stock"]
+    CheckHasSlots -- Còn ca trống --> CheckChanges{"Giá đổi HOẶC<br/>Ca yêu cầu bị hết chỗ?"}
+
+    CheckChanges -- Có biến động --> CheckRetry{"Số lần thử lại<br/>retryCount >= 2?"}
+    CheckRetry -- ">= 2 (Quá 2 lần)" --> CancelTooMany["Hủy Card cũ -> CANCELLED<br/>Trả về status: error<br/>Biến động quá nhiều lần"]
+    CheckRetry -- "< 2 (Còn lượt)" --> CreateAltCard["Tăng retryCount Redis TTL 15m<br/>Hủy Card cũ -> Tạo Alternative Card mới<br/>Trả về status: alternative_needed"]
+
+    CheckChanges -- Dữ liệu khớp 100% --> CreateHold["Gọi CreateBookingHoldUseCase<br/>1. Khóa nguyên tử Redis Lua<br/>2. Tạo Booking HOLD 15m trong DB"]
+
+    CreateHold --> CheckPriceDiscrepancy{"Giá giữ chỗ khớp<br/>giá niêm yết trên Card?"}
+    CheckPriceDiscrepancy -- Lệch giá --> CompensatePrice["Bù trừ: CancelBookingHoldUseCase<br/>Hủy Card cũ -> status: refresh_required"]
+    CheckPriceDiscrepancy -- Khớp giá --> SaveOutcome["Lưu Outcome bền vững vào PostgreSQL V25<br/>Đánh dấu Card CONFIRMED trên Redis"]
+
+    SaveOutcome --> CheckPersistCrash{"Gặp lỗi khi lưu<br/>Outcome bền vững?"}
+    CheckPersistCrash -- Có lỗi hệ thống --> CompensateRollback["CƠ CHẾ BÙ TRỪ TỰ ĐỘNG:<br/>Gọi CancelBookingHoldUseCase<br/>Giải phóng tồn kho ngay lập tức"] --> Resp500["Ném ngoại lệ hệ thống"]
+    CheckPersistCrash -- Lưu thành công --> ReleaseLock["Giải phóng khóa phân tán Redis"]
+    ReleaseLock --> RespSuccess(["HTTP 200 OK<br/>status: success, bookingId, holdExpiresAt"])
+
+    classDef normal fill:#e1f5fe,stroke:#0288d1,stroke-width:2px;
+    classDef branch fill:#fff3e0,stroke:#f57c00,stroke-width:2px;
+    classDef success fill:#e8f5e9,stroke:#388e3c,stroke-width:2px;
+    classDef failure fill:#ffebee,stroke:#d32f2f,stroke-width:2px;
+    classDef compensate fill:#f3e5f5,stroke:#7b1fa2,stroke-width:2px;
+
+    class Start,FetchLive,CreateHold,SaveOutcome,ReleaseLock normal;
+    class CheckOwner,CheckDurable,TryLock,FindCard,CheckBinding,CheckPending,CheckPackage,ValidGrouping,CheckHasSlots,CheckChanges,CheckRetry,CheckPriceDiscrepancy,CheckPersistCrash branch;
+    class RespSuccess,ReplayDurable success;
+    class Resp404,Resp403_Conv,Resp409,Resp400_Expire,Resp403_Card,RespError_State,CancelRefresh1,CancelOutOfStock,CancelTooMany,Resp500 failure;
+    class CompensatePrice,CompensateRollback,CreateAltCard compensate;

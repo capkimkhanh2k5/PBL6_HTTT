@@ -20,7 +20,7 @@ import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.mock.web.MockHttpServletRequest;
 
 import java.util.Locale;
-import java.util.Map;
+import com.danasea.backend.modules.ai.presentation.dtos.ChatRequest;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -68,7 +68,7 @@ class AssistantControllerLocaleTest {
         request.setRemoteAddr("127.0.0.1");
 
         assertThrows(AiConversationLocaleMismatchException.class, () -> controller.chat(
-                Map.of("conversationId", conversationId.toString(), "message", "Hello"), request));
-        verify(chatUseCase, never()).processMessage(any(), any(), any());
+                new ChatRequest(conversationId, "Hello"), request));
+        verify(chatUseCase, never()).processMessage(any(), any(), any(), any());
     }
 }

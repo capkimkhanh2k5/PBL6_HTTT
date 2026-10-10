@@ -1,0 +1,16 @@
+{
+  "model_id": "chinhnc/Quyet-1.0-Small",
+  "revision": "233167bba5df61b5375a522bf8a042d8d2189379",
+  "model_dir": "/Users/capkimkhanh/.cache/danasea/quyet-small/models/233167bba5df61b5375a522bf8a042d8d2189379",
+  "verified_files": [
+    "LICENSE",
+    "NOTICE",
+    "README.md",
+    "model.safetensors",
+    "quyet_config.json",
+    "special_tokens_map.json",
+    "tokenizer.json",
+    "tokenizer_config.json"
+  ],
+  "weights_bytes": 1310455956
+}

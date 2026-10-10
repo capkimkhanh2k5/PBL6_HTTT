@@ -1,18 +1,25 @@
 package com.danasea.backend.modules.ai.application.tool;
 
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+
+import org.springframework.stereotype.Component;
+import org.springframework.beans.factory.annotation.Autowired;
+import com.danasea.backend.modules.service.application.api.AiCatalogReadApi;
+import com.danasea.backend.modules.ai.application.dtos.TravelRequest;
+import com.danasea.backend.shared.i18n.SupportedLanguage;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+
 import com.danasea.backend.modules.ai.domain.services.SanitizationService;
 import com.danasea.backend.modules.service.application.dtos.ServiceDetailResult;
 import com.danasea.backend.modules.service.application.usecases.GetPublicServiceDetailUseCase;
 import com.danasea.backend.modules.service.domain.exceptions.ServiceNotFoundException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Component;
 
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import lombok.RequiredArgsConstructor;
 
 @Component
 @RequiredArgsConstructor
@@ -21,6 +28,10 @@ public class GetServiceDetailTool implements ToolExecutor {
     private final GetPublicServiceDetailUseCase getPublicServiceDetailUseCase;
     private final SanitizationService sanitizationService;
     private final ObjectMapper objectMapper;
+    private AiCatalogReadApi catalog;
+
+    @Autowired
+    public void setCatalog(AiCatalogReadApi catalog) { this.catalog = catalog; }
 
     @Override
     public String getName() {
@@ -28,10 +39,35 @@ public class GetServiceDetailTool implements ToolExecutor {
     }
 
     @Override
-    public String execute(String argumentsJson) {
+    public String execute(String argumentsJson) { return execute(argumentsJson, null); }
+
+    @Override
+    public String execute(String argumentsJson, ToolExecutionContext executionContext) {
         try {
             UUID serviceId = parseServiceId(argumentsJson);
-            ServiceDetailResult detail = getPublicServiceDetailUseCase.execute(serviceId, null, null);
+            if (catalog != null) {
+                JsonNode args = objectMapper.readTree(argumentsJson);
+                ObjectNode supplied = args.get("criteria") instanceof ObjectNode criteria ? criteria : objectMapper.createObjectNode();
+                var context = objectMapper.treeToValue(supplied, TravelRequest.class).context();
+                SupportedLanguage language = executionContext == null || executionContext.language() == null
+                        ? SupportedLanguage.VI : executionContext.language();
+                var service = catalog.find(serviceId, new AiCatalogReadApi.Query(null, null, context.from(), context.to(),
+                        context.partySize(), null, null, null, 1, language));
+                Map<String, Object> result = new LinkedHashMap<>();
+                result.put("serviceId", service.id()); result.put("name", sanitize(service.name()));
+                result.put("description", sanitize(service.description())); result.put("address", sanitize(service.address()));
+                result.put("categoryId", service.categoryId()); result.put("categoryName", sanitize(service.categoryName()));
+                result.put("latitude", service.latitude()); result.put("longitude", service.longitude());
+                result.put("averageRating", service.averageRating()); result.put("reviewCount", service.reviewCount());
+                result.put("options", service.options()); result.put("priceBasis", "ACTIVE_OPTION_PARTY_TOTAL");
+                result.put("partySize", context.partySize()); result.put("from", context.from()); result.put("to", context.to());
+                result.put("defaultedFields", context.criteria().defaultedFields());
+                result.put("price", service.options().stream().map(AiCatalogReadApi.Option::partyTotal).min(java.math.BigDecimal::compareTo).orElse(null));
+                result.put("availableSlots", service.options().stream().flatMap(option -> option.slots().stream()).toList());
+                result.put("retrievedAt", java.time.Instant.now()); result.put("inventoryReserved", false);
+                return objectMapper.writeValueAsString(result);
+            }
+            ServiceDetailResult detail = getPublicServiceDetailUseCase.readOnlySnapshot(serviceId);
 
             Map<String, Object> result = new LinkedHashMap<>();
             result.put("serviceId", detail.getId());
@@ -48,6 +84,13 @@ public class GetServiceDetailTool implements ToolExecutor {
             result.put("categoryName", sanitize(detail.getCategoryName()));
             result.put("imageUrls", sanitize(detail.getImageUrls()));
             result.put("availableSlots", sanitize(detail.getAvailableSlots()));
+            result.put("options", detail.getOptions() == null ? List.of() : detail.getOptions().stream().map(option -> {
+                Map<String, Object> value = new LinkedHashMap<>();
+                value.put("id", option.id()); value.put("name", sanitize(option.name()));
+                value.put("pricingUnit", option.pricingUnit()); value.put("unitPrice", option.price());
+                value.put("maxPaxPerPackage", option.maxPaxPerPackage()); value.put("benefits", sanitize(option.benefits()));
+                return value;
+            }).toList());
             return objectMapper.writeValueAsString(result);
         } catch (IllegalArgumentException exception) {
             return error("INVALID_ARGUMENTS", exception.getMessage());

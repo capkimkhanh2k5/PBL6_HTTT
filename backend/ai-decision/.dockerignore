@@ -1,0 +1,13 @@
+__pycache__/
+**/__pycache__/
+*.py[cod]
+.ruff_cache/
+.mypy_cache/
+.env*
+tests/
+reports/
+docs/
+README.md
+scripts/*
+!scripts/run.sh
+config/quyet-small.lock.txt

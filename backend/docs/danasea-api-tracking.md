@@ -460,6 +460,44 @@ Hai item phải nhận hai đơn vị khác nhau và tính giá hai gói. Nhóm 
 - [x] GET /api/assistant/conversations/{id}
 - [x] GET /api/assistant/conversations/{id}/history
 
+### AI workflow, assessment, preferences and support — API
+- [x] GET /api/admin/ai/assessment-cases
+- [x] GET /api/admin/support/requests
+- [x] GET /api/admin/support/requests/{id}
+- [x] GET /api/ai/itineraries
+- [x] GET /api/ai/itineraries/page
+- [x] GET /api/ai/itineraries/{id}
+- [x] GET /api/ai/itineraries/{id}/proposals
+- [x] GET /api/ai/itineraries/{id}/revisions
+- [x] GET /api/ai/preferences
+- [x] GET /api/ai/review-summaries/{serviceId}
+- [x] GET /api/ai/support/requests
+- [x] GET /api/ai/support/requests/{id}
+- [x] POST /api/admin/ai/assessment-cases/{id}/resolve
+- [x] POST /api/admin/ai/risk-cases
+- [x] POST /api/admin/support/requests/{id}/handle
+- [x] POST /api/ai/classifications/service
+- [x] POST /api/ai/content-assessments
+- [x] POST /api/ai/itineraries
+- [x] POST /api/ai/itineraries/preview
+- [x] POST /api/ai/itineraries/previews/{previewId}/save
+- [x] POST /api/ai/itineraries/{id}/accept
+- [x] POST /api/ai/itineraries/{id}/archive
+- [x] POST /api/ai/itineraries/{id}/proposals/{proposalId}/accept
+- [x] POST /api/ai/itineraries/{id}/proposals/{proposalId}/reject
+- [x] POST /api/ai/itineraries/{id}/replan
+- [x] POST /api/ai/nearby
+- [x] POST /api/ai/recommendations
+- [x] POST /api/ai/recommendations/{id}/feedback
+- [x] POST /api/ai/search
+- [x] POST /api/ai/services/compare
+- [x] POST /api/ai/support
+- [x] POST /api/ai/support/requests
+- [x] POST /api/ai/support/requests/preview
+- [x] POST /api/ai/support/requests/{id}/cancel
+- [x] POST /api/ai/weather
+- [x] PUT /api/ai/preferences
+
 ### AI — Việc cần hoàn thiện
 - [x] Kiểm tra owner ở API đọc hội thoại và lịch sử; sai owner trả 403, UUID không tồn tại trả 404
 - [x] Ràng buộc owner, conversationId và confirmation card trước khi tạo hold; chặn ghép card của hội thoại khác

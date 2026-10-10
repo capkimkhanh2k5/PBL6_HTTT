@@ -1,7 +1,20 @@
 package com.danasea.backend.modules.ai.application.tool;
 
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
 import com.danasea.backend.modules.ai.application.port.ConfirmationCardStorePort;
 import com.danasea.backend.modules.ai.domain.models.ConfirmationCard;
+import com.danasea.backend.modules.ai.domain.models.TravelContext;
+import com.danasea.backend.modules.ai.domain.models.ParticipantGrouping;
+import com.danasea.backend.modules.service.application.api.AiCatalogReadApi;
 import com.danasea.backend.modules.service.application.dtos.ServiceDetailResult;
 import com.danasea.backend.modules.service.application.usecases.GetPublicServiceDetailUseCase;
 import com.danasea.backend.modules.service.domain.exceptions.ServiceNotFoundException;
@@ -10,14 +23,6 @@ import com.danasea.backend.shared.i18n.LocalizedMessageService;
 import com.danasea.backend.shared.i18n.SupportedLanguage;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
-import java.math.BigDecimal;
-import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
 
 @Component
 public class RequestBookingConfirmationTool implements ConversationAwareToolExecutor {
@@ -29,6 +34,7 @@ public class RequestBookingConfirmationTool implements ConversationAwareToolExec
     private final ConfirmationCardStorePort cardStorePort;
     private final GetPublicServiceDetailUseCase serviceDetailUseCase;
     private final ServiceAvailabilityPort serviceAvailabilityPort;
+    private final AiCatalogReadApi catalog;
     private LocalizedMessageService messages = LocalizedMessageService.standalone();
 
     @Autowired
@@ -40,11 +46,18 @@ public class RequestBookingConfirmationTool implements ConversationAwareToolExec
     public RequestBookingConfirmationTool(ObjectMapper objectMapper,
                                           ConfirmationCardStorePort cardStorePort,
                                           GetPublicServiceDetailUseCase serviceDetailUseCase,
-                                          ServiceAvailabilityPort serviceAvailabilityPort) {
+                                          ServiceAvailabilityPort serviceAvailabilityPort,
+                                          AiCatalogReadApi catalog) {
         this.objectMapper = objectMapper;
         this.cardStorePort = cardStorePort;
         this.serviceDetailUseCase = serviceDetailUseCase;
         this.serviceAvailabilityPort = serviceAvailabilityPort;
+        this.catalog = catalog;
+    }
+
+    public RequestBookingConfirmationTool(ObjectMapper mapper, ConfirmationCardStorePort store,
+                                          GetPublicServiceDetailUseCase details, ServiceAvailabilityPort slots) {
+        this(mapper, store, details, slots, null);
     }
 
     public RequestBookingConfirmationTool(ObjectMapper objectMapper,
@@ -76,17 +89,18 @@ public class RequestBookingConfirmationTool implements ConversationAwareToolExec
         SupportedLanguage language = context == null || context.language() == null
                 ? SupportedLanguage.VI
                 : context.language();
-        return executeInternal(argumentsJson, context == null ? null : context.conversationId(), language);
+        return executeInternal(argumentsJson, context == null ? null : context.conversationId(), language,
+                context == null ? null : context.userId());
     }
 
     @Override
     public String execute(String argumentsJson, UUID conversationId) {
-        return executeInternal(argumentsJson, conversationId, SupportedLanguage.VI);
+        return executeInternal(argumentsJson, conversationId, SupportedLanguage.VI, null);
     }
 
-    private String executeInternal(String argumentsJson, UUID conversationId, SupportedLanguage language) {
-        if (conversationId == null || cardStorePort == null || serviceDetailUseCase == null
-                || serviceAvailabilityPort == null) {
+    private String executeInternal(String argumentsJson, UUID conversationId, SupportedLanguage language, UUID ownerId) {
+        if (conversationId == null || cardStorePort == null || catalog == null && (serviceDetailUseCase == null
+                || serviceAvailabilityPort == null)) {
             return error("CONFIRMATION_UNAVAILABLE", "Booking confirmation is temporarily unavailable");
         }
 
@@ -99,6 +113,7 @@ public class RequestBookingConfirmationTool implements ConversationAwareToolExec
             UUID serviceId = parseServiceId(arguments);
             String date = requiredText(arguments, "date", 100);
             int participants = requiredParticipants(arguments);
+            if (catalog != null) return nativeConfirmation(arguments, conversationId, language, serviceId, participants, date, ownerId);
             ServiceDetailResult service = serviceDetailUseCase.execute(serviceId, null, null);
             List<String> availableSlots = service.getAvailableSlots() == null ? List.of() : service.getAvailableSlots();
             if (!availableSlots.contains(date)) {
@@ -123,6 +138,7 @@ public class RequestBookingConfirmationTool implements ConversationAwareToolExec
             ConfirmationCard card = ConfirmationCard.builder()
                     .id(UUID.randomUUID().toString())
                     .conversationId(conversationId)
+                    .ownerId(ownerId)
                     .serviceId(serviceId)
                     .slotId(slotId)
                     .price(price)
@@ -151,6 +167,41 @@ public class RequestBookingConfirmationTool implements ConversationAwareToolExec
         } catch (Exception exception) {
             return error("CONFIRMATION_UNAVAILABLE", "Booking confirmation is temporarily unavailable");
         }
+    }
+
+    private String nativeConfirmation(JsonNode args, UUID conversationId, SupportedLanguage language,
+                                      UUID serviceId, int participants, String requestedDate, UUID ownerId) throws Exception {
+        if (!args.hasNonNull("option_id") || !args.hasNonNull("slot_id")) {
+            return error("OPTION_AND_SLOT_REQUIRED", "Choose an active option and a current slot before requesting confirmation");
+        }
+        if (participants > 50) throw new IllegalArgumentException("participants must be between 1 and 50");
+        UUID optionId = UUID.fromString(requiredText(args, "option_id", 36));
+        UUID slotId = UUID.fromString(requiredText(args, "slot_id", 36));
+        if (requestedDate.length() < 10) throw new IllegalArgumentException("date must contain an ISO travel date");
+        LocalDate from = LocalDate.parse(requestedDate.substring(0, 10));
+        if (from.isBefore(LocalDate.now(TravelContext.ZONE))) throw new IllegalArgumentException("date cannot be in the past");
+        var service = catalog.find(serviceId, new AiCatalogReadApi.Query(null, null, from, from, participants,
+                null, null, null, 1, language));
+        var option = service.options().stream().filter(item -> item.id().equals(optionId)).findFirst().orElse(null);
+        if (option == null) return error("OPTION_UNAVAILABLE", "The selected option is not active for this service");
+        var slot = option.slots().stream().filter(item -> item.id().equals(slotId)).findFirst().orElse(null);
+        if (slot == null) return error("SLOT_UNAVAILABLE", "The selected slot is not currently bookable for the party");
+        String canonicalDate = LocalDateTime.of(slot.date(), slot.start()).toString();
+        List<Integer> grouping = "PER_PACKAGE".equals(option.pricingUnit())
+                ? ParticipantGrouping.propose(participants, option.maxPaxPerPackage(), option.quantity()) : List.of();
+        ConfirmationCard card = ConfirmationCard.builder().id(UUID.randomUUID().toString()).conversationId(conversationId).ownerId(ownerId)
+                .serviceId(serviceId).optionId(optionId).slotId(slotId).participantsCount(participants)
+                .price(option.unitPrice()).quantity(option.quantity()).participantsPerPackage(grouping).date(canonicalDate)
+                .status(ConfirmationCard.STATUS_PENDING).createdAt(LocalDateTime.now()).locale(language.code()).build();
+        cardStorePort.save(card);
+        return objectMapper.writeValueAsString(Map.ofEntries(
+                Map.entry("status", STATUS_CONFIRMATION_PENDING), Map.entry("cardId", card.getId()),
+                Map.entry("serviceId", serviceId), Map.entry("optionId", optionId), Map.entry("slotId", slotId),
+                Map.entry("date", canonicalDate), Map.entry("participants", participants), Map.entry("quantity", option.quantity()),
+                Map.entry("participantsPerPackage", grouping), Map.entry("groupingRequiresConfirmation", !grouping.isEmpty()),
+                Map.entry("unitPrice", option.unitPrice()), Map.entry("price", option.unitPrice()),
+                Map.entry("partyTotal", option.partyTotal()), Map.entry("expiresInSeconds", 900),
+                Map.entry("message", messages.get("ai.booking.confirmation", language))));
     }
 
     private UUID parseServiceId(JsonNode arguments) {

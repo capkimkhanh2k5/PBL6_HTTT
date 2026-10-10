@@ -7,7 +7,7 @@
 **/dist/
 .github
 .vscode
-.postman 
+.postman
 .DS_Store
 .agents/
 .worktrees/
@@ -18,4 +18,8 @@ frontend/docs/*_files/
 frontend/docs/*.mp4
 frontend/docs/*.jpg
 frontend/docs/motionsites_prompts/
-frontend/public/images/*.mp4
+frontend/public/images/*.mp4
+private/
+__pycache__/
+*.py[cod]
+.ruff_cache/

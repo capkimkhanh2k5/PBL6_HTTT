@@ -1,0 +1,108 @@
+sequenceDiagram
+    autonumber
+    %% ==========================================
+    %% 1. AI CHAT OVERVIEW FLOW
+    %% Luồng tổng quan Chat Assistant: Budget Filter, Idempotency, Moderation, Tool Loop & Structured Artifacts
+    %% ==========================================
+
+    actor Client as 📱/🌐 Khách Hàng (Client)
+    participant Budget as ⏱️ AiExecutionBudgetFilter
+    participant Locale as 🌐 LocaleContextFilter
+    participant Ctrl as 🎮 AssistantController
+    participant Rate as ⚡ RedisRateLimiter
+    participant Idem as 📑 ChatIdempotencyService
+    participant Guard as 🛡️ GroqModerationClient (Prompt Guard)
+    participant ChatUC as ⚙️ ChatUseCase
+    participant History as 📜 ChatHistoryService
+    participant Groq as ☁️ GroqLlmClient (5 Keys Rotator)
+    participant ToolReg as 🧰 AIToolRegistry (15 Tools)
+    participant Mapper as 🎨 AssistantArtifactMapper
+    participant DB as 🐘 PostgreSQL (ai_chat_requests, ai_conversations, ai_messages)
+
+    Client->>Budget: POST /api/assistant/chat<br/>Headers: Accept-Language: vi, Idempotency-Key: "idem_123", X-Execution-Budget-Ms: 8000<br/>Body: { "conversationId": "uuid-conv", "message": "Tìm tour kayak ngày mai" }
+    activate Budget
+
+    Note over Budget: Thiết lập Execution Budget Deadline (Tối đa 8000ms)<br/>Kiểm tra giới hạn 8 requests AI song song/JVM (Quá tải -> HTTP 429)
+
+    Budget->>Locale: Chuyển tiếp Request
+    activate Locale
+    Note over Locale: Trích xuất header Accept-Language -> SupportedLanguage.VI
+
+    Locale->>Ctrl: invoke chat()
+    activate Ctrl
+
+    Note over Ctrl: Trích xuất SecurityContext (User ID) & TrustTier (VERIFIED/UNVERIFIED)
+
+    Ctrl->>Rate: isAllowed(userId, clientIp, tier)
+    activate Rate
+    alt Vượt định mức Token Bucket
+        Rate-->>Ctrl: false
+        Ctrl-->>Client: HTTP 429 Too Many Requests (RATE_LIMIT_EXCEEDED)
+    end
+    Rate-->>Ctrl: true (Cho phép)
+    deactivate Rate
+
+    Ctrl->>Idem: begin(userId, key, conversationId, message, language)
+    activate Idem
+    alt Trùng Idempotency-Key hoặc Hash câu hỏi đã xử lý
+        Idem-->>Ctrl: Claim(replay = true, cachedResponse)
+        Ctrl-->>Client: HTTP 200 OK (Trả lại kết quả đã cache, không tốn token LLM)
+    end
+    Idem-->>Ctrl: Claim(replay = false)
+    deactivate Idem
+
+    Ctrl->>History: getOrCreateConversation(convId, userId, language)
+    activate History
+    History->>DB: Lấy/Tạo mới Conversation
+    History-->>Ctrl: AiConversationEntity
+    deactivate History
+
+    Note over Ctrl: Kiểm tra ngôn ngữ hội thoại (Locale Guard):<br/>Nếu conversation.locale != request.language -> Ném AiConversationLocaleMismatchException (HTTP 400)
+
+    Ctrl->>Guard: isSafe(truncatedMessage max 1800 ký tự)
+    activate Guard
+    alt Phát hiện Prompt Injection / Tấn công Jailbreak
+        Guard-->>Ctrl: Safe = false (Mã độc / Vi phạm)
+        Ctrl-->>Client: HTTP 400 Bad Request (ai.moderation.blocked)
+    end
+    Guard-->>Ctrl: Safe = true
+    deactivate Guard
+
+    Ctrl->>ChatUC: processMessage(conversationId, message, language, userId)
+    activate ChatUC
+
+    ChatUC->>History: loadRecentMessages(conversationId)
+    ChatUC->>Groq: generateResponse(history, tools, language)
+    activate Groq
+
+    opt LLM yêu cầu gọi công cụ (Tool Call)
+        Groq-->>ChatUC: ToolCall (name, arguments)
+        ChatUC->>ToolReg: execute(toolCall, ToolExecutionContext)
+        activate ToolReg
+        ToolReg-->>ChatUC: ToolResult JSON
+        deactivate ToolReg
+        ChatUC->>Groq: generateResponse(history + tool_result, tools, language)
+    end
+
+    Groq-->>ChatUC: LlmResponse(content, toolCalls, responseStatus)
+    deactivate Groq
+
+    ChatUC->>Mapper: mapToArtifacts(toolCalls, language)
+    activate Mapper
+    Note over Mapper: Ánh xạ kết quả tool thành typed cards (AssistantArtifact):<br/>• BOOKING_CONFIRMATION_CARD<br/>• ITINERARY_PREVIEW<br/>• DISCOVERY_SUGGESTION<br/>• SERVICE_COMPARISON<br/>• REVIEW_HIGHLIGHT<br/>• CANONICAL_POLICY<br/>• SUPPORT_ACTION
+    Mapper-->>ChatUC: List<AssistantArtifact> (cards, sources, actions)
+    deactivate Mapper
+
+    ChatUC->>DB: Lưu AiMessage (User & Assistant) và AuditLog
+    ChatUC-->>Ctrl: Response(content, cards, sources, actions, requiredInputs, context)
+    deactivate ChatUC
+
+    opt Có Idempotency-Key
+        Ctrl->>Idem: complete(claim, responseBody)
+        Idem->>DB: Lưu ai_chat_requests (V22) với snapshot phản hồi
+    end
+
+    Ctrl-->>Client: HTTP 200 OK { status: "success", message, cards, sources, actions, generatedTextVerified: false }
+    deactivate Ctrl
+    deactivate Locale
+    deactivate Budget

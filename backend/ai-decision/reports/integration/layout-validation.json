@@ -1,0 +1,47 @@
+{
+  "validationDate": "2026-10-09",
+  "branch": "feat/AI",
+  "scope": "Quyet worker directory regrouping",
+  "unitTests": {
+    "passed": 7,
+    "failures": 0,
+    "skipped": 0
+  },
+  "realQuyetTasksPassed": [
+    "intent",
+    "service_category",
+    "review",
+    "moderation",
+    "relevance",
+    "complaint",
+    "risk"
+  ],
+  "modelRevision": "233167bba5df61b5375a522bf8a042d8d2189379",
+  "rubricVersion": "danasea-2026-10-08-v1",
+  "localWorkerHealth": "UP",
+  "shellLauncherFromOtherDirectoryPassed": true,
+  "diagnosticLauncherFromOtherDirectoryPassed": true,
+  "diagnosticSchemaValidRequests": 1,
+  "ruffCheckPassed": true,
+  "ruffFormatPassed": true,
+  "mypyPassed": true,
+  "mypyCommand": "mypy --ignore-missing-imports --follow-imports=skip app config scripts tests",
+  "pythonSourceFilesChecked": 9,
+  "banditMediumHighPassed": true,
+  "banditScope": [
+    "app",
+    "config",
+    "scripts"
+  ],
+  "syntaxJsonAndShellPassed": true,
+  "composeConfigPassed": true,
+  "dockerCopySourcesExist": true,
+  "dockerImageBuildRun": false,
+  "originalFixturesReportsLocksAndRubricsUnchanged": true,
+  "javaResourcesAndTestsUnchanged": true,
+  "javaFullSuiteRerun": false,
+  "jarBackendSmokeRerun": false,
+  "frontendMobileChanged": false,
+  "modelQualityEvaluation": false,
+  "stagedUserChangesPreserved": true
+}

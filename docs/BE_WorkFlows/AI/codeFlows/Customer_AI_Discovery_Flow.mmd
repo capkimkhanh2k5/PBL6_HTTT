@@ -1,0 +1,116 @@
+sequenceDiagram
+    autonumber
+    %% ==========================================
+    %% 7. CUSTOMER AI DISCOVERY FLOW
+    %% Smart Search, Recommendations & Nearby Discovery (Cá nhân hóa, Quét Catalog 10k, Quyet Scoring)
+    %% ==========================================
+
+    actor Client as 📱/🌐 Khách Hàng (Client)
+    participant Ctrl as 🎮 CustomerAiController
+    participant Parser as 🔍 TravelQueryParser
+    participant PrefApi as 👤 CustomerPreferenceReadApi
+    participant UC as ⚙️ DiscoverServicesUseCase
+    participant Reader as 🐘 AiCatalogReader (Postgres)
+    participant Quyet as ⚡ Quyet Small Worker (/decide)
+    participant Weather as ⛅ TravelWeatherPort (Weather Engine)
+    participant DB_Rec as 💾 ai_recommendations (Postgres V24)
+
+    Note over Client, Ctrl: Khách gửi yêu cầu: POST /api/ai/search, /recommendations, hoặc /nearby
+
+    Client->>Ctrl: POST /api/ai/{mode}<br/>Body: TravelRequest (query, partySize, totalBudget, from, to, lat, lon, radiusKm, offset...)
+    activate Ctrl
+
+    Note over Ctrl: Trích xuất SecurityContext (User ID) & LocaleContext (VI/EN)
+
+    Ctrl->>UC: execute(context, mode, language, userId)
+    activate UC
+
+    UC->>UC: context.validateCurrentDates()<br/>(Party 1-50, Budget 0-1 tỷ, Cửa sổ ngày <= 14 ngày, Không quá khứ)
+
+    opt Cần làm rõ (Thiếu số người trong câu gia đình hoặc criteria mơ hồ)
+        UC-->>Ctrl: Result(status: "NEEDS_INPUT", clarificationQuestions: [...])
+        Ctrl-->>Client: HTTP 200 { status: "NEEDS_INPUT", questions: [...] }
+    end
+
+    alt Chế độ NEARBY mà thiếu tọa độ (lat/lon == null)
+        UC-->>Ctrl: Result(status: "NEEDS_INPUT", requiredInputs: ["latitude", "longitude"])
+        Ctrl-->>Client: HTTP 200 { status: "NEEDS_INPUT", requiredInputs: [...] }
+    end
+
+    opt useSavedPreferences == true và userId != null
+        UC->>PrefApi: load(userId)
+        activate PrefApi
+        Note over PrefApi: Đọc sở thích đã đồng ý: interests, wishlist, recently viewed,<br/>positive/negative feedback, danh mục loại trừ
+        PrefApi-->>UC: Signals
+        deactivate PrefApi
+    end
+
+    UC->>Parser: activityKeyword, budget, perPersonBudget, excludedActivities
+    activate Parser
+    Parser-->>UC: Trả keyword, ngân sách parse (x partySize nếu per-person), exclusions
+    deactivate Parser
+
+    Note over UC, Reader: Quét Catalog thực tế (Giới hạn quét tối đa 10.000 items, ngân sách 8 giây)
+    UC->>Reader: searchPage(Query: keyword, categoryId, dates, budget, offset, limit=15)
+    activate Reader
+    Reader-->>UC: PageResult (Danh sách dịch vụ PUBLISHED kèm Options ACTIVE & Slots, nextOffset, limitations)
+    deactivate Reader
+
+    loop Duyệt qua từng PublishedService và Options
+        UC->>UC: Kiểm tra từ khóa loại trừ (Exclusions từ query + sở thích cá nhân)
+        UC->>UC: Lọc Option theo ngân sách: option.partyTotal <= effectiveBudget<br/>(PER_PERSON: đơn giá x khách | PER_PACKAGE: đơn giá x ceil(khách/maxPax))
+        UC->>UC: Lọc Slot theo khung giờ: dayStart <= slot.start && slot.end <= dayEnd
+
+        opt Nếu context.weatherSafeOnly == true (Kiểm tra thời tiết, tối đa 20 slot có cache)
+            UC->>Weather: assess(service, slot)
+            activate Weather
+            Weather-->>UC: Assessment (acceptable, status, provisional)
+            deactivate Weather
+            Note over UC: Nếu !acceptable -> Loại bỏ slot khỏi danh sách có thể đặt
+        end
+
+        opt Chế độ NEARBY hoặc có radiusKm
+            UC->>UC: Tính khoảng cách Haversine (lat1, lon1, lat2, lon2)<br/>Nếu distance > radiusKm -> Bỏ qua
+        end
+
+        UC->>UC: Tính Baseline Score = (Rating / 5.0) + Matching Interests + 1 / (1 + distance)<br/>+ Điểm cá nhân hóa (+0.35 wishlist, +0.25 positive, -0.5 negative)
+    end
+
+    opt Chế độ RECOMMENDATION và candidates > 0
+        Note over UC, Quyet: Chấm điểm tương quan (Relevance Scoring) cho TỐI ĐA 5 ứng viên hàng đầu
+        loop Duyệt tối đa 5 ứng viên (index 0..4) trong deadline 8 giây
+            UC->>Quyet: POST /decide (Task: RELEVANCE, payload: query, interests, service description)
+            activate Quyet
+            Quyet-->>UC: DecisionResult (score: relevance 0..3)
+            deactivate Quyet
+            Note over UC: Cộng dồn điểm: score += relevance / 3.0
+        end
+    end
+
+    opt query không rỗng (Phân loại ý định)
+        UC->>Quyet: POST /decide (Task: INTENT, payload: message=query)
+        activate Quyet
+        Quyet-->>UC: DecisionResult (intent: TOUR_SEARCH, BOOKING, COMPLAINT...)
+        deactivate Quyet
+    end
+
+    Note over UC: Sắp xếp xếp hạng (Ranking)
+    alt Chế độ NEARBY
+        UC->>UC: Sort: distanceKm ASC -> minimumPartyTotal ASC
+    else Chế độ SEARCH / RECOMMENDATION
+        UC->>UC: Sort: score DESC -> service.id ASC
+    end
+
+    UC->>UC: Giới hạn tối đa 15 kết quả (Cắt theo limit: 1-15, mặc định 10)
+
+    opt Chế độ RECOMMENDATION và userId != null
+        UC->>DB_Rec: recordRecommendation(userId, topServiceIds, contextFingerprint)
+        Note over DB_Rec: Lưu bản ghi ai_recommendations (V24) để tracking feedback sau này
+        DB_Rec-->>UC: recommendationId (UUID)
+    end
+
+    UC-->>Ctrl: Result(status: AVAILABLE / PARTIAL / NO_MATCHES, candidates, intent, nextOffset, limitations, recommendationId)
+    deactivate UC
+
+    Ctrl-->>Client: HTTP 200 OK { status, candidates, intent, nextOffset, limitations, recommendationId... }
+    deactivate Ctrl

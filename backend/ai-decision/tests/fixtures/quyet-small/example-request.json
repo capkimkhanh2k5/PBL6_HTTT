@@ -1,0 +1,29 @@
+{
+  "state": {
+    "message": "Tôi đang ở điểm tập trung, đơn đã thanh toán nhưng không có ai đến đón. Tôi cần nhân viên hỗ trợ ngay."
+  },
+  "questions": {
+    "department": {
+      "type": "choice",
+      "instructions": "Bộ phận nào cần xử lý yêu cầu trong message?",
+      "criteria": {
+        "customer_support": "Khách cần kiểm tra đơn hoặc hỗ trợ khi sử dụng dịch vụ.",
+        "service_discovery": "Khách muốn tìm dịch vụ mới.",
+        "other": "Không thuộc hai bộ phận trên."
+      }
+    },
+    "needs_human": {
+      "type": "noul",
+      "instructions": "Yêu cầu cần nhân viên hỗ trợ trực tiếp vì khách đang gặp sự cố khi sử dụng dịch vụ."
+    },
+    "urgency": {
+      "type": "score",
+      "instructions": "Chấm mức cần ưu tiên của yêu cầu hỗ trợ.",
+      "criteria": [
+        "Câu hỏi chung, không có sự cố.",
+        "Sự cố cần xử lý trước chuyến đi.",
+        "Khách đang gặp sự cố tại thời điểm sử dụng dịch vụ và cần hỗ trợ ngay."
+      ]
+    }
+  }
+}

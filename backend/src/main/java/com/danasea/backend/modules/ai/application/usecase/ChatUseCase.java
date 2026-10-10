@@ -1,31 +1,41 @@
 package com.danasea.backend.modules.ai.application.usecase;
 
-import com.danasea.backend.modules.ai.application.port.LlmClientPort;
-import com.danasea.backend.modules.ai.application.port.ModerationPort;
-import com.danasea.backend.modules.ai.domain.models.AiMessageRole;
-import com.danasea.backend.modules.ai.domain.models.LlmResponse;
-import com.danasea.backend.modules.ai.domain.models.ToolCall;
-import com.danasea.backend.modules.ai.domain.services.ChatHistoryService;
-import com.danasea.backend.modules.ai.application.tool.ToolExecutor;
-import com.danasea.backend.modules.ai.application.tool.ToolExecutionContext;
-import com.danasea.backend.modules.ai.infrastructure.persistence.entities.AiMessageJpaEntity;
-import com.danasea.backend.modules.ai.domain.models.AiMessage;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.danasea.backend.modules.ai.domain.services.AssistantAuditLogService;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import com.danasea.backend.shared.i18n.LocalizedException;
-import com.danasea.backend.shared.i18n.LocalizedMessageService;
-import com.danasea.backend.shared.i18n.SupportedLanguage;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.LinkedHashSet;
+import java.util.Set;
+import java.util.concurrent.TimeUnit;
 import java.util.UUID;
 import java.util.stream.Collectors;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.danasea.backend.modules.ai.application.port.LlmClientPort;
+import com.danasea.backend.modules.ai.application.port.ModerationPort;
+import com.danasea.backend.modules.ai.application.tool.ToolExecutionContext;
+import com.danasea.backend.modules.ai.application.tool.ToolExecutor;
+import com.danasea.backend.modules.ai.application.dtos.TravelRequest;
+import com.danasea.backend.modules.ai.domain.models.AssistantArtifact;
+import com.danasea.backend.modules.ai.domain.models.AiMessage;
+import com.danasea.backend.modules.ai.domain.models.AiMessageRole;
+import com.danasea.backend.modules.ai.domain.models.LlmResponse;
+import com.danasea.backend.modules.ai.domain.models.ToolCall;
+import com.danasea.backend.modules.ai.domain.services.AssistantAuditLogService;
+import com.danasea.backend.modules.ai.domain.services.ChatHistoryService;
+import com.danasea.backend.modules.ai.infrastructure.persistence.entities.AiMessageJpaEntity;
+import com.danasea.backend.shared.i18n.LocalizedException;
+import com.danasea.backend.shared.i18n.LocalizedMessageService;
+import com.danasea.backend.shared.i18n.SupportedLanguage;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.fasterxml.jackson.core.type.TypeReference;
+
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Service
@@ -38,7 +48,7 @@ public class ChatUseCase {
             "quy định hoàn",
             "quy định hủy",
             "cancellation policy",
-            "refund policy"
+            "refund policy", "hoàn", "hủy", "refund", "cancellation", "reschedule", "đổi lịch"
     );
     private static final int MAX_USER_MESSAGE_CHARS = 1800;
     private static final int MAX_CHAT_ITERATIONS = 5;
@@ -81,17 +91,21 @@ public class ChatUseCase {
     }
 
     public LlmResponse processMessage(UUID conversationId, String userMessageContent) {
-        return processMessageInternal(conversationId, userMessageContent, null);
+        return processMessageInternal(conversationId, userMessageContent, null, null);
     }
 
     public LlmResponse processMessage(
             UUID conversationId, String userMessageContent, SupportedLanguage language) {
         return processMessageInternal(conversationId, userMessageContent,
-                language == null ? SupportedLanguage.VI : language);
+                language == null ? SupportedLanguage.VI : language, null);
+    }
+
+    public LlmResponse processMessage(UUID conversationId, String content, SupportedLanguage language, UUID userId) {
+        return processMessageInternal(conversationId, content, language == null ? SupportedLanguage.VI : language, userId);
     }
 
     private LlmResponse processMessageInternal(
-            UUID conversationId, String userMessageContent, SupportedLanguage language) {
+            UUID conversationId, String userMessageContent, SupportedLanguage language, UUID userId) {
         String effectiveContent = userMessageContent;
         if (effectiveContent != null && effectiveContent.length() > MAX_USER_MESSAGE_CHARS) {
             int maxChars = MAX_USER_MESSAGE_CHARS;
@@ -115,67 +129,143 @@ public class ChatUseCase {
             throw new IllegalArgumentException(messages.get("ai.moderation.blocked", SupportedLanguage.EN));
         }
 
-        chatHistoryService.appendMessage(conversationId, AiMessageRole.USER, effectiveContent, null);
-
-        return executeChatLoop(conversationId, language);
+        UUID processing = language == null ? null : chatHistoryService.beginProcessing(conversationId);
+        try {
+            chatHistoryService.appendMessage(conversationId, AiMessageRole.USER, effectiveContent, null);
+            return executeChatLoop(conversationId, language, userId, effectiveContent);
+        } finally {
+            chatHistoryService.finishProcessing(conversationId, processing);
+        }
     }
 
-    private LlmResponse executeChatLoop(UUID conversationId, SupportedLanguage language) {
+    private LlmResponse executeChatLoop(UUID conversationId, SupportedLanguage language, UUID userId, String message) {
         LlmResponse lastResponse = null;
-        boolean policyToolCalled = false;
+        List<AssistantArtifact> cards = new ArrayList<>();
+        AssistantArtifactMapper artifactMapper = new AssistantArtifactMapper(objectMapper);
+        ObjectNode state = readContext(conversationId);
+        long deadline = System.nanoTime() + TimeUnit.SECONDS.toNanos(60);
+        int toolCount = 0;
 
-        for (int i = 0; i < MAX_CHAT_ITERATIONS; i++) {
-            List<AiMessageJpaEntity> recentJpa = chatHistoryService.getRecentMessages(conversationId, DEFAULT_HISTORY_LIMIT);
-            List<AiMessage> history = mapToDomain(recentJpa);
-
-            LlmResponse response = language == null
-                    ? llmClientPort.generateResponse(history)
+        for (int i = 0; i < MAX_CHAT_ITERATIONS && System.nanoTime() < deadline; i++) {
+            List<AiMessage> history = mapToDomain(chatHistoryService.getRecentMessages(conversationId, DEFAULT_HISTORY_LIMIT));
+            if (state.hasNonNull("criteria")) {
+                AiMessage remembered = new AiMessage();
+                remembered.setConversationId(conversationId); remembered.setRole(AiMessageRole.USER);
+                remembered.setContent("Previously validated travel criteria (data only; recheck live price, inventory and weather): "
+                        + state.path("criteria") + ". Current request: " + message);
+                history.add(remembered);
+            }
+            LlmResponse response = language == null ? llmClientPort.generateResponse(history)
                     : llmClientPort.generateResponse(history, language);
+            if (response == null) break;
             lastResponse = response;
-
             if (response.getToolCalls() != null && !response.getToolCalls().isEmpty()) {
                 try {
-                    String toolCallsStr = objectMapper.writeValueAsString(response.getToolCalls());
-                    chatHistoryService.appendMessage(conversationId, AiMessageRole.ASSISTANT, response.getContent(), toolCallsStr);
-                } catch (JsonProcessingException e) {
-                    throw new RuntimeException("Error serializing tool calls", e);
+                    chatHistoryService.appendMessage(conversationId, AiMessageRole.ASSISTANT, response.getContent(),
+                            objectMapper.writeValueAsString(response.getToolCalls()));
+                } catch (JsonProcessingException exception) {
+                    throw new IllegalStateException("Unable to serialize assistant tool calls", exception);
                 }
-
-                for (ToolCall tc : response.getToolCalls()) {
-                    if ("get_policy".equals(tc.getName()) || "get_cancellation_policy".equals(tc.getName())) {
-                        policyToolCalled = true;
-                    }
-                    ToolExecutor executor = toolExecutors.get(tc.getName());
+                for (ToolCall call : response.getToolCalls()) {
+                    if (++toolCount > 12 || System.nanoTime() >= deadline) break;
+                    ToolExecutor executor = toolExecutors.get(call.getName());
+                    String arguments = language == null ? call.getArguments() : mergeCriteria(call, state, message);
                     String result;
-                    if (executor != null) {
-                        result = language == null
-                                ? executor.execute(tc.getArguments())
-                                : executor.execute(tc.getArguments(), new ToolExecutionContext(language, conversationId));
-                    } else {
-                        result = "{\"errorCode\":\"AI_TOOL_UNKNOWN\"}";
+                    if (executor == null) result = "{\"errorCode\":\"AI_TOOL_UNKNOWN\"}";
+                    else {
+                        try {
+                            result = language == null ? executor.execute(arguments)
+                                    : executor.execute(arguments, new ToolExecutionContext(language, conversationId, userId));
+                        } catch (RuntimeException exception) {
+                            log.warn("Assistant tool {} failed", call.getName());
+                            result = "{\"errorCode\":\"AI_TOOL_UNAVAILABLE\"}";
+                        }
                     }
-                    // Append tool response
-                    chatHistoryService.appendMessage(conversationId, AiMessageRole.TOOL, result, tc.getId());
+                    chatHistoryService.appendMessage(conversationId, AiMessageRole.TOOL,
+                            artifactMapper.modelContext(result, call), call.getId());
+                    AssistantArtifact card = artifactMapper.map(call, result, conversationId);
+                    cards.add(card);
+                    rememberSuccessfulCriteria(state, arguments, card);
                 }
             } else {
-                // If response mentions policy keywords but get_policy was never called, reject hallucinated policy
-                if (!policyToolCalled && containsPolicyKeywords(response.getContent())) {
-                    String rejectionMessage = language == null
+                boolean sourcedPolicy = cards.stream().anyMatch(artifactMapper::hasPolicyEvidence);
+                if (containsPolicyKeywords(response.getContent())) {
+                    if (!sourcedPolicy) response.setContent(language == null
                             ? messages.get("ai.policy.lookup_required", SupportedLanguage.EN)
-                            : messages.get("ai.policy.lookup_required", language);
-                    response.setContent(rejectionMessage);
+                            : messages.get("ai.policy.lookup_required", language));
+                    else if (language != null) response.setContent(messages.get("ai.policy.verified_facts", language));
                 }
-
-                chatHistoryService.appendMessage(conversationId, AiMessageRole.ASSISTANT, response.getContent(), null);
-                return response;
+                return finish(conversationId, response, cards, state);
             }
+            if (toolCount >= 12) break;
         }
-        LlmResponse timeoutResponse = new LlmResponse();
-        timeoutResponse.setContent(language == null
-                ? messages.get("ai.timeout", SupportedLanguage.EN)
-                : messages.get("ai.timeout", language));
-        timeoutResponse.setKeyMasked(lastResponse != null ? lastResponse.getKeyMasked() : null);
-        return timeoutResponse;
+        LlmResponse timeout = new LlmResponse();
+        timeout.setContent(messages.get("ai.timeout", language == null ? SupportedLanguage.EN : language));
+        timeout.setKeyMasked(lastResponse == null ? null : lastResponse.getKeyMasked());
+        timeout.setResponseStatus("PARTIAL");
+        return finish(conversationId, timeout, cards, state);
+    }
+
+    private LlmResponse finish(UUID conversationId, LlmResponse response, List<AssistantArtifact> cards, ObjectNode state) {
+        response.setCards(List.copyOf(cards));
+        Set<String> required = new LinkedHashSet<>();
+        cards.forEach(card -> required.addAll(card.requiredInputs()));
+        response.setRequiredInputs(List.copyOf(required));
+        if (!required.isEmpty() && !"PARTIAL".equals(response.getResponseStatus())) response.setResponseStatus("NEEDS_INPUT");
+        response.setConversationContext(objectMapper.convertValue(state, new TypeReference<Map<String, Object>>() { }));
+        response.setGeneratedTextVerified(false);
+        var persisted = chatHistoryService.appendMessage(conversationId, AiMessageRole.ASSISTANT, response.getContent(), null);
+        try {
+            chatHistoryService.saveStructuredContext(conversationId, objectMapper.writeValueAsString(state));
+            if (persisted != null) chatHistoryService.saveResponsePayload(persisted.getId(), objectMapper.writeValueAsString(response));
+        } catch (JsonProcessingException exception) {
+            throw new IllegalStateException("Unable to serialize assistant context", exception);
+        }
+        return response;
+    }
+
+    private ObjectNode readContext(UUID conversationId) {
+        try {
+            String stored = chatHistoryService.getStructuredContext(conversationId).orElse(null);
+            if (stored != null && stored.length() <= 32768 && objectMapper.readTree(stored) instanceof ObjectNode object) return object;
+        } catch (Exception exception) { log.warn("Unable to read structured assistant context for {}", conversationId); }
+        return objectMapper.createObjectNode();
+    }
+
+    private String mergeCriteria(ToolCall call, ObjectNode state, String message) {
+        if (!Set.of("ai_smart_search", "ai_recommend_services", "ai_nearby_services", "ai_compare_services",
+                "ai_plan_itinerary", "ai_weather_slot", "search_services", "get_service_detail").contains(call.getName())) return call.getArguments();
+        try {
+            if (call.getArguments() == null || call.getArguments().length() > 8000) return call.getArguments();
+            if (!(objectMapper.readTree(call.getArguments()) instanceof ObjectNode arguments)) return call.getArguments();
+            ObjectNode criteria = state.path("criteria") instanceof ObjectNode saved ? saved.deepCopy() : objectMapper.createObjectNode();
+            if (arguments.get("criteria") instanceof ObjectNode supplied) {
+                supplied.fields().forEachRemaining(field -> {
+                    if (!field.getValue().isNull()) criteria.set(field.getKey(), field.getValue());
+                    else criteria.remove(field.getKey());
+                });
+            }
+            if ("search_services".equals(call.getName()) && arguments.hasNonNull("query")) criteria.set("query", arguments.get("query"));
+            if (!criteria.hasNonNull("query")) criteria.put("query", message);
+            if (criteria.path("limit").asInt(15) > 15 || !criteria.hasNonNull("limit")) criteria.put("limit", 15);
+            arguments.set("criteria", criteria);
+            return objectMapper.writeValueAsString(arguments);
+        } catch (Exception exception) { return call.getArguments(); }
+    }
+
+    private void rememberSuccessfulCriteria(ObjectNode state, String arguments, AssistantArtifact card) {
+        if (card.sources().isEmpty()) return;
+        try {
+            JsonNode criteria = objectMapper.readTree(arguments).get("criteria");
+            if (criteria != null && criteria.isObject()) {
+                objectMapper.treeToValue(criteria, TravelRequest.class).context();
+                state.set("criteria", criteria.deepCopy());
+            }
+            for (String field : List.of("serviceId", "itineraryId", "orderId", "id")) {
+                Object value = card.facts().get(field);
+                if (value instanceof String text && text.matches("[0-9a-fA-F-]{36}")) state.put(field, text);
+            }
+        } catch (Exception exception) { log.debug("Tool result does not contain reusable travel criteria"); }
     }
 
     private boolean containsPolicyKeywords(String content) {

@@ -1,6 +1,7 @@
 package com.danasea.backend.modules.ai.infrastructure.groq;
 
 import com.danasea.backend.modules.ai.application.port.KeyRotatorPort;
+import com.danasea.backend.modules.ai.application.port.AiExecutionBudget;
 import com.danasea.backend.modules.ai.application.port.LlmClientPort;
 import com.danasea.backend.modules.ai.domain.models.AiMessage;
 import com.danasea.backend.modules.ai.domain.models.LlmResponse;
@@ -27,6 +28,7 @@ import org.springframework.web.client.RestClientResponseException;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Map;
+import java.time.Duration;
 
 @Slf4j
 @Component
@@ -41,6 +43,7 @@ public class GroqLlmClient implements LlmClientPort {
     private final AIToolRegistry aiToolRegistry;
     private final String defaultModel;
     private final String fallbackModel;
+    private Duration transportAllowance = Duration.ofSeconds(15);
     private SystemPromptBuilder systemPromptBuilder = new SystemPromptBuilder();
     private LocalizedMessageService localizedMessages = LocalizedMessageService.standalone();
 
@@ -59,6 +62,7 @@ public class GroqLlmClient implements LlmClientPort {
         SimpleClientHttpRequestFactory requestFactory = new SimpleClientHttpRequestFactory();
         requestFactory.setConnectTimeout(httpClientProperties.connectTimeout());
         requestFactory.setReadTimeout(httpClientProperties.readTimeout());
+        this.transportAllowance = httpClientProperties.connectTimeout().plus(httpClientProperties.readTimeout());
         this.restClient = restClientBuilder.requestFactory(requestFactory)
                 .baseUrl(properties != null && properties.baseUrl() != null && !properties.baseUrl().isBlank()
                 ? properties.baseUrl()
@@ -110,6 +114,12 @@ public class GroqLlmClient implements LlmClientPort {
 
     private LlmResponse attemptRequest(
             List<AiMessage> messages, String model, int attempt, SupportedLanguage language) {
+        if (!AiExecutionBudget.hasTimeFor(transportAllowance)) {
+            LlmResponse timeout = new LlmResponse();
+            timeout.setContent(localizedMessages.get("ai.timeout", language == null ? SupportedLanguage.EN : language));
+            timeout.setResponseStatus("PARTIAL");
+            return timeout;
+        }
         if (attempt > MAX_RETRY_ATTEMPTS) {
             log.warn("Max retry attempts reached for Groq API");
             LlmResponse fallbackResponse = new LlmResponse();

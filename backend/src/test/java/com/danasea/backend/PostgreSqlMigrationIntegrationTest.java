@@ -66,6 +66,8 @@ class PostgreSqlMigrationIntegrationTest {
             assertTrue(tableExists(statement, "settlements"));
             assertTrue(tableExists(statement, "checkin_tokens"));
             assertTrue(tableExists(statement, "category_safety_rules"));
+            assertTrue(tableExists(statement, "ai_itineraries"));
+            assertTrue(tableExists(statement, "ai_assessment_cases"));
         }
     }
 
