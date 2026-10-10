@@ -1,0 +1,41 @@
+flowchart LR
+    %% ==========================================
+    %% DECISION FLOWCHART: HARE-NIEMEYER DISCOUNT ALLOCATION
+    %% DANASEA Marine Tourism Platform (Balanced Multi-Phase Layout)
+    %% ==========================================
+
+    subgraph Phase1 ["📌 PHA 1: LỌC & TÍNH TỶ TRỌNG CƠ SỞ"]
+        direction TB
+        Start(["Nhận yêu cầu phân bổ chiết khấu<br/><code>items, totalDiscount</code>"]) --> FilterItems["Lọc items đủ điều kiện áp mã<br/><code>eligibleItems = filter(items, code)</code>"]
+        FilterItems --> CalcTotal["Tính tổng tiền hợp lệ:<br/><code>totalEligible = SUM(item.subtotal)</code>"]
+        CalcTotal --> CalcShare["Tính tỷ trọng & sàn nguyên từng item:<br/><code>exactShare = totalDiscount * (subtotal / totalEligible)</code><br/><code>integerPart = FLOOR(exactShare)</code><br/><code>fractionalPart = exactShare - integerPart</code>"]
+    end
+
+    subgraph Phase2 ["⚖️ PHA 2: XỬ LÝ PHẦN DƯ LẺ HARE-NIEMEYER"]
+        direction TB
+        CalcRemainder["Tính phần dư lẻ tiền mặt (VNĐ):<br/><code>remainder = totalDiscount - SUM(integerPart)</code>"]
+        CalcRemainder --> CheckRem{"remainder > 0?"}
+        CheckRem -- "remainder == 0" --> ZeroRem["Không có phần dư<br/>Giữ nguyên hạn mức sàn"]
+        CheckRem -- "remainder > 0" --> SortFrac["<b>Thuật toán Hare-Niemeyer:</b><br/>Sắp xếp giảm dần theo <code>fractionalPart</code>"]
+        SortFrac --> Distribute["Phân bổ lần lượt <b>+1 VNĐ</b><br/>vào các item đầu bảng đến khi hết remainder"]
+    end
+
+    subgraph Phase3 ["🎯 PHA 3: TỔNG HỢP & GÁN DÒNG TIỀN"]
+        direction TB
+        ZeroRem --> Assemble["Tổng hợp kết quả cuối cùng:<br/>- Khớp 100% dòng tiền: <code>SUM(itemDiscount) == totalDiscount</code><br/>- Gán <code>finalAmount = subtotal - itemDiscount</code><br/>- Tách bạch <code>vendorDiscount</code> vs <code>platformDiscount</code>"]
+        Distribute --> Assemble
+        Assemble --> Done(["Hoàn tất phân bổ không lệch dòng tiền"])
+    end
+
+    CalcShare --> CalcRemainder
+
+    %% Style classes
+    classDef startEnd fill:#e0f2fe,stroke:#0284c7,stroke-width:2px,color:#0369a1;
+    classDef decision fill:#fef3c7,stroke:#d97706,stroke-width:2px,color:#92400e;
+    classDef action fill:#f0fdf4,stroke:#16a34a,stroke-width:2px,color:#15803d;
+    classDef phase fill:#f8fafc,stroke:#cbd5e1,stroke-width:2px,color:#334155;
+
+    class Start,Done startEnd;
+    class CheckRem decision;
+    class FilterItems,CalcTotal,CalcShare,CalcRemainder,ZeroRem,SortFrac,Distribute,Assemble action;
+    class Phase1,Phase2,Phase3 phase;

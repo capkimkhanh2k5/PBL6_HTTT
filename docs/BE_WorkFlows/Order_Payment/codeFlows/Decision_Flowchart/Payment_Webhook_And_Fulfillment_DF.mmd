@@ -1,0 +1,33 @@
+flowchart TD
+    Start(["Cổng thanh toán gửi Webhook IPN<br/>POST /api/payments/webhook/{provider}<br/>Body + Signature Headers"]) --> IdentifyProvider{"Cổng gửi Webhook?"}
+
+    %% Xác thực VNPay
+    IdentifyProvider -- "VNPAY" --> VerifyVNPay{"Kiểm tra chữ ký số HMAC-SHA512<br/>dựa trên vnp_SecureHash?"}
+    VerifyVNPay -- "Chữ ký không khớp / Giả mạo" --> ErrBadSig["Ném PaymentVerificationException<br/>Trả về HTTP 400 Bad Request"]
+    VerifyVNPay -- "Chữ ký hợp lệ" --> CheckVNPayResult{"Mã phản hồi từ cổng?<br/>vnp_ResponseCode == '00'<br/>vnp_TransactionStatus == '00'"}
+
+    %% Xác thực PayPal
+    IdentifyProvider -- "PAYPAL" --> VerifyPayPal{"Xác thực Webhook Signature qua PayPal REST API<br/>POST /v1/notifications/verify-webhook-signature<br/>với 5 transmission headers & raw JSON"}
+    VerifyPayPal -- "Xác thực thất bại" --> ErrBadSig
+    VerifyPayPal -- "Xác thực thành công" --> CheckPayPalResult{"Event type từ PayPal?<br/>CHECKOUT.ORDER.COMPLETED<br/>PAYMENT.CAPTURE.COMPLETED"}
+
+    %% Kiểm tra Idempotency
+    CheckVNPayResult -- "Giao dịch thành công" --> CheckIdempotency{"Idempotency Guard:<br/>MasterOrder đã ở trạng thái PAID?"}
+    CheckPayPalResult -- "Giao dịch thành công" --> CheckIdempotency
+
+    CheckIdempotency -- "Đã là PAID trước đó" --> ReturnNoOp(["Trả về ngay HTTP 200 OK<br/>(Idempotent No-op, tránh xử lý trùng)"])
+
+    %% Cập nhật thành công liên hoàn
+    CheckIdempotency -- "Chưa xử lý (Lần đầu)" --> AtomicUpdate["Thực thi chuyển trạng thái liên hoàn nguyên tử:<br/>1. MasterOrder: status = PAID, paymentStatus = CASH_PAID<br/>2. Toàn bộ SubOrders: status = CONFIRMED<br/>3. Payment: status = SUCCESS, lưu providerTransactionId"]
+
+    AtomicUpdate --> ConfirmBooking["Kích hoạt xác nhận đặt chỗ:<br/>BookingStatusUpdatePort.confirmBooking(bookingId)<br/>-> Booking: status = CONFIRMED"]
+
+    ConfirmBooking --> PublishSuccess["Bắn sự kiện PaymentSuccessEvent sang Event Bus<br/>(Gửi email xác nhận, thông báo đẩy in-app)"]
+
+    PublishSuccess --> HandshakeOK(["Phản hồi HTTP 200 OK cho Cổng thanh toán<br/>Hoàn tất chu trình IPN"])
+
+    %% Xử lý thất bại từ cổng
+    CheckVNPayResult -- "Giao dịch thất bại / Khách hủy" --> MarkPaymentFailed["Cập nhật Payment: status = FAILED<br/>Ghi nhận mã lỗi lastError từ cổng"]
+    CheckPayPalResult -- "Giao dịch bị từ chối / Hết hạn" --> MarkPaymentFailed
+
+    MarkPaymentFailed --> HandshakeFail(["Phản hồi HTTP 200 OK ghi nhận kết quả thất bại"])

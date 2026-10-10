@@ -1,0 +1,50 @@
+flowchart TD
+    %% ==========================================
+    %% DECISION FLOWCHART: TRIP REMINDER & NOTIFICATION DISPATCH
+    %% DANASEA Marine Tourism Platform
+    %% ==========================================
+
+    Start(["Background Job định kỳ 1 giờ/lần<br/><code>TripReminderJob.scanUpcomingTrips()</code>"]) --> ScanWindow["Quét các ca dịch vụ khởi hành trong 24 giờ tới<br/><code>startTime BETWEEN now AND now + 24h</code>"]
+
+    ScanWindow --> FetchOrders["Truy vấn danh sách đơn hàng liên quan đến các slot"]
+
+    FetchOrders --> LoopOrders["Với từng SubOrder trong danh sách quét:"]
+
+    LoopOrders --> CheckEligibility{"Kiểm tra điều kiện đơn hợp lệ:<br/>- <code>subOrder.status == 'CONFIRMED'</code><br/>- <code>masterOrder.paymentStatus == 'PAID'</code>?"}
+
+    CheckEligibility -- "Không thỏa (Đơn chưa trả tiền / Đã hủy)" --> SkipOrder["Bỏ qua đơn này, không gửi thông báo"]
+
+    CheckEligibility -- "Thỏa mãn điều kiện" --> GenIdempKey["Sinh khóa Idempotency duy nhất:<br/><code>key = 'trip:' + slotId + ':customer:' + customerId</code>"]
+
+    GenIdempKey --> InsertDB{"Thực thi lệnh INSERT vào bảng <code>notifications</code><br/>với ràng buộc <code>UNIQUE(idempotency_key)</code>"}
+
+    InsertDB -- "Trùng khóa (Đã gửi trước đó trong ngày)" --> CollideIgnore["<b>Idempotent Guard: Bỏ qua (DO NOTHING)</b><br/>Ngăn chặn spam thông báo trùng lặp"]
+
+    InsertDB -- "Chèn mới thành công (1 row affected)" --> SaveInApp["Lưu thông báo In-App vào hộp thư:<br/>- <code>userId = customerId</code><br/>- <code>status = 'SENT'</code><br/>- <code>isRead = false</code>"]
+
+    SaveInApp --> RegisterPushSync["Đăng ký Hook sau khi Transaction commit:<br/><code>TransactionSynchronizationManager.registerSynchronization(<br/>afterCommit(() -> pushPort.sendPush(...)))</code>"]
+
+    RegisterPushSync --> CommitTx{"Giao dịch Database Commit thành công?"}
+
+    CommitTx -- "Rollback do lỗi CSDL" --> CancelPush["Hủy lệnh gọi Push Notification<br/><i>(Chống gửi Push ảo khi DB không lưu)</i>"]
+
+    CommitTx -- "Commit Thành Công" --> TriggerPush["<b>Kích hoạt gửi Mobile Push Notification:</b><br/>Gửi lời nhắc chuyến đi đến thiết bị di động của khách"]
+
+    SkipOrder --> NextOrder{"Còn SubOrder tiếp theo?"}
+    CollideIgnore --> NextOrder
+    CancelPush --> NextOrder
+    TriggerPush --> NextOrder
+
+    NextOrder -- "Còn" --> LoopOrders
+    NextOrder -- "Hết danh sách" --> End(["Hoàn tất đợt quét nhắc chuyến đi"])
+
+    %% Style classes
+    classDef startEnd fill:#e0f2fe,stroke:#0284c7,stroke-width:2px,color:#0369a1;
+    classDef decision fill:#fef3c7,stroke:#d97706,stroke-width:2px,color:#92400e;
+    classDef action fill:#f0fdf4,stroke:#16a34a,stroke-width:2px,color:#15803d;
+    classDef error fill:#fee2e2,stroke:#dc2626,stroke-width:2px,color:#b91c1c;
+
+    class Start,End startEnd;
+    class CheckEligibility,InsertDB,CommitTx,NextOrder decision;
+    class ScanWindow,FetchOrders,LoopOrders,GenIdempKey,SaveInApp,RegisterPushSync,TriggerPush action;
+    class SkipOrder,CollideIgnore,CancelPush error;

@@ -1,11 +1,11 @@
 package com.danasea.backend.modules.service.application.dtos;
 
-import java.math.BigDecimal;
-import java.util.List;
-import java.util.UUID;
 import com.danasea.backend.modules.service.presentation.dtos.ServiceOptionResponse;
 import com.danasea.backend.modules.service.presentation.dtos.StructuredSlotResponse;
 import com.danasea.backend.modules.vendor.domain.models.BadgeTier;
+import java.math.BigDecimal;
+import java.util.List;
+import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -42,6 +42,11 @@ public class ServiceDetailResult {
     private Integer duration;
     private Integer capacity;
     private String participantConditions;
+    private Boolean waiverRequired;
+    private Integer waiverVersion;
+    private String waiverContent;
+    private String waiverLanguage;
+    private Boolean waiverFallbackUsed;
     private String refundPolicy;
     private String cancellationPolicy;
     private String safetyRules;

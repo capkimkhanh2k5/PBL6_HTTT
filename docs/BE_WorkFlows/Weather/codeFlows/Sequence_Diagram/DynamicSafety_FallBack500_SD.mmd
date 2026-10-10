@@ -1,0 +1,54 @@
+sequenceDiagram
+    autonumber
+    actor Admin as Quản Trị Viên (Admin)
+    participant Controller as AdminSafetyRuleController
+    participant RuleService as CategorySafetyRuleService
+    participant Cache as RedisCache
+    participant Repo as SafetyRuleRepository
+    participant DB as PostgreSQL
+    participant Registry as BuiltInDefaultRegistry (ASTM/PADI)
+
+    %% LUỒNG 1: ADMIN CẬP NHẬT NGƯỠNG AN TOÀN
+    rect rgb(240, 249, 255)
+    Note over Admin,DB: LUỒNG 1: ADMIN CẬP NHẬT NGƯỠNG AN TOÀN ĐỘNG
+    Admin->>Controller: PATCH /api/admin/category-safety-rules/{categoryId} (dto)
+    Controller->>RuleService: updateRule(categoryId, dto)
+    activate RuleService
+
+    RuleService->>RuleService: Validate nghiệp vụ (không âm, Caution <= Max)
+    RuleService->>Repo: save(updatedRule)
+    Repo->>DB: UPDATE category_safety_rules SET ... WHERE id = ?
+    DB-->>Repo: Updated
+
+    RuleService->>Cache: evict("category_safety_rules:" + categoryId)
+    Cache-->>RuleService: Cache Evicted
+    RuleService-->>Controller: CategorySafetyRule
+    deactivate RuleService
+
+    Controller-->>Admin: 200 OK (Ngưỡng cập nhật có hiệu lực tức thì trên toàn sàn)
+    end
+
+    %% LUỒNG 2: TRUY VẤN NGƯỠNG AN TOÀN & ZERO-500 FALLBACK
+    rect rgb(254, 242, 242)
+    Note over RuleService,Registry: LUỒNG 2: TRUY VẤN NGƯỠNG & CƠ CHẾ BẢO VỆ ZERO-500 FALLBACK
+    RuleService->>Cache: get("category_safety_rules:" + categoryId)
+    alt Cache Hit
+        Cache-->>RuleService: CategorySafetyRule (From Cache)
+    else Cache Miss
+        RuleService->>Repo: findByCategoryId(categoryId)
+        activate Repo
+        Repo->>DB: SELECT * FROM category_safety_rules WHERE category_id = ?
+        alt DB Thành công & Tìm thấy bản ghi
+            DB-->>Repo: CategorySafetyRuleEntity
+            Repo-->>RuleService: Rule
+            RuleService->>Cache: put("category_safety_rules:" + categoryId, Rule)
+        else DB Lỗi kết nối / Bảng rỗng / Exception
+            DB-->>Repo: DB Connection Timeout / Error
+            deactivate Repo
+            Note over RuleService,Registry: ZERO-500 FALLBACK: Bắt ngoại lệ DB và lấy Rule mặc định
+            RuleService->>Registry: getDefaultRuleForCategory(categoryId)
+            Registry-->>RuleService: Built-in Safe Rule (ASTM/PADI/ACA Standard)
+            Note over RuleService: Tuyệt đối không bao giờ làm gián đoạn hệ thống hay ném HTTP 500
+        end
+    end
+    end

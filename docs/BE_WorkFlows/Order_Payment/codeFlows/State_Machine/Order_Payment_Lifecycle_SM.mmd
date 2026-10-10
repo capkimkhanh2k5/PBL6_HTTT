@@ -1,0 +1,22 @@
+stateDiagram-v2
+    [*] --> PENDING_PAYMENT: Tạo từ Booking HOLD
+
+    state "Vòng Đời Đơn Hàng Chính (OrderStatus)" as MasterOrderFlow {
+        PENDING_PAYMENT --> PAID: Webhook IPN / Capture SUCCESS (Thanh toán 100%)
+        PENDING_PAYMENT --> CANCELLED: Quá hạn 15 phút / Khách chủ động hủy
+        PAID --> COMPLETED: Toàn bộ Sub-Orders đã hoàn tất phục vụ
+        PAID --> PARTIALLY_COMPLETED: Một phần Sub-Orders hoàn tất, một phần hoàn tiền/hủy
+    }
+
+    state "Vòng Đời Dòng Tiền Thực Thu (PaymentStatus)" as CashFlow {
+        UNPAID --> CASH_PAID: Giao dịch cổng thành công (100%)
+        CASH_PAID --> REFUNDED: Hoàn tiền toàn phần hoặc một phần (Chính sách / Khiếu nại)
+        CASH_PAID --> NO_REFUND: Khách hủy trễ (<= 24h), vi phạm mốc thời gian giữ lại tiền vé
+    }
+
+    state "Vòng Đời Đơn Phụ Vendor (SubOrderStatus)" as SubOrderFlow {
+        PENDING --> CONFIRMED: Khi MasterOrder chuyển sang PAID
+        CONFIRMED --> CHECKED_IN: Khách quét mã QR tại thực địa với Vendor
+        CHECKED_IN --> COMPLETED: Kết thúc buổi trải nghiệm dịch vụ
+        CONFIRMED --> CANCELLED_OR_REFUNDED: Hủy chuyến / Bồi hoàn thời tiết
+    }

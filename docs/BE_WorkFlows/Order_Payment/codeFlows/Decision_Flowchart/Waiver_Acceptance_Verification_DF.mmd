@@ -1,0 +1,36 @@
+flowchart TD
+    Start(["Khách hàng gửi yêu cầu chấp thuận cam kết<br/>POST /api/sub-orders/{id}/waiver-acceptance<br/>{ accepted: true, version: 1, language: 'VI' }"]) --> CheckAuth{"Kiểm tra xác thực JWT<br/>(Role: CUSTOMER)"}
+
+    CheckAuth -- "Chưa đăng nhập / Sai Token" --> Err401["HTTP 401 Unauthorized / 403 Forbidden"]
+
+    CheckAuth -- "Hợp lệ" --> ExtractUser["Trích xuất currentUserId từ SecurityContext"]
+
+    ExtractUser --> LockEntities["Khóa dữ liệu tuần tự trong DB (@Transactional):<br/>1. Khóa MasterOrder (findByIdForUpdate)<br/>2. Khóa SubOrder (findByIdForUpdate)"]
+
+    LockEntities --> GateIDOR{"Gate 1: IDOR Guard<br/>masterOrder.customerId == currentUserId?"}
+    GateIDOR -- "Sai (Không phải chủ đơn)" --> ErrIDOR["Ném UnauthorizedOrderAccessException<br/>Trả về HTTP 403 Forbidden"]
+
+    GateIDOR -- "Đúng" --> GateState{"Gate 2: State Guard<br/>• masterOrder == PENDING_PAYMENT?<br/>• subOrder == PENDING?"}
+    GateState -- "Sai (Đơn đã thanh toán/hủy)" --> ErrState["Ném InvalidOrderStateException<br/>Trả về HTTP 409 Conflict"]
+
+    GateState -- "Đúng" --> GateRequired{"Gate 3: Requirement Guard<br/>subOrder.waiverRequired == true?"}
+    GateRequired -- "Sai (Dịch vụ không bắt buộc)" --> ErrRequired["Ném InvalidOrderStateException<br/>Trả về HTTP 409 Conflict"]
+
+    GateRequired -- "Đúng" --> GateVersion{"Gate 4: Version Guard<br/>request.version == subOrder.waiverVersion?"}
+    GateVersion -- "Sai lệch phiên bản" --> ErrVersion["Ném WaiverVersionMismatchException<br/>Trả về HTTP 409 Conflict"]
+
+    GateVersion -- "Khớp phiên bản" --> CheckReplay{"Gate 5: Idempotent Check<br/>subOrder.waiverAccepted == true?"}
+
+    %% Nhánh Replay (Đã xác nhận trước đó)
+    CheckReplay -- "Đã xác nhận trước đó" --> ReturnSaved["Trả về kết quả xác nhận đã lưu trong DB:<br/>• KHÔNG cập nhật lại timestamp<br/>• KHÔNG sinh log kiểm toán lặp"]
+    ReturnSaved --> Resp200(["HTTP 200 OK<br/>SubOrderWaiverAcceptanceResponse"])
+
+    %% Nhánh Xác nhận lần đầu
+    CheckReplay -- "Xác nhận lần đầu" --> MatchContent["Đối chiếu nội dung snapshot theo language:<br/>• language = 'VI' -> ưu tiên VI, fallback EN<br/>• language = 'EN' -> ưu tiên EN, fallback VI"]
+
+    MatchContent --> RecordEvidence["Ghi nhận bằng chứng thực tế từ hệ thống:<br/>• waiverAccepted = true<br/>• waiverAcceptedBy = currentUserId (JWT)<br/>• waiverAcceptedAt = now() (Server Clock)<br/>• waiverAcceptedLanguage = ngôn ngữ thực tế<br/>• waiverAcceptedContent = nội dung đã đồng ý"]
+
+    RecordEvidence --> SaveSubOrder["Lưu SubOrder vào Database"]
+    SaveSubOrder --> WriteAudit["Ghi nhận nhật ký kiểm toán:<br/>auditLogInternalApi.recordTransactionalAuditLog(<br/>'SUB_ORDER_WAIVER_ACCEPTED')"]
+
+    WriteAudit --> Resp200

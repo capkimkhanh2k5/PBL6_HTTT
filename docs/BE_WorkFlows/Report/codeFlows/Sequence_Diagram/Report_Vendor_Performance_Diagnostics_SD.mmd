@@ -1,0 +1,60 @@
+sequenceDiagram
+    autonumber
+    actor Admin as Quản Trị Viên (Admin)
+    participant Ctrl as AdminReportController
+    participant UC as GetVendorPerformanceReportUseCase
+    participant Port as ReportDataPort / JpaReportDataAdapter
+    participant DB as Database (PostgreSQL / H2)
+    participant Eval as VendorPerformanceItem (Diagnostic Engine)
+
+    Note over Admin, Ctrl: 1. Gửi yêu cầu phân tích đối tác
+    Admin->>Ctrl: GET /api/admin/reports/vendors?from=2026-09-01&to=2026-09-30(&vendorId=...)
+    Ctrl->>UC: execute(timeRange, vendorId)
+
+    Note over UC, Port: 2. Trích xuất đa nguồn dữ liệu vận hành
+    UC->>Port: findApprovedVendors() (hoặc findVendorById nếu truyền vendorId)
+    Port->>DB: SELECT từ bảng vendors
+    DB-->>Port: Danh sách thông tin Vendor (id, businessName, ratingAvg...)
+
+    par Truy vấn song song dữ liệu liên quan trong kỳ
+        UC->>Port: findSubOrders(timeRange, vendorId)
+        Port->>DB: Lấy sub_orders
+        DB-->>Port: Trả về SubOrders
+    and
+        UC->>Port: findRefunds(timeRange, vendorId)
+        Port->>DB: Lấy refunds
+        DB-->>Port: Trả về Refunds
+    and
+        UC->>Port: findServiceSlots(timeRange, vendorId)
+        Port->>DB: Lấy service_slots
+        DB-->>Port: Trả về ServiceSlots (capacity, bookedCount)
+    and
+        UC->>Port: findReviews(timeRange, vendorId)
+        Port->>DB: Lấy reviews
+        DB-->>Port: Trả về Reviews (rating)
+    end
+
+    Note over UC, Eval: 3. Phân loại theo Vendor & Tính toán chỉ số vận hành
+    loop Lặp qua từng đối tác Vendor
+        UC->>UC: Gom nhóm SubOrders, Refunds, Slots, Reviews theo vendorId
+        UC->>UC: Tính Doanh thu gộp (GMV), Hoa hồng, Hoàn tiền -> Net Vendor Payout
+        UC->>UC: Đếm tổng số đơn, đơn COMPLETED, đơn CANCELLED -> Tỷ lệ hủy (%)
+        UC->>UC: Tổng hợp totalBooked và totalCapacity -> Tỷ lệ lấp đầy chỗ (Occupancy Rate %)
+        UC->>UC: Tính điểm đánh giá trung bình (Rating) và số lượt đánh giá thực tế
+
+        Note over UC, Eval: 4. Động cơ chẩn đoán thông minh (Rule-based Decision Engine)
+        UC->>Eval: evaluate(vendorId, businessName, gmv, netPayout, totalOrders, cancelledOrders, booked, capacity, rating...)
+
+        rect rgb(240, 248, 255)
+            Note over Eval: Kiểm tra các quy tắc chẩn đoán (Rules):<br/>- cancellationRate > 20% -> Phát hiện HIGH_CANCELLATION<br/>- rating < 3.5 và ratingCount >= 3 -> Phát hiện LOW_RATING<br/>- slotOccupancyRate >= 95% -> Phát hiện OVERLOADED (quá tải)<br/>- slotOccupancyRate < 20% và totalOrders < 5 -> Phát hiện UNDERPERFORMING
+        end
+
+        rect rgb(255, 245, 245)
+            Note over Eval: Phân cấp mức độ nghiêm trọng (Severity):<br/>- CRITICAL: cancellationRate > 40% HOẶC (rating < 2.5 và ratingCount >= 5)<br/>- WARNING: Có ít nhất 1 vấn đề được phát hiện<br/>- HEALTHY: Vận hành ổn định bình thường
+        end
+
+        Eval-->>UC: Trả về đối tượng VendorPerformanceItem hoàn chỉnh
+    end
+
+    UC-->>Ctrl: Danh sách List<VendorPerformanceItem>
+    Ctrl-->>Admin: HTTP 200 OK + VendorPerformanceResponse<br/>(Hỗ trợ Admin định vị ngay các Vendor/Dịch vụ cần cải thiện)

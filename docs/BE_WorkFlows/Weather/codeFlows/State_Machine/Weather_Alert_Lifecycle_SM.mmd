@@ -1,0 +1,30 @@
+stateDiagram-v2
+    %% ==========================================
+    %% STATE MACHINE: WEATHER ALERT LIFECYCLE
+    %% DANASEA Marine Tourism Platform
+    %% ==========================================
+
+    [*] --> MONITORING_YELLOW: Phát hiện thời tiết chạm ngưỡng Vàng (YELLOW)
+    [*] --> AWAITING_ADMIN_RESOLUTION: Phát hiện thời tiết chạm ngưỡng Đỏ trực tiếp (RED)
+
+    state MONITORING_YELLOW {
+        [*] --> InMonitoring
+        InMonitoring --> InMonitoring: Quét định kỳ 30p (Vẫn Vàng - In-place update)
+    }
+
+    MONITORING_YELLOW --> RESOLVED_NORMAL: Thời tiết cải thiện (Trở lại GREEN)
+    MONITORING_YELLOW --> AWAITING_ADMIN_RESOLUTION: Thời tiết xấu đi (Chạm ngưỡng Đỏ RED)
+
+    state AWAITING_ADMIN_RESOLUTION {
+        [*] --> InAwaiting
+        InAwaiting --> InAwaiting: Quét định kỳ 30p (Vẫn Đỏ - In-place update)
+    }
+
+    AWAITING_ADMIN_RESOLUTION --> RESOLVED_CANCELLED: Admin duyệt HỦY tour (Hoàn tiền 100%)
+    AWAITING_ADMIN_RESOLUTION --> RESOLVED_OVERRIDDEN: Admin đánh giá an toàn thực địa (BỎ QUA cảnh báo)
+    AWAITING_ADMIN_RESOLUTION --> AUTO_CANCELLED_FOR_SAFETY: Thời gian T <= 60 phút mà Admin chưa phản hồi (Tự động hủy an toàn)
+
+    RESOLVED_NORMAL --> [*]: Đóng cảnh báo an toàn
+    RESOLVED_CANCELLED --> [*]: Kích hoạt hoàn tiền và đóng cảnh báo
+    RESOLVED_OVERRIDDEN --> [*]: Cho phép tour diễn ra
+    AUTO_CANCELLED_FOR_SAFETY --> [*]: Kích hoạt hoàn tiền tự động 100% và đóng cảnh báo

@@ -1,0 +1,31 @@
+flowchart TD
+    Start(["Kiểm tra an toàn đặt trước<br/><code>GET /api/weather/advance-safety-check</code>"]) --> FetchSlot["Tra cứu ServiceSlot & Service"]
+
+    FetchSlot --> CheckDate{"Ngày khởi hành tour?"}
+    CheckDate -- "Cách hiện tại > 7 ngày" --> BeyondRange["Trả về <code>safetyStatus = UNKNOWN</code><br/><code>isSafe = false</code> (Vượt ngoài khả năng dự báo số liệu)"]
+    CheckDate -- "Trong vòng 7 ngày" --> CheckCache["Tra cứu Weather Cache (Redis / Postgres)"]
+
+    CheckCache --> CheckFreshness{"Dữ liệu cache có trong vòng 30 phút?"}
+    CheckFreshness -- "Dữ liệu mới (< 30 phút)" --> EvalRules["Đánh giá quy tắc an toàn hàng hải<br/>(Gió, Sóng, Tầm nhìn, Dông bão)"]
+    CheckFreshness -- "Cache quá 30 phút nhưng < 2 giờ" --> FetchLive["Gọi OpenMeteo API đồng bộ dữ liệu mới"]
+    CheckFreshness -- "Cache quá 2 giờ hoặc mất kết nối" --> StaleFallback["Không thể chứng thực an toàn:<br/><code>safetyStatus = UNKNOWN</code>, <code>isSafe = false</code>"]
+
+    FetchLive -- "Gọi thành công" --> SaveCache["Cập nhật Cache mới"] --> EvalRules
+    FetchLive -- "OpenMeteo lỗi / 500" --> FallbackOld["Sử dụng Cache cũ để hiển thị kèm cảnh báo độ trễ"] --> EvalRules
+
+    EvalRules --> Verdict{"Kết quả đánh giá an toàn?"}
+    Verdict -- "An toàn (Xanh)" --> SafeResult["<code>isSafe = true</code>, <code>alertLevel = GREEN</code>"]
+    Verdict -- "Cảnh báo / Nguy hiểm (Vàng / Đỏ)" --> DangerResult["<code>isSafe = false</code>, <code>alertLevel = YELLOW/RED</code>"]
+
+    BeyondRange --> ReturnResp(["Trả về <code>AdvanceBookingSafetyResponse</code>"])
+    StaleFallback --> ReturnResp
+    SafeResult --> ReturnResp
+    DangerResult --> ReturnResp
+
+    classDef startEnd fill:#e0f2fe,stroke:#0284c7,stroke-width:2px,color:#0369a1;
+    classDef decision fill:#fef3c7,stroke:#d97706,stroke-width:2px,color:#92400e;
+    classDef action fill:#f0fdf4,stroke:#16a34a,stroke-width:2px,color:#15803d;
+
+    class Start,ReturnResp startEnd;
+    class CheckDate,CheckFreshness,Verdict decision;
+    class BeyondRange,CheckCache,EvalRules,FetchLive,SaveCache,FallbackOld,StaleFallback,SafeResult,DangerResult action;

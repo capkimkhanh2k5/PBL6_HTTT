@@ -1,0 +1,24 @@
+flowchart TD
+    Start(["Admin xử lý giải quyết khiếu nại<br/><code>POST /api/admin/disputes/{id}/resolve</code>"]) --> CheckAdmin{"Người dùng có quyền<br/><code>ROLE_ADMIN</code>?"}
+    CheckAdmin -- "Không phải Admin" --> Err403["Trả về <b>HTTP 403 Forbidden</b><br/><code>ACCESS_DENIED</code>"]
+    CheckAdmin -- "Là Admin" --> CheckDisputeState{"Trạng thái Dispute<br/>có là <code>OPEN</code> hoặc <code>UNDER_REVIEW</code>?"}
+
+    CheckDisputeState -- "Đã đóng / giải quyết trước đó" --> Err409["Trả về <b>HTTP 409 Conflict</b><br/><code>DISPUTE_ALREADY_RESOLVED</code>"]
+    CheckDisputeState -- "Hợp lệ" --> DecisionType{"Quyết định phán quyết của Admin?"}
+
+    DecisionType -- "CHẤP THUẬN KHIẾU NẠI (ACCEPT)" --> RefundFlow["<b>Xử lý hoàn tiền:</b><br/>- Tạo yêu cầu hoàn tiền tự động <code>Refund</code><br/>- Khấu trừ từ doanh thu Vendor vào kỳ đối soát<br/>- Chuyển status = <code>RESOLVED_REFUNDED</code>"]
+    DecisionType -- "BÁC BỎ KHIẾU NẠI (REJECT)" --> RejectFlow["<b>Đóng khiếu nại:</b><br/>- Bảo lưu doanh thu cho Vendor<br/>- Ghi nhận lý do bác bỏ của Admin<br/>- Chuyển status = <code>RESOLVED_REJECTED</code>"]
+
+    RefundFlow --> NotifyParties["Gửi thông báo kết quả đến Khách hàng & Vendor"]
+    RejectFlow --> NotifyParties
+    NotifyParties --> Success200(["Trả về <b>HTTP 200 OK</b><br/><code>DisputeResolutionResponse</code>"])
+
+    classDef startEnd fill:#e0f2fe,stroke:#0284c7,stroke-width:2px,color:#0369a1;
+    classDef decision fill:#fef3c7,stroke:#d97706,stroke-width:2px,color:#92400e;
+    classDef action fill:#f0fdf4,stroke:#16a34a,stroke-width:2px,color:#15803d;
+    classDef error fill:#fee2e2,stroke:#dc2626,stroke-width:2px,color:#b91c1c;
+
+    class Start,Success200 startEnd;
+    class CheckAdmin,CheckDisputeState,DecisionType decision;
+    class RefundFlow,RejectFlow,NotifyParties action;
+    class Err403,Err409 error;

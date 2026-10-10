@@ -1,0 +1,53 @@
+sequenceDiagram
+    autonumber
+    participant Job as RefundProcessingJob (Cron 1m)
+    participant Service as RefundProcessingService
+    participant RefundRepo as RefundRepositoryPort
+    participant PaymentRepo as PaymentRepositoryPort
+    participant Gateway as PaymentGatewayPort
+    participant PayPal as PayPal API v2
+    participant VNPay as VNPay Refund API
+    participant DB as PostgreSQL
+
+    Job->>Service: processPendingRefunds()
+    activate Service
+
+    Service->>RefundRepo: findPendingRefundsReady(now())
+    RefundRepo->>DB: SELECT * FROM refunds WHERE status = 'PENDING' AND next_retry_at <= now() FOR UPDATE SKIP LOCKED
+    DB-->>RefundRepo: List<Refund>
+    RefundRepo-->>Service: List<Refund>
+
+    loop Với từng Refund PENDING
+        Service->>PaymentRepo: findBySubOrderId(refund.subOrderId)
+        PaymentRepo->>DB: SELECT * FROM payments WHERE ...
+        DB-->>PaymentRepo: Payment (VNPAY / PAYPAL, providerTxnId, captureId)
+        PaymentRepo-->>Service: Payment
+
+        alt Cổng thanh toán là PAYPAL
+            Service->>Gateway: refund(new GatewayRefundRequest(captureId, amountUsd))
+            activate Gateway
+            Gateway->>PayPal: POST /v2/payments/captures/{capture_id}/refund
+            PayPal-->>Gateway: HTTP 201 Created (refund_id, status: 'COMPLETED')
+            Gateway-->>Service: GatewayRefundResponse(SUCCESS, refund_id)
+            deactivate Gateway
+        else Cổng thanh toán là VNPAY
+            Service->>Gateway: refund(new GatewayRefundRequest(providerTxnId, amountVnd))
+            activate Gateway
+            Gateway->>VNPay: POST vnp_Command=refund (HMAC-SHA512 signature)
+            VNPay-->>Gateway: vnp_ResponseCode = '00' (Success)
+            Gateway-->>Service: GatewayRefundResponse(SUCCESS, vnp_TransactionNo)
+            deactivate Gateway
+        end
+
+        alt Hoàn tiền Thành công (SUCCESS)
+            Service->>DB: UPDATE refunds SET status = 'PROCESSED', provider_refund_id = ?, processed_at = now() WHERE id = ?
+            Service->>DB: UPDATE master_orders SET payment_status = 'REFUNDED' WHERE id = ?
+        else Lỗi mạng / Gateway Timeout (RETRYABLE)
+            Service->>DB: UPDATE refunds SET retry_count = retry_count + 1, next_retry_at = now() + (2^retry * 30s) WHERE id = ?
+        else Lỗi nghiêm trọng / Bị từ chối (FATAL / REJECTED)
+            Service->>DB: UPDATE refunds SET status = 'FAILED', failure_reason = ? WHERE id = ?
+            Note over Service,DB: Ghi log cảnh báo mức WARN/ERROR để Admin xử lý thủ công
+        end
+    end
+
+    deactivate Service

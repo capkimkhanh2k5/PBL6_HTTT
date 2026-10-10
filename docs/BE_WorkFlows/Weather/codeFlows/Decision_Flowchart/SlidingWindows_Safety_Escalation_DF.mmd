@@ -1,0 +1,58 @@
+flowchart TD
+    %% ==========================================
+    %% DECISION FLOWCHART: SLIDING WINDOWS SAFETY & ESCALATION
+    %% DANASEA Marine Tourism Platform
+    %% ==========================================
+
+    Start(["Background Job định kỳ 30 phút/lần<br/><code>SlotWeatherMonitoringJob.scanUpcomingSlots()</code>"]) --> QuerySlots["Quét các Booking Slot sắp diễn ra trong ngày"]
+
+    QuerySlots --> CheckWindow{"Phân loại slot theo mốc thời gian khởi hành T"}
+
+    CheckWindow -- "T thuộc [now+23h, now+25h]" --> Window24["Mốc đánh giá <b>T-24h</b> (Dự báo trung hạn)"]
+    CheckWindow -- "T thuộc [now+1h, now+3h]" --> Window2["Mốc đánh giá <b>T-2h</b> (Dự báo cận giờ thực địa)"]
+    CheckWindow -- "Các khung giờ khác" --> SkipScan["Bỏ qua lượt quét hiện tại"]
+
+    Window24 --> FetchAndEval
+    Window2 --> FetchAndEval["Lấy dự báo Open-Meteo & chạy <code>WeatherRuleEngine</code>"]
+
+    FetchAndEval --> CheckEvalResult{"Kết quả đánh giá an toàn thời tiết?"}
+
+    %% KẾT QUẢ GREEN
+    CheckEvalResult -- "GREEN (An toàn)" --> CheckOldAlert{"Đã có Alert trước đó?"}
+    CheckOldAlert -- "Có (Trước đó là YELLOW)" --> ResolveNormal["Chuyển Alert sang <code>RESOLVED_NORMAL</code><br/>Hủy theo dõi, gửi thông báo thời tiết tốt lên"]
+    CheckOldAlert -- "Không" --> SafePass["Cập nhật trạng thái an toàn bình thường"]
+
+    %% KẾT QUẢ YELLOW
+    CheckEvalResult -- "YELLOW (Cảnh báo)" --> CheckExistYellow{"Đã có Alert từ trước?"}
+    CheckExistYellow -- "Chưa có" --> CreateYellowAlert["Tạo mới Alert <code>MONITORING_YELLOW</code><br/>Gửi thông báo sớm (Early Warning) cho Khách & Vendor"]
+    CheckExistYellow -- "Đã có" --> UpdateYellowInPlace["Cập nhật chỉ số thời tiết <b>In-place</b><br/><i>(Chống spam thông báo nhiều lần)</i>"]
+
+    %% KẾT QUẢ RED
+    CheckEvalResult -- "RED (Nguy hiểm)" --> CheckExistRed{"Đã có Alert RED chờ xử lý?"}
+    CheckExistRed -- "Chưa có (Hoặc đang YELLOW)" --> EscalateRed["Leo thang cảnh báo: <code>AWAITING_ADMIN_RESOLUTION</code><br/>Phát chuông cảnh báo khẩn cấp cho Quản trị viên & 2 bên"]
+    CheckExistRed -- "Đã ở trạng thái chờ duyệt" --> UpdateRedInPlace["Cập nhật chỉ số thời tiết mới nhất <b>In-place</b>"]
+
+    EscalateRed --> CheckT60
+    UpdateRedInPlace --> CheckT60{"Kiểm tra điều kiện cận giờ:<br/><b>Thời gian khởi hành T <= 60 phút</b><br/>và Admin vẫn chưa phản hồi?"}
+
+    CheckT60 -- "Chưa tới mốc T <= 60 phút" --> WaitAdmin["Tiếp tục duy trì trạng thái chờ Admin xử lý"]
+    CheckT60 -- "ĐÚNG: T <= 60 phút (Quá sát giờ khởi hành)" --> AutoEscalateCancel["<b>KÍCH HOẠT AUTO-ESCALATION (HỦY AN TOÀN TỰ ĐỘNG):</b><br/>1. Chuyển Alert sang <code>AUTO_CANCELLED_FOR_SAFETY</code><br/>2. Cập nhật SubOrder <code>status = 'CANCELLED'</code><br/>3. Khởi tạo hoàn tiền 100%: <code>RefundReason = 'WEATHER'</code><br/>4. Gửi thông báo khẩn cấp hủy tour hoàn tiền cho 3 bên"]
+
+    AutoEscalateCancel --> Done(["Hoàn tất chu kỳ quét an toàn thời tiết"])
+    ResolveNormal --> Done
+    SafePass --> Done
+    CreateYellowAlert --> Done
+    UpdateYellowInPlace --> Done
+    WaitAdmin --> Done
+    SkipScan --> Done
+
+    %% Style classes
+    classDef startEnd fill:#e0f2fe,stroke:#0284c7,stroke-width:2px,color:#0369a1;
+    classDef decision fill:#fef3c7,stroke:#d97706,stroke-width:2px,color:#92400e;
+    classDef action fill:#f0fdf4,stroke:#16a34a,stroke-width:2px,color:#15803d;
+    classDef danger fill:#fee2e2,stroke:#dc2626,stroke-width:2px,color:#b91c1c;
+
+    class Start,Done startEnd;
+    class CheckWindow,CheckEvalResult,CheckOldAlert,CheckExistYellow,CheckExistRed,CheckT60 decision;
+    class QuerySlots,Window24,Window2,FetchAndEval,ResolveNormal,SafePass,CreateYellowAlert,UpdateYellowInPlace,UpdateRedInPlace,WaitAdmin,SkipScan action;
+    class EscalateRed,AutoEscalateCancel danger;

@@ -10,9 +10,9 @@
 
 ---
 
-## 1. Review_CustomerLifecycle.png — Vòng Đời Đánh Giá Của Khách Hàng
+## 1. Review_CustomerLifecycle_SD.png — Vòng Đời Đánh Giá Của Khách Hàng
 
-![Review_CustomerLifecycle](Review_CustomerLifecycle.png)
+![Review_CustomerLifecycle](Review_CustomerLifecycle_SD.png)
 
 **Các lớp xử lý chính:**
 - Controllers: `CustomerReviewController`
@@ -69,9 +69,9 @@
 
 ---
 
-## 2. Review_Moderation_And_VendorReply.png — Vận Hành, Phản Hồi Đối Tác & Kiểm Duyệt Quản Trị
+## 2. Review_Moderation_And_VendorReply_SD.png — Vận Hành, Phản Hồi Đối Tác & Kiểm Duyệt Quản Trị
 
-![Review_Moderation_And_VendorReply](Review_Moderation_And_VendorReply.png)
+![Review_Moderation_And_VendorReply](Review_Moderation_And_VendorReply_SD.png)
 
 **Các lớp xử lý chính:**
 - Controllers: `ServiceReviewController`, `VendorReviewController`, `AdminReviewController`
@@ -115,9 +115,9 @@
 
 ---
 
-## 3. Review_RatingCalculation_And_BadgeDerivation.png — Động Cơ Tính Điểm & Phân Hạng Huy Hiệu
+## 3. Review_RatingCalculation_And_BadgeDerivation_DF.png — Động Cơ Tính Điểm & Phân Hạng Huy Hiệu
 
-![Review_RatingCalculation_And_BadgeDerivation](Review_RatingCalculation_And_BadgeDerivation.png)
+![Review_RatingCalculation_And_BadgeDerivation](Review_RatingCalculation_And_BadgeDerivation_DF.png)
 
 **Lớp xử lý chính:** `com.danasea.backend.modules.operation.domain.services.ReviewRatingService`
 
@@ -152,7 +152,7 @@ Nhằm đảm bảo dữ liệu thống kê không bị sai lệch trong môi tr
 
 ## 4. Kiểm Chứng Nghiệp Vụ & Đồng Thời (11 Scenarios Test)
 
-Toàn bộ các luồng nghiệp vụ trên đã được kiểm chứng tự động và vượt qua 100% qua bộ kiểm thử tích hợp PostgreSQL 16 thật trong [`ReviewConcurrencyIntegrationTest.java`](file:///Users/capkimkhanh/.gemini/antigravity/worktrees/PBL6/implement_review_rating_system/backend/src/test/java/com/danasea/backend/modules/operation/ReviewConcurrencyIntegrationTest.java):
+Toàn bộ các luồng nghiệp vụ trên đã được kiểm chứng tự động và vượt qua 100% qua bộ kiểm thử tích hợp PostgreSQL 16 thật trong [`ReviewConcurrencyIntegrationTest.java`](../../../backend/src/test/java/com/danasea/backend/modules/operation/ReviewConcurrencyIntegrationTest.java):
 
 1. `sameExperienceCanCreateOnlyOneReview`: Đảm bảo 1 trải nghiệm chỉ tạo được đúng 1 đánh giá khi gọi đồng thời.
 2. `uniqueConstraintProtectsAgainstDirectDuplicateInserts`: Ràng buộc `uq_reviews_sub_order` chặn đứng duplicate insert ở tầng database.

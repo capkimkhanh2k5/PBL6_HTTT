@@ -1,11 +1,10 @@
 package com.danasea.backend.modules.order.application.dtos;
 
+import com.danasea.backend.modules.order.domain.models.SubOrder;
+import com.danasea.backend.modules.order.domain.models.SubOrderStatus;
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 import java.util.UUID;
-
-import com.danasea.backend.modules.order.domain.models.SubOrder;
-import com.danasea.backend.modules.order.domain.models.SubOrderStatus;
 
 public record SubOrderDetailResult(
         UUID id,
@@ -25,10 +24,46 @@ public record SubOrderDetailResult(
         BigDecimal commissionAmount,
         BigDecimal vendorPayoutAmount,
         SubOrderStatus status,
+        Boolean waiverRequired,
+        Integer waiverVersion,
+        String waiverContent,
+        String waiverContentEn,
         Boolean waiverAccepted,
+        OffsetDateTime waiverAcceptedAt,
+        UUID waiverAcceptedBy,
+        String waiverAcceptedLanguage,
+        String waiverAcceptedContent,
         OffsetDateTime vendorNotifiedAt,
         OffsetDateTime createdAt
 ) {
+    public SubOrderDetailResult(
+            UUID id,
+            UUID bookingItemId,
+            UUID masterOrderId,
+            UUID vendorId,
+            UUID serviceId,
+            UUID slotId,
+            Integer quantity,
+            BigDecimal unitPrice,
+            BigDecimal subtotalAmount,
+            BigDecimal discountAmount,
+            BigDecimal vendorDiscountAmount,
+            BigDecimal platformDiscountAmount,
+            BigDecimal finalAmount,
+            BigDecimal commissionRate,
+            BigDecimal commissionAmount,
+            BigDecimal vendorPayoutAmount,
+            SubOrderStatus status,
+            Boolean waiverAccepted,
+            OffsetDateTime vendorNotifiedAt,
+            OffsetDateTime createdAt
+    ) {
+        this(id, bookingItemId, masterOrderId, vendorId, serviceId, slotId, quantity, unitPrice, subtotalAmount,
+                discountAmount, vendorDiscountAmount, platformDiscountAmount, finalAmount,
+                commissionRate, commissionAmount, vendorPayoutAmount, status,
+                false, 1, null, null, waiverAccepted, null, null, null, null, vendorNotifiedAt, createdAt);
+    }
+
     public SubOrderDetailResult(
             UUID id,
             UUID bookingItemId,
@@ -49,7 +84,8 @@ public record SubOrderDetailResult(
     ) {
         this(id, bookingItemId, masterOrderId, vendorId, serviceId, slotId, quantity, unitPrice, subtotalAmount,
                 BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO, subtotalAmount,
-                commissionRate, commissionAmount, vendorPayoutAmount, status, waiverAccepted, vendorNotifiedAt, createdAt);
+                commissionRate, commissionAmount, vendorPayoutAmount, status,
+                false, 1, null, null, waiverAccepted, null, null, null, null, vendorNotifiedAt, createdAt);
     }
 
     public static SubOrderDetailResult fromDomain(SubOrder subOrder) {
@@ -74,7 +110,15 @@ public record SubOrderDetailResult(
                 subOrder.getCommissionAmount(),
                 subOrder.getVendorPayoutAmount(),
                 subOrder.getStatus(),
-                subOrder.getWaiverAccepted(),
+                Boolean.TRUE.equals(subOrder.getWaiverRequired()),
+                subOrder.getWaiverVersion() != null ? subOrder.getWaiverVersion() : 1,
+                subOrder.getWaiverContent(),
+                subOrder.getWaiverContentEn(),
+                Boolean.TRUE.equals(subOrder.getWaiverAccepted()),
+                subOrder.getWaiverAcceptedAt(),
+                subOrder.getWaiverAcceptedBy(),
+                subOrder.getWaiverAcceptedLanguage(),
+                subOrder.getWaiverAcceptedContent(),
                 subOrder.getVendorNotifiedAt(),
                 subOrder.getCreatedAt()
         );

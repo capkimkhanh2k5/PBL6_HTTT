@@ -1,0 +1,28 @@
+flowchart TD
+    Start(["Cron Job kích hoạt định kỳ (mỗi 15 phút)<br/><code>TripReminderScheduledJob</code>"]) --> ScanUpcoming["Quét các SubOrders có ca khởi hành<br/>trong vòng 24 giờ và 2 giờ tới"]
+
+    ScanUpcoming --> HasSlots{"Có ca tour sắp diễn ra?"}
+    HasSlots -- "Không có" --> EndJob(["Kết thúc chu kỳ Job"])
+    HasSlots -- "Có danh sách SubOrders" --> LoopOrders["Duyệt từng SubOrder"]
+
+    LoopOrders --> CheckSent{"Đã gửi thông báo nhắc lịch<br/>với Idempotency Key <code>reminder-{subOrderId}-{window}</code>?"}
+    CheckSent -- "Đã gửi rồi" --> Skip["Bỏ qua để tránh gửi lặp"]
+    CheckSent -- "Chưa gửi" --> CheckWeather{"Thời tiết ca tour có cảnh báo an toàn?"}
+
+    CheckWeather -- "Có cảnh báo xấu" --> SendWeatherReminder["Gửi Notification: Nhắc lịch kèm khuyến cáo thời tiết & hướng dẫn đổi lịch"]
+    CheckWeather -- "Thời tiết an toàn" --> SendNormalReminder["Gửi Notification: Nhắc chuẩn bị đồ bơi, áo phao & thời gian check-in"]
+
+    SendWeatherReminder --> MarkSent["Đánh dấu thời gian đã gửi thông báo"]
+    SendNormalReminder --> MarkSent
+    Skip --> NextItem{"Còn SubOrder tiếp theo?"}
+    MarkSent --> NextItem
+    NextItem -- "Còn" --> LoopOrders
+    NextItem -- "Hết" --> EndJob
+
+    classDef startEnd fill:#e0f2fe,stroke:#0284c7,stroke-width:2px,color:#0369a1;
+    classDef decision fill:#fef3c7,stroke:#d97706,stroke-width:2px,color:#92400e;
+    classDef action fill:#f0fdf4,stroke:#16a34a,stroke-width:2px,color:#15803d;
+
+    class Start,EndJob startEnd;
+    class HasSlots,CheckSent,CheckWeather,NextItem decision;
+    class ScanOrders,LoopOrders,Skip,SendWeatherReminder,SendNormalReminder,MarkSent action;

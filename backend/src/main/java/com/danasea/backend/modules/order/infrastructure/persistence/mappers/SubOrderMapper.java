@@ -1,9 +1,8 @@
 package com.danasea.backend.modules.order.infrastructure.persistence.mappers;
 
-import org.springframework.stereotype.Component;
-
 import com.danasea.backend.modules.order.domain.models.SubOrder;
 import com.danasea.backend.modules.order.infrastructure.persistence.entities.SubOrderJpaEntity;
+import org.springframework.stereotype.Component;
 
 @Component
 public class SubOrderMapper {
@@ -32,8 +31,15 @@ public class SubOrderMapper {
         domain.setVendorPayoutAmount(entity.getVendorPayoutAmount());
         domain.setStatus(entity.getStatus());
         domain.setCancellationReason(entity.getCancellationReason());
-        domain.setWaiverAccepted(entity.getWaiverAccepted());
+        domain.setWaiverRequired(entity.getWaiverRequired() != null ? entity.getWaiverRequired() : Boolean.FALSE);
+        domain.setWaiverVersion(entity.getWaiverVersion() != null ? entity.getWaiverVersion() : 1);
+        domain.setWaiverContent(entity.getWaiverContent());
+        domain.setWaiverContentEn(entity.getWaiverContentEn());
+        domain.setWaiverAccepted(entity.getWaiverAccepted() != null ? entity.getWaiverAccepted() : Boolean.FALSE);
         domain.setWaiverAcceptedAt(entity.getWaiverAcceptedAt());
+        domain.setWaiverAcceptedBy(entity.getWaiverAcceptedBy());
+        domain.setWaiverAcceptedLanguage(entity.getWaiverAcceptedLanguage());
+        domain.setWaiverAcceptedContent(entity.getWaiverAcceptedContent());
         domain.setQrSecret(entity.getQrSecret());
         domain.setCheckedInAt(entity.getCheckedInAt());
         domain.setVendorNotifiedAt(entity.getVendorNotifiedAt());
@@ -68,8 +74,15 @@ public class SubOrderMapper {
         entity.setVendorPayoutAmount(domain.getVendorPayoutAmount());
         entity.setStatus(domain.getStatus());
         entity.setCancellationReason(domain.getCancellationReason());
-        entity.setWaiverAccepted(domain.getWaiverAccepted());
+        entity.setWaiverRequired(domain.getWaiverRequired() != null ? domain.getWaiverRequired() : Boolean.FALSE);
+        entity.setWaiverVersion(domain.getWaiverVersion() != null ? domain.getWaiverVersion() : 1);
+        entity.setWaiverContent(domain.getWaiverContent());
+        entity.setWaiverContentEn(domain.getWaiverContentEn());
+        entity.setWaiverAccepted(domain.getWaiverAccepted() != null ? domain.getWaiverAccepted() : Boolean.FALSE);
         entity.setWaiverAcceptedAt(domain.getWaiverAcceptedAt());
+        entity.setWaiverAcceptedBy(domain.getWaiverAcceptedBy());
+        entity.setWaiverAcceptedLanguage(domain.getWaiverAcceptedLanguage());
+        entity.setWaiverAcceptedContent(domain.getWaiverAcceptedContent());
         entity.setQrSecret(domain.getQrSecret());
         entity.setCheckedInAt(domain.getCheckedInAt());
         entity.setVendorNotifiedAt(domain.getVendorNotifiedAt());

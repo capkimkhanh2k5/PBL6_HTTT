@@ -1,0 +1,60 @@
+flowchart TD
+    %% ==========================================
+    %% DECISION FLOWCHART: VENDOR DIAGNOSTICS & PERFORMANCE ENGINE
+    %% DANASEA Marine Tourism Platform
+    %% ==========================================
+
+    Start(["Khởi chạy động cơ chẩn đoán hiệu suất đối tác<br/><code>VendorDiagnosticEngine.evaluate(vendorMetrics)</code>"]) --> CalcMetrics["Tính toán các chỉ số vận hành cốt lõi:<br/>- <code>cancellationRate = (hủy / tổng đơn) * 100%</code><br/>- <code>occupancyRate = (suất đặt / tổng công suất) * 100%</code><br/>- <code>averageRating</code> & <code>reviewCount</code><br/>- <code>totalBookings</code> & <code>netPayout</code>"]
+
+    CalcMetrics --> CheckCritical{"Kiểm tra ngưỡng Báo Động Đỏ (CRITICAL)?<br/><code>cancellationRate > 40%</code><br/>HOẶC (<code>averageRating < 2.5</code> VÀ <code>reviewCount >= 5</code>)"}
+
+    %% MỨC CRITICAL
+    CheckCritical -- "ĐÚNG (Nguy cơ nghiêm trọng)" --> CriticalAlert["<b>Phân cấp: CRITICAL (Báo động đỏ)</b><br/>- Cảnh báo vi phạm chất lượng nghiêm trọng<br/>- Đề xuất Admin can thiệp đình chỉ hoặc thanh tra đối tác"]
+    CriticalAlert --> CheckIssues
+
+    %% KIỂM TRA TỪNG VẤN ĐỀ VẬN HÀNH
+    CheckCritical -- "KHÔNG (Chưa chạm ngưỡng đỏ)" --> CheckIssues["Đánh giá 4 nhóm vấn đề vận hành (VendorIssueType)"]
+
+    CheckIssues --> CheckCancelIssue{"Tỷ lệ hủy đơn cao?<br/><code>cancellationRate > 20%</code>"}
+    CheckCancelIssue -- "Có" --> AddCancelIssue["Gắn nhãn: <code>HIGH_CANCELLATION</code>"]
+    CheckCancelIssue -- "Không" --> CheckRatingIssue
+
+    AddCancelIssue --> CheckRatingIssue{"Điểm đánh giá kém?<br/><code>averageRating < 3.5 && reviewCount >= 3</code>"}
+    CheckRatingIssue -- "Có" --> AddRatingIssue["Gắn nhãn: <code>LOW_RATING</code>"]
+    CheckRatingIssue -- "Không" --> CheckOverloadIssue
+
+    AddRatingIssue --> CheckOverloadIssue{"Quá tải công suất?<br/><code>occupancyRate >= 95%</code>"}
+    CheckOverloadIssue -- "Có" --> AddOverloadIssue["Gắn nhãn: <code>OVERLOADED</code><br/>(Nguy cơ thiếu chỗ / suy giảm chất lượng)"]
+    CheckOverloadIssue -- "Không" --> CheckUnderperformIssue
+
+    AddOverloadIssue --> CheckUnderperformIssue{"Kinh doanh ế ẩm?<br/><code>occupancyRate < 20% && totalBookings < 5</code>"}
+    CheckUnderperformIssue -- "Có" --> AddUnderperformIssue["Gắn nhãn: <code>UNDERPERFORMING</code><br/>(Cần đẩy mạnh quảng bá / giảm giá)"]
+    CheckUnderperformIssue -- "Không" --> DetermineSeverity
+
+    CheckRatingIssue -- "Không" --> CheckOverloadIssue
+    CheckOverloadIssue -- "Không" --> CheckUnderperformIssue
+    CheckUnderperformIssue -- "Không" --> DetermineSeverity
+
+    AddCancelIssue --> DetermineSeverity
+    AddRatingIssue --> DetermineSeverity
+    AddOverloadIssue --> DetermineSeverity
+    AddUnderperformIssue --> DetermineSeverity
+
+    DetermineSeverity{"Xác định cấp độ nghiêm trọng cuối cùng"}
+
+    DetermineSeverity -- "Đã đánh dấu CRITICAL" --> FinalCritical(["Trả về <code>VendorDiagnosisAlert</code><br/>- Severity: <b>CRITICAL</b><br/>- Danh sách Issues chi tiết<br/>- Khuyến nghị can thiệp cho Admin"])
+    DetermineSeverity -- "Có ít nhất 1 Issue (Chưa bị Critical)" --> FinalWarning(["Trả về <code>VendorDiagnosisAlert</code><br/>- Severity: <b>WARNING (Cảnh báo vàng)</b><br/>- Danh sách Issues chi tiết<br/>- Nhắc nhở Vendor cải thiện"])
+    DetermineSeverity -- "Không có bất kỳ Issue nào" --> FinalHealthy(["Trả về <code>VendorDiagnosisAlert</code><br/>- Severity: <b>HEALTHY (Xanh an toàn)</b><br/>- Hoạt động ổn định, chất lượng tốt"])
+
+    %% Style classes
+    classDef startEnd fill:#e0f2fe,stroke:#0284c7,stroke-width:2px,color:#0369a1;
+    classDef decision fill:#fef3c7,stroke:#d97706,stroke-width:2px,color:#92400e;
+    classDef action fill:#f0fdf4,stroke:#16a34a,stroke-width:2px,color:#15803d;
+    classDef warning fill:#fef9c3,stroke:#ca8a04,stroke-width:2px,color:#854d0e;
+    classDef danger fill:#fee2e2,stroke:#dc2626,stroke-width:2px,color:#b91c1c;
+
+    class Start,FinalHealthy startEnd;
+    class CheckCritical,CheckCancelIssue,CheckRatingIssue,CheckOverloadIssue,CheckUnderperformIssue,DetermineSeverity decision;
+    class CalcMetrics,CheckIssues,AddCancelIssue,AddRatingIssue,AddOverloadIssue,AddUnderperformIssue action;
+    class FinalWarning warning;
+    class CriticalAlert,FinalCritical danger;

@@ -2,17 +2,17 @@
 
 > Folder này chứa **5 sơ đồ** mô tả toàn bộ cơ chế kiểm tra an toàn thời tiết, vòng đời cảnh báo, và quy trình hoàn tiền tự động cho hệ thống DANASEA.
 
-| # | Sơ đồ | Loại | Nội dung |
-|---|-------|------|----------|
-| 1 | `AdvanceBookSafetyCheck` | Sequence Diagram | Kiểm tra an toàn thời tiết trước đặt chỗ (Cache → Open-Meteo API song song → WeatherRuleEngine → GREEN/YELLOW/RED) |
-| 2 | `DynamicSafety_FallBack500` | Sequence Diagram | Admin cập nhật ngưỡng an toàn + Zero-500 Fallback (Cache → DB → Built-in Default Registry ASTM/PADI) |
-| 3 | `SlidingWindows_SafetyAsset` | Flowchart | Quét chu kỳ 30 phút, leo thang cảnh báo YELLOW → RED, auto-escalation hủy + hoàn tiền khi T ≤ 60 phút |
-| 4 | `WeatherAlertLifeCycle` | State Machine | Vòng đời cảnh báo: `MONITORING_YELLOW` → `RESOLVED_NORMAL` / `AWAITING_ADMIN_RESOLUTION` → 4 trạng thái kết thúc |
-| 5 | `Weather_ReturnMoney` | Flowchart | Cron Job T-24h & T-2h → đánh giá vi phạm → Admin duyệt hủy → hoàn tiền 100% |
+| # | Sơ đồ | Loại | Mã nguồn Mermaid (.mmd) | Nội dung |
+|---|-------|------|--------------------------|----------|
+| 1 | `Weather_Safety_Evaluation_DF` | Decision Flowchart | [`codeFlows/Decision_Flowchart/Weather_Safety_Evaluation_DF.mmd`](codeFlows/Decision_Flowchart/Weather_Safety_Evaluation_DF.mmd) | Cây quyết định đánh giá an toàn thời tiết: kiểm tra gió, sóng, mưa, tầm nhìn và cơ chế Zero-500 Fallback |
+| 2 | `SlidingWindows_Safety_Escalation_DF` | Decision Flowchart | [`codeFlows/Decision_Flowchart/SlidingWindows_Safety_Escalation_DF.mmd`](codeFlows/Decision_Flowchart/SlidingWindows_Safety_Escalation_DF.mmd) | Cây quyết định quét chu kỳ 30 phút, leo thang cảnh báo YELLOW → RED, auto-escalation hủy + hoàn tiền khi T ≤ 60 phút |
+| 3 | `Weather_Alert_Lifecycle_SM` | State Machine | [`codeFlows/State_Machine/Weather_Alert_Lifecycle_SM.mmd`](codeFlows/State_Machine/Weather_Alert_Lifecycle_SM.mmd) | Vòng đời cảnh báo: `MONITORING_YELLOW` → `RESOLVED_NORMAL` / `AWAITING_ADMIN_RESOLUTION` → 4 trạng thái kết thúc |
+| 4 | `AdvanceBookSafetyCheck_SD` | Sequence Diagram | [`codeFlows/Sequence_Diagram/AdvanceBookSafetyCheck_SD.mmd`](codeFlows/Sequence_Diagram/AdvanceBookSafetyCheck_SD.mmd) | Kiểm tra an toàn thời tiết trước đặt chỗ (Cache → Open-Meteo API song song → WeatherRuleEngine → GREEN/YELLOW/RED) |
+| 5 | `DynamicSafety_FallBack500_SD` | Sequence Diagram | [`codeFlows/Sequence_Diagram/DynamicSafety_FallBack500_SD.mmd`](codeFlows/Sequence_Diagram/DynamicSafety_FallBack500_SD.mmd) | Admin cập nhật ngưỡng an toàn + Zero-500 Fallback (Cache → DB → Built-in Default Registry ASTM/PADI) |
 
 ---
 
-## 1. AdvanceBookSafetyCheck.png — Kiểm tra an toàn trước khi đặt chỗ
+## 1. AdvanceBookSafetyCheck_SD.png — Kiểm tra an toàn trước khi đặt chỗ
 
 **Thành phần:** `Khách Hàng` → `WeatherController` → `WeatherForecastCacheService` → `OpenMeteoApiClient` → `Open-Meteo API` → `CategorySafetyRuleService` → `WeatherRuleEngine`
 
@@ -32,7 +32,7 @@
 
 ---
 
-## 2. DynamicSafety_FallBack500.png — Ngưỡng an toàn động & Fallback Zero-500
+## 2. DynamicSafety_FallBack500_SD.png — Ngưỡng an toàn động & Fallback Zero-500
 
 **2 luồng chính:**
 
@@ -52,7 +52,7 @@
 
 ---
 
-## 3. SlidingWindows_SafetyAsset.png — Quét chu kỳ & Leo thang cảnh báo
+## 3. SlidingWindows_SafetyAsset_DF.png — Quét chu kỳ & Leo thang cảnh báo
 
 **Luồng (mỗi 30 phút):**
 1. Quét tất cả Booking Slot sắp diễn ra
@@ -78,7 +78,7 @@
 
 ---
 
-## 4. WeatherAlertLifeCycle.png — Vòng đời cảnh báo thời tiết
+## 4. Weather_Alert_Lifecycle_SM.png — Vòng đời cảnh báo thời tiết
 
 **Máy trạng thái:**
 
@@ -109,7 +109,7 @@
 
 ---
 
-## 5. Weather_ReturnMoney.png — Hoàn tiền khi thời tiết nguy hiểm
+## 5. Weather_ReturnMoney_DF.png — Hoàn tiền khi thời tiết nguy hiểm
 
 **Luồng:**
 1. **Cron Job** chạy tại T-24h và T-2h

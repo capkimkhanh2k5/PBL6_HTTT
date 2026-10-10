@@ -1,0 +1,23 @@
+flowchart TD
+    Start(["Sự kiện ReviewCreatedEvent / ReviewUpdatedEvent"]) --> LoadReviews["Truy vấn danh sách đánh giá hợp lệ của Dịch vụ<br/>(<code>isVisible == true</code>)"]
+
+    LoadReviews --> CountReviews{"Tổng số lượng đánh giá?"}
+    CountReviews -- "Số lượng = 0" --> ResetRating["Đặt <code>averageRating = 0.0</code><br/><code>totalReviews = 0</code>, Không gắn huy hiệu"]
+    CountReviews -- "Số lượng > 0" --> CalcAvg["Tính điểm trung bình cộng số sao:<br/><code>sum(rating) / totalReviews</code> (Làm tròn 1 chữ số thập phân)"]
+
+    CalcAvg --> CheckBadge{"Điều kiện cấp huy hiệu uy tín:<br/>- <code>averageRating >= 4.8</code><br/>- <code>totalReviews >= 20</code>?"}
+    CheckBadge -- "Đạt điều kiện" --> AwardBadge["Gán huy hiệu <b>TOP RATED SERVICE</b>"]
+    CheckBadge -- "Chưa đạt" --> NormalBadge["Bảo lưu hoặc thu hồi huy hiệu TOP RATED"]
+
+    ResetRating --> UpdateServiceDB["Cập nhật lại Service Entity trong Database & đẩy Cache"]
+    AwardBadge --> UpdateServiceDB
+    NormalBadge --> UpdateServiceDB
+    UpdateServiceDB --> End(["Hoàn tất cập nhật xếp hạng"])
+
+    classDef startEnd fill:#e0f2fe,stroke:#0284c7,stroke-width:2px,color:#0369a1;
+    classDef decision fill:#fef3c7,stroke:#d97706,stroke-width:2px,color:#92400e;
+    classDef action fill:#f0fdf4,stroke:#16a34a,stroke-width:2px,color:#15803d;
+
+    class Start,End startEnd;
+    class CountReviews,CheckBadge decision;
+    class LoadReviews,ResetRating,CalcAvg,AwardBadge,NormalBadge,UpdateServiceDB action;

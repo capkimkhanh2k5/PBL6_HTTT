@@ -2,16 +2,17 @@
 
 > Module Report & Dashboard chịu trách nhiệm tính toán, tổng hợp các chỉ số hoạt động thời gian thực (Real-time Dashboard), phân rã doanh thu và đơn hàng theo chuỗi thời gian (Time-series Analytics), chẩn đoán điểm nghẽn hiệu suất đối tác (Vendor Diagnostics) và cung cấp bộ máy xuất dữ liệu CSV chuẩn hóa theo múi giờ Việt Nam (`Asia/Ho_Chi_Minh` UTC+7) cho cả Quản trị viên (Admin) và Đối tác (Vendor).
 
-| # | Sơ đồ | Loại | Nội dung |
-|---|-------|------|----------|
-| 1 | `Report_Architecture_And_DataFlow` | Architecture & Data Flow | Kiến trúc tổng thể Clean Architecture của Module Report: Phân tách rõ ràng giữa Tầng Presentation (Controllers & DTOs), Application (6 UseCases & TimeSeriesHelper), Domain (Models, Enums, Ports) và Infrastructure (JpaReportDataAdapter & Rfc4180Utf8BomCsvExporter). |
-| 2 | `Report_TimeSeries_Analytics` | Sequence Diagram | Quy trình tổng hợp báo cáo doanh thu và đơn hàng theo chuỗi thời gian: Chuẩn hóa múi giờ UTC+7 và biên ngày [00:00:00 - 23:59:59], phân rã 5 chỉ số tài chính, phân loại lý do hủy đơn và tự động lấp đầy chu kỳ trống (Zero-filling). |
-| 3 | `Report_Vendor_Performance_Diagnostics` | Sequence Diagram & Decision Engine | Động cơ phân tích hiệu suất và chẩn đoán đối tác: Tính toán GMV, Net Payout, tỷ lệ hủy, tỷ lệ lấp đầy chỗ (`slot occupancy rate`), điểm đánh giá thực tế, tự động phát hiện 4 nhóm vấn đề (`HIGH_CANCELLATION`, `LOW_RATING`, `OVERLOADED`, `UNDERPERFORMING`) và phân cấp cảnh báo (`HEALTHY`, `WARNING`, `CRITICAL`). |
-| 4 | `Report_Export_And_VendorIsolation` | Sequence Diagram | Cơ chế cô lập đa người thuê (Multi-tenant Vendor Isolation) và xuất dữ liệu CSV chuẩn RFC 4180: Chống tấn công IDOR bằng cách trích xuất danh tính trực tiếp từ Security Context, gắn 3-byte UTF-8 BOM (`0xEF, 0xBB, 0xBF`) để Excel hiển thị tiếng Việt hoàn hảo. |
+| # | Sơ đồ | Loại | Mã nguồn Mermaid (.mmd) | Nội dung |
+|---|-------|------|--------------------------|----------|
+| 1 | `Report_Architecture_And_DataFlow_ARCH` | Architecture Diagram | [`codeFlows/Architecture/Report_Architecture_And_DataFlow_ARCH.mmd`](codeFlows/Architecture/Report_Architecture_And_DataFlow_ARCH.mmd) | Kiến trúc tổng thể Clean Architecture của Module Report: Phân tách rõ ràng Presentation, Application (6 UseCases), Domain và Infrastructure |
+| 2 | `Report_Vendor_Diagnostics_DF` | Decision Flowchart | [`codeFlows/Decision_Flowchart/Report_Vendor_Diagnostics_DF.mmd`](codeFlows/Decision_Flowchart/Report_Vendor_Diagnostics_DF.mmd) | Cây quyết định chẩn đoán đối tác: kiểm tra ngưỡng CRITICAL (>40% hủy hoặc <2.5 sao), 4 nhóm vấn đề và phân cấp HEALTHY / WARNING / CRITICAL |
+| 3 | `Report_TimeSeries_Analytics_SD` | Sequence Diagram | [`codeFlows/Sequence_Diagram/Report_TimeSeries_Analytics_SD.mmd`](codeFlows/Sequence_Diagram/Report_TimeSeries_Analytics_SD.mmd) | Quy trình tổng hợp báo cáo doanh thu và đơn hàng theo chuỗi thời gian: Chuẩn hóa múi giờ UTC+7, 5 chỉ số tài chính và tự động lấp đầy 0 (Zero-filling) |
+| 4 | `Report_Vendor_Performance_Diagnostics_SD` | Sequence Diagram | [`codeFlows/Sequence_Diagram/Report_Vendor_Performance_Diagnostics_SD.mmd`](codeFlows/Sequence_Diagram/Report_Vendor_Performance_Diagnostics_SD.mmd) | Động cơ phân tích hiệu suất và chẩn đoán đối tác: Tính toán GMV, Net Payout, tỷ lệ hủy, tỷ lệ lấp đầy chỗ (`slot occupancy rate`) |
+| 5 | `Report_Export_And_VendorIsolation_SD` | Sequence Diagram | [`codeFlows/Sequence_Diagram/Report_Export_And_VendorIsolation_SD.mmd`](codeFlows/Sequence_Diagram/Report_Export_And_VendorIsolation_SD.mmd) | Cơ chế cô lập đa người thuê (Multi-tenant Vendor Isolation) chống IDOR và xuất dữ liệu CSV chuẩn RFC 4180 đính kèm 3-byte UTF-8 BOM |
 
 ---
 
-## 1. Report_Architecture_And_DataFlow.png — Kiến Trúc & Dòng Dữ Liệu Module Report
+## 1. Report_Architecture_And_DataFlow_ARCH.png — Kiến Trúc & Dòng Dữ Liệu Module Report
 
 **Package gốc:** `com.danasea.backend.modules.report`
 
@@ -41,7 +42,7 @@
 
 ---
 
-## 2. Report_TimeSeries_Analytics.png — Báo Cáo Chuỗi Thời Gian Doanh Thu & Đơn Hàng
+## 2. Report_TimeSeries_Analytics_SD.png — Báo Cáo Chuỗi Thời Gian Doanh Thu & Đơn Hàng
 
 **Lớp xử lý chính:** `GetRevenueReportUseCase`, `GetBookingReportUseCase`, `TimeSeriesPeriodHelper`, `JpaReportDataAdapter`
 
@@ -77,7 +78,7 @@
 
 ---
 
-## 3. Report_Vendor_Performance_Diagnostics.png — Phân Tích Hiệu Suất & Động Cơ Chẩn Đoán Đối Tác
+## 3. Report_Vendor_Performance_Diagnostics_SD.png — Phân Tích Hiệu Suất & Động Cơ Chẩn Đoán Đối Tác
 
 **Lớp xử lý chính:** `GetVendorPerformanceReportUseCase`, `VendorPerformanceItem`
 
@@ -108,7 +109,7 @@
 
 ---
 
-## 4. Report_Export_And_VendorIsolation.png — Cơ Chế Cô Lập Đa Người Thuê & Xuất Báo Cáo CSV
+## 4. Report_Export_And_VendorIsolation_SD.png — Cơ Chế Cô Lập Đa Người Thuê & Xuất Báo Cáo CSV
 
 **Lớp xử lý chính:** `ExportReportCsvUseCase`, `Rfc4180Utf8BomCsvExporter`, `VendorReportController`, `AdminReportController`
 

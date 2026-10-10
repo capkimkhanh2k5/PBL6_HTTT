@@ -1,0 +1,41 @@
+flowchart TD
+    Start(["Khách hàng gửi yêu cầu tạo đơn hàng<br/>POST /api/orders { bookingId, discountCode? }<br/>Header: Idempotency-Key"]) --> CheckExistingBooking{"Đơn hàng cho Booking này<br/>đã tồn tại trong hệ thống?"}
+
+    %% Nhánh kiểm tra Idempotency theo Booking
+    CheckExistingBooking -- "Đã tồn tại đơn" --> CheckBookingIDOR{"IDOR Guard:<br/>order.customerId == currentUserId?"}
+    CheckBookingIDOR -- "Sai (User khác đọc trộm)" --> Err403Booking["Ném UnauthorizedOrderAccessException<br/>Trả về HTTP 403 Forbidden"]
+    CheckBookingIDOR -- "Đúng (Chính chủ)" --> ReturnExisting(["Trả về MasterOrder đã tạo trước đó<br/>HTTP 201 Created (Idempotent Response)"])
+
+    %% Nhánh kiểm tra Idempotency theo Key
+    CheckExistingBooking -- "Chưa có theo bookingId" --> CheckExistingKey{"Idempotency-Key<br/>đã từng được gửi trước đó?"}
+    CheckExistingKey -- "Đã tồn tại Key" --> CheckKeyConflict{"Đúng chủ đơn & cùng bookingId?"}
+    CheckKeyConflict -- "Khác chủ / Khác booking" --> Err409Key["Ném Conflict Exception<br/>Trả về HTTP 409 Conflict"]
+    CheckKeyConflict -- "Hợp lệ" --> ReturnExisting
+
+    %% Nhánh tạo mới
+    CheckExistingKey -- "Key mới hoàn toàn" --> LoadBooking["Tra cứu thông tin đặt chỗ:<br/>BookingLookupPort.findBookingForOrder(bookingId)"]
+
+    LoadBooking --> CheckBookingOwner{"IDOR Guard:<br/>booking.customerId == currentUserId?"}
+    CheckBookingOwner -- "Không phải chủ đặt chỗ" --> Err403New["Ném UnauthorizedOrderAccessException<br/>Trả về HTTP 403 Forbidden"]
+
+    CheckBookingOwner -- "Hợp lệ" --> CheckBookingStatus{"Trạng thái Booking == HOLD<br/>và chưa hết hạn 15 phút?"}
+    CheckBookingStatus -- "Sai (Đã quá hạn / Không hợp lệ)" --> Err409Status["Ném BookingNotEligibleForOrderException<br/>Trả về HTTP 409 Conflict"]
+
+    CheckBookingStatus -- "Hợp lệ" --> SplitSubOrders["Tách Sub-Orders 1:1 theo BookingItem:<br/>• Phân bổ theo từng vendorId<br/>• Lấy tỷ lệ hoa hồng: commissionRate<br/>• Đóng băng Snapshot cam kết an toàn:<br/>waiverRequired, waiverVersion, waiverContent (VI/EN)"]
+
+    SplitSubOrders --> HasDiscount{"Đơn hàng có gửi kèm<br/>mã giảm giá (discountCode)?"}
+
+    %% Xử lý Voucher
+    HasDiscount -- "Có mã giảm giá" --> LockVoucher["Khóa bi quan Voucher trong DB:<br/>codes.findByCodeForUpdate(code)"]
+    LockVoucher --> ValidateVoucherQuota{"Voucher hợp lệ,<br/>còn quota toàn sàn & cá nhân?"}
+    ValidateVoucherQuota -- "Không hợp lệ / Hết lượt" --> ErrVoucher["Ném DiscountValidationException<br/>Trả về HTTP 400 Bad Request"]
+    ValidateVoucherQuota -- "Hợp lệ" --> AllocDiscount["Phân bổ chiết khấu bằng giải thuật Hare-Niemeyer<br/>(Đảm bảo tổng làm tròn chính xác từng đồng)"]
+    AllocDiscount --> IncVoucherCount["Tăng usedCount nguyên tử & lưu DiscountRedemption"]
+    IncVoucherCount --> SaveOrder
+
+    %% Không có voucher
+    HasDiscount -- "Không dùng mã" --> SaveOrder["Lưu MasterOrder (status = PENDING_PAYMENT, UNPAID)<br/>Lưu danh sách SubOrders (status = PENDING)"]
+
+    SaveOrder --> UpdateBooking["Cập nhật trạng thái Booking -> PENDING_PAYMENT"]
+    UpdateBooking --> PublishEvent["Bắn sự kiện OrderCreatedEvent sang Event Bus"]
+    PublishEvent --> Success(["Trả về HTTP 201 Created<br/>MasterOrderResponse kèm chi tiết SubOrders & Snapshot"])

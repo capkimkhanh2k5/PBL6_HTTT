@@ -1,0 +1,58 @@
+flowchart TD
+    %% ==========================================
+    %% DECISION FLOWCHART: REFUND POLICY ENGINE
+    %% DANASEA Marine Tourism Platform
+    %% ==========================================
+
+    Start(["Khởi động công cụ đánh giá chính sách<br/><code>RefundPolicyEngine.evaluate(reason, departureTime, cancelTime, finalAmount)</code>"]) --> CheckReason{"Phân loại lý do hoàn tiền<br/><code>RefundReason</code>"}
+
+    %% NHÁNH 1: BẤT KHẢ KHÁNG / LỖI VENDOR
+    CheckReason -- "WEATHER hoặc VENDOR_FAULT" --> ForceMajeure["<b>Nhóm Bất Khả Kháng / Lỗi Đối Tác</b><br/>- Hoàn tiền 100% không phụ thuộc thời gian<br/>- <code>refundPercentage = 100%</code>"]
+    ForceMajeure --> CalcAmount
+
+    %% NHÁNH 2: ADMIN CAN THIỆP / TRANH CHẤP / BỒI THƯỜNG
+    CheckReason -- "ADMIN_OVERRIDE, COMPENSATION hoặc DISPUTE" --> CheckCustomPercent{"Có cung cấp tỷ lệ thủ công<br/><code>customPercentage != null</code>?"}
+    CheckCustomPercent -- "Có" --> ApplyCustom["Áp dụng chính xác tỷ lệ Admin chỉ định<br/><code>refundPercentage = customPercentage</code>"]
+    CheckCustomPercent -- "Không (null)" --> ApplyAdminDefault["Mặc định hoàn toàn phần<br/><code>refundPercentage = 100%</code>"]
+    ApplyCustom --> CalcAmount
+    ApplyAdminDefault --> CalcAmount
+
+    %% NHÁNH 3: KHÁCH HÀNG CHỦ ĐỘNG HỦY
+    CheckReason -- "CUSTOMER_REQUEST hoặc CUSTOMER_CANCEL" --> CheckTimeValidity{"Thời điểm hủy sau khởi hành?<br/><code>cancelTime > departureTime</code>"}
+    CheckTimeValidity -- "Đúng (Chuyến đi đã diễn ra)" --> PostTrip["Hủy sau giờ khởi hành vi phạm chính sách<br/><code>refundPercentage = 0%</code>"]
+    PostTrip --> CalcAmount
+
+    CheckTimeValidity -- "Không (Hủy trước giờ khởi hành)" --> CalcRemainingMinutes["Tính số phút còn lại trước khởi hành:<br/><code>minutesUntilDeparture = departureTime - cancelTime</code>"]
+
+    CalcRemainingMinutes --> CheckWindows{"Đánh giá các mốc thời gian hoàn tiền"}
+
+    CheckWindows -- "> 48 giờ (> 2880 phút)" --> Window100["<b>Mốc > 48 giờ (Báo trước dài hạn)</b><br/><code>refundPercentage = 100%</code>"]
+    CheckWindows -- "Từ 24 đến 48 giờ (1440 - 2880 phút)" --> Window70["<b>Mốc 24h - 48h (Báo trước trung hạn)</b><br/><code>refundPercentage = 70%</code>"]
+    CheckWindows -- "Từ 2 đến 24 giờ (120 - 1440 phút)" --> Window30["<b>Mốc 2h - 24h (Báo cận giờ)</b><br/><code>refundPercentage = 30%</code>"]
+    CheckWindows -- "< 2 giờ (< 120 phút)" --> Window0["<b>Mốc < 2 giờ (Hủy sát giờ)</b><br/><code>refundPercentage = 0%</code>"]
+
+    Window100 --> CalcAmount
+    Window70 --> CalcAmount
+    Window30 --> CalcAmount
+    Window0 --> CalcAmount
+
+    %% NHÁNH 4: LÝ DO KHÔNG XÁC ĐỊNH
+    CheckReason -- "Lý do khác hoặc Không hợp lệ" --> UnknownReason["Mặc định không hoàn tiền<br/><code>refundPercentage = 0%</code>"]
+    UnknownReason --> CalcAmount
+
+    %% TÍNH TOÁN SỐ TIỀN THỰC HOÀN
+    CalcAmount["<b>Tính toán số tiền hoàn thực tế:</b><br/><code>refundAmount = finalAmount * (refundPercentage / 100)</code><br/><i>* Lưu ý: Chỉ tính trên số tiền mặt thực trả (finalAmount),<br/>tuyệt đối không quy đổi voucher giảm giá thành tiền mặt</i>"] --> CheckZero{"Số tiền hoàn <code>refundAmount > 0</code>?"}
+
+    CheckZero -- "Không (<= 0 VNĐ)" --> ResultZero(["Trả về <code>RefundEvaluationResult</code><br/>- <code>refundPercentage = 0%</code><br/>- <code>refundAmount = 0 VNĐ</code><br/>- Không tạo bản ghi hoàn tiền qua cổng"])
+    CheckZero -- "Có (> 0 VNĐ)" --> ResultPositive(["Trả về <code>RefundEvaluationResult</code><br/>- Ghi nhận <code>refundPercentage</code><br/>- <code>refundAmount</code> chính xác theo tiền mặt<br/>- Sẵn sàng tạo bản ghi <code>Refund (PENDING)</code>"])
+
+    %% Style classes
+    classDef startEnd fill:#e0f2fe,stroke:#0284c7,stroke-width:2px,color:#0369a1;
+    classDef decision fill:#fef3c7,stroke:#d97706,stroke-width:2px,color:#92400e;
+    classDef action fill:#f0fdf4,stroke:#16a34a,stroke-width:2px,color:#15803d;
+    classDef error fill:#fee2e2,stroke:#dc2626,stroke-width:2px,color:#b91c1c;
+
+    class Start,ResultZero,ResultPositive startEnd;
+    class CheckReason,CheckCustomPercent,CheckTimeValidity,CheckWindows,CheckZero decision;
+    class ForceMajeure,ApplyCustom,ApplyAdminDefault,CalcRemainingMinutes,Window100,Window70,Window30,Window0,CalcAmount action;
+    class PostTrip,UnknownReason error;

@@ -1,0 +1,61 @@
+sequenceDiagram
+    autonumber
+    actor Customer as Khách Hàng
+    participant Controller as OrderController
+    participant UseCase as CreateOrderUseCase
+    participant CodeRepo as DiscountCodeRepositoryPort
+    participant Engine as DiscountAllocationEngine
+    participant MasterRepo as MasterOrderRepository
+    participant SubOrderRepo as SubOrderRepository
+    participant RedemptionRepo as DiscountRedemptionRepository
+    participant EventPublisher as ApplicationEventPublisher
+    participant DB as PostgreSQL
+
+    Customer->>Controller: POST /api/orders (bookingId, discountCode)
+    Note over Customer,Controller: Header: Idempotency-Key, Authorization: Bearer JWT
+
+    Controller->>UseCase: execute(command)
+    activate UseCase
+
+    Note over UseCase: Kiểm tra Idempotency & IDOR trên Booking và Order cũ
+
+    alt Có áp dụng mã giảm giá (discountCode != null)
+        UseCase->>CodeRepo: findByCodeForUpdate(cleanCode)
+        CodeRepo->>DB: SELECT * FROM discount_codes WHERE UPPER(code) = UPPER(?) FOR UPDATE
+        DB-->>CodeRepo: DiscountCodeEntity (ĐÃ KHÓA BI QUAN)
+        CodeRepo-->>UseCase: code
+
+        alt Quota đã hết (usedCount >= maxUses)
+            UseCase-->>Controller: throw QuotaExceededException (400)
+            Controller-->>Customer: 400 Bad Request (DISCOUNT_QUOTA_EXCEEDED)
+        end
+
+        UseCase->>Engine: evaluateAndAllocate(items, code)
+        Engine-->>UseCase: AllocationResult (tiền giảm từng item, finalPayableAmount)
+
+        UseCase->>CodeRepo: incrementUsedCountAtomic(code.getId())
+        CodeRepo->>DB: UPDATE discount_codes SET used_count = used_count + 1 WHERE id = ? AND used_count < max_uses
+        DB-->>CodeRepo: 1 row affected
+    end
+
+    UseCase->>MasterRepo: save(masterOrder)
+    MasterRepo->>DB: INSERT INTO master_orders (id, customer_id, total_amount, discount_amount, ...)
+    DB-->>MasterRepo: Saved
+
+    loop Với từng BookingItem tách SubOrder 1:1
+        UseCase->>SubOrderRepo: save(subOrder)
+        SubOrderRepo->>DB: INSERT INTO sub_orders (final_amount, commission_basis_amount, commission_amount, vendor_payout_amount, ...)
+    end
+
+    alt Có áp dụng mã giảm giá
+        UseCase->>RedemptionRepo: save(redemption)
+        RedemptionRepo->>DB: INSERT INTO discount_redemptions (discount_code_id, master_order_id, customer_id, amount_deducted)
+    end
+
+    UseCase->>DB: UPDATE bookings SET status = 'PENDING_PAYMENT' WHERE id = ?
+    UseCase->>EventPublisher: publishEvent(new OrderCreatedEvent(orderId))
+
+    UseCase-->>Controller: OrderCreatedResponse(orderId, totalAmount, subOrders)
+    deactivate UseCase
+
+    Controller-->>Customer: 201 Created (orderId, chi tiết thanh toán)

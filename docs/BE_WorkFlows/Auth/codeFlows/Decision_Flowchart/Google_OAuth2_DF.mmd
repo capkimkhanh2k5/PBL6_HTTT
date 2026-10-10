@@ -1,0 +1,37 @@
+flowchart TD
+    %% ==========================================
+    %% DECISION FLOWCHART: GOOGLE OAUTH2 LOGIN & AUTO-PROVISIONING
+    %% DANASEA Marine Tourism Platform
+    %% ==========================================
+
+    Start(["Khách hàng gửi Google ID Token<br/><code>POST /api/v1/auth/google</code><br/>Body: <code>{idToken}</code>"]) --> VerifyToken{"Xác thực Google ID Token<br/>qua <code>GoogleIdTokenVerifier</code>"}
+
+    VerifyToken -- "Chữ ký sai / Hết hạn / Sai Client ID" --> Err401Google["Trả về <b>HTTP 401 Unauthorized</b><br/><code>INVALID_GOOGLE_TOKEN</code>"]
+    VerifyToken -- "Token hợp lệ" --> ExtractClaims["Trích xuất thông tin Google Profile:<br/>- <code>googleId (sub)</code><br/>- <code>email</code> (email_verified=true)<br/>- <code>fullName</code><br/>- <code>avatarUrl</code>"]
+
+    ExtractClaims --> FindUserDB{"Tra cứu người dùng theo email trong DB<br/><code>userRepo.findByEmail(email)</code>?"}
+
+    %% TÀI KHOẢN ĐÃ TỒN TẠI
+    FindUserDB -- "Tài khoản ĐÃ TỒN TẠI" --> CheckLocked{"Tài khoản có đang bị khóa?<br/><code>user.isLocked == true</code>?"}
+
+    CheckLocked -- "Bị khóa" --> Err403Locked["Trả về <b>HTTP 403 Forbidden</b><br/><code>ACCOUNT_LOCKED</code>"]
+    CheckLocked -- "Hoạt động bình thường" --> LinkGoogle["Cập nhật liên kết Google ID & Avatar (nếu thiếu)<br/>Bảo lưu quyền hạn hiện có của tài khoản"]
+
+    %% TÀI KHOẢN CHƯA TỒN TẠI -> AUTO-PROVISIONING
+    FindUserDB -- "Tài khoản CHƯA TỒN TẠI" --> AutoProvision["<b>Tự động đăng ký mới (Auto-Provisioning):</b><br/>- Vai trò mặc định: <code>Role = CUSTOMER</code><br/>- Trạng thái: <code>status = ACTIVE</code><br/>- Nhà cung cấp: <code>authProvider = GOOGLE</code><br/>- Xác thực email: <code>emailVerified = true</code><br/>- Khởi tạo <code>sessionVersion = 1</code>"]
+
+    LinkGoogle --> IssueTokens
+    AutoProvision --> IssueTokens["<b>Cấp phát bộ Token Danasea:</b><br/>- <code>accessToken</code> (JWT thời hạn ngắn, claim sessionVersion)<br/>- <code>refreshToken</code> (Thời hạn 7 ngày, lưu vào Redis Cache)"]
+
+    IssueTokens --> Success200(["Trả về <b>HTTP 200 OK</b><br/><code>AuthenticationResponse</code><br/>- Access Token & Refresh Token<br/>- Thông tin hồ sơ người dùng"])
+
+    %% Style classes
+    classDef startEnd fill:#e0f2fe,stroke:#0284c7,stroke-width:2px,color:#0369a1;
+    classDef decision fill:#fef3c7,stroke:#d97706,stroke-width:2px,color:#92400e;
+    classDef action fill:#f0fdf4,stroke:#16a34a,stroke-width:2px,color:#15803d;
+    classDef error fill:#fee2e2,stroke:#dc2626,stroke-width:2px,color:#b91c1c;
+
+    class Start,Success200 startEnd;
+    class VerifyToken,FindUserDB,CheckLocked decision;
+    class ExtractClaims,LinkGoogle,AutoProvision,IssueTokens action;
+    class Err401Google,Err403Locked error;

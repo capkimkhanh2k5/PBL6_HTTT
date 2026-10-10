@@ -1,0 +1,141 @@
+sequenceDiagram
+    autonumber
+    actor Vendor as Nhà cung cấp (Vendor)
+    actor Customer as Khách hàng (Customer)
+    participant SvcCtrl as VendorServiceController<br/>(/api/vendor/services/{id})
+    participant SvcUC as UpdateServiceUseCase
+    participant SvcRepo as ServiceRepositoryPort
+    participant OrderUC as CreateOrderUseCase / OrderPaymentService
+    participant SubCtrl as SubOrderWaiverController<br/>(/api/sub-orders/{id}/waiver-acceptance)
+    participant AcceptUC as AcceptSubOrderWaiverUseCase
+    participant PayCtrl as PaymentController<br/>(create-intent / paypal-capture)
+    participant PayUC as CreatePaymentIntentUseCase / OrderPaymentService
+    participant Guard as WaiverAcceptanceGuard
+    participant Lookup as ServiceWaiverLookupPort
+    participant I18n as LocalizedContentSelector
+    participant Audit as AuditLogInternalApi
+    participant Gateway as Cổng Thanh Toán (VNPay / PayPal)
+    participant DB as PostgreSQL Database
+
+    %% =========================================================================
+    %% PHÂN ĐOẠN 1: THIẾT LẬP CHÍNH SÁCH CAM KẾT & KHÓA BI QUAN TUẦN TỰ HÓA VERSION
+    %% =========================================================================
+    rect rgb(240, 248, 255)
+    Note over Vendor, DB: [Giai đoạn 1] Quản lý Chính Sách Cam Kết & Tuần Tự Hóa Phiên Bản (Pessimistic Row Lock)
+    Vendor->>SvcCtrl: PUT/PATCH /api/vendor/services/{id}<br/>{ waiverRequired: true, waiverContent: "...", waiverContentEn: "..." }
+    activate SvcCtrl
+    SvcCtrl->>SvcUC: execute(UpdateServiceCommand)
+    activate SvcUC
+    Note over SvcUC: @Transactional + Khóa hàng bi quan ngăn chặn Race Condition
+    SvcUC->>SvcRepo: findByIdForUpdate(serviceId)
+    SvcRepo->>DB: SELECT * FROM services WHERE id = ? FOR UPDATE
+    DB-->>SvcRepo: ServiceEntity (khóa hàng)
+
+    Note over SvcUC: 1. Chuẩn hóa chuỗi (trim/blank -> null)<br/>2. Kiểm tra nội dung: cấm bật required nếu cả VI & EN đều rỗng (400 Bad Request)<br/>3. Dirty Check: nếu thay đổi required hoặc nội dung -> waiverVersion = waiverVersion + 1<br/>4. Cập nhật đồng thời từ 2 luồng sẽ xếp hàng tuần tự -> sinh các version riêng biệt (v1 -> v2 -> v3)
+    SvcUC->>SvcRepo: save(service)
+    SvcRepo->>DB: UPDATE services SET waiver_required = ?, waiver_version = ?, ... WHERE id = ?
+    SvcUC-->>SvcCtrl: ServiceResult (waiverVersion mới)
+    deactivate SvcUC
+    SvcCtrl-->>Vendor: 200 OK (ServiceDetailResponse)
+    deactivate SvcCtrl
+    end
+
+    %% =========================================================================
+    %% PHÂN ĐOẠN 2: TẠO ĐƠN HÀNG VÀ ĐÓNG BĂNG SNAPSHOT CAM KẾT
+    %% =========================================================================
+    rect rgb(245, 255, 245)
+    Note over Customer, DB: [Giai đoạn 2] Tạo Đơn Hàng & Đóng Băng Snapshot Cam Kết (Policy Freeze)
+    Customer->>OrderUC: Tạo MasterOrder từ Booking HOLD (POST /api/orders)
+    activate OrderUC
+    loop Từng dịch vụ trong đơn (BookingItem -> SubOrder)
+        OrderUC->>Lookup: findWaiverSnapshot(serviceId)
+        Lookup->>DB: SELECT waiver_required, waiver_version, waiver_content, waiver_content_en FROM services
+        DB-->>Lookup: Snapshot
+        Lookup-->>OrderUC: ServiceWaiverSnapshot
+        Note over OrderUC: Đóng băng bất biến snapshot vào SubOrderJpaEntity:<br/>waiverRequired, waiverVersion, waiverContent, waiverContentEn<br/>(Vendor sửa dịch vụ sau này không bao giờ ảnh hưởng đơn đã tạo)
+    end
+    OrderUC->>DB: INSERT INTO master_orders (PENDING_PAYMENT), sub_orders (PENDING)
+    OrderUC-->>Customer: 201 Created (MasterOrderResponse kèm SubOrder snapshot)
+    deactivate OrderUC
+    end
+
+    %% =========================================================================
+    %% PHÂN ĐOẠN 3: ĐỌC & XÁC NHẬN CAM KẾT AN TOÀN TỪNG SUB-ORDER
+    %% =========================================================================
+    rect rgb(255, 250, 240)
+    Note over Customer, DB: [Giai đoạn 3] Khách Hàng Đọc & Xác Nhận Cam Kết (POST /api/sub-orders/{id}/waiver-acceptance)
+    Customer->>SubCtrl: POST /api/sub-orders/{id}/waiver-acceptance<br/>{ accepted: true, version: 1, language: "VI" }
+    activate SubCtrl
+    Note over SubCtrl: Xác thực JWT (ROLE_CUSTOMER) -> trích xuất currentUserId
+
+    SubCtrl->>AcceptUC: execute(userId, subOrderId, command)
+    activate AcceptUC
+    Note over AcceptUC: Khóa bi quan theo thứ tự nhất quán: MasterOrder -> SubOrder
+    AcceptUC->>DB: SELECT master_order_id FROM sub_orders WHERE id = ?
+    DB-->>AcceptUC: masterOrderId
+    AcceptUC->>DB: SELECT * FROM master_orders WHERE id = ? FOR UPDATE
+    DB-->>AcceptUC: MasterOrder
+    AcceptUC->>DB: SELECT * FROM sub_orders WHERE id = ? FOR UPDATE
+    DB-->>AcceptUC: SubOrder (Snapshot waiver)
+
+    Note over AcceptUC: KIỂM SOÁT TÍNH TOÀN VẸN & BẢO MẬT NGHIÊM NGẶT:<br/>1. IDOR Guard: masterOrder.customerId == userId (403 Forbidden nếu sai)<br/>2. State Guard: masterOrder PENDING_PAYMENT & subOrder PENDING (409 Conflict nếu sai)<br/>3. Required Guard: subOrder.waiverRequired == true (409 Conflict nếu dịch vụ không yêu cầu)<br/>4. Version Guard: command.version == subOrder.waiverVersion (409 Conflict nếu lệch version)<br/>5. Snapshot Content Matching: chọn đúng nội dung VI/EN theo ngôn ngữ, xử lý fallback
+    alt Đã xác nhận trước đó (Idempotent Replay cùng version & cùng userId)
+        Note over AcceptUC: Trả kết quả đã lưu trong snapshot, KHÔNG sửa timestamp, KHÔNG lặp audit log
+        AcceptUC-->>SubCtrl: SubOrderWaiverAcceptanceResult (dữ liệu đã lưu)
+    else Xác nhận lần đầu
+        Note over AcceptUC: Ghi nhận bằng chứng thực tế từ hệ thống:<br/>• acceptedBy = userId (từ JWT)<br/>• acceptedAt = now() (Server Clock)<br/>• acceptedContent = snapshotContent (theo ngôn ngữ thực tế)
+        AcceptUC->>DB: UPDATE sub_orders SET waiver_accepted = true, waiver_accepted_by = ?, ... WHERE id = ?
+        AcceptUC->>Audit: recordTransactionalAuditLog("SUB_ORDER_WAIVER_ACCEPTED")
+        Audit->>DB: INSERT INTO audit_logs (...)
+        AcceptUC-->>SubCtrl: SubOrderWaiverAcceptanceResult
+    end
+    deactivate AcceptUC
+    SubCtrl-->>Customer: 200 OK (SubOrderWaiverAcceptanceResponse)
+    deactivate SubCtrl
+    end
+
+    %% =========================================================================
+    %% PHÂN ĐOẠN 4: PAYMENT WAIVER GUARD CHẶN KHỞI TẠO THANH TOÁN & CAPTURE PAYPAL
+    %% =========================================================================
+    rect rgb(255, 240, 245)
+    Note over Customer, Gateway: [Giai đoạn 4] Payment Waiver Guard (Chặn Create-Intent & PayPal Capture)
+    Customer->>PayCtrl: POST /api/payments/{orderId}/create-intent (hoặc /payments/paypal/capture)
+    activate PayCtrl
+    PayCtrl->>PayUC: execute(orderId, command, currentUserId)
+    activate PayUC
+
+    Note over PayUC: 1. Khóa MasterOrder (findByIdForUpdate)<br/>2. Khóa danh sách SubOrders theo ORDER BY s.id ASC (findByMasterOrderIdForUpdate)
+    PayUC->>DB: SELECT * FROM master_orders WHERE id = ? FOR UPDATE
+    PayUC->>DB: SELECT * FROM sub_orders WHERE master_order_id = ? ORDER BY id ASC FOR UPDATE
+
+    Note over PayUC: 3. THẨM ĐỊNH CAM KẾT QUA COMPONENT TẬP TRUNG (WaiverAcceptanceGuard)
+    loop Duyệt từng SubOrder trong đơn
+        PayUC->>Guard: missing(subOrderId, serviceId, version, required, accepted, contentVi, contentEn, lookup, selector)
+        activate Guard
+        alt required == true && !accepted
+            Guard->>Lookup: findWaiverSnapshot(serviceId)
+            Lookup-->>Guard: serviceName
+            Guard->>I18n: selectDetailed(contentVi, contentEn)
+            I18n-->>Guard: LocalizedSelection(content, language, fallbackUsed)
+            Guard-->>PayUC: Optional.of(MissingWaiverItem)
+        else Không yêu cầu hoặc đã accepted
+            Guard-->>PayUC: Optional.empty()
+        end
+        deactivate Guard
+    end
+
+    alt Tồn tại ít nhất một SubOrder thiếu cam kết an toàn
+        Note over PayUC: Ném WaiverAcceptanceRequiredException (HTTP 409 Conflict)<br/>Trả danh sách missingSubOrders kèm snapshot nội dung & fallback<br/>🔴 TUYỆT ĐỐI KHÔNG GỌI CỔNG THANH TOÁN (GATEWAY)
+        PayUC-->>PayCtrl: WaiverAcceptanceRequiredException
+        PayCtrl-->>Customer: 409 Conflict (code: WAIVER_ACCEPTANCE_REQUIRED, missingSubOrders: [...])
+    else Toàn bộ SubOrder bắt buộc đều đã được chấp thuận
+        Note over PayUC: 🟢 ĐỦ ĐIỀU KIỆN AN TOÀN: Tạo Payment PENDING và gọi cổng thanh toán
+        PayUC->>DB: INSERT INTO payments (status = PENDING)
+        PayUC->>Gateway: Gửi yêu cầu khởi tạo giao dịch / Capture giao dịch
+        Gateway-->>PayUC: Kết quả cổng (paymentUrl / approvalUrl / Capture SUCCESS)
+        PayUC-->>PayCtrl: PaymentIntentResult / PaymentResponse
+        PayCtrl-->>Customer: 200 OK (paymentUrl / capture outcome)
+    end
+    deactivate PayUC
+    deactivate PayCtrl
+    end

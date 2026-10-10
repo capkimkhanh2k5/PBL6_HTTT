@@ -1,0 +1,12 @@
+package com.danasea.backend.modules.order.application.dtos;
+
+import java.time.OffsetDateTime;
+import java.util.UUID;
+
+public record SubOrderWaiverAcceptanceResult(
+        UUID subOrderId,
+        UUID masterOrderId,
+        boolean accepted,
+        int waiverVersion,
+        String language,
+        OffsetDateTime acceptedAt) {}

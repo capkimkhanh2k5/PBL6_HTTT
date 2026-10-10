@@ -1,0 +1,39 @@
+sequenceDiagram
+    autonumber
+    participant Trigger as Nguồn Kích Hoạt (Hủy Khách Hàng / Cron Timeout)
+    participant Listener as OrderExpiryEventListener
+    participant ReleaseService as DiscountReservationService
+    participant CodeRepo as DiscountCodeRepositoryPort
+    participant RedemptionRepo as DiscountRedemptionRepository
+    participant DB as PostgreSQL
+
+    Note over Trigger,DB: Kích hoạt khi Đơn PENDING_PAYMENT bị Hủy hoặc Hết Hạn 15 phút
+
+    alt Kịch bản A: Khách hủy Booking chưa thanh toán
+        Trigger->>ReleaseService: release(orderId, discountCodeId)
+    else Kịch bản B: Background Job phát hiện hết hạn (BookingHoldExpiredEvent)
+        Trigger->>Listener: handleBookingHoldExpired(event)
+        Listener->>DB: SELECT * FROM master_orders WHERE booking_id = ? FOR UPDATE
+        Note over Listener: Nếu đơn đã PAID -> Bỏ qua. Nếu PENDING_PAYMENT -> Hủy đơn
+        Listener->>ReleaseService: release(orderId, discountCodeId)
+    end
+
+    activate ReleaseService
+    ReleaseService->>CodeRepo: findByIdForUpdate(discountCodeId)
+    CodeRepo->>DB: SELECT * FROM discount_codes WHERE id = ? FOR UPDATE
+    DB-->>CodeRepo: DiscountCodeEntity (ĐÃ KHÓA BI QUAN)
+
+    ReleaseService->>RedemptionRepo: deleteByMasterOrderIdAndDiscountCodeId(orderId, codeId)
+    RedemptionRepo->>DB: DELETE FROM discount_redemptions WHERE master_order_id = ? AND discount_code_id = ?
+    DB-->>RedemptionRepo: deletedRows
+
+    alt Xóa thành công bản ghi giữ chỗ (deletedRows > 0)
+        ReleaseService->>CodeRepo: decrementUsedCount(codeId)
+        CodeRepo->>DB: UPDATE discount_codes SET used_count = GREATEST(0, used_count - 1) WHERE id = ?
+        DB-->>CodeRepo: 1 row affected
+        Note over ReleaseService,DB: Đã hoàn trả 1 lượt sử dụng voucher về hệ thống an toàn
+    else Bản ghi đã bị xóa trước đó / Replay Event (deletedRows == 0)
+        Note over ReleaseService: Idempotency Guard: Không giảm used_count lần 2
+    end
+
+    deactivate ReleaseService
