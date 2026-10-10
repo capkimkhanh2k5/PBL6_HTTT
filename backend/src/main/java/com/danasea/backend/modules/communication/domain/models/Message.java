@@ -14,4 +14,5 @@ public class Message extends BaseDomainModel {
     private String content;
     private String attachmentUrl;
     private Boolean isRead;
+    private Long sequence;
 }

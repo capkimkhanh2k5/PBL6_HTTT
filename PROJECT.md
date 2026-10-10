@@ -1,105 +1,174 @@
-# Project: Danasea Business Reports & Statistics Dashboard
+# Project: Customer - Vendor Communication & Dispute Lifecycle Management Ecosystem
 
 ## Architecture
-Hệ thống Thống kê & Báo cáo kinh doanh Danasea được xây dựng thành một Module độc lập tuân thủ nghiêm ngặt mô hình Clean Architecture & Modular Monolith của dự án:
-- **Package root**: `com.danasea.backend.modules.report`
-- **Tầng Domain (`com.danasea.backend.modules.report.domain`)**:
-  - `models`: `DashboardMetrics`, `RevenueReportItem`, `BookingReportItem`, `VendorPerformanceItem`, `TimePeriod`, `VendorDiagnosisAlert`.
-  - `enums`: `GroupByPeriod` (`DAY`, `WEEK`, `QUARTER`, `YEAR`), `ReportType` (`REVENUE`, `BOOKINGS`, `VENDORS`), `VendorAlertSeverity` (`HEALTHY`, `WARNING`, `CRITICAL`), `VendorIssueType`.
-- **Tầng Application (`com.danasea.backend.modules.report.application`)**:
-  - `ports`: `ReportDataPort` (cổng trích xuất dữ liệu tổng hợp), `CsvExporterPort` (cổng xuất CSV).
-  - `usecases`:
-    - `GetAdminDashboardUseCase`: Tổng hợp chỉ số toàn sàn thời gian thực + cảnh báo bất thường.
-    - `GetVendorDashboardUseCase`: Tổng hợp chỉ số riêng cho vendor thời gian thực + cảnh báo lấp đầy/hủy.
-    - `GetRevenueReportUseCase`: Thống kê tài chính time-series (GMV, Cash, Refunds, Commission, Net Payout) theo chu kỳ (day, week, quarter, year) múi giờ `Asia/Ho_Chi_Minh`.
-    - `GetBookingReportUseCase`: Thống kê đơn đặt time-series phân loại chi tiết theo lý do hủy (CUSTOMER_CANCEL, WEATHER, VENDOR_FAULT, ADMIN_OVERRIDE, v.v.).
-    - `GetVendorPerformanceReportUseCase`: Phân tích hiệu suất từng đối tác (doanh thu, đơn, tỷ lệ hủy, slot occupancy rate, rating) và phân loại chẩn đoán thông minh.
-    - `ExportReportCsvUseCase`: Xuất báo cáo định dạng CSV chuẩn RFC 4180 có UTF-8 BOM.
-- **Tầng Infrastructure (`com.danasea.backend.modules.report.infrastructure`)**:
-  - `persistence`: `JpaReportDataAdapter` thực thi các câu truy vấn JPQL/SQL kết hợp Java time-series grouping, đảm bảo tương thích 100% trên cả H2 (in-memory test) và PostgreSQL (production).
-  - `csv`: `Rfc4180Utf8BomCsvExporter` thuần Java không phụ thuộc thư viện ngoài, xuất BOM `0xEF, 0xBB, 0xBF`.
-- **Tầng Presentation (`com.danasea.backend.modules.report.presentation`)**:
-  - `AdminDashboardController` / cập nhật `AdminController`: Cung cấp `GET /api/admin/dashboard` (bảo tồn thuộc tính `status: "ADMIN_ACCESS_GRANTED"` để tương thích các test bảo mật RBAC).
-  - `VendorDashboardController`: Cung cấp `GET /api/vendor/dashboard`.
-  - `AdminReportController`: Cung cấp `GET /api/admin/reports/revenue`, `GET /api/admin/reports/bookings`, `GET /api/admin/reports/vendors`, `GET /api/admin/reports/export`.
-  - `VendorReportController`: Cung cấp `GET /api/vendor/reports/revenue`, `GET /api/vendor/reports/bookings`, `GET /api/vendor/reports/export`.
-  - `dtos`: Strongly-typed DTOs cho các tham số và phản hồi.
+Hệ thống Tin nhắn Trao đổi Khách hàng - Đối tác (Communication) và Vòng đời Tranh chấp (Dispute Lifecycle) được tổ chức theo mô hình Modular Monolith kết hợp Clean Architecture & Domain-Driven Design (DDD) trong Backend Spring Boot (Java 21):
+
+- **Package `com.danasea.backend.modules.communication`**:
+  - `domain`: `Conversation`, `Message`, các exceptions `ConversationNotFoundException`, `UnauthorizedChatAccessException`.
+  - `application`:
+    - `usecases`: `CreateOrGetConversationUseCase`, `GetConversationsUseCase`, `GetMessagesUseCase`, `SendMessageUseCase`, `MarkMessagesAsReadUseCase`.
+    - `dtos`: `CreateConversationRequest`, `SendMessageRequest`, `ConversationResponse`, `MessageResponse`.
+  - `infrastructure`:
+    - `persistence`: `ConversationJpaEntity`, `MessageJpaEntity`, `JpaConversationRepository`, `JpaMessageRepository`, mappers.
+  - `presentation`:
+    - `controllers`: `ConversationController` (`/api/conversations`).
+    - `dtos`: Request & Response records.
+    - `handlers`: `CommunicationExceptionHandler` (@RestControllerAdvice).
+
+- **Package `com.danasea.backend.modules.dispute`**:
+  - `domain`:
+    - `models`: `Dispute`, `DisputeReason`, `DisputeStatus`, `DisputeResolution`.
+    - `exceptions`: `DisputeNotFoundException`, `UnauthorizedDisputeAccessException`, `InvalidDisputeStateException`, `DuplicateDisputeException`.
+  - `application`:
+    - `usecases`:
+      - Hiện hữu: `CreateDisputeUseCase`, `GetDisputesUseCase`, `ResolveDisputeUseCase`.
+      - Mới: `GetCustomerDisputesUseCase`, `GetCustomerDisputeDetailUseCase`, `GetVendorDisputesUseCase`, `GetVendorDisputeDetailUseCase`, `SubmitVendorDisputeResponseUseCase`, `GetAdminDisputeDetailUseCase`, `UploadDisputeEvidenceUseCase`.
+    - `dtos`: `SubmitVendorResponseRequest`, `DisputeResponse`.
+  - `infrastructure`:
+    - `persistence`: `DisputeJpaEntity` (bổ sung `vendor_response`, `vendor_evidence_urls`, `vendor_responded_at`), `JpaDisputeRepository`.
+  - `presentation`:
+    - `controllers`:
+      - Cập nhật `CustomerDisputeController` (`/api/disputes`, `/api/orders/{id}/disputes`).
+      - Tạo mới `VendorDisputeController` (`/api/vendor/disputes`).
+      - Cập nhật `AdminDisputeController` (`/api/admin/disputes`).
+      - Tạo mới `DisputeEvidenceController` (`/api/disputes/evidence`).
+    - `handlers`: `DisputeExceptionHandler`.
+
+- **Package `com.danasea.backend.modules.service.application.ports.FileStoragePort` & `FileSignatureValidator`**:
+  - Tái sử dụng `FileStoragePort` (Cloudinary) và `FileSignatureValidator` (magic bytes check) cho luồng upload bằng chứng, kiểm tra MIME (JPEG, PNG, WEBP, PDF) và dung lượng tối đa 5MB.
 
 ---
 
 ## Feature Inventory
 | # | Feature | Description | Milestone | Source |
 |---|---------|-------------|-----------|--------|
-| F1 | Admin Real Dashboard Metrics | Thay thế mock tại `GET /api/admin/dashboard` bằng dữ liệu thực (doanh thu, đơn mới, tỷ lệ hoàn tất, tỷ lệ hủy, cảnh báo đơn vị quá tải / hủy cao bất thường), giữ trường `status: ADMIN_ACCESS_GRANTED`. | M3 | R1 |
-| F2 | Vendor Real Dashboard Metrics | Cung cấp `GET /api/vendor/dashboard` với các chỉ số hoạt động thời gian thực của chính vendor đó, cảnh báo quá tải slot và tỷ lệ hủy. | M3 | R1 |
-| F3 | Multi-tenant & Vendor Isolation | Đảm bảo Vendor chỉ truy cập dữ liệu của chính mình qua `SecurityUtils.getCurrentUserId()` + `VendorInternalApi.findByUserId()`, cấm truyền vendorId từ client. Admin có thể xem toàn sàn hoặc filter theo vendorId. | M3 | R1, R2, R3, R4 |
-| F4 | Time-Series Revenue Analytics (Admin & Vendor) | `GET /api/admin/reports/revenue` và `GET /api/vendor/reports/revenue` hỗ trợ `from`, `to`, `groupBy=day\|week\|quarter\|year`. Phân rã GMV, Collected Cash, Refunds, Commission, Net Vendor Payout. | M2 | R2 |
-| F5 | Time-Series Booking Analytics (Admin & Vendor) | `GET /api/admin/reports/bookings` và `GET /api/vendor/reports/bookings` hỗ trợ `from`, `to`, `groupBy`. Tổng số đơn, số hoàn thành, số hủy và phân loại chi tiết theo lý do hủy (`CUSTOMER_CANCEL`, `WEATHER`, `VENDOR_FAULT`, `ADMIN_OVERRIDE`, v.v.). | M2 | R2 |
-| F6 | Asia/Ho_Chi_Minh Timezone Integrity | Đồng nhất múi giờ `Asia/Ho_Chi_Minh` (UTC+7). Mốc ghi nhận thanh toán `PaymentStatus.SUCCESS`. Khoảng lọc bao phủ trọn vẹn từ 00:00:00.000000 đến 23:59:59.999999. Zero-filling đầy đủ các chu kỳ trống. | M2 | R2 |
-| F7 | Financial Math & Formula Reconciliation | Bảo đảm toàn vẹn tài chính: `Collected Cash = GMV - Discount`; `Net Vendor Payout = Collected Cash - Platform Commission - Vendor Refunds`. | M1 | R2, AC |
-| F8 | Vendor Performance & Diagnostic Insights | `GET /api/admin/reports/vendors` phân tích doanh thu, số đơn, tỷ lệ hủy, slot occupancy rate (`SUM(booked)/SUM(capacity)`), rating/review. Cơ chế chẩn đoán thông minh (`HEALTHY`, `WARNING`, `CRITICAL`). | M2 | R3 |
-| F9 | Standardized UTF-8 BOM CSV Export | `GET /api/admin/reports/export` và `GET /api/vendor/reports/export` hỗ trợ `type=revenue\|bookings\|vendors`, xuất file CSV chuẩn RFC 4180 có UTF-8 BOM (`\uFEFF`), hỗ trợ Excel tiếng Việt không lỗi font. | M2 | R4 |
-| F10 | API Contract & Error Handling | Tất cả endpoint trả về HTTP 200 JSON chuẩn, validation lỗi trả về HTTP 400 qua `GlobalExceptionHandler`, header CSV đúng `Content-Type: text/csv; charset=UTF-8` và `Content-Disposition`. | M3 | AC |
-| F11 | API Inventory Guard Synchronization | Cập nhật số lượng endpoint trong `BackendApplicationTests` tương ứng với số lượng endpoint mới bổ sung để bảo toàn test kiểm soát inventory. | M3 | Survey Explorer 3 |
-| F12 | Full Programmatic Verification Suite | 100% Unit Tests & Integration Tests (MockMvc) kiểm chứng phân nhóm thời gian, hủy/hoàn tiền, RBAC phân quyền, Vendor Isolation, CSV format. `./mvnw test` pass 100%. | M4 | AC |
+| F1 | Database Migration V25 & JPA Entities | Tạo migration `V25__add_vendor_dispute_response_and_chat_enhancements.sql` (bổ sung cột `vendor_response`, `vendor_evidence_urls`, `vendor_responded_at` vào bảng `disputes`, mở rộng `messages.content` sang `TEXT`). Cập nhật `DisputeJpaEntity`, `ConversationJpaEntity`, `MessageJpaEntity`. | M1 | Survey |
+| F2 | JPA Repository Query Methods | Mở rộng `JpaConversationRepository`, `JpaMessageRepository`, và `JpaDisputeRepository` với các phương thức truy vấn tối ưu cho Customer, Vendor, MasterOrder, và REST polling. | M1 | Survey |
+| F3 | Conversation Creation & List API | Triển khai `POST /api/conversations` (tạo hoặc lấy hội thoại theo `masterOrderId`) và `GET /api/conversations` (lấy danh sách hội thoại của người dùng đăng nhập kèm tin nhắn mới nhất, phân trang). | M2 | R1 |
+| F4 | Message Send & REST Polling API | Triển khai `GET /api/conversations/{id}/messages` (REST polling theo `afterSequence` hoặc phân trang, sắp xếp theo sequence tăng dần; giữ `after` để tương thích) và `POST /api/conversations/{id}/messages` (gửi tin nhắn mới). Hỗ trợ đánh dấu đã đọc `isRead`. | M2 | R1 |
+| F5 | Messaging RBAC & Order Ownership Verification | Kiểm soát chặt chẽ quyền truy cập hội thoại: Chỉ Customer sở hữu đơn hoặc Vendor của sub-order liên quan mới được phép xem/nhắn tin (HTTP 403 nếu vi phạm). | M2 | R1 |
+| F6 | Customer Dispute Tracking API | Triển khai `GET /api/disputes` và `GET /api/disputes/{id}` cho Customer. Đảm bảo Customer Isolation: chỉ xem được tranh chấp do chính mình tạo (HTTP 403 nếu IDOR). | M3 | R2 |
+| F7 | Vendor Dispute Review & Response API | Triển khai `GET /api/vendor/disputes` (lọc theo `status`), `GET /api/vendor/disputes/{id}`, và `POST /api/vendor/disputes/{id}/responses` (gửi giải trình và danh sách URL bằng chứng). Đảm bảo Vendor Isolation qua `VendorInternalApi` (HTTP 403 nếu vi phạm). | M3 | R3 |
+| F8 | Admin Comprehensive Dispute Dossier API | Triển khai `GET /api/admin/disputes/{id}`: Xem toàn bộ hồ sơ tranh chấp chi tiết gồm nội dung khiếu nại của Customer, bằng chứng Customer, giải trình và bằng chứng của Vendor, và dòng thời gian trạng thái. | M3 | R4 |
+| F9 | Controlled Evidence Upload & File Validation | Triển khai `POST /api/disputes/evidence`: Tải lên tệp bằng chứng qua `FileStoragePort`, kiểm tra nghiêm ngặt định dạng MIME (JPEG, PNG, WEBP, PDF), kiểm tra magic bytes, dung lượng <= 5MB. Yêu cầu xác thực. | M3 | R5 |
+| F10 | API Inventory Guard Synchronization & Test Migration | Cập nhật số lượng endpoint trong `BackendApplicationTests.allApplicationEndpointsAreDiscoverable()` tương ứng với các endpoint mới (163 endpoint từ 55 controller), cập nhật `PostgreSqlMigrationIntegrationTest` lên version "26". | M4 | Survey |
+| F11 | Full Test Suite Verification (100% Pass) | Toàn bộ Unit Tests và Integration Tests (MockMvc) cho các Use Cases và Controllers mới (`ConversationControllerTest`, `MessageControllerTest`, `CustomerDisputeControllerTest`, `VendorDisputeControllerTest`, `AdminDisputeControllerTest`, `DisputeEvidenceUploadTest`) chạy `./mvnw test` đạt 100% BUILD SUCCESS. | M4 | AC |
 
 ---
 
 ## Milestones
 | # | Name | Scope | Dependencies | Status |
 |---|------|-------|-------------|--------|
-| M1 | Domain Models & Persistence Layer | Định nghĩa Domain Models, Enums, `ReportDataPort`, và `JpaReportDataAdapter` truy vấn dữ liệu từ `sub_orders`, `payments`, `refunds`, `service_slots`, `vendors`, `reviews`. Kiểm chứng công thức tài chính. | None | DONE |
-| M2 | Business Logic, Diagnostics & CSV Export | Cài đặt toàn bộ UseCases (`GetAdminDashboardUseCase`, `GetVendorDashboardUseCase`, `GetRevenueReportUseCase`, `GetBookingReportUseCase`, `GetVendorPerformanceReportUseCase`, `ExportReportCsvUseCase`), thuật toán phân nhóm time-series zero-filling múi giờ UTC+7, và tiện ích xuất CSV chuẩn UTF-8 BOM. Viết Unit Tests đầy đủ. | M1 | DONE |
-| M3 | Presentation, Controllers & Security Isolation | Cài đặt các Controllers, DTOs, Request Validation, xử lý `@PreAuthorize`, cơ chế giải quyết `vendorId` bảo đảm Vendor Isolation. Cập nhật `AdminController.dashboard` (giữ `status: ADMIN_ACCESS_GRANTED`), cập nhật `BackendApplicationTests`. Viết MockMvc Unit Tests cho toàn bộ endpoints. | M2 | DONE |
-| M4 | E2E Testing, RBAC Verification & Final Pass | Chạy toàn bộ test suite dự án (`./mvnw test`), kiểm thử tích hợp bảo mật, cô lập dữ liệu đa người thuê (Multi-tenant), kiểm thử biên ngày tháng và xuất file CSV. Đảm bảo 100% tests pass. | M3 | DONE |
+| M1 | Database Migration & Persistence Layer | Tạo migration Flyway V25 và V26, cập nhật `DisputeJpaEntity`, `ConversationJpaEntity`, `MessageJpaEntity`, viết query methods cho `JpaConversationRepository`, `JpaMessageRepository`, `JpaDisputeRepository`. | None | DONE |
+| M2 | Customer - Vendor Messaging API (Module Communication) | Cài đặt Use Cases (`CreateOrGetConversationUseCase`, `GetConversationsUseCase`, `GetMessagesUseCase`, `SendMessageUseCase`, `MarkMessagesAsReadUseCase`), DTOs, `ConversationController` (`/api/conversations`), xử lý RBAC & Order Ownership. Viết Unit & MockMvc Tests. | M1 | DONE |
+| M3 | Multi-Role Dispute Lifecycle & Controlled Evidence Upload | Cài đặt Use Cases cho Customer (`GetCustomerDisputesUseCase`, `GetCustomerDisputeDetailUseCase`), Vendor (`GetVendorDisputesUseCase`, `GetVendorDisputeDetailUseCase`, `SubmitVendorDisputeResponseUseCase`), Admin (`GetAdminDisputeDetailUseCase`), và Evidence Upload (`UploadDisputeEvidenceUseCase`). Cập nhật `CustomerDisputeController`, `AdminDisputeController`, tạo mới `VendorDisputeController` và `DisputeEvidenceController` (`POST /api/disputes/evidence` với MIME check, magic bytes, <= 5MB). Viết Unit & MockMvc Tests. | M1 | DONE |
+| M4 | E2E Testing, Inventory Guard Sync & Final Verification | Cập nhật `BackendApplicationTests` (163 endpoints) & `PostgreSqlMigrationIntegrationTest` (v26). Chạy kiểm thử toàn diện `./mvnw test` trong thư mục backend đạt 100% PASS không lỗi hồi quy. Forensic audit kiểm tra tính toàn vẹn. | M1, M2, M3 | DONE |
 
 ---
 
 ## Interface Contracts
-### Module Report ↔ Security & Vendor Module
-- **Vendor Resolution**:
-  - `SecurityUtils.getCurrentUserId()` -> `Optional<UUID> userId`.
-  - `VendorInternalApi.findByUserId(userId)` -> `Optional<Vendor>`.
-  - Nếu không tìm thấy Vendor: ném `AccessDeniedException("Vendor profile not found for current user")` (HTTP 403).
-- **Time Filter Contract**:
-  - Input: `LocalDate from, LocalDate to`.
-  - Conversion:
-    - `startDateTime = from.atStartOfDay(ZoneId.of("Asia/Ho_Chi_Minh")).toOffsetDateTime()` (00:00:00+07:00).
-    - `endDateTime = to.atTime(LocalTime.MAX).atZone(ZoneId.of("Asia/Ho_Chi_Minh")).toOffsetDateTime()` (23:59:59.999999+07:00).
-  - Validation: Nếu `from.isAfter(to)` -> ném `IllegalArgumentException("From date cannot be after to date")` (HTTP 400).
-- **CSV Export Contract**:
-  - Param: `String type` (`revenue`, `bookings`, `vendors`), `LocalDate from`, `LocalDate to`.
-  - Header: `Content-Type: text/csv; charset=UTF-8`, `Content-Disposition: attachment; filename="report-{type}-{from}-{to}.csv"`.
-  - Body: `byte[]` bắt đầu bằng `0xEF, 0xBB, 0xBF`.
+### 1. Communication API Endpoints
+- `POST /api/conversations`:
+  - Body: `{ "masterOrderId": "UUID", "vendorId": "UUID (required for multi-vendor orders)" }`
+  - Headers: `Authorization: Bearer <token>`
+  - Response: `201 Created` hoặc `200 OK` -> `ConversationResponse(id, masterOrderId, customerId, vendorId, createdAt, updatedAt, lastMessage)`
+  - Errors: 400 Bad Request (`INVALID_INPUT`), 403 Forbidden (`ACCESS_DENIED`), 404 Not Found (`ORDER_NOT_FOUND`).
+- `GET /api/conversations`:
+  - Params: `page` (default 0), `size` (default 20, max 100)
+  - Response: `200 OK` -> `Page<ConversationResponse>`
+- `GET /api/conversations/{id}/messages`:
+  - Params: `afterSequence` (non-negative Long, preferred polling cursor), `after` (legacy timestamp, mutually exclusive with afterSequence), `page`, `size` (default 50, max 100)
+  - Response: `200 OK` -> `List<MessageResponse>` (sắp xếp sequence ASC, chỉ đánh dấu đã đọc các tin đến trong batch trả về)
+  - Errors: 403 Forbidden (`ACCESS_DENIED`), 404 Not Found (`CONVERSATION_NOT_FOUND`).
+- `POST /api/conversations/{id}/messages`:
+  - Body: `{ "content": "String", "attachmentUrl": "String (optional)" }`
+  - Response: `201 Created` -> `MessageResponse(id, conversationId, senderId, content, attachmentUrl, isRead, createdAt, sequence)`
+  - Errors: 400 Bad Request (`INVALID_INPUT`), 403 Forbidden (`ACCESS_DENIED`), 404 Not Found (`CONVERSATION_NOT_FOUND`).
+
+### 2. Dispute API Endpoints
+- `GET /api/disputes`:
+  - Params: `page`, `size`
+  - Response: `200 OK` -> `Page<DisputeResponse>` (chỉ gồm các dispute của current user)
+- `GET /api/disputes/{id}`:
+  - Response: `200 OK` -> `DisputeResponse` (chứa đầy đủ thông tin giải trình của Vendor nếu có, trạng thái, bằng chứng, quyết định admin)
+  - Errors: 403 Forbidden (`ACCESS_DENIED`), 404 Not Found (`DISPUTE_NOT_FOUND`).
+- `GET /api/vendor/disputes`:
+  - Params: `status` (optional `DisputeStatus`), `page`, `size`
+  - Headers: `Authorization: Bearer <vendor_token>`
+  - Response: `200 OK` -> `Page<DisputeResponse>` (chỉ gồm các dispute thuộc `sub_orders` của current vendor)
+- `GET /api/vendor/disputes/{id}`:
+  - Response: `200 OK` -> `DisputeResponse`
+  - Errors: 403 Forbidden (`ACCESS_DENIED`), 404 Not Found (`DISPUTE_NOT_FOUND`).
+- `POST /api/vendor/disputes/{id}/responses`:
+  - Body: `{ "response": "String (giải trình)", "evidenceUrls": ["String"] }`
+  - Response: `200 OK` -> `DisputeResponse` (cập nhật `vendorResponse`, `vendorEvidenceUrls`, `vendorRespondedAt`)
+  - Errors: 400 Bad Request, 403 Forbidden (`ACCESS_DENIED`), 404 Not Found (`DISPUTE_NOT_FOUND`), 409 Conflict (nếu dispute đã giải quyết).
+- `GET /api/admin/disputes/{id}`:
+  - Headers: `Authorization: Bearer <admin_token>`
+  - Response: `200 OK` -> `DisputeResponse` (hồ sơ toàn diện).
+
+### 3. Evidence Upload API Endpoint
+- `POST /api/disputes/evidence`:
+  - Content-Type: `multipart/form-data`
+  - Part: `file` (MultipartFile)
+  - Validation: MIME `image/jpeg`, `image/png`, `image/webp`, `application/pdf`; size <= 5MB.
+  - Response: `200 OK` -> `{ "fileUrl": "https://res.cloudinary.com/..." }`
+  - Errors: 400 Bad Request (`INVALID_FILE_TYPE`), 401 Unauthorized (`UNAUTHORIZED`).
 
 ---
 
 ## Code Layout
-- `backend/src/main/java/com/danasea/backend/modules/report/`:
-  - `domain/models/`: `DashboardMetrics.java`, `RevenueReportItem.java`, `BookingReportItem.java`, `VendorPerformanceItem.java`, `TimePeriod.java`, `VendorDiagnosisAlert.java`.
-  - `domain/enums/`: `GroupByPeriod.java`, `ReportType.java`, `VendorAlertSeverity.java`.
-  - `application/ports/`: `ReportDataPort.java`, `CsvExporterPort.java`.
+- `backend/src/main/resources/db/migration/`:
+  - `V25__add_vendor_dispute_response_and_chat_enhancements.sql`
+- `backend/src/main/java/com/danasea/backend/modules/communication/`:
+  - `domain/models/`: `Conversation.java`, `Message.java`
+  - `domain/exceptions/`: `ConversationNotFoundException.java`, `UnauthorizedChatAccessException.java`
+  - `application/dtos/`: `CreateConversationRequest.java`, `SendMessageRequest.java`, `ConversationResponse.java`, `MessageResponse.java`
   - `application/usecases/`:
-    - `GetAdminDashboardUseCase.java`
-    - `GetVendorDashboardUseCase.java`
-    - `GetRevenueReportUseCase.java`
-    - `GetBookingReportUseCase.java`
-    - `GetVendorPerformanceReportUseCase.java`
-    - `ExportReportCsvUseCase.java`
-  - `infrastructure/persistence/`: `JpaReportDataAdapter.java`, `SpringDataReportOrderRepository.java` (hoặc truy vấn qua EntityManager/Criteria).
-  - `infrastructure/csv/`: `Rfc4180Utf8BomCsvExporter.java`.
+    - `CreateOrGetConversationUseCase.java`
+    - `GetConversationsUseCase.java`
+    - `GetMessagesUseCase.java`
+    - `SendMessageUseCase.java`
+    - `MarkMessagesAsReadUseCase.java`
+  - `infrastructure/persistence/`:
+    - `entities/ConversationJpaEntity.java`, `MessageJpaEntity.java`
+    - `repositories/JpaConversationRepository.java`, `JpaMessageRepository.java`
+  - `presentation/controllers/`: `ConversationController.java`
+  - `presentation/handlers/`: `CommunicationExceptionHandler.java`
+- `backend/src/main/java/com/danasea/backend/modules/dispute/`:
+  - `application/dtos/`: `SubmitVendorResponseRequest.java`, `DisputeResponse.java`
+  - `application/usecases/`:
+    - `GetCustomerDisputesUseCase.java`
+    - `GetCustomerDisputeDetailUseCase.java`
+    - `GetVendorDisputesUseCase.java`
+    - `GetVendorDisputeDetailUseCase.java`
+    - `SubmitVendorDisputeResponseUseCase.java`
+    - `GetAdminDisputeDetailUseCase.java`
+    - `UploadDisputeEvidenceUseCase.java`
+  - `infrastructure/persistence/entities/`: `DisputeJpaEntity.java`
   - `presentation/controllers/`:
-    - `AdminDashboardController.java` (hoặc cập nhật `AdminController.java`)
-    - `VendorDashboardController.java`
-    - `AdminReportController.java`
-    - `VendorReportController.java`
-  - `presentation/dtos/`: `AdminDashboardResponse.java`, `VendorDashboardResponse.java`, `RevenueReportResponse.java`, `BookingReportResponse.java`, `VendorPerformanceResponse.java`, các DTOs chi tiết.
-- `backend/src/test/java/com/danasea/backend/modules/report/`:
-  - `domain/`: Unit tests cho domain logic và financial math.
-  - `application/`: Unit tests cho tất cả UseCases và CSV Exporter.
-  - `presentation/`: MockMvc standalone tests cho các Controller.
-  - `integration/`: Security & Vendor isolation tests.
+    - `CustomerDisputeController.java`
+    - `VendorDisputeController.java`
+    - `AdminDisputeController.java`
+    - `DisputeEvidenceController.java`
+- `backend/src/test/java/com/danasea/backend/`:
+  - `BackendApplicationTests.java` (Inventory guard)
+  - `infrastructure/database/PostgreSqlMigrationIntegrationTest.java`
+  - `modules/communication/presentation/controllers/`:
+    - `ConversationControllerTest.java`
+    - `MessageControllerTest.java`
+  - `modules/dispute/presentation/controllers/`:
+    - `CustomerDisputeControllerTest.java`
+    - `VendorDisputeControllerTest.java`
+    - `AdminDisputeControllerTest.java`
+    - `DisputeEvidenceUploadTest.java`
 
-## Review fixes — 09/10/2026
+## Concurrency and polling fixes — 09/10/2026
 
-Reports and dashboards share cash/refund ledger events: immutable payment `paid_at`, processed refund `processed_at`, signed commission/payout adjustments, exact cash allocation across vendors, and exclusive date boundaries. Booking reports classify creation cohorts and count each cancellation once, with persisted reasons and an explicit unknown count. CSV neutralizes business-name formulas. Range limit: 3660 inclusive days. See `backend/docs/reports-dashboard-contract.md` for historical-data limitations and the complete API contract.
+- Creation locks the master order; a unique customer/vendor/masterOrder key prevents duplicate conversations.
+- Sending locks the conversation until commit and assigns the next per-conversation sequence. Responses include persisted timestamps and sequence.
+- Polling uses afterSequence and bounded batches (maximum 100), marking only delivered incoming messages as read. Clients advance their cursor after processing the whole polling batch, not from an outgoing send response.
+- Legacy after resolves an exact stored timestamp to its earliest sequence; timestamp ties may replay boundary messages, which legacy clients must deduplicate by id. Use afterSequence for reliable batch progress.
+- Vendor responses share the dispute write lock with admin resolution. Admin list and resolve retain all vendor explanation fields.
+- V26 merges historical duplicate conversations without deleting messages and backfills ordered sequences.
+- Real PostgreSQL regression tests: ChatDisputeConcurrencyIntegrationTest and ChatMigrationIntegrationTest. Full-suite verification is recorded in backend/docs/danasea-api-tracking.md after execution.

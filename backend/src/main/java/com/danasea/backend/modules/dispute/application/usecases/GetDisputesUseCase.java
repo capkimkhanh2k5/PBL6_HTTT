@@ -39,25 +39,7 @@ public class GetDisputesUseCase {
         } else {
             pageResult = disputeRepository.findAll(pageable);
         }
-        return pageResult.map(this::toResponse);
+        return pageResult.map(DisputeResponse::fromEntity);
     }
 
-    private DisputeResponse toResponse(DisputeJpaEntity entity) {
-        return new DisputeResponse(
-                entity.getId(),
-                entity.getOrderId(),
-                entity.getSubOrderId(),
-                entity.getCustomerId(),
-                entity.getReason(),
-                entity.getDescription(),
-                entity.getEvidenceUrls(),
-                entity.getStatus(),
-                entity.getRefundPercentage(),
-                entity.getAdminNote(),
-                entity.getResolvedBy(),
-                entity.getResolvedAt(),
-                entity.getCreatedAt(),
-                entity.getUpdatedAt()
-        );
-    }
 }

@@ -33,6 +33,12 @@ public interface JpaDisputeRepository extends JpaRepository<DisputeJpaEntity, UU
 
     Optional<DisputeJpaEntity> findByIdAndCustomerId(UUID id, UUID customerId);
 
+    Page<DisputeJpaEntity> findBySubOrderIdIn(Collection<UUID> subOrderIds, Pageable pageable);
+
+    Page<DisputeJpaEntity> findBySubOrderIdInAndStatus(Collection<UUID> subOrderIds, DisputeStatus status, Pageable pageable);
+
+    Optional<DisputeJpaEntity> findByIdAndSubOrderIdIn(UUID id, Collection<UUID> subOrderIds);
+
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("SELECT d FROM DisputeEntity d WHERE d.id = :id")
     Optional<DisputeJpaEntity> findByIdForUpdate(@Param("id") UUID id);

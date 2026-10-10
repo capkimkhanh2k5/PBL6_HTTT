@@ -2,6 +2,7 @@ package com.danasea.backend.modules.dispute.presentation.handlers;
 
 import com.danasea.backend.modules.dispute.domain.exceptions.*;
 import com.danasea.backend.modules.order.domain.exceptions.OrderNotFoundException;
+import com.danasea.backend.modules.service.domain.exceptions.InvalidFileTypeException;
 import com.danasea.backend.shared.presentation.ErrorResponse;
 import com.danasea.backend.shared.presentation.LocalizedExceptionHandlerSupport;
 import org.springframework.core.Ordered;
@@ -16,6 +17,12 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 @Order(Ordered.HIGHEST_PRECEDENCE)
 @RestControllerAdvice(basePackages = "com.danasea.backend.modules.dispute")
 public class DisputeExceptionHandler extends LocalizedExceptionHandlerSupport {
+
+    @ExceptionHandler(InvalidFileTypeException.class)
+    public ResponseEntity<ErrorResponse> handleInvalidFileType(InvalidFileTypeException ex) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(error("INVALID_FILE_TYPE"));
+    }
 
     @ExceptionHandler(DisputeAlreadyResolvedException.class)
     public ResponseEntity<ErrorResponse> handleDisputeAlreadyResolved(DisputeAlreadyResolvedException ex) {

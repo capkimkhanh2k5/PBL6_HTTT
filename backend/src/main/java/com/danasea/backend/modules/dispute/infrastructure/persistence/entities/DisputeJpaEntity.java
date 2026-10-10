@@ -60,6 +60,17 @@ public class DisputeJpaEntity extends BaseJpaEntity {
     @Column(name = "resolved_by")
     private UUID resolvedBy;
 
+    @Column(name = "vendor_response", columnDefinition = "TEXT")
+    private String vendorResponse;
+
+    @Convert(converter = StringListJsonConverter.class)
+    @Column(name = "vendor_evidence_urls", columnDefinition = "TEXT")
+    @Builder.Default
+    private List<String> vendorEvidenceUrls = new ArrayList<>();
+
+    @Column(name = "vendor_responded_at")
+    private OffsetDateTime vendorRespondedAt;
+
     // Compatibility aliases
     @Transient
     public UUID getRaisedBy() {
