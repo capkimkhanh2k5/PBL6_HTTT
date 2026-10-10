@@ -7,8 +7,8 @@ import org.springframework.stereotype.Component;
 
 import com.danasea.backend.modules.account.application.api.AccountInternalApi;
 import com.danasea.backend.modules.account.domain.models.Role;
-import com.danasea.backend.modules.ai.application.port.CustomerSupportNoticePort;
-import com.danasea.backend.modules.ai.application.port.CustomerSupportRequestStorePort.Request;
+import com.danasea.backend.modules.ai.application.ports.CustomerSupportNoticePort;
+import com.danasea.backend.modules.ai.application.ports.CustomerSupportRequestStorePort.Request;
 import com.danasea.backend.modules.communication.application.dtos.NotificationCommand;
 import com.danasea.backend.modules.communication.application.usecases.SendNotificationUseCase;
 import com.danasea.backend.modules.communication.domain.models.NotificationChannel;

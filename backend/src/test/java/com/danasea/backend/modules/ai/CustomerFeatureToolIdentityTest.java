@@ -6,9 +6,9 @@ import static org.mockito.ArgumentMatchers.*;
 
 import java.util.UUID;
 import org.junit.jupiter.api.Test;
-import com.danasea.backend.modules.ai.application.tool.CustomerFeatureTool;
-import com.danasea.backend.modules.ai.application.tool.ToolExecutionContext;
-import com.danasea.backend.modules.ai.application.usecase.CustomerSupportUseCase;
+import com.danasea.backend.modules.ai.application.tools.CustomerFeatureTool;
+import com.danasea.backend.modules.ai.application.tools.ToolExecutionContext;
+import com.danasea.backend.modules.ai.application.usecases.CustomerSupportUseCase;
 import com.danasea.backend.shared.i18n.SupportedLanguage;
 import com.fasterxml.jackson.databind.ObjectMapper;
 

@@ -30,11 +30,11 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
-import com.danasea.backend.modules.ai.application.port.ConfirmationCardStorePort;
-import com.danasea.backend.modules.ai.application.port.ConfirmationOutcomePort;
-import com.danasea.backend.modules.ai.application.tool.RequestBookingConfirmationTool;
-import com.danasea.backend.modules.ai.application.tool.ToolExecutionContext;
-import com.danasea.backend.modules.ai.application.usecase.ConfirmBookingUseCase;
+import com.danasea.backend.modules.ai.application.ports.ConfirmationCardStorePort;
+import com.danasea.backend.modules.ai.application.ports.ConfirmationOutcomePort;
+import com.danasea.backend.modules.ai.application.tools.RequestBookingConfirmationTool;
+import com.danasea.backend.modules.ai.application.tools.ToolExecutionContext;
+import com.danasea.backend.modules.ai.application.usecases.ConfirmBookingUseCase;
 import com.danasea.backend.modules.ai.domain.exceptions.AiStateConflictException;
 import com.danasea.backend.modules.ai.domain.models.ConfirmationCard;
 import com.danasea.backend.modules.ai.domain.models.TravelContext;

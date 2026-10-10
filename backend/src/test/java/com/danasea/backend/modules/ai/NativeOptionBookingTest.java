@@ -17,9 +17,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 
-import com.danasea.backend.modules.ai.application.port.ConfirmationCardStorePort;
-import com.danasea.backend.modules.ai.application.tool.RequestBookingConfirmationTool;
-import com.danasea.backend.modules.ai.application.usecase.ConfirmBookingUseCase;
+import com.danasea.backend.modules.ai.application.ports.ConfirmationCardStorePort;
+import com.danasea.backend.modules.ai.application.tools.RequestBookingConfirmationTool;
+import com.danasea.backend.modules.ai.application.usecases.ConfirmBookingUseCase;
 import com.danasea.backend.modules.ai.domain.models.ConfirmationCard;
 import com.danasea.backend.modules.ai.domain.models.TravelContext;
 import com.danasea.backend.modules.booking.application.dtos.*;

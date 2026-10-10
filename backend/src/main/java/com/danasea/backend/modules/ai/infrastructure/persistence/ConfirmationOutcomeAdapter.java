@@ -13,7 +13,7 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.danasea.backend.modules.ai.application.port.ConfirmationOutcomePort;
+import com.danasea.backend.modules.ai.application.ports.ConfirmationOutcomePort;
 import com.danasea.backend.modules.ai.domain.exceptions.AiStateConflictException;
 import com.danasea.backend.modules.ai.domain.models.ConfirmationCard;
 import com.fasterxml.jackson.core.type.TypeReference;

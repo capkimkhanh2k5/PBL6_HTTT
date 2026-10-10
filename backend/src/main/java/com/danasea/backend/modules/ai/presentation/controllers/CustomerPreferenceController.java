@@ -14,9 +14,9 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.danasea.backend.modules.ai.application.port.CustomerPreferenceStorePort.Feedback;
-import com.danasea.backend.modules.ai.application.port.CustomerPreferenceStorePort.Profile;
-import com.danasea.backend.modules.ai.application.usecase.CustomerPreferenceUseCase;
+import com.danasea.backend.modules.ai.application.ports.CustomerPreferenceStorePort.Feedback;
+import com.danasea.backend.modules.ai.application.ports.CustomerPreferenceStorePort.Profile;
+import com.danasea.backend.modules.ai.application.usecases.CustomerPreferenceUseCase;
 import com.danasea.backend.security.infrastructure.SecurityUtils;
 
 import lombok.RequiredArgsConstructor;

@@ -3,8 +3,8 @@ package com.danasea.backend.modules.weather.infrastructure.adapters;
 import com.danasea.backend.modules.weather.application.dtos.WeatherInfoDto;
 import com.danasea.backend.modules.weather.application.ports.output.WeatherProviderPort;
 import com.danasea.backend.modules.weather.infrastructure.api.OpenMeteoApiClient;
-import com.danasea.backend.modules.weather.infrastructure.api.dto.OpenMeteoMarineResponse;
-import com.danasea.backend.modules.weather.infrastructure.api.dto.OpenMeteoWeatherResponse;
+import com.danasea.backend.modules.weather.infrastructure.api.dtos.OpenMeteoMarineResponse;
+import com.danasea.backend.modules.weather.infrastructure.api.dtos.OpenMeteoWeatherResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 

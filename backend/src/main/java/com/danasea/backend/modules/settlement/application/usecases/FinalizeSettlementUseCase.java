@@ -1,6 +1,6 @@
 package com.danasea.backend.modules.settlement.application.usecases;
 
-import com.danasea.backend.modules.settlement.application.dto.SettlementResponse;
+import com.danasea.backend.modules.settlement.application.dtos.SettlementResponse;
 import com.danasea.backend.modules.settlement.domain.exceptions.SettlementAlreadyFinalizedException;
 import com.danasea.backend.modules.settlement.domain.exceptions.SettlementNotFoundException;
 import com.danasea.backend.modules.settlement.domain.models.SettlementStatus;

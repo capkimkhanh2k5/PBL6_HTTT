@@ -24,10 +24,10 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.test.web.servlet.MockMvc;
 
 import com.danasea.backend.modules.ai.application.api.CustomerPreferenceReadApi;
-import com.danasea.backend.modules.ai.application.port.DecisionModelPort;
-import com.danasea.backend.modules.ai.application.port.RateLimiterPort;
-import com.danasea.backend.modules.ai.application.port.ReviewHighlightPort;
-import com.danasea.backend.modules.ai.application.port.TravelWeatherPort;
+import com.danasea.backend.modules.ai.application.ports.DecisionModelPort;
+import com.danasea.backend.modules.ai.application.ports.RateLimiterPort;
+import com.danasea.backend.modules.ai.application.ports.ReviewHighlightPort;
+import com.danasea.backend.modules.ai.application.ports.TravelWeatherPort;
 import com.danasea.backend.modules.ai.domain.models.DecisionResult;
 import com.danasea.backend.security.authorization.BaseSecurityIntegrationTest;
 import com.fasterxml.jackson.databind.ObjectMapper;

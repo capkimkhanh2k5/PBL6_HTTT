@@ -9,8 +9,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.danasea.backend.modules.ai.application.port.DecisionModelPort;
-import com.danasea.backend.modules.ai.application.usecase.AssessTextUseCase;
+import com.danasea.backend.modules.ai.application.ports.DecisionModelPort;
+import com.danasea.backend.modules.ai.application.usecases.AssessTextUseCase;
 import com.danasea.backend.modules.ai.domain.models.DecisionResult;
 import com.danasea.backend.modules.ai.domain.models.DecisionTask;
 import com.danasea.backend.security.infrastructure.SecurityUtils;

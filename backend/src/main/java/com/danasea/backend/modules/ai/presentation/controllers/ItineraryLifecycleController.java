@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.danasea.backend.modules.ai.application.dtos.TravelRequest;
-import com.danasea.backend.modules.ai.application.usecase.PlanItineraryUseCase;
+import com.danasea.backend.modules.ai.application.usecases.PlanItineraryUseCase;
 import com.danasea.backend.modules.ai.domain.models.ItineraryPlan.Preview;
 import com.danasea.backend.modules.ai.domain.models.ItineraryPlan.Proposal;
 import com.danasea.backend.modules.ai.domain.models.ItineraryPlan.Revision;

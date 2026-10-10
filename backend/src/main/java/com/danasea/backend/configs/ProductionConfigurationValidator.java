@@ -9,7 +9,7 @@ import org.springframework.stereotype.Component;
 import com.danasea.backend.configs.properties.CloudinaryProperties;
 import com.danasea.backend.configs.properties.CorsProperties;
 import com.danasea.backend.configs.properties.PaymentProperties;
-import com.danasea.backend.modules.ai.infrastructure.groq.config.GroqProperties;
+import com.danasea.backend.modules.ai.infrastructure.groq.configs.GroqProperties;
 
 import jakarta.annotation.PostConstruct;
 

@@ -47,7 +47,7 @@ import com.danasea.backend.modules.vendor.domain.models.DocType;
 import com.danasea.backend.modules.vendor.domain.models.Vendor;
 import com.danasea.backend.modules.vendor.domain.models.VendorDocument;
 import com.danasea.backend.modules.vendor.domain.models.VerificationStatus;
-import com.danasea.backend.modules.vendor.presentation.advices.VendorExceptionHandler;
+import com.danasea.backend.modules.vendor.presentation.handlers.VendorExceptionHandler;
 import com.danasea.backend.modules.vendor.presentation.dtos.RegisterVendorProfileRequest;
 import com.danasea.backend.modules.vendor.presentation.dtos.UpdateVendorProfileRequest;
 import com.danasea.backend.security.authentication.infrastructure.security.JwtAuthenticationFilter;

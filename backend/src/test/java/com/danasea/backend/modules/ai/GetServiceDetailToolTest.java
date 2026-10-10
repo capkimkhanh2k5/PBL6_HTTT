@@ -1,6 +1,6 @@
 package com.danasea.backend.modules.ai;
 
-import com.danasea.backend.modules.ai.application.tool.GetServiceDetailTool;
+import com.danasea.backend.modules.ai.application.tools.GetServiceDetailTool;
 import com.danasea.backend.modules.ai.domain.services.SanitizationService;
 import com.danasea.backend.modules.service.application.dtos.ServiceDetailResult;
 import com.danasea.backend.modules.service.application.usecases.GetPublicServiceDetailUseCase;

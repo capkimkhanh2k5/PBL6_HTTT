@@ -1,6 +1,6 @@
 package com.danasea.backend.modules.ai;
 
-import com.danasea.backend.modules.ai.application.port.KeyRotatorPort;
+import com.danasea.backend.modules.ai.application.ports.KeyRotatorPort;
 import com.danasea.backend.modules.ai.domain.models.AiMessage;
 import com.danasea.backend.modules.ai.domain.models.AiMessageRole;
 import com.danasea.backend.modules.ai.domain.models.LlmResponse;

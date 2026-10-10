@@ -1,8 +1,8 @@
 package com.danasea.backend.modules.ai;
 
-import com.danasea.backend.modules.ai.application.port.RateLimiterPort;
-import com.danasea.backend.modules.ai.application.usecase.ChatUseCase;
-import com.danasea.backend.modules.ai.application.usecase.ConfirmBookingUseCase;
+import com.danasea.backend.modules.ai.application.ports.RateLimiterPort;
+import com.danasea.backend.modules.ai.application.usecases.ChatUseCase;
+import com.danasea.backend.modules.ai.application.usecases.ConfirmBookingUseCase;
 import com.danasea.backend.modules.ai.domain.TrustTier;
 import com.danasea.backend.modules.ai.domain.exceptions.AiConversationLocaleMismatchException;
 import com.danasea.backend.modules.ai.domain.services.AssistantAuditLogService;

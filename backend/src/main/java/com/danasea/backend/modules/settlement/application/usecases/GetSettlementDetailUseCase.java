@@ -1,7 +1,7 @@
 package com.danasea.backend.modules.settlement.application.usecases;
 
 import com.danasea.backend.modules.booking.domain.ports.VendorLookupPort;
-import com.danasea.backend.modules.settlement.application.dto.SettlementDetailResponse;
+import com.danasea.backend.modules.settlement.application.dtos.SettlementDetailResponse;
 import com.danasea.backend.modules.settlement.domain.exceptions.SettlementNotFoundException;
 import com.danasea.backend.modules.settlement.domain.exceptions.UnauthorizedSettlementAccessException;
 import com.danasea.backend.modules.settlement.infrastructure.persistence.entities.SettlementJpaEntity;

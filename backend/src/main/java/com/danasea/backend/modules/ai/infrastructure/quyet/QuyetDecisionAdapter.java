@@ -15,8 +15,8 @@ import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
 
-import com.danasea.backend.modules.ai.application.port.DecisionModelPort;
-import com.danasea.backend.modules.ai.application.port.AiExecutionBudget;
+import com.danasea.backend.modules.ai.application.ports.DecisionModelPort;
+import com.danasea.backend.modules.ai.application.ports.AiExecutionBudget;
 import com.danasea.backend.modules.ai.domain.models.DecisionResult.Answer;
 import com.danasea.backend.modules.ai.domain.models.DecisionResult;
 import com.danasea.backend.modules.ai.domain.models.DecisionTask;

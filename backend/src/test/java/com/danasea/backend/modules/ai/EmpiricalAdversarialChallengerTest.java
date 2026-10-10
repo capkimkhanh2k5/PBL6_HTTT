@@ -1,14 +1,14 @@
 package com.danasea.backend.modules.ai;
 
-import com.danasea.backend.modules.ai.application.port.ConfirmationCardStorePort;
-import com.danasea.backend.modules.ai.application.port.LlmClientPort;
-import com.danasea.backend.modules.ai.application.port.ModerationPort;
-import com.danasea.backend.modules.ai.application.tool.GetPolicyTool;
-import com.danasea.backend.modules.ai.application.tool.GetSafetyAlertTool;
-import com.danasea.backend.modules.ai.application.tool.GetWeatherForecastTool;
-import com.danasea.backend.modules.ai.application.tool.ToolExecutor;
-import com.danasea.backend.modules.ai.application.usecase.ChatUseCase;
-import com.danasea.backend.modules.ai.application.usecase.ConfirmBookingUseCase;
+import com.danasea.backend.modules.ai.application.ports.ConfirmationCardStorePort;
+import com.danasea.backend.modules.ai.application.ports.LlmClientPort;
+import com.danasea.backend.modules.ai.application.ports.ModerationPort;
+import com.danasea.backend.modules.ai.application.tools.GetPolicyTool;
+import com.danasea.backend.modules.ai.application.tools.GetSafetyAlertTool;
+import com.danasea.backend.modules.ai.application.tools.GetWeatherForecastTool;
+import com.danasea.backend.modules.ai.application.tools.ToolExecutor;
+import com.danasea.backend.modules.ai.application.usecases.ChatUseCase;
+import com.danasea.backend.modules.ai.application.usecases.ConfirmBookingUseCase;
 import com.danasea.backend.modules.ai.domain.models.ConfirmationCard;
 import com.danasea.backend.modules.ai.domain.models.LlmResponse;
 import com.danasea.backend.modules.ai.domain.models.ToolCall;

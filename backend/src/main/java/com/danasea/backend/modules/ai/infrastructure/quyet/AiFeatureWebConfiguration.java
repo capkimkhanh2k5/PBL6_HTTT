@@ -7,7 +7,7 @@ import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
-import com.danasea.backend.modules.ai.application.port.RateLimiterPort;
+import com.danasea.backend.modules.ai.application.ports.RateLimiterPort;
 import com.danasea.backend.modules.ai.domain.TrustTier;
 import com.danasea.backend.security.infrastructure.SecurityUtils;
 import com.danasea.backend.shared.i18n.LocalizedMessageService;

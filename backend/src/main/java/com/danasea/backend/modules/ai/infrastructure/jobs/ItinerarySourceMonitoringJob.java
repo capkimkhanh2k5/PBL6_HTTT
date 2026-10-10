@@ -8,8 +8,8 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
-import com.danasea.backend.modules.ai.application.port.ItineraryStorePort;
-import com.danasea.backend.modules.ai.application.usecase.PlanItineraryUseCase;
+import com.danasea.backend.modules.ai.application.ports.ItineraryStorePort;
+import com.danasea.backend.modules.ai.application.usecases.PlanItineraryUseCase;
 import com.danasea.backend.modules.service.application.api.AiItinerarySlotReadApi;
 import com.danasea.backend.modules.weather.application.api.AiItineraryAlertReadApi;
 

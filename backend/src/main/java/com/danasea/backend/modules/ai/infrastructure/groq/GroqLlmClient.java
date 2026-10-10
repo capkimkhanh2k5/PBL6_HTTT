@@ -1,8 +1,8 @@
 package com.danasea.backend.modules.ai.infrastructure.groq;
 
-import com.danasea.backend.modules.ai.application.port.KeyRotatorPort;
-import com.danasea.backend.modules.ai.application.port.AiExecutionBudget;
-import com.danasea.backend.modules.ai.application.port.LlmClientPort;
+import com.danasea.backend.modules.ai.application.ports.KeyRotatorPort;
+import com.danasea.backend.modules.ai.application.ports.AiExecutionBudget;
+import com.danasea.backend.modules.ai.application.ports.LlmClientPort;
 import com.danasea.backend.modules.ai.domain.models.AiMessage;
 import com.danasea.backend.modules.ai.domain.models.LlmResponse;
 import com.danasea.backend.modules.ai.domain.models.ToolCall;
@@ -10,7 +10,7 @@ import com.danasea.backend.modules.ai.domain.services.AIToolRegistry;
 import com.danasea.backend.modules.ai.domain.services.SystemPromptBuilder;
 import com.danasea.backend.shared.i18n.LocalizedMessageService;
 import com.danasea.backend.shared.i18n.SupportedLanguage;
-import com.danasea.backend.modules.ai.infrastructure.groq.config.GroqProperties;
+import com.danasea.backend.modules.ai.infrastructure.groq.configs.GroqProperties;
 import com.danasea.backend.configs.properties.HttpClientProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;

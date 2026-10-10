@@ -22,7 +22,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
-import com.danasea.backend.modules.ai.application.port.*;
+import com.danasea.backend.modules.ai.application.ports.*;
 import com.danasea.backend.modules.ai.domain.models.DecisionResult;
 import com.danasea.backend.modules.ai.domain.models.TravelContext;
 import com.danasea.backend.security.authorization.BaseSecurityIntegrationTest;

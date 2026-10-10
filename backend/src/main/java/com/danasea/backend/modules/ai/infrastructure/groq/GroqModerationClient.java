@@ -1,9 +1,9 @@
 package com.danasea.backend.modules.ai.infrastructure.groq;
 
-import com.danasea.backend.modules.ai.application.port.KeyRotatorPort;
-import com.danasea.backend.modules.ai.application.port.ModerationPort;
+import com.danasea.backend.modules.ai.application.ports.KeyRotatorPort;
+import com.danasea.backend.modules.ai.application.ports.ModerationPort;
 import com.danasea.backend.configs.properties.HttpClientProperties;
-import com.danasea.backend.modules.ai.infrastructure.groq.config.GroqProperties;
+import com.danasea.backend.modules.ai.infrastructure.groq.configs.GroqProperties;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;

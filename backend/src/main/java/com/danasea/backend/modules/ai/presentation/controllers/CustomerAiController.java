@@ -16,12 +16,12 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.danasea.backend.modules.ai.application.dtos.TravelRequest;
-import com.danasea.backend.modules.ai.application.usecase.CompareServicesUseCase;
-import com.danasea.backend.modules.ai.application.usecase.CustomerSupportUseCase;
-import com.danasea.backend.modules.ai.application.usecase.DiscoverServicesUseCase;
-import com.danasea.backend.modules.ai.application.usecase.PlanItineraryUseCase;
-import com.danasea.backend.modules.ai.application.usecase.ReviewSummaryUseCase;
-import com.danasea.backend.modules.ai.application.usecase.WeatherAwareUseCase;
+import com.danasea.backend.modules.ai.application.usecases.CompareServicesUseCase;
+import com.danasea.backend.modules.ai.application.usecases.CustomerSupportUseCase;
+import com.danasea.backend.modules.ai.application.usecases.DiscoverServicesUseCase;
+import com.danasea.backend.modules.ai.application.usecases.PlanItineraryUseCase;
+import com.danasea.backend.modules.ai.application.usecases.ReviewSummaryUseCase;
+import com.danasea.backend.modules.ai.application.usecases.WeatherAwareUseCase;
 import com.danasea.backend.modules.ai.domain.models.ItineraryPlan.Saved;
 import com.danasea.backend.security.infrastructure.SecurityUtils;
 import com.danasea.backend.shared.i18n.SupportedLanguage;

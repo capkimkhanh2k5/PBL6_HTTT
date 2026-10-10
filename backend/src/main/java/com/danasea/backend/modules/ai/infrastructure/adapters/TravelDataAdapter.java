@@ -5,7 +5,7 @@ import java.util.UUID;
 
 import org.springframework.stereotype.Component;
 
-import com.danasea.backend.modules.ai.application.port.TravelDataPort;
+import com.danasea.backend.modules.ai.application.ports.TravelDataPort;
 import com.danasea.backend.modules.operation.application.api.AiReviewReadApi.ReviewEvidence;
 import com.danasea.backend.modules.operation.application.api.AiReviewReadApi;
 import com.danasea.backend.modules.service.application.api.AiCatalogReadApi.PublishedService;

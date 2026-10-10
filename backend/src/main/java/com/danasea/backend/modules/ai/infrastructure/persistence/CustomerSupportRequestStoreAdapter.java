@@ -14,8 +14,8 @@ import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionTemplate;
 
-import com.danasea.backend.modules.ai.application.port.CustomerSupportNoticePort;
-import com.danasea.backend.modules.ai.application.port.CustomerSupportRequestStorePort;
+import com.danasea.backend.modules.ai.application.ports.CustomerSupportNoticePort;
+import com.danasea.backend.modules.ai.application.ports.CustomerSupportRequestStorePort;
 import com.danasea.backend.modules.ai.domain.exceptions.AiResourceNotFoundException;
 import com.danasea.backend.modules.ai.domain.exceptions.AiStateConflictException;
 import com.danasea.backend.modules.ai.infrastructure.persistence.entities.AiCustomerSupportRequestJpaEntity;

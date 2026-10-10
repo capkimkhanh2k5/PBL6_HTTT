@@ -23,8 +23,8 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.danasea.backend.modules.ai.application.port.DecisionModelPort;
-import com.danasea.backend.modules.ai.application.port.TravelWeatherPort;
+import com.danasea.backend.modules.ai.application.ports.DecisionModelPort;
+import com.danasea.backend.modules.ai.application.ports.TravelWeatherPort;
 import com.danasea.backend.modules.ai.domain.models.DecisionResult;
 import com.danasea.backend.modules.ai.domain.models.TravelContext;
 import com.danasea.backend.security.authorization.BaseSecurityIntegrationTest;

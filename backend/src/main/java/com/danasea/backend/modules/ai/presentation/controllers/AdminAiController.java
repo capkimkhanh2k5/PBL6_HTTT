@@ -12,8 +12,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.danasea.backend.modules.ai.application.port.AssessmentCaseStorePort;
-import com.danasea.backend.modules.ai.application.usecase.AnalyzeTransactionRiskUseCase;
+import com.danasea.backend.modules.ai.application.ports.AssessmentCaseStorePort;
+import com.danasea.backend.modules.ai.application.usecases.AnalyzeTransactionRiskUseCase;
 import com.danasea.backend.modules.ai.domain.models.AssessmentCase;
 import com.danasea.backend.security.infrastructure.SecurityUtils;
 

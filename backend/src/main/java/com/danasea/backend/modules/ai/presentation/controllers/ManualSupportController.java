@@ -13,8 +13,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.danasea.backend.modules.ai.application.port.CustomerSupportRequestStorePort.Request;
-import com.danasea.backend.modules.ai.application.usecase.CustomerSupportRequestUseCase;
+import com.danasea.backend.modules.ai.application.ports.CustomerSupportRequestStorePort.Request;
+import com.danasea.backend.modules.ai.application.usecases.CustomerSupportRequestUseCase;
 import com.danasea.backend.security.infrastructure.SecurityUtils;
 
 import lombok.RequiredArgsConstructor;

@@ -8,8 +8,8 @@ import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Component;
 
-import com.danasea.backend.modules.ai.application.port.LlmClientPort;
-import com.danasea.backend.modules.ai.application.port.ReviewHighlightPort;
+import com.danasea.backend.modules.ai.application.ports.LlmClientPort;
+import com.danasea.backend.modules.ai.application.ports.ReviewHighlightPort;
 import com.danasea.backend.modules.ai.domain.models.AiMessage;
 import com.danasea.backend.modules.ai.domain.models.AiMessageRole;
 import com.danasea.backend.modules.operation.application.api.AiReviewReadApi.ReviewEvidence;

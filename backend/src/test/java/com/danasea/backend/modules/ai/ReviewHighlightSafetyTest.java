@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.UUID;
 
 import org.junit.jupiter.api.Test;
-import com.danasea.backend.modules.ai.application.port.LlmClientPort;
+import com.danasea.backend.modules.ai.application.ports.LlmClientPort;
 import com.danasea.backend.modules.ai.domain.models.LlmResponse;
 import com.danasea.backend.modules.ai.infrastructure.groq.GroqReviewHighlightAdapter;
 import com.danasea.backend.modules.operation.application.api.AiReviewReadApi.ReviewEvidence;

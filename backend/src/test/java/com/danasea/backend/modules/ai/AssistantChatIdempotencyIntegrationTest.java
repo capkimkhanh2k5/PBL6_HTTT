@@ -21,9 +21,9 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
-import com.danasea.backend.modules.ai.application.port.LlmClientPort;
-import com.danasea.backend.modules.ai.application.port.ModerationPort;
-import com.danasea.backend.modules.ai.application.port.RateLimiterPort;
+import com.danasea.backend.modules.ai.application.ports.LlmClientPort;
+import com.danasea.backend.modules.ai.application.ports.ModerationPort;
+import com.danasea.backend.modules.ai.application.ports.RateLimiterPort;
 import com.danasea.backend.modules.ai.domain.models.LlmResponse;
 import com.danasea.backend.security.authorization.BaseSecurityIntegrationTest;
 import com.fasterxml.jackson.databind.ObjectMapper;

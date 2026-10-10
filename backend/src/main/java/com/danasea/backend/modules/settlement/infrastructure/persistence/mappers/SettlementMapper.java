@@ -1,8 +1,8 @@
 package com.danasea.backend.modules.settlement.infrastructure.persistence.mappers;
 
-import com.danasea.backend.modules.settlement.application.dto.SettlementDetailResponse;
-import com.danasea.backend.modules.settlement.application.dto.SettlementLineItemResponse;
-import com.danasea.backend.modules.settlement.application.dto.SettlementResponse;
+import com.danasea.backend.modules.settlement.application.dtos.SettlementDetailResponse;
+import com.danasea.backend.modules.settlement.application.dtos.SettlementLineItemResponse;
+import com.danasea.backend.modules.settlement.application.dtos.SettlementResponse;
 import com.danasea.backend.modules.settlement.domain.models.Settlement;
 import com.danasea.backend.modules.settlement.domain.models.SettlementLineItem;
 import com.danasea.backend.modules.settlement.infrastructure.persistence.entities.SettlementJpaEntity;

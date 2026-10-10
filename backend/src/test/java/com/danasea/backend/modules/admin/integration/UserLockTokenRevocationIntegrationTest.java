@@ -13,10 +13,10 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.danasea.backend.modules.account.application.service.AccountInternalService;
+import com.danasea.backend.modules.account.application.services.AccountInternalService;
 import com.danasea.backend.modules.account.domain.models.Role;
 import com.danasea.backend.modules.account.domain.models.User;
-import com.danasea.backend.modules.audit.application.service.AuditLogInternalService;
+import com.danasea.backend.modules.audit.application.services.AuditLogInternalService;
 import com.danasea.backend.modules.audit.infrastructure.mappers.AuditLogMapper;
 import com.danasea.backend.modules.audit.infrastructure.adapters.AuditLogAdapter;
 import com.danasea.backend.modules.account.infrastructure.mappers.RefreshTokenMapper;

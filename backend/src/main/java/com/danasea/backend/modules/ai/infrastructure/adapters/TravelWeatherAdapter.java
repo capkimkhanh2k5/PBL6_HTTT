@@ -7,7 +7,7 @@ import java.util.Map;
 
 import org.springframework.stereotype.Component;
 
-import com.danasea.backend.modules.ai.application.port.TravelWeatherPort;
+import com.danasea.backend.modules.ai.application.ports.TravelWeatherPort;
 import com.danasea.backend.modules.ai.domain.models.TravelContext;
 import com.danasea.backend.modules.service.application.api.AiCatalogReadApi.PublishedService;
 import com.danasea.backend.modules.service.application.api.AiCatalogReadApi.Slot;

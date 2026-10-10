@@ -9,7 +9,7 @@ import java.util.UUID;
 
 import org.springframework.stereotype.Component;
 
-import com.danasea.backend.modules.ai.application.port.CustomerOrderReadPort;
+import com.danasea.backend.modules.ai.application.ports.CustomerOrderReadPort;
 import com.danasea.backend.modules.order.application.dtos.CancellationPreviewResult;
 import com.danasea.backend.modules.order.application.dtos.GetCancellationPreviewQuery;
 import com.danasea.backend.modules.order.application.dtos.GetOrderDetailQuery;
