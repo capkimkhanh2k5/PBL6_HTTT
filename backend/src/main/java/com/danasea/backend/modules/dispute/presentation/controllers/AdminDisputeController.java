@@ -1,5 +1,6 @@
 package com.danasea.backend.modules.dispute.presentation.controllers;
 
+import com.danasea.backend.modules.dispute.application.usecases.GetAdminDisputeDetailUseCase;
 import com.danasea.backend.modules.dispute.application.usecases.GetDisputesUseCase;
 import com.danasea.backend.modules.dispute.application.usecases.ResolveDisputeUseCase;
 import com.danasea.backend.modules.dispute.domain.models.DisputeReason;
@@ -28,6 +29,7 @@ public class AdminDisputeController {
 
     private final GetDisputesUseCase getDisputesUseCase;
     private final ResolveDisputeUseCase resolveDisputeUseCase;
+    private final GetAdminDisputeDetailUseCase getAdminDisputeDetailUseCase;
 
     @GetMapping
     public ResponseEntity<Page<DisputeResponse>> getDisputes(
@@ -37,6 +39,15 @@ public class AdminDisputeController {
     ) {
         log.info("Admin query disputes with status: {}, reason: {}", status, reason);
         Page<DisputeResponse> response = getDisputesUseCase.execute(status, reason, pageable);
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<DisputeResponse> getDisputeDetail(
+            @PathVariable("id") UUID id
+    ) {
+        log.info("Admin query dispute detail for id: {}", id);
+        DisputeResponse response = getAdminDisputeDetailUseCase.execute(id);
         return ResponseEntity.ok(response);
     }
 

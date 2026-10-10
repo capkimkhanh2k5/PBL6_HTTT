@@ -1,10 +1,10 @@
 # DANASEA — Master API & Test Checklist (EPIC-01 → EPIC-08)
 
-**Cập nhật:** 10/10/2026 — nhánh `complete_discovery_and_notifications`; bổ sung khám phá dịch vụ, hồ sơ vendor công khai, thông báo và biên nhận; đồng bộ tồn Redis/DB, chống thông báo trùng và phân trang PDF.
+**Cập nhật:** 10/10/2026 — đồng bộ các API đã triển khai với nhánh main và giữ đầy đủ nghiệp vụ của từng module.
+
+**Phạm vi kiểm kê:** Các tổ hợp HTTP method/path được đối chiếu tự động với controller trong profile `test` qua `BackendApplicationTests`; inventory mới nhất được xuất tại `backend/target/test-artifacts/api-endpoints.txt`. Swagger/Actuator do thư viện cung cấp không thuộc inventory này. Các số lượng trong ghi nhận nghiệm thu bên dưới thuộc snapshot được nêu tại thời điểm kiểm chứng.
 
 **Quy ước:** Với mục API, `[x]` nghĩa là endpoint đã có trong controller; không đồng nghĩa đã kiểm chứng toàn bộ nghiệp vụ hoặc tích hợp cổng thanh toán thật. Với mục Test, hạ tầng và quyết định nghiệp vụ, giữ trạng thái checklist đã ghi nhận; `[ ]` là việc còn thiếu/chưa xác nhận. Lần cập nhật này không đánh dấu các test chưa xác nhận thành đã pass.
-
-**Phạm vi kiểm kê:** 158 tổ hợp HTTP method/path từ các controller trong profile `test`, gồm 4 đường dẫn alias, 4 endpoint chẩn đoán ở profile `dev/test` và 1 webhook nội bộ chỉ ở `test`. Swagger/Actuator do thư viện cung cấp không nằm trong số API controller này. Các API cần hoàn thiện nghiệp vụ được ghi chú tại mục tương ứng; xem thêm [báo cáo rà soát](API-completeness-review-2026-10-06.md) và [kết quả sandbox](payment-sandbox-verification-2026-10-06.md).
 
 ---
 
@@ -285,7 +285,6 @@ Ví dụ hai gói riêng có số khách khác nhau trong cùng ca:
 ```
 Hai item phải nhận hai đơn vị khác nhau và tính giá hai gói. Nhóm ghép 4 người khi đơn vị 1 còn 2 chỗ sẽ được đưa nguyên nhóm vào đơn vị 2 nếu đủ chỗ.
 
-
 ---
 
 ## EPIC-04 · Order & Payment
@@ -401,7 +400,6 @@ Hai item phải nhận hai đơn vị khác nhau và tính giá hai gói. Nhóm 
 - [x] OrderExpiryEventListenerTest (4 unit test: hủy khi pending, giữ nguyên paid, không có đơn, trả reservation khi hết hạn)
 - [x] SettlementCalculationTest (15 unit test: tính settlement, loại trừ, hoa hồng và snapshot giảm giá; trường hợp đồng tài trợ ở mức engine, API hiện chỉ có PLATFORM hoặc VENDOR)
 
-
 ### Quản trị giao dịch — hợp đồng đối soát ngày 09/10/2026
 
 **Kiểm chứng 09/10/2026:** `./mvnw clean verify` → BUILD SUCCESS; 1.711 test cases, 1576 thực chạy, 135 skipped, 0 failures, 0 errors. Trong đó 29 ca `AdminTransactionIntegrationTest` trên PostgreSQL 16/Flyway/Redis 7 riêng và 57 ca tập trung reconciliation/adapter/job. Kiểm kê runtime: 126 method/path; migration mới V23 đã được kiểm tra trên DB mới và nâng từ V20. Gateway được mock; sandbox thật chưa được chạy trong lần này.
@@ -502,11 +500,38 @@ Hai item phải nhận hai đơn vị khác nhau và tính giá hai gói. Nhóm 
 
 Chính sách hiện tại: khách sửa review trong 7 ngày; chưa cung cấp API xóa. Admin ẩn/hiện để kiểm duyệt; ẩn loại review khỏi điểm tổng hợp, hiện tính lại điểm.
 
+### Nhắn tin Customer — Vendor
+- [x] POST /api/conversations (tạo hoặc lấy hội thoại theo masterOrderId và vendorId; đơn nhiều vendor phải chọn vendorId)
+- [x] GET /api/conversations (phân trang, tin cuối và unreadCount; size tối đa 100)
+- [x] GET /api/conversations/{id}/messages (phân trang hoặc polling, size mặc định 50/tối đa 100)
+- [x] POST /api/conversations/{id}/messages (gửi tin nhắn, trả createdAt và sequence đã lưu)
+- [x] Chỉ customer của đơn hoặc vendor có sub-order liên quan được tham gia hội thoại.
+- [x] Khóa master order khi tạo và unique customer/vendor/masterOrder chống tạo hội thoại trùng.
+- [x] Gửi tin giữ khóa hội thoại tới commit; sequence tăng theo từng hội thoại, có unique constraint.
+- [x] Đánh dấu đã đọc chỉ các tin đến nằm trong batch được trả về; tin ngoài batch và tin tự gửi giữ nguyên.
+
+**Hợp đồng polling:** dùng `afterSequence=0` để bắt đầu; lần tiếp theo gửi sequence của tin cuối đã nhận. Response là `List<MessageResponse>`, luôn theo sequence tăng dần, không trả quá size đã yêu cầu. Không gửi đồng thời `after` và `afterSequence`; sequence âm hoặc size > 100 trả 400. Response bổ sung trường `sequence`; cursor chỉ có ý nghĩa trong đúng hội thoại.
+
+`after` (ISO-8601) được giữ để tương thích: nếu khớp timestamp một tin đã lưu, backend tiếp tục từ sequence của tin đầu tiên tại timestamp đó. Khi nhiều tin cùng timestamp, có thể trả lặp tin ở ranh giới; client cũ cần loại trùng theo id. Nếu không khớp timestamp nào, nó là bộ lọc thời gian. Client nên chuyển sang `afterSequence` để tiến qua mọi batch mà không phụ thuộc đồng hồ/timestamp trùng nhau. Không tăng cursor chỉ từ response gửi tin: khi polling, chỉ tăng sau khi đã xử lý toàn bộ batch nhận được để không bỏ qua tin của phía bên kia.
+
 ### Khiếu nại — Tranh chấp
 - [x] POST /api/orders/{id}/disputes
+- [x] GET /api/disputes (chỉ tranh chấp của customer hiện tại)
+- [x] GET /api/disputes/{id} (chi tiết, gồm giải trình và bằng chứng vendor)
+- [x] GET /api/vendor/disputes (phân trang, lọc status; chỉ sub-order của vendor hiện tại)
+- [x] GET /api/vendor/disputes/{id}
+- [x] POST /api/vendor/disputes/{id}/responses (giải trình và bằng chứng; đã giải quyết trả 409)
+- [x] POST /api/disputes/evidence (upload có xác thực; JPEG/PNG/WEBP/PDF, kiểm tra magic bytes, tối đa 5MB)
 - [x] GET /api/admin/disputes
+- [x] GET /api/admin/disputes/{id} (toàn bộ hồ sơ)
 - [x] PATCH /api/admin/disputes/{id}/resolve (yêu cầu refund từ dispute được lưu PENDING; cần luồng thực thi tại cổng)
-- [ ] Test: khiếu nại trùng, resolve cập nhật đúng Order/Refund
+- [x] Vendor response và admin resolve dùng cùng khóa tranh chấp; không ghi đè quyết định đã chốt.
+- [x] Admin list/detail/resolve ánh xạ đầy đủ vendorResponse, vendorEvidenceUrls và vendorRespondedAt.
+- [x] ChatDisputeConcurrencyIntegrationTest: PostgreSQL thật kiểm tra tạo hội thoại đồng thời, unique constraint, hai thứ tự reply/resolve, batch read receipt, timestamp, polling đồng thời, cursor/clock regression, giới hạn và ownership.
+- [x] ChatMigrationIntegrationTest: V28 → V29 gộp hội thoại trùng, giữ tin nhắn, backfill sequence và kiểm tra unique constraint.
+- [x] Migration V29 bổ sung unique hội thoại và sequence; không sửa migration đã phát hành.
+
+**Kiểm chứng 09/10/2026 — worktree `implement_customer_vendor_chat`:** `./mvnw clean verify` BUILD SUCCESS; 2.224 test, 0 failure/error, 135 skipped (2.089 test thực thi đạt). Trong đó 11 test ChatDisputeConcurrencyIntegrationTest và 1 test ChatMigrationIntegrationTest chạy trên PostgreSQL 16 thật đều pass; Flyway V26 và Hibernate schema validation pass. Đối chiếu checklist với mapping runtime profile test: đủ 163/163 endpoint từ 55 controller, không có mục API thừa.
 
 ### QR Check-in
 - [x] POST /api/bookings/{id}/qr-code
@@ -564,7 +589,6 @@ Nếu DB dev đã áp dụng migration notification V25 cũ, cần kiểm tra ch
 - [ ] Test: pipeline CI/CD chạy end-to-end trên staging
 
 ---
-
 
 # ĐỀ XUẤT
 

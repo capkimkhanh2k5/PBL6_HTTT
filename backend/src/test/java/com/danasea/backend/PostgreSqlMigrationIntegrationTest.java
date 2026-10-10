@@ -4,7 +4,12 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.sql.DriverManager;
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.Objects;
 import org.flywaydb.core.Flyway;
+import org.flywaydb.core.api.MigrationInfo;
+import org.flywaydb.core.api.MigrationVersion;
 import org.junit.jupiter.api.Test;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.wait.strategy.Wait;
@@ -46,7 +51,10 @@ class PostgreSqlMigrationIntegrationTest {
         var migrationResult = flyway.migrate();
         assertTrue(migrationResult.success);
         assertNotNull(flyway.info().current());
-        assertEquals("27", flyway.info().current().getVersion().getVersion());
+        var latestVersion = Arrays.stream(flyway.info().all())
+                .map(MigrationInfo::getVersion).filter(Objects::nonNull)
+                .max(Comparator.naturalOrder()).orElseThrow();
+        assertEquals(latestVersion, flyway.info().current().getVersion());
         assertTrue(flyway.validateWithResult().validationSuccessful);
 
         try (var connection = DriverManager.getConnection(jdbcUrl, "migration_user", "migration_password");
@@ -130,6 +138,44 @@ class PostgreSqlMigrationIntegrationTest {
             try (var rows=statement.executeQuery("SELECT capacity_released FROM booking_items WHERE id='00000000-0000-0000-0000-000000000034'")) {
                 assertTrue(rows.next());assertTrue(rows.getBoolean(1));
             }
+        }
+    }
+
+    @Test
+    void newModulesUpgradeCurrentMainSchemaWithoutLosingNotifications() throws Exception {
+        String url = "jdbc:postgresql://" + POSTGRES.getHost() + ":" + POSTGRES.getFirstMappedPort() + "/migration_test";
+        Flyway baseline = Flyway.configure().dataSource(url, "migration_user", "migration_password")
+                .schemas("current_main_upgrade").defaultSchema("current_main_upgrade")
+                .locations("classpath:db/migration").target("27").load();
+        baseline.migrate();
+        try (var connection = DriverManager.getConnection(url, "migration_user", "migration_password");
+                var statement = connection.createStatement()) {
+            statement.execute("SET search_path TO current_main_upgrade");
+            statement.executeUpdate("""
+                    INSERT INTO users(id, role, created_at, updated_at)
+                    VALUES ('10000000-0000-0000-0000-000000000001', 'CUSTOMER', NOW(), NOW());
+                    INSERT INTO notifications(id, user_id, type, channel, title, body, locale, status,
+                            is_read, idempotency_key, created_at, updated_at)
+                    VALUES ('10000000-0000-0000-0000-000000000002', '10000000-0000-0000-0000-000000000001',
+                            'PAYMENT_SUCCESS', 'IN_APP', 'Preserved notification', 'Preserved body',
+                            'en', 'SENT', true, 'upgrade-existing', NOW(), NOW());
+                    """);
+        }
+        Flyway upgraded = Flyway.configure().dataSource(url, "migration_user", "migration_password")
+                .schemas("current_main_upgrade").defaultSchema("current_main_upgrade")
+                .locations("classpath:db/migration").load();
+        assertTrue(upgraded.migrate().success);
+        assertTrue(upgraded.validateWithResult().validationSuccessful);
+        assertTrue(upgraded.info().current().getVersion().compareTo(MigrationVersion.fromVersion("27")) > 0);
+        try (var connection = DriverManager.getConnection(url, "migration_user", "migration_password");
+                var statement = connection.createStatement();
+                var row = statement.executeQuery("""
+                        SELECT is_read, idempotency_key FROM current_main_upgrade.notifications
+                        WHERE id = '10000000-0000-0000-0000-000000000002'
+                        """)) {
+            assertTrue(row.next());
+            assertTrue(row.getBoolean(1));
+            assertEquals("upgrade-existing", row.getString(2));
         }
     }
 

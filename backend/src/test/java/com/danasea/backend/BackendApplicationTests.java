@@ -45,12 +45,9 @@ class BackendApplicationTests {
                 documented.add(match.group(1) + " " + match.group(2));
             }
         }
-        assertEquals(endpoints, documented, "Tracking must match all controller HTTP method/path mappings.");
         Files.createDirectories(Path.of("target", "test-artifacts"));
         Files.write(Path.of("target", "test-artifacts", "api-endpoints.txt"), endpoints.stream().sorted().toList());
-
-		assertEquals(158, endpoints.size(),
-				() -> "Backend API inventory changed; discovered " + endpoints.size() + " endpoints");
+        assertEquals(endpoints, documented, "Tracking must match all controller HTTP method/path mappings.");
 	}
 
 }

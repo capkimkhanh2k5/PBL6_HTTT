@@ -27,6 +27,9 @@ public class DisputeMapper {
                 .adminNote(entity.getAdminNote())
                 .resolvedAt(entity.getResolvedAt())
                 .resolvedBy(entity.getResolvedBy())
+                .vendorResponse(entity.getVendorResponse())
+                .vendorEvidenceUrls(entity.getVendorEvidenceUrls() != null ? new ArrayList<>(entity.getVendorEvidenceUrls()) : new ArrayList<>())
+                .vendorRespondedAt(entity.getVendorRespondedAt())
                 .createdAt(entity.getCreatedAt())
                 .updatedAt(entity.getUpdatedAt())
                 .build();
@@ -49,6 +52,9 @@ public class DisputeMapper {
                 .adminNote(domain.getAdminNote())
                 .resolvedAt(domain.getResolvedAt())
                 .resolvedBy(domain.getResolvedBy())
+                .vendorResponse(domain.getVendorResponse())
+                .vendorEvidenceUrls(domain.getVendorEvidenceUrls() != null ? new ArrayList<>(domain.getVendorEvidenceUrls()) : new ArrayList<>())
+                .vendorRespondedAt(domain.getVendorRespondedAt())
                 .build();
 
         entity.setId(domain.getId());

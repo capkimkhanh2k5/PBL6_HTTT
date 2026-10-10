@@ -39,6 +39,13 @@ public class Dispute extends BaseDomainModel {
     private OffsetDateTime resolvedAt;
     private UUID resolvedBy;
 
+    private String vendorResponse;
+
+    @Builder.Default
+    private List<String> vendorEvidenceUrls = new ArrayList<>();
+
+    private OffsetDateTime vendorRespondedAt;
+
     public boolean isActive() {
         return status != null && status.isActive();
     }

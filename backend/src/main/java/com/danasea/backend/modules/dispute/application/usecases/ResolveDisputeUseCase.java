@@ -151,25 +151,7 @@ public class ResolveDisputeUseCase {
         dispute.setResolvedAt(now);
         DisputeJpaEntity savedDispute = disputeRepository.save(dispute);
 
-        return toResponse(savedDispute);
+        return DisputeResponse.fromEntity(savedDispute);
     }
 
-    private DisputeResponse toResponse(DisputeJpaEntity savedDispute) {
-        return new DisputeResponse(
-                savedDispute.getId(),
-                savedDispute.getOrderId(),
-                savedDispute.getSubOrderId(),
-                savedDispute.getCustomerId(),
-                savedDispute.getReason(),
-                savedDispute.getDescription(),
-                savedDispute.getEvidenceUrls(),
-                savedDispute.getStatus(),
-                savedDispute.getRefundPercentage(),
-                savedDispute.getAdminNote(),
-                savedDispute.getResolvedBy(),
-                savedDispute.getResolvedAt(),
-                savedDispute.getCreatedAt(),
-                savedDispute.getUpdatedAt()
-        );
-    }
 }
