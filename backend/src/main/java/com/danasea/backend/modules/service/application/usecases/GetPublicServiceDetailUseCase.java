@@ -1,9 +1,5 @@
 package com.danasea.backend.modules.service.application.usecases;
 
-import java.util.List;
-import java.util.UUID;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 import com.danasea.backend.modules.order.domain.services.RefundPolicyEngine;
 import com.danasea.backend.modules.service.application.dtos.ServiceDetailResult;
 import com.danasea.backend.modules.service.application.services.ServiceDiscoveryAvailability;
@@ -22,6 +18,11 @@ import com.danasea.backend.modules.service.presentation.dtos.ServiceOptionRespon
 import com.danasea.backend.modules.service.presentation.dtos.StructuredSlotResponse;
 import com.danasea.backend.modules.vendor.domain.models.BadgeTier;
 import com.danasea.backend.shared.i18n.LocalizedContentSelector;
+import java.time.format.DateTimeFormatter;
+import java.util.List;
+import java.util.UUID;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 @Component
 public class GetPublicServiceDetailUseCase {
@@ -142,6 +143,16 @@ public class GetPublicServiceDetailUseCase {
             participantConditions = service.getWaiverContent();
         }
 
+        LocalizedContentSelector.LocalizedSelection waiverSelection = localizedContentSelector != null
+                ? localizedContentSelector.selectDetailed(service.getWaiverContent(), service.getWaiverContentEn())
+                : new LocalizedContentSelector.LocalizedSelection(service.getWaiverContent(), "VI", false);
+
+        Boolean waiverRequired = Boolean.TRUE.equals(service.getWaiverRequired());
+        Integer waiverVersion = service.getWaiverVersion() != null ? service.getWaiverVersion() : 1;
+        String waiverContent = waiverSelection.content();
+        String waiverLanguage = waiverSelection.language();
+        Boolean waiverFallbackUsed = waiverSelection.fallbackUsed();
+
         // Refund, cancellation and safety policies
         String refundPolicy = refundPolicyEngine != null ? refundPolicyEngine.getRefundPolicySummary()
                 : "Refund policy: 100% more than 48 hours before departure, 70% from 24 to 48 hours, 30% from 2 to 24 hours, and 0% within 2 hours. Dangerous weather and vendor fault receive a full refund.";
@@ -163,7 +174,7 @@ public class GetPublicServiceDetailUseCase {
                 ? List.of() : discoveryAvailability.describe(service);
         List<String> availableSlots = discoveryAvailability == null ? serviceAvailabilityPort.findAvailableSlots(id)
                 : structuredSlots.stream().filter(StructuredSlotResponse::bookable)
-                        .map(slot -> slot.date() + "T" + slot.startTime().format(java.time.format.DateTimeFormatter.ISO_LOCAL_TIME))
+                        .map(slot -> slot.date() + "T" + slot.startTime().format(DateTimeFormatter.ISO_LOCAL_TIME))
                         .distinct().toList();
 
         return ServiceDetailResult.builder()
@@ -190,6 +201,11 @@ public class GetPublicServiceDetailUseCase {
                 .duration(duration)
                 .capacity(capacity)
                 .participantConditions(participantConditions)
+                .waiverRequired(waiverRequired)
+                .waiverVersion(waiverVersion)
+                .waiverContent(waiverContent)
+                .waiverLanguage(waiverLanguage)
+                .waiverFallbackUsed(waiverFallbackUsed)
                 .refundPolicy(refundPolicy)
                 .cancellationPolicy(cancellationPolicy)
                 .safetyRules(safetyRules)

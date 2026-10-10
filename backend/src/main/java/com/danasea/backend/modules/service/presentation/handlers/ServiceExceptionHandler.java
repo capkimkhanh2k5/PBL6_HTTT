@@ -1,10 +1,5 @@
 package com.danasea.backend.modules.service.presentation.handlers;
 
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.bind.annotation.RestControllerAdvice;
-
 import com.danasea.backend.modules.service.domain.exceptions.CategoryInactiveException;
 import com.danasea.backend.modules.service.domain.exceptions.CategoryNotFoundException;
 import com.danasea.backend.modules.service.domain.exceptions.ImageNotFoundException;
@@ -16,9 +11,14 @@ import com.danasea.backend.modules.service.domain.exceptions.ServiceImagesRequir
 import com.danasea.backend.modules.service.domain.exceptions.ServiceNotFoundException;
 import com.danasea.backend.modules.service.domain.exceptions.UnauthorizedServiceAccessException;
 import com.danasea.backend.modules.service.domain.exceptions.VendorNotApprovedException;
+import com.danasea.backend.modules.service.domain.exceptions.WaiverContentRequiredException;
 import com.danasea.backend.modules.service.domain.exceptions.WeatherRequirementsMissingException;
 import com.danasea.backend.shared.presentation.ErrorResponse;
 import com.danasea.backend.shared.presentation.LocalizedExceptionHandlerSupport;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 @RestControllerAdvice
 public class ServiceExceptionHandler extends LocalizedExceptionHandlerSupport {
@@ -69,6 +69,12 @@ public class ServiceExceptionHandler extends LocalizedExceptionHandlerSupport {
     public ResponseEntity<ErrorResponse> handleWeatherMissing(WeatherRequirementsMissingException ex) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                 .body(error("WEATHER_REQUIREMENTS_MISSING"));
+    }
+
+    @ExceptionHandler(WaiverContentRequiredException.class)
+    public ResponseEntity<ErrorResponse> handleWaiverContentRequired(WaiverContentRequiredException ex) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(error("WAIVER_CONTENT_REQUIRED"));
     }
 
     @ExceptionHandler(ImageNotFoundException.class)

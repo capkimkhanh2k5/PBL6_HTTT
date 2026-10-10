@@ -1,11 +1,10 @@
 package com.danasea.backend.modules.service.infrastructure.persistence.entities;
 
 import com.danasea.backend.modules.service.domain.models.ServiceStatus;
-import java.math.BigDecimal;
-import java.util.UUID;
-
 import com.danasea.backend.shared.core.infrastructure.persistence.entities.BaseJpaEntity;
 import jakarta.persistence.*;
+import java.math.BigDecimal;
+import java.util.UUID;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -49,10 +48,17 @@ public class ServiceJpaEntity extends BaseJpaEntity {
     @Column(name = "rejection_reason")
     private String rejectionReason;
 
+    @Column(columnDefinition = "TEXT")
     private String waiverContent;
 
     @Column(columnDefinition = "TEXT")
     private String waiverContentEn;
+
+    @Column(name = "waiver_required")
+    private Boolean waiverRequired = false;
+
+    @Column(name = "waiver_version")
+    private Integer waiverVersion = 1;
 
     private Boolean weatherSensitive;
 

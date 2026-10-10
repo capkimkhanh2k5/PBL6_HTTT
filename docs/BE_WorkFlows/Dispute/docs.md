@@ -12,7 +12,7 @@
 
 ---
 
-## 1. Dispute_CustomerCreate.png — Khách Hàng Mở Khiếu Nại
+## 1. Dispute_CustomerCreate_SD.png — Khách Hàng Mở Khiếu Nại
 
 **Lớp xử lý chính:** `com.danasea.backend.modules.dispute.application.usecases.CreateDisputeUseCase`
 
@@ -28,7 +28,7 @@
 
 ---
 
-## 2. Dispute_AdminResolve.png — Admin Giải Quyết Khiếu Nại
+## 2. Dispute_AdminResolve_SD.png — Admin Giải Quyết Khiếu Nại
 
 **Lớp xử lý chính:** `com.danasea.backend.modules.dispute.application.usecases.ResolveDisputeUseCase`
 
@@ -45,7 +45,7 @@
 
 ---
 
-## 3. Dispute_StateMachine.png — Vòng Đời Trạng Thái Khiếu Nại
+## 3. Dispute_SM.png — Vòng Đời Trạng Thái Khiếu Nại
 
 - `OPEN`: Trạng thái ban đầu sau khi khách hàng tạo khiếu nại thành công.
 - `UNDER_REVIEW`: Trạng thái khi Admin hoặc bộ phận CSKH tiếp nhận hồ sơ xem xét.

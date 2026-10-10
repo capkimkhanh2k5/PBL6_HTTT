@@ -1,0 +1,66 @@
+sequenceDiagram
+    autonumber
+    actor Admin as Quản Trị Viên (Admin)
+    actor Vendor as Đối Tác (Vendor)
+    participant Controller as DiscountCodeController
+    participant Rules as DiscountCodeRules
+    participant ServiceRepo as JpaServiceRepository
+    participant CodeRepo as DiscountCodeRepositoryPort
+    participant DB as PostgreSQL
+
+    %% NHÁNH 1: ADMIN TẠO MÃ SÀN HOẶC TÀI TRỢ
+    rect rgb(240, 249, 255)
+    Note over Admin,DB: NHÁNH 1: ADMIN TẠO MÃ TOÀN SÀN HOẶC TÀI TRỢ RIÊNG
+    Admin->>Controller: POST /api/admin/discount-codes (payload)
+    Controller->>Rules: validate(newCode)
+    activate Rules
+    Rules->>Rules: Kiểm tra scope, discountValue > 0, dateRange hợp lệ
+    Rules-->>Controller: Validated OK
+    deactivate Rules
+    Controller->>CodeRepo: save(code)
+    CodeRepo->>DB: INSERT INTO discount_codes (code, scope='PLATFORM', sponsor_type='PLATFORM', ...)
+    DB-->>CodeRepo: Saved
+    CodeRepo-->>Controller: DiscountCodeEntity
+    Controller-->>Admin: 201 Created
+    end
+
+    %% NHÁNH 2: VENDOR TỰ TẠO MÃ GIẢM GIÁ
+    rect rgb(254, 249, 195)
+    Note over Vendor,DB: NHÁNH 2: VENDOR TỰ TẠO MÃ CHO GIAN HÀNG CỦA MÌNH
+    Vendor->>Controller: POST /api/vendor/discount-codes (payload)
+    Note over Vendor,Controller: Tự động gán vendorId = currentVendorId, sponsorType = 'VENDOR'
+
+    alt Áp dụng cho Service cụ thể (serviceId != null)
+        Controller->>ServiceRepo: findById(serviceId)
+        ServiceRepo->>DB: SELECT vendor_id FROM services WHERE id = ?
+        DB-->>ServiceRepo: service.vendor_id
+
+        alt Dịch vụ không thuộc về Vendor này
+            Controller-->>Vendor: 400 Bad Request (DISCOUNT_SERVICE_INVALID)
+        end
+    end
+
+    Controller->>Rules: validate(vendorCode)
+    Controller->>CodeRepo: save(code)
+    CodeRepo->>DB: INSERT INTO discount_codes (code, scope='VENDOR', sponsor_type='VENDOR', vendor_id=...)
+    DB-->>CodeRepo: Saved
+    Controller-->>Vendor: 201 Created
+    end
+
+    %% NHÁNH 3: VENDOR SỬA MÃ & CHỐNG IDOR
+    rect rgb(254, 242, 242)
+    Note over Vendor,DB: NHÁNH 3: VENDOR CẬP NHẬT MÃ - CHỐNG IDOR & BẢO VỆ MÃ SÀN
+    Vendor->>Controller: PATCH /api/vendor/discount-codes/{id} (updateDto)
+    Controller->>CodeRepo: findByIdForUpdate(id)
+    CodeRepo->>DB: SELECT * FROM discount_codes WHERE id = ? FOR UPDATE
+    DB-->>CodeRepo: code
+
+    alt Mã thuộc Vendor khác HOẶC là mã do Sàn tài trợ (sponsorType == 'PLATFORM')
+        Controller-->>Vendor: 403 Forbidden (ACCESS_DENIED_NOT_OWNER)
+    end
+
+    Controller->>Rules: validate(mergedCode)
+    Controller->>CodeRepo: save(mergedCode)
+    CodeRepo->>DB: UPDATE discount_codes SET ... WHERE id = ?
+    Controller-->>Vendor: 200 OK
+    end

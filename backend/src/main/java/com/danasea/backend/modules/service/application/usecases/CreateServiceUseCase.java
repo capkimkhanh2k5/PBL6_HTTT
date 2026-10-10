@@ -1,17 +1,14 @@
 package com.danasea.backend.modules.service.application.usecases;
-import com.danasea.backend.modules.service.domain.models.ServiceImage;
-
-import java.util.List;
-import java.util.UUID;
-
 import com.danasea.backend.modules.service.application.dtos.CreateServiceCommand;
 import com.danasea.backend.modules.service.application.dtos.ServiceResult;
 import com.danasea.backend.modules.service.application.usecases.helpers.ServiceResultMapper;
 import com.danasea.backend.modules.service.domain.exceptions.CategoryInactiveException;
 import com.danasea.backend.modules.service.domain.exceptions.CategoryNotFoundException;
 import com.danasea.backend.modules.service.domain.exceptions.VendorNotApprovedException;
+import com.danasea.backend.modules.service.domain.exceptions.WaiverContentRequiredException;
 import com.danasea.backend.modules.service.domain.models.Category;
 import com.danasea.backend.modules.service.domain.models.Service;
+import com.danasea.backend.modules.service.domain.models.ServiceImage;
 import com.danasea.backend.modules.service.domain.models.ServiceStatus;
 import com.danasea.backend.modules.service.domain.ports.CategoryRepositoryPort;
 import com.danasea.backend.modules.service.domain.ports.ServiceImageRepositoryPort;
@@ -19,6 +16,7 @@ import com.danasea.backend.modules.service.domain.ports.ServiceRepositoryPort;
 import com.danasea.backend.modules.service.domain.ports.VendorPort;
 import com.danasea.backend.modules.vendor.domain.models.Vendor;
 import com.danasea.backend.modules.vendor.domain.models.VerificationStatus;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
@@ -46,6 +44,13 @@ public class CreateServiceUseCase {
             throw new CategoryInactiveException(cmd.categoryId());
         }
 
+        boolean waiverReq = Boolean.TRUE.equals(cmd.waiverRequired());
+        String wc = cmd.waiverContent() != null ? cmd.waiverContent().trim() : null;
+        String wce = cmd.waiverContentEn() != null ? cmd.waiverContentEn().trim() : null;
+        if (waiverReq && (wc == null || wc.isBlank()) && (wce == null || wce.isBlank())) {
+            throw new WaiverContentRequiredException();
+        }
+
         // 3. Build service domain object
         Service service = Service.builder()
                 .vendorId(vendor.getId())
@@ -61,8 +66,10 @@ public class CreateServiceUseCase {
                 .address(cmd.address())
                 .latitude(cmd.latitude())
                 .longitude(cmd.longitude())
-                .waiverContent(cmd.waiverContent())
-                .waiverContentEn(cmd.waiverContentEn())
+                .waiverContent(wc)
+                .waiverContentEn(wce)
+                .waiverRequired(waiverReq)
+                .waiverVersion(1)
                 .weatherSensitive(cmd.weatherSensitive())
                 .minWindKmh(cmd.minWindKmh())
                 .maxWaveM(cmd.maxWaveM())

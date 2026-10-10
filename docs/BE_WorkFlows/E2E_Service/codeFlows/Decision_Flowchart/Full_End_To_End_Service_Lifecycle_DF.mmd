@@ -1,0 +1,41 @@
+flowchart TD
+    Start(["Khách hàng truy cập nền tảng DanaSea"]) --> Browse["Tìm kiếm & Khám phá dịch vụ tour biển"]
+
+    Browse --> Hold["Tạo giữ chỗ tạm thời (Booking Hold 10 phút)"]
+    Hold --> CheckWaiver{"Tour có bắt buộc cam kết an toàn<br/>(<code>waiverRequired == true</code>)?"}
+
+    CheckWaiver -- "Bắt buộc" --> AcceptWaiver["Khách hàng đọc & xác nhận cam kết an toàn<br/><code>POST /api/sub-orders/{id}/waiver-acceptance</code>"]
+    CheckWaiver -- "Không" --> Payment
+    AcceptWaiver --> Payment["Thanh toán qua cổng VNPay / MoMo<br/><code>POST /api/orders/{id}/payment-intent</code>"]
+
+    Payment --> PaySuccess{"Thanh toán thành công?"}
+    PaySuccess -- "Thất bại / Hết hạn" --> ReleaseHold["Hủy đơn & Hoàn trả Capacity cho Slot"]
+    PaySuccess -- "Thành công" --> Confirm["Order & SubOrders chuyển sang <code>CONFIRMED / PAID</code>"]
+
+    Confirm --> CheckWeatherEvent{"Có cảnh báo bão / thời tiết xấu?"}
+    CheckWeatherEvent -- "Thời tiết xấu" --> RescheduleBranch{"Khách chọn đổi lịch hay hủy hoàn tiền?"}
+    RescheduleBranch -- "Đổi lịch" --> RescheduleFlow["Chuyển sang ca tour mới khả dụng<br/>(<code>POST /api/sub-orders/{id}/reschedule</code>)"]
+    RescheduleBranch -- "Hủy tour" --> WeatherRefund["Tự động hủy & Hoàn tiền 100%"]
+
+    CheckWeatherEvent -- "Thời tiết tốt" --> ArriveDay["Đến ngày đi tour"]
+    RescheduleFlow --> ArriveDay
+
+    ArriveDay --> CheckInFlow["Vendor quét mã QR Check-in<br/>(<code>POST /api/vendor/checkin/verify</code>)"]
+    CheckInFlow --> Experience["Khách trải nghiệm dịch vụ"]
+
+    Experience --> Complete["SubOrder hoàn tất: <code>COMPLETED</code>"]
+    Complete --> ReviewFlow["Khách gửi đánh giá & nhận xét trong vòng 7 ngày"]
+    Complete --> SettlementFlow["Doanh thu được đưa vào kỳ đối soát cho Vendor"]
+
+    ReleaseHold --> End(["Kết thúc"])
+    WeatherRefund --> End
+    ReviewFlow --> End
+    SettlementFlow --> End
+
+    classDef startEnd fill:#e0f2fe,stroke:#0284c7,stroke-width:2px,color:#0369a1;
+    classDef decision fill:#fef3c7,stroke:#d97706,stroke-width:2px,color:#92400e;
+    classDef action fill:#f0fdf4,stroke:#16a34a,stroke-width:2px,color:#15803d;
+
+    class Start,End startEnd;
+    class CheckWaiver,PaySuccess,CheckWeatherEvent,RescheduleBranch decision;
+    class Browse,Hold,AcceptWaiver,Payment,ReleaseHold,Confirm,RescheduleFlow,WeatherRefund,ArriveDay,CheckInFlow,Experience,Complete,ReviewFlow,SettlementFlow action;

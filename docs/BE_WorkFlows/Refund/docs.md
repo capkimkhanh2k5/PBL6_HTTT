@@ -2,14 +2,15 @@
 
 > Module Refund định nghĩa công cụ tính toán chính sách hoàn tiền tự động (`RefundPolicyEngine`) và quy trình xử lý hủy đơn bồi hoàn của khách hàng.
 
-| # | Sơ đồ | Loại | Nội dung |
-|---|-------|------|----------|
-| 1 | `RefundPolicy_Engine` | Flowchart | Cây quyết định của `RefundPolicyEngine`: phân loại theo 5 nhóm lý do và tính mức hoàn tiền theo các mốc thời gian trước khởi hành |
-| 2 | `RefundPolicy_CancellationFlow` | Sequence Diagram | Quy trình hủy đơn và khởi tạo hoàn tiền: Xác thực IDOR, gọi engine tính toán, tạo bản ghi Refund bất biến và cập nhật đơn sang CANCELLED |
+| # | Sơ đồ | Loại | Mã nguồn Mermaid (.mmd) | Nội dung |
+|---|-------|------|--------------------------|----------|
+| 1 | `RefundPolicy_Engine_DF` | Decision Flowchart | [`codeFlows/Decision_Flowchart/RefundPolicy_Engine_DF.mmd`](codeFlows/Decision_Flowchart/RefundPolicy_Engine_DF.mmd) | Cây quyết định của `RefundPolicyEngine`: phân loại theo 5 nhóm lý do và tính mức hoàn tiền theo các mốc thời gian trước khởi hành |
+| 2 | `RefundPolicy_Cancellation_SD` | Sequence Diagram | [`codeFlows/Sequence_Diagram/RefundPolicy_Cancellation_SD.mmd`](codeFlows/Sequence_Diagram/RefundPolicy_Cancellation_SD.mmd) | Quy trình hủy đơn và khởi tạo hoàn tiền 2 giai đoạn: Preview (Idempotent Query) & Execute (Command DB Transaction) |
+| 3 | `Refund_Processing_Pipeline_SD` | Sequence Diagram | [`codeFlows/Sequence_Diagram/Refund_Processing_Pipeline_SD.mmd`](codeFlows/Sequence_Diagram/Refund_Processing_Pipeline_SD.mmd) | Luồng thực thi hoàn tiền thực tế qua cổng VNPay / PayPal và cơ chế retry Exponential Backoff của Background Job |
 
 ---
 
-## 1. RefundPolicy_Engine.png — Cây Quyết Định Chính Sách Hoàn Tiền
+## 1. RefundPolicy_Engine_DF.png — Cây Quyết Định Chính Sách Hoàn Tiền
 
 **Lớp nghiệp vụ chính:** `com.danasea.backend.modules.order.domain.services.RefundPolicyEngine`
 
@@ -34,7 +35,7 @@
 
 ---
 
-## 2. RefundPolicy_CancellationFlow.png — Luồng Xem Trước Mức Hoàn Tiền & Thực Thi Hủy Đơn
+## 2. RefundPolicy_Cancellation_SD.png — Luồng Xem Trước Mức Hoàn Tiền & Thực Thi Hủy Đơn
 
 **Kiến trúc phân tách Use Case:**
 - **Query (Idempotent Preview):** `GetCancellationPreviewUseCase` (không làm biến đổi trạng thái hệ thống).

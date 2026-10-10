@@ -1,0 +1,54 @@
+sequenceDiagram
+    autonumber
+    actor Customer as Khách Hàng
+    participant Controller as CheckinCustomerController
+    participant UseCase as GenerateCheckinQrUseCase
+    participant SubOrderRepo as SubOrderRepository
+    participant MasterRepo as MasterOrderRepository
+    participant Signer as QrTokenSigner
+    participant TokenRepo as CheckinTokenRepository
+    participant DB as PostgreSQL
+
+    Customer->>Controller: GET /api/bookings/{identifier}/qr-code
+    Note over Customer,Controller: Header: Authorization: Bearer JWT
+
+    Controller->>UseCase: execute(identifier, currentUserId)
+    activate UseCase
+
+    alt identifier là MasterOrder ID
+        UseCase->>MasterRepo: findById(identifier)
+        MasterRepo->>DB: SELECT * FROM master_orders WHERE id = ?
+        DB-->>MasterRepo: MasterOrder
+        UseCase->>SubOrderRepo: findFirstByMasterOrderId(identifier)
+        SubOrderRepo->>DB: SELECT * FROM sub_orders WHERE master_order_id = ?
+        DB-->>SubOrderRepo: SubOrder
+    else identifier là SubOrder ID
+        UseCase->>SubOrderRepo: findById(identifier)
+        SubOrderRepo->>DB: SELECT * FROM sub_orders WHERE id = ?
+        DB-->>SubOrderRepo: SubOrder
+    end
+
+    alt IDOR Violation (masterOrder.customerId != currentUserId)
+        UseCase-->>Controller: throw UnauthorizedCheckinAccessException (403)
+        Controller-->>Customer: 403 Forbidden (ACCESS_DENIED_NOT_OWNER)
+    end
+
+    alt Trạng thái SubOrder không phải là CONFIRMED
+        UseCase-->>Controller: throw InvalidSubOrderStateException (400)
+        Controller-->>Customer: 400 Bad Request (Đơn chưa hoàn tất thanh toán)
+    end
+
+    UseCase->>Signer: generateSignedToken(subOrderId, expiryTime = slot.endTime)
+    activate Signer
+    Signer->>Signer: HMAC-SHA256(subOrderId + expiryTime + salt, secretKey)
+    Signer-->>UseCase: signedQrToken
+    deactivate Signer
+
+    UseCase->>TokenRepo: save(new CheckinToken(subOrderId, signedQrToken, expiryTime))
+    TokenRepo->>DB: INSERT INTO checkin_tokens (sub_order_id, token_hash, expiry_time, used=false)
+    DB-->>TokenRepo: Token Saved
+
+    UseCase-->>Controller: QrCodeResponse(qrToken, qrImageUrl, expiryTime)
+    deactivate UseCase
+
+    Controller-->>Customer: 200 OK (Token chuỗi & Base64 QR Image)

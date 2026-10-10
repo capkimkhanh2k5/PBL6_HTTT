@@ -2,15 +2,17 @@
 
 > Module Booking chịu trách nhiệm xử lý luồng đặt chỗ dịch vụ du lịch biển, cơ chế khóa chỗ phân tán trên Redis (Distributed Inventory Lock) chống vượt hạn mức (Overbooking), tự động giải phóng chỗ khi quá hạn (TTL 15 phút) và chính sách hủy chỗ theo mốc thời gian.
 
-| # | Sơ đồ | Loại | Nội dung |
-|---|-------|------|----------|
-| 1 | `Booking_Hold_InventoryLock` | Sequence Diagram | Khách hàng khởi tạo giữ chỗ (`POST /api/bookings/hold`): Kiểm tra slot, khóa nguyên tử nhiều slot trên Redis qua Lua Script (`SETNX`/TTL 15 phút), tạo bản ghi Booking trạng thái `HOLD` |
-| 2 | `Booking_Hold_Cleanup_And_Expiry` | Sequence Diagram | Scheduled Background Job (`BookingHoldCleanupJob`): Quét định kỳ các booking `HOLD` / `PENDING_PAYMENT` đã hết hạn TTL, giải phóng Redis lock, hủy booking và bắn sự kiện `BookingHoldExpiredEvent` |
-| 3 | `Booking_Cancel_And_Refund_Window` | Sequence Diagram | Khách hàng chủ động hủy booking (`PATCH /api/bookings/{id}/cancel`): Chống IDOR (403), áp dụng quy tắc mốc 24h (trước 24h: hoàn 100%, dưới 24h: mất 100% tiền), giải phóng tồn kho slot tương ứng |
+| # | Sơ đồ | Loại | Mã nguồn Mermaid (.mmd) | Nội dung |
+|---|-------|------|--------------------------|----------|
+| 1 | `Booking_Hold_InventoryLock_DF` | Decision Flowchart | [`codeFlows/Decision_Flowchart/Booking_Hold_InventoryLock_DF.mmd`](codeFlows/Decision_Flowchart/Booking_Hold_InventoryLock_DF.mmd) | Cây quyết định kiểm tra Auth, Payload, tồn kho DB PostgreSQL và khóa phân tán Redis Lua Script nguyên tử |
+| 2 | `Booking_Cancel_And_Refund_Window_DF` | Decision Flowchart | [`codeFlows/Decision_Flowchart/Booking_Cancel_And_Refund_Window_DF.mmd`](codeFlows/Decision_Flowchart/Booking_Cancel_And_Refund_Window_DF.mmd) | Cây quyết định hủy booking: IDOR Guard, phân nhánh đơn HOLD vs CONFIRMED, chính sách mốc 24h (>24h hoàn 100%, <=24h hoàn 0%) |
+| 3 | `Booking_Hold_InventoryLock_SD` | Sequence Diagram | [`codeFlows/Sequence_Diagram/Booking_Hold_InventoryLock_SD.mmd`](codeFlows/Sequence_Diagram/Booking_Hold_InventoryLock_SD.mmd) | Khách hàng khởi tạo giữ chỗ (`POST /api/bookings/hold`): Kiểm tra slot, khóa nguyên tử nhiều slot trên Redis qua Lua Script (`SETNX`/TTL 15 phút), tạo bản ghi Booking trạng thái `HOLD` |
+| 4 | `Booking_Hold_Cleanup_And_Expiry_SD` | Sequence Diagram | [`codeFlows/Sequence_Diagram/Booking_Hold_Cleanup_And_Expiry_SD.mmd`](codeFlows/Sequence_Diagram/Booking_Hold_Cleanup_And_Expiry_SD.mmd) | Scheduled Background Job (`BookingHoldCleanupJob`): Quét định kỳ các booking `HOLD` / `PENDING_PAYMENT` đã hết hạn TTL, giải phóng Redis lock, hủy booking và bắn sự kiện `BookingHoldExpiredEvent` |
+| 5 | `Booking_Cancel_And_Refund_Window_SD` | Sequence Diagram | [`codeFlows/Sequence_Diagram/Booking_Cancel_And_Refund_Window_SD.mmd`](codeFlows/Sequence_Diagram/Booking_Cancel_And_Refund_Window_SD.mmd) | Khách hàng chủ động hủy booking (`PATCH /api/bookings/{id}/cancel`): Chống IDOR (403), áp dụng quy tắc mốc 24h, giải phóng tồn kho slot tương ứng |
 
 ---
 
-## 1. Booking_Hold_InventoryLock.png — Khởi Tạo Giữ Chỗ & Khóa Tồn Kho Redis
+## 1. Booking_Hold_InventoryLock_SD.png — Khởi Tạo Giữ Chỗ & Khóa Tồn Kho Redis
 
 **Luồng nghiệp vụ chi tiết:**
 1. Khách hàng gửi yêu cầu giữ chỗ qua API `POST /api/bookings/hold` kèm danh sách các slot `{slotId, quantity}` và tiêu đề `Idempotency-Key`.
@@ -25,7 +27,7 @@
 
 ---
 
-## 2. Booking_Hold_Cleanup_And_Expiry.png — Quét Hết Hạn & Giải Phóng Chỗ Tự Động
+## 2. Booking_Hold_Cleanup_And_Expiry_SD.png — Quét Hết Hạn & Giải Phóng Chỗ Tự Động
 
 **Luồng nghiệp vụ chi tiết:**
 1. Scheduled Background Job (`BookingHoldCleanupJob`) kích hoạt định kỳ mỗi **1 phút**.
@@ -38,7 +40,7 @@
 
 ---
 
-## 3. Booking_Cancel_And_Refund_Window.png — Khách Hàng Hủy Booking & Quy Tắc Mốc 24H
+## 3. Booking_Cancel_And_Refund_Window_SD.png — Khách Hàng Hủy Booking & Quy Tắc Mốc 24H
 
 **Luồng nghiệp vụ chi tiết:**
 1. Khách hàng gửi yêu cầu hủy booking qua `PATCH /api/bookings/{id}/cancel` kèm lý do `{reason}`.

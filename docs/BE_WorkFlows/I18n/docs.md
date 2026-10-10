@@ -9,7 +9,7 @@
 
 ---
 
-## 1. I18n_LocaleResolution.png — Phân Giải Ngôn Ngữ Theo Request
+## 1. I18n_LocaleResolution_SD.png — Phân Giải Ngôn Ngữ Theo Request
 
 **Lớp xử lý chính:** `com.danasea.backend.shared.i18n.LocaleContextFilter`
 
@@ -25,7 +25,7 @@
 
 ---
 
-## 2. I18n_ErrorLocalization.png — Bản Địa Hóa Thông Báo Lỗi
+## 2. I18n_ErrorLocalization_SD.png — Bản Địa Hóa Thông Báo Lỗi
 
 **Thành phần tham gia:** `LocalizedException`, `LocalizedMessageService`, `GlobalExceptionHandler`, `ErrorResponseLocalizationAdvice`
 

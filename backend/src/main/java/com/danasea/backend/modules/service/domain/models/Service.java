@@ -1,13 +1,12 @@
 package com.danasea.backend.modules.service.domain.models;
 
-import java.math.BigDecimal;
-import java.util.UUID;
-
 import com.danasea.backend.modules.service.domain.exceptions.InvalidServiceStateException;
 import com.danasea.backend.modules.service.domain.exceptions.ServiceImagesRequiredException;
 import com.danasea.backend.modules.service.domain.exceptions.UnauthorizedServiceAccessException;
 import com.danasea.backend.modules.service.domain.exceptions.WeatherRequirementsMissingException;
 import com.danasea.backend.shared.core.domain.models.BaseDomainModel;
+import java.math.BigDecimal;
+import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -38,6 +37,8 @@ public class Service extends BaseDomainModel {
     private String rejectionReason;
     private String waiverContent;
     private String waiverContentEn;
+    private Boolean waiverRequired;
+    private Integer waiverVersion;
     private Boolean weatherSensitive;
     private BigDecimal minWindKmh;
     private BigDecimal maxWaveM;

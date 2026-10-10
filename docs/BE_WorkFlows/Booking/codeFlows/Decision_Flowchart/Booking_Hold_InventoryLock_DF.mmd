@@ -1,0 +1,36 @@
+flowchart TD
+    %% ==========================================
+    %% DECISION FLOWCHART: BOOKING HOLD & INVENTORY LOCK
+    %% DANASEA Marine Tourism Platform
+    %% ==========================================
+
+    Start(["Khách hàng gửi yêu cầu giữ chỗ<br/><code>POST /api/bookings/hold</code>"]) --> CheckAuth{"Xác thực JWT Token?"}
+
+    CheckAuth -- "Không hợp lệ / Hết hạn" --> Err401["Trả về <b>HTTP 401 Unauthorized</b>"]
+    CheckAuth -- "Hợp lệ" --> CheckPayload{"Kiểm tra danh sách Slot & Số lượng<br/><code>items: [{slotId, quantity}]</code>"}
+
+    CheckPayload -- "Danh sách rỗng hoặc số lượng <= 0" --> Err400["Trả về <b>HTTP 400 Bad Request</b><br/><code>INVALID_BOOKING_REQUEST</code>"]
+    CheckPayload -- "Dữ liệu hợp lệ" --> CheckDBCapacity{"Kiểm tra tồn kho DB PostgreSQL<br/><code>capacity - bookedCount >= quantity</code>"}
+
+    CheckDBCapacity -- "Bất kỳ slot nào không đủ chỗ" --> Err409Cap["Trả về <b>HTTP 409 Conflict</b><br/><code>SLOT_CAPACITY_EXCEEDED</code>"]
+    CheckDBCapacity -- "Tất cả slot còn đủ chỗ trống" --> RedisLock["Thực thi <b>Redis Lua Script</b> nguyên tử<br/>Khóa phân tán nhiều slot cùng lúc<br/>Key: <code>slot:{id}:held</code>, TTL: 15 phút"]
+
+    RedisLock --> CheckRedisLock{"Redis Lua Script thực thi thành công?"}
+
+    CheckRedisLock -- "Thất bại (Slot bị đối thủ giữ trước)" --> RollbackRedis["Rollback tự động toàn bộ slot đã giữ trong batch<br/><code>DEL / DECRBY</code> các key tạm"]
+    RollbackRedis --> Err409Lock["Trả về <b>HTTP 409 Conflict</b><br/><code>INVENTORY_LOCK_FAILED</code>"]
+
+    CheckRedisLock -- "Thành công (Đã giữ toàn bộ slot)" --> CreateBooking["Lưu bản ghi <b>BookingJpaEntity</b> vào PostgreSQL<br/>- Trạng thái: <code>HOLD</code><br/>- <code>holdExpiresAt = now() + 15 phút</code><br/>- Gắn danh sách <code>BookingItem</code>"]
+
+    CreateBooking --> Return201(["Trả về <b>HTTP 201 Created</b><br/>Kèm <code>bookingId</code>, mốc <code>holdExpiresAt</code><br/>Hướng dẫn khách thanh toán trong 15 phút"])
+
+    %% Style classes
+    classDef startEnd fill:#e0f2fe,stroke:#0284c7,stroke-width:2px,color:#0369a1;
+    classDef decision fill:#fef3c7,stroke:#d97706,stroke-width:2px,color:#92400e;
+    classDef action fill:#f0fdf4,stroke:#16a34a,stroke-width:2px,color:#15803d;
+    classDef error fill:#fee2e2,stroke:#dc2626,stroke-width:2px,color:#b91c1c;
+
+    class Start,Return201 startEnd;
+    class CheckAuth,CheckPayload,CheckDBCapacity,CheckRedisLock decision;
+    class RedisLock,RollbackRedis,CreateBooking action;
+    class Err401,Err400,Err409Cap,Err409Lock error;

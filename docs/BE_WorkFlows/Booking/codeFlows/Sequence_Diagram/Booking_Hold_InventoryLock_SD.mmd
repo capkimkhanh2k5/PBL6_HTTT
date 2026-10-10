@@ -1,0 +1,52 @@
+sequenceDiagram
+    autonumber
+    actor Customer as Khách Hàng
+    participant Controller as BookingController
+    participant UseCase as CreateBookingHoldUseCase
+    participant SlotPort as ServiceSlotPort
+    participant DB as PostgreSQL
+    participant RedisAdapter as RedisInventoryLockAdapter
+    participant Redis as Redis Server
+
+    Customer->>Controller: POST /api/bookings/hold (items: [{slotId, qty}])
+    Note over Customer,Controller: Header: Idempotency-Key, Authorization: Bearer JWT
+
+    Controller->>UseCase: execute(command)
+    activate UseCase
+
+    loop Với từng Slot trong items
+        UseCase->>SlotPort: getSlotCapacity(slotId)
+        SlotPort->>DB: SELECT capacity, booked_count FROM service_slots WHERE id = ?
+        DB-->>SlotPort: capacity, booked_count
+        SlotPort-->>UseCase: CapacityInfo
+
+        alt Tồn kho không đủ (capacity - booked_count < qty)
+            UseCase-->>Controller: throw SlotCapacityExceededException (409)
+            Controller-->>Customer: 409 Conflict (SLOT_CAPACITY_EXCEEDED)
+        end
+    end
+
+    UseCase->>RedisAdapter: acquireHolds(bookingId, items, ttl = 15m)
+    activate RedisAdapter
+    RedisAdapter->>Redis: EVAL script.lua (SETNX / INCRBY slot:{id}:held)
+    Redis-->>RedisAdapter: Lock Result (Success / Contention Fail)
+
+    alt Bị tranh chấp (Slot đã bị khách khác giữ)
+        RedisAdapter->>Redis: Rollback các slot đã giữ tạm trong batch
+        RedisAdapter-->>UseCase: Lock Failed
+        UseCase-->>Controller: throw InventoryLockFailedException (409)
+        Controller-->>Customer: 409 Conflict (INVENTORY_LOCK_FAILED)
+    end
+    deactivate RedisAdapter
+
+    UseCase->>DB: INSERT INTO bookings (id, customer_id, status='HOLD', hold_expires_at=now+15m)
+    DB-->>UseCase: Booking Saved
+
+    loop Lưu chi tiết từng item
+        UseCase->>DB: INSERT INTO booking_items (booking_id, slot_id, quantity, unit_price)
+    end
+
+    UseCase-->>Controller: BookingHoldResult(bookingId, expiresAt)
+    deactivate UseCase
+
+    Controller-->>Customer: 201 Created (bookingId, items, holdExpiresAt)

@@ -1,12 +1,11 @@
 package com.danasea.backend.modules.service.application.usecases.helpers;
 
-import java.util.List;
-import java.util.stream.Collectors;
-
 import com.danasea.backend.modules.service.application.dtos.ServiceImageResult;
 import com.danasea.backend.modules.service.application.dtos.ServiceResult;
 import com.danasea.backend.modules.service.domain.models.Service;
 import com.danasea.backend.modules.service.domain.models.ServiceImage;
+import java.util.List;
+import java.util.stream.Collectors;
 
 public final class ServiceResultMapper {
 
@@ -37,6 +36,8 @@ public final class ServiceResultMapper {
                 service.getRejectionReason(),
                 service.getWaiverContent(),
                 service.getWaiverContentEn(),
+                Boolean.TRUE.equals(service.getWaiverRequired()),
+                service.getWaiverVersion() != null ? service.getWaiverVersion() : 1,
                 service.getWeatherSensitive(),
                 service.getMinWindKmh(),
                 service.getMaxWaveM(),

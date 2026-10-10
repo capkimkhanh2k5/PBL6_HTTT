@@ -1,0 +1,37 @@
+flowchart TD
+    Start(["Khách hàng chọn dịch vụ & Giữ chỗ (Booking HOLD)"]) --> CreateOrder["Tạo đơn hàng MasterOrder (POST /api/orders)"]
+
+    CreateOrder --> FreezeSnapshot["Backend đóng băng Snapshot cam kết vào từng SubOrder:<br/>• waiverRequired<br/>• waiverVersion<br/>• waiverContent (VI/EN)"]
+
+    FreezeSnapshot --> CheckHasWaiver{"Đơn hàng có SubOrder<br/>yêu cầu cam kết an toàn?"}
+
+    %% Nhánh không có cam kết
+    CheckHasWaiver -- "Không có dịch vụ nào yêu cầu" --> DirectPayment["Khách hàng chọn cổng thanh toán<br/>(VNPay hoặc PayPal)"]
+
+    %% Nhánh có cam kết
+    CheckHasWaiver -- "Có ít nhất 1 dịch vụ yêu cầu" --> ShowWaiverUI["Giao diện hiển thị Modal Cam kết An toàn<br/>(Hiển thị nội dung theo ngôn ngữ khách chọn)"]
+
+    ShowWaiverUI --> CustomerAction{"Khách hàng bấm<br/>Đồng ý cam kết?"}
+
+    CustomerAction -- "Chưa đồng ý / Đóng modal" --> TryPayAnyway["Khách hàng cố tình bấm Thanh toán"]
+    CustomerAction -- "Đồng ý" --> CallAcceptAPI["Gọi API: POST /api/sub-orders/{id}/waiver-acceptance<br/>{ accepted: true, version, language }"]
+
+    CallAcceptAPI --> VerifyAcceptance["Hệ thống thẩm định & ghi nhận bằng chứng:<br/>• Khóa MasterOrder & SubOrder<br/>• Đối chiếu version & snapshot<br/>• Ghi nhận JWT user, Server clock, Audit Log"]
+
+    VerifyAcceptance --> AcceptSuccess["Xác nhận thành công (200 OK)<br/>SubOrder: waiverAccepted = true"]
+    AcceptSuccess --> DirectPayment
+
+    %% Luồng thanh toán & Payment Guard
+    DirectPayment --> TriggerPayment["Gọi API thanh toán:<br/>• POST /api/payments/{orderId}/create-intent<br/>(hoặc POST /api/payments/paypal/capture)"]
+
+    TryPayAnyway --> TriggerPayment
+
+    TriggerPayment --> PaymentGuard{"Payment Waiver Guard<br/>Quét toàn bộ SubOrders"}
+
+    PaymentGuard -- "Còn SubOrder chưa xác nhận" --> Reject409["Trả về HTTP 409 Conflict<br/>code: WAIVER_ACCEPTANCE_REQUIRED<br/>kèm danh sách missingSubOrders"]
+    Reject409 --> BlockGateway["🔴 CHẶN TUYỆT ĐỐI:<br/>Không gọi cổng thanh toán"]
+    BlockGateway --> ShowWaiverUI
+
+    PaymentGuard -- "Tất cả đã xác nhận hợp lệ" --> CallGateway["🟢 ĐỦ ĐIỀU KIỆN:<br/>Tạo Payment PENDING & Gọi cổng thanh toán"]
+
+    CallGateway --> GatewaySuccess(["Chuyển hướng cổng VNPay / Duyệt PayPal Checkout"])

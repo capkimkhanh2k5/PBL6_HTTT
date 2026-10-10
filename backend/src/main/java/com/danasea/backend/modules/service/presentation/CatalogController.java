@@ -1,15 +1,5 @@
 package com.danasea.backend.modules.service.presentation;
 
-import java.math.BigDecimal;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.util.List;
-import java.util.UUID;
-import java.util.stream.Collectors;
-import org.springframework.format.annotation.DateTimeFormat;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
 import com.danasea.backend.modules.service.application.dtos.SearchServicesCriteria;
 import com.danasea.backend.modules.service.application.dtos.ServiceDetailResult;
 import com.danasea.backend.modules.service.application.dtos.ServiceSummaryResult;
@@ -19,7 +9,17 @@ import com.danasea.backend.modules.service.presentation.dtos.PageResponse;
 import com.danasea.backend.modules.service.presentation.dtos.ServiceDetailResponse;
 import com.danasea.backend.modules.service.presentation.dtos.ServiceSummaryResponse;
 import com.danasea.backend.security.infrastructure.SecurityUtils;
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.util.List;
+import java.util.UUID;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
+import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping({"/api/services", "/api/v1/catalog"})
@@ -131,6 +131,11 @@ public class CatalogController {
                 .duration(result.getDuration())
                 .capacity(result.getCapacity())
                 .participantConditions(result.getParticipantConditions())
+                .waiverRequired(result.getWaiverRequired())
+                .waiverVersion(result.getWaiverVersion())
+                .waiverContent(result.getWaiverContent())
+                .waiverLanguage(result.getWaiverLanguage())
+                .waiverFallbackUsed(result.getWaiverFallbackUsed())
                 .refundPolicy(result.getRefundPolicy())
                 .cancellationPolicy(result.getCancellationPolicy())
                 .safetyRules(result.getSafetyRules())

@@ -1,0 +1,46 @@
+flowchart TD
+    %% ==========================================
+    %% DECISION FLOWCHART: SERVICE SEARCH & FILTER PIPELINE
+    %% DANASEA Marine Tourism Platform
+    %% ==========================================
+
+    Start(["Khách hàng gửi yêu cầu tìm kiếm dịch vụ<br/><code>GET /api/services</code><br/>Query params: date, timeSlot, guests, minRating, minPrice, maxPrice..."]) --> CheckParams{"Kiểm tra các tham số đầu vào (Validation Guardrails)"}
+
+    %% KIỂM TRA THAM SỐ
+    CheckParams -- "minRating < 0.0 hoặc > 5.0" --> Err400Rating["Trả về <b>HTTP 400 Bad Request</b><br/><code>INVALID_MIN_RATING</code>"]
+    CheckParams -- "Số khách guests <= 0" --> Err400Guests["Trả về <b>HTTP 400 Bad Request</b><br/><code>INVALID_GUEST_COUNT</code>"]
+    CheckParams -- "Phân trang không hợp lệ (size > 100 hoặc page < 0)" --> Err400Page["Trả về <b>HTTP 400 Bad Request</b><br/><code>INVALID_PAGEABLE</code>"]
+    CheckParams -- "Khoảng giá ngược (minPrice > maxPrice)" --> Err400Price["Trả về <b>HTTP 400 Bad Request</b><br/><code>INVALID_PRICE_RANGE</code>"]
+
+    CheckParams -- "Tất cả tham số hợp lệ" --> BuildQuery["Khởi tạo truy vấn động Specification / QueryDSL<br/><b>Điều kiện cơ sở:</b> <code>status = 'PUBLISHED' AND is_deleted = false</code>"]
+
+    %% ÁP DỤNG CÁC BỘ LỌC
+    BuildQuery --> CheckGeo{"Có lọc theo tọa độ địa lý<br/><code>lat, lng, radiusKm</code>?"}
+    CheckGeo -- "Có" --> ApplyHaversine["Áp dụng công thức <b>Haversine Bounding Box</b><br/>Lọc các dịch vụ trong bán kính <code>radiusKm</code>"]
+    CheckGeo -- "Không" --> CheckDateSlot
+
+    ApplyHaversine --> CheckDateSlot{"Có lọc theo Ngày / Giờ / Số khách<br/><code>date, timeSlot, guests</code>?"}
+
+    CheckDateSlot -- "Có" --> FilterSlots["<b>Kiểm tra tính khả dụng của Khung giờ (Structured Slots):</b><br/>Dịch vụ phải có ít nhất 1 slot thỏa mãn:<br/><code>availableCapacity = Math.max(0, capacity - bookedCount) >= guests</code><br/>vào đúng ngày/giờ yêu cầu"]
+    CheckDateSlot -- "Không" --> CheckVendorCategory
+
+    FilterSlots --> CheckVendorCategory{"Có lọc theo Category, Vendor, Khoảng giá, Rating?"}
+    CheckVendorCategory -- "Có" --> ApplyFilters["Áp dụng bộ lọc Category ID, Vendor ID,<br/><code>price BETWEEN minPrice AND maxPrice</code>,<br/><code>ratingAvg >= minRating</code>"]
+    CheckVendorCategory -- "Không" --> ApplySorting
+
+    ApplyFilters --> ApplySorting["<b>Sắp xếp kết quả động (Dynamic Sort):</b><br/>- <code>price_asc / price_desc</code><br/>- <code>rating_desc</code> (Đánh giá cao nhất)<br/>- <code>views_desc</code> (Phổ biến nhất)"]
+
+    ApplySorting --> ProjectDTO["<b>Ánh xạ DTO Bảo Mật (Strict DTO Separation):</b><br/>- Chỉ trả thông tin công khai: <code>vendorId, businessName, badgeTier</code><br/>- <b>Tuyệt đối loại bỏ:</b> Số tài khoản ngân hàng, mã số thuế của đối tác"]
+
+    ProjectDTO --> Success200(["Trả về <b>HTTP 200 OK</b><br/><code>PageResponse&lt;ServiceSummaryResponse&gt;</code><br/>Kèm phân trang và danh sách dịch vụ"])
+
+    %% Style classes
+    classDef startEnd fill:#e0f2fe,stroke:#0284c7,stroke-width:2px,color:#0369a1;
+    classDef decision fill:#fef3c7,stroke:#d97706,stroke-width:2px,color:#92400e;
+    classDef action fill:#f0fdf4,stroke:#16a34a,stroke-width:2px,color:#15803d;
+    classDef error fill:#fee2e2,stroke:#dc2626,stroke-width:2px,color:#b91c1c;
+
+    class Start,Success200 startEnd;
+    class CheckParams,CheckGeo,CheckDateSlot,CheckVendorCategory decision;
+    class BuildQuery,ApplyHaversine,FilterSlots,ApplyFilters,ApplySorting,ProjectDTO action;
+    class Err400Rating,Err400Guests,Err400Page,Err400Price error;

@@ -1,32 +1,40 @@
 package com.danasea.backend.modules.order.application.usecases;
 
+import com.danasea.backend.modules.order.application.dtos.CreatePaymentIntentCommand;
+import com.danasea.backend.modules.order.application.services.WaiverAcceptanceGuard;
+import com.danasea.backend.modules.order.domain.exceptions.InvalidOrderStateException;
+import com.danasea.backend.modules.order.domain.exceptions.OrderNotFoundException;
+import com.danasea.backend.modules.order.domain.exceptions.PaymentGatewayException;
+import com.danasea.backend.modules.order.domain.exceptions.UnauthorizedOrderAccessException;
+import com.danasea.backend.modules.order.domain.exceptions.WaiverAcceptanceRequiredException;
+import com.danasea.backend.modules.order.domain.models.MasterOrder;
+import com.danasea.backend.modules.order.domain.models.MasterOrderStatus;
+import com.danasea.backend.modules.order.domain.models.MissingWaiverItem;
+import com.danasea.backend.modules.order.domain.models.PaymentProvider;
+import com.danasea.backend.modules.order.domain.models.PaymentStatus;
+import com.danasea.backend.modules.order.domain.models.SubOrder;
+import com.danasea.backend.modules.order.domain.ports.MasterOrderRepositoryPort;
+import com.danasea.backend.modules.order.domain.ports.PaymentGatewayPort;
+import com.danasea.backend.modules.order.domain.ports.PaymentIntentResult;
+import com.danasea.backend.modules.order.domain.ports.ServiceWaiverLookupPort;
+import com.danasea.backend.modules.order.domain.ports.SubOrderRepositoryPort;
+import com.danasea.backend.modules.order.infrastructure.persistence.entities.PaymentJpaEntity;
+import com.danasea.backend.modules.order.infrastructure.persistence.repositories.JpaPaymentRepository;
+import com.danasea.backend.shared.i18n.LocalizedContentSelector;
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 import java.util.regex.Pattern;
-
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionTemplate;
-
-import com.danasea.backend.modules.order.application.dtos.CreatePaymentIntentCommand;
-import com.danasea.backend.modules.order.domain.exceptions.InvalidOrderStateException;
-import com.danasea.backend.modules.order.domain.exceptions.OrderNotFoundException;
-import com.danasea.backend.modules.order.domain.exceptions.PaymentGatewayException;
-import com.danasea.backend.modules.order.domain.exceptions.UnauthorizedOrderAccessException;
-import com.danasea.backend.modules.order.domain.models.MasterOrder;
-import com.danasea.backend.modules.order.domain.models.MasterOrderStatus;
-import com.danasea.backend.modules.order.domain.models.PaymentProvider;
-import com.danasea.backend.modules.order.domain.models.PaymentStatus;
-import com.danasea.backend.modules.order.domain.ports.MasterOrderRepositoryPort;
-import com.danasea.backend.modules.order.domain.ports.PaymentGatewayPort;
-import com.danasea.backend.modules.order.domain.ports.PaymentIntentResult;
-import com.danasea.backend.modules.order.infrastructure.persistence.entities.PaymentJpaEntity;
-import com.danasea.backend.modules.order.infrastructure.persistence.repositories.JpaPaymentRepository;
 
 @Service
 public class CreatePaymentIntentUseCase {
@@ -37,17 +45,35 @@ public class CreatePaymentIntentUseCase {
     private final PaymentGatewayPort paymentGatewayPort;
     private final JpaPaymentRepository paymentRepository;
     private final TransactionTemplate transaction;
+    private final SubOrderRepositoryPort subOrderRepository;
+    private final ServiceWaiverLookupPort serviceWaiverLookupPort;
+    private final LocalizedContentSelector localizedContentSelector;
+
+    @Autowired
+    public CreatePaymentIntentUseCase(
+            MasterOrderRepositoryPort masterOrderRepository,
+            PaymentGatewayPort paymentGatewayPort,
+            JpaPaymentRepository paymentRepository,
+            PlatformTransactionManager transactionManager,
+            SubOrderRepositoryPort subOrderRepository,
+            ServiceWaiverLookupPort serviceWaiverLookupPort,
+            LocalizedContentSelector localizedContentSelector) {
+        this.masterOrderRepository = masterOrderRepository;
+        this.paymentGatewayPort = paymentGatewayPort;
+        this.paymentRepository = paymentRepository;
+        this.subOrderRepository = subOrderRepository;
+        this.serviceWaiverLookupPort = serviceWaiverLookupPort;
+        this.localizedContentSelector = localizedContentSelector;
+        this.transaction = new TransactionTemplate(transactionManager);
+        this.transaction.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
+    }
 
     public CreatePaymentIntentUseCase(
             MasterOrderRepositoryPort masterOrderRepository,
             PaymentGatewayPort paymentGatewayPort,
             JpaPaymentRepository paymentRepository,
             PlatformTransactionManager transactionManager) {
-        this.masterOrderRepository = masterOrderRepository;
-        this.paymentGatewayPort = paymentGatewayPort;
-        this.paymentRepository = paymentRepository;
-        this.transaction = new TransactionTemplate(transactionManager);
-        this.transaction.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
+        this(masterOrderRepository, paymentGatewayPort, paymentRepository, transactionManager, null, null, null);
     }
 
     @Transactional(propagation = Propagation.NOT_SUPPORTED)
@@ -75,6 +101,20 @@ public class CreatePaymentIntentUseCase {
 
     private UUID preparePayment(CreatePaymentIntentCommand command) {
         MasterOrder order = requirePayableOrder(command);
+
+        if (subOrderRepository != null) {
+            List<SubOrder> subOrders = subOrderRepository.findByMasterOrderIdForUpdate(order.getId());
+            List<MissingWaiverItem> missingSubOrders = new ArrayList<>();
+            for (var sub : subOrders) {
+                WaiverAcceptanceGuard.missing(sub.getId(), sub.getServiceId(), sub.getWaiverVersion(),
+                        sub.getWaiverRequired(), sub.getWaiverAccepted(), sub.getWaiverContent(), sub.getWaiverContentEn(),
+                        serviceWaiverLookupPort, localizedContentSelector).ifPresent(missingSubOrders::add);
+            }
+            if (!missingSubOrders.isEmpty()) {
+                throw new WaiverAcceptanceRequiredException(order.getId(), missingSubOrders);
+            }
+        }
+
         String key = command.idempotencyKey().trim();
         var existing = paymentRepository.findByMasterOrderIdAndIdempotencyKey(order.getId(), key);
         if (existing.isPresent()) {

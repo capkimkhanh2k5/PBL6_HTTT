@@ -1,22 +1,5 @@
 package com.danasea.backend.modules.order.application.usecases;
 
-import java.math.BigDecimal;
-import java.math.RoundingMode;
-import java.time.OffsetDateTime;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Optional;
-import java.util.UUID;
-import java.util.function.Function;
-import java.util.stream.Collectors;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
 import com.danasea.backend.modules.order.application.dtos.CreateOrderCommand;
 import com.danasea.backend.modules.order.application.dtos.MasterOrderDetailResult;
 import com.danasea.backend.modules.order.domain.exceptions.BookingNotEligibleForOrderException;
@@ -34,16 +17,32 @@ import com.danasea.backend.modules.order.domain.ports.BookingStatusUpdatePort;
 import com.danasea.backend.modules.order.domain.ports.CommissionPolicyPort;
 import com.danasea.backend.modules.order.domain.ports.MasterOrderRepositoryPort;
 import com.danasea.backend.modules.order.domain.ports.OrderEventPublisherPort;
+import com.danasea.backend.modules.order.domain.ports.ServiceWaiverLookupPort;
 import com.danasea.backend.modules.order.domain.ports.SubOrderRepositoryPort;
+import com.danasea.backend.modules.order.domain.services.DiscountAllocationEngine;
 import com.danasea.backend.modules.order.domain.services.DiscountAllocationEngine.AllocationResult;
 import com.danasea.backend.modules.order.domain.services.DiscountAllocationEngine.CandidateItem;
 import com.danasea.backend.modules.order.domain.services.DiscountAllocationEngine.ItemAllocation;
-import com.danasea.backend.modules.order.domain.services.DiscountAllocationEngine;
 import com.danasea.backend.modules.order.infrastructure.persistence.entities.DiscountCodeJpaEntity;
 import com.danasea.backend.modules.order.infrastructure.persistence.entities.DiscountRedemptionJpaEntity;
 import com.danasea.backend.modules.order.infrastructure.persistence.mappers.DiscountCodeMapper;
 import com.danasea.backend.modules.order.infrastructure.persistence.repositories.JpaDiscountCodeRepository;
 import com.danasea.backend.modules.order.infrastructure.persistence.repositories.JpaDiscountRedemptionRepository;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.time.OffsetDateTime;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Optional;
+import java.util.UUID;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class CreateOrderUseCase {
@@ -58,6 +57,7 @@ public class CreateOrderUseCase {
     private final JpaDiscountRedemptionRepository discountRedemptionRepository;
     private final DiscountAllocationEngine discountAllocationEngine;
     private final DiscountCodeMapper discountCodeMapper;
+    private final ServiceWaiverLookupPort serviceWaiverLookupPort;
 
     @Autowired
     public CreateOrderUseCase(
@@ -70,7 +70,8 @@ public class CreateOrderUseCase {
             @Autowired(required = false) JpaDiscountCodeRepository discountCodeRepository,
             @Autowired(required = false) JpaDiscountRedemptionRepository discountRedemptionRepository,
             @Autowired(required = false) DiscountAllocationEngine discountAllocationEngine,
-            @Autowired(required = false) DiscountCodeMapper discountCodeMapper) {
+            @Autowired(required = false) DiscountCodeMapper discountCodeMapper,
+            @Autowired(required = false) ServiceWaiverLookupPort serviceWaiverLookupPort) {
         this.masterOrderRepository = masterOrderRepository;
         this.subOrderRepository = subOrderRepository;
         this.bookingLookupPort = bookingLookupPort;
@@ -81,6 +82,23 @@ public class CreateOrderUseCase {
         this.discountRedemptionRepository = discountRedemptionRepository;
         this.discountAllocationEngine = discountAllocationEngine;
         this.discountCodeMapper = discountCodeMapper;
+        this.serviceWaiverLookupPort = serviceWaiverLookupPort;
+    }
+
+    public CreateOrderUseCase(
+            MasterOrderRepositoryPort masterOrderRepository,
+            SubOrderRepositoryPort subOrderRepository,
+            BookingLookupPort bookingLookupPort,
+            BookingStatusUpdatePort bookingStatusUpdatePort,
+            CommissionPolicyPort commissionPolicyPort,
+            OrderEventPublisherPort orderEventPublisherPort,
+            JpaDiscountCodeRepository discountCodeRepository,
+            JpaDiscountRedemptionRepository discountRedemptionRepository,
+            DiscountAllocationEngine discountAllocationEngine,
+            DiscountCodeMapper discountCodeMapper) {
+        this(masterOrderRepository, subOrderRepository, bookingLookupPort, bookingStatusUpdatePort,
+                commissionPolicyPort, orderEventPublisherPort, discountCodeRepository,
+                discountRedemptionRepository, discountAllocationEngine, discountCodeMapper, null);
     }
 
     public CreateOrderUseCase(
@@ -282,6 +300,16 @@ public class CreateOrderUseCase {
 
             subOrder.setStatus(SubOrderStatus.PENDING);
             subOrder.setWaiverAccepted(false);
+
+            if (serviceWaiverLookupPort != null) {
+                serviceWaiverLookupPort.findWaiverSnapshot(item.serviceId()).ifPresent(snapshot -> {
+                    subOrder.setWaiverRequired(snapshot.waiverRequired());
+                    subOrder.setWaiverVersion(snapshot.waiverVersion());
+                    subOrder.setWaiverContent(snapshot.waiverContent());
+                    subOrder.setWaiverContentEn(snapshot.waiverContentEn());
+                });
+            }
+
             subOrders.add(subOrder);
         }
         subOrders = subOrderRepository.saveAll(subOrders);

@@ -1,30 +1,5 @@
 package com.danasea.backend.modules.order.application;
 
-import java.math.BigDecimal;
-import java.math.RoundingMode;
-import java.time.LocalDateTime;
-import java.time.OffsetDateTime;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.UUID;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
-import org.springframework.security.access.AccessDeniedException;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.PlatformTransactionManager;
-import org.springframework.transaction.TransactionDefinition;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.transaction.support.TransactionTemplate;
 import com.danasea.backend.modules.audit.application.api.AuditLogInternalApi;
 import com.danasea.backend.modules.booking.application.dtos.ConfirmBookingCommand;
 import com.danasea.backend.modules.booking.application.usecases.ConfirmBookingUseCase;
@@ -36,6 +11,7 @@ import com.danasea.backend.modules.booking.infrastructure.persistence.entities.B
 import com.danasea.backend.modules.booking.infrastructure.persistence.entities.BookingJpaEntity;
 import com.danasea.backend.modules.booking.infrastructure.persistence.repositories.JpaBookingRepository;
 import com.danasea.backend.modules.order.application.dtos.CreatePaymentIntentCommand;
+import com.danasea.backend.modules.order.application.services.WaiverAcceptanceGuard;
 import com.danasea.backend.modules.order.application.usecases.CreatePaymentIntentUseCase;
 import com.danasea.backend.modules.order.domain.events.PaymentSuccessEvent;
 import com.danasea.backend.modules.order.domain.exceptions.InvalidOrderStateException;
@@ -43,7 +19,9 @@ import com.danasea.backend.modules.order.domain.exceptions.InvalidWebhookExcepti
 import com.danasea.backend.modules.order.domain.exceptions.OrderNotFoundException;
 import com.danasea.backend.modules.order.domain.exceptions.PaymentGatewayException;
 import com.danasea.backend.modules.order.domain.exceptions.RefundNotFoundException;
+import com.danasea.backend.modules.order.domain.exceptions.WaiverAcceptanceRequiredException;
 import com.danasea.backend.modules.order.domain.models.MasterOrderStatus;
+import com.danasea.backend.modules.order.domain.models.MissingWaiverItem;
 import com.danasea.backend.modules.order.domain.models.PaymentOrderStatus;
 import com.danasea.backend.modules.order.domain.models.PaymentProvider;
 import com.danasea.backend.modules.order.domain.models.PaymentStatus;
@@ -54,6 +32,7 @@ import com.danasea.backend.modules.order.domain.models.SubOrderStatus;
 import com.danasea.backend.modules.order.domain.ports.CommissionPolicyPort;
 import com.danasea.backend.modules.order.domain.ports.PaymentCaptureResult;
 import com.danasea.backend.modules.order.domain.ports.PaymentGatewayPort;
+import com.danasea.backend.modules.order.domain.ports.ServiceWaiverLookupPort;
 import com.danasea.backend.modules.order.domain.services.RefundPolicyEngine;
 import com.danasea.backend.modules.order.infrastructure.persistence.entities.MasterOrderJpaEntity;
 import com.danasea.backend.modules.order.infrastructure.persistence.entities.PaymentJpaEntity;
@@ -77,10 +56,36 @@ import com.danasea.backend.modules.order.presentation.dtos.RefundWebhookResponse
 import com.danasea.backend.modules.order.presentation.dtos.SubOrderResponse;
 import com.danasea.backend.modules.service.infrastructure.persistence.repositories.JpaServiceSlotRepository;
 import com.danasea.backend.modules.vendor.application.api.VendorInternalApi;
+import com.danasea.backend.shared.i18n.LocalizedContentSelector;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.UUID;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.TransactionDefinition;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionTemplate;
 
 @Slf4j
 @Service
@@ -94,6 +99,20 @@ public class OrderPaymentService {
     @Autowired
     public void setEventPublisher(ApplicationEventPublisher eventPublisher) {
         this.eventPublisher = eventPublisher;
+    }
+
+    private ServiceWaiverLookupPort serviceWaiverLookupPort;
+
+    @Autowired
+    public void setServiceWaiverLookupPort(ServiceWaiverLookupPort serviceWaiverLookupPort) {
+        this.serviceWaiverLookupPort = serviceWaiverLookupPort;
+    }
+
+    private LocalizedContentSelector localizedContentSelector;
+
+    @Autowired
+    public void setLocalizedContentSelector(LocalizedContentSelector localizedContentSelector) {
+        this.localizedContentSelector = localizedContentSelector;
     }
 
     private final JpaBookingRepository bookingRepository;
@@ -285,6 +304,16 @@ public class OrderPaymentService {
             subOrder.setVendorPayoutAmount(subtotal.subtract(commission));
             subOrder.setStatus(SubOrderStatus.PENDING);
             subOrder.setWaiverAccepted(false);
+
+            if (serviceWaiverLookupPort != null) {
+                serviceWaiverLookupPort.findWaiverSnapshot(item.getServiceId()).ifPresent(snapshot -> {
+                    subOrder.setWaiverRequired(snapshot.waiverRequired());
+                    subOrder.setWaiverVersion(snapshot.waiverVersion());
+                    subOrder.setWaiverContent(snapshot.waiverContent());
+                    subOrder.setWaiverContentEn(snapshot.waiverContentEn());
+                });
+            }
+
             subOrders.add(subOrder);
         }
         subOrderRepository.saveAll(subOrders);
@@ -464,6 +493,7 @@ public class OrderPaymentService {
                 return false;
             }
             requirePendingPayment(payment, order);
+            validateWaiverAcceptance(order);
             if (payment.getCaptureRequestId() != null || payment.getCaptureRequestedAt() != null
                     || (payment.getLastError() != null && !payment.getLastError().startsWith("GATEWAY_QUERY_AWAITING_VERIFICATION"))) {
                 return false;
@@ -487,6 +517,7 @@ public class OrderPaymentService {
                 return new CaptureOutcome(toPaymentResponse(payment), null);
             }
             requirePendingPayment(payment, order);
+            validateWaiverAcceptance(order);
             PaymentCaptureResult result;
             try {
                 if (!fresh) {
@@ -978,9 +1009,57 @@ public class OrderPaymentService {
     }
 
     private SubOrderResponse toSubOrderResponse(SubOrderJpaEntity subOrder) {
-        return new SubOrderResponse(subOrder.getId(), subOrder.getVendorId(), subOrder.getServiceId(),
-                subOrder.getSlotId(), subOrder.getQuantity(), subOrder.getUnitPrice(),
-                subOrder.getSubtotalAmount(), subOrder.getStatus());
+        String waiverContent = null;
+        String waiverLanguage = null;
+        boolean fallbackUsed = false;
+
+        if (Boolean.TRUE.equals(subOrder.getWaiverRequired())) {
+            if (localizedContentSelector != null) {
+                var sel = localizedContentSelector.selectDetailed(subOrder.getWaiverContent(), subOrder.getWaiverContentEn());
+                waiverContent = sel.content();
+                waiverLanguage = sel.language();
+                fallbackUsed = sel.fallbackUsed();
+            } else {
+                waiverContent = subOrder.getWaiverContent() != null ? subOrder.getWaiverContent() : subOrder.getWaiverContentEn();
+                waiverLanguage = "VI";
+                fallbackUsed = false;
+            }
+        }
+
+        return new SubOrderResponse(
+                subOrder.getId(),
+                subOrder.getVendorId(),
+                subOrder.getServiceId(),
+                subOrder.getSlotId(),
+                subOrder.getQuantity(),
+                subOrder.getUnitPrice(),
+                subOrder.getSubtotalAmount(),
+                subOrder.getStatus(),
+                subOrder.getDiscountAmount(),
+                subOrder.getFinalAmount(),
+                subOrder.getWaiverRequired(),
+                subOrder.getWaiverVersion(),
+                waiverContent,
+                waiverLanguage,
+                fallbackUsed,
+                subOrder.getWaiverAccepted(),
+                subOrder.getWaiverAcceptedAt(),
+                subOrder.getWaiverAcceptedBy(),
+                subOrder.getWaiverAcceptedLanguage()
+        );
+    }
+
+    private void validateWaiverAcceptance(MasterOrderJpaEntity order) {
+        List<SubOrderJpaEntity> subOrders = subOrderRepository.findByMasterOrderIdForUpdate(order.getId());
+        List<MissingWaiverItem> missingSubOrders = new ArrayList<>();
+        for (var sub : subOrders) {
+            WaiverAcceptanceGuard.missing(sub.getId(), sub.getServiceId(), sub.getWaiverVersion(),
+                    sub.getWaiverRequired(), sub.getWaiverAccepted(), sub.getWaiverContent(), sub.getWaiverContentEn(),
+                    serviceWaiverLookupPort, localizedContentSelector).ifPresent(missingSubOrders::add);
+        }
+        if (!missingSubOrders.isEmpty()) {
+            throw new WaiverAcceptanceRequiredException(order.getId(), missingSubOrders);
+        }
     }
 
     @Transactional(readOnly = true)

@@ -1,0 +1,50 @@
+sequenceDiagram
+    autonumber
+    participant Cron as Spring Scheduler (1 phút/lần)
+    participant Job as BookingHoldCleanupJob
+    participant BookingRepo as JpaBookingRepository
+    participant DB as PostgreSQL
+    participant RedisAdapter as RedisInventoryLockAdapter
+    participant Redis as Redis Server
+    participant EventBus as ApplicationEventPublisher
+    participant OrderListener as OrderExpiryEventListener
+    participant OrderRepo as MasterOrderRepository
+
+    Cron->>Job: executeCleanup()
+    activate Job
+
+    Job->>BookingRepo: findExpiredHolds(now, ['HOLD', 'PENDING_PAYMENT'])
+    BookingRepo->>DB: SELECT * FROM bookings WHERE status IN (...) AND hold_expires_at < now()
+    DB-->>BookingRepo: List<BookingJpaEntity> (expired)
+    BookingRepo-->>Job: List<Booking>
+
+    loop Với từng Booking quá hạn
+        Job->>RedisAdapter: releaseHolds(booking.getId(), booking.getItems())
+        activate RedisAdapter
+        RedisAdapter->>Redis: EVAL release_script.lua (DECRBY / DEL slot:{id}:held)
+        Redis-->>RedisAdapter: OK
+        deactivate RedisAdapter
+
+        Job->>DB: UPDATE bookings SET status = 'CANCELLED', updated_at = now() WHERE id = ?
+
+        Job->>EventBus: publishEvent(new BookingHoldExpiredEvent(bookingId))
+        activate EventBus
+        EventBus->>OrderListener: handleBookingHoldExpired(event)
+        activate OrderListener
+
+        OrderListener->>OrderRepo: findByBookingIdForUpdate(bookingId)
+        OrderRepo->>DB: SELECT * FROM master_orders WHERE booking_id = ? FOR UPDATE
+        DB-->>OrderRepo: MasterOrder
+
+        alt Đơn đã kịp thanh toán (status == 'PAID')
+            OrderListener-->>EventBus: Bỏ qua (Đơn đã thanh toán an toàn)
+        else Đơn vẫn PENDING_PAYMENT
+            OrderListener->>DB: UPDATE sub_orders SET status = 'CANCELLED' WHERE master_order_id = ?
+            OrderListener->>DB: UPDATE master_orders SET status = 'CANCELLED' WHERE id = ?
+            OrderListener->>EventBus: publishEvent(new OrderCancelledEvent(orderId))
+        end
+        deactivate OrderListener
+        deactivate EventBus
+    end
+
+    deactivate Job

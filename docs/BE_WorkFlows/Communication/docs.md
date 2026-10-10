@@ -196,15 +196,16 @@ sequenceDiagram
 
 > Phân hệ Communication chịu trách nhiệm quản lý trung tâm thông báo người dùng (In-App Notification Center), cơ chế theo dõi trạng thái đã đọc (Read Tracking & Unread Count), phản ứng thời gian thực với các sự kiện thanh toán / hoàn tiền qua kiến trúc Event-Driven, và tác vụ định kỳ quét nhắc chuyến đi sắp khởi hành (Trip Reminder Scheduled Job) tích hợp cơ chế Push Notification.
 
-| # | Sơ đồ | Loại | Nội dung |
-|---|-------|------|----------|
-| 1 | `InApp_Notification_Lifecycle_And_ReadTracking_Flow` | Sequence Diagram | Quản lý thông báo người dùng (`/api/notifications`): Phân trang, đánh dấu đã đọc từng thông báo (chống IDOR), đánh dấu đọc tất cả (Idempotent Bulk Update) và đếm số lượng chưa đọc. |
-| 2 | `Payment_And_Refund_Event_Notification_Flow` | Sequence Diagram | Kiến trúc Hướng Sự Kiện (Event-Driven): Lắng nghe `PaymentSuccessEvent` và `RefundCompletedEvent` để phát sinh thông báo tức thời cho Khách hàng và Đối tác. |
-| 3 | `Scheduled_Trip_Reminder_Job_Flow` | Sequence Diagram | Tác vụ định kỳ nhắc chuyến (`TripReminderJob`): Quét các slot khởi hành trong vòng 24 giờ, chống gửi lặp qua khóa Idempotency, đồng bộ Mobile Push sau commit CSDL. |
+| # | Sơ đồ | Loại | Mã nguồn Mermaid (.mmd) | Nội dung |
+|---|-------|------|--------------------------|----------|
+| 1 | `Trip_Reminder_And_Dispatch_DF` | Decision Flowchart | [`codeFlows/Decision_Flowchart/Trip_Reminder_And_Dispatch_DF.mmd`](codeFlows/Decision_Flowchart/Trip_Reminder_And_Dispatch_DF.mmd) | Cây quyết định quét nhắc chuyến đi: lọc đơn hợp lệ, Idempotent Unique Insert, commit hook và bắn Mobile Push |
+| 2 | `InApp_Notification_Lifecycle_And_ReadTracking_SD` | Sequence Diagram | [`codeFlows/Sequence_Diagram/InApp_Notification_Lifecycle_And_ReadTracking_SD.mmd`](codeFlows/Sequence_Diagram/InApp_Notification_Lifecycle_And_ReadTracking_SD.mmd) | Quản lý thông báo người dùng (`/api/notifications`): Phân trang, đánh dấu đã đọc từng thông báo (chống IDOR), đánh dấu đọc tất cả và đếm số lượng chưa đọc. |
+| 3 | `Payment_And_Refund_Event_Notification_SD` | Sequence Diagram | [`codeFlows/Sequence_Diagram/Payment_And_Refund_Event_Notification_SD.mmd`](codeFlows/Sequence_Diagram/Payment_And_Refund_Event_Notification_SD.mmd) | Kiến trúc Hướng Sự Kiện (Event-Driven): Lắng nghe `PaymentSuccessEvent` và `RefundCompletedEvent` để phát sinh thông báo tức thời cho Khách hàng và Đối tác. |
+| 4 | `Scheduled_Trip_Reminder_Job_SD` | Sequence Diagram | [`codeFlows/Sequence_Diagram/Scheduled_Trip_Reminder_Job_SD.mmd`](codeFlows/Sequence_Diagram/Scheduled_Trip_Reminder_Job_SD.mmd) | Tác vụ định kỳ nhắc chuyến (`TripReminderJob`): Quét các slot khởi hành trong vòng 24 giờ, chống gửi lặp qua khóa Idempotency, đồng bộ Mobile Push sau commit CSDL. |
 
 ---
 
-## 1. InApp_Notification_Lifecycle_And_ReadTracking_Flow.mmd — Vòng Đời Thông Báo & Trạng Thái Đã Đọc
+## 1. InApp_Notification_Lifecycle_And_ReadTracking_SD.mmd — Vòng Đời Thông Báo & Trạng Thái Đã Đọc
 
 **Điểm truy cập API:**
 - `GET /api/notifications`: Lấy danh sách thông báo của người dùng hiện tại (hỗ trợ phân trang `page`, `size`).
@@ -220,7 +221,7 @@ sequenceDiagram
 
 ---
 
-## 2. Payment_And_Refund_Event_Notification_Flow.mmd — Sự Kiện Thanh Toán & Hoàn Tiền Tức Thời
+## 2. Payment_And_Refund_Event_Notification_SD.mmd — Sự Kiện Thanh Toán & Hoàn Tiền Tức Thời
 
 **Kiến trúc xử lý:** Phân tách hoàn toàn (Decoupled) thông qua Spring `ApplicationEventPublisher`. Các service lõi thanh toán không phụ thuộc trực tiếp vào module thông báo.
 
@@ -236,7 +237,7 @@ sequenceDiagram
 
 ---
 
-## 3. Scheduled_Trip_Reminder_Job_Flow.mmd — Tác Vụ Quét Nhắc Chuyến Khởi Hành
+## 3. Scheduled_Trip_Reminder_Job_SD.mmd — Tác Vụ Quét Nhắc Chuyến Khởi Hành
 
 **Thành phần thực thi:** `com.danasea.backend.modules.communication.infrastructure.jobs.TripReminderJob`
 

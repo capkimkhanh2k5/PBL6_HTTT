@@ -1,26 +1,5 @@
 package com.danasea.backend.modules.order.presentation.controllers;
 
-import java.time.LocalDateTime;
-import java.time.OffsetDateTime;
-import java.util.List;
-import java.util.UUID;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.AccessDeniedException;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
 import com.danasea.backend.modules.order.application.OrderPaymentService;
 import com.danasea.backend.modules.order.application.dtos.CancellationPreviewResult;
 import com.danasea.backend.modules.order.application.dtos.CreateOrderCommand;
@@ -31,6 +10,7 @@ import com.danasea.backend.modules.order.application.dtos.GetOrderReceiptQuery;
 import com.danasea.backend.modules.order.application.dtos.MasterOrderDetailResult;
 import com.danasea.backend.modules.order.application.dtos.OrderRefundResult;
 import com.danasea.backend.modules.order.application.dtos.RequestRefundCommand;
+import com.danasea.backend.modules.order.application.dtos.SubOrderDetailResult;
 import com.danasea.backend.modules.order.application.usecases.CreateOrderUseCase;
 import com.danasea.backend.modules.order.application.usecases.GetCancellationPreviewUseCase;
 import com.danasea.backend.modules.order.application.usecases.GetCustomerOrdersUseCase;
@@ -52,8 +32,30 @@ import com.danasea.backend.modules.order.presentation.dtos.RefundResponse;
 import com.danasea.backend.modules.order.presentation.dtos.SubOrderCancellationPreview;
 import com.danasea.backend.modules.order.presentation.dtos.SubOrderResponse;
 import com.danasea.backend.security.infrastructure.SecurityUtils;
+import com.danasea.backend.shared.i18n.LocalizedContentSelector;
 import jakarta.validation.Valid;
+import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
+import java.util.List;
+import java.util.UUID;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 @Slf4j
 @RestController
@@ -68,6 +70,7 @@ public class OrderController {
     private final OrderPaymentService orderPaymentService;
     private final GetOrderReceiptUseCase getOrderReceiptUseCase;
     private final PdfReceiptGenerator pdfReceiptGenerator;
+    private final LocalizedContentSelector localizedContentSelector;
 
     @Autowired
     public OrderController(
@@ -78,7 +81,8 @@ public class OrderController {
             GetCancellationPreviewUseCase getCancellationPreviewUseCase,
             @Autowired(required = false) OrderPaymentService orderPaymentService,
             @Autowired(required = false) GetOrderReceiptUseCase getOrderReceiptUseCase,
-            @Autowired(required = false) PdfReceiptGenerator pdfReceiptGenerator) {
+            @Autowired(required = false) PdfReceiptGenerator pdfReceiptGenerator,
+            @Autowired(required = false) LocalizedContentSelector localizedContentSelector) {
         this.createOrderUseCase = createOrderUseCase;
         this.getOrderDetailUseCase = getOrderDetailUseCase;
         this.getCustomerOrdersUseCase = getCustomerOrdersUseCase;
@@ -87,6 +91,7 @@ public class OrderController {
         this.orderPaymentService = orderPaymentService;
         this.getOrderReceiptUseCase = getOrderReceiptUseCase;
         this.pdfReceiptGenerator = pdfReceiptGenerator != null ? pdfReceiptGenerator : new PdfReceiptGenerator();
+        this.localizedContentSelector = localizedContentSelector;
     }
 
     public OrderController(
@@ -97,7 +102,7 @@ public class OrderController {
             GetCancellationPreviewUseCase getCancellationPreviewUseCase,
             OrderPaymentService orderPaymentService) {
         this(createOrderUseCase, getOrderDetailUseCase, getCustomerOrdersUseCase,
-                requestRefundUseCase, getCancellationPreviewUseCase, orderPaymentService, null, null);
+                requestRefundUseCase, getCancellationPreviewUseCase, orderPaymentService, null, null, null);
     }
 
     public OrderController(
@@ -107,7 +112,7 @@ public class OrderController {
             RequestRefundUseCase requestRefundUseCase,
             GetCancellationPreviewUseCase getCancellationPreviewUseCase) {
         this(createOrderUseCase, getOrderDetailUseCase, getCustomerOrdersUseCase,
-                requestRefundUseCase, getCancellationPreviewUseCase, null, null, null);
+                requestRefundUseCase, getCancellationPreviewUseCase, null, null, null, null);
     }
 
     @PostMapping
@@ -237,18 +242,7 @@ public class OrderController {
             return null;
         }
         List<SubOrderResponse> items = r.subOrders() == null ? List.of() : r.subOrders().stream()
-                .map(s -> new SubOrderResponse(
-                        s.id(),
-                        s.vendorId(),
-                        s.serviceId(),
-                        s.slotId(),
-                        s.quantity(),
-                        s.unitPrice(),
-                        s.subtotalAmount(),
-                        s.status(),
-                        s.discountAmount(),
-                        s.finalAmount()
-                )).toList();
+                .map(this::toSubOrderResponse).toList();
         return new OrderResponse(
                 r.id(),
                 r.bookingId(),
@@ -259,6 +253,47 @@ public class OrderController {
                 items,
                 r.createdAt(),
                 r.createdAt()
+        );
+    }
+
+    private SubOrderResponse toSubOrderResponse(SubOrderDetailResult s) {
+        String waiverContent = null;
+        String waiverLanguage = null;
+        boolean fallbackUsed = false;
+
+        if (Boolean.TRUE.equals(s.waiverRequired())) {
+            if (localizedContentSelector != null) {
+                var sel = localizedContentSelector.selectDetailed(s.waiverContent(), s.waiverContentEn());
+                waiverContent = sel.content();
+                waiverLanguage = sel.language();
+                fallbackUsed = sel.fallbackUsed();
+            } else {
+                waiverContent = s.waiverContent() != null ? s.waiverContent() : s.waiverContentEn();
+                waiverLanguage = "VI";
+                fallbackUsed = false;
+            }
+        }
+
+        return new SubOrderResponse(
+                s.id(),
+                s.vendorId(),
+                s.serviceId(),
+                s.slotId(),
+                s.quantity(),
+                s.unitPrice(),
+                s.subtotalAmount(),
+                s.status(),
+                s.discountAmount(),
+                s.finalAmount(),
+                s.waiverRequired(),
+                s.waiverVersion(),
+                waiverContent,
+                waiverLanguage,
+                fallbackUsed,
+                s.waiverAccepted(),
+                s.waiverAcceptedAt(),
+                s.waiverAcceptedBy(),
+                s.waiverAcceptedLanguage()
         );
     }
 

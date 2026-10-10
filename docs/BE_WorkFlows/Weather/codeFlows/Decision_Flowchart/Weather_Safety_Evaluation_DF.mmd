@@ -1,0 +1,55 @@
+flowchart TD
+    %% ==========================================
+    %% DECISION FLOWCHART: WEATHER SAFETY EVALUATION & ZERO-500
+    %% DANASEA Marine Tourism Platform
+    %% ==========================================
+
+    Start(["Khởi chạy đánh giá an toàn thời tiết<br/><code>WeatherRuleEngine.evaluateSafety(weatherInfo, categoryId)</code>"]) --> CheckRuleCache{"Kiểm tra Cache bộ quy tắc an toàn<br/><code>category_safety_rules:{id}</code>"}
+
+    CheckRuleCache -- "Cache Hit (Tìm thấy)" --> LoadRuleOk["Nạp <code>CategorySafetyRule</code> từ Cache"]
+    CheckRuleCache -- "Cache Miss" --> QueryDB{"Truy vấn PostgreSQL<br/><code>safetyRuleRepo.findByCategoryId(id)</code>"}
+
+    QueryDB -- "DB Thành công" --> CacheRule["Lưu Rule vào Redis Cache"]
+    CacheRule --> LoadRuleOk
+
+    QueryDB -- "DB Lỗi / Rỗng / Timeout" --> Zero500Fallback["<b>Kích hoạt Zero-500 Fallback:</b><br/>Lấy ngưỡng an toàn chuẩn quốc tế từ<br/><code>Built-in Default Registry (ASTM/PADI/ACA)</code><br/><i>(Tuyệt đối không bao giờ ném lỗi HTTP 500)</i>"]
+    Zero500Fallback --> LoadRuleOk
+
+    LoadRuleOk --> EvalWind{"Đánh giá tốc độ gió & gió giật<br/><code>windSpeed</code> & <code>windGust</code>"}
+
+    EvalWind -- "Vượt ngưỡng nguy hiểm (wind >= maxWind)" --> MarkRedWind["Đánh dấu mức: <b>RED (Hazardous)</b><br/>Vi phạm an toàn gió bão cấp cao"]
+    EvalWind -- "Trong khoảng cảnh báo (cautionWind <= wind < maxWind)" --> MarkYellowWind["Đánh dấu mức: <b>YELLOW (Caution)</b>"]
+    EvalWind -- "An toàn (wind < cautionWind)" --> EvalWave{"Đánh giá chiều cao sóng biển<br/><code>waveHeight</code> (m)"}
+
+    EvalWave -- "Vượt ngưỡng nguy hiểm (wave >= maxWave)" --> MarkRedWave["Đánh dấu mức: <b>RED (Hazardous)</b><br/>Sóng lớn vượt khả năng chịu tải"]
+    EvalWave -- "Trong khoảng cảnh báo (cautionWave <= wave < maxWave)" --> MarkYellowWave["Đánh dấu mức: <b>YELLOW (Caution)</b>"]
+    EvalWave -- "An toàn (wave < cautionWave)" --> EvalPrecip{"Đánh giá lượng mưa & Mã WMO bão lũ"}
+
+    EvalPrecip -- "Mưa dông / Sấm sét / Mã WMO nguy hiểm" --> MarkRedPrecip["Đánh dấu mức: <b>RED (Hazardous)</b><br/>Thời tiết cực đoan nguy cơ sét đánh"]
+    EvalPrecip -- "Mưa rải rác / Tầm nhìn giảm nhẹ" --> MarkYellowPrecip["Đánh dấu mức: <b>YELLOW (Caution)</b>"]
+    EvalPrecip -- "Trời quang / Gió nhẹ / Sóng êm" --> MarkGreen["Đánh dấu mức: <b>GREEN (Safe)</b><br/>Điều kiện lý tưởng cho hoạt động biển"]
+
+    MarkRedWind --> ResultRed
+    MarkRedWave --> ResultRed
+    MarkRedPrecip --> ResultRed
+
+    MarkYellowWind --> ResultYellow
+    MarkYellowWave --> ResultYellow
+    MarkYellowPrecip --> ResultYellow
+
+    ResultRed(["<b>KẾT QUẢ: RED (Nguy Hiểm)</b><br/>- Không an toàn khởi hành<br/>- Kích hoạt cảnh báo khẩn cấp / Hủy đơn hoàn 100%"])
+    ResultYellow(["<b>KẾT QUẢ: YELLOW (Cảnh Báo Sớm)</b><br/>- Cho phép theo dõi thêm<br/>- Gửi Early Warning cho Khách & Vendor<br/>- Tái kiểm tra tại mốc T-2h"])
+    MarkGreen --> ResultGreen(["<b>KẾT QUẢ: GREEN (An Toàn Tuyệt Đối)</b><br/>- Đủ điều kiện khởi hành bình thường<br/>- Cập nhật trạng thái an toàn"])
+
+    %% Style classes
+    classDef startEnd fill:#e0f2fe,stroke:#0284c7,stroke-width:2px,color:#0369a1;
+    classDef decision fill:#fef3c7,stroke:#d97706,stroke-width:2px,color:#92400e;
+    classDef action fill:#f0fdf4,stroke:#16a34a,stroke-width:2px,color:#15803d;
+    classDef warning fill:#fef9c3,stroke:#ca8a04,stroke-width:2px,color:#854d0e;
+    classDef danger fill:#fee2e2,stroke:#dc2626,stroke-width:2px,color:#b91c1c;
+
+    class Start,ResultGreen startEnd;
+    class CheckRuleCache,QueryDB,EvalWind,EvalWave,EvalPrecip decision;
+    class LoadRuleOk,CacheRule,Zero500Fallback,MarkGreen action;
+    class MarkYellowWind,MarkYellowWave,MarkYellowPrecip,ResultYellow warning;
+    class MarkRedWind,MarkRedWave,MarkRedPrecip,ResultRed danger;

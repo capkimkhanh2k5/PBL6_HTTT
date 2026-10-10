@@ -1,20 +1,18 @@
 package com.danasea.backend.modules.order.infrastructure.persistence.adapters;
 
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
-
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
-import org.springframework.stereotype.Component;
-
 import com.danasea.backend.modules.order.domain.models.OrderPagedResult;
 import com.danasea.backend.modules.order.domain.models.SubOrder;
 import com.danasea.backend.modules.order.domain.ports.SubOrderRepositoryPort;
 import com.danasea.backend.modules.order.infrastructure.persistence.entities.SubOrderJpaEntity;
 import com.danasea.backend.modules.order.infrastructure.persistence.mappers.SubOrderMapper;
 import com.danasea.backend.modules.order.infrastructure.persistence.repositories.JpaSubOrderRepository;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
+import org.springframework.stereotype.Component;
 
 @Component
 public class SubOrderRepositoryAdapter implements SubOrderRepositoryPort {
@@ -49,6 +47,16 @@ public class SubOrderRepositoryAdapter implements SubOrderRepositoryPort {
     }
 
     @Override
+    public Optional<UUID> findMasterOrderIdById(UUID id) {
+        return jpaSubOrderRepository.findMasterOrderIdById(id);
+    }
+
+    @Override
+    public Optional<SubOrder> findByIdForUpdate(UUID id) {
+        return jpaSubOrderRepository.findByIdForUpdate(id).map(mapper::toDomain);
+    }
+
+    @Override
     public Optional<SubOrder> findByBookingItemId(UUID bookingItemId) {
         return jpaSubOrderRepository.findByBookingItemId(bookingItemId).map(mapper::toDomain);
     }
@@ -61,6 +69,13 @@ public class SubOrderRepositoryAdapter implements SubOrderRepositoryPort {
     @Override
     public List<SubOrder> findByMasterOrderId(UUID masterOrderId) {
         return jpaSubOrderRepository.findByMasterOrderId(masterOrderId).stream()
+                .map(mapper::toDomain)
+                .toList();
+    }
+
+    @Override
+    public List<SubOrder> findByMasterOrderIdForUpdate(UUID masterOrderId) {
+        return jpaSubOrderRepository.findByMasterOrderIdForUpdate(masterOrderId).stream()
                 .map(mapper::toDomain)
                 .toList();
     }

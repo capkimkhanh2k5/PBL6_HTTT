@@ -1,10 +1,5 @@
 package com.danasea.backend.modules.order.presentation.handlers;
 
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.AccessDeniedException;
-import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.bind.annotation.RestControllerAdvice;
 import com.danasea.backend.modules.order.domain.exceptions.BookingNotEligibleForOrderException;
 import com.danasea.backend.modules.order.domain.exceptions.InvalidDiscountException;
 import com.danasea.backend.modules.order.domain.exceptions.InvalidOrderStateException;
@@ -15,8 +10,17 @@ import com.danasea.backend.modules.order.domain.exceptions.PaymentVerificationEx
 import com.danasea.backend.modules.order.domain.exceptions.RefundNotFoundException;
 import com.danasea.backend.modules.order.domain.exceptions.UnauthorizedOrderAccessException;
 import com.danasea.backend.modules.order.domain.exceptions.UnpaidOrderReceiptException;
+import com.danasea.backend.modules.order.domain.exceptions.WaiverAcceptanceRequiredException;
+import com.danasea.backend.modules.order.domain.exceptions.WaiverVersionMismatchException;
+import com.danasea.backend.modules.order.presentation.dtos.MissingWaiverSubOrderResponse;
+import com.danasea.backend.modules.order.presentation.dtos.WaiverAcceptanceRequiredResponse;
 import com.danasea.backend.shared.presentation.ErrorResponse;
 import com.danasea.backend.shared.presentation.LocalizedExceptionHandlerSupport;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 @RestControllerAdvice
 public class OrderExceptionHandler extends LocalizedExceptionHandlerSupport {
@@ -86,5 +90,36 @@ public class OrderExceptionHandler extends LocalizedExceptionHandlerSupport {
         String code = ex.getErrorCode() != null ? ex.getErrorCode() : "INVALID_DISCOUNT";
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                 .body(error(code));
+    }
+
+    @ExceptionHandler(WaiverVersionMismatchException.class)
+    public ResponseEntity<ErrorResponse> handleWaiverVersionMismatch(WaiverVersionMismatchException ex) {
+        return ResponseEntity.status(HttpStatus.CONFLICT)
+                .body(error("WAIVER_VERSION_MISMATCH"));
+    }
+
+    @ExceptionHandler(WaiverAcceptanceRequiredException.class)
+    public ResponseEntity<WaiverAcceptanceRequiredResponse> handleWaiverAcceptanceRequired(
+            WaiverAcceptanceRequiredException ex) {
+        String msg = message("error.waiver_acceptance_required");
+        var items = ex.getMissingSubOrders().stream()
+                .map(m -> new MissingWaiverSubOrderResponse(
+                        m.subOrderId(),
+                        m.serviceId(),
+                        m.serviceName(),
+                        m.waiverVersion(),
+                        m.required(),
+                        m.waiverContent(),
+                        m.contentLanguage(),
+                        m.fallbackUsed()
+                ))
+                .toList();
+        return ResponseEntity.status(HttpStatus.CONFLICT)
+                .body(new WaiverAcceptanceRequiredResponse(
+                        WaiverAcceptanceRequiredResponse.ERROR_CODE,
+                        msg,
+                        ex.getOrderId(),
+                        items
+                ));
     }
 }

@@ -1,0 +1,25 @@
+flowchart TD
+    Start(["Người dùng yêu cầu xuất báo cáo<br/><code>GET /api/vendor/reports/export</code>"]) --> CheckRole{"Người dùng có quyền<br/><code>ROLE_VENDOR</code> hay <code>ROLE_ADMIN</code>?"}
+    CheckRole -- "Không có quyền" --> Err403["Trả về <b>HTTP 403 Forbidden</b>"]
+    CheckRole -- "ROLE_VENDOR" --> EnforceVendorId["<b>Bắt buộc cô lập theo Vendor:</b><br/>Gán cứng <code>vendorId = currentVendorId</code><br/>(Chống triệt để lỗ hổng IDOR chéo vendor)"]
+    CheckRole -- "ROLE_ADMIN" --> AllowAllVendor["Cho phép lọc theo vendorId tùy chọn hoặc toàn sàn"]
+
+    EnforceVendorId --> QueryMetrics["Tổng hợp số liệu từ Database/Read Model"]
+    AllowAllVendor --> QueryMetrics
+
+    QueryMetrics --> CheckFormat{"Định dạng xuất yêu cầu<br/>(CSV hay PDF)?"}
+    CheckFormat -- "CSV" --> GenCsv["Sinh tệp CSV với UTF-8 BOM<br/>chuẩn hóa cột tiền tệ & số lượng"]
+    CheckFormat -- "PDF" --> GenPdf["Sinh tệp PDF thiết kế bảng biểu<br/>đính kèm chữ ký xác thực nền tảng"]
+
+    GenCsv --> ReturnStream(["Streaming file nhị phân về Client<br/>kèm Content-Disposition attachment"])
+    GenPdf --> ReturnStream
+
+    classDef startEnd fill:#e0f2fe,stroke:#0284c7,stroke-width:2px,color:#0369a1;
+    classDef decision fill:#fef3c7,stroke:#d97706,stroke-width:2px,color:#92400e;
+    classDef action fill:#f0fdf4,stroke:#16a34a,stroke-width:2px,color:#15803d;
+    classDef error fill:#fee2e2,stroke:#dc2626,stroke-width:2px,color:#b91c1c;
+
+    class Start,ReturnStream startEnd;
+    class CheckRole,CheckFormat decision;
+    class EnforceVendorId,AllowAllVendor,QueryMetrics,GenCsv,GenPdf action;
+    class Err403 error;

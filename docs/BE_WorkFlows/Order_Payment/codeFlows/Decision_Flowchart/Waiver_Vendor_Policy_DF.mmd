@@ -1,0 +1,30 @@
+flowchart TD
+    Start(["Vendor gửi yêu cầu cập nhật dịch vụ<br/>PUT/PATCH /api/vendor/services/{id}"]) --> BeginTx["Bắt đầu Transaction (@Transactional)"]
+
+    BeginTx --> RowLock["Khóa hàng bi quan cơ sở dữ liệu:<br/>serviceRepository.findByIdForUpdate(serviceId)"]
+
+    RowLock --> CheckOwner{"Người dùng là chủ<br/>sở hữu của dịch vụ?"}
+    CheckOwner -- "Không phải chủ sở hữu" --> Err403["Ném UnauthorizedServiceAccessException<br/>Trả về HTTP 403 Forbidden"]
+
+    CheckOwner -- "Hợp lệ" --> NormalizeData["Chuẩn hóa dữ liệu văn bản (trim)<br/>Khoảng trắng rỗng -> null"]
+
+    NormalizeData --> CheckEmptyContent{"waiverRequired == true<br/>NHƯNG cả nội dung VI & EN<br/>đều để trống?"}
+
+    CheckEmptyContent -- "Đúng (Vi phạm ràng buộc)" --> Err400["Ném WaiverContentRequiredException<br/>Trả về HTTP 400 Bad Request"]
+
+    CheckEmptyContent -- "Không vi phạm" --> DirtyCheck{"Dirty Check Cam kết:<br/>• waiverRequired thay đổi?<br/>HOẶC<br/>• waiverContent thay đổi?<br/>HOẶC<br/>• waiverContentEn thay đổi?"}
+
+    DirtyCheck -- "Có thay đổi chính sách/nội dung" --> IncVersion["Tự động tăng phiên bản:<br/>waiverVersion = waiverVersion + 1"]
+    DirtyCheck -- "Không thay đổi cam kết<br/>(Chỉ đổi giá, ảnh, tên,...)" --> KeepVersion["Giữ nguyên waiverVersion hiện tại"]
+
+    IncVersion --> SaveDB["Lưu ServiceJpaEntity vào Database"]
+    KeepVersion --> SaveDB
+
+    SaveDB --> CommitTx["Commit Transaction & Nhả khóa hàng"]
+
+    CommitTx --> Success(["Trả về 200 OK<br/>ServiceDetailResponse với waiverVersion mới"])
+
+    %% Ghi chú kiến trúc
+    subgraph ConcurrencyNote ["Cơ chế bảo vệ đồng thời (Concurrency Safety)"]
+        Note1["Nếu 2 request cập nhật cùng lúc từ Vendor:<br/>• Hàng đợi DB tuần tự hóa qua findByIdForUpdate<br/>• Request 1 hoàn tất tăng version (v1 -> v2)<br/>• Request 2 đọc version mới nhất và tăng tiếp (v2 -> v3)<br/>• Triệt tiêu hoàn toàn rủi ro Lost Update<br/>• Snapshot của các đơn hàng cũ hoàn toàn giữ nguyên"]
+    end

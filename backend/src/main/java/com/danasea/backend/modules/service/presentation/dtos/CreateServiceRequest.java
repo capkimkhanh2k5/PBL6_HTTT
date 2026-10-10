@@ -4,7 +4,6 @@ import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
-
 import java.math.BigDecimal;
 import java.util.UUID;
 
@@ -23,7 +22,21 @@ public record CreateServiceRequest(
         BigDecimal longitude,
         String waiverContent,
         String waiverContentEn,
+        Boolean waiverRequired,
         Boolean weatherSensitive,
         BigDecimal minWindKmh,
         BigDecimal maxWaveM
-) {}
+) {
+    public CreateServiceRequest(
+            UUID categoryId, String name, String nameEn, String description,
+            String descriptionEn, BigDecimal price, Integer durationMinutes,
+            Integer capacityPerSlot, String locationName, String address,
+            BigDecimal latitude, BigDecimal longitude, String waiverContent,
+            String waiverContentEn, Boolean weatherSensitive,
+            BigDecimal minWindKmh, BigDecimal maxWaveM) {
+        this(categoryId, name, nameEn, description, descriptionEn, price,
+                durationMinutes, capacityPerSlot, locationName, address,
+                latitude, longitude, waiverContent, waiverContentEn, false,
+                weatherSensitive, minWindKmh, maxWaveM);
+    }
+}

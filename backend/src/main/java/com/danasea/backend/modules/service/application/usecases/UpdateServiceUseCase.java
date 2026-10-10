@@ -1,7 +1,5 @@
 package com.danasea.backend.modules.service.application.usecases;
 
-import java.util.List;
-
 import com.danasea.backend.modules.service.application.dtos.ServiceResult;
 import com.danasea.backend.modules.service.application.dtos.UpdateServiceCommand;
 import com.danasea.backend.modules.service.application.usecases.helpers.ServiceResultMapper;
@@ -9,6 +7,7 @@ import com.danasea.backend.modules.service.domain.exceptions.CategoryInactiveExc
 import com.danasea.backend.modules.service.domain.exceptions.CategoryNotFoundException;
 import com.danasea.backend.modules.service.domain.exceptions.ServiceNotFoundException;
 import com.danasea.backend.modules.service.domain.exceptions.VendorNotApprovedException;
+import com.danasea.backend.modules.service.domain.exceptions.WaiverContentRequiredException;
 import com.danasea.backend.modules.service.domain.models.Category;
 import com.danasea.backend.modules.service.domain.models.Service;
 import com.danasea.backend.modules.service.domain.models.ServiceImage;
@@ -17,7 +16,10 @@ import com.danasea.backend.modules.service.domain.ports.ServiceImageRepositoryPo
 import com.danasea.backend.modules.service.domain.ports.ServiceRepositoryPort;
 import com.danasea.backend.modules.service.domain.ports.VendorPort;
 import com.danasea.backend.modules.vendor.domain.models.Vendor;
+import java.util.List;
+import java.util.Objects;
 import lombok.RequiredArgsConstructor;
+import org.springframework.transaction.annotation.Transactional;
 
 @RequiredArgsConstructor
 public class UpdateServiceUseCase {
@@ -27,11 +29,12 @@ public class UpdateServiceUseCase {
     private final ServiceImageRepositoryPort serviceImageRepository;
     private final VendorPort vendorPort;
 
+    @Transactional
     public ServiceResult execute(UpdateServiceCommand cmd) {
         Vendor vendor = vendorPort.findByUserId(cmd.userId())
                 .orElseThrow(() -> new VendorNotApprovedException("Vendor not found for user: " + cmd.userId()));
 
-        Service service = serviceRepository.findById(cmd.serviceId())
+        Service service = serviceRepository.findByIdForUpdate(cmd.serviceId())
                 .orElseThrow(() -> new ServiceNotFoundException(cmd.serviceId()));
 
         // Check ownership
@@ -59,8 +62,31 @@ public class UpdateServiceUseCase {
         if (cmd.address() != null) service.setAddress(cmd.address());
         if (cmd.latitude() != null) service.setLatitude(cmd.latitude());
         if (cmd.longitude() != null) service.setLongitude(cmd.longitude());
-        if (cmd.waiverContent() != null) service.setWaiverContent(cmd.waiverContent());
-        if (cmd.waiverContentEn() != null) service.setWaiverContentEn(cmd.waiverContentEn());
+        // Waiver updates & dirty check
+        String currentWc = normalize(service.getWaiverContent());
+        String currentWce = normalize(service.getWaiverContentEn());
+        boolean currentReq = Boolean.TRUE.equals(service.getWaiverRequired());
+
+        boolean newReq = cmd.waiverRequired() != null ? Boolean.TRUE.equals(cmd.waiverRequired()) : currentReq;
+        String newWc = cmd.waiverContent() != null ? normalize(cmd.waiverContent()) : currentWc;
+        String newWce = cmd.waiverContentEn() != null ? normalize(cmd.waiverContentEn()) : currentWce;
+
+        if (newReq && (newWc == null || newWc.isBlank()) && (newWce == null || newWce.isBlank())) {
+            throw new WaiverContentRequiredException();
+        }
+
+        boolean waiverChanged = (newReq != currentReq)
+                || !Objects.equals(newWc, currentWc)
+                || !Objects.equals(newWce, currentWce);
+
+        if (waiverChanged) {
+            int currentVer = service.getWaiverVersion() != null && service.getWaiverVersion() > 0 ? service.getWaiverVersion() : 1;
+            service.setWaiverVersion(currentVer + 1);
+        }
+
+        service.setWaiverRequired(newReq);
+        if (cmd.waiverContent() != null) service.setWaiverContent(newWc);
+        if (cmd.waiverContentEn() != null) service.setWaiverContentEn(newWce);
         if (cmd.weatherSensitive() != null) service.setWeatherSensitive(cmd.weatherSensitive());
         if (cmd.minWindKmh() != null) service.setMinWindKmh(cmd.minWindKmh());
         if (cmd.maxWaveM() != null) service.setMaxWaveM(cmd.maxWaveM());
@@ -74,5 +100,13 @@ public class UpdateServiceUseCase {
         Service saved = serviceRepository.save(service);
         List<ServiceImage> images = serviceImageRepository.findByServiceId(saved.getId());
         return ServiceResultMapper.toResult(saved, images);
+    }
+
+    private String normalize(String s) {
+        if (s == null) {
+            return null;
+        }
+        String trimmed = s.trim();
+        return trimmed.isEmpty() ? null : trimmed;
     }
 }

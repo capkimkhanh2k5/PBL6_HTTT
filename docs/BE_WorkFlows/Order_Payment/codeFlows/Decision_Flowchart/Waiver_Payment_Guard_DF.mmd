@@ -1,0 +1,38 @@
+flowchart TD
+    Start(["Khách hàng kích hoạt luồng thanh toán:<br/>• POST /api/payments/{orderId}/create-intent<br/>HOẶC<br/>• POST /api/payments/paypal/capture"]) --> CheckPayable["Kiểm tra quyền sở hữu IDOR & đơn hàng ở PENDING_PAYMENT"]
+
+    CheckPayable --> LockOrder["Khóa dữ liệu chống Race Condition:<br/>1. Khóa MasterOrder (findByIdForUpdate)<br/>2. Khóa SubOrders theo ORDER BY s.id ASC (FOR UPDATE)"]
+
+    LockOrder --> LoopSubOrders["Duyệt từng SubOrder trong đơn hàng"]
+
+    LoopSubOrders --> GuardCall["Gọi WaiverAcceptanceGuard.missing(...)<br/>truyền snapshot, lookup, selector"]
+
+    GuardCall --> CheckMissing{"waiverRequired == true<br/>VÀ<br/>waiverAccepted != true?"}
+
+    CheckMissing -- "Đúng (Thiếu cam kết)" --> BuildMissingItem["1. Lấy serviceName từ ServiceWaiverLookupPort<br/>2. Phân giải text & cờ fallback qua LocalizedContentSelector<br/>3. Tạo MissingWaiverItem thêm vào danh sách"]
+
+    CheckMissing -- "Sai (Đã accept hoặc không bắt buộc)" --> NextSubOrder{"Còn SubOrder tiếp theo?"}
+    BuildMissingItem --> NextSubOrder
+
+    NextSubOrder -- "Còn" --> LoopSubOrders
+
+    NextSubOrder -- "Đã duyệt hết toàn bộ" --> HasMissing{"Danh sách missingSubOrders<br/>có phần tử nào không?"}
+
+    %% Nhánh CHẶN
+    HasMissing -- "Có ít nhất 1 mục thiếu" --> ThrowGuardEx["Ném WaiverAcceptanceRequiredException<br/>(kèm orderId và missingSubOrders)"]
+
+    ThrowGuardEx --> BlockGateway["🔴 CHẶN CỔNG THANH TOÁN TUYỆT ĐỐI:<br/>Không gọi VNPay SDK, không gọi PayPal REST API"]
+
+    BlockGateway --> Map409["OrderExceptionHandler ánh xạ sang HTTP 409 Conflict:<br/>• code: 'WAIVER_ACCEPTANCE_REQUIRED'<br/>• orderId: UUID<br/>• missingSubOrders: [ { subOrderId, serviceName, waiverContent, ... } ]"]
+
+    Map409 --> ClientUI(["Client hiển thị ngay Popup cam kết từ missingSubOrders<br/>mà không cần gọi thêm API tra cứu phụ"])
+
+    %% Nhánh CHO PHÉP
+    HasMissing -- "Không có mục nào thiếu (Hợp lệ 100%)" --> ProceedPayment["🟢 ĐỦ ĐIỀU KIỆN THANH TOÁN:<br/>Tiến hành các bước xử lý tiền tệ"]
+
+    ProceedPayment --> CallProvider{"Loại yêu cầu?"}
+    CallProvider -- "Khởi tạo Intent" --> InitPayment["Tạo bản ghi Payment PENDING<br/>Gọi VNPay URL / PayPal create order"]
+    CallProvider -- "PayPal Capture" --> CapturePayment["Gọi PayPal REST API v2 POST .../capture<br/>Cập nhật đơn PAID & nhả vé"]
+
+    InitPayment --> Success(["HTTP 200 OK (Trả link thanh toán / kết quả capture)"])
+    CapturePayment --> Success

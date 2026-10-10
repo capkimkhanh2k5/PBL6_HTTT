@@ -4,18 +4,19 @@
 
 | # | Sơ đồ | Loại | Nội dung |
 |---|-------|------|----------|
-| 1 | `Order_Creation_And_Splitting` | Sequence Diagram | Tạo Master Order từ Booking HOLD: kiểm tra Idempotency, xác thực IDOR, tách Sub-Orders 1:1 theo từng BookingItem, áp dụng tỷ lệ hoa hồng Vendor và chuyển trạng thái Booking sang `PENDING_PAYMENT` |
-| 2 | `Payment_Intent_DualGateways` | Sequence Diagram | Khởi tạo Payment Intent đa cổng: phân luồng linh hoạt giữa VNPay (cổng nội địa, định dạng số tiền x100, chữ ký HMAC-SHA512) và PayPal (cổng quốc tế, chuẩn hóa quy đổi VND-USD, gọi REST API v2 Checkout) |
-| 3 | `Payment_Webhook_And_Fulfillment` | Sequence Diagram | Xử lý Webhook IPN từ cổng thanh toán: xác thực chữ ký số bảo mật, cơ chế chống lặp giao dịch (Idempotency Guard), chuyển trạng thái đơn hàng sang `PAID`, xác nhận đơn phụ `CONFIRMED` và kích hoạt hoàn tất Booking |
-| 4 | `Order_Payment_Lifecycle_StateMachine` | State Machine | Vòng đời trạng thái phân tách 2 trục độc lập giữa Vòng đời đơn hàng (`OrderStatus`), Trục dòng tiền thực thu (`PaymentStatus`) và Vòng đời đơn phụ của Vendor (`SubOrderStatus`) |
-| 5 | `EPIC04_Architecture_And_UseCases` | Flowchart | Kiến trúc phân lớp Clean Architecture tách biệt các Use Cases: Tạo đơn, Đa cổng thanh toán, Webhook, Xem trước mức hoàn tiền và Khởi tạo hoàn tiền |
-| 6 | `Admin_MultiFilter_Listing_Flow` | Sequence Diagram | Quản trị toàn sàn: Lọc đa chiều đơn hàng, giao dịch thanh toán và hoàn tiền cho Admin (`GET /api/admin/orders`, `/payments`, `/refunds`), tối ưu hóa subquery `EXISTS` và gom nhóm tránh N+1 |
-| 7 | `Automated_Payment_Reconciliation_Flow` | Sequence Diagram | Đối soát tự động định kỳ (`PaymentReconciliationJob`): Quét pending payments > 2 phút, gọi VNPay QueryDR (HMAC-SHA512) & PayPal Capture, cập nhật trạng thái đơn hàng và ghi nhận nhật ký kiểm toán `AuditLogInternalApi` |
-| 8 | `Order_Receipt_And_Pdf_Generation_Flow` | Sequence Diagram | Phát hành biên nhận đơn hàng (`GET /api/orders/{id}/receipt`): Xác thực IDOR, kiểm tra điều kiện PAID, nạp danh sách dịch vụ chi tiết và xuất PDF chuẩn tiếng Việt qua Apache PDFBox 3.0 |
+| 1 | `Order_Creation_And_Splitting_DF` | Decision Flowchart | [`codeFlows/Decision_Flowchart/Order_Creation_And_Splitting_DF.mmd`](./codeFlows/Decision_Flowchart/Order_Creation_And_Splitting_DF.mmd) — Tạo Master Order từ Booking HOLD: kiểm tra Idempotency, xác thực IDOR, tách Sub-Orders 1:1, áp dụng hoa hồng và voucher |
+| 2 | `Payment_Intent_DualGateways_DF` | Decision Flowchart | [`codeFlows/Decision_Flowchart/Payment_Intent_DualGateways_DF.mmd`](./codeFlows/Decision_Flowchart/Payment_Intent_DualGateways_DF.mmd) — Khởi tạo Intent đa cổng, Payment Waiver Guard chặn thanh toán thiếu cam kết, phân luồng VNPay vs PayPal |
+| 3 | `Payment_Webhook_And_Fulfillment_DF` | Decision Flowchart | [`codeFlows/Decision_Flowchart/Payment_Webhook_And_Fulfillment_DF.mmd`](./codeFlows/Decision_Flowchart/Payment_Webhook_And_Fulfillment_DF.mmd) — Xử lý Webhook IPN: xác thực chữ ký VNPay/PayPal, Idempotency Guard, hoàn tất đơn PAID và xác nhận Booking |
+| 4 | `Order_Payment_Lifecycle_SM` | State Machine | [`codeFlows/State_Machine/Order_Payment_Lifecycle_SM.mmd`](./codeFlows/State_Machine/Order_Payment_Lifecycle_SM.mmd) — Máy trạng thái 3 trục: Vòng đời đơn (`OrderStatus`), Trục dòng tiền (`PaymentStatus`), Đơn phụ (`SubOrderStatus`) |
+| 5 | `EPIC04_Architecture_And_UseCases_ARCH` | Flowchart | Kiến trúc phân lớp Clean Architecture tách biệt các Use Cases: Tạo đơn, Đa cổng thanh toán, Webhook, Xem trước mức hoàn tiền và Khởi tạo hoàn tiền |
+| 6 | `Admin_MultiFilter_Listing_SD` | Sequence Diagram | [`codeFlows/Sequence_Diagram/Admin_MultiFilter_Listing_SD.mmd`](./codeFlows/Sequence_Diagram/Admin_MultiFilter_Listing_SD.mmd) — Quản trị toàn sàn: Lọc đa chiều đơn hàng, giao dịch thanh toán và hoàn tiền cho Admin |
+| 7 | `Automated_Payment_Reconciliation_SD` | Sequence & Flowchart | [`codeFlows/Sequence_Diagram/Automated_Payment_Reconciliation_SD.mmd`](./codeFlows/Sequence_Diagram/Automated_Payment_Reconciliation_SD.mmd) & [`codeFlows/State_Machine/Reconciliation_Decision_SM.mmd`](./codeFlows/State_Machine/Reconciliation_Decision_SM.mmd) — Đối soát tự động định kỳ |
+| 8 | `Order_Receipt_And_Pdf_Generation_SD` | Sequence Diagram | [`codeFlows/Sequence_Diagram/Order_Receipt_And_Pdf_Generation_SD.mmd`](./codeFlows/Sequence_Diagram/Order_Receipt_And_Pdf_Generation_SD.mmd) — Phát hành biên nhận đơn hàng (`GET /api/orders/{id}/receipt`): IDOR, điều kiện PAID, xuất PDF |
+| 9 | `Sub_Order_Waiver_Acceptance_And_Payment_Guard_SD` | 4 Decision Flowcharts + 1 Sequence | [`codeFlows/Decision_Flowchart/Waiver_Payment_Guard_DF.mmd`](codeFlows/Decision_Flowchart/Waiver_Payment_Guard_DF.mmd) & [`codeFlows/Sequence_Diagram/Sub_Order_Waiver_Acceptance_And_Payment_Guard_SD.mmd`](codeFlows/Sequence_Diagram/Sub_Order_Waiver_Acceptance_And_Payment_Guard_SD.mmd) — Cam kết an toàn trước thanh toán |
 
 ---
 
-### 1. Order_Creation_And_Splitting.png — Tạo Master Order & Tách Sub-Orders 1:1
+### 1. Order_Creation_And_Splitting_DF.png — Tạo Master Order & Tách Sub-Orders 1:1
 
 **Luồng nghiệp vụ chi tiết:**
 1. Khách hàng gửi yêu cầu tạo đơn qua `POST /api/orders` với `{bookingId}` và header `Idempotency-Key`.
@@ -42,13 +43,14 @@
 
 ---
 
-## 2. Payment_Intent_DualGateways.png — Tạo Payment Intent Đa Cổng, Khóa Tuần Tự & Bền Vững Hóa
+## 2. Payment_Intent_DualGateways_DF.png — Tạo Payment Intent Đa Cổng, Khóa Tuần Tự & Bền Vững Hóa
 
 **Luồng nghiệp vụ chi tiết:**
 1. Khách hàng gửi yêu cầu thanh toán qua `POST /api/payments/{orderId}/create-intent` kèm `{provider: "VNPAY" | "PAYPAL"}`.
 2. **Kiểm tra quyền sở hữu & trạng thái đơn:**
    - Kiểm tra IDOR: `order.customerId == currentUserId` (403 Forbidden nếu không phải chủ đơn).
    - Đơn hàng bắt buộc phải ở trạng thái `PENDING_PAYMENT` (409 Conflict nếu đơn đã thanh toán hoặc đã hủy).
+   - **Bảo vệ cam kết an toàn (Payment Waiver Guard - R9):** Khóa các `SubOrder` thuộc đơn hàng (`ORDER BY s.id ASC`), kiểm tra xem có SubOrder nào yêu cầu cam kết an toàn (`waiverRequired = true`) nhưng chưa được khách xác nhận (`waiverAccepted != true`) hay không. Nếu có, lập tức ném `WaiverAcceptanceRequiredException` trả về HTTP 409 Conflict với code `WAIVER_ACCEPTANCE_REQUIRED` và danh sách `missingSubOrders`, ngăn chặn tuyệt đối việc tạo payment intent hoặc gọi sang cổng thanh toán.
 3. **Cơ chế khóa tuần tự & Bền vững hóa (Pessimistic Lock & Idempotent Persistence):**
    - Áp dụng khóa tuần tự: Khóa bản ghi `Payment` theo `orderId`, sau đó khóa `MasterOrder` trong DB để loại trừ xung đột đồng thời (Race Condition) khi người dùng bấm gửi nhiều yêu cầu liên tiếp.
    - **Tạo và Commit Payment trước khi gọi cổng:** Bản ghi `Payment` ở trạng thái `PENDING` được lưu và commit vào PostgreSQL trước khi gửi yêu cầu sang gateway. Khi xảy ra timeout hoặc người dùng retry, hệ thống tái sử dụng đúng UUID của Payment `PENDING` đó, ngăn ngừa tạo ra các bản ghi rác.
@@ -66,6 +68,7 @@
      - Trích xuất liên kết phê duyệt thanh toán (`rel: "approve"`).
 5. **Hoàn tất bước Capture PayPal (`POST /api/payments/paypal/capture`):**
    - Sau khi khách hàng duyệt thanh toán trên giao diện PayPal, client gửi yêu cầu capture kèm `orderId` và `paypalOrderId`.
+   - **Payment Waiver Guard Phase 2:** Thực hiện kiểm tra toàn bộ các SubOrder bắt buộc tương tự trước khi gọi PayPal API capture.
    - `OrderPaymentService` gọi PayPal REST API v2 `POST /v2/checkout/orders/{id}/capture` để khớp dòng tiền, lưu `providerCaptureId` và cập nhật đơn hàng thành `PAID`.
 6. **Đối soát tự động (Payment Reconciliation Job):**
    - `PaymentReconciliationJob` chạy ngầm định kỳ quét các `Payment` ở trạng thái `PENDING` quá thời gian quy định (ví dụ quá 15 phút) để tự động truy vấn trạng thái từ cổng thanh toán và đồng bộ dữ liệu.
@@ -75,7 +78,7 @@
 
 ---
 
-## 3. Payment_Webhook_And_Fulfillment.png — Xử Lý Webhook IPN & Xác Nhận Đơn Hàng
+## 3. Payment_Webhook_And_Fulfillment_DF.png — Xử Lý Webhook IPN & Xác Nhận Đơn Hàng
 
 **Luồng nghiệp vụ chi tiết:**
 1. Cổng thanh toán (VNPay hoặc PayPal) gửi HTTP POST Webhook IPN đến `/api/payments/webhook/{provider}` kèm payload giao dịch và chữ ký số.
@@ -96,7 +99,7 @@
 
 ---
 
-## 4. Order_Payment_Lifecycle_StateMachine.png — Vòng Đời Trạng Thái Đơn Hàng & Dòng Tiền
+## 4. Order_Payment_Lifecycle_SM.png — Vòng Đời Trạng Thái Đơn Hàng & Dòng Tiền
 
 Sơ đồ biểu diễn mô hình máy trạng thái phân tách 2 trục độc lập giữa **Vòng đời thực hiện (Fulfillment)** và **Dòng tiền (Cashflow)**:
 
@@ -119,7 +122,7 @@ Sơ đồ biểu diễn mô hình máy trạng thái phân tách 2 trục độc
 
 ---
 
-## 5. EPIC04_Architecture_And_UseCases.png — Kiến Trúc Clean Architecture Phân Tách Use Cases
+## 5. EPIC04_Architecture_And_UseCases_ARCH.png — Kiến Trúc Clean Architecture Phân Tách Use Cases
 
 Sơ đồ tổng quan toàn bộ kiến trúc phân tầng chuẩn Clean Architecture của EPIC-04:
 
@@ -203,7 +206,7 @@ Sơ đồ tổng quan toàn bộ kiến trúc phân tầng chuẩn Clean Archite
 
 ---
 
-## 8. Order_Receipt_And_Pdf_Generation_Flow.mmd — Phát Hành Biên Nhận Đơn Hàng & Xuất PDF
+## 8. Order_Receipt_And_Pdf_Generation_SD.mmd — Phát Hành Biên Nhận Đơn Hàng & Xuất PDF
 
 **Lớp xử lý chính:**
 - `com.danasea.backend.modules.order.presentation.controllers.OrderController`
@@ -225,3 +228,107 @@ Sơ đồ tổng quan toàn bộ kiến trúc phân tầng chuẩn Clean Archite
    - Tích hợp phông chữ `NotoSans-Regular.ttf` và `NotoSans-Bold.ttf` hỗ trợ hiển thị đầy đủ dấu tiếng Việt Unicode mà không bị lỗi phông hay ký tự lạ.
    - Cơ chế ngắt dòng tự động (Word Wrapping) và phân trang động (`LINES_PER_PAGE = 43`), hỗ trợ các đơn hàng có nhiều mục dịch vụ trải dài qua nhiều trang mà không bị tràn khung.
    - Trả về nhị phân `application/pdf` kèm header `Content-Disposition: inline; filename="receipt-{orderId}.pdf"`.
+
+---
+
+## 9. Sub_Order_Waiver_Acceptance_And_Payment_Guard — Cam Kết An Toàn Trước Thanh Toán & Guard Bảo Vệ
+
+> 📌 *Hệ thống sơ đồ Decision Flowchart & Sequence Diagrams:*
+> - Sơ đồ 1: Luồng tổng quan khách hàng & kiểm soát cam kết: [`codeFlows/Decision_Flowchart/Waiver_Customer_Journey_DF.mmd`](./codeFlows/Decision_Flowchart/Waiver_Customer_Journey_DF.mmd)
+> - Sơ đồ 2: Chính sách Vendor, Khóa bi quan & Quản lý phiên bản: [`codeFlows/Decision_Flowchart/Waiver_Vendor_Policy_DF.mmd`](./codeFlows/Decision_Flowchart/Waiver_Vendor_Policy_DF.mmd)
+> - Sơ đồ 3: Các tầng bảo vệ khi xác nhận cam kết (Verification Gates): [`codeFlows/Decision_Flowchart/Waiver_Acceptance_Verification_DF.mmd`](./codeFlows/Decision_Flowchart/Waiver_Acceptance_Verification_DF.mmd)
+> - Sơ đồ 4: Cơ chế Payment Waiver Guard (Chặn Create Intent & PayPal Capture): [`codeFlows/Decision_Flowchart/Waiver_Payment_Guard_DF.mmd`](./codeFlows/Decision_Flowchart/Waiver_Payment_Guard_DF.mmd)
+> - Sơ đồ tuần tự hợp nhất: [`codeFlows/Sequence_Diagram/Sub_Order_Waiver_Acceptance_And_Payment_Guard_SD.mmd`](./codeFlows/Sequence_Diagram/Sub_Order_Waiver_Acceptance_And_Payment_Guard_SD.mmd)
+
+**Lớp xử lý chính:**
+- `com.danasea.backend.modules.order.presentation.controllers.SubOrderWaiverController`
+- `com.danasea.backend.modules.order.application.usecases.AcceptSubOrderWaiverUseCase`
+- `com.danasea.backend.modules.order.application.services.WaiverAcceptanceGuard`
+- `com.danasea.backend.modules.order.application.usecases.CreatePaymentIntentUseCase`
+- `com.danasea.backend.modules.order.application.OrderPaymentService`
+- `com.danasea.backend.modules.order.domain.ports.ServiceWaiverLookupPort`
+- `com.danasea.backend.shared.i18n.LocalizedContentSelector`
+- `com.danasea.backend.modules.service.presentation.controllers.VendorServiceController`
+- `com.danasea.backend.modules.service.application.usecases.CreateServiceUseCase`
+- `com.danasea.backend.modules.service.application.usecases.UpdateServiceUseCase`
+- `com.danasea.backend.modules.audit.application.api.AuditLogInternalApi`
+
+### Điểm truy cập API: `POST /api/sub-orders/{id}/waiver-acceptance`
+- **Yêu cầu bảo mật:** Bắt buộc JWT xác thực với quyền `ROLE_CUSTOMER`.
+- **Request Body:**
+  ```json
+  {
+    "accepted": true,
+    "version": 1,
+    "language": "VI"
+  }
+  ```
+- **Validation (Ánh xạ đa ngôn ngữ i18n):**
+  - `accepted`: `@NotNull(message = "{validation.accepted_flag_is_required}")`, `@AssertTrue(message = "{validation.safety_waiver_must_be_accepted}")`.
+  - `version`: `@NotNull(message = "{validation.waiver_version_is_required}")`.
+  - `language`: `@NotBlank(message = "{validation.language_is_required}")`, chuẩn hóa ("VI" hoặc "EN").
+
+### Quy tắc nghiệp vụ then chốt:
+
+1. **Chính sách tại Service & Khóa Tuần Tự Hóa (Vendor Policy & Row Lock):**
+   - Quản lý chính sách cam kết an toàn thông qua `waiverRequired`, `waiverVersion`, `waiverContent`, `waiverContentEn`.
+   - **Khóa bi quan ngăn Race Condition:** `UpdateServiceUseCase` được bảo vệ bởi `@Transactional` kết hợp `serviceRepository.findByIdForUpdate(cmd.serviceId())`. Các yêu cầu cập nhật đồng thời từ Vendor sẽ được hàng đợi DB tuần tự hóa, sinh các `waiverVersion` riêng biệt liên tiếp (v1 $\rightarrow$ v2 $\rightarrow$ v3) mà không bị mất dữ liệu cập nhật (Lost Update).
+   - **Bảo vệ nội dung:** Cấm bật `waiverRequired = true` khi cả nội dung tiếng Việt và tiếng Anh đều để trống (`WaiverContentRequiredException` $\rightarrow$ `400 Bad Request`).
+   - **Độc lập với thời tiết:** Thuộc tính `waiverRequired` hoàn toàn độc lập với `weatherSensitive`, không tự động suy diễn từ nhau.
+   - **Tự động quản lý Version (Dirty Check):** Khởi tạo `waiverVersion = 1`. Khi vendor cập nhật dịch vụ:
+     - Chuẩn hóa chuỗi (loại bỏ khoảng trắng thừa).
+     - Chỉ tăng `waiverVersion = waiverVersion + 1` một lần khi thực sự có thay đổi ở `waiverRequired` hoặc nội dung VI/EN.
+     - Thay đổi giá bán, tiêu đề, ảnh,... không làm tăng `waiverVersion`.
+
+2. **Snapshot bất biến theo Đơn hàng (Order Waiver Snapshot):**
+   - Khi tạo đơn hàng (áp dụng cho cả `CreateOrderUseCase` và `OrderPaymentService.createOrder`):
+     - Tra cứu thông qua `ServiceWaiverLookupPort` và ghi nhận snapshot bất biến từ Service vào từng `SubOrder`: `waiverRequired`, `waiverVersion`, `waiverContent`, `waiverContentEn`.
+     - Vendor sửa đổi dịch vụ sau này chỉ áp dụng cho đơn mới; toàn bộ đơn cũ giữ nguyên snapshot cam kết tại thời điểm đặt.
+   - **Hợp đồng đọc (Public Detail & Order Detail):** Trả về đầy đủ trạng thái `waiverRequired`, `waiverVersion`, nội dung snapshot theo ngôn ngữ yêu cầu (`LocalizedContentSelector`), ngôn ngữ thực tế trả về và cờ `fallbackUsed`.
+
+3. **Cơ chế Khóa Bi Quan & Concurrency (Pessimistic Lock Order):**
+   - Để triệt tiêu xung đột dữ liệu (Race Condition) và Deadlock giữa luồng khách chấp thuận cam kết và luồng bấm thanh toán/capture:
+     - Luôn khóa `MasterOrder` trước bằng `findByIdForUpdate`.
+     - Sau đó khóa các `SubOrder` theo thứ tự ID tăng dần (`ORDER BY s.id ASC`).
+   - API xác nhận cam kết chỉ giữ khóa trong transaction DB ngắn. Luồng payment hiện có commit bản ghi PENDING trước khi gọi cổng, nhưng transaction khởi tạo/capture vẫn giữ khóa Payment/MasterOrder trong lúc gọi gateway để tuần tự hóa retry; không coi đây là luồng không giữ khóa qua mạng.
+
+4. **Xác thực API Chấp thuận Cam kết (`AcceptSubOrderWaiverUseCase`):**
+   - **IDOR Guard:** Kiểm tra `masterOrder.customerId == currentUserId`. Nếu vi phạm $\rightarrow$ **HTTP 403 Forbidden** (`UnauthorizedOrderAccessException`).
+   - **State Guard:** Đơn hàng bắt buộc phải ở trạng thái `PENDING_PAYMENT` và SubOrder ở trạng thái `PENDING`. Vi phạm $\rightarrow$ **HTTP 409 Conflict** (`InvalidOrderStateException`).
+   - **Required Guard:** SubOrder bắt buộc phải có `waiverRequired == true`. Nếu dịch vụ không yêu cầu cam kết $\rightarrow$ **HTTP 409 Conflict** (`InvalidOrderStateException`).
+   - **Version Mismatch Guard:** `command.version() == subOrder.getWaiverVersion()`. Nếu sai lệch $\rightarrow$ **HTTP 409 Conflict** (`WaiverVersionMismatchException`).
+   - **Bằng chứng xác nhận đáng tin cậy:** Tuyệt đối không nhận `userId`, thời điểm xác nhận hay nội dung từ client khai báo. Toàn bộ thông tin được ghi nhận tự động từ:
+     - `waiverAcceptedBy`: Lấy từ JWT Security Context (`currentUserId`).
+     - `waiverAcceptedAt`: Lấy từ đồng hồ chuẩn của Server (`OffsetDateTime.now()`).
+     - `waiverAcceptedContent`: Lấy từ nội dung snapshot của SubOrder tương ứng với ngôn ngữ đã chọn (kèm logic fallback VI/EN).
+   - **Tính Idempotent (Replay cùng xác nhận):** Nếu SubOrder đã được xác nhận trước đó với cùng `version` và cùng `userId`:
+     - Trả về kết quả xác nhận đã lưu (`200 OK`).
+     - **Không ghi đè lại timestamp** `waiverAcceptedAt`.
+     - **Không sinh log kiểm toán lặp** (Audit Log).
+
+5. **Payment Waiver Guard & Phản hồi HTTP 409 Conflict:**
+   - **Thành phần Guard tập trung (`WaiverAcceptanceGuard`):** Cả `CreatePaymentIntentUseCase` và `OrderPaymentService.capturePayPalOrder` đều thống nhất gọi qua phương thức tĩnh `WaiverAcceptanceGuard.missing(...)` để kiểm tra điều kiện cam kết của từng SubOrder.
+   - Trước khi tạo Payment Intent hoặc Capture PayPal:
+     - Quét toàn bộ các SubOrder của MasterOrder: nếu có bất kỳ SubOrder nào có `waiverRequired = true` và `waiverAccepted != true`:
+     - Ném `WaiverAcceptanceRequiredException` và **ngừng ngay lập tức luồng thanh toán mà không gọi sang cổng thanh toán (VNPay / PayPal)**.
+     - `OrderExceptionHandler` ánh xạ sang **HTTP 409 Conflict** với cấu trúc chi tiết:
+       ```json
+       {
+         "code": "WAIVER_ACCEPTANCE_REQUIRED",
+         "message": "Một hoặc nhiều dịch vụ yêu cầu xác nhận cam kết an toàn trước khi thanh toán.",
+         "orderId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+         "missingSubOrders": [
+           {
+             "subOrderId": "c2b3d4e5-...",
+             "serviceId": "a1b2c3d4-...",
+             "serviceName": "Tour Lặn Biển Cù Lao Chàm",
+             "waiverVersion": 1,
+             "required": true,
+             "waiverContent": "Khách hàng cam kết đủ điều kiện sức khỏe và tuân thủ hướng dẫn an toàn...",
+             "contentLanguage": "VI",
+             "fallbackUsed": false
+           }
+         ]
+       }
+       ```
+   - Frontend có thể sử dụng ngay dữ liệu trong `missingSubOrders` để mở popup/modal cam kết cho khách hàng đọc và bấm đồng ý mà không cần gọi thêm API truy vấn phụ.
