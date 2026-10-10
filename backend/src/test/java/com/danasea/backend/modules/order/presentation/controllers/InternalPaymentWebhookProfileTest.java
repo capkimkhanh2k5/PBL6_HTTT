@@ -3,15 +3,18 @@ package com.danasea.backend.modules.order.presentation.controllers;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 
+import com.danasea.backend.modules.order.application.OrderPaymentService;
+import com.danasea.backend.modules.order.domain.ports.ServiceWaiverLookupPort;
+import com.danasea.backend.shared.i18n.LocalizedContentSelector;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.boot.test.context.runner.ApplicationContextRunner;
 
-import com.danasea.backend.modules.order.application.OrderPaymentService;
-
 class InternalPaymentWebhookProfileTest {
     private final ApplicationContextRunner runner = new ApplicationContextRunner()
+            .withBean(ServiceWaiverLookupPort.class, () -> mock(ServiceWaiverLookupPort.class))
+            .withBean(LocalizedContentSelector.class, LocalizedContentSelector::new)
             .withBean(OrderPaymentService.class, () -> mock(OrderPaymentService.class))
             .withUserConfiguration(InternalPaymentWebhookController.class);
 

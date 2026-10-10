@@ -35,8 +35,15 @@ public class SubOrder extends BaseDomainModel {
     private SubOrderStatus status;
 
     private RefundReason cancellationReason;
+    private Boolean waiverRequired;
+    private Integer waiverVersion;
+    private String waiverContent;
+    private String waiverContentEn;
     private Boolean waiverAccepted;
     private OffsetDateTime waiverAcceptedAt;
+    private UUID waiverAcceptedBy;
+    private String waiverAcceptedLanguage;
+    private String waiverAcceptedContent;
     private UUID qrSecret;
     private OffsetDateTime checkedInAt;
     private OffsetDateTime vendorNotifiedAt;
@@ -47,6 +54,8 @@ public class SubOrder extends BaseDomainModel {
     public SubOrder() {
         super();
         this.status = SubOrderStatus.PENDING;
+        this.waiverRequired = false;
+        this.waiverVersion = 1;
         this.waiverAccepted = false;
         this.discountAmount = BigDecimal.ZERO;
         this.vendorDiscountAmount = BigDecimal.ZERO;

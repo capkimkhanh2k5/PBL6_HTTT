@@ -57,7 +57,7 @@ Migration `V21__review_enhancements.sql` bổ sung visibility/moderation, unique
 
 Bằng chứng kiểm thử: `ReviewUseCaseTest`, `ReviewControllerTest`, `ReviewRatingIntegrationTest` và `ReviewConcurrencyIntegrationTest` với PostgreSQL 16 thật (11 ca kiểm tra cạnh tranh, privacy, ảnh, ownership và badge). Validation dùng bundle Anh/Việt; inventory của nhánh là 124 endpoint.
 
-### P1 Chi trả vendor và cấu hình hoa hồng
+### P1 Chi trả vendor và cấu hình hoa hồng -> ĐANG THẢO LUẬN, CHƯA THỐNG NHẤT VÀ TRIỂN KHAI.
 
 Settlement đã có generate/list/detail/finalize. Finalize chỉ chốt kỳ, chưa đánh dấu PAID; PayoutRequest mới có model/entity/repository. Chưa có luồng rút tiền và xác nhận chi trả. `CommissionPolicyAdapter` hiện trả mặc định 10%, chưa đọc cấu hình.
 
@@ -68,7 +68,12 @@ Settlement đã có generate/list/detail/finalize. Finalize chỉ chốt kỳ, c
 
 Đảm bảo một settlement không chi trả hai lần, không rút quá số được nhận, lưu audit log. Thông tin ngân hàng riêng tư chỉ dùng cho vendor/admin có quyền.
 
-### P1 Cam kết an toàn trước giao dịch
+***SUGGEST TODO***
+Thay mức 10% cố định bằng chính sách mặc định + thỏa thuận riêng của vendor, có thời gian hiệu lực và audit.
+Giữ snapshot commission theo từng sub-order. Phần lưu tỷ lệ đã có; cần bổ sung nguồn/phiên bản chính sách và dùng nhất quán kết quả xác định tỷ lệ trong luồng tạo đơn.
+Hoàn thiện chi trả settlement: chốt số tiền, kiểm soát khoản đang chi trả, chống trả trùng và xác nhận PAID kèm chứng từ. Khoản điều chỉnh phát sinh sau khi chốt cần có lịch sử riêng, không sửa số đã chi trả. Có thể dùng luồng rút tiền vendor hoặc admin trực tiếp chi trả.
+
+### P1 Cam kết an toàn trước giao dịch -> Đã Xử Lý
 
 Vendor có thể nhập waiver content, sub-order có waiverAccepted/waiverAcceptedAt; public detail chưa trả nội dung waiver và order request chỉ nhận bookingId. Sub-order được tạo với waiverAccepted=false; chưa thấy luồng xác nhận hay guard yêu cầu cam kết.
 
@@ -104,7 +109,7 @@ Kiểm thử: `AdminTransactionIntegrationTest` chạy HTTP/RBAC/owner và trans
 
 Phạm vi này là backend được kiểm chứng với gateway mô phỏng. Giao dịch capture/refund/webhook trên sandbox thật vẫn cần nghiệm thu riêng. Với giao dịch đã thu tiền nhưng booking không thể xác nhận, hệ thống giữ dấu hiệu cần review để xử lý vận hành; không tự bỏ qua guard tồn hoặc gửi một lệnh thu/hoàn tiền khác.
 
-### P1/P2 Đổi lịch do thời tiết và lý do vận hành
+### P1/P2 Đổi lịch do thời tiết và lý do vận hành -> Đã Xử Lý
 
 Chưa thấy API chuyển booking/sub-order sang slot mới. Action DISMISSED ở weather alert chỉ sửa evaluation; thông báo nói rescheduled nhưng không đổi slot. Vendor reject đã tồn tại nhưng chỉ chấp nhận sub-order CONFIRMED, khác mô tả checklist từ chối trước thanh toán. Cần chốt và cập nhật tài liệu theo nghiệp vụ thực.
 

@@ -1,15 +1,13 @@
 package com.danasea.backend.modules.service.infrastructure.persistence.mappers;
 
+import com.danasea.backend.modules.service.domain.models.Service;
+import com.danasea.backend.modules.service.domain.models.ServiceStatus;
+import com.danasea.backend.modules.service.infrastructure.persistence.entities.ServiceJpaEntity;
 import java.math.BigDecimal;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
-
 import org.springframework.stereotype.Component;
-
-import com.danasea.backend.modules.service.domain.models.Service;
-import com.danasea.backend.modules.service.domain.models.ServiceStatus;
-import com.danasea.backend.modules.service.infrastructure.persistence.entities.ServiceJpaEntity;
 
 @Component
 public class ServiceMapper {
@@ -40,6 +38,8 @@ public class ServiceMapper {
         domain.setRejectionReason(entity.getRejectionReason());
         domain.setWaiverContent(entity.getWaiverContent());
         domain.setWaiverContentEn(entity.getWaiverContentEn());
+        domain.setWaiverRequired(entity.getWaiverRequired() != null ? entity.getWaiverRequired() : Boolean.FALSE);
+        domain.setWaiverVersion(entity.getWaiverVersion() != null ? entity.getWaiverVersion() : 1);
         domain.setWeatherSensitive(entity.getWeatherSensitive());
         domain.setMinWindKmh(entity.getMinWindKmh());
         domain.setMaxWaveM(entity.getMaxWaveM());
@@ -75,6 +75,8 @@ public class ServiceMapper {
         entity.setRejectionReason(domain.getRejectionReason());
         entity.setWaiverContent(domain.getWaiverContent());
         entity.setWaiverContentEn(domain.getWaiverContentEn());
+        entity.setWaiverRequired(domain.getWaiverRequired() != null ? domain.getWaiverRequired() : Boolean.FALSE);
+        entity.setWaiverVersion(domain.getWaiverVersion() != null ? domain.getWaiverVersion() : 1);
         entity.setWeatherSensitive(domain.getWeatherSensitive() != null ? domain.getWeatherSensitive() : Boolean.FALSE);
         entity.setMinWindKmh(domain.getMinWindKmh());
         entity.setMaxWaveM(domain.getMaxWaveM());

@@ -6,18 +6,6 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.math.BigDecimal;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
-
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-
 import com.danasea.backend.modules.service.application.dtos.ServiceResult;
 import com.danasea.backend.modules.service.application.dtos.UpdateServiceCommand;
 import com.danasea.backend.modules.service.domain.exceptions.UnauthorizedServiceAccessException;
@@ -29,6 +17,15 @@ import com.danasea.backend.modules.service.domain.ports.ServiceRepositoryPort;
 import com.danasea.backend.modules.service.domain.ports.VendorPort;
 import com.danasea.backend.modules.vendor.domain.models.Vendor;
 import com.danasea.backend.modules.vendor.domain.models.VerificationStatus;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
 @DisplayName("UpdateServiceUseCase Tests")
@@ -83,7 +80,7 @@ class UpdateServiceUseCaseTest {
         saved.setName("New Name");
 
         when(vendorPort.findByUserId(userId)).thenReturn(Optional.of(vendor(vendorId)));
-        when(serviceRepository.findById(serviceId)).thenReturn(Optional.of(draft));
+        when(serviceRepository.findByIdForUpdate(serviceId)).thenReturn(Optional.of(draft));
         when(serviceRepository.save(any())).thenReturn(saved);
         when(serviceImageRepository.findByServiceId(any())).thenReturn(List.of());
 
@@ -100,7 +97,7 @@ class UpdateServiceUseCaseTest {
         Service saved = serviceWithStatus(vendorId, ServiceStatus.PENDING_REVIEW);
 
         when(vendorPort.findByUserId(userId)).thenReturn(Optional.of(vendor(vendorId)));
-        when(serviceRepository.findById(serviceId)).thenReturn(Optional.of(published));
+        when(serviceRepository.findByIdForUpdate(serviceId)).thenReturn(Optional.of(published));
         when(serviceRepository.save(any())).thenAnswer(inv -> {
             Service s = inv.getArgument(0);
             assertThat(s.getStatus()).isEqualTo(ServiceStatus.PENDING_REVIEW);
@@ -120,7 +117,7 @@ class UpdateServiceUseCaseTest {
         Service serviceOfOther = serviceWithStatus(otherVendorId, ServiceStatus.DRAFT);
 
         when(vendorPort.findByUserId(userId)).thenReturn(Optional.of(vendor(vendorId)));
-        when(serviceRepository.findById(serviceId)).thenReturn(Optional.of(serviceOfOther));
+        when(serviceRepository.findByIdForUpdate(serviceId)).thenReturn(Optional.of(serviceOfOther));
 
         assertThatThrownBy(() -> useCase.execute(cmd("Hacked Name")))
                 .isInstanceOf(UnauthorizedServiceAccessException.class);

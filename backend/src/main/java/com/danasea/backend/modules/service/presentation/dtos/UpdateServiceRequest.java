@@ -1,12 +1,12 @@
 package com.danasea.backend.modules.service.presentation.dtos;
 
-import java.math.BigDecimal;
-import java.util.UUID;
 import jakarta.validation.constraints.DecimalMax;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Size;
+import java.math.BigDecimal;
+import java.util.UUID;
 
 public record UpdateServiceRequest(
         UUID categoryId,
@@ -35,9 +35,23 @@ public record UpdateServiceRequest(
         @Size(max = 10000)
         String waiverContent,
         String waiverContentEn,
+        Boolean waiverRequired,
         Boolean weatherSensitive,
         @DecimalMin("0.0")
         BigDecimal minWindKmh,
         @DecimalMin("0.0")
         BigDecimal maxWaveM
-) {}
+) {
+    public UpdateServiceRequest(
+            UUID categoryId, String name, String nameEn, String description,
+            String descriptionEn, BigDecimal price, Integer durationMinutes,
+            Integer capacityPerSlot, String locationName, String address,
+            BigDecimal latitude, BigDecimal longitude, String waiverContent,
+            String waiverContentEn, Boolean weatherSensitive,
+            BigDecimal minWindKmh, BigDecimal maxWaveM) {
+        this(categoryId, name, nameEn, description, descriptionEn, price,
+                durationMinutes, capacityPerSlot, locationName, address,
+                latitude, longitude, waiverContent, waiverContentEn, null,
+                weatherSensitive, minWindKmh, maxWaveM);
+    }
+}

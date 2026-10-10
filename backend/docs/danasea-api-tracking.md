@@ -419,6 +419,13 @@ Hai item phải nhận hai đơn vị khác nhau và tính giá hai gói. Nhóm 
 
 ---
 
+### Safety waiver acceptance
+- `POST /api/sub-orders/{id}/waiver-acceptance`: Customer owner confirms the frozen sub-order waiver with `accepted=true`, `version`, and `language` (`VI`/`EN`). Stores JWT user, server timestamp, actual fallback language and accepted content; replay preserves the original evidence.
+- Public service/order detail exposes waiver policy, version, content and fallback metadata. Order creation freezes the policy. Payment initiation and PayPal capture reject missing required acceptance with HTTP 409 `WAIVER_ACCEPTANCE_REQUIRED` and `missingSubOrders`.
+- V35 backfills unpaid legacy sub-orders from current service policy; paid history is preserved without invented acceptance. Vendor policy updates are serialized and increment the version only for actual policy/content changes.
+
+---
+
 ## EPIC-05 · Weather & Safety Rules
 
 ### Quyết định nghiệp vụ
