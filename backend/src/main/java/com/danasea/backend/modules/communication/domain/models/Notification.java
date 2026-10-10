@@ -2,7 +2,6 @@ package com.danasea.backend.modules.communication.domain.models;
 
 import java.time.OffsetDateTime;
 import java.util.UUID;
-
 import com.danasea.backend.shared.core.domain.models.BaseDomainModel;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -20,4 +19,18 @@ public class Notification extends BaseDomainModel {
     private UUID relatedEntityId;
     private NotificationStatus status;
     private OffsetDateTime sentAt;
+    private boolean isRead;
+    private OffsetDateTime readAt;
+
+    public boolean isRead() {
+        return isRead;
+    }
+
+    public boolean getIsRead() {
+        return isRead;
+    }
+
+    public void setIsRead(boolean isRead) {
+        this.isRead = isRead;
+    }
 }

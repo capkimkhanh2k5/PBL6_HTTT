@@ -11,6 +11,7 @@
 | 5 | `EPIC04_Architecture_And_UseCases` | Flowchart | Kiến trúc phân lớp Clean Architecture tách biệt các Use Cases: Tạo đơn, Đa cổng thanh toán, Webhook, Xem trước mức hoàn tiền và Khởi tạo hoàn tiền |
 | 6 | `Admin_MultiFilter_Listing_Flow` | Sequence Diagram | Quản trị toàn sàn: Lọc đa chiều đơn hàng, giao dịch thanh toán và hoàn tiền cho Admin (`GET /api/admin/orders`, `/payments`, `/refunds`), tối ưu hóa subquery `EXISTS` và gom nhóm tránh N+1 |
 | 7 | `Automated_Payment_Reconciliation_Flow` | Sequence Diagram | Đối soát tự động định kỳ (`PaymentReconciliationJob`): Quét pending payments > 2 phút, gọi VNPay QueryDR (HMAC-SHA512) & PayPal Capture, cập nhật trạng thái đơn hàng và ghi nhận nhật ký kiểm toán `AuditLogInternalApi` |
+| 8 | `Order_Receipt_And_Pdf_Generation_Flow` | Sequence Diagram | Phát hành biên nhận đơn hàng (`GET /api/orders/{id}/receipt`): Xác thực IDOR, kiểm tra điều kiện PAID, nạp danh sách dịch vụ chi tiết và xuất PDF chuẩn tiếng Việt qua Apache PDFBox 3.0 |
 
 ---
 
@@ -199,3 +200,28 @@ Sơ đồ tổng quan toàn bộ kiến trúc phân tầng chuẩn Clean Archite
    - Khi giao dịch hết hạn thanh toán (`expiresAt < now`): `Payment` -> `FAILED` với mã lỗi `PAYMENT_EXPIRED_UNPAID`.
 4. **Lưu vết kiểm toán hệ thống (Audit Log):**
    - Tự động gọi `AuditLogInternalApi.recordAuditLog(...)` cho từng sự kiện: `RECONCILE_PAYMENT_SUCCESS`, `RECONCILE_PAYMENT_FAILED`, `RECONCILE_PAYMENT_EXPIRED`.
+
+---
+
+## 8. Order_Receipt_And_Pdf_Generation_Flow.mmd — Phát Hành Biên Nhận Đơn Hàng & Xuất PDF
+
+**Lớp xử lý chính:**
+- `com.danasea.backend.modules.order.presentation.controllers.OrderController`
+- `com.danasea.backend.modules.order.application.usecases.GetOrderReceiptUseCase`
+- `com.danasea.backend.modules.order.infrastructure.pdf.PdfReceiptGenerator`
+
+**Điểm truy cập API:** `GET /api/orders/{id}/receipt` (Yêu cầu JWT xác thực)
+- Query param: `format=json` (mặc định) hoặc `format=pdf`.
+- Header: `Accept: application/pdf` hoặc `Accept: application/json`.
+
+**Quy tắc nghiệp vụ & Bảo mật (R6):**
+1. **Kiểm tra quyền sở hữu (IDOR Guard):** Khách hàng chỉ được phép tra cứu và xuất biên nhận cho đơn hàng do chính mình sở hữu (`order.customerId == currentUserId`). Quản trị viên (`isAdmin = true`) có toàn quyền tra cứu biên nhận cho mọi đơn hàng. Vi phạm trả về `403 Forbidden` (`UnauthorizedOrderAccessException`).
+2. **Điều kiện phát hành (Paid Status Guard):** Biên nhận chỉ được cấp cho đơn hàng đã thanh toán thành công (`paymentStatus != UNPAID`). Đơn hàng chưa thanh toán (`UNPAID`) hoặc bị hủy khi chưa thanh toán sẽ bị từ chối với `400 Bad Request` (`UnpaidOrderReceiptException`).
+3. **Lắp ráp dữ liệu hóa đơn chi tiết:**
+   - Sinh mã tra cứu: `orderCode` (`ORD-XXXXXXXX`) và `receiptCode` (`REC-XXXXXXXX`).
+   - Nạp danh sách đơn con (`SubOrders`), tên dịch vụ bản địa hóa qua `LocalizedContentSelector` (Việt / Anh), số lượng, đơn giá, giảm giá voucher và thành tiền thực thu.
+   - Thông tin phương thức thanh toán (`VNPAY`, `PAYPAL`) và mốc thời gian giao dịch thực tế `paidAt`.
+4. **Bộ sinh PDF tiếng Việt chuyên dụng (Apache PDFBox 3.0.8):**
+   - Tích hợp phông chữ `NotoSans-Regular.ttf` và `NotoSans-Bold.ttf` hỗ trợ hiển thị đầy đủ dấu tiếng Việt Unicode mà không bị lỗi phông hay ký tự lạ.
+   - Cơ chế ngắt dòng tự động (Word Wrapping) và phân trang động (`LINES_PER_PAGE = 43`), hỗ trợ các đơn hàng có nhiều mục dịch vụ trải dài qua nhiều trang mà không bị tràn khung.
+   - Trả về nhị phân `application/pdf` kèm header `Content-Disposition: inline; filename="receipt-{orderId}.pdf"`.

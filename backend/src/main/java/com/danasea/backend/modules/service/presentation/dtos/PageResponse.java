@@ -11,4 +11,8 @@ public class PageResponse<T> {
     private int page;
     private int size;
     private long totalElements;
+
+    public long getTotal() {
+        return totalElements;
+    }
 }

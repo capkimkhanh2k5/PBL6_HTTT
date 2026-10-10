@@ -1,18 +1,46 @@
 package com.danasea.backend.modules.service.infrastructure.persistence.specifications;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
-
-import com.danasea.backend.modules.service.domain.models.ServiceStatus;
-import com.danasea.backend.modules.service.infrastructure.persistence.entities.ServiceJpaEntity;
-import jakarta.persistence.criteria.Predicate;
 import org.springframework.data.jpa.domain.Specification;
+import com.danasea.backend.modules.booking.domain.models.Booking;
+import com.danasea.backend.modules.order.domain.models.PaymentOrderStatus;
+import com.danasea.backend.modules.order.domain.models.SubOrderStatus;
+import com.danasea.backend.modules.order.infrastructure.persistence.entities.MasterOrderJpaEntity;
+import com.danasea.backend.modules.order.infrastructure.persistence.entities.SubOrderJpaEntity;
+import com.danasea.backend.modules.service.application.dtos.SearchServicesCriteria;
+import com.danasea.backend.modules.service.domain.models.ServiceStatus;
+import com.danasea.backend.modules.service.domain.models.SlotStatus;
+import com.danasea.backend.modules.service.infrastructure.persistence.entities.ServiceJpaEntity;
+import com.danasea.backend.modules.service.infrastructure.persistence.entities.ServiceSlotJpaEntity;
+import jakarta.persistence.criteria.Predicate;
+import jakarta.persistence.criteria.Root;
+import jakarta.persistence.criteria.Subquery;
 
 public final class ServiceSpecifications {
 
     private ServiceSpecifications() {
+    }
+
+    public static Specification<ServiceJpaEntity> orderByBookings() {
+        return (root, query, cb) -> {
+            if (query.getResultType() != Long.class && query.getResultType() != long.class) {
+                Subquery<Long> bookings = query.subquery(Long.class);
+                Root<SubOrderJpaEntity> subOrder = bookings.from(SubOrderJpaEntity.class);
+                Root<MasterOrderJpaEntity> order = bookings.from(MasterOrderJpaEntity.class);
+                bookings.select(cb.count(subOrder)).where(cb.equal(subOrder.get("serviceId"), root.get("id")),
+                        cb.equal(subOrder.get("masterOrderId"), order.get("id")),
+                        cb.equal(order.get("paymentStatus"), PaymentOrderStatus.PAID),
+                        subOrder.get("status").in(SubOrderStatus.CONFIRMED, SubOrderStatus.CHECKED_IN,
+                                SubOrderStatus.IN_PROGRESS, SubOrderStatus.COMPLETED));
+                query.orderBy(cb.desc(bookings), cb.asc(root.get("id")));
+            }
+            return cb.conjunction();
+        };
     }
 
     public static Specification<ServiceJpaEntity> isPublished() {
@@ -80,6 +108,53 @@ public final class ServiceSpecifications {
         };
     }
 
+    public static Specification<ServiceJpaEntity> hasVendor(UUID vendorId) {
+        return (root, query, cb) -> {
+            if (vendorId == null) {
+                return cb.conjunction();
+            }
+            return cb.equal(root.get("vendorId"), vendorId);
+        };
+    }
+
+    public static Specification<ServiceJpaEntity> hasMinRating(BigDecimal minRating) {
+        return (root, query, cb) -> {
+            if (minRating == null) {
+                return cb.conjunction();
+            }
+            return cb.greaterThanOrEqualTo(root.get("avgRating"), minRating);
+        };
+    }
+
+    public static Specification<ServiceJpaEntity> hasAvailableSlot(
+            LocalDate date,
+            LocalTime timeSlot,
+            Integer guests
+    ) {
+        return (root, query, cb) -> {
+            if (date == null && timeSlot == null && guests == null) {
+                return cb.conjunction();
+            }
+            Subquery<UUID> slotSubquery = query.subquery(UUID.class);
+            Root<ServiceSlotJpaEntity> slotRoot = slotSubquery.from(ServiceSlotJpaEntity.class);
+            slotSubquery.select(slotRoot.get("serviceId"));
+            List<Predicate> slotPreds = new ArrayList<>();
+            slotPreds.add(cb.equal(slotRoot.get("status"), SlotStatus.OPEN));
+            LocalDate today = LocalDate.now(Booking.VIETNAM_ZONE);
+            LocalTime now = LocalTime.now(Booking.VIETNAM_ZONE);
+            slotPreds.add(cb.or(cb.greaterThan(slotRoot.get("date"), today),
+                    cb.and(cb.equal(slotRoot.get("date"), today), cb.greaterThan(slotRoot.get("startTime"), now))));
+            if (date != null) {
+                slotPreds.add(cb.equal(slotRoot.get("date"), date));
+            }
+            if (timeSlot != null) {
+                slotPreds.add(cb.equal(slotRoot.get("startTime"), timeSlot));
+            }
+            slotSubquery.where(slotPreds.toArray(new Predicate[0]));
+            return root.get("id").in(slotSubquery);
+        };
+    }
+
     public static Specification<ServiceJpaEntity> filter(
             UUID categoryId,
             String keyword,
@@ -88,6 +163,43 @@ public final class ServiceSpecifications {
             BigDecimal lat,
             BigDecimal lng,
             Double radiusKm
+    ) {
+        return filter(categoryId, keyword, minPrice, maxPrice, lat, lng, radiusKm, null, null, null, null, null);
+    }
+
+    public static Specification<ServiceJpaEntity> filter(SearchServicesCriteria criteria) {
+        if (criteria == null) {
+            return isPublished();
+        }
+        return filter(
+                criteria.getCategoryId(),
+                criteria.getKeyword(),
+                criteria.getMinPrice(),
+                criteria.getMaxPrice(),
+                criteria.getLat(),
+                criteria.getLng(),
+                criteria.getRadiusKm(),
+                criteria.getDate(),
+                criteria.getTimeSlot(),
+                criteria.getGuests(),
+                criteria.getVendorId(),
+                criteria.getMinRating()
+        );
+    }
+
+    public static Specification<ServiceJpaEntity> filter(
+            UUID categoryId,
+            String keyword,
+            BigDecimal minPrice,
+            BigDecimal maxPrice,
+            BigDecimal lat,
+            BigDecimal lng,
+            Double radiusKm,
+            LocalDate date,
+            LocalTime timeSlot,
+            Integer guests,
+            UUID vendorId,
+            BigDecimal minRating
     ) {
         return (root, query, cb) -> {
             List<Predicate> predicates = new ArrayList<>();
@@ -135,6 +247,37 @@ public final class ServiceSpecifications {
                 Predicate latBetween = cb.between(root.get("latitude"), minLat, maxLat);
                 Predicate lngBetween = cb.between(root.get("longitude"), minLng, maxLng);
                 predicates.add(cb.and(notNull, latBetween, lngBetween));
+            }
+
+            // 6. Vendor ID
+            if (vendorId != null) {
+                predicates.add(cb.equal(root.get("vendorId"), vendorId));
+            }
+
+            // 7. Minimum Rating
+            if (minRating != null) {
+                predicates.add(cb.greaterThanOrEqualTo(root.get("avgRating"), minRating));
+            }
+
+            // 8. Slot criteria (date, timeSlot, guests)
+            if (date != null || timeSlot != null || guests != null) {
+                Subquery<UUID> slotSubquery = query.subquery(UUID.class);
+                Root<ServiceSlotJpaEntity> slotRoot = slotSubquery.from(ServiceSlotJpaEntity.class);
+                slotSubquery.select(slotRoot.get("serviceId"));
+                List<Predicate> slotPreds = new ArrayList<>();
+                slotPreds.add(cb.equal(slotRoot.get("status"), SlotStatus.OPEN));
+                LocalDate today = LocalDate.now(Booking.VIETNAM_ZONE);
+                LocalTime now = LocalTime.now(Booking.VIETNAM_ZONE);
+                slotPreds.add(cb.or(cb.greaterThan(slotRoot.get("date"), today),
+                        cb.and(cb.equal(slotRoot.get("date"), today), cb.greaterThan(slotRoot.get("startTime"), now))));
+                if (date != null) {
+                    slotPreds.add(cb.equal(slotRoot.get("date"), date));
+                }
+                if (timeSlot != null) {
+                    slotPreds.add(cb.equal(slotRoot.get("startTime"), timeSlot));
+                }
+                slotSubquery.where(slotPreds.toArray(new Predicate[0]));
+                predicates.add(root.get("id").in(slotSubquery));
             }
 
             return cb.and(predicates.toArray(new Predicate[0]));

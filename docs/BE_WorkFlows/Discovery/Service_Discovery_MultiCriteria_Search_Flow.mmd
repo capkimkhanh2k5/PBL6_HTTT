@@ -1,0 +1,51 @@
+sequenceDiagram
+    autonumber
+    actor Client as Khách hàng (Web/Mobile App)
+    participant Ctrl as CatalogController<br/>(/api/services)
+    participant UC as SearchServicesUseCase
+    participant Spec as ServiceSpecifications
+    participant SlotCalc as ServiceSlotAvailabilityCalculator
+    participant Repo as JpaServiceRepository
+    participant DB as PostgreSQL Database
+
+    Note over Client, DB: Luồng Tìm Kiếm & Khám Phá Dịch Vụ Mở Rộng (R1)
+
+    Client->>Ctrl: GET /api/services?<br/>date=2026-10-15&guests=4&vendorId=...&minRating=4.0&sortBy=price_asc
+    activate Ctrl
+
+    Note over Ctrl: Validate tham số đầu vào:<br/>• minRating ∈ [0.0, 5.0]<br/>• guests > 0, page >= 0, size ∈ [1, 100]<br/>• Chuẩn hóa date/timeSlot từ dateTime nếu có
+
+    alt Tham số không hợp lệ (guests <= 0 hoặc minRating > 5.0)
+        Ctrl-->>Client: 400 Bad Request (ResponseStatusException)
+    end
+
+    Ctrl->>UC: execute(SearchServicesCriteria)
+    activate UC
+
+    UC->>Spec: buildSpecification(criteria)
+    activate Spec
+    Note over Spec: Tạo Predicates JPA Specification:<br/>1. status = 'PUBLISHED' & isDeleted = false<br/>2. categoryId, keyword (name, description)<br/>3. minPrice <= price <= maxPrice<br/>4. vendorId (khớp chính xác đối tác)<br/>5. averageRating >= minRating<br/>6. Tọa độ địa lý (Haversine formula nếu có lat/lng/radiusKm)
+    Spec-->>UC: Specification<ServiceEntity>
+    deactivate Spec
+
+    UC->>Repo: findAll(Specification, Pageable/Sort)
+    activate Repo
+    Repo->>DB: SELECT * FROM services WHERE ... ORDER BY ...
+    DB-->>Repo: List<ServiceEntity>
+    deactivate Repo
+
+    opt Có lọc theo ngày (date) hoặc số người (guests)
+        UC->>SlotCalc: filterAndCalculateAvailability(services, date, timeSlot, guests)
+        activate SlotCalc
+        Note over SlotCalc: 1. Truy vấn service_slots theo serviceId & date<br/>2. Tính tồn trống: availableCapacity = capacity - bookedCount<br/>3. Loại bỏ dịch vụ không có slot nào thỏa mãn guests <= availableCapacity
+        SlotCalc-->>UC: List<FilteredServiceEntity>
+        deactivate SlotCalc
+    end
+
+    UC->>UC: Map sang List<ServiceSummaryResult>
+    UC-->>Ctrl: List<ServiceSummaryResult> & totalCount
+    deactivate UC
+
+    Ctrl->>Ctrl: Wrap vào PageResponse<ServiceSummaryResponse>
+    Ctrl-->>Client: 200 OK (PageResponse với danh sách dịch vụ chuẩn SEO & ảnh đại diện)
+    deactivate Ctrl

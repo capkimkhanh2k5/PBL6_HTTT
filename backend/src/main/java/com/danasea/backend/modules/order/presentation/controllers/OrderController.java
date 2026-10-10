@@ -4,11 +4,10 @@ import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.UUID;
-
-import jakarta.validation.Valid;
-
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -22,13 +21,13 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-
 import com.danasea.backend.modules.order.application.OrderPaymentService;
 import com.danasea.backend.modules.order.application.dtos.CancellationPreviewResult;
 import com.danasea.backend.modules.order.application.dtos.CreateOrderCommand;
 import com.danasea.backend.modules.order.application.dtos.GetCancellationPreviewQuery;
 import com.danasea.backend.modules.order.application.dtos.GetCustomerOrdersQuery;
 import com.danasea.backend.modules.order.application.dtos.GetOrderDetailQuery;
+import com.danasea.backend.modules.order.application.dtos.GetOrderReceiptQuery;
 import com.danasea.backend.modules.order.application.dtos.MasterOrderDetailResult;
 import com.danasea.backend.modules.order.application.dtos.OrderRefundResult;
 import com.danasea.backend.modules.order.application.dtos.RequestRefundCommand;
@@ -36,12 +35,15 @@ import com.danasea.backend.modules.order.application.usecases.CreateOrderUseCase
 import com.danasea.backend.modules.order.application.usecases.GetCancellationPreviewUseCase;
 import com.danasea.backend.modules.order.application.usecases.GetCustomerOrdersUseCase;
 import com.danasea.backend.modules.order.application.usecases.GetOrderDetailUseCase;
+import com.danasea.backend.modules.order.application.usecases.GetOrderReceiptUseCase;
 import com.danasea.backend.modules.order.application.usecases.RequestRefundUseCase;
 import com.danasea.backend.modules.order.domain.models.OrderPagedResult;
 import com.danasea.backend.modules.order.domain.models.RefundReason;
+import com.danasea.backend.modules.order.infrastructure.pdf.PdfReceiptGenerator;
 import com.danasea.backend.modules.order.presentation.dtos.CancellationPreviewResponse;
 import com.danasea.backend.modules.order.presentation.dtos.CreateOrderRequest;
 import com.danasea.backend.modules.order.presentation.dtos.OrderPageResponse;
+import com.danasea.backend.modules.order.presentation.dtos.OrderReceiptResponse;
 import com.danasea.backend.modules.order.presentation.dtos.OrderResponse;
 import com.danasea.backend.modules.order.presentation.dtos.PaymentResponse;
 import com.danasea.backend.modules.order.presentation.dtos.RefundDetailResponse;
@@ -50,7 +52,7 @@ import com.danasea.backend.modules.order.presentation.dtos.RefundResponse;
 import com.danasea.backend.modules.order.presentation.dtos.SubOrderCancellationPreview;
 import com.danasea.backend.modules.order.presentation.dtos.SubOrderResponse;
 import com.danasea.backend.security.infrastructure.SecurityUtils;
-
+import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -64,6 +66,8 @@ public class OrderController {
     private final RequestRefundUseCase requestRefundUseCase;
     private final GetCancellationPreviewUseCase getCancellationPreviewUseCase;
     private final OrderPaymentService orderPaymentService;
+    private final GetOrderReceiptUseCase getOrderReceiptUseCase;
+    private final PdfReceiptGenerator pdfReceiptGenerator;
 
     @Autowired
     public OrderController(
@@ -72,13 +76,28 @@ public class OrderController {
             GetCustomerOrdersUseCase getCustomerOrdersUseCase,
             RequestRefundUseCase requestRefundUseCase,
             GetCancellationPreviewUseCase getCancellationPreviewUseCase,
-            @Autowired(required = false) OrderPaymentService orderPaymentService) {
+            @Autowired(required = false) OrderPaymentService orderPaymentService,
+            @Autowired(required = false) GetOrderReceiptUseCase getOrderReceiptUseCase,
+            @Autowired(required = false) PdfReceiptGenerator pdfReceiptGenerator) {
         this.createOrderUseCase = createOrderUseCase;
         this.getOrderDetailUseCase = getOrderDetailUseCase;
         this.getCustomerOrdersUseCase = getCustomerOrdersUseCase;
         this.requestRefundUseCase = requestRefundUseCase;
         this.getCancellationPreviewUseCase = getCancellationPreviewUseCase;
         this.orderPaymentService = orderPaymentService;
+        this.getOrderReceiptUseCase = getOrderReceiptUseCase;
+        this.pdfReceiptGenerator = pdfReceiptGenerator != null ? pdfReceiptGenerator : new PdfReceiptGenerator();
+    }
+
+    public OrderController(
+            CreateOrderUseCase createOrderUseCase,
+            GetOrderDetailUseCase getOrderDetailUseCase,
+            GetCustomerOrdersUseCase getCustomerOrdersUseCase,
+            RequestRefundUseCase requestRefundUseCase,
+            GetCancellationPreviewUseCase getCancellationPreviewUseCase,
+            OrderPaymentService orderPaymentService) {
+        this(createOrderUseCase, getOrderDetailUseCase, getCustomerOrdersUseCase,
+                requestRefundUseCase, getCancellationPreviewUseCase, orderPaymentService, null, null);
     }
 
     public OrderController(
@@ -88,7 +107,7 @@ public class OrderController {
             RequestRefundUseCase requestRefundUseCase,
             GetCancellationPreviewUseCase getCancellationPreviewUseCase) {
         this(createOrderUseCase, getOrderDetailUseCase, getCustomerOrdersUseCase,
-                requestRefundUseCase, getCancellationPreviewUseCase, null);
+                requestRefundUseCase, getCancellationPreviewUseCase, null, null, null);
     }
 
     @PostMapping
@@ -185,6 +204,32 @@ public class OrderController {
         CancellationPreviewResult result = getCancellationPreviewUseCase.execute(
                 new GetCancellationPreviewQuery(currentUserId(), id, isAdmin()));
         return ResponseEntity.ok(toCancellationPreviewResponse(result));
+    }
+
+    @GetMapping("/{id}/receipt")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<?> getReceipt(
+            @PathVariable("id") UUID id,
+            @RequestParam(name = "format", required = false) String format,
+            @RequestHeader(name = "Accept", required = false) String acceptHeader) {
+        if (getOrderReceiptUseCase == null) {
+            throw new IllegalStateException("GetOrderReceiptUseCase is not configured.");
+        }
+        OrderReceiptResponse receipt = getOrderReceiptUseCase.execute(
+                new GetOrderReceiptQuery(id, currentUserId(), isAdmin()));
+
+        boolean isPdfRequested = "pdf".equalsIgnoreCase(format)
+                || (acceptHeader != null && acceptHeader.contains(MediaType.APPLICATION_PDF_VALUE));
+
+        if (isPdfRequested) {
+            byte[] pdfBytes = pdfReceiptGenerator.generate(receipt);
+            return ResponseEntity.ok()
+                    .contentType(MediaType.APPLICATION_PDF)
+                    .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"receipt-" + id + ".pdf\"")
+                    .body(pdfBytes);
+        }
+
+        return ResponseEntity.ok(receipt);
     }
 
     private OrderResponse toOrderResponse(MasterOrderDetailResult r) {

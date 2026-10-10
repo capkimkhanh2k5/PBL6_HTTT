@@ -3,16 +3,15 @@ package com.danasea.backend.modules.service.infrastructure.persistence.repositor
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-
-import com.danasea.backend.modules.service.domain.models.ServiceStatus;
-import com.danasea.backend.modules.service.infrastructure.persistence.entities.ServiceJpaEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+import com.danasea.backend.modules.service.domain.models.ServiceStatus;
+import com.danasea.backend.modules.service.infrastructure.persistence.entities.ServiceJpaEntity;
 import jakarta.persistence.LockModeType;
 
 @Repository
@@ -38,4 +37,6 @@ public interface JpaServiceRepository extends JpaRepository<ServiceJpaEntity, UU
     int incrementViewCount(@Param("id") UUID id, @Param("status") ServiceStatus status);
 
     Optional<ServiceJpaEntity> findByIdAndStatus(UUID id, ServiceStatus status);
+
+    long countByVendorIdAndStatus(UUID vendorId, ServiceStatus status);
 }

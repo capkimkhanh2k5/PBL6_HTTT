@@ -1,10 +1,10 @@
 # DANASEA — Master API & Test Checklist (EPIC-01 → EPIC-08)
 
-**Cập nhật:** 09/10/2026 — nhánh `implement_discount_management_api`; bổ sung quản lý voucher, snapshot tiền sau giảm giá, bảo vệ quota và đồng bộ hoàn tiền/settlement.
+**Cập nhật:** 10/10/2026 — nhánh `complete_discovery_and_notifications`; bổ sung khám phá dịch vụ, hồ sơ vendor công khai, thông báo và biên nhận; đồng bộ tồn Redis/DB, chống thông báo trùng và phân trang PDF.
 
 **Quy ước:** Với mục API, `[x]` nghĩa là endpoint đã có trong controller; không đồng nghĩa đã kiểm chứng toàn bộ nghiệp vụ hoặc tích hợp cổng thanh toán thật. Với mục Test, hạ tầng và quyết định nghiệp vụ, giữ trạng thái checklist đã ghi nhận; `[ ]` là việc còn thiếu/chưa xác nhận. Lần cập nhật này không đánh dấu các test chưa xác nhận thành đã pass.
 
-**Phạm vi kiểm kê:** 133 tổ hợp HTTP method/path từ 44 controller trong profile `test`, gồm 4 đường dẫn alias, 4 endpoint chẩn đoán ở profile `dev/test` và 1 webhook nội bộ chỉ ở `test`. Swagger/Actuator do thư viện cung cấp không nằm trong số API controller này. Các API cần hoàn thiện nghiệp vụ được ghi chú tại mục tương ứng; xem thêm [báo cáo rà soát](API-completeness-review-2026-10-06.md) và [kết quả sandbox](payment-sandbox-verification-2026-10-06.md).
+**Phạm vi kiểm kê:** 158 tổ hợp HTTP method/path từ các controller trong profile `test`, gồm 4 đường dẫn alias, 4 endpoint chẩn đoán ở profile `dev/test` và 1 webhook nội bộ chỉ ở `test`. Swagger/Actuator do thư viện cung cấp không nằm trong số API controller này. Các API cần hoàn thiện nghiệp vụ được ghi chú tại mục tương ứng; xem thêm [báo cáo rà soát](API-completeness-review-2026-10-06.md) và [kết quả sandbox](payment-sandbox-verification-2026-10-06.md).
 
 ---
 
@@ -131,6 +131,10 @@
 - [x] GET /api/admin/vendors/{id} (trả kèm toàn bộ document để Admin đọc)
 - [x] PATCH /api/admin/vendors/{id}/approve — Rule đã chốt: Admin đọc toàn bộ document trong hồ sơ, ấn Approve nếu thỏa mãn (không approve từng document riêng lẻ)
 - [x] PATCH /api/admin/vendors/{id}/reject
+
+### Vendor Public Profile — API
+- [x] GET /api/vendors/{id} (hồ sơ công khai, không trả thông tin tài khoản ngân hàng/thuế)
+- [x] GET /api/vendors/{id}/services (dịch vụ đã công khai của vendor, có phân trang và sắp xếp)
 
 ### Vendor Profile — Test
 - [x] RegisterVendorProfileUseCaseTest (5 case)
@@ -295,6 +299,7 @@ Hai item phải nhận hai đơn vị khác nhau và tính giá hai gói. Nhóm 
 ### API
 - [x] POST /api/orders (tạo Master Order từ booking, chờ thanh toán)
 - [x] GET /api/orders/{id}
+- [x] GET /api/orders/{id}/receipt (chủ đơn/admin; JSON hoặc `format=pdf`; yêu cầu bản ghi thanh toán thành công, vẫn tải được sau hoàn thành/hoàn tiền)
 - [x] GET /api/orders/{id}/cancellation-preview (xem trước số tiền hoàn theo policy)
 - [x] GET /api/orders
 - [x] GET /api/vendor/orders
@@ -518,7 +523,30 @@ Chính sách hiện tại: khách sửa review trong 7 ngày; chưa cung cấp A
 - [ ] Test: tính hoa hồng đúng, không tính trùng đơn hoàn/hủy
 
 ### Thông báo — API
-- [x] GET /api/notifications (danh sách thông báo của user hiện tại, có phân trang)
+- [x] GET /api/notifications (danh sách thông báo của user hiện tại, có phân trang, `isRead`/`readAt`)
+- [x] GET /api/notifications/unread-count (số thông báo chưa đọc của user hiện tại)
+- [x] PATCH /api/notifications/{id}/read (chỉ chủ thông báo; đánh dấu đọc idempotent)
+- [x] PATCH /api/notifications/read-all (chỉ đánh dấu thông báo của user hiện tại)
+
+### Discovery, notification & receipt — Bảo đảm nghiệp vụ
+- [x] Search lọc ca tương lai còn đủ chỗ trước phân trang/count; trừ hold Redis còn hiệu lực và kiểm tra đơn vị dùng chung/gói riêng.
+- [x] `slots` trong detail trả từng cặp slot/option: `optionId`, `pricingUnit`, `maxPaxPerPackage`, `inventoryType`, `bookable`; `availableCapacity` tính theo đơn vị của option. `capacity` là sức chứa người của ca, không phải số gói.
+- [x] `availableSlots` cũ chỉ chứa ca còn đặt được; `sortBy=bookings_desc` dựa trên số sub-order đã thanh toán đang xác nhận/đã check-in/đang diễn ra/hoàn thành.
+- [x] Luồng thanh toán/hoàn tiền thực phát event khi xác nhận SUCCESS/PROCESSED; thông báo IN_APP lưu trong cùng giao dịch PostgreSQL, rollback cùng trạng thái.
+- [x] Migration `V27__notification_read_tracking_and_idempotency.sql` bổ sung unique key; event/job đồng thời không tạo trùng thông báo.
+- [x] Nhắc lịch theo giờ Việt Nam, trong 24 giờ trước khởi hành, chỉ sub-order CONFIRMED thuộc master PAID/PARTIALLY_COMPLETED đã thanh toán; không nhắc trải nghiệm bị hủy/từ chối/hoàn thành.
+- [x] Nội dung thông báo theo locale người nhận (vi/en); gửi push sau commit.
+- [x] Biên nhận dùng snapshot tiền đã lưu; PDF phân trang, xuống dòng, nhúng font tiếng Việt và giữ đủ item/tổng tiền.
+- [ ] Push thiết bị thật: adapter hiện tại chỉ preview log trong dev và trả `false`; cần cấu hình/tích hợp nhà cung cấp push trước khi nghiệm thu delivery thực.
+
+### Discovery, notification & receipt — Test nghiệm thu
+- [x] 93 kiểm tra tập trung strict: 69 test P2, 17 hồi quy, 2 PDF, 2 migration, 2 context/inventory và 1 luồng hoàn tiền; không skip.
+- [x] Test đối chiếu toàn bộ 158 method/path controller với tracking; phát hiện API thiếu/thừa trong tài liệu.
+- [x] `clean verify`: Maven báo 2.168 test, 0 failure/error, 135 skip ở bộ service E2E cũ; 2.033 test thực thi pass. Không tính test skip là đã nghiệm thu.
+
+Availability là dữ liệu tham khảo; `POST /api/bookings/hold` vẫn quyết định tồn nguyên tử. Khi có nhiều option, khách gửi đúng `optionId` và quantity theo đơn vị option. Search `guests` là số người; nhóm tour ghép mặc định không chia sang nhiều đơn vị, còn gói riêng có thể cần nhiều gói theo giới hạn người/gói.
+
+Nếu DB dev đã áp dụng migration notification V25 cũ, cần kiểm tra chính xác bản ghi Flyway và phối hợp nâng version trước khi ghép nhánh. Không xóa/reset DB hay sửa history tự động; V27 chưa giải quyết việc hai nhánh AI/chat khác cùng sử dụng V25.
 
 ### Chính sách Hoàn/Hủy
 - [ ] Rule engine % hoàn tiền theo mốc thời gian (dùng chung logic "mất toàn bộ nếu hủy trễ" đã chốt ở EPIC-03)
