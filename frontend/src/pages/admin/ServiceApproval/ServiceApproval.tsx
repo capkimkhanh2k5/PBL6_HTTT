@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { createPortal } from 'react-dom';
 import { MOCK_ADMIN_SERVICES } from '../../../data/adminMockData';
-import type { Service, ServiceStatus } from '../../../types';
+import type { ServiceStatus } from '../../../types';
 
 type ServiceExtended = typeof MOCK_ADMIN_SERVICES[0];
 
@@ -16,7 +16,6 @@ export function ServiceApproval() {
   const [isApproveModalOpen, setIsApproveModalOpen] = useState(false);
   const [isRejectModalOpen, setIsRejectModalOpen] = useState(false);
   const [rejectReason, setRejectReason] = useState('');
-  const [previewDoc, setPreviewDoc] = useState<string | null>(null);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
   const showToast = (msg: string) => {
@@ -89,162 +88,51 @@ export function ServiceApproval() {
           </div>
         )}
 
-        {/* Top Header */}
-        <section className="mb-space-xl">
-          <div className="flex flex-col xl:flex-row xl:items-end justify-between gap-space-lg">
-            <div className="space-y-space-xs">
-              <div className="flex items-center gap-space-sm">
-                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-primary/10 text-primary font-label-sm uppercase tracking-wider font-bold">
-                  <span className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse"></span>
-                  Hải đồ Cảng vụ Đà Nẵng • Vùng nước hoạt động cấp phép
-                </span>
-                <span className="text-outline-variant font-label-sm">•</span>
-                <span className="font-label-sm text-on-surface-variant uppercase tracking-wider font-semibold">Hệ thống thẩm định thời gian thực</span>
-              </div>
-              <h1 className="font-headline-xl text-headline-xl text-on-surface tracking-tight font-black">
-                Thẩm định Dịch vụ Tour Biển &amp; Đánh giá An toàn Hải trình
-              </h1>
-              <p className="font-body-md text-body-md text-on-surface-variant max-w-4xl">
-                Kiểm định phương án tổ chức, vùng mặt nước hoạt động, cam kết miễn trừ trách nhiệm và tự động đối soát với điều kiện khí tượng thủy văn thời gian thực.
-              </p>
-            </div>
-            <div className="flex items-center gap-space-sm shrink-0">
-              <button 
-                onClick={() => showToast("Đang đồng bộ dữ liệu phao AIS bãi lặn Sơn Trà...")}
-                className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-primary text-on-primary font-label-md text-label-md shadow-sm hover:bg-primary-container transition-all font-bold"
-              >
-                <span className="material-symbols-outlined text-[18px]">sync</span>
-                <span>Đồng bộ trạm phao biển</span>
-              </button>
-            </div>
+        {/* Header */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 mb-4 border-b border-slate-200">
+          <div>
+            <h1 className="text-xl md:text-2xl font-bold text-slate-800 tracking-tight">
+              Kiểm duyệt Dịch vụ
+            </h1>
           </div>
-        </section>
-
-        {/* Telemetry Deck */}
-        <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-space-md mb-space-xl">
-          {/* Station Card */}
-          <div className="lg:col-span-2 rounded-2xl bg-surface-container-lowest p-space-lg shadow-sm relative overflow-hidden flex flex-col justify-between border border-outline-variant/20">
-            <div className="flex items-start justify-between gap-space-md relative z-10">
-              <div className="flex items-center gap-3">
-                <div className="w-11 h-11 rounded-xl bg-primary/10 text-primary flex items-center justify-center">
-                  <span className="material-symbols-outlined text-[24px]">airwave</span>
-                </div>
-                <div>
-                  <div className="flex items-center gap-2">
-                    <span className="font-headline-sm text-headline-sm text-on-surface font-bold">Trạm Hải văn Sơn Trà</span>
-                    <span className="px-2 py-0.5 rounded-full bg-surface-container-high text-on-surface-variant font-label-sm text-[10px] tracking-wider uppercase font-semibold">VITA-ST04</span>
-                  </div>
-                  <p className="font-body-sm text-body-sm text-on-surface-variant">Bộ đệm Cảng vụ: Cập nhật 5 phút trước</p>
-                </div>
-              </div>
-              <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/10 text-primary font-bold">
-                <span className="material-symbols-outlined text-[18px]">verified_user</span>
-                <span className="font-label-sm text-label-sm uppercase tracking-wide">Đủ điều kiện xuất bến</span>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-3 gap-3 my-space-md relative z-10">
-              <div className="rounded-xl bg-surface-container-low p-space-sm flex flex-col justify-between">
-                <span className="font-label-sm text-outline">Gió hải lưu</span>
-                <div className="mt-1">
-                  <span className="font-headline-md font-black text-on-surface">12</span>
-                  <span className="font-label-md text-outline"> km/h</span>
-                </div>
-                <span className="font-body-sm text-primary font-medium">Hướng Đông Nam</span>
-              </div>
-              <div className="rounded-xl bg-surface-container-low p-space-sm flex flex-col justify-between">
-                <span className="font-label-sm text-outline">Độ cao sóng</span>
-                <div className="mt-1">
-                  <span className="font-headline-md font-black text-on-surface">0.5</span>
-                  <span className="font-label-md text-outline"> mét</span>
-                </div>
-                <span className="font-body-sm text-primary font-medium">Mặt biển êm (Cấp 1)</span>
-              </div>
-              <div className="rounded-xl bg-surface-container-low p-space-sm flex flex-col justify-between">
-                <span className="font-label-sm text-outline">Lượng mưa</span>
-                <div className="mt-1">
-                  <span className="font-headline-md font-black text-on-surface">0</span>
-                  <span className="font-label-md text-outline"> mm</span>
-                </div>
-                <span className="font-body-sm text-on-surface-variant">Tầm nhìn &gt; 10 hải lý</span>
-              </div>
-            </div>
+          <div className="flex items-center gap-2 text-xs font-medium">
+            <span className="px-2.5 py-1 rounded-md bg-white border border-slate-200 text-slate-600">
+              Tổng: <strong>{totalCount}</strong>
+            </span>
+            <span className="px-2.5 py-1 rounded-md bg-primary/10 text-primary border border-primary/20">
+              Đang mở bán: <strong>{activeCount}</strong>
+            </span>
+            <span className="px-2.5 py-1 rounded-md bg-amber-50 text-amber-700 border border-amber-200">
+              Chờ duyệt: <strong>{pendingCount}</strong>
+            </span>
           </div>
-
-          {/* Total services */}
-          <div className="rounded-2xl bg-surface-container-lowest p-space-lg shadow-sm flex flex-col justify-between border border-outline-variant/20">
-            <div className="flex items-center justify-between">
-              <span className="font-label-lg text-on-surface-variant font-bold">Tổng dịch vụ biển</span>
-              <span className="w-8 h-8 rounded-lg bg-surface-container flex items-center justify-center text-primary">
-                <span className="material-symbols-outlined text-[20px]">sailing</span>
-              </span>
-            </div>
-            <div className="my-space-xs">
-              <div className="flex items-baseline gap-2">
-                <span className="font-headline-xl text-headline-xl font-black text-on-surface">{totalCount}</span>
-                <span className="font-label-md text-outline font-semibold">Tour đăng ký</span>
-              </div>
-            </div>
-            <div className="space-y-1.5">
-              <div className="flex justify-between items-center font-label-sm text-label-sm">
-                <span className="text-primary font-semibold flex items-center gap-1.5">
-                  <span className="w-2 h-2 rounded-full bg-primary"></span>
-                  {activeCount} Đang mở bán
-                </span>
-                <span className="text-on-surface font-bold">{Math.round((activeCount / (totalCount || 1)) * 100)}%</span>
-              </div>
-              <div className="w-full bg-surface-container-high rounded-full h-1.5 overflow-hidden flex">
-                <div className="bg-primary h-full" style={{ width: `${(activeCount / (totalCount || 1)) * 100}%` }}></div>
-              </div>
-            </div>
-          </div>
-
-          {/* Pending verification */}
-          <div className="rounded-2xl bg-surface-container-lowest p-space-lg shadow-sm flex flex-col justify-between border border-outline-variant/20">
-            <div className="flex items-center justify-between">
-              <span className="font-label-lg text-on-surface-variant font-bold">Tình trạng kiểm định</span>
-              <span className="w-8 h-8 rounded-lg bg-secondary-container/20 flex items-center justify-center text-secondary">
-                <span className="material-symbols-outlined text-[20px]">pending_actions</span>
-              </span>
-            </div>
-            <div className="my-space-xs">
-              <div className="flex items-baseline gap-2">
-                <span className="font-headline-xl text-headline-xl font-black text-secondary">{pendingCount}</span>
-                <span className="font-label-md text-secondary font-bold">Chờ Cảng vụ duyệt</span>
-              </div>
-            </div>
-            <div className="flex items-center justify-between pt-2 font-label-sm text-label-sm">
-              <span className="text-outline font-semibold">{rejectedCount} Bị từ chối</span>
-              <span className="px-2 py-0.5 rounded bg-secondary-container/20 text-secondary font-bold">Cần xử lý</span>
-            </div>
-          </div>
-        </section>
+        </div>
 
         {/* Filter Section */}
-        <section className="mb-space-lg rounded-2xl bg-surface-container-lowest p-space-md shadow-sm border border-outline-variant/20">
+        <section className="mb-space-lg rounded-xl bg-white p-space-md shadow-xs border border-slate-200">
           <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-space-md">
             <div className="flex items-center gap-1.5 overflow-x-auto pb-1 lg:pb-0">
               <button 
                 onClick={() => setStatusFilter('all')}
-                className={`px-3.5 py-1.5 rounded-lg font-label-md text-label-md transition-all shrink-0 ${statusFilter === 'all' ? 'bg-primary text-on-primary font-bold shadow-xs' : 'bg-surface-container-low text-on-surface-variant hover:bg-surface-container'}`}
+                className={`px-3.5 py-1.5 rounded-lg text-xs transition-all shrink-0 ${statusFilter === 'all' ? 'bg-primary text-white font-bold shadow-xs' : 'bg-white text-slate-700 hover:bg-slate-50 border border-slate-200'}`}
               >
                 Tất cả ({totalCount})
               </button>
               <button 
                 onClick={() => setStatusFilter('PENDING_APPROVAL')}
-                className={`px-3.5 py-1.5 rounded-lg font-label-md text-label-md transition-all shrink-0 ${statusFilter === 'PENDING_APPROVAL' ? 'bg-primary text-on-primary font-bold shadow-xs' : 'bg-surface-container-low text-on-surface-variant hover:bg-surface-container'}`}
+                className={`px-3.5 py-1.5 rounded-lg text-xs transition-all shrink-0 ${statusFilter === 'PENDING_APPROVAL' ? 'bg-primary text-white font-bold shadow-xs' : 'bg-white text-slate-700 hover:bg-slate-50 border border-slate-200'}`}
               >
                 Chờ duyệt ({pendingCount})
               </button>
               <button 
                 onClick={() => setStatusFilter('ACTIVE')}
-                className={`px-3.5 py-1.5 rounded-lg font-label-md text-label-md transition-all shrink-0 ${statusFilter === 'ACTIVE' ? 'bg-primary text-on-primary font-bold shadow-xs' : 'bg-surface-container-low text-on-surface-variant hover:bg-surface-container'}`}
+                className={`px-3.5 py-1.5 rounded-lg text-xs transition-all shrink-0 ${statusFilter === 'ACTIVE' ? 'bg-primary text-white font-bold shadow-xs' : 'bg-white text-slate-700 hover:bg-slate-50 border border-slate-200'}`}
               >
                 Đang mở bán ({activeCount})
               </button>
               <button 
                 onClick={() => setStatusFilter('REJECTED')}
-                className={`px-3.5 py-1.5 rounded-lg font-label-md text-label-md transition-all shrink-0 ${statusFilter === 'REJECTED' ? 'bg-primary text-on-primary font-bold shadow-xs' : 'bg-surface-container-low text-on-surface-variant hover:bg-surface-container'}`}
+                className={`px-3.5 py-1.5 rounded-lg text-xs transition-all shrink-0 ${statusFilter === 'REJECTED' ? 'bg-primary text-white font-bold shadow-xs' : 'bg-white text-slate-700 hover:bg-slate-50 border border-slate-200'}`}
               >
                 Bị từ chối ({rejectedCount})
               </button>
@@ -254,7 +142,7 @@ export function ServiceApproval() {
               <select 
                 value={categoryFilter}
                 onChange={(e) => setCategoryFilter(e.target.value)}
-                className="h-9 px-3 rounded-lg bg-surface-container-low text-on-surface font-label-md text-label-md focus:outline-none cursor-pointer border border-outline-variant/30"
+                className="h-9 px-3 rounded-lg bg-slate-50 text-slate-700 text-xs focus:outline-none focus:ring-1 focus:ring-primary cursor-pointer border border-slate-200"
               >
                 <option value="all">Tất cả danh mục biển</option>
                 <option value="cat-1">Chèo SUP &amp; Kayak</option>
@@ -269,73 +157,69 @@ export function ServiceApproval() {
 
         {/* Dual Workspace: Review Queue & Verification Panel */}
         <section className="grid grid-cols-1 lg:grid-cols-12 gap-space-lg items-start">
-          {/* Left Column (5 Cols) */}
-          <div className="lg:col-span-5 flex flex-col gap-space-md">
-            <div className="flex items-center justify-between px-1">
-              <span className="font-label-lg text-on-surface font-bold">Danh sách tour thẩm định</span>
-              <span className="font-label-sm text-outline">{filteredServices.length} tour</span>
+          {/* Left Column (5 Cols): Review Queue Console */}
+          <div className="lg:col-span-5 bg-white rounded-xl border border-slate-200 overflow-hidden shadow-xs">
+            <div className="px-4 py-3 border-b border-slate-200 bg-slate-50 flex items-center justify-between">
+              <span className="text-xs font-bold text-slate-700 uppercase tracking-wider">Hàng Đợi Thẩm Định</span>
+              <span className="text-xs text-slate-500 font-medium">{filteredServices.length} tour</span>
             </div>
 
-            {filteredServices.map(service => {
-              const isSelected = service.id === selectedService?.id;
-              return (
-                <div 
-                  key={service.id}
-                  onClick={() => setSelectedServiceId(service.id)}
-                  className={`rounded-2xl p-space-md shadow-sm transition-all cursor-pointer border border-outline-variant/20 ${
-                    isSelected ? 'bg-primary/10 ring-2 ring-primary' : 'bg-surface-container-lowest hover:bg-surface-container-low/50'
-                  }`}
-                >
-                  <div className="flex gap-space-md">
+            <div className="divide-y divide-slate-200 max-h-[820px] overflow-y-auto">
+              {filteredServices.map(service => {
+                const isSelected = service.id === selectedService?.id;
+                return (
+                  <div 
+                    key={service.id}
+                    onClick={() => setSelectedServiceId(service.id)}
+                    className={`p-3.5 transition-colors cursor-pointer flex gap-3 ${
+                      isSelected ? 'bg-primary/5 border-l-4 border-l-primary' : 'hover:bg-slate-50'
+                    }`}
+                  >
                     <img 
                       src={service.thumbnailUrl} 
                       alt={service.name}
-                      className="w-24 h-24 rounded-xl object-cover shrink-0"
+                      className="w-16 h-16 rounded-lg object-cover shrink-0 border border-slate-200"
                     />
                     <div className="flex flex-col justify-between flex-1 min-w-0">
                       <div>
-                        <div className="flex items-center justify-between gap-1 mb-1">
-                          <span className="font-label-sm text-primary uppercase font-bold tracking-wider truncate">{service.vendorName}</span>
-                          <span className={`inline-flex items-center px-2 py-0.5 rounded-full font-label-sm text-[10px] font-bold ${
+                        <div className="flex items-center justify-between gap-1 mb-0.5">
+                          <span className="text-[11px] font-bold text-primary truncate uppercase">{service.vendorName}</span>
+                          <span className={`inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold ${
                             service.status === 'ACTIVE'
-                              ? 'bg-primary/10 text-primary'
+                              ? 'bg-primary/10 text-primary border border-primary/20'
                               : service.status === 'PENDING_APPROVAL'
-                              ? 'bg-secondary-container/25 text-on-secondary-container'
-                              : 'bg-secondary-container/20 text-secondary'
+                              ? 'bg-amber-50 text-amber-700 border border-amber-200'
+                              : 'bg-red-50 text-red-700 border border-red-200'
                           }`}>
                             {service.status === 'ACTIVE' ? 'Đã duyệt' : service.status === 'PENDING_APPROVAL' ? 'Chờ duyệt' : 'Từ chối'}
                           </span>
                         </div>
-                        <h3 className="font-headline-sm text-sm font-bold text-on-surface leading-tight truncate">
+                        <h4 className="text-xs font-bold text-slate-800 leading-snug truncate">
                           {service.name}
-                        </h3>
-                        <p className="font-body-sm text-xs text-on-surface-variant truncate mt-0.5">
+                        </h4>
+                        <p className="text-[11px] text-slate-500 truncate">
                           {service.locationName} • {service.durationMinutes} phút
                         </p>
                       </div>
 
-                      <div className="flex items-center justify-between pt-2">
-                        <div>
-                          <span className="font-headline-sm text-sm font-black text-primary">
-                            {(service.price ?? service.basePrice ?? 0).toLocaleString('vi-VN')} đ
-                          </span>
-                        </div>
-                        <span className="w-6 h-6 rounded-full bg-primary text-on-primary flex items-center justify-center">
-                          <span className="material-symbols-outlined text-[14px]">arrow_forward</span>
+                      <div className="flex items-center justify-between pt-1 text-xs">
+                        <span className="font-bold text-primary">
+                          {(service.price ?? service.basePrice ?? 0).toLocaleString('vi-VN')} đ
                         </span>
+                        <span className="text-[11px] text-slate-400 font-mono">#{service.id}</span>
                       </div>
                     </div>
                   </div>
-                </div>
-              );
-            })}
+                );
+              })}
+            </div>
           </div>
 
           {/* Right Column (7 Cols) */}
           {selectedService && (
             <div className="lg:col-span-7 flex flex-col gap-space-lg">
-              <div className="rounded-3xl bg-surface-container-lowest p-space-lg shadow-sm border border-outline-variant/20">
-                <div className="flex flex-col md:flex-row md:items-start justify-between gap-space-md pb-space-md border-b border-outline-variant/20">
+              <div className="rounded-xl bg-white p-space-lg shadow-xs border border-slate-200">
+                <div className="flex flex-col md:flex-row md:items-start justify-between gap-space-md pb-space-md border-b border-slate-200">
                   <div>
                     <div className="flex items-center gap-2 mb-1.5">
                       <span className="px-2.5 py-0.5 rounded-full bg-primary/10 text-primary font-label-sm text-xs uppercase font-bold">
@@ -354,7 +238,7 @@ export function ServiceApproval() {
                   </div>
 
                   <div className="rounded-2xl bg-surface-container-low p-space-md text-right shrink-0">
-                    <span className="font-label-sm text-outline block uppercase tracking-wider text-xs">Đơn giá niêm yết</span>
+                    <span className="font-label-sm text-on-surface-variant block text-xs font-medium">Đơn giá niêm yết</span>
                     <div className="flex items-baseline justify-end gap-1 mt-0.5">
                       <span className="font-headline-xl text-headline-xl text-primary font-black">
                         {(selectedService.price ?? selectedService.basePrice ?? 0).toLocaleString('vi-VN')}
@@ -390,10 +274,10 @@ export function ServiceApproval() {
                   <div className="flex items-center justify-between mb-2">
                     <div className="flex items-center gap-2">
                       <span className="w-2.5 h-2.5 rounded-full bg-primary"></span>
-                      <span className="font-headline-sm text-sm text-on-surface font-bold">Quy chuẩn An toàn Hàng hải (safety_rule_evaluations)</span>
+                      <span className="font-headline-sm text-sm text-on-surface font-bold">Đánh giá An toàn Biển</span>
                     </div>
-                    <span className="px-2.5 py-0.5 rounded-full bg-primary/15 text-primary font-label-sm text-xs font-bold uppercase">
-                      is_safe = true (ĐẠT)
+                    <span className="px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 font-label-sm text-xs font-semibold">
+                      Đạt chuẩn an toàn
                     </span>
                   </div>
                   <div className="grid grid-cols-2 gap-3 text-xs">
@@ -410,8 +294,8 @@ export function ServiceApproval() {
 
                 {/* Waiver Form */}
                 <div className="mb-space-md">
-                  <span className="font-label-sm text-outline font-bold uppercase tracking-wider block mb-1">
-                    Cam kết Miễn trừ Trách nhiệm Cảng vụ (waiver_content)
+                  <span className="font-label-md text-on-surface font-semibold block mb-1">
+                    Cam kết Miễn trừ Trách nhiệm (waiver_content)
                   </span>
                   <div className="p-3 rounded-xl bg-surface-container-low text-xs text-on-surface-variant border-l-2 border-primary leading-relaxed">
                     {selectedService.waiverContent}
@@ -496,7 +380,6 @@ export function ServiceApproval() {
               </div>
               <div>
                 <h3 className="font-headline-md text-headline-md font-bold text-on-surface">Xác nhận Phê duyệt &amp; Xuất bản Tour</h3>
-                <span className="text-xs text-outline">Quy chuẩn an toàn Cảng vụ Hàng hải Đà Nẵng</span>
               </div>
             </div>
 

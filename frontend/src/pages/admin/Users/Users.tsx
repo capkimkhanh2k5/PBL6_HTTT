@@ -151,245 +151,156 @@ export function Users() {
           </div>
         )}
 
-        {/* Top Breadcrumb & Executive Head */}
-        <div className="flex flex-col gap-space-xs pb-space-lg">
-          <div className="flex items-center gap-space-xs text-outline font-label-md text-label-md">
-            <span className="hover:text-primary transition-colors cursor-pointer">Hệ thống Quản trị Cảng vụ</span>
-            <span className="material-symbols-outlined text-[16px]">chevron_right</span>
-            <span className="text-primary font-bold">Quản lý Người dùng &amp; Phân quyền Tài khoản</span>
+        {/* Header */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 mb-4 border-b border-slate-200">
+          <div>
+            <h1 className="text-xl md:text-2xl font-bold text-slate-800 tracking-tight">
+              Quản lý Người dùng
+            </h1>
           </div>
-          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-space-md mt-1">
-            <div>
-              <h1 className="font-headline-lg text-headline-lg text-on-surface tracking-tight font-black">
-                Danh sách Tài khoản Người dùng &amp; Phân quyền Hệ thống
-              </h1>
-              <p className="font-body-md text-body-md text-on-surface-variant max-w-3xl mt-1">
-                Quản lý hồ sơ định danh, kiểm soát phân quyền chuyên sâu (CUSTOMER, VENDOR, ADMIN), bảo mật xác thực hai lớp và giám sát các phiên hoạt động an toàn của toàn sàn DANASEA.
-              </p>
-            </div>
-            <div className="flex items-center gap-space-sm flex-shrink-0">
-              <button 
-                onClick={handleExportCSV}
-                className="inline-flex items-center gap-2 px-space-md py-2.5 rounded-xl bg-surface-container-lowest text-primary font-label-lg text-label-lg shadow-sm hover:bg-surface-container transition-all border border-outline-variant/30 font-semibold"
-              >
-                <span className="material-symbols-outlined text-[20px]">file_download</span>
-                <span>Xuất CSV</span>
-              </button>
-              <button 
-                onClick={() => setIsAddAdminOpen(true)}
-                className="inline-flex items-center gap-2 px-space-lg py-2.5 rounded-xl bg-primary text-on-primary font-label-lg text-label-lg shadow-sm hover:bg-primary-container transition-all font-bold"
-              >
-                <span className="material-symbols-outlined text-[20px]">person_add</span>
-                <span>+ Thêm Quản trị viên Cảng vụ</span>
-              </button>
-            </div>
+          <div className="flex items-center gap-2 flex-shrink-0">
+            <button 
+              onClick={handleExportCSV}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white hover:bg-slate-50 text-slate-700 text-sm font-medium border border-slate-200 shadow-xs transition-colors"
+            >
+              <span className="material-symbols-outlined text-[18px]">file_download</span>
+              <span>Xuất CSV</span>
+            </button>
+            <button 
+              onClick={() => setIsAddAdminOpen(true)}
+              className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-primary text-white text-sm font-semibold hover:bg-primary-container transition-colors shadow-xs"
+            >
+              <span className="material-symbols-outlined text-[18px]">person_add</span>
+              <span>Thêm Quản trị viên</span>
+            </button>
           </div>
         </div>
 
-        {/* Metric Statistics Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-space-md mb-space-xl">
-          {/* Stat 1: Total Users */}
-          <div className="bg-surface-container-lowest p-space-md rounded-xl shadow-sm flex flex-col justify-between relative overflow-hidden group border border-outline-variant/20">
-            <div className="flex items-center justify-between">
-              <span className="font-label-sm text-label-sm text-outline uppercase tracking-wider font-bold">Tổng tài khoản</span>
-              <div className="w-8 h-8 rounded-lg bg-surface-container flex items-center justify-center text-primary">
-                <span className="material-symbols-outlined text-[18px]">group</span>
-              </div>
+        {/* Filters Bar with Role Quick Tabs */}
+        <div className="flex flex-col gap-3 mb-4">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            {/* Quick Role Tabs */}
+            <div className="flex items-center gap-1 p-1 bg-slate-100 rounded-xl border border-slate-200 text-xs font-medium">
+              <button
+                onClick={() => setRoleFilter('all')}
+                className={`px-3 py-1.5 rounded-lg transition-colors ${roleFilter === 'all' ? 'bg-primary text-white font-bold shadow-xs' : 'text-slate-600 hover:text-slate-900'}`}
+              >
+                Tất cả ({totalCount})
+              </button>
+              <button
+                onClick={() => setRoleFilter('CUSTOMER')}
+                className={`px-3 py-1.5 rounded-lg transition-colors ${roleFilter === 'CUSTOMER' ? 'bg-primary text-white font-bold shadow-xs' : 'text-slate-600 hover:text-slate-900'}`}
+              >
+                Khách hàng ({customerCount})
+              </button>
+              <button
+                onClick={() => setRoleFilter('VENDOR')}
+                className={`px-3 py-1.5 rounded-lg transition-colors ${roleFilter === 'VENDOR' ? 'bg-primary text-white font-bold shadow-xs' : 'text-slate-600 hover:text-slate-900'}`}
+              >
+                Đối tác ({vendorCount})
+              </button>
+              <button
+                onClick={() => setRoleFilter('ADMIN')}
+                className={`px-3 py-1.5 rounded-lg transition-colors ${roleFilter === 'ADMIN' ? 'bg-primary text-white font-bold shadow-xs' : 'text-slate-600 hover:text-slate-900'}`}
+              >
+                Quản trị ({adminCount})
+              </button>
             </div>
-            <div className="mt-space-sm">
-              <span className="font-headline-xl text-headline-xl text-on-surface font-black">{totalCount}</span>
-              <div className="flex items-center gap-1.5 mt-1 text-primary text-label-sm font-label-sm font-semibold">
-                <span className="material-symbols-outlined text-[14px]">trending_up</span>
-                <span>Cập nhật thời gian thực</span>
-              </div>
+
+            <div className="flex items-center gap-2 text-xs text-slate-500">
+              <span>Bị khóa: <strong className="text-red-600">{lockedCount}</strong></span>
+              <span>•</span>
+              <span>Hiển thị: <strong>{filteredUsers.length}</strong> kết quả</span>
             </div>
-            <div className="absolute bottom-0 left-0 right-0 h-1 bg-primary/20 group-hover:bg-primary transition-colors"></div>
           </div>
 
-          {/* Stat 2: Customer */}
-          <div className="bg-surface-container-lowest p-space-md rounded-xl shadow-sm flex flex-col justify-between relative overflow-hidden group border border-outline-variant/20">
-            <div className="flex items-center justify-between">
-              <span className="font-label-sm text-label-sm text-outline uppercase tracking-wider font-bold">Khách (CUSTOMER)</span>
-              <div className="w-8 h-8 rounded-lg bg-surface-container-low flex items-center justify-center text-tertiary">
-                <span className="material-symbols-outlined text-[18px]">travel_explore</span>
-              </div>
-            </div>
-            <div className="mt-space-sm">
-              <span className="font-headline-xl text-headline-xl text-on-surface font-black">{customerCount}</span>
-              <div className="flex items-center gap-1.5 mt-1 text-on-surface-variant text-label-sm font-label-sm">
-                <span>Chiếm {Math.round((customerCount / (totalCount || 1)) * 100)}% hệ thống</span>
-              </div>
-            </div>
-            <div className="absolute bottom-0 left-0 right-0 h-1 bg-tertiary/20 group-hover:bg-tertiary transition-colors"></div>
-          </div>
-
-          {/* Stat 3: Vendor */}
-          <div className="bg-surface-container-lowest p-space-md rounded-xl shadow-sm flex flex-col justify-between relative overflow-hidden group border border-outline-variant/20">
-            <div className="flex items-center justify-between">
-              <span className="font-label-sm text-label-sm text-outline uppercase tracking-wider font-bold">Đối tác (VENDOR)</span>
-              <div className="w-8 h-8 rounded-lg bg-primary-fixed/30 flex items-center justify-center text-primary">
-                <span className="material-symbols-outlined text-[18px]">sailing</span>
-              </div>
-            </div>
-            <div className="mt-space-sm">
-              <span className="font-headline-xl text-headline-xl text-primary font-black">{vendorCount}</span>
-              <div className="flex items-center gap-1.5 mt-1 text-primary text-label-sm font-label-sm font-semibold">
-                <span className="w-1.5 h-1.5 rounded-full bg-primary-container"></span>
-                <span>Hồ sơ Cảng vụ</span>
-              </div>
-            </div>
-            <div className="absolute bottom-0 left-0 right-0 h-1 bg-primary-container group-hover:bg-primary transition-colors"></div>
-          </div>
-
-          {/* Stat 4: Admin */}
-          <div className="bg-surface-container-lowest p-space-md rounded-xl shadow-sm flex flex-col justify-between relative overflow-hidden group border border-outline-variant/20">
-            <div className="flex items-center justify-between">
-              <span className="font-label-sm text-label-sm text-outline uppercase tracking-wider font-bold">Cảng vụ (ADMIN)</span>
-              <div className="w-8 h-8 rounded-lg bg-inverse-surface flex items-center justify-center text-inverse-primary">
-                <span className="material-symbols-outlined text-[18px]">shield_person</span>
-              </div>
-            </div>
-            <div className="mt-space-sm">
-              <span className="font-headline-xl text-headline-xl text-inverse-surface font-black">{adminCount}</span>
-              <div className="flex items-center gap-1.5 mt-1 text-on-surface-variant text-label-sm font-label-sm">
-                <span>Cán bộ kiểm soát</span>
-              </div>
-            </div>
-            <div className="absolute bottom-0 left-0 right-0 h-1 bg-inverse-surface group-hover:bg-primary transition-colors"></div>
-          </div>
-
-          {/* Stat 5: Locked accounts */}
-          <div className="bg-surface-container-lowest p-space-md rounded-xl shadow-sm flex flex-col justify-between relative overflow-hidden group border border-outline-variant/20">
-            <div className="flex items-center justify-between">
-              <span className="font-label-sm text-label-sm text-secondary uppercase tracking-wider font-bold">Tài khoản bị khóa</span>
-              <div className="w-8 h-8 rounded-lg bg-secondary-container/20 flex items-center justify-center text-secondary">
-                <span className="material-symbols-outlined text-[18px]">lock_person</span>
-              </div>
-            </div>
-            <div className="mt-space-sm">
-              <span className="font-headline-xl text-headline-xl text-secondary font-black">{lockedCount}</span>
-              <div className="flex items-center gap-1 mt-1 text-secondary text-label-sm font-label-sm font-semibold">
-                <span>Cần xử lý bảo mật</span>
-              </div>
-            </div>
-            <div className="absolute bottom-0 left-0 right-0 h-1 bg-secondary group-hover:bg-secondary-container transition-colors"></div>
-          </div>
-        </div>
-
-        {/* Filters & Query Bar */}
-        <div className="bg-surface-container-lowest p-space-md rounded-2xl shadow-sm flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-space-md mb-space-lg border border-outline-variant/20">
-          <div className="flex-1 flex flex-col md:flex-row items-center gap-space-sm">
-            {/* Search Input */}
-            <div className="relative w-full md:w-80">
-              <span className="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-outline text-[20px]">search</span>
+          {/* Search and Secondary Dropdowns */}
+          <div className="flex flex-wrap items-center gap-3">
+            <div className="relative flex-1 min-w-[220px]">
+              <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-[18px]">search</span>
               <input 
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full h-11 pl-11 pr-4 rounded-xl bg-surface text-on-surface font-body-md text-body-md placeholder:text-outline focus:outline-none focus:bg-surface-container-lowest focus:ring-2 focus:ring-primary shadow-sm transition-all border border-outline-variant/30" 
-                placeholder="Họ tên, email, số điện thoại..." 
+                className="w-full h-9 pl-9 pr-3 rounded-lg bg-slate-50 text-slate-800 text-sm placeholder:text-slate-400 focus:outline-none focus:bg-white focus:ring-1 focus:ring-primary border border-slate-200" 
+                placeholder="Tìm theo tên, email, số điện thoại..." 
                 type="text"
               />
             </div>
 
-            {/* Role Filter */}
-            <div className="w-full md:w-auto">
-              <select 
-                value={roleFilter}
-                onChange={(e) => setRoleFilter(e.target.value)}
-                className="w-full h-11 px-space-md rounded-xl bg-surface text-on-surface font-label-md text-label-md focus:outline-none focus:ring-2 focus:ring-primary shadow-sm cursor-pointer border border-outline-variant/30"
-              >
-                <option value="all">Vai trò: Tất cả ({totalCount})</option>
-                <option value="CUSTOMER">Khách du lịch (CUSTOMER)</option>
-                <option value="VENDOR">Đối tác vận hành (VENDOR)</option>
-                <option value="ADMIN">Quản trị viên Cảng vụ (ADMIN)</option>
-              </select>
-            </div>
+            <select 
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value)}
+              className="h-9 px-3 rounded-lg bg-slate-50 text-slate-700 text-sm border border-slate-200 focus:outline-none focus:ring-1 focus:ring-primary cursor-pointer"
+            >
+              <option value="all">Trạng thái: Tất cả</option>
+              <option value="active">Đang hoạt động</option>
+              <option value="locked">Bị khóa</option>
+            </select>
 
-            {/* Email Verified Filter */}
-            <div className="w-full md:w-auto">
-              <select 
-                value={emailFilter}
-                onChange={(e) => setEmailFilter(e.target.value)}
-                className="w-full h-11 px-space-md rounded-xl bg-surface text-on-surface font-label-md text-label-md focus:outline-none focus:ring-2 focus:ring-primary shadow-sm cursor-pointer border border-outline-variant/30"
-              >
-                <option value="all">Email: Tất cả</option>
-                <option value="verified">Đã xác thực</option>
-                <option value="unverified">Chưa xác thực</option>
-              </select>
-            </div>
-
-            {/* Account Status Filter */}
-            <div className="w-full md:w-auto">
-              <select 
-                value={statusFilter}
-                onChange={(e) => setStatusFilter(e.target.value)}
-                className="w-full h-11 px-space-md rounded-xl bg-surface text-on-surface font-label-md text-label-md focus:outline-none focus:ring-2 focus:ring-primary shadow-sm cursor-pointer border border-outline-variant/30"
-              >
-                <option value="all">Trạng thái: Tất cả</option>
-                <option value="active">Đang hoạt động</option>
-                <option value="locked">Đang bị khóa</option>
-              </select>
-            </div>
-          </div>
-
-          {/* Quick Count Badge */}
-          <div className="flex items-center gap-2 text-on-surface-variant font-label-md text-label-md self-end lg:self-center px-space-sm">
-            <span>Đang hiển thị:</span>
-            <span className="px-2.5 py-1 bg-surface-container text-primary font-bold rounded-lg">{filteredUsers.length} / {totalCount}</span>
+            <select 
+              value={emailFilter}
+              onChange={(e) => setEmailFilter(e.target.value)}
+              className="h-9 px-3 rounded-lg bg-slate-50 text-slate-700 text-sm border border-slate-200 focus:outline-none focus:ring-1 focus:ring-primary cursor-pointer"
+            >
+              <option value="all">Email: Tất cả</option>
+              <option value="verified">Đã xác thực</option>
+              <option value="unverified">Chưa xác thực</option>
+            </select>
           </div>
         </div>
 
+
         {/* Main Users Table Section */}
-        <div className="bg-surface-container-lowest rounded-2xl shadow-sm overflow-hidden mb-space-xl border border-outline-variant/20">
+        <div className="bg-white rounded-xl shadow-xs overflow-hidden mb-space-xl border border-slate-200">
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse">
               <thead>
-                <tr className="bg-surface-container text-on-surface-variant font-label-sm text-label-sm uppercase tracking-wider">
-                  <th className="py-3.5 px-space-lg">Người dùng (Họ tên / Email)</th>
-                  <th className="py-3.5 px-space-md">Số điện thoại</th>
-                  <th className="py-3.5 px-space-md">Vai trò (Role)</th>
-                  <th className="py-3.5 px-space-md">Ngôn ngữ</th>
-                  <th className="py-3.5 px-space-md">Xác thực Email</th>
-                  <th className="py-3.5 px-space-md">Tình trạng</th>
-                  <th className="py-3.5 px-space-md">Ngày đăng ký</th>
-                  <th className="py-3.5 px-space-lg text-right">Thao tác</th>
+                <tr className="bg-slate-50 text-slate-700 text-xs font-semibold border-b border-slate-200">
+                  <th className="py-3 px-4 border-r border-slate-200 whitespace-nowrap">Người dùng (Họ tên / Email)</th>
+                  <th className="py-3 px-3 border-r border-slate-200 whitespace-nowrap">Số điện thoại</th>
+                  <th className="py-3 px-3 border-r border-slate-200 whitespace-nowrap">Vai trò (Role)</th>
+                  <th className="py-3 px-3 border-r border-slate-200 whitespace-nowrap">Ngôn ngữ</th>
+                  <th className="py-3 px-3 border-r border-slate-200 whitespace-nowrap">Xác thực Email</th>
+                  <th className="py-3 px-3 border-r border-slate-200 whitespace-nowrap">Tình trạng</th>
+                  <th className="py-3 px-3 border-r border-slate-200 whitespace-nowrap">Ngày đăng ký</th>
+                  <th className="py-3 px-4 text-center whitespace-nowrap">Thao tác</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-outline-variant/10 font-body-md text-body-md text-on-surface">
+              <tbody className="divide-y divide-slate-200 text-xs text-slate-700">
                 {filteredUsers.length === 0 ? (
                   <tr>
-                    <td colSpan={8} className="py-12 text-center text-outline">
+                    <td colSpan={8} className="py-12 text-center text-slate-400">
                       Không tìm thấy tài khoản người dùng phù hợp với bộ lọc.
                     </td>
                   </tr>
                 ) : (
                   filteredUsers.map(user => (
-                    <tr key={user.id} className="hover:bg-surface-container-low/40 transition-colors">
-                      <td className="py-space-md px-space-lg">
+                    <tr key={user.id} className="hover:bg-slate-50 transition-colors">
+                      <td className="py-3.5 px-4 border-r border-slate-200">
                         <div className="flex items-center gap-space-md">
                           <img 
                             src={user.avatarUrl || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.fullName)}&background=087F8C&color=fff`} 
                             alt={user.fullName}
-                            className="w-10 h-10 rounded-full object-cover shadow-sm flex-shrink-0 border border-outline-variant/30"
+                            className="w-10 h-10 rounded-full object-cover shadow-xs flex-shrink-0 border border-slate-200"
                           />
                           <div className="flex flex-col min-w-0">
-                            <span className="font-label-lg text-label-lg text-on-surface font-bold truncate">{user.fullName}</span>
-                            <span className="text-outline font-body-sm text-body-sm truncate">{user.email}</span>
+                            <span className="font-bold text-slate-800 truncate">{user.fullName}</span>
+                            <span className="text-slate-500 text-[11px] truncate">{user.email}</span>
                           </div>
                         </div>
                       </td>
 
-                      <td className="py-space-md px-space-md font-mono text-body-sm text-on-surface">
+                      <td className="py-3.5 px-3 font-mono text-xs text-slate-700 border-r border-slate-200 whitespace-nowrap">
                         {user.phone}
                       </td>
 
-                      <td className="py-space-md px-space-md">
-                        <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full font-label-sm text-label-sm font-bold shadow-xs ${
+                      <td className="py-3.5 px-3 border-r border-slate-200 whitespace-nowrap">
+                        <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold ${
                           user.role === 'ADMIN' 
-                            ? 'bg-inverse-surface text-inverse-primary'
+                            ? 'bg-purple-50 text-purple-700 border border-purple-200'
                             : user.role === 'VENDOR'
-                            ? 'bg-primary-container text-on-primary-container'
-                            : 'bg-surface-container text-on-surface-variant'
+                            ? 'bg-primary/10 text-primary border border-primary/20'
+                            : 'bg-slate-100 text-slate-700 border border-slate-200'
                         }`}>
                           <span className="material-symbols-outlined text-[13px]">
                             {user.role === 'ADMIN' ? 'shield_person' : user.role === 'VENDOR' ? 'sailing' : 'person'}
@@ -398,55 +309,55 @@ export function Users() {
                         </span>
                       </td>
 
-                      <td className="py-space-md px-space-md">
-                        <span className="inline-flex items-center gap-1 font-label-sm text-label-sm text-on-surface-variant uppercase font-semibold">
-                          <span className="w-2 h-2 rounded-full bg-outline-variant"></span>
+                      <td className="py-3.5 px-3 border-r border-slate-200 whitespace-nowrap">
+                        <span className="inline-flex items-center gap-1 text-[11px] text-slate-600 uppercase font-semibold">
+                          <span className="w-1.5 h-1.5 rounded-full bg-slate-400"></span>
                           {user.locale || 'VI'}
                         </span>
                       </td>
 
-                      <td className="py-space-md px-space-md">
+                      <td className="py-3.5 px-3 border-r border-slate-200 whitespace-nowrap">
                         {user.isEmailVerified ? (
-                          <span className="inline-flex items-center gap-1 text-primary font-label-sm text-label-sm font-bold bg-primary/10 px-2 py-0.5 rounded">
+                          <span className="inline-flex items-center gap-1 text-primary text-[11px] font-bold bg-primary/10 border border-primary/20 px-2 py-0.5 rounded">
                             <span className="material-symbols-outlined text-[14px]">verified</span> ĐÃ XÁC THỰC
                           </span>
                         ) : (
-                          <span className="inline-flex items-center gap-1 text-outline font-label-sm text-label-sm bg-surface-container px-2 py-0.5 rounded">
+                          <span className="inline-flex items-center gap-1 text-slate-500 text-[11px] bg-slate-100 border border-slate-200 px-2 py-0.5 rounded">
                             CHƯA XÁC THỰC
                           </span>
                         )}
                       </td>
 
-                      <td className="py-space-md px-space-md">
+                      <td className="py-3.5 px-3 border-r border-slate-200 whitespace-nowrap">
                         {user.isLocked ? (
-                          <span className="inline-flex items-center gap-1.5 font-label-sm text-label-sm text-secondary font-bold bg-secondary-container/20 px-2.5 py-1 rounded-full">
-                            <span className="w-2 h-2 rounded-full bg-secondary"></span> ĐÃ KHÓA
+                          <span className="inline-flex items-center gap-1.5 text-[11px] text-red-700 font-bold bg-red-50 border border-red-200 px-2.5 py-0.5 rounded-full">
+                            <span className="w-1.5 h-1.5 rounded-full bg-red-500"></span> ĐÃ KHÓA
                           </span>
                         ) : (
-                          <span className="inline-flex items-center gap-1.5 font-label-sm text-label-sm text-primary font-bold bg-primary/10 px-2.5 py-1 rounded-full">
-                            <span className="w-2 h-2 rounded-full bg-primary"></span> HOẠT ĐỘNG
+                          <span className="inline-flex items-center gap-1.5 text-[11px] text-primary font-bold bg-primary/10 border border-primary/20 px-2.5 py-0.5 rounded-full">
+                            <span className="w-1.5 h-1.5 rounded-full bg-primary"></span> HOẠT ĐỘNG
                           </span>
                         )}
                       </td>
 
-                      <td className="py-space-md px-space-md text-outline font-body-sm text-body-sm">
+                      <td className="py-3.5 px-3 text-slate-500 text-xs border-r border-slate-200 whitespace-nowrap">
                         {user.createdAt ? new Date(user.createdAt).toLocaleDateString('vi-VN') : '10/05/2024'}
                       </td>
 
-                      <td className="py-space-md px-space-lg text-right">
-                        <div className="flex items-center justify-end gap-2">
+                      <td className="py-3.5 px-4 text-center whitespace-nowrap">
+                        <div className="flex items-center justify-center gap-1.5">
                           <button 
                             onClick={() => { setSelectedUser(user); setIsDrawerOpen(true); }}
-                            className="px-3 py-1.5 rounded-lg bg-surface-container hover:bg-surface-container-high text-primary font-label-sm text-label-sm font-semibold transition-colors"
+                            className="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 text-xs font-semibold transition-colors"
                           >
                             Xem chi tiết
                           </button>
                           <button 
                             onClick={() => handleOpenLock(user)}
-                            className={`px-3 py-1.5 rounded-lg font-label-sm text-label-sm font-semibold transition-colors ${
+                            className={`px-2.5 py-1 rounded-lg text-xs font-semibold transition-colors border ${
                               user.isLocked 
-                                ? 'bg-primary-container text-on-primary-container hover:bg-primary hover:text-on-primary'
-                                : 'bg-secondary-container/20 hover:bg-secondary-container/40 text-secondary'
+                                ? 'bg-primary text-white border-primary hover:bg-primary-container'
+                                : 'bg-red-50 hover:bg-red-100 text-red-700 border-red-200'
                             }`}
                           >
                             {user.isLocked ? 'Mở khóa' : 'Khóa'}
@@ -667,7 +578,7 @@ export function Users() {
                   <span className="material-symbols-outlined text-[24px]">shield_person</span>
                 </div>
                 <div>
-                  <h3 className="font-headline-sm text-headline-sm text-on-surface font-bold">Thêm Quản trị viên Cảng vụ</h3>
+                  <h3 className="font-headline-sm text-headline-sm text-on-surface font-bold">Thêm Quản trị viên Hệ thống</h3>
                   <span className="font-body-sm text-body-sm text-outline">Tạo tài khoản ADMIN có quyền điều hành</span>
                 </div>
               </div>
@@ -681,7 +592,7 @@ export function Users() {
 
             <form className="space-y-space-md" onSubmit={handleCreateAdmin}>
               <div>
-                <label className="block font-label-md text-label-md text-on-surface mb-1 font-semibold">Họ và tên cán bộ</label>
+                <label className="block font-label-md text-label-md text-on-surface mb-1 font-semibold">Họ và tên</label>
                 <input 
                   value={newAdminName}
                   onChange={(e) => setNewAdminName(e.target.value)}

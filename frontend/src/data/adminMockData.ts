@@ -3,8 +3,6 @@ import type {
   Vendor,
   Service,
   Category,
-  MasterOrder,
-  SubOrder,
   Dispute,
   PayoutRequest,
   DiscountCode,

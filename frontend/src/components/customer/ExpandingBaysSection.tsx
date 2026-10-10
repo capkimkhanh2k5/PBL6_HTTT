@@ -1,0 +1,129 @@
+import React, { useRef, useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
+import { COASTAL_BAYS } from '../../data/customerHomeData';
+import type { CoastalBayData } from '../../data/customerHomeData';
+import { useLanguageStore } from '../../store/useLanguageStore';
+
+export const ExpandingBaysSection: React.FC = () => {
+  const { language, t } = useLanguageStore();
+  const sectionRef = useRef<HTMLDivElement>(null);
+  const [isRevealed, setIsRevealed] = useState(false);
+  const [hoveredBayId, setHoveredBayId] = useState<string | null>(null);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsRevealed(true);
+          observer.disconnect();
+        }
+      },
+      { threshold: 0.1 }
+    );
+    if (sectionRef.current) observer.observe(sectionRef.current);
+    return () => observer.disconnect();
+  }, []);
+
+  return (
+    <div ref={sectionRef} className="py-2">
+      {/* Section Header */}
+      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-6 pb-4 border-b border-white/20">
+        <div>
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cyan-400/20 backdrop-blur-md border border-cyan-300/40 text-cyan-200 text-xs font-bold uppercase mb-2 shadow-sm">
+            <span className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse" />
+            <span>{language === 'en' ? 'Coastal Sanctuaries' : 'Kỳ Quan Vịnh Biển Đà Nẵng'}</span>
+          </div>
+          <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.95)] drop-shadow-[0_8px_20px_rgba(0,0,0,0.7)]">
+            {t.panels.title}
+          </h2>
+          <p className="text-xs sm:text-sm text-slate-100 mt-1 max-w-xl font-medium drop-shadow-[0_1.5px_3px_rgba(0,0,0,0.95)] drop-shadow-[0_4px_12px_rgba(0,0,0,0.6)]">
+            {language === 'en'
+              ? 'Discover four pristine coastal bays, each offering unique tides, crystal visibility and untouched marine life.'
+              : 'Khám phá 4 vùng vịnh biển hoang sơ tuyệt mỹ, với điều kiện sóng êm, làn nước trong vắt và hệ sinh thái san hô phong phú.'}
+          </p>
+        </div>
+
+        <Link
+          to="/search?category=bays"
+          className="text-xs font-bold text-cyan-300 hover:text-white transition-colors hidden sm:inline-flex items-center gap-1 shrink-0 drop-shadow-md"
+        >
+          <span>{t.sections.viewAll}</span>
+          <span className="material-symbols-outlined text-[14px]">arrow_forward</span>
+        </Link>
+      </div>
+
+      {/* 4 Distinct Coastal Bay Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+        {COASTAL_BAYS.map((bay: CoastalBayData, idx: number) => {
+          const displayName = language === 'en' ? bay.nameEn : bay.name;
+          const displayTagline = language === 'en' ? bay.taglineEn : bay.tagline;
+          const displayBestTime = language === 'en' ? bay.bestTimeEn : bay.bestTime;
+          const displayTide = language === 'en' ? bay.tideConditionEn : bay.tideCondition;
+
+          const isThisHovered = hoveredBayId === bay.id;
+
+          return (
+            <div
+              key={bay.id}
+              onMouseEnter={() => setHoveredBayId(bay.id)}
+              onMouseLeave={() => setHoveredBayId(null)}
+              style={{
+                transitionDelay: isRevealed ? `${idx * 70}ms` : '0ms',
+              }}
+              className={`group relative rounded-2xl overflow-hidden bg-slate-900 transition-all duration-300 ease-out flex flex-col justify-end h-[380px] sm:h-[400px] cursor-pointer ${
+                !isRevealed
+                  ? 'opacity-0 translate-y-6'
+                  : isThisHovered
+                  ? 'scale-[1.03] -translate-y-1.5 shadow-xl ring-2 ring-cyan-400/50 z-10'
+                  : 'scale-100 translate-y-0 opacity-100 shadow-sm hover:shadow-md'
+              }`}
+            >
+              {/* Image */}
+              <img
+                src={bay.imageUrl}
+                alt={displayName}
+                className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
+                loading="lazy"
+              />
+
+              {/* Gradient Scrim */}
+              <div className="absolute inset-0 bg-gradient-to-t from-slate-950/90 via-slate-950/40 to-transparent" />
+
+              {/* Top Floating Badge */}
+              <div className="absolute top-3 left-3 right-3 flex items-center justify-between z-10">
+                <span className="px-2.5 py-1 rounded-full bg-slate-950/70 backdrop-blur-sm border border-white/20 text-cyan-300 text-[11px] font-medium flex items-center gap-1 shadow-xs">
+                  <span className="material-symbols-outlined text-[13px]">schedule</span>
+                  <span>{displayBestTime}</span>
+                </span>
+                <span className="px-2 py-0.5 rounded-full bg-white/90 backdrop-blur-sm text-slate-800 text-[10px] font-semibold shadow-xs max-w-[120px] truncate">
+                  {displayTide}
+                </span>
+              </div>
+
+              {/* Bottom Content Pod */}
+              <div className="relative p-4 z-10 text-white flex flex-col justify-end">
+                <h3 className="text-lg font-bold text-white mb-1 group-hover:text-cyan-300 transition-colors">
+                  {displayName}
+                </h3>
+
+                <p className="text-xs text-slate-200 line-clamp-2 mb-3 leading-relaxed">
+                  {displayTagline}
+                </p>
+
+                <Link
+                  to={`/search?location=${encodeURIComponent(displayName)}`}
+                  className="w-full py-2 px-3 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-white font-semibold text-xs flex items-center justify-center gap-1.5 transition-all shadow-sm"
+                >
+                  <span>{t.panels.exploreSpot}</span>
+                  <span>→</span>
+                </Link>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+};
+
+export default ExpandingBaysSection;

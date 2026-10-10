@@ -30,7 +30,6 @@ import { Payouts } from "./pages/vendor/Revenue/Payouts";
 import { Disputes as VendorDisputes } from "./pages/vendor/Disputes/Disputes";
 import { DisputeDetail as VendorDisputeDetail } from "./pages/vendor/Disputes/DisputeDetail";
 import { Profile as VendorProfile } from "./pages/vendor/Profile/Profile";
-import { Schedule as VendorSchedule } from "./pages/vendor/Schedule/Schedule";
 
 // Admin Phase 5
 import { AdminDashboard } from "./pages/admin/Dashboard/AdminDashboard";
@@ -46,10 +45,12 @@ import { Settings } from "./pages/admin/Settings/Settings";
 import { Logs } from "./pages/admin/Logs/Logs";
 import { DevRoleSwitcher } from "./components/common/DevRoleSwitcher";
 import { PageLoader } from "./components/common/PageLoader";
+import { ScrollToTop } from "./components/common/ScrollToTop";
 
 function App() {
   return (
     <BrowserRouter>
+      <ScrollToTop />
       <PageLoader />
       <DevRoleSwitcher />
       <Routes>

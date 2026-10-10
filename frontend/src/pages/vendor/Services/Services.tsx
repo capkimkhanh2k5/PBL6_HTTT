@@ -189,108 +189,47 @@ export function Services() {
     return 0; // newest default
   });
 
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(5);
+
+  const totalItems = filteredServices.length;
+  const totalPages = Math.max(1, Math.ceil(totalItems / pageSize));
+  const validCurrentPage = Math.min(currentPage, totalPages);
+  const paginatedServices = filteredServices.slice(
+    (validCurrentPage - 1) * pageSize,
+    validCurrentPage * pageSize
+  );
+
   const activeCount = services.filter(s => s.status === 'ACTIVE').length;
   const pendingCount = services.filter(s => s.status === 'PENDING_APPROVAL').length;
   const draftCount = services.filter(s => s.status === 'DRAFT').length;
   const pausedCount = services.filter(s => s.status === 'PAUSED').length;
 
   return (
-    <main className="w-full pt-16 bg-background flex-1">
-      <div className="flex flex-col w-full px-space-lg lg:px-space-xl py-space-lg space-y-space-lg">
-        {/* Header & KPI Banner Section */}
-        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-space-md">
-          <div className="flex flex-col space-y-1">
-            <div className="flex items-center gap-space-sm">
-              <span className="px-2.5 py-1 rounded-full bg-primary/10 text-primary font-label-sm text-label-sm uppercase tracking-wider font-bold">
-                Quản trị trải nghiệm biển
-              </span>
-              <span className="w-1.5 h-1.5 rounded-full bg-outline-variant"></span>
-              <span className="font-body-sm text-body-sm text-on-surface-variant flex items-center gap-1">
-                <span className="material-symbols-outlined text-primary text-[15px]">verified</span> Đối tác VITA - Cảng vụ Đà Nẵng
-              </span>
-            </div>
-            <div className="flex items-baseline gap-space-sm">
-              <h1 className="font-headline-lg text-headline-lg text-on-surface font-bold tracking-tight">
-                Quản lý dịch vụ trải nghiệm biển
-              </h1>
-              <span className="px-2.5 py-0.5 rounded-full bg-surface-container-high text-on-surface-variant font-label-md text-label-md font-semibold">
-                Tổng số: {services.length.toString().padStart(2, '0')} dịch vụ
-              </span>
-            </div>
+    <div className="w-full bg-background flex-1">
+      <div className="flex flex-col w-full px-6 py-4 space-y-3.5">
+        {/* Header */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-300">
+          <div>
+            <h1 className="text-xl md:text-2xl font-bold text-black tracking-tight">
+              Dịch vụ
+            </h1>
           </div>
-          <div className="flex items-center gap-space-sm">
+          <div className="flex items-center gap-2">
             <button 
               onClick={() => navigate('/vendor/services/new')}
-              className="inline-flex items-center gap-2 px-space-lg py-2.5 rounded-xl bg-primary text-on-primary font-label-md text-label-md font-semibold shadow-md hover:bg-primary-container transition-all shadow-[0_4px_16px_rgba(0,100,111,0.25)]" 
+              className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-primary text-on-primary text-sm font-medium hover:bg-primary-container transition-colors shadow-xs" 
               type="button"
             >
-              <span className="material-symbols-outlined text-body-lg">add_circle</span>
-              <span>+ Tạo dịch vụ mới</span>
+              <span className="material-symbols-outlined text-[18px]">add</span>
+              <span>Tạo dịch vụ mới</span>
             </button>
           </div>
         </div>
 
-        {/* Metric Snapshot Bento Row */}
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-space-md">
-          <div className="p-space-md rounded-2xl bg-surface-container-lowest shadow-sm flex items-center justify-between">
-            <div className="space-y-1">
-              <span className="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wide">Đang hoạt động</span>
-              <div className="flex items-baseline gap-space-xs">
-                <span className="font-headline-lg text-headline-lg font-bold text-on-surface">{activeCount.toString().padStart(2, '0')}</span>
-                <span className="font-body-sm text-body-sm text-primary font-semibold">tour mở bán</span>
-              </div>
-              <p className="font-body-sm text-body-sm text-on-surface-variant">Sẵn sàng nhận khách đặt cọc</p>
-            </div>
-            <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center text-primary">
-              <span className="material-symbols-outlined text-headline-md">kitesurfing</span>
-            </div>
-          </div>
-
-          <div className="p-space-md rounded-2xl bg-surface-container-lowest shadow-sm flex items-center justify-between">
-            <div className="space-y-1">
-              <span className="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wide">Chờ Cảng vụ duyệt</span>
-              <div className="flex items-baseline gap-space-xs">
-                <span className="font-headline-lg text-headline-lg font-bold text-secondary">{pendingCount.toString().padStart(2, '0')}</span>
-                <span className="font-body-sm text-body-sm text-secondary font-semibold">hồ sơ PADI</span>
-              </div>
-              <p className="font-body-sm text-body-sm text-on-surface-variant">Dự kiến phản hồi &lt; 24h</p>
-            </div>
-            <div className="w-12 h-12 rounded-2xl bg-secondary/10 flex items-center justify-center text-secondary">
-              <span className="material-symbols-outlined text-headline-md">pending_actions</span>
-            </div>
-          </div>
-
-          <div className="p-space-md rounded-2xl bg-surface-container-lowest shadow-sm flex items-center justify-between">
-            <div className="space-y-1">
-              <span className="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wide">Điểm hài lòng biển</span>
-              <div className="flex items-baseline gap-space-xs">
-                <span className="font-headline-lg text-headline-lg font-bold text-on-surface">4.92</span>
-                <span className="font-body-sm text-body-sm text-primary-container font-semibold">/ 5.0</span>
-              </div>
-              <p className="font-body-sm text-body-sm text-on-surface-variant">147 đánh giá xác thực</p>
-            </div>
-            <div className="w-12 h-12 rounded-2xl bg-primary-container/10 flex items-center justify-center text-primary-container">
-              <span className="material-symbols-outlined text-headline-md">award_star</span>
-            </div>
-          </div>
-
-          <div className="p-space-md rounded-2xl bg-surface-container-lowest shadow-sm flex items-center justify-between">
-            <div className="space-y-1">
-              <span className="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wide">Sức chứa hôm nay</span>
-              <div className="flex items-baseline gap-space-xs">
-                <span className="font-headline-lg text-headline-lg font-bold text-on-surface">36 / 48</span>
-                <span className="font-body-sm text-body-sm text-outline font-normal">chỗ</span>
-              </div>
-              <p className="font-body-sm text-body-sm text-primary font-semibold">75% công suất bãi</p>
-            </div>
-            <div className="w-12 h-12 rounded-2xl bg-surface-container-high flex items-center justify-center text-on-surface">
-              <span className="material-symbols-outlined text-headline-md">groups</span>
-            </div>
-          </div>
-        </div>
-
         {/* Primary Filter Tabs & Unified Filter Bar */}
-        <div className="flex flex-col space-y-space-md">
+        <div className="flex flex-col space-y-2.5">
           {/* Status Pill Tabs */}
           <div className="flex items-center gap-2 overflow-x-auto pb-1 text-nowrap scrollbar-none">
             <button 
@@ -374,24 +313,24 @@ export function Services() {
           </div>
 
           {/* Search & Filter Controls Panel */}
-          <div className="p-space-md rounded-2xl bg-surface-container-lowest shadow-sm flex flex-col md:flex-row items-center justify-between gap-space-md">
+          <div className="p-3 rounded-xl bg-white border border-slate-300 shadow-xs flex flex-col md:flex-row items-center justify-between gap-3">
             <div className="relative w-full md:max-w-md">
-              <span className="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-on-surface-variant text-body-lg">search</span>
+              <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-black text-body-lg">search</span>
               <input 
                 value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-10 pr-space-md py-2.5 rounded-xl bg-surface-container-low text-on-surface placeholder:text-on-surface-variant text-body-md focus:outline-none focus:ring-2 focus:ring-primary shadow-none" 
+                onChange={(e) => { setSearchQuery(e.target.value); setCurrentPage(1); }}
+                className="w-full pl-10 pr-3 py-2 rounded-lg bg-slate-50 border border-slate-300 text-black placeholder:text-slate-500 text-sm focus:outline-none focus:ring-1 focus:ring-black" 
                 placeholder="Tìm theo tên dịch vụ, mã tour, bến xuất phát..." 
                 type="text"
               />
             </div>
-            <div className="flex flex-wrap items-center gap-space-sm w-full md:w-auto">
-              <div className="flex items-center gap-2 bg-surface-container-low px-3 py-2 rounded-xl">
-                <span className="material-symbols-outlined text-primary text-[18px]">category</span>
+            <div className="flex flex-wrap items-center gap-2 w-full md:w-auto">
+              <div className="flex items-center gap-2 bg-slate-50 border border-slate-300 px-3 py-1.5 rounded-lg">
+                <span className="material-symbols-outlined text-black text-[18px]">category</span>
                 <select 
                   value={categoryFilter}
-                  onChange={(e) => setCategoryFilter(e.target.value)}
-                  className="bg-transparent text-on-surface font-label-md text-label-md focus:outline-none cursor-pointer"
+                  onChange={(e) => { setCategoryFilter(e.target.value); setCurrentPage(1); }}
+                  className="bg-transparent text-black text-xs font-semibold focus:outline-none cursor-pointer"
                 >
                   <option value="all">Tất cả danh mục</option>
                   <option value="sup">Chèo SUP &amp; Kayak</option>
@@ -400,12 +339,12 @@ export function Services() {
                   <option value="extreme">Thể thao cảm giác mạnh</option>
                 </select>
               </div>
-              <div className="flex items-center gap-2 bg-surface-container-low px-3 py-2 rounded-xl">
-                <span className="material-symbols-outlined text-on-surface-variant text-[18px]">swap_vert</span>
+              <div className="flex items-center gap-2 bg-slate-50 border border-slate-300 px-3 py-1.5 rounded-lg">
+                <span className="material-symbols-outlined text-black text-[18px]">swap_vert</span>
                 <select 
                   value={sortBy}
                   onChange={(e) => setSortBy(e.target.value)}
-                  className="bg-transparent text-on-surface font-label-md text-label-md focus:outline-none cursor-pointer"
+                  className="bg-transparent text-black text-xs font-semibold focus:outline-none cursor-pointer"
                 >
                   <option value="newest">Mới cập nhật</option>
                   <option value="price_asc">Giá tăng dần</option>
@@ -414,175 +353,170 @@ export function Services() {
                 </select>
               </div>
               <button 
-                onClick={() => { setSearchQuery(''); setCategoryFilter('all'); setSortBy('newest'); setActiveTab('ALL'); }}
-                className="p-2.5 rounded-xl bg-surface-container-low text-on-surface-variant hover:text-primary transition-colors" 
+                onClick={() => { setSearchQuery(''); setCategoryFilter('all'); setSortBy('newest'); setActiveTab('ALL'); setCurrentPage(1); }}
+                className="p-2 rounded-lg bg-slate-100 border border-slate-300 text-black hover:bg-slate-200 transition-colors" 
                 title="Làm mới bộ lọc" 
                 type="button"
               >
-                <span className="material-symbols-outlined text-body-lg">refresh</span>
+                <span className="material-symbols-outlined text-[18px]">refresh</span>
               </button>
             </div>
           </div>
         </div>
 
-        {/* Main Luxury Service Management Table */}
+        {/* Main Service Management Table */}
         <div
           key={`${activeTab}-${categoryFilter}-${sortBy}`}
-          className="w-full bg-surface-container-lowest rounded-2xl shadow-sm overflow-hidden flex flex-col animate-fade-in-up"
+          className="w-full bg-white rounded-xl border border-slate-200 shadow-xs overflow-hidden flex flex-col"
         >
-          <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse min-w-[1100px]">
+          <div className="overflow-x-auto scrollbar-thin">
+            <table className="w-full text-left border-collapse min-w-[960px]">
               <thead>
-                <tr className="bg-surface-container-low text-on-surface-variant font-label-sm text-label-sm uppercase tracking-wider">
-                  <th className="py-space-md px-space-lg font-semibold">Tên dịch vụ &amp; Trải nghiệm</th>
-                  <th className="py-space-md px-space-md font-semibold">Danh mục</th>
-                  <th className="py-space-md px-space-md font-semibold">Đơn giá áp dụng</th>
-                  <th className="py-space-md px-space-md font-semibold">Thời lượng &amp; Ca</th>
-                  <th className="py-space-md px-space-md font-semibold">Đánh giá</th>
-                  <th className="py-space-md px-space-md font-semibold">Trạng thái</th>
-                  <th className="py-space-md px-space-lg text-right font-semibold">Thao tác</th>
+                <tr className="bg-slate-50 text-black text-xs font-bold border-b border-slate-200">
+                  <th className="py-3 px-4 font-bold text-black border-r border-slate-200">Tên dịch vụ &amp; Trải nghiệm</th>
+                  <th className="py-3 px-3 font-bold text-black border-r border-slate-200">Danh mục</th>
+                  <th className="py-3 px-3 font-bold text-black text-right border-r border-slate-200">Đơn giá niêm yết</th>
+                  <th className="py-3 px-3 font-bold text-black border-r border-slate-200">Thời lượng &amp; Ca</th>
+                  <th className="py-3 px-3 font-bold text-black border-r border-slate-200">Đánh giá</th>
+                  <th className="py-3 px-3 font-bold text-black border-r border-slate-200">Trạng thái</th>
+                  <th className="py-3 px-3 text-center font-bold text-black sticky right-0 bg-slate-50 z-10 w-[130px]">
+                    Thao tác
+                  </th>
                 </tr>
               </thead>
-              <tbody className="font-body-md text-body-md text-on-surface">
-                {filteredServices.length > 0 ? (
-                  filteredServices.map(service => (
-                    <tr key={service.id} className="hover:bg-surface-container-low/40 transition-colors group">
-                      <td className="py-space-md px-space-lg">
-                        <div className="flex items-center gap-space-md">
-                          <div className="relative w-14 h-14 rounded-xl overflow-hidden flex-shrink-0 shadow-sm bg-surface-container-high">
+              <tbody className="divide-y divide-slate-200 text-sm text-black">
+                {paginatedServices.length > 0 ? (
+                  paginatedServices.map(service => (
+                    <tr key={service.id} className="hover:bg-slate-50 transition-colors group">
+                      <td className="py-3 px-4 border-r border-slate-200">
+                        <div className="flex items-center gap-3">
+                          <div className="w-12 h-12 rounded-lg overflow-hidden shrink-0 bg-slate-100 border border-slate-200">
                             <img className="w-full h-full object-cover" alt={service.name} src={service.image} />
-                            <span className="absolute bottom-1 right-1 px-1 py-0.5 rounded bg-inverse-surface/80 text-[9px] font-bold text-surface-bright">HDV</span>
                           </div>
                           <div className="flex flex-col min-w-0">
-                            <div className="flex items-center gap-2">
-                              <span 
-                                onClick={() => navigate('/vendor/services/new')}
-                                className="font-headline-sm text-headline-sm font-bold text-on-surface hover:text-primary transition-colors truncate cursor-pointer"
-                              >
-                                {service.name}
-                              </span>
-                              <span className="material-symbols-outlined text-primary text-[16px]" title="Bảo hiểm biển đã kích hoạt">verified</span>
-                            </div>
-                            <span className="font-body-sm text-body-sm text-on-surface-variant flex items-center gap-1.5 mt-0.5">
-                              <span className="material-symbols-outlined text-[14px]">pin_drop</span>
-                              {service.location}
+                            <span 
+                              onClick={() => navigate('/vendor/services/new')}
+                              className="font-bold text-sm text-black hover:underline truncate cursor-pointer"
+                            >
+                              {service.name}
+                            </span>
+                            <span className="text-xs text-black flex items-center gap-1 mt-0.5">
+                              <span className="material-symbols-outlined text-[13px] text-black">location_on</span>
+                              <span>{service.location}</span>
                             </span>
                           </div>
                         </div>
                       </td>
-                      <td className="py-space-md px-space-md">
-                        <span className="px-2.5 py-1 rounded-full bg-primary/10 text-primary font-label-sm text-label-sm font-semibold whitespace-nowrap">
+                      <td className="py-3 px-3 border-r border-slate-200">
+                        <span className="px-2 py-0.5 rounded bg-slate-100 text-black text-xs font-medium border border-slate-200 whitespace-nowrap">
                           {service.category}
                         </span>
                       </td>
-                      <td className="py-space-md px-space-md">
-                        <div className="flex flex-col">
-                          <div className="flex items-center gap-1.5">
-                            <span className="font-headline-sm text-headline-sm font-bold text-primary">
+                      <td className="py-3 px-3 text-right border-r border-slate-200">
+                        <div className="flex flex-col items-end">
+                          <div className="flex items-center gap-1">
+                            <span className="font-mono font-bold text-sm text-black">
                               {service.price.toLocaleString('vi-VN')} đ
                             </span>
                             <button 
                               onClick={() => { setEditingService(service); setEditPriceInput(service.price.toString()); }}
-                              className="text-on-surface-variant hover:text-primary transition-colors"
+                              className="text-black hover:text-slate-700 transition-colors cursor-pointer"
                               title="Sửa giá nhanh"
+                              type="button"
                             >
-                              <span className="material-symbols-outlined text-[16px]">edit</span>
+                              <span className="material-symbols-outlined text-[15px]">edit</span>
                             </button>
                           </div>
-                          <span className="font-label-sm text-label-sm text-on-surface-variant">/ người (trọn gói)</span>
+                          <span className="text-[11px] text-black">/ người</span>
                         </div>
                       </td>
-                      <td className="py-space-md px-space-md">
-                        <div className="flex flex-col space-y-1">
-                          <span className="font-label-md text-label-md font-semibold text-on-surface flex items-center gap-1">
-                            <span className="material-symbols-outlined text-[16px] text-tertiary">schedule</span>
-                            {service.duration >= 60 ? `${Math.floor(service.duration / 60)} giờ` : `${service.duration} phút`}
+                      <td className="py-3 px-3 border-r border-slate-200">
+                        <div className="flex flex-col text-xs space-y-0.5 text-black">
+                          <span className="font-medium text-black flex items-center gap-1">
+                            <span className="material-symbols-outlined text-[14px] text-black">schedule</span>
+                            <span>{service.duration >= 60 ? `${Math.floor(service.duration / 60)} giờ` : `${service.duration} phút`}</span>
                           </span>
-                          <span className="font-body-sm text-body-sm text-on-surface-variant flex items-center gap-1">
-                            <span className="material-symbols-outlined text-[15px] text-outline">group</span>
-                            {service.capacityPerSlot} người / ca
+                          <span className="text-[11px] text-black flex items-center gap-1">
+                            <span className="material-symbols-outlined text-[14px] text-black">group</span>
+                            <span>{service.capacityPerSlot} người / ca</span>
                           </span>
                         </div>
                       </td>
-                      <td className="py-space-md px-space-md">
+                      <td className="py-3 px-3 border-r border-slate-200">
                         {service.rating > 0 ? (
-                          <div className="flex items-center gap-1">
-                            <span className="material-symbols-outlined text-amber-500 text-[18px]" style={{ fontVariationSettings: "'FILL' 1" }}>star</span>
-                            <span className="font-label-md text-label-md font-bold text-on-surface">{service.rating}</span>
-                            <span className="font-body-sm text-body-sm text-on-surface-variant">({service.reviewCount})</span>
+                          <div className="flex items-center gap-1 text-xs">
+                            <span className="material-symbols-outlined text-amber-500 text-[16px]" style={{ fontVariationSettings: "'FILL' 1" }}>star</span>
+                            <span className="font-bold text-black">{service.rating}</span>
+                            <span className="text-black">({service.reviewCount})</span>
                           </div>
                         ) : (
-                          <span className="text-on-surface-variant text-label-sm italic">Chưa có đánh giá</span>
+                          <span className="text-black text-xs italic">Chưa có đánh giá</span>
                         )}
                       </td>
-                      <td className="py-space-md px-space-md">
+                      <td className="py-3 px-3 border-r border-slate-200">
                         {service.status === 'ACTIVE' && (
-                          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 font-label-sm text-label-sm font-bold tracking-wide">
-                            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                            ĐANG HOẠT ĐỘNG
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-semibold bg-emerald-50 text-emerald-800 border border-emerald-300">
+                            <span className="w-1.5 h-1.5 rounded-full bg-emerald-600"></span>
+                            <span>Đang hoạt động</span>
                           </span>
                         )}
                         {service.status === 'PENDING_APPROVAL' && (
-                          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-50 text-amber-700 font-label-sm text-label-sm font-bold tracking-wide">
-                            <span className="w-2 h-2 rounded-full bg-amber-500"></span>
-                            CHỜ DUYỆT CẢNG VỤ
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-semibold bg-amber-50 text-amber-800 border border-amber-300">
+                            <span className="w-1.5 h-1.5 rounded-full bg-amber-600"></span>
+                            <span>Chờ duyệt</span>
                           </span>
                         )}
                         {service.status === 'DRAFT' && (
-                          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-surface-container text-on-surface-variant font-label-sm text-label-sm font-bold">
-                            <span className="w-2 h-2 rounded-full bg-outline"></span>
-                            BẢN NHÁP
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-medium bg-slate-100 text-slate-800 border border-slate-200">
+                            <span className="w-1.5 h-1.5 rounded-full bg-slate-500"></span>
+                            <span>Bản nháp</span>
                           </span>
                         )}
                         {service.status === 'PAUSED' && (
-                          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-red-50 text-red-600 font-label-sm text-label-sm font-bold">
-                            <span className="w-2 h-2 rounded-full bg-red-500"></span>
-                            ĐÃ TẠM NGƯNG
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-medium bg-red-50 text-red-800 border border-red-300">
+                            <span className="w-1.5 h-1.5 rounded-full bg-red-600"></span>
+                            <span>Đã tạm ngưng</span>
                           </span>
                         )}
                       </td>
-                      <td className="py-space-md px-space-lg text-right">
-                        <div className="flex items-center justify-end gap-1.5">
+                      <td className="py-3 px-3 text-center sticky right-0 bg-white group-hover:bg-slate-50 z-10 transition-colors w-[130px]">
+                        <div className="flex items-center justify-center gap-1.5">
                           <button 
                             onClick={() => navigate('/vendor/services/new')}
-                            className="p-2 rounded-lg text-on-surface-variant hover:bg-surface-container hover:text-primary transition-all" 
+                            className="p-1.5 rounded text-black hover:bg-slate-200 transition-colors" 
                             title="Chỉnh sửa dịch vụ" 
                             type="button"
                           >
-                            <span className="material-symbols-outlined text-body-lg">edit</span>
+                            <span className="material-symbols-outlined text-[18px]">edit</span>
                           </button>
                           
                           <button 
                             onClick={() => handleToggleStatus(service.id)}
-                            className={`p-2 rounded-lg transition-all ${
-                              service.status === 'ACTIVE' 
-                                ? 'text-on-surface-variant hover:bg-secondary/10 hover:text-secondary' 
-                                : 'text-emerald-600 hover:bg-emerald-50'
-                            }`} 
+                            className="p-1.5 rounded text-black hover:bg-slate-200 transition-colors" 
                             title={service.status === 'ACTIVE' ? 'Tạm ngưng nhận khách' : 'Mở bán lại'} 
                             type="button"
                           >
-                            <span className="material-symbols-outlined text-body-lg">
+                            <span className="material-symbols-outlined text-[18px]">
                               {service.status === 'ACTIVE' ? 'pause_circle' : 'play_circle'}
                             </span>
                           </button>
 
                           <button 
                             onClick={() => navigate('/vendor/schedule')}
-                            className="px-2.5 py-1.5 rounded-lg bg-surface-container text-primary font-label-sm text-label-sm font-semibold hover:bg-primary/10 transition-all flex items-center gap-1" 
+                            className="p-1.5 rounded text-black hover:bg-slate-200 transition-colors" 
+                            title="Lịch ca & Sức chứa"
                             type="button"
                           >
-                            <span className="material-symbols-outlined text-[15px]">calendar_month</span>
-                            <span>Lịch ca</span>
+                            <span className="material-symbols-outlined text-[18px]">calendar_month</span>
                           </button>
 
                           <button 
                             onClick={() => handleDeleteService(service.id, service.name)}
-                            className="p-2 rounded-lg text-on-surface-variant hover:bg-error/10 hover:text-error transition-all" 
+                            className="p-1.5 rounded text-black hover:text-red-600 hover:bg-red-50 transition-colors" 
                             title="Xóa dịch vụ" 
                             type="button"
                           >
-                            <span className="material-symbols-outlined text-body-lg">delete</span>
+                            <span className="material-symbols-outlined text-[18px]">delete</span>
                           </button>
                         </div>
                       </td>
@@ -590,14 +524,92 @@ export function Services() {
                   ))
                 ) : (
                   <tr>
-                    <td colSpan={7} className="py-12 text-center text-on-surface-variant">
-                      <span className="material-symbols-outlined text-4xl mb-2 text-outline">search_off</span>
-                      <p className="font-body-md">Không tìm thấy dịch vụ nào phù hợp với bộ lọc hiện tại.</p>
+                    <td colSpan={7} className="py-12 text-center text-black">
+                      <span className="material-symbols-outlined text-4xl mb-2 text-slate-400">search_off</span>
+                      <p className="font-body-md text-black">Không tìm thấy dịch vụ nào phù hợp với bộ lọc hiện tại.</p>
                     </td>
                   </tr>
                 )}
               </tbody>
             </table>
+          </div>
+
+          {/* Minimal Clean Pagination Bar */}
+          <div className="px-4 py-2 border-t border-slate-200 bg-slate-50 flex items-center justify-between text-xs select-none">
+            {/* Page Size Selector */}
+            <div className="flex items-center gap-2">
+              <span className="text-black font-semibold">Số dòng:</span>
+              <select
+                value={pageSize}
+                onChange={(e) => {
+                  setPageSize(Number(e.target.value));
+                  setCurrentPage(1);
+                }}
+                className="px-2 py-1 rounded bg-white border border-slate-200 text-xs font-semibold text-black cursor-pointer focus:outline-none"
+              >
+                <option value={5}>5</option>
+                <option value={10}>10</option>
+                <option value={20}>20</option>
+              </select>
+            </div>
+
+            {/* Pagination Navigation */}
+            <div className="flex items-center gap-1">
+              <button
+                onClick={() => setCurrentPage(1)}
+                disabled={validCurrentPage === 1}
+                className="p-1 rounded border border-slate-200 text-black hover:bg-slate-100 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                title="Trang đầu"
+                type="button"
+              >
+                <span className="material-symbols-outlined text-[16px]">first_page</span>
+              </button>
+              <button
+                onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+                disabled={validCurrentPage === 1}
+                className="p-1 rounded border border-slate-200 text-black hover:bg-slate-100 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                title="Trang trước"
+                type="button"
+              >
+                <span className="material-symbols-outlined text-[16px]">chevron_left</span>
+              </button>
+
+              <div className="flex items-center gap-1 px-1">
+                {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                  <button
+                    key={page}
+                    onClick={() => setCurrentPage(page)}
+                    className={`min-w-[28px] h-7 px-2 rounded text-xs font-bold transition-colors ${
+                      page === validCurrentPage
+                        ? "bg-primary text-white"
+                        : "border border-slate-200 text-black hover:bg-slate-100"
+                    }`}
+                    type="button"
+                  >
+                    {page}
+                  </button>
+                ))}
+              </div>
+
+              <button
+                onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+                disabled={validCurrentPage === totalPages}
+                className="p-1 rounded border border-slate-300 text-black hover:bg-slate-200 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                title="Trang sau"
+                type="button"
+              >
+                <span className="material-symbols-outlined text-[16px]">chevron_right</span>
+              </button>
+              <button
+                onClick={() => setCurrentPage(totalPages)}
+                disabled={validCurrentPage === totalPages}
+                className="p-1 rounded border border-slate-300 text-black hover:bg-slate-200 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                title="Trang cuối"
+                type="button"
+              >
+                <span className="material-symbols-outlined text-[16px]">last_page</span>
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -630,7 +642,7 @@ export function Services() {
                 className="w-full px-space-md py-2.5 rounded-xl bg-surface-container-low text-on-surface font-headline-sm font-bold text-primary focus:outline-none focus:ring-2 focus:ring-primary shadow-sm"
                 placeholder="Ví dụ: 300000"
               />
-              <span className="text-[11px] text-on-surface-variant italic">* Giá trọn gói đã bao gồm bảo hiểm cứu hộ biển và áo phao quy chuẩn VITA.</span>
+              <span className="text-[11px] text-on-surface-variant italic">* Giá trọn gói đã bao gồm bảo hiểm cứu hộ biển và áo phao.</span>
             </div>
             <div className="flex justify-end gap-2 pt-2 border-t border-outline-variant/30">
               <button 
@@ -658,6 +670,6 @@ export function Services() {
           <span className="font-label-md text-label-md">{toastMessage}</span>
         </div>
       )}
-    </main>
+    </div>
   );
 }

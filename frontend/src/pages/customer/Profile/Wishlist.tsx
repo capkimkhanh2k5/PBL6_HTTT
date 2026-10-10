@@ -39,7 +39,7 @@ export function Wishlist() {
     <main className="w-full pt-20 bg-surface flex-1">
       <div className="flex flex-col w-full">
         {/* Ocean Condition & Tide Tracker Bar */}
-        <section className="max-w-[1280px] mx-auto w-full px-margin-mobile md:px-margin-desktop pt-space-lg pb-space-xs">
+        <section className="max-w-[1440px] mx-auto w-full px-4 sm:px-8 lg:px-12 pt-space-lg pb-space-xs">
           <div className="bg-surface-container-low rounded-2xl p-space-sm md:p-space-md flex flex-wrap items-center justify-between gap-space-sm shadow-sm">
             <div className="flex items-center gap-space-sm">
               <div className="w-10 h-10 rounded-full bg-secondary/10 flex items-center justify-center text-secondary">
@@ -63,7 +63,7 @@ export function Wishlist() {
         </section>
 
         {/* Main Content Container */}
-        <section className="max-w-[1280px] mx-auto w-full px-margin-mobile md:px-margin-desktop py-space-xl">
+        <section className="max-w-[1440px] mx-auto w-full px-4 sm:px-8 lg:px-12 py-space-xl">
           {/* Header Section */}
           <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-space-lg mb-space-2xl">
             <div className="max-w-2xl flex flex-col gap-space-xs">

@@ -98,12 +98,10 @@ const INITIAL_REVIEWS: ReviewItem[] = [
     serviceName: 'Lướt ván phản lực Jetsurf Sơn Trà',
     slotTime: 'Ca 15:30 - 16:30 • 14/10/2024',
     rating: 5,
-    date: '14/10/2024 lúc 18:00',
-    criteria: { safety: 5.0, guide: 5.0, equipment: 5.0, scenery: 4.9 },
-    content: 'Cảm giác lướt ván trên mặt biển phê không tưởng! Động cơ khỏe, huấn luyện viên 1 kèm 1 an tâm tuyệt đối.',
-    photos: [
-      'https://images.unsplash.com/photo-1559827291-72ee739d0d9a?auto=format&fit=crop&w=400&q=80'
-    ]
+    date: '14/10/2024 lúc 17:00',
+    criteria: { safety: 5.0, guide: 5.0, equipment: 5.0, scenery: 5.0 },
+    content: 'Cực kỳ phấn khích! Động cơ mạnh, được hướng dẫn thao tác chi tiết từng bước. Đội cứu hộ luôn túc trực ca nô bên cạnh nên yên tâm 100%. Nhất định sẽ quay lại!',
+    photos: []
   }
 ];
 
@@ -113,46 +111,34 @@ const INITIAL_CONVERSATIONS: Conversation[] = [
     customerName: 'Nguyễn Văn An',
     avatarText: 'NA',
     orderCode: '#SUB-89412-01',
-    serviceName: 'Chèo SUP Bình Minh Mỹ Khê',
-    lastMessage: 'Anh có gửi lại file ảnh flycam gốc qua link Drive không shop?',
+    serviceName: 'Chèo SUP đón bình minh',
+    lastMessage: 'Dạ vâng, sáng mai nhóm mình có mặt đúng 05:15 tại Bến 02 nhé!',
     time: '10:42',
     unread: true,
     messages: [
       {
-        id: 'M1',
+        id: 'M1-1',
         sender: 'customer',
         senderName: 'Nguyễn Văn An',
         avatarText: 'NA',
-        time: '08:15',
-        text: 'Chào Danang Ocean Club! Mình và nhóm vừa kết thúc tour chèo SUP ngắm bình minh lúc 7h sáng nay tại bãi Mỹ Khê. Trải nghiệm rất tuyệt vời ạ!'
+        time: '10:30',
+        text: 'Chào bạn, cho mình hỏi bên mình có tủ gửi đồ tư trang và điện thoại an toàn không?'
       },
       {
-        id: 'M2',
+        id: 'M1-2',
         sender: 'vendor',
         senderName: 'Danang Ocean Club',
         avatarText: 'DOC',
-        time: '08:22',
-        text: 'Dạ Danang Ocean Club chào anh An! Rất vui vì anh và cả nhóm đã có buổi sáng đón nắng trên biển trọn vẹn ạ. Hướng dẫn viên Huy vừa chuyển toàn bộ file ảnh flycam cho bộ phận kỹ thuật để gửi đến anh ngay đây ạ.'
+        time: '10:35',
+        text: 'Dạ chào anh An! CLB có sẵn tủ locker khóa số miễn phí và túi chống nước chuyên dụng IPX8 tặng kèm để du khách mang theo chụp hình ạ.'
       },
       {
-        id: 'M3',
-        sender: 'vendor',
-        senderName: 'Danang Ocean Club',
-        avatarText: 'DOC',
-        time: '08:25',
-        text: 'Anh tải bộ ảnh lưu niệm theo đường link Drive tốc độ cao này nhé!',
-        attachment: {
-          name: 'DANASEA_MYSUP_1710.zip',
-          details: '32 ảnh RAW + 4 Clip Flycam 4K (412 MB)'
-        }
-      },
-      {
-        id: 'M4',
+        id: 'M1-3',
         sender: 'customer',
         senderName: 'Nguyễn Văn An',
         avatarText: 'NA',
         time: '10:42',
-        text: 'Anh có gửi lại file ảnh flycam gốc qua link Drive không shop? Vì mấy tấm chụp góc ngược sáng bình minh đẹp quá nhóm muốn in canvas kỷ niệm!'
+        text: 'Dạ vâng, sáng mai nhóm mình có mặt đúng 05:15 tại Bến 02 nhé!'
       }
     ]
   },
@@ -160,8 +146,8 @@ const INITIAL_CONVERSATIONS: Conversation[] = [
     id: 2,
     customerName: 'Lê Hoàng Long',
     avatarText: 'LH',
-    orderCode: '#SUB-89210-04',
-    serviceName: 'Lướt ván phản lực E-Foil',
+    orderCode: '#SUB-89415-03',
+    serviceName: 'Lặn ngắm san hô Bãi Bụt',
     lastMessage: 'Cảm ơn câu lạc bộ đã gửi hướng dẫn chuẩn bị trang phục lặn.',
     time: '09:15',
     unread: false,
@@ -269,12 +255,12 @@ export function VendorReviews() {
         }
         return c;
       }));
-    }, 1500);
+    }, 2000);
   };
 
-  // Submit review reply
+  // Submit reply
   const handleSaveReply = () => {
-    if (!replyingReviewId || !replyText.trim()) return;
+    if (!replyText.trim() || !replyingReviewId) return;
 
     setReviews(prev => prev.map(r => {
       if (r.id === replyingReviewId) {
@@ -282,7 +268,7 @@ export function VendorReviews() {
           ...r,
           reply: {
             author: 'Danang Ocean Club',
-            time: new Date().toLocaleDateString('vi-VN') + ' lúc ' + new Date().toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' }),
+            time: new Date().toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' }) + ' ' + new Date().toLocaleDateString('vi-VN'),
             text: replyText.trim()
           }
         };
@@ -328,460 +314,392 @@ export function VendorReviews() {
   });
 
   return (
-    <main className="w-full pt-16 bg-surface min-h-screen">
-      <div className="flex flex-col w-full">
-        {/* Breadcrumb & Control Header */}
-        <div className="px-space-xl pt-space-lg pb-space-md flex flex-col gap-space-xs">
-          <div className="flex items-center gap-space-xs text-on-surface-variant font-label-md text-label-md">
-            <span>Quản trị Bán hàng</span>
-            <span className="material-symbols-outlined text-[14px]">chevron_right</span>
-            <span className="text-primary font-semibold">Tương tác Khách hàng &amp; Đánh giá chất lượng</span>
-          </div>
+    <div className="w-full px-6 py-4 space-y-3.5 bg-background min-h-screen">
+      {/* Toast Alert */}
+      {toastMessage && (
+        <div className="fixed bottom-6 right-6 z-50 bg-black text-white px-5 py-3 rounded-lg shadow-xl flex items-center gap-3 border border-slate-600 animate-bounce">
+          <span className="material-symbols-outlined text-emerald-400 text-[20px]">check_circle</span>
+          <span className="text-xs font-medium">{toastMessage}</span>
+        </div>
+      )}
 
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-space-md mt-space-xs">
-            <div className="flex flex-col">
-              <h1 className="font-headline-lg text-headline-lg font-bold text-on-surface tracking-tight">
-                Hộp thư Trao đổi &amp; Đánh giá Dịch vụ
-              </h1>
-              <p className="font-body-md text-body-md text-on-surface-variant mt-1">
-                Trung tâm phản hồi nhanh cho du khách, giải đáp lịch trình và xây dựng uy tín câu lạc bộ qua đánh giá thực tế.
-              </p>
-            </div>
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <h1 className="text-xl md:text-2xl font-bold text-black tracking-tight">
+          Đánh giá &amp; Phản hồi
+        </h1>
 
-            <div className="flex items-center gap-space-sm self-start md:self-auto">
-              <div className="flex items-center gap-2 px-space-md py-2 rounded-xl bg-surface-container-low shadow-sm">
-                <span className="material-symbols-outlined text-primary text-[18px]">verified_user</span>
-                <span className="font-label-sm text-label-sm text-on-surface-variant">Quy chuẩn VITA 100% Minh bạch</span>
-              </div>
-              <button 
-                onClick={handleExportCSAT}
-                className="flex items-center gap-2 px-space-md py-2 rounded-xl bg-primary text-on-primary font-label-md text-label-md shadow-sm hover:bg-primary-container transition-all" 
-                type="button"
-              >
-                <span className="material-symbols-outlined text-[18px]">file_download</span>
-                <span>Xuất báo cáo CSAT</span>
-              </button>
-            </div>
-          </div>
-
-          {/* Navigation Switch Tabs */}
-          <div className="flex items-center gap-space-sm mt-space-md">
+        <div className="flex items-center gap-2">
+          {/* View Mode Tabs */}
+          <div className="flex items-center rounded-lg border border-slate-200 bg-white p-0.5">
             <button 
               onClick={() => setActiveTab('reviews')}
-              className={`flex items-center gap-2 px-space-lg py-3 rounded-xl font-label-lg text-label-lg transition-all ${
+              className={`px-3 py-1.5 rounded-md text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
                 activeTab === 'reviews' 
-                  ? 'bg-primary-container text-on-primary-container font-semibold shadow-sm' 
-                  : 'text-on-surface-variant hover:bg-surface-container-high'
+                  ? 'bg-primary text-white' 
+                  : 'text-black hover:bg-slate-100'
               }`} 
               type="button"
             >
-              <span className="material-symbols-outlined text-[20px]">hotel_class</span>
-              <span>Đánh giá &amp; Phản hồi dịch vụ</span>
-              <span className="px-2 py-0.5 rounded-full bg-surface-container-lowest text-primary font-label-sm text-label-sm font-bold">
-                {reviews.length}
-              </span>
+              <span className="material-symbols-outlined text-[16px]">hotel_class</span>
+              <span>Đánh giá ({reviews.length})</span>
             </button>
 
             <button 
               onClick={() => setActiveTab('chat')}
-              className={`flex items-center gap-2 px-space-lg py-3 rounded-xl font-label-lg text-label-lg transition-all ${
+              className={`px-3 py-1.5 rounded-md text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
                 activeTab === 'chat' 
-                  ? 'bg-primary-container text-on-primary-container font-semibold shadow-sm' 
-                  : 'text-on-surface-variant hover:bg-surface-container-high'
+                  ? 'bg-primary text-white' 
+                  : 'text-black hover:bg-slate-100'
               }`} 
               type="button"
             >
-              <span className="material-symbols-outlined text-[20px]">forum</span>
-              <span>Tin nhắn trao đổi (Inbox)</span>
-              <span className="px-2 py-0.5 rounded-full bg-secondary-fixed text-on-secondary-fixed font-label-sm text-label-sm font-bold">
-                1 mới
-              </span>
+              <span className="material-symbols-outlined text-[16px]">forum</span>
+              <span>Tin nhắn (Inbox)</span>
             </button>
           </div>
+
+          <button 
+            onClick={handleExportCSAT}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-slate-200 bg-white text-black text-xs font-semibold hover:bg-slate-50 transition-all cursor-pointer" 
+            type="button"
+          >
+            <span className="material-symbols-outlined text-[16px]">file_download</span>
+            <span>Xuất CSAT</span>
+          </button>
         </div>
+      </div>
 
-        {/* TAB 1: REVIEWS VIEW */}
-        {activeTab === 'reviews' && (
-          <div className="px-space-xl pb-space-3xl flex flex-col gap-space-xl animate-fade-in-up">
-            {/* Top KPI Metrics & Rating Aggregation Bento */}
-            <div className="grid grid-cols-1 md:grid-cols-12 gap-space-md">
-              {/* Overall Score Card */}
-              <div className="md:col-span-4 rounded-xl bg-surface-container-lowest p-space-lg shadow-sm flex flex-col justify-between">
-                <div className="flex items-center justify-between">
-                  <span className="font-label-sm text-label-sm font-bold tracking-wider text-tertiary uppercase">Chỉ số Uy tín Biển</span>
-                  <span className="inline-flex items-center gap-1 text-primary text-label-sm font-bold bg-surface-container-high px-2.5 py-1 rounded-full">
-                    <span className="material-symbols-outlined text-[14px]">military_tech</span> Top 3 Mỹ Khê
-                  </span>
-                </div>
-                <div className="my-space-md flex items-baseline gap-space-sm">
-                  <span className="font-display-lg text-display-lg font-bold text-on-surface leading-none">4.9</span>
-                  <span className="font-headline-sm text-headline-sm text-on-surface-variant">/ 5.0</span>
-                  <div className="flex items-center gap-0.5 ml-space-sm text-amber-500">
-                    <span className="material-symbols-outlined text-[20px]" style={{ fontVariationSettings: "'FILL' 1" }}>star</span>
-                    <span className="material-symbols-outlined text-[20px]" style={{ fontVariationSettings: "'FILL' 1" }}>star</span>
-                    <span className="material-symbols-outlined text-[20px]" style={{ fontVariationSettings: "'FILL' 1" }}>star</span>
-                    <span className="material-symbols-outlined text-[20px]" style={{ fontVariationSettings: "'FILL' 1" }}>star</span>
-                    <span className="material-symbols-outlined text-[20px]" style={{ fontVariationSettings: "'FILL' 1" }}>star_half</span>
-                  </div>
-                </div>
-                <p className="font-body-sm text-body-sm text-on-surface-variant">
-                  Dựa trên <strong className="text-on-surface font-semibold">147 lượt đánh giá thực tế</strong> từ khách hàng đã hoàn tất xuất bến.
-                </p>
+      {/* TAB 1: REVIEWS VIEW */}
+      {activeTab === 'reviews' && (
+        <div className="space-y-3.5">
+          {/* Minimal Rating Header Strip */}
+          <div className="flex flex-wrap items-center justify-between gap-3 px-4 py-2.5 rounded-lg bg-surface-container-lowest border border-slate-200">
+            <div className="flex items-center gap-3">
+              <span className="text-2xl font-bold text-black font-mono">4.9</span>
+              <div className="flex items-center gap-1 text-amber-500">
+                {[1, 2, 3, 4].map(s => (
+                  <span key={s} className="material-symbols-outlined text-[18px]" style={{ fontVariationSettings: "'FILL' 1" }}>star</span>
+                ))}
+                <span className="material-symbols-outlined text-[18px]" style={{ fontVariationSettings: "'FILL' 1" }}>star_half</span>
+                <span className="text-xs font-bold text-black ml-1">/ 5.0</span>
               </div>
-
-              {/* Breakdown Bars */}
-              <div className="md:col-span-5 rounded-xl bg-surface-container-lowest p-space-lg shadow-sm flex flex-col justify-between">
-                <div className="flex items-center justify-between">
-                  <span className="font-label-sm text-label-sm font-bold tracking-wider text-tertiary uppercase">Phân bổ Sao Thực tế</span>
-                  <span className="font-label-sm text-label-sm text-on-surface-variant">100% Khách xác thực</span>
-                </div>
-                <div className="flex flex-col gap-2 my-2">
-                  <div className="flex items-center gap-3 text-label-sm font-medium">
-                    <span className="w-10 text-on-surface-variant">5 sao</span>
-                    <div className="flex-1 h-2 rounded-full bg-surface-container-high overflow-hidden">
-                      <div className="h-full bg-primary rounded-full w-[87%]"></div>
-                    </div>
-                    <span className="w-10 text-right text-on-surface font-bold">128</span>
-                  </div>
-                  <div className="flex items-center gap-3 text-label-sm font-medium">
-                    <span className="w-10 text-on-surface-variant">4 sao</span>
-                    <div className="flex-1 h-2 rounded-full bg-surface-container-high overflow-hidden">
-                      <div className="h-full bg-primary-container rounded-full w-[10%]"></div>
-                    </div>
-                    <span className="w-10 text-right text-on-surface font-bold">14</span>
-                  </div>
-                  <div className="flex items-center gap-3 text-label-sm font-medium">
-                    <span className="w-10 text-on-surface-variant">3 sao</span>
-                    <div className="flex-1 h-2 rounded-full bg-surface-container-high overflow-hidden">
-                      <div className="h-full bg-secondary-container rounded-full w-[3%]"></div>
-                    </div>
-                    <span className="w-10 text-right text-on-surface font-bold">5</span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Response Rate Card */}
-              <div className="md:col-span-3 rounded-xl bg-surface-container-lowest p-space-lg shadow-sm flex flex-col justify-between">
-                <span className="font-label-sm text-label-sm font-bold tracking-wider text-tertiary uppercase">Tỷ lệ phản hồi</span>
-                <div className="my-space-sm flex flex-col">
-                  <span className="font-display-sm text-display-sm font-bold text-primary">98.5%</span>
-                  <span className="font-body-sm text-on-surface-variant mt-1">Thời gian trung bình: <strong>14 phút</strong></span>
-                </div>
-                <span className="text-[12px] text-emerald-600 font-semibold flex items-center gap-1">
-                  <span className="material-symbols-outlined text-[16px]">verified</span> Đạt chuẩn cấp tốc VITA
-                </span>
-              </div>
+              <span className="text-slate-400">•</span>
+              <span className="text-xs text-black">
+                <strong className="font-bold">147</strong> lượt đánh giá
+              </span>
             </div>
 
-            {/* Filter Tabs */}
-            <div className="flex items-center gap-2 overflow-x-auto pb-1">
+            <div className="flex items-center gap-4 text-xs text-black">
+              <span>Tỷ lệ phản hồi: <strong className="font-bold">98.5%</strong></span>
+              <span className="text-slate-400">•</span>
+              <span className="px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 text-[11px] font-bold border border-emerald-300">
+                Top 3 Mỹ Khê
+              </span>
+            </div>
+          </div>
+
+          {/* Star Filter Tabs */}
+          <div className="flex items-center gap-2 overflow-x-auto">
+            <button 
+              onClick={() => setStarFilter('ALL')}
+              className={`px-3 py-1 rounded-md text-xs font-bold transition-all border cursor-pointer ${
+                starFilter === 'ALL' 
+                  ? 'bg-primary text-white border-primary shadow-xs' 
+                  : 'bg-white text-black border-slate-200 hover:bg-slate-50'
+              }`}
+            >
+              Tất cả ({reviews.length})
+            </button>
+            {[5, 4, 3].map(stars => (
               <button 
-                onClick={() => setStarFilter('ALL')}
-                className={`px-4 py-2 rounded-xl font-label-md text-label-md transition-all ${
-                  starFilter === 'ALL' ? 'bg-primary text-on-primary font-bold' : 'bg-surface-container-lowest text-on-surface-variant hover:bg-surface-container'
+                key={stars}
+                onClick={() => setStarFilter(stars)}
+                className={`px-3 py-1 rounded-md text-xs font-bold transition-all flex items-center gap-1 border cursor-pointer ${
+                  starFilter === stars 
+                    ? 'bg-primary text-white border-primary shadow-xs' 
+                    : 'bg-white text-black border-slate-200 hover:bg-slate-50'
                 }`}
               >
-                Tất cả ({reviews.length})
+                <span>{stars} sao</span>
+                <span className="material-symbols-outlined text-[13px] text-amber-500" style={{ fontVariationSettings: "'FILL' 1" }}>star</span>
               </button>
-              {[5, 4, 3].map(stars => (
-                <button 
-                  key={stars}
-                  onClick={() => setStarFilter(stars)}
-                  className={`px-4 py-2 rounded-xl font-label-md text-label-md transition-all flex items-center gap-1 ${
-                    starFilter === stars ? 'bg-primary text-on-primary font-bold' : 'bg-surface-container-lowest text-on-surface-variant hover:bg-surface-container'
-                  }`}
-                >
-                  <span>{stars} sao</span>
-                  <span className="material-symbols-outlined text-[16px] text-amber-500" style={{ fontVariationSettings: "'FILL' 1" }}>star</span>
-                </button>
-              ))}
-            </div>
-
-            {/* Reviews List */}
-            <div key={starFilter} className="flex flex-col gap-space-md animate-fade-in-up">
-              {filteredReviews.map(rev => (
-                <article key={rev.id} className="bg-surface-container-lowest rounded-2xl p-space-xl shadow-sm flex flex-col gap-space-md">
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-outline-variant/30 pb-space-sm">
-                    <div className="flex items-center gap-space-sm">
-                      <div className="w-10 h-10 rounded-full bg-primary/15 text-primary font-bold flex items-center justify-center">
-                        {rev.avatarText}
-                      </div>
-                      <div>
-                        <div className="flex items-center gap-2">
-                          <h3 className="font-headline-sm text-headline-sm font-bold text-on-surface">{rev.customerName}</h3>
-                          <span className="px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 text-[10px] font-bold">Đã hoàn thành tour</span>
-                        </div>
-                        <p className="font-label-sm text-on-surface-variant">{rev.serviceName} • {rev.slotTime}</p>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <div className="flex text-amber-500">
-                        {Array.from({ length: rev.rating }).map((_, idx) => (
-                          <span key={idx} className="material-symbols-outlined text-[18px]" style={{ fontVariationSettings: "'FILL' 1" }}>star</span>
-                        ))}
-                      </div>
-                      <span className="font-label-sm text-on-surface-variant">{rev.date}</span>
-                    </div>
-                  </div>
-
-                  <p className="font-body-md text-body-md text-on-surface leading-relaxed">{rev.content}</p>
-
-                  {rev.photos.length > 0 && (
-                    <div className="flex items-center gap-2">
-                      {rev.photos.map((p, idx) => (
-                        <div key={idx} className="w-20 h-20 rounded-xl overflow-hidden shadow-sm">
-                          <img src={p} alt="Review attachment" className="w-full h-full object-cover" />
-                        </div>
-                      ))}
-                    </div>
-                  )}
-
-                  {/* Existing Reply */}
-                  {rev.reply ? (
-                    <div className="mt-space-xs p-space-md rounded-xl bg-surface-container-low flex flex-col gap-space-xs">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2">
-                          <div className="w-6 h-6 rounded-full bg-primary flex items-center justify-center">
-                            <span className="material-symbols-outlined text-on-primary text-[14px]">reply</span>
-                          </div>
-                          <span className="font-label-md text-label-md font-bold text-primary">{rev.reply.author}</span>
-                          <span className="text-on-surface-variant font-label-sm text-label-sm">• {rev.reply.time}</span>
-                        </div>
-                        <span className="px-2 py-0.5 rounded-full bg-surface-container font-label-sm text-[11px] text-tertiary">Đã phản hồi</span>
-                      </div>
-                      <p className="font-body-md text-body-md text-on-surface pl-8">“{rev.reply.text}”</p>
-                    </div>
-                  ) : (
-                    <div className="flex justify-end pt-2">
-                      <button 
-                        onClick={() => { setReplyingReviewId(rev.id); setReplyText(''); }}
-                        className="px-4 py-2 rounded-xl bg-primary text-on-primary font-label-md font-bold hover:bg-primary-container transition-all flex items-center gap-1.5"
-                      >
-                        <span className="material-symbols-outlined text-[18px]">reply</span>
-                        Phản hồi đánh giá
-                      </button>
-                    </div>
-                  )}
-                </article>
-              ))}
-            </div>
+            ))}
           </div>
-        )}
 
-        {/* TAB 2: CHAT (INBOX) VIEW */}
-        {activeTab === 'chat' && (
-          <div className="px-space-xl pb-space-3xl flex flex-col animate-fade-in-up">
-            <div className="w-full bg-surface-container-lowest rounded-2xl shadow-sm overflow-hidden grid grid-cols-1 lg:grid-cols-12 min-h-[680px] border border-outline-variant/30">
-              {/* Sidebar (4 Cols) */}
-              <div className="lg:col-span-4 bg-surface-container-low/50 flex flex-col border-r border-outline-variant/30">
-                <div className="p-space-md flex flex-col gap-space-xs border-b border-outline-variant/30">
-                  <div className="relative w-full">
-                    <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline text-[18px]">search</span>
-                    <input 
-                      className="w-full h-10 pl-9 pr-3 rounded-xl bg-surface-container-lowest border-none font-body-sm text-body-sm text-on-surface placeholder:text-outline focus:outline-none focus:ring-2 focus:ring-primary shadow-sm" 
-                      placeholder="Tìm tên khách hoặc mã đơn..." 
-                      type="text"
-                    />
-                  </div>
-                </div>
-
-                <div className="flex-1 overflow-y-auto flex flex-col">
-                  {conversations.map(conv => (
-                    <div 
-                      key={conv.id}
-                      onClick={() => setActiveChatId(conv.id)}
-                      className={`p-space-md flex items-start gap-space-sm cursor-pointer transition-colors border-b border-outline-variant/20 ${
-                        activeChatId === conv.id ? 'bg-surface-container-lowest shadow-sm' : 'hover:bg-surface-container-high'
-                      }`}
-                    >
-                      <div className="w-11 h-11 rounded-full bg-primary/15 text-primary flex items-center justify-center font-bold text-label-lg shrink-0">
-                        {conv.avatarText}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center justify-between">
-                          <span className="font-headline-sm text-headline-sm font-bold text-on-surface truncate">{conv.customerName}</span>
-                          <span className="font-label-sm text-label-sm text-on-surface-variant">{conv.time}</span>
-                        </div>
-                        <div className="font-label-sm text-label-sm text-primary font-semibold truncate">{conv.orderCode} • {conv.serviceName}</div>
-                        <p className="font-body-sm text-body-sm text-on-surface-variant truncate mt-0.5">{conv.lastMessage}</p>
-                      </div>
+          {/* Reviews Feed */}
+          <div className="bg-surface-container-lowest rounded-lg border border-slate-200 divide-y divide-slate-200 overflow-hidden">
+            {filteredReviews.map(rev => (
+              <article key={rev.id} className="p-3.5 flex flex-col gap-2 hover:bg-slate-50 transition-colors">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1.5">
+                  <div className="flex items-center gap-2.5">
+                    <div className="w-8 h-8 rounded-full bg-slate-100 border border-slate-200 text-black font-bold text-xs flex items-center justify-center shrink-0">
+                      {rev.avatarText}
                     </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* Main Chat Area (8 Cols) */}
-              <div className="lg:col-span-8 flex flex-col justify-between bg-surface-container-lowest">
-                {/* Chat Top Bar */}
-                <div className="p-space-md bg-surface-container-low/40 flex items-center justify-between gap-space-md border-b border-outline-variant/30">
-                  <div className="flex items-center gap-space-sm">
-                    <div className="w-10 h-10 rounded-full bg-primary text-on-primary flex items-center justify-center font-bold text-label-lg">
-                      {activeConversation.avatarText}
-                    </div>
-                    <div className="flex flex-col">
+                    <div>
                       <div className="flex items-center gap-2">
-                        <span className="font-headline-sm text-headline-sm font-bold text-on-surface">{activeConversation.customerName}</span>
-                        <span className="w-2 h-2 rounded-full bg-primary"></span>
-                        <span className="font-label-sm text-label-sm text-primary font-medium">Đang trực tuyến</span>
-                      </div>
-                      <span className="font-label-sm text-label-sm text-on-surface-variant">
-                        Đơn liên quan: <strong className="text-on-surface">{activeConversation.orderCode}</strong> ({activeConversation.serviceName})
-                      </span>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Chat Messages Stream */}
-                <div className="p-space-lg flex-1 overflow-y-auto flex flex-col gap-space-md max-h-[520px]">
-                  <div className="flex items-center justify-center">
-                    <span className="px-3 py-1 rounded-full bg-surface-container font-label-sm text-label-sm text-on-surface-variant">
-                      Hôm nay
-                    </span>
-                  </div>
-
-                  {activeConversation.messages.map(msg => (
-                    <div 
-                      key={msg.id} 
-                      className={`flex items-start gap-space-xs max-w-xl ${msg.sender === 'vendor' ? 'justify-end self-end' : ''}`}
-                    >
-                      {msg.sender === 'customer' && (
-                        <div className="w-7 h-7 rounded-full bg-primary text-on-primary flex items-center justify-center text-[11px] font-bold shrink-0">
-                          {msg.avatarText}
-                        </div>
-                      )}
-                      <div className={`flex flex-col gap-1 ${msg.sender === 'vendor' ? 'items-end' : ''}`}>
-                        <div className={`p-3.5 rounded-2xl ${
-                          msg.sender === 'vendor' 
-                            ? 'rounded-tr-xs bg-primary text-on-primary font-body-md text-body-md' 
-                            : 'rounded-tl-xs bg-surface-container-low text-on-surface font-body-md text-body-md'
-                        }`}>
-                          {msg.text}
-                          {msg.attachment && (
-                            <div className="mt-2 flex items-center gap-2 p-2 rounded-xl bg-white/10 text-white text-label-sm">
-                              <span className="material-symbols-outlined text-[20px]">folder_zip</span>
-                              <div>
-                                <p className="font-bold">{msg.attachment.name}</p>
-                                <p className="text-[11px] opacity-80">{msg.attachment.details}</p>
-                              </div>
-                            </div>
-                          )}
-                        </div>
-                        <span className="font-label-sm text-[11px] text-on-surface-variant">
-                          {msg.time} • {msg.sender === 'vendor' ? 'Đã gửi' : 'Đã nhận'}
+                        <h3 className="text-xs font-bold text-black">{rev.customerName}</h3>
+                        <span className="px-1.5 py-0.2 rounded text-[10px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-300">
+                          Đã hoàn thành
                         </span>
                       </div>
-                      {msg.sender === 'vendor' && (
-                        <div className="w-7 h-7 rounded-full bg-secondary-container text-on-secondary flex items-center justify-center text-[11px] font-bold shrink-0">
-                          DOC
+                      <p className="text-[11px] text-slate-600 mt-0.5">{rev.serviceName} • {rev.slotTime}</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2 text-xs">
+                    <div className="flex text-amber-500">
+                      {Array.from({ length: rev.rating }).map((_, idx) => (
+                        <span key={idx} className="material-symbols-outlined text-[15px]" style={{ fontVariationSettings: "'FILL' 1" }}>star</span>
+                      ))}
+                    </div>
+                    <span className="text-slate-500 text-[11px] font-mono">{rev.date}</span>
+                  </div>
+                </div>
+
+                <p className="text-xs text-black leading-relaxed">{rev.content}</p>
+
+                {rev.photos.length > 0 && (
+                  <div className="flex items-center gap-2 pt-0.5">
+                    {rev.photos.map((p, idx) => (
+                      <div key={idx} className="w-14 h-14 rounded overflow-hidden border border-slate-200">
+                        <img src={p} alt="Review attachment" className="w-full h-full object-cover" />
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {/* Existing Reply */}
+                {rev.reply ? (
+                  <div className="mt-1 p-2 rounded bg-surface-container-low border-l-4 border-l-primary flex flex-col gap-0.5 text-xs">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-1.5">
+                        <span className="material-symbols-outlined text-primary text-[14px]">reply</span>
+                        <span className="font-bold text-primary">{rev.reply.author}</span>
+                        <span className="text-slate-500 text-[10px] font-mono">• {rev.reply.time}</span>
+                      </div>
+                      <span className="text-[10px] text-slate-700 font-semibold">Đã phản hồi</span>
+                    </div>
+                    <p className="text-black italic pl-4 text-[11px] leading-relaxed">“{rev.reply.text}”</p>
+                  </div>
+                ) : (
+                  <div className="flex justify-end pt-0.5">
+                    <button 
+                      onClick={() => { setReplyingReviewId(rev.id); setReplyText(''); }}
+                      className="px-2.5 py-1 rounded bg-primary text-on-primary text-[11px] font-semibold hover:bg-primary-container transition-all flex items-center gap-1 cursor-pointer"
+                    >
+                      <span className="material-symbols-outlined text-[14px]">reply</span>
+                      Phản hồi
+                    </button>
+                  </div>
+                )}
+              </article>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* TAB 2: CHAT (INBOX) VIEW */}
+      {activeTab === 'chat' && (
+        <div className="bg-surface-container-lowest rounded-lg border border-slate-200 overflow-hidden grid grid-cols-1 lg:grid-cols-12 min-h-[580px]">
+          {/* Sidebar (4 Cols) */}
+          <div className="lg:col-span-4 bg-slate-50 flex flex-col border-r border-slate-200">
+            <div className="p-2.5 border-b border-slate-200 bg-white">
+              <div className="relative w-full">
+                <span className="material-symbols-outlined absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-500 text-[16px]">search</span>
+                <input 
+                  className="w-full h-8 pl-8 pr-2.5 rounded-md bg-white border border-slate-200 text-xs text-black placeholder:text-slate-400 focus:outline-none focus:border-primary" 
+                  placeholder="Tìm tên khách hoặc mã đơn..." 
+                  type="text"
+                />
+              </div>
+            </div>
+
+            <div className="flex-1 overflow-y-auto flex flex-col divide-y divide-slate-200">
+              {conversations.map(conv => (
+                <div 
+                  key={conv.id}
+                  onClick={() => setActiveChatId(conv.id)}
+                  className={`p-3 flex items-start gap-2.5 cursor-pointer transition-colors ${
+                    activeChatId === conv.id ? 'bg-slate-100 border-l-4 border-l-primary' : 'hover:bg-slate-50'
+                  }`}
+                >
+                  <div className="w-8 h-8 rounded-full bg-slate-100 border border-slate-200 text-black flex items-center justify-center font-bold text-xs shrink-0">
+                    {conv.avatarText}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs font-bold text-black truncate">{conv.customerName}</span>
+                      <span className="text-[10px] text-slate-500 font-mono">{conv.time}</span>
+                    </div>
+                    <div className="text-[11px] text-black font-semibold truncate">{conv.orderCode} • {conv.serviceName}</div>
+                    <p className="text-[11px] text-slate-600 truncate mt-0.5">{conv.lastMessage}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Main Chat Area (8 Cols) */}
+          <div className="lg:col-span-8 flex flex-col justify-between bg-white">
+            {/* Chat Top Bar */}
+            <div className="p-2.5 bg-slate-50 flex items-center justify-between border-b border-slate-200">
+              <div className="flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-full bg-primary text-white flex items-center justify-center font-bold text-xs">
+                  {activeConversation.avatarText}
+                </div>
+                <div className="flex flex-col">
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs font-bold text-black">{activeConversation.customerName}</span>
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-600"></span>
+                    <span className="text-[10px] text-slate-600 font-medium">Trực tuyến</span>
+                  </div>
+                  <span className="text-[10px] text-slate-600">
+                    Đơn: <strong className="text-black font-mono">{activeConversation.orderCode}</strong> ({activeConversation.serviceName})
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {/* Chat Messages Stream */}
+            <div className="p-3.5 flex-1 overflow-y-auto flex flex-col gap-2.5 max-h-[440px]">
+              <div className="flex items-center justify-center">
+                <span className="px-2 py-0.5 rounded bg-slate-100 text-slate-700 text-[10px] font-medium border border-slate-200">
+                  Hôm nay
+                </span>
+              </div>
+
+              {activeConversation.messages.map(msg => (
+                <div 
+                  key={msg.id} 
+                  className={`flex items-start gap-1.5 max-w-lg ${msg.sender === 'vendor' ? 'justify-end self-end' : ''}`}
+                >
+                  {msg.sender === 'customer' && (
+                    <div className="w-6 h-6 rounded-full bg-slate-100 border border-slate-200 text-black flex items-center justify-center text-[10px] font-bold shrink-0">
+                      {msg.avatarText}
+                    </div>
+                  )}
+                  <div className={`flex flex-col gap-0.5 ${msg.sender === 'vendor' ? 'items-end' : ''}`}>
+                    <div className={`p-2.5 rounded-lg text-xs ${
+                      msg.sender === 'vendor' 
+                        ? 'bg-primary text-white' 
+                        : 'bg-slate-100 text-black border border-slate-200'
+                    }`}>
+                      {msg.text}
+                      {msg.attachment && (
+                        <div className="mt-1.5 flex items-center gap-2 p-1.5 rounded bg-white/10 text-white text-[11px]">
+                          <span className="material-symbols-outlined text-[16px]">folder_zip</span>
+                          <div>
+                            <p className="font-bold">{msg.attachment.name}</p>
+                            <p className="text-[10px] opacity-80">{msg.attachment.details}</p>
+                          </div>
                         </div>
                       )}
                     </div>
-                  ))}
-                </div>
-
-                {/* Chat Input Bar */}
-                <div className="p-space-md bg-surface-container-low/60 flex flex-col gap-2 border-t border-outline-variant/30">
-                  {/* Quick Prompts */}
-                  <div className="flex items-center gap-2 overflow-x-auto pb-1 text-nowrap">
-                    <button 
-                      onClick={() => setMessageInput('Dạ Danang Ocean Club xin chào quý khách!')}
-                      className="px-2.5 py-1 rounded-lg bg-surface-container-lowest hover:bg-surface-container text-on-surface-variant font-label-sm text-[11px] border border-outline-variant/30"
-                    >
-                      ⚡ Chào khách
-                    </button>
-                    <button 
-                      onClick={() => setMessageInput('Quý khách vui lòng có mặt trước 15 phút tại trạm cứu hộ bãi tắm Mỹ Khê 2 để nhận áo phao nhé ạ.')}
-                      className="px-2.5 py-1 rounded-lg bg-surface-container-lowest hover:bg-surface-container text-on-surface-variant font-label-sm text-[11px] border border-outline-variant/30"
-                    >
-                      ⚡ Nhắc giờ tập trung
-                    </button>
-                    <button 
-                      onClick={() => setMessageInput('CLB đã gửi link ảnh flycam chất lượng cao qua tin nhắn này rồi ạ!')}
-                      className="px-2.5 py-1 rounded-lg bg-surface-container-lowest hover:bg-surface-container text-on-surface-variant font-label-sm text-[11px] border border-outline-variant/30"
-                    >
-                      ⚡ Gửi ảnh kỷ niệm
-                    </button>
+                    <span className="text-[10px] text-slate-500 font-mono">
+                      {msg.time} • {msg.sender === 'vendor' ? 'Đã gửi' : 'Đã nhận'}
+                    </span>
                   </div>
-
-                  <div className="flex items-center gap-space-xs">
-                    <div className="flex-1 relative">
-                      <input 
-                        className="w-full h-11 px-space-md rounded-xl bg-surface-container-lowest border-none font-body-md text-body-md text-on-surface placeholder:text-outline focus:outline-none focus:ring-2 focus:ring-primary shadow-sm" 
-                        placeholder="Nhập tin nhắn hỗ trợ cho du khách..." 
-                        type="text"
-                        value={messageInput}
-                        onChange={(e) => setMessageInput(e.target.value)}
-                        onKeyDown={(e) => {
-                          if (e.key === 'Enter') handleSendMessage();
-                        }}
-                      />
+                  {msg.sender === 'vendor' && (
+                    <div className="w-6 h-6 rounded-full bg-primary text-white flex items-center justify-center text-[10px] font-bold shrink-0">
+                      DOC
                     </div>
-                    <button 
-                      onClick={() => handleSendMessage()}
-                      className="w-11 h-11 rounded-xl bg-primary text-on-primary flex items-center justify-center shadow-sm hover:bg-primary-container transition-all shrink-0" 
-                      type="button"
-                    >
-                      <span className="material-symbols-outlined text-[20px]">send</span>
-                    </button>
-                  </div>
+                  )}
                 </div>
-              </div>
+              ))}
             </div>
-          </div>
-        )}
 
-        {/* Reply Review Modal (Portaled to body) */}
-        {replyingReviewId && createPortal(
-          <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-scale-in">
-            <div className="bg-surface rounded-2xl max-w-lg w-full p-space-lg shadow-2xl flex flex-col gap-space-md border border-outline-variant/30">
-              <div className="flex items-center justify-between border-b border-outline-variant/30 pb-3">
-                <h3 className="font-headline-sm font-bold text-on-surface flex items-center gap-2">
-                  <span className="material-symbols-outlined text-primary">reply</span>
-                  Phản hồi đánh giá của khách
-                </h3>
-                <button onClick={() => setReplyingReviewId(null)} className="text-on-surface-variant hover:text-on-surface">
-                  <span className="material-symbols-outlined">close</span>
+            {/* Chat Input Bar */}
+            <div className="p-2.5 bg-slate-50 flex flex-col gap-2 border-t border-slate-200">
+              {/* Quick Prompts */}
+              <div className="flex items-center gap-1.5 overflow-x-auto pb-0.5">
+                <button 
+                  onClick={() => setMessageInput('Dạ Danang Ocean Club xin chào quý khách!')}
+                  className="px-2 py-0.5 rounded bg-white hover:bg-slate-100 text-black text-[11px] border border-slate-200 whitespace-nowrap cursor-pointer"
+                >
+                  ⚡ Chào khách
+                </button>
+                <button 
+                  onClick={() => setMessageInput('Quý khách vui lòng có mặt trước 15 phút tại trạm cứu hộ bãi tắm Mỹ Khê 2 để nhận áo phao nhé ạ.')}
+                  className="px-2 py-0.5 rounded bg-white hover:bg-slate-100 text-black text-[11px] border border-slate-200 whitespace-nowrap cursor-pointer"
+                >
+                  ⚡ Nhắc giờ tập trung
+                </button>
+                <button 
+                  onClick={() => setMessageInput('CLB đã gửi link ảnh flycam chất lượng cao qua tin nhắn này rồi ạ!')}
+                  className="px-2 py-0.5 rounded bg-white hover:bg-slate-100 text-black text-[11px] border border-slate-200 whitespace-nowrap cursor-pointer"
+                >
+                  ⚡ Gửi ảnh kỷ niệm
                 </button>
               </div>
 
-              <div className="flex flex-col gap-1.5">
-                <label className="font-label-md font-semibold text-on-surface">Nội dung phản hồi từ CLB</label>
-                <textarea 
-                  rows={4}
-                  value={replyText}
-                  onChange={(e) => setReplyText(e.target.value)}
-                  placeholder="Viết phản hồi chu đáo, thể hiện sự trân trọng và chuyên nghiệp của đơn vị cung cấp..."
-                  className="w-full p-3 rounded-xl bg-surface-container-low text-on-surface font-body-md focus:outline-none focus:ring-2 focus:ring-primary shadow-sm"
+              <div className="flex items-center gap-2">
+                <input 
+                  className="flex-1 h-9 px-3 rounded-lg bg-white border border-slate-200 text-xs text-black placeholder:text-slate-400 focus:outline-none focus:border-primary" 
+                  placeholder="Nhập tin nhắn hỗ trợ cho du khách..." 
+                  type="text"
+                  value={messageInput}
+                  onChange={(e) => setMessageInput(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') handleSendMessage();
+                  }}
                 />
-              </div>
-
-              <div className="flex justify-end gap-2 pt-2 border-t border-outline-variant/30">
                 <button 
-                  onClick={() => setReplyingReviewId(null)}
-                  className="px-4 py-2 rounded-xl bg-surface-container-high text-on-surface font-label-md"
+                  onClick={() => handleSendMessage()}
+                  className="h-9 px-4 rounded-lg bg-primary text-white flex items-center justify-center hover:bg-primary-container transition-all cursor-pointer text-xs font-bold gap-1" 
+                  type="button"
                 >
-                  Hủy
-                </button>
-                <button 
-                  onClick={handleSaveReply}
-                  className="px-5 py-2 rounded-xl bg-primary text-on-primary font-label-md font-bold shadow hover:bg-primary-container"
-                >
-                  Đăng phản hồi
+                  <span className="material-symbols-outlined text-[16px]">send</span>
+                  <span>Gửi</span>
                 </button>
               </div>
             </div>
-          </div>,
-          document.body
-        )}
-
-        {/* Toast */}
-        {toastMessage && (
-          <div className="fixed bottom-6 right-6 z-50 p-space-md rounded-xl bg-on-surface text-surface shadow-xl flex items-center gap-space-sm animate-in fade-in slide-in-from-bottom-4 duration-200">
-            <span className="material-symbols-outlined text-emerald-400 text-[20px]">task_alt</span>
-            <span className="font-label-md text-label-md">{toastMessage}</span>
           </div>
-        )}
-      </div>
-    </main>
+        </div>
+      )}
+
+      {/* Reply Review Modal (Portaled to body) */}
+      {replyingReviewId && createPortal(
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/60 p-4">
+          <div className="bg-white rounded-lg max-w-lg w-full p-4 shadow-xl flex flex-col gap-3 border border-slate-200">
+            <div className="flex items-center justify-between border-b border-slate-200 pb-2.5">
+              <h3 className="text-sm font-bold text-black flex items-center gap-1.5">
+                <span className="material-symbols-outlined text-primary text-[18px]">reply</span>
+                Phản hồi đánh giá của khách
+              </h3>
+              <button onClick={() => setReplyingReviewId(null)} className="text-black hover:text-slate-600 cursor-pointer">
+                <span className="material-symbols-outlined text-[18px]">close</span>
+              </button>
+            </div>
+
+            <div className="flex flex-col gap-1">
+              <label className="text-xs font-semibold text-black">Nội dung phản hồi từ CLB</label>
+              <textarea 
+                rows={4}
+                value={replyText}
+                onChange={(e) => setReplyText(e.target.value)}
+                placeholder="Viết phản hồi chu đáo, thể hiện sự trân trọng và chuyên nghiệp của đơn vị cung cấp..."
+                className="w-full p-2.5 rounded-lg bg-white text-black text-xs border border-slate-200 focus:outline-none focus:border-primary"
+              />
+            </div>
+
+            <div className="flex justify-end gap-2 pt-2 border-t border-slate-200">
+              <button 
+                onClick={() => setReplyingReviewId(null)}
+                className="px-3 py-1.5 rounded-lg border border-slate-200 text-black text-xs font-semibold hover:bg-slate-100 cursor-pointer"
+              >
+                Hủy
+              </button>
+              <button 
+                onClick={handleSaveReply}
+                className="px-4 py-1.5 rounded-lg bg-primary text-white text-xs font-bold hover:bg-primary-container cursor-pointer"
+              >
+                Đăng phản hồi
+              </button>
+            </div>
+          </div>
+        </div>,
+        document.body
+      )}
+    </div>
   );
 }
