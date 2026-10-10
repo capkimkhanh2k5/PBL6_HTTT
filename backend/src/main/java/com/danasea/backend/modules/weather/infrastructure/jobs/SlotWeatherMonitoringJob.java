@@ -1,36 +1,15 @@
 package com.danasea.backend.modules.weather.infrastructure.jobs;
 
-import java.math.BigDecimal;
-import java.time.Clock;
-import java.time.Duration;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.OffsetDateTime;
-import java.time.ZoneId;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
-
 import com.danasea.backend.modules.communication.application.dtos.NotificationCommand;
 import com.danasea.backend.modules.communication.application.usecases.SendNotificationUseCase;
 import com.danasea.backend.modules.communication.domain.models.NotificationChannel;
-import com.danasea.backend.modules.order.domain.models.RefundEvaluationResult;
-import com.danasea.backend.modules.order.domain.models.RefundReason;
-import com.danasea.backend.modules.order.domain.models.RefundStatus;
 import com.danasea.backend.modules.order.domain.models.SubOrderStatus;
 import com.danasea.backend.modules.order.domain.services.RefundPolicyEngine;
 import com.danasea.backend.modules.order.infrastructure.persistence.entities.MasterOrderJpaEntity;
-import com.danasea.backend.modules.order.infrastructure.persistence.entities.RefundJpaEntity;
 import com.danasea.backend.modules.order.infrastructure.persistence.entities.SubOrderJpaEntity;
 import com.danasea.backend.modules.order.infrastructure.persistence.repositories.JpaMasterOrderRepository;
 import com.danasea.backend.modules.order.infrastructure.persistence.repositories.JpaRefundRepository;
 import com.danasea.backend.modules.order.infrastructure.persistence.repositories.JpaSubOrderRepository;
-import com.danasea.backend.modules.service.domain.models.SlotStatus;
 import com.danasea.backend.modules.service.infrastructure.persistence.entities.CategoryJpaEntity;
 import com.danasea.backend.modules.service.infrastructure.persistence.entities.ServiceJpaEntity;
 import com.danasea.backend.modules.service.infrastructure.persistence.entities.ServiceSlotJpaEntity;
@@ -40,6 +19,7 @@ import com.danasea.backend.modules.service.infrastructure.persistence.repositori
 import com.danasea.backend.modules.weather.application.dtos.WeatherInfoDto;
 import com.danasea.backend.modules.weather.application.ports.output.WeatherProviderPort;
 import com.danasea.backend.modules.weather.application.services.LocalizedWeatherEvaluationValue;
+import com.danasea.backend.modules.weather.application.services.WeatherBookingCancellationService;
 import com.danasea.backend.modules.weather.domain.models.CategorySafetyRule;
 import com.danasea.backend.modules.weather.domain.services.CategorySafetyRuleService;
 import com.danasea.backend.modules.weather.domain.services.WeatherRuleEngine;
@@ -48,8 +28,22 @@ import com.danasea.backend.modules.weather.infrastructure.persistence.repositori
 import com.danasea.backend.shared.i18n.LocalizedContentValue;
 import com.danasea.backend.shared.i18n.LocalizedMessageRef;
 import com.fasterxml.jackson.databind.ObjectMapper;
-
+import java.time.Clock;
+import java.time.Duration;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
+import java.time.ZoneId;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 @Slf4j
 @Component
@@ -59,6 +53,9 @@ public class SlotWeatherMonitoringJob {
 
     @Autowired
     private Clock clock;
+
+    @Autowired
+    private WeatherBookingCancellationService weatherCancellation;
 
     private final JpaServiceSlotRepository slotRepository;
     private final JpaServiceRepository serviceRepository;
@@ -253,42 +250,17 @@ public class SlotWeatherMonitoringJob {
 
                     List<SubOrderJpaEntity> subOrders = subOrderRepository.findBySlotId(slot.getId());
                     int cancelledCount = 0;
+                    List<SubOrderJpaEntity> cancelled = new ArrayList<>();
                     for (SubOrderJpaEntity subOrder : subOrders) {
-                        if (subOrder.getStatus() != SubOrderStatus.CANCELLED && subOrder.getStatus() != SubOrderStatus.REFUNDED) {
-                            subOrder.setStatus(SubOrderStatus.CANCELLED);
-                            subOrderRepository.save(subOrder);
-
-                            if (refundRepository != null && subOrder.getFinalAmount().signum() > 0) {
-                                RefundEvaluationResult evalResult = refundPolicyEngine.evaluate(
-                                        RefundReason.WEATHER,
-                                        slotStart,
-                                        now,
-                                        subOrder.getFinalAmount()
-                                );
-                                String idempotencyKey = "weather-auto-" + alert.getId();
-                                if (refundRepository.findBySubOrderIdAndIdempotencyKey(
-                                        subOrder.getId(), idempotencyKey).isEmpty()) {
-                                    RefundJpaEntity refund = new RefundJpaEntity();
-                                    refund.setSubOrderId(subOrder.getId());
-                                    refund.setAmount(evalResult.refundAmount());
-                                    refund.setRefundPercentage(evalResult.refundPercentage());
-                                    refund.setReason(RefundReason.WEATHER);
-                                    refund.setStatus(RefundStatus.PENDING);
-                                    refund.setIdempotencyKey(idempotencyKey);
-                                    refundRepository.save(refund);
-                                }
-                            }
+                        if (weatherCancellation.cancel(subOrder.getId(), slot.getId(), alert.getId())) {
                             cancelledCount++;
+                            cancelled.add(subOrder);
                         }
                     }
-
-                    // Close the slot to prevent further bookings
-                    slot.setStatus(SlotStatus.CLOSED);
-                    slotRepository.save(slot);
+                    slotRepository.closeForWeather(slot.getId());
 
                     // Update alert status
                     alert.setStatus("AUTO_CANCELLED_FOR_SAFETY");
-                    alert.setIsSafe(true);
                     alert.setWarningMessage("[AUTO-CANCELLED FOR SAFETY] Canceled and refunded 100% due to unresolved RED alert within 60 minutes: "
                             + alert.getWarningMessage());
                     evaluationRepository.save(alert);
@@ -316,7 +288,7 @@ public class SlotWeatherMonitoringJob {
                     }
 
                     // 3. Notify Customer
-                    for (SubOrderJpaEntity subOrder : subOrders) {
+                    for (SubOrderJpaEntity subOrder : cancelled) {
                         UUID customerId = resolveCustomerId(subOrder);
                         sendLocalizedNotification(customerId, "AUTO_CANCELLED_FOR_SAFETY",
                                 "notification.weather.auto_cancel.customer.title", new Object[]{serviceName},
@@ -359,8 +331,8 @@ public class SlotWeatherMonitoringJob {
                 lat, lng, slot.getDate(), slot.getStartTime(), slot.getEndTime()
         );
 
-        if (forecast == null) {
-            log.warn("Could not retrieve forecast for slot {}", slot.getId());
+        if (forecast == null || !forecast.isFreshAt(Instant.now()) || forecast.getPeakWindSpeed() == null) {
+            log.warn("No fresh verified meteorological forecast for slot {}; existing safety alerts remain active", slot.getId());
             return false;
         }
 

@@ -1,0 +1,30 @@
+flowchart TD
+    Start(["Khách hàng gửi yêu cầu thanh toán<br/>POST /api/payments/{orderId}/create-intent<br/>{ provider: 'VNPAY' | 'PAYPAL' }"]) --> CheckAuth{"Kiểm tra xác thực & IDOR:<br/>order.customerId == currentUserId?"}
+
+    CheckAuth -- "Không phải chủ đơn" --> Err403["Ném UnauthorizedOrderAccessException<br/>Trả về HTTP 403 Forbidden"]
+
+    CheckAuth -- "Hợp lệ" --> CheckOrderStatus{"Trạng thái MasterOrder == PENDING_PAYMENT<br/>và paymentStatus == UNPAID?"}
+    CheckOrderStatus -- "Đã thanh toán / Đã hủy" --> Err409State["Ném InvalidOrderStateException<br/>Trả về HTTP 409 Conflict"]
+
+    CheckOrderStatus -- "Hợp lệ" --> WaiverGuard{"Payment Waiver Guard:<br/>Khóa MasterOrder & SubOrders (ORDER BY id ASC)<br/>Quét qua WaiverAcceptanceGuard.missing(...)"}
+
+    %% Nhánh thiếu cam kết
+    WaiverGuard -- "Có SubOrder chưa xác nhận cam kết" --> RejectWaiver["Ném WaiverAcceptanceRequiredException<br/>Trả về HTTP 409 Conflict<br/>(WAIVER_ACCEPTANCE_REQUIRED, missingSubOrders)"]
+    RejectWaiver --> BlockGateway["🔴 DỪNG TOÀN BỘ TIẾN TRÌNH:<br/>Tuyệt đối không gọi sang cổng thanh toán"]
+
+    %% Nhánh đủ cam kết
+    WaiverGuard -- "100% cam kết đã được xác nhận" --> CheckIdempotencyKey{"Kiểm tra Idempotency Key<br/>của giao dịch thanh toán?"}
+
+    CheckIdempotencyKey -- "Đã tồn tại Payment PENDING" --> ReusePayment["Tái sử dụng bản ghi Payment PENDING cũ<br/>(Ngăn ngừa tạo rác DB khi timeout/retry)"]
+    CheckIdempotencyKey -- "Giao dịch mới" --> CreatePayment["Tạo và commit bản ghi Payment PENDING<br/>vào PostgreSQL trước khi gọi Gateway"]
+
+    ReusePayment --> RouteGateway{"Lựa chọn Cổng thanh toán?"}
+    CreatePayment --> RouteGateway
+
+    %% Phân nhánh VNPay
+    RouteGateway -- "VNPAY (Nội địa)" --> BuildVNPay["1. Nhân số tiền x 100 theo chuẩn VNPay<br/>2. Sắp xếp query params theo thứ tự từ điển ASCII<br/>3. Ký số bảo mật HMAC-SHA512 với vnp_HashSecret<br/>4. Tạo URL thanh toán VNPay Sandbox"]
+    BuildVNPay --> SuccessVNPay(["HTTP 200 OK<br/>Trả về paymentUrl điều hướng VNPay"])
+
+    %% Phân nhánh PayPal
+    RouteGateway -- "PAYPAL (Quốc tế)" --> BuildPayPal["1. Gọi OAuth2 lấy Bearer Access Token<br/>2. Quy đổi VND sang USD theo tỷ giá (tối thiểu $1.00 USD)<br/>3. Gọi REST API v2 POST /v2/checkout/orders (intent: CAPTURE)<br/>kèm header PayPal-Request-Id bằng Payment UUID<br/>4. Lưu providerOrderId và trích xuất link duyệt 'approve'"]
+    BuildPayPal --> SuccessPayPal(["HTTP 200 OK<br/>Trả về paymentUrl điều hướng PayPal Checkout"])

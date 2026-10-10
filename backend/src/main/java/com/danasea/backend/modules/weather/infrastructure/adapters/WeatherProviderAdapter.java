@@ -5,14 +5,13 @@ import com.danasea.backend.modules.weather.application.ports.output.WeatherProvi
 import com.danasea.backend.modules.weather.infrastructure.api.OpenMeteoApiClient;
 import com.danasea.backend.modules.weather.infrastructure.api.dtos.OpenMeteoMarineResponse;
 import com.danasea.backend.modules.weather.infrastructure.api.dtos.OpenMeteoWeatherResponse;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
+import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
-import java.time.Instant;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 @Component
 public class WeatherProviderAdapter implements WeatherProviderPort {
@@ -68,6 +67,7 @@ public class WeatherProviderAdapter implements WeatherProviderPort {
         }
 
         return WeatherInfoDto.WeatherData.builder()
+                .sourceFetchedAt(sourceTime(response.getSourceFetchedAtEpochMillis()))
                 .time(current.getTime())
                 .temperature(current.getTemperature2m())
                 .precipitation(current.getPrecipitation())
@@ -97,7 +97,8 @@ public class WeatherProviderAdapter implements WeatherProviderPort {
         if (response.getCurrent() != null) {
             OpenMeteoMarineResponse.CurrentData current = response.getCurrent();
             return WeatherInfoDto.MarineData.builder()
-                    .time(current.getTime())
+                    .sourceFetchedAt(sourceTime(response.getSourceFetchedAtEpochMillis()))
+                .time(current.getTime())
                     .waveHeight(current.getWaveHeight())
                     .waveDirection(current.getWaveDirection())
                     .wavePeriod(current.getWavePeriod())
@@ -117,6 +118,7 @@ public class WeatherProviderAdapter implements WeatherProviderPort {
         }
 
         return WeatherInfoDto.MarineData.builder()
+                .sourceFetchedAt(sourceTime(response.getSourceFetchedAtEpochMillis()))
                 .time(hourly.getTime().get(0))
                 .waveHeight(getFirstOrNull(hourly.getWaveHeight()))
                 .waveDirection(getFirstOrNull(hourly.getWaveDirection()))
@@ -276,4 +278,8 @@ public class WeatherProviderAdapter implements WeatherProviderPort {
         }
         return null;
     }
+    private Instant sourceTime(Long timestamp) {
+        return timestamp == null ? null : Instant.ofEpochMilli(timestamp);
+    }
+
 }

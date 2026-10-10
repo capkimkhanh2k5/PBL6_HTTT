@@ -10,7 +10,7 @@
 
 ---
 
-## 1. Settlement_Generate.png — Admin Khởi Tạo Bảng Quyết Toán
+## 1. Settlement_Generate_SD.png — Admin Khởi Tạo Bảng Quyết Toán
 
 **Lớp xử lý chính:** `com.danasea.backend.modules.settlement.application.usecases.GenerateSettlementUseCase`
 
@@ -35,7 +35,7 @@
 
 ---
 
-## 2. Settlement_Finalize.png — Admin Phê Duyệt Chốt Quyết Toán
+## 2. Settlement_Finalize_SD.png — Admin Phê Duyệt Chốt Quyết Toán
 
 **Lớp xử lý chính:** `com.danasea.backend.modules.settlement.application.usecases.FinalizeSettlementUseCase`
 
@@ -50,7 +50,7 @@
 
 ---
 
-## 3. Settlement_Vendor.png — Vendor Tra Cứu Bảng Quyết Toán
+## 3. Settlement_Vendor_SD.png — Vendor Tra Cứu Bảng Quyết Toán
 
 **Lớp xử lý chính:** `GetSettlementsUseCase` & `GetSettlementDetailUseCase`
 

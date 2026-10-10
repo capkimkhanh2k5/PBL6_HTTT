@@ -1,0 +1,41 @@
+flowchart TD
+    %% ==========================================
+    %% DECISION FLOWCHART: CHECK-IN VENDOR VERIFY
+    %% DANASEA Marine Tourism Platform
+    %% ==========================================
+
+    Start(["Nhân viên Vendor quét mã QR<br/><code>POST /api/vendor/checkin/verify</code><br/>Body: <code>{qrToken}</code>"]) --> CheckStaffAuth{"Xác thực JWT Token nhân viên?"}
+
+    CheckStaffAuth -- "Chưa đăng nhập / Hết hạn" --> Err401["Trả về <b>HTTP 401 Unauthorized</b>"]
+    CheckStaffAuth -- "Hợp lệ" --> Gate1Sig{"<b>CỔNG 1: Xác thực chữ ký số HMAC</b><br/><code>QrTokenSigner.verifySignature()</code><br/><i>(So sánh Constant-time chống Timing Attack)</i>"}
+
+    Gate1Sig -- "Chữ ký sai / Bị can thiệp giả mạo" --> Err400Sig["Trả về <b>HTTP 400 Bad Request</b><br/><code>INVALID_QR_SIGNATURE</code>"]
+    Gate1Sig -- "Chữ ký hợp lệ" --> Gate2Exist{"<b>CỔNG 2: Tra cứu Token trong DB</b><br/><code>tokenRepo.findByTokenString(token)</code>?"}
+
+    Gate2Exist -- "Không tồn tại trong bảng checkin_tokens" --> Err404Token["Trả về <b>HTTP 404 Not Found</b><br/><code>CHECKIN_TOKEN_NOT_FOUND</code>"]
+    Gate2Exist -- "Tìm thấy bản ghi" --> Gate3Replay{"<b>CỔNG 3: Chống Tấn Công Phát Lại (Anti-Replay)</b><br/>Mã đã từng được sử dụng trước đó?<br/><code>token.used == false</code>?"}
+
+    Gate3Replay -- "Token đã qua sử dụng (used = true)" --> Err409Replay["Trả về <b>HTTP 409 Conflict</b><br/><b>Chặn vé quay vòng</b><br/><code>QR_TOKEN_ALREADY_USED</code>"]
+    Gate3Replay -- "Token chưa sử dụng (used = false)" --> Gate4Expiry{"<b>CỔNG 4: Kiểm tra thời hạn hiệu lực Token</b><br/><code>now() <= token.expiryTime</code>?"}
+
+    Gate4Expiry -- "Mã QR đã hết hạn hiệu lực" --> Err400Expiry["Trả về <b>HTTP 400 Bad Request</b><br/><code>QR_TOKEN_EXPIRED</code>"]
+    Gate4Expiry -- "Token còn hạn" --> Gate5Vendor{"<b>CỔNG 5: Kiểm tra quyền sở hữu đối tác (Vendor Match)</b><br/><code>slot.vendorId == staff.vendorId</code>?"}
+
+    Gate5Vendor -- "Không khớp (Quét nhầm dịch vụ vendor khác)" --> Err403Vendor["Trả về <b>HTTP 403 Forbidden</b><br/><code>ACCESS_DENIED_NOT_SERVICE_VENDOR</code>"]
+    Gate5Vendor -- "Đúng Vendor cung cấp" --> Gate6Window{"<b>CỔNG 6: Khung giờ check-in (CheckinWindowPolicy)</b><br/>Thời điểm quét có nằm trong cửa sổ cho phép?<br/><code>startTime - earlyWindow <= now <= endTime + lateWindow</code>"}
+
+    Gate6Window -- "Quá sớm hoặc quá trễ so với ca trải nghiệm" --> Err400Window["Trả về <b>HTTP 400 Bad Request</b><br/><code>INVALID_CHECKIN_WINDOW</code>"]
+    Gate6Window -- "Hợp lệ trong khung giờ" --> ExecuteCheckIn["<b>Hoàn tất thủ tục Check-in nguyên tử:</b><br/>1. Đánh dấu Token: <code>token.used = true</code><br/>   - Ghi nhận <code>usedAt = now()</code><br/>   - Ghi nhận <code>usedByStaffId = currentStaffId</code><br/>2. Cập nhật SubOrder: <code>status = 'CHECKED_IN'</code><br/>3. Bắn sự kiện <code>SubOrderCheckedInEvent</code>"]
+
+    ExecuteCheckIn --> Return200(["Trả về <b>HTTP 200 OK</b><br/><code>CheckinSuccessResponse</code><br/>- Khách hàng & Tour đã sẵn sàng<br/>- Thông tin số chỗ, dịch vụ, ghi chú"])
+
+    %% Style classes
+    classDef startEnd fill:#e0f2fe,stroke:#0284c7,stroke-width:2px,color:#0369a1;
+    classDef decision fill:#fef3c7,stroke:#d97706,stroke-width:2px,color:#92400e;
+    classDef action fill:#f0fdf4,stroke:#16a34a,stroke-width:2px,color:#15803d;
+    classDef error fill:#fee2e2,stroke:#dc2626,stroke-width:2px,color:#b91c1c;
+
+    class Start,Return200 startEnd;
+    class CheckStaffAuth,Gate1Sig,Gate2Exist,Gate3Replay,Gate4Expiry,Gate5Vendor,Gate6Window decision;
+    class ExecuteCheckIn action;
+    class Err401,Err400Sig,Err404Token,Err409Replay,Err400Expiry,Err403Vendor,Err400Window error;

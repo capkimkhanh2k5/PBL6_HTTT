@@ -2,17 +2,17 @@
 
 > Module Discount chịu trách nhiệm quản lý toàn bộ vòng đời của mã giảm giá (voucher), kiểm tra tính hợp lệ và xem trước chiết khấu khi checkout, phân bổ chính xác theo giải thuật **Largest Remainder (Hare-Niemeyer)**, khóa bi quan (Pessimistic Locking) chống vượt hạn mức (Over-redemption), tự động giải phóng quota khi đơn bị hủy/hết hạn, và tích hợp sâu với luồng Hoàn tiền (Refund) và Đối soát (Settlement) đảm bảo dòng tiền tài chính chính xác tuyệt đối 100%.
 
-| # | Sơ đồ | Loại | Nội dung |
-|---|-------|------|----------|
-| 1 | `Discount_Code_Management_And_Validation` | Sequence Diagram | Quản lý mã giảm giá Admin & Vendor (`GET/POST/PATCH`): kiểm tra toàn vẹn nghiệp vụ qua `DiscountCodeRules`, phân lập phạm vi tài trợ (`sponsor_type`: `PLATFORM` vs `VENDOR`), bảo vệ chống IDOR và ngăn chặn vendor chỉnh sửa voucher do sàn tài trợ. |
-| 2 | `Discount_Checkout_Preview_And_Eligibility` | Sequence Diagram | Xem trước giảm giá khi đặt đơn (`POST /api/checkout/discount-preview`): kiểm tra trạng thái booking `HOLD`, tính hợp lệ thời gian/quota tổng/quota user, đánh giá ứng viên theo scope, tính toán phân bổ dự kiến, chặn voucher giảm 100% (`DISCOUNT_ZERO_PAYABLE_UNSUPPORTED`) và trả thông điệp đa ngôn ngữ (i18n). |
-| 3 | `Discount_Order_Creation_Allocation_And_Locking` | Sequence Diagram | Khởi tạo đơn hàng có áp dụng mã (`POST /api/orders`): kiểm tra Idempotency & IDOR, khóa bi quan Voucher trên PostgreSQL (`findByCodeForUpdate`), kiểm tra quota, chạy giải thuật Hare-Niemeyer, tách SubOrders với `finalAmount` & `commissionBasisAmount`, tăng `usedCount` nguyên tử và ghi nhận `DiscountRedemption`. |
-| 4 | `Discount_Reservation_Release_On_Cancel_Or_Expiry` | Sequence Diagram | Giải phóng và hoàn trả quota voucher tự động (`DiscountReservationService`): kích hoạt khi khách hủy booking chưa thanh toán hoặc khi hết hạn giữ chỗ 15 phút (`BookingHoldExpiredEvent`), xóa bản ghi redemption nguyên tử và giảm `usedCount`, chống hoàn trả trùng lặp (Idempotent). |
-| 5 | `Discount_Financial_Impact_Refund_And_Settlement` | Sequence Diagram | Tác động tài chính liên module: Hoàn tiền (Refund) chỉ hoàn tiền mặt thực trả của khách (`finalAmount`), không hoàn tiền phần voucher; Đối soát (Settlement) tính hoa hồng dựa trên cơ sở tài trợ (`effectiveCommissionBasis`), xử lý hoàn tiền một phần bằng cơ chế đảo ngược trợ giá theo tỷ lệ. |
+| # | Sơ đồ | Loại | Mã nguồn Mermaid (.mmd) | Nội dung |
+|---|-------|------|--------------------------|----------|
+| 1 | `Discount_Checkout_Preview_And_Eligibility_DF` | Decision Flowchart | [`codeFlows/Decision_Flowchart/Discount_Checkout_Preview_And_Eligibility_DF.mmd`](codeFlows/Decision_Flowchart/Discount_Checkout_Preview_And_Eligibility_DF.mmd) | Cây quyết định kiểm tra điều kiện áp mã: trạng thái booking, IDOR, thời hạn, quota sàn/user, scope, min order, chặn voucher 100% |
+| 2 | `Discount_Allocation_HareNiemeyer_DF` | Decision Flowchart | [`codeFlows/Decision_Flowchart/Discount_Allocation_HareNiemeyer_DF.mmd`](codeFlows/Decision_Flowchart/Discount_Allocation_HareNiemeyer_DF.mmd) | Cây quyết định thuật toán phân bổ Largest Remainder (Hare-Niemeyer) làm tròn lẻ từng đồng VNĐ qua các Sub-Orders |
+| 3 | `Discount_Code_Management_And_Validation_SD` | Sequence Diagram | [`codeFlows/Sequence_Diagram/Discount_Code_Management_And_Validation_SD.mmd`](codeFlows/Sequence_Diagram/Discount_Code_Management_And_Validation_SD.mmd) | Quản lý mã giảm giá Admin & Vendor: kiểm tra toàn vẹn nghiệp vụ qua `DiscountCodeRules`, phân lập phạm vi tài trợ, chống IDOR |
+| 4 | `Discount_Order_Creation_Allocation_And_Locking_SD` | Sequence Diagram | [`codeFlows/Sequence_Diagram/Discount_Order_Creation_Allocation_And_Locking_SD.mmd`](codeFlows/Sequence_Diagram/Discount_Order_Creation_Allocation_And_Locking_SD.mmd) | Khởi tạo đơn hàng có áp dụng mã: kiểm tra Idempotency & IDOR, khóa bi quan Voucher (`FOR UPDATE`), tăng `usedCount` nguyên tử |
+| 5 | `Discount_Reservation_Release_On_Cancel_Or_Expiry_SD` | Sequence Diagram | [`codeFlows/Sequence_Diagram/Discount_Reservation_Release_On_Cancel_Or_Expiry_SD.mmd`](codeFlows/Sequence_Diagram/Discount_Reservation_Release_On_Cancel_Or_Expiry_SD.mmd) | Giải phóng quota voucher tự động khi khách hủy booking hoặc hết hạn 15 phút, xóa redemption nguyên tử, chống hoàn trùng |
 
 ---
 
-## 1. Discount_Code_Management_And_Validation.png — Quản Lý Mã Giảm Giá & Quy Tắc Ràng Buộc
+## 1. Discount_Code_Management_And_Validation_SD.png — Quản Lý Mã Giảm Giá & Quy Tắc Ràng Buộc
 
 **Luồng nghiệp vụ chi tiết:**
 1. **Admin quản lý mã toàn sàn hoặc tài trợ (`POST/PATCH /api/admin/discount-codes`):**
@@ -35,7 +35,7 @@
 
 ---
 
-## 2. Discount_Checkout_Preview_And_Eligibility.png — Xem Trước Giảm Giá Khi Đặt Đơn (Preview)
+## 2. Discount_Checkout_Preview_And_Eligibility_DF.png — Xem Trước Giảm Giá Khi Đặt Đơn (Preview)
 
 **Luồng nghiệp vụ chi tiết:**
 1. Khách hàng gửi yêu cầu xem trước qua `POST /api/checkout/discount-preview` kèm `{bookingId, discountCode}`.
@@ -59,7 +59,7 @@
 
 ---
 
-## 3. Discount_Order_Creation_Allocation_And_Locking.png — Tạo Đơn Hàng, Khóa Bi Quan & Phân Bổ
+## 3. Discount_Order_Creation_Allocation_And_Locking_SD.png — Tạo Đơn Hàng, Khóa Bi Quan & Phân Bổ
 
 **Luồng nghiệp vụ chi tiết:**
 1. Khách hàng gửi yêu cầu tạo đơn qua `POST /api/orders` kèm `{bookingId, discountCode}` và header `Idempotency-Key`.
@@ -95,7 +95,7 @@
 
 ---
 
-## 4. Discount_Reservation_Release_On_Cancel_Or_Expiry.png — Giải Phóng & Hoàn Trả Quota Tự Động
+## 4. Discount_Reservation_Release_On_Cancel_Or_Expiry_SD.png — Giải Phóng & Hoàn Trả Quota Tự Động
 
 **Luồng nghiệp vụ chi tiết:**
 1. **Hai nguồn kích hoạt giải phóng voucher khi đơn chưa thanh toán:**
@@ -127,7 +127,7 @@
 
 ---
 
-## 5. Discount_Financial_Impact_Refund_And_Settlement.png — Tác Động Tài Chính Hoàn Tiền & Đối Soát
+## 5. Discount_Financial_Impact_Refund_And_Settlement_SD.png — Tác Động Tài Chính Hoàn Tiền & Đối Soát
 
 **Luồng nghiệp vụ chi tiết:**
 1. **Tác động Hoàn tiền (Refund Impact):**

@@ -1,0 +1,48 @@
+sequenceDiagram
+    autonumber
+    actor Customer as Khách Hàng
+    participant Controller as WeatherController
+    participant Cache as WeatherForecastCacheService
+    participant Client as OpenMeteoApiClient
+    participant MetAPI as Open-Meteo Khí Tượng API
+    participant MarineAPI as Open-Meteo Hải Văn API
+    participant RuleService as CategorySafetyRuleService
+    participant Engine as WeatherRuleEngine
+
+    Customer->>Controller: GET /api/v1/weather/advance-safety-check (lat, lng, categoryId, targetDateTime)
+    Controller->>Cache: getForecast(lat, lng, targetDateTime)
+    activate Cache
+
+    alt Cache Hit (Đã có dữ liệu dự báo trong Redis/Local Cache)
+        Cache-->>Controller: WeatherInfoDto (from Cache)
+    else Cache Miss (Chưa có dự báo)
+        Cache->>Client: fetchParallelForecast(lat, lng)
+        activate Client
+
+        par Gọi song song 2 API Open-Meteo
+            Client->>MetAPI: GET /v1/forecast (forecast_days=16: temp, rain, wind_gust, WMO)
+            MetAPI-->>Client: Meteorological Data
+        and
+            Client->>MarineAPI: GET /v1/marine (forecast_days=8: wave_height, period, swell)
+            MarineAPI-->>Client: Marine Ocean Data
+        end
+
+        Client->>Client: Hợp nhất dữ liệu -> WeatherInfoDto
+        Client-->>Cache: WeatherInfoDto
+        deactivate Client
+
+        Cache->>Cache: Lưu Cache Redis (TTL 1 giờ)
+        Cache-->>Controller: WeatherInfoDto
+    end
+    deactivate Cache
+
+    Controller->>RuleService: getRuleByCategoryId(categoryId)
+    RuleService-->>Controller: CategorySafetyRule
+
+    Controller->>Engine: evaluateSafety(weatherInfo, categorySafetyRule)
+    activate Engine
+    Engine->>Engine: Đánh giá gió, sóng, mưa, tầm nhìn so với ngưỡng
+    Engine-->>Controller: SafetyEvaluationResult (GREEN / YELLOW / RED, chi tiết, khuyến cáo)
+    deactivate Engine
+
+    Controller-->>Customer: 200 OK (SafetyEvaluationResult)

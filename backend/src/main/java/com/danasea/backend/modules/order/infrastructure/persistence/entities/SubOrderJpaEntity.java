@@ -1,17 +1,12 @@
 package com.danasea.backend.modules.order.infrastructure.persistence.entities;
 
 import com.danasea.backend.modules.order.domain.models.RefundReason;
-
 import com.danasea.backend.modules.order.domain.models.SubOrderStatus;
+import com.danasea.backend.shared.core.infrastructure.persistence.entities.BaseJpaEntity;
+import jakarta.persistence.*;
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 import java.util.UUID;
-
-import jakarta.persistence.*;
-
-import com.danasea.backend.modules.order.domain.models.SubOrderStatus;
-import com.danasea.backend.shared.core.infrastructure.persistence.entities.BaseJpaEntity;
-
 import lombok.Getter;
 import lombok.Setter;
 
@@ -75,6 +70,15 @@ public class SubOrderJpaEntity extends BaseJpaEntity {
 
     @Column(name = "vendor_notified_at")
     private OffsetDateTime vendorNotifiedAt;
+
+    @Column(name = "reschedule_version", nullable = false)
+    private Long rescheduleVersion = 0L;
+
+    @Column(name = "rescheduled_at")
+    private OffsetDateTime rescheduledAt;
+
+    @Column(name = "original_slot_id")
+    private UUID originalSlotId;
 
     public BigDecimal getFinalAmount() {
         if (finalAmount != null) {

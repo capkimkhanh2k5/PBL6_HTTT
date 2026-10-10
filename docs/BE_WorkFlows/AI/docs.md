@@ -4,22 +4,22 @@
 
 | # | Sơ đồ | Loại | Mã Nguồn (.mmd) | Nội dung cốt lõi |
 |---|-------|------|-----------------|-------------------|
-| 1 | `AI_Chat` | Sequence Diagram | `codeFlows/AI_Chat.mmd` | Luồng tổng quan Chat AI (AiExecutionBudgetFilter 8s → Idempotency → LlamaGuard → LLM Tool Loop → ArtifactMapper → DB) |
-| 2 | `Chat_ModerationFlow` | Sequence Diagram | `codeFlows/Chat_ModerationFlow.mmd` | Chi tiết bảo vệ: Rate Limit 2 tầng, cắt chuỗi 1800 ký tự chống Padding, Tool Calling 5 lượt, Policy Guard thu hồi câu trả lời không có căn cứ |
-| 3 | `RevalidBooking` | Sequence Diagram | `codeFlows/RevalidBooking.mmd` | Xác nhận đặt chỗ thời gian thực: Outcome bền vững V25, Khóa phân tán Redis 30s, Ràng buộc 3 bên, Grouping gói riêng, Tái thẩm định giá/slot & Bù trừ rollback |
-| 4 | `RevalidBookingFlow` | Flowchart | `codeFlows/RevalidBookingFlow.mmd` | Cây quyết định phân nhánh Re-validation chi tiết: Outcome replay → PENDING check → Package grouping → Slot/Price check → Retry count < 2 → Khóa tồn kho nguyên tử |
-| 5 | `RollKeys_ModelFallBack` | Flowchart | `codeFlows/RollKeys_ModelFallBack.mmd` | Xoay 5 API Key Groq (ACTIVE / COOLDOWN 1p / DISABLED) + Fallback Model tức thời khi gặp lỗi 429/401/5xx |
-| 6 | `AI_Hybrid_Architecture` | Architecture Diagram | `codeFlows/AI_Hybrid_Architecture.mmd` | Bức tranh kiến trúc phân tầng 3 lớp Hybrid AI toàn diện: 8 Controllers, AiExecutionBudgetFilter, 14 Use Cases, Monitoring Job, 15 Tools, Dual-Brain AI, Postgres V21-V25 & Redis |
-| 7 | `Customer_AI_Discovery_Flow` | Sequence Diagram | `codeFlows/Customer_AI_Discovery_Flow.mmd` | Khám phá Dịch vụ Thông minh (Search, Recommend, Nearby): Quét Catalog 10k items budget 8s, Preferences Consented, Lọc thời tiết 20 slot, Quyet Relevance top 5, Tracking recommendationId |
-| 8 | `Itinerary_Planning_And_Replan_Flow` | Sequence Diagram | `codeFlows/Itinerary_Planning_And_Replan_Flow.mmd` | Chu trình Lập lịch 3 giai đoạn: (1) Preview → Save Draft → Accept tái kiểm tra giá/thời tiết; (2) Re-plan tạo Proposal PENDING (diff); (3) Job nền giám sát nguồn tự động mỗi 60s |
-| 9 | `Content_Assessment_And_Transaction_Risk_Flow` | Sequence Diagram | `codeFlows/Content_Assessment_And_Transaction_Risk_Flow.mmd` | Kiểm duyệt văn bản (Regex + Quyet Moderation/Category), Phân tích rủi ro giao dịch (Quy tắc vận tốc 3/5/3), Hàng đợi xét duyệt Admin có khóa lạc quan |
-| 10 | `AI_Travel_Assistant_MultiTool_Flow` | Sequence Diagram | `codeFlows/AI_Travel_Assistant_MultiTool_Flow.mmd` | Trợ lý du lịch đa công cụ (15 tools), Structured Artifacts (typed cards), Tạo thẻ Native Option Card trên Redis & Re-validation bền vững |
-| 11 | `Customer_Preference_And_Feedback_Flow` | Sequence Diagram | `codeFlows/Customer_Preference_And_Feedback_Flow.mmd` | Quản lý sở thích cá nhân hóa (Consent bật/tắt, Exclusions, Version), Vòng lặp phản hồi gợi ý (SHOWN, CLICK, POSITIVE, NEGATIVE) & Tác động điểm xếp hạng |
-| 12 | `Customer_Support_And_Admin_Queue_Flow` | Sequence Diagram | `codeFlows/Customer_Support_And_Admin_Queue_Flow.mmd` | Hỗ trợ khách hàng AI (Tra cứu đơn của chính mình, Quyet Topic/Urgency, AI Cancellation Preview tính phí hoàn), Tạo ticket có Idempotency & Hàng đợi Admin xử lý thủ công |
+| 1 | `AI_Chat` | Sequence Diagram | [`codeFlows/Sequence_Diagram/AI_Chat_SD.mmd`](codeFlows/Sequence_Diagram/AI_Chat_SD.mmd) | Luồng tổng quan Chat AI (AiExecutionBudgetFilter 8s → Idempotency → LlamaGuard → LLM Tool Loop → ArtifactMapper → DB) |
+| 2 | `Chat_ModerationFlow` | Sequence Diagram | [`codeFlows/Sequence_Diagram/Chat_Moderation_SD.mmd`](codeFlows/Sequence_Diagram/Chat_Moderation_SD.mmd) | Chi tiết bảo vệ: Rate Limit 2 tầng, cắt chuỗi 1800 ký tự chống Padding, Tool Calling 5 lượt, Policy Guard thu hồi câu trả lời không có căn cứ |
+| 3 | `RevalidBooking` | Sequence Diagram | [`codeFlows/Sequence_Diagram/RevalidBooking_SD.mmd`](codeFlows/Sequence_Diagram/RevalidBooking_SD.mmd) | Xác nhận đặt chỗ thời gian thực: Outcome bền vững V25, Khóa phân tán Redis 30s, Ràng buộc 3 bên, Grouping gói riêng, Tái thẩm định giá/slot & Bù trừ rollback |
+| 4 | `RevalidBookingFlow` | Decision Flowchart | [`codeFlows/Decision_Flowchart/RevalidBooking_DF.mmd`](codeFlows/Decision_Flowchart/RevalidBooking_DF.mmd) | Cây quyết định phân nhánh Re-validation chi tiết: Outcome replay → PENDING check → Package grouping → Slot/Price check → Retry count < 2 → Khóa tồn kho nguyên tử |
+| 5 | `RollKeys_ModelFallBack` | Decision Flowchart | [`codeFlows/Decision_Flowchart/RollKeys_ModelFallBack_DF.mmd`](codeFlows/Decision_Flowchart/RollKeys_ModelFallBack_DF.mmd) | Cây quyết định xoay 5 API Key Groq (ACTIVE / COOLDOWN 1p / DISABLED) + Fallback Model tức thời khi gặp lỗi 429/401/5xx |
+| 6 | `AI_Hybrid_Architecture` | Architecture Diagram | [`codeFlows/Architecture/AI_Hybrid_Architecture_ARCH.mmd`](codeFlows/Architecture/AI_Hybrid_Architecture_ARCH.mmd) | Bức tranh kiến trúc phân tầng 3 lớp Hybrid AI toàn diện: 8 Controllers, AiExecutionBudgetFilter, 14 Use Cases, Monitoring Job, 15 Tools, Dual-Brain AI, Postgres V21-V25 & Redis |
+| 7 | `Customer_AI_Discovery_Flow` | Sequence Diagram | [`codeFlows/Sequence_Diagram/Customer_AI_Discovery_SD.mmd`](codeFlows/Sequence_Diagram/Customer_AI_Discovery_SD.mmd) | Khám phá Dịch vụ Thông minh (Search, Recommend, Nearby): Quét Catalog 10k items budget 8s, Preferences Consented, Lọc thời tiết 20 slot, Quyet Relevance top 5, Tracking recommendationId |
+| 8 | `Itinerary_Planning_And_Replan_Flow` | Sequence Diagram | [`codeFlows/Sequence_Diagram/Itinerary_Planning_And_Replan_SD.mmd`](codeFlows/Sequence_Diagram/Itinerary_Planning_And_Replan_SD.mmd) | Chu trình Lập lịch 3 giai đoạn: (1) Preview → Save Draft → Accept tái kiểm tra giá/thời tiết; (2) Re-plan tạo Proposal PENDING (diff); (3) Job nền giám sát nguồn tự động mỗi 60s |
+| 9 | `Content_Assessment_And_Transaction_Risk_Flow` | Sequence Diagram | [`codeFlows/Sequence_Diagram/Content_Assessment_And_Transaction_Risk_SD.mmd`](codeFlows/Sequence_Diagram/Content_Assessment_And_Transaction_Risk_SD.mmd) | Kiểm duyệt văn bản (Regex + Quyet Moderation/Category), Phân tích rủi ro giao dịch (Quy tắc vận tốc 3/5/3), Hàng đợi xét duyệt Admin có khóa lạc quan |
+| 10 | `AI_Travel_Assistant_MultiTool_Flow` | Sequence Diagram | [`codeFlows/Sequence_Diagram/AI_Travel_Assistant_MultiTool_SD.mmd`](codeFlows/Sequence_Diagram/AI_Travel_Assistant_MultiTool_SD.mmd) | Trợ lý du lịch đa công cụ (15 tools), Structured Artifacts (typed cards), Tạo thẻ Native Option Card trên Redis & Re-validation bền vững |
+| 11 | `Customer_Preference_And_Feedback_Flow` | Sequence Diagram | [`codeFlows/Sequence_Diagram/Customer_Preference_And_Feedback_SD.mmd`](codeFlows/Sequence_Diagram/Customer_Preference_And_Feedback_SD.mmd) | Quản lý sở thích cá nhân hóa (Consent bật/tắt, Exclusions, Version), Vòng lặp phản hồi gợi ý (SHOWN, CLICK, POSITIVE, NEGATIVE) & Tác động điểm xếp hạng |
+| 12 | `Customer_Support_And_Admin_Queue_Flow` | Sequence Diagram | [`codeFlows/Sequence_Diagram/Customer_Support_And_Admin_Queue_SD.mmd`](codeFlows/Sequence_Diagram/Customer_Support_And_Admin_Queue_SD.mmd) | Hỗ trợ khách hàng AI (Tra cứu đơn của chính mình, Quyet Topic/Urgency, AI Cancellation Preview tính phí hoàn), Tạo ticket có Idempotency & Hàng đợi Admin xử lý thủ công |
 
 ---
 
-## 1. AI_Chat.png — Luồng tổng quan AI Chat
+## 1. AI_Chat_SD.png — Luồng tổng quan AI Chat
 
 **Thành phần:** `User (Client)` → `AiExecutionBudgetFilter` → `LocaleContextFilter` → `AssistantController` → `RedisRateLimiter` → `ChatIdempotencyService` → `GroqModerationClient (Prompt Guard)` → `ChatHistoryService` → `ChatUseCase` → `GroqLlmClient` → `AIToolRegistry (15 Tools)` → `AssistantArtifactMapper` → `PostgreSQL`
 
@@ -40,7 +40,7 @@
 
 ---
 
-## 2. Chat_ModerationFlow.png — Chi tiết Moderation & Tool Calling
+## 2. Chat_Moderation_SD.png — Chi tiết Moderation & Tool Calling
 
 **Thành phần:** `Khách Hàng` → `AssistantController` → `RedisRateLimiter (2-Layer)` → `GroqModerationClient` → `ChatUseCase` → `GroqLlmClient (Rotator 5 Keys)` → `ToolExecutor [ConversationAware]` → `PolicyGuard` → `Postgres & Redis`
 
@@ -58,7 +58,7 @@
 
 ---
 
-## 3. RevalidBooking.png — Xác nhận đặt chỗ thời gian thực (Sequence & Bảo mật)
+## 3. RevalidBooking_SD.png — Xác nhận đặt chỗ thời gian thực (Sequence & Bảo mật)
 
 **Thành phần:** `User` → `AssistantController` → `ChatHistoryService` → `ConfirmBookingUseCase` → `ConfirmationOutcomeAdapter (V25)` → `RedisConfirmationCardStore` → `AiCatalogReadApi` → `CreateBookingHoldUseCase` → `CancelBookingHoldUseCase`
 
@@ -95,7 +95,7 @@
 
 ---
 
-## 4. RevalidBookingFlow.png — Cây quyết định phân nhánh Re-validation (Flowchart)
+## 4. RevalidBooking_DF.png — Cây quyết định phân nhánh Re-validation (Flowchart)
 
 **Cây quyết định chi tiết:**
 1. Khách gửi yêu cầu `POST /conversations/{id}/confirm` → Kiểm tra `conversation.userId == currentUserId`:
@@ -127,7 +127,7 @@
 
 ---
 
-## 5. RollKeys_ModelFallBack.png — Xoay API Key & Fallback Model Groq
+## 5. RollKeys_ModelFallBack_DF.png — Xoay API Key & Fallback Model Groq
 
 **Chiến lược độ tin cậy dịch vụ (Zero-Downtime Resilience):**
 - Quản lý **5 API Key Groq** trong Redis Key Pool với 3 trạng thái:
@@ -148,7 +148,7 @@ Khi cạn toàn bộ 5 Key trong pool hoặc vượt quá ngân sách thời gia
 
 ---
 
-## 6. AI_Hybrid_Architecture.png — Kiến trúc phân tầng 3 lớp Hybrid AI (Toàn diện)
+## 6. AI_Hybrid_Architecture_ARCH.png — Kiến trúc phân tầng 3 lớp Hybrid AI (Toàn diện)
 
 **Sự kết hợp hoàn chỉnh của hệ thống AI DANASEA:**
 1. **Tầng Giao Diện (Client Apps):** Web App (React / Vite) và Mobile App (Flutter).
@@ -184,7 +184,7 @@ Khi cạn toàn bộ 5 Key trong pool hoặc vượt quá ngân sách thời gia
 
 ---
 
-## 7. Customer_AI_Discovery_Flow.png — Khám phá Dịch vụ Thông minh (Search, Recommend, Nearby)
+## 7. Customer_AI_Discovery_SD.png — Khám phá Dịch vụ Thông minh (Search, Recommend, Nearby)
 
 **Thành phần:** `Client` → `CustomerAiController` → `TravelQueryParser` → `CustomerPreferenceReadApi` → `DiscoverServicesUseCase` → `AiCatalogReader (Postgres)` → `Quyet Small Worker` → `TravelWeatherPort` → `ai_recommendations`
 
@@ -211,7 +211,7 @@ Khi cạn toàn bộ 5 Key trong pool hoặc vượt quá ngân sách thời gia
 
 ---
 
-## 8. Itinerary_Planning_And_Replan_Flow.png — Lập Lịch Trình, Vòng Đời & Tái Lập Lịch (3 Giai Đoạn)
+## 8. Itinerary_Planning_And_Replan_SD.png — Lập Lịch Trình, Vòng Đời & Tái Lập Lịch (3 Giai Đoạn)
 
 **Thành phần:** `Client` → `ItineraryLifecycleController` → `PlanItineraryUseCase` → `DiscoverServicesUseCase` → `TravelWeatherPort` → `ItinerarySourceMonitoringJob` → `PostgreSQL (V21 & V23)` → `In-App Notification`
 
@@ -251,7 +251,7 @@ Khi cạn toàn bộ 5 Key trong pool hoặc vượt quá ngân sách thời gia
 
 ---
 
-## 9. Content_Assessment_And_Transaction_Risk_Flow.png — Kiểm Duyệt Văn Bản & Rủi Ro Giao Dịch
+## 9. Content_Assessment_And_Transaction_Risk_SD.png — Kiểm Duyệt Văn Bản & Rủi Ro Giao Dịch
 
 **Thành phần:** `User/Vendor/Admin` → `AiAssessmentController` / `AdminAiController` → `AssessTextUseCase` / `AnalyzeTransactionRiskUseCase` → `TransactionRiskReadPort` → `Quyet Small Worker` → `AssessmentCaseStorePort (PostgreSQL V21)`
 
@@ -279,7 +279,7 @@ Khi cạn toàn bộ 5 Key trong pool hoặc vượt quá ngân sách thời gia
 
 ---
 
-## 10. AI_Travel_Assistant_MultiTool_Flow.png — Trợ Lý Du Lịch Đa Công Cụ (15 Tools & Structured Artifacts)
+## 10. AI_Travel_Assistant_MultiTool_SD.png — Trợ Lý Du Lịch Đa Công Cụ (15 Tools & Structured Artifacts)
 
 **Thành phần:** `Client` → `AiExecutionBudgetFilter` → `AssistantController` → `ChatIdempotencyService` → `GroqLlmClient` → `AIToolRegistry (15 Tools)` → `CustomerFeatureTool` → `AssistantArtifactMapper` → `ConfirmBookingUseCase` → `CreateBookingHoldUseCase`
 
@@ -307,7 +307,7 @@ Khi cạn toàn bộ 5 Key trong pool hoặc vượt quá ngân sách thời gia
 
 ---
 
-## 11. Customer_Preference_And_Feedback_Flow.png — Quản Lý Sở Thích Cá Nhân Hóa & Phản Hồi Gợi Ý
+## 11. Customer_Preference_And_Feedback_SD.png — Quản Lý Sở Thích Cá Nhân Hóa & Phản Hồi Gợi Ý
 
 **Thành phần:** `Khách Hàng (User)` → `CustomerPreferenceController` → `CustomerPreferenceUseCase` → `DiscoverServicesUseCase` → `PostgreSQL (V24 Preferences & Recommendations)`
 
@@ -332,7 +332,7 @@ Khi cạn toàn bộ 5 Key trong pool hoặc vượt quá ngân sách thời gia
 
 ---
 
-## 12. Customer_Support_And_Admin_Queue_Flow.png — Luồng Hỗ Trợ Khách Hàng AI & Hàng Đợi Admin
+## 12. Customer_Support_And_Admin_Queue_SD.png — Luồng Hỗ Trợ Khách Hàng AI & Hàng Đợi Admin
 
 **Thành phần:** `Khách Hàng (Customer)` → `Quản Trị Viên (Admin)` → `CustomerSupportWorkflowController` → `ManualSupportController` → `CustomerSupportUseCase` → `CustomerSupportRequestUseCase` → `CustomerRefundEligibilityPolicy` → `Core Order Module` → `Quyet Worker` → `PostgreSQL V24` → `In-App Notification`
 

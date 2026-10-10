@@ -1,14 +1,13 @@
 package com.danasea.backend.modules.booking.domain.models;
 
+import com.danasea.backend.modules.service.domain.models.PricingUnit;
+import com.danasea.backend.shared.core.domain.models.BaseDomainModel;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
-
-import com.danasea.backend.modules.service.domain.models.PricingUnit;
-import com.danasea.backend.shared.core.domain.models.BaseDomainModel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -30,6 +29,8 @@ public class BookingItem extends BaseDomainModel {
     private PricingUnit pricingUnit;
     private Integer quantity;
     private Integer participantsCount;
+    private Integer maxPaxPerPackage;
+    private boolean allowSplit;
     private LocalDate bookingDate;
     private LocalTime bookingTime;
     private BigDecimal price;

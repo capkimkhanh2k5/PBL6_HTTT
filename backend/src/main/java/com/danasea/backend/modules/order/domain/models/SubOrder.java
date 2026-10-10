@@ -1,15 +1,12 @@
 package com.danasea.backend.modules.order.domain.models;
 
-import com.danasea.backend.modules.order.domain.models.RefundReason;
 
+import com.danasea.backend.modules.order.domain.exceptions.InvalidOrderStateException;
+import com.danasea.backend.shared.core.domain.models.BaseDomainModel;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.OffsetDateTime;
 import java.util.UUID;
-
-import com.danasea.backend.modules.order.domain.exceptions.InvalidOrderStateException;
-import com.danasea.backend.shared.core.domain.models.BaseDomainModel;
-
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
@@ -43,6 +40,9 @@ public class SubOrder extends BaseDomainModel {
     private UUID qrSecret;
     private OffsetDateTime checkedInAt;
     private OffsetDateTime vendorNotifiedAt;
+    private Long rescheduleVersion = 0L;
+    private OffsetDateTime rescheduledAt;
+    private UUID originalSlotId;
 
     public SubOrder() {
         super();

@@ -2,14 +2,15 @@
 
 > Module Check-In cung cấp cơ chế tạo và xác thực mã QR an toàn phục vụ khách hàng làm thủ tục check-in trải nghiệm dịch vụ tại thực địa với đối tác/vendor.
 
-| # | Sơ đồ | Loại | Nội dung |
-|---|-------|------|----------|
-| 1 | `CheckIn_GenerateQR` | Sequence Diagram | Khách hàng khởi tạo mã QR check-in: Dual-resolution (hỗ trợ cả SubOrder ID và MasterOrder ID), kiểm tra IDOR, ràng buộc trạng thái đơn hàng và ký số HMAC-SHA256 |
-| 2 | `CheckIn_VendorVerify` | Sequence Diagram | Vendor/Nhân viên quét và xác thực mã QR: Kiểm tra tính toàn vẹn chữ ký HMAC (constant-time), chống tấn công phát lại (Anti-Replay), kiểm tra khung giờ hợp lệ (`CheckinWindowPolicy`) và cập nhật trạng thái đơn hàng |
+| # | Sơ đồ | Loại | Mã nguồn Mermaid (.mmd) | Nội dung |
+|---|-------|------|--------------------------|----------|
+| 1 | `CheckIn_Vendor_Verify_DF` | Decision Flowchart | [`codeFlows/Decision_Flowchart/CheckIn_Vendor_Verify_DF.mmd`](codeFlows/Decision_Flowchart/CheckIn_Vendor_Verify_DF.mmd) | Cây quyết định xác thực 6 cổng: Constant-time HMAC, DB Token tồn tại, Anti-Replay vé quay vòng, TTL, Vendor Match và Check-in Window |
+| 2 | `CheckIn_Generate_QR_SD` | Sequence Diagram | [`codeFlows/Sequence_Diagram/CheckIn_Generate_QR_SD.mmd`](codeFlows/Sequence_Diagram/CheckIn_Generate_QR_SD.mmd) | Khách hàng khởi tạo mã QR check-in: Dual-resolution (hỗ trợ cả SubOrder ID và MasterOrder ID), kiểm tra IDOR, ràng buộc trạng thái đơn hàng và ký số HMAC-SHA256 |
+| 3 | `CheckIn_Vendor_Verify_SD` | Sequence Diagram | [`codeFlows/Sequence_Diagram/CheckIn_Vendor_Verify_SD.mmd`](codeFlows/Sequence_Diagram/CheckIn_Vendor_Verify_SD.mmd) | Vendor/Nhân viên quét và xác thực mã QR: Kiểm tra tính toàn vẹn chữ ký HMAC (constant-time), chống tấn công phát lại (Anti-Replay), kiểm tra khung giờ hợp lệ (`CheckinWindowPolicy`) và cập nhật trạng thái đơn hàng |
 
 ---
 
-## 1. CheckIn_GenerateQR.png — Khách Hàng Tạo Mã QR Check-in
+## 1. CheckIn_GenerateQR_SD.png — Khách Hàng Tạo Mã QR Check-in
 
 **Lớp xử lý chính:** `com.danasea.backend.modules.checkin.application.usecases.GenerateCheckinQrUseCase`
 
@@ -23,7 +24,7 @@
 
 ---
 
-## 2. CheckIn_VendorVerify.png — Vendor Quét & Xác Thực Check-in
+## 2. CheckIn_VendorVerify_SD.png — Vendor Quét & Xác Thực Check-in
 
 **Lớp xử lý chính:** `com.danasea.backend.modules.checkin.application.usecases.VerifyCheckinUseCase`
 

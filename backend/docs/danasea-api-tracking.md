@@ -433,17 +433,37 @@ Hai item phải nhận hai đơn vị khác nhau và tính giá hai gói. Nhóm 
 - [x] GET /api/admin/category-safety-rules
 - [x] PATCH /api/admin/category-safety-rules/{categoryId}
 - [x] GET /api/admin/weather-alerts
-- [x] POST /api/admin/weather-alerts/{evaluationId}/resolve (evaluationId là ID bản đánh giá an toàn; action CANCEL_AND_REFUND hoặc DISMISSED)
+- [x] POST /api/admin/weather-alerts/{evaluationId}/resolve (evaluationId là ID bản đánh giá an toàn; action CANCEL_AND_REFUND hoặc DISMISSED; DISMISSED không gán isSafe=true)
+- [x] GET /api/sub-orders/{id}/reschedule-options (xem ca thay thế khả dụng, kiểm tra sức chứa đoàn/gói và phí đổi lịch 0 VNĐ)
+- [x] POST /api/vendor/sub-orders/{id}/reschedule-proposals (vendor đề xuất đổi ca thay thế do lý do vận hành)
+- [x] POST /api/sub-orders/{id}/reschedule (khách hàng xác nhận chuyển ca, có Idempotency-Key và optimistic lock version)
 
 ### Jobs và việc cần hoàn thiện
 - [x] Job thu thập weather/marine và job giám sát an toàn các slot sắp diễn ra
 - [x] Nối refund PENDING từ cảnh báo với luồng thực thi tại cổng thanh toán
-- [ ] Hoàn thiện đổi lịch thực tế; action DISMISSED hiện chỉ cập nhật bản đánh giá, không chuyển booking sang slot mới
+- [x] Hoàn thiện đổi lịch thực tế cho Sub-Order: Chuyển booking item, cập nhật tồn kho 2 ca nguyên tử, thu hồi QR cũ, tăng version và audit log; action DISMISSED tách biệt khỏi isSafe (không tự đặt isSafe=true khi dismiss).
+- [x] Cache thời tiết phân tầng: Fresh cache (<= 30m), Stale fallback (> 30m - <= 2h) khi nguồn ngoài lỗi trả kèm metadata đầy đủ (stale, source, fetchedAt, dataCoverage, estimatedMarine); Quá 2 giờ không dùng làm chứng nhận an toàn.
 
 ### Test
-- [ ] WeatherServiceAdapterTest (xử lý timeout/lỗi API bên thứ 3)
-- [ ] WeatherRuleEngineTest (vượt ngưỡng chặn, không vượt cho phép, không weather_sensitive bỏ qua)
-- [ ] WeatherAlertJobTest (không cảnh báo trùng)
+- [x] WeatherCacheFallbackTest (fresh cache, stale cache fallback khi upstream lỗi, từ chối cache > 2h, metadata dataCoverage & estimatedMarine)
+- [x] SubOrderRescheduleUseCaseTest (tra cứu options, vendor proposal, IDOR chặn, khách confirm chuyển ca, atomic inventory swap, cấp QR secret mới, optimistic lock conflict 409, idempotency replay/conflict 409)
+- [x] SubOrderRescheduleControllerTest (GET options 200, POST proposal 200, POST confirm 200)
+- [x] AdminWeatherAlertControllerTest (DISMISSED không ghi đè isSafe=true, CANCEL_AND_REFUND tạo refund PENDING)
+- [x] WeatherRuleEngineTest (vượt ngưỡng chặn, không vượt cho phép, không weather_sensitive bỏ qua)
+- [x] SlotWeatherMonitoringJobTest (không cảnh báo trùng; forecast cũ không tự gỡ cảnh báo RED)
+
+---
+
+### Reschedule contract and verification (2026-10-10)
+- Vendor proposals do not reserve inventory. `reasonType` supports `OPERATIONAL`/`WEATHER`; default expiry is the earliest of 24 hours, the original departure, and the proposed departure. A new proposal supersedes previous pending proposals under the same order lock.
+- Only the customer owner confirms a PAID/CONFIRMED, not checked-in, upcoming sub-order. Admin may inspect options but cannot accept on the customer's behalf. Target must remain open, published, within the same service/vendor, and without a known unsafe assessment.
+- Keep the purchased quantity, price, package-capacity snapshot, participants and original `allowSplit` consent. Availability includes live Redis holds; package availability counts empty whole units. Redis allocation is reused verbatim for DB commit. Temporary holds are released after commit/rollback, with a 2-minute expiry protecting crash recovery.
+- `Idempotency-Key` accepts 8–100 letters/digits or `._:-`; replay checks ownership and the complete target/proposal/version fingerprint, and returns the committed historical version. Conflict responses preserve HTTP 409 and code `RESCHEDULE_CONFLICT`.
+- V36 adds history/proposals, booking policy snapshots, and durable notification delivery markers; it can coexist with waiver V35. Legacy package limits conservatively retain allocated-unit capacity and participant requirements.
+- Weather cancellation locks and rechecks the current order/slot, releases inventory once, and creates a PENDING full-refund request. Resolution never invents `isSafe=true`. Refund notifications say the request is awaiting provider confirmation.
+- Cache freshness is 30 minutes; upstream errors/null results may use the same source payload up to 2 hours old, including Redis fallback after restart. Original source timestamps are preserved. Missing marine data is `METEOROLOGY_ONLY`, without an invented estimate. Advance safety returns `UNKNOWN` for stale/unverified/missing observations and beyond the forecast horizon; monitoring cannot clear warnings from stale data.
+- Durable proposal/history rows are retried each minute using separate transactions and idempotent notification keys. Trip reminders follow the new slot automatically.
+- Real PostgreSQL/Redis regression coverage: `ReschedulePersistenceIntegrationTest`; HTTP 409: `RescheduleHttpConflictTest`; source timestamps/fallback: `WeatherSourceFreshnessTest`; stale safety guard: `WeatherFreshnessSafetyGuardTest`.
 
 ---
 

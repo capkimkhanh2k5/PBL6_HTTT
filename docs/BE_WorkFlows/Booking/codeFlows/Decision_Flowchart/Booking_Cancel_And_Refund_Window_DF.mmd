@@ -1,0 +1,46 @@
+flowchart TD
+    %% ==========================================
+    %% DECISION FLOWCHART: BOOKING CANCEL & REFUND WINDOW
+    %% DANASEA Marine Tourism Platform
+    %% ==========================================
+
+    Start(["Khách hàng gửi yêu cầu hủy booking<br/><code>PATCH /api/bookings/{id}/cancel</code><br/>Body: <code>{reason}</code>"]) --> CheckAuth{"Xác thực JWT Token?"}
+
+    CheckAuth -- "Chưa đăng nhập / Token hết hạn" --> Err401["Trả về <b>HTTP 401 Unauthorized</b>"]
+    CheckAuth -- "Hợp lệ" --> FindBooking{"Tra cứu Booking theo ID?"}
+
+    FindBooking -- "Không tìm thấy" --> Err404["Trả về <b>HTTP 404 Not Found</b><br/><code>BOOKING_NOT_FOUND</code>"]
+    FindBooking -- "Tìm thấy bản ghi" --> CheckOwner{"Kiểm tra quyền sở hữu (IDOR Check)<br/><code>booking.customerId == currentUserId</code><br/>hoặc có quyền <code>ROLE_ADMIN</code>?"}
+
+    CheckOwner -- "Không khớp chủ sở hữu" --> Err403["Trả về <b>HTTP 403 Forbidden</b><br/><code>ACCESS_DENIED_NOT_OWNER</code>"]
+    CheckOwner -- "Đúng chủ đơn / Admin" --> CheckStatus{"Kiểm tra trạng thái Booking hiện tại?"}
+
+    CheckStatus -- "CANCELLED" --> Err400Cancelled["Trả về <b>HTTP 400 Bad Request</b><br/><code>BOOKING_ALREADY_CANCELLED</code>"]
+    CheckStatus -- "COMPLETED" --> Err400Completed["Trả về <b>HTTP 400 Bad Request</b><br/><code>BOOKING_CANNOT_CANCEL_COMPLETED</code>"]
+
+    %% NHÁNH 1: BOOKING ĐANG HOLD (CHƯA THANH TOÁN)
+    CheckStatus -- "HOLD (Chưa thanh toán)" --> ReleaseRedis["Giải phóng số lượng giữ trên Redis<br/><code>RedisInventoryLockAdapter.releaseHolds(...)</code>"]
+    ReleaseRedis --> CancelUnpaidOrder["Kiểm tra MasterOrder liên kết:<br/>Nếu đang <code>PENDING_PAYMENT</code> → chuyển <code>CANCELLED</code><br/>Giải phóng mã giảm giá (nếu có)"]
+    CancelUnpaidOrder --> MarkHoldCancelled["Cập nhật Booking <code>status = CANCELLED</code>"]
+    MarkHoldCancelled --> Return200Hold(["Trả về <b>HTTP 200 OK</b><br/>- <code>refundPercentage: 0%</code><br/>- <code>refundAmount: 0 VNĐ</code><br/>- Ghi chú: Đơn chưa thanh toán"])
+
+    %% NHÁNH 2: BOOKING ĐÃ CONFIRMED (ĐÃ THANH TOÁN)
+    CheckStatus -- "CONFIRMED (Đã thanh toán)" --> CheckDeparture{"Đánh giá khoảng cách tới giờ khởi hành<br/><code>hoursUntilDeparture = departureTime - now()</code>"}
+
+    CheckDeparture -- "HỦY SỚM (> 24 giờ)" --> EarlyCancel["<b>Áp dụng chính sách hoàn 100%</b><br/>- Giảm tồn kho đã đặt: <code>bookedCount = bookedCount - qty</code><br/>- Chuyển Booking <code>status = CANCELLED</code><br/>- Ghi nhận <code>refundPercentage = 100%</code>"]
+    EarlyCancel --> InitRefund100["Khởi tạo hoàn tiền qua <code>FinancialRefundPort</code><br/>- Tạo bản ghi <code>Refund (status = PENDING)</code><br/>- Lý do: <code>CUSTOMER_CANCEL</code><br/>- Kích hoạt <code>RefundProcessingService</code>"]
+    InitRefund100 --> Return200Early(["Trả về <b>HTTP 200 OK</b><br/>- <code>refundPercentage: 100%</code><br/>- Số tiền hoàn lại đầy đủ<br/>- Mã giao dịch hoàn tiền"])
+
+    CheckDeparture -- "HỦY TRỄ (<= 24 giờ)" --> LateCancel["<b>Áp dụng chính sách phạt hủy trễ</b><br/>- Khách mất 100% tiền vé (Hoàn 0%)<br/>- Vẫn giảm tồn kho <code>bookedCount</code> để nhường chỗ<br/>- Chuyển Booking <code>status = CANCELLED</code><br/>- Ghi nhận <code>refundPercentage = 0%</code>"]
+    LateCancel --> Return200Late(["Trả về <b>HTTP 200 OK</b><br/>- <code>refundPercentage: 0%</code><br/>- <code>refundAmount: 0 VNĐ</code><br/>- Ghi chú: Hủy sát giờ vi phạm chính sách"])
+
+    %% Style classes
+    classDef startEnd fill:#e0f2fe,stroke:#0284c7,stroke-width:2px,color:#0369a1;
+    classDef decision fill:#fef3c7,stroke:#d97706,stroke-width:2px,color:#92400e;
+    classDef action fill:#f0fdf4,stroke:#16a34a,stroke-width:2px,color:#15803d;
+    classDef error fill:#fee2e2,stroke:#dc2626,stroke-width:2px,color:#b91c1c;
+
+    class Start,Return200Hold,Return200Early,Return200Late startEnd;
+    class CheckAuth,FindBooking,CheckOwner,CheckStatus,CheckDeparture decision;
+    class ReleaseRedis,CancelUnpaidOrder,MarkHoldCancelled,EarlyCancel,InitRefund100,LateCancel action;
+    class Err401,Err404,Err403,Err400Cancelled,Err400Completed error;

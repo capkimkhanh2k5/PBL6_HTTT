@@ -1,0 +1,23 @@
+flowchart TD
+    Start(["HTTP Request đến Backend API"]) --> CheckHeader{"Request có chứa Header<br/><code>Accept-Language</code>?"}
+
+    CheckHeader -- "Không có Header" --> FallbackDefault["Sử dụng ngôn ngữ mặc định:<br/><code>SupportedLanguage.VI</code> (Tiếng Việt)"]
+    CheckHeader -- "Có Header" --> ParseTag["Trích xuất Primary Tag<br/>(ví dụ: <code>vi-VN</code> -> <code>vi</code>, <code>en-US</code> -> <code>en</code>)"]
+
+    ParseTag --> MatchLang{"Ngôn ngữ có nằm trong danh sách hỗ trợ<br/>(<code>vi</code>, <code>en</code>)?"}
+    MatchLang -- "Không hỗ trợ (ví dụ: fr, ja, zh)" --> FallbackWarn["Ghi nhận Fallback Metric<br/>Mặc định về <code>SupportedLanguage.VI</code>"]
+    MatchLang -- "Hợp lệ" --> SetLocale["Xác lập <code>LocaleContextHolder</code><br/>với Locale tương ứng"]
+
+    FallbackDefault --> SetContext["Lưu trữ Locale vào ThreadLocal Context"]
+    FallbackWarn --> SetContext
+    SetLocale --> SetContext
+
+    SetContext --> End(["Chuyển giao Request tới Controller & Service"])
+
+    classDef startEnd fill:#e0f2fe,stroke:#0284c7,stroke-width:2px,color:#0369a1;
+    classDef decision fill:#fef3c7,stroke:#d97706,stroke-width:2px,color:#92400e;
+    classDef action fill:#f0fdf4,stroke:#16a34a,stroke-width:2px,color:#15803d;
+
+    class Start,End startEnd;
+    class CheckHeader,MatchLang decision;
+    class FallbackDefault,ParseTag,FallbackWarn,SetLocale,SetContext action;

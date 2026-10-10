@@ -1,0 +1,81 @@
+sequenceDiagram
+    autonumber
+    actor Customer as Khách Hàng
+    participant Controller as OrderCancellationController
+    participant PreviewUseCase as GetCancellationPreviewUseCase
+    participant CancelUseCase as RequestRefundUseCase
+    participant Engine as RefundPolicyEngine
+    participant SubOrderRepo as SubOrderRepositoryPort
+    participant RefundRepo as RefundRepositoryPort
+    participant SlotPort as ServiceSlotPort
+    participant EventPublisher as OrderEventPublisherPort
+    participant DB as PostgreSQL
+
+    %% ==========================================
+    %% GIAI ĐOẠN 1: XEM TRƯỚC MỨC HOÀN TIỀN (PREVIEW)
+    %% ==========================================
+    rect rgb(240, 249, 255)
+    Note over Customer,DB: GIAI ĐOẠN 1: XEM TRƯỚC MỨC HOÀN TIỀN (QUERY - KHÔNG BIẾN ĐỔI DỮ LIỆU)
+    Customer->>Controller: GET /api/orders/sub-orders/{id}/cancel-preview
+    Controller->>PreviewUseCase: execute(subOrderId, currentUserId)
+    activate PreviewUseCase
+
+    PreviewUseCase->>SubOrderRepo: findById(subOrderId)
+    SubOrderRepo->>DB: SELECT * FROM sub_orders WHERE id = ?
+    DB-->>SubOrderRepo: SubOrderEntity
+    SubOrderRepo-->>PreviewUseCase: SubOrder
+
+    alt IDOR Violation (subOrder.customerId != currentUserId)
+        PreviewUseCase-->>Controller: throw AccessDeniedException (403)
+        Controller-->>Customer: 403 Forbidden
+    end
+
+    PreviewUseCase->>Engine: evaluate(CUSTOMER_REQUEST, departureTime, now, subOrder.finalAmount)
+    Engine-->>PreviewUseCase: RefundEvaluationResult(percentage, refundAmount)
+
+    PreviewUseCase-->>Controller: CancellationPreviewResult
+    deactivate PreviewUseCase
+    Controller-->>Customer: 200 OK (tỷ lệ dự kiến, số tiền hoàn, thời hạn hủy)
+    end
+
+    %% ==========================================
+    %% GIAI ĐOẠN 2: THỰC THI HỦY ĐƠN & KHỞI TẠO HOÀN TIỀN
+    %% ==========================================
+    rect rgb(254, 242, 242)
+    Note over Customer,DB: GIAI ĐOẠN 2: THỰC THI HỦY ĐƠN & KHỞI TẠO HOÀN TIỀN (COMMAND - GIAO DỊCH DB)
+    Customer->>Controller: POST /api/orders/sub-orders/{id}/cancel (reason)
+    Note over Customer,Controller: Header: Idempotency-Key, Authorization: Bearer JWT
+
+    Controller->>CancelUseCase: execute(command)
+    activate CancelUseCase
+
+    CancelUseCase->>SubOrderRepo: findByIdForUpdate(subOrderId)
+    SubOrderRepo->>DB: SELECT * FROM sub_orders WHERE id = ? FOR UPDATE
+    DB-->>SubOrderRepo: SubOrder
+
+    alt Đơn không ở trạng thái CONFIRMED
+        CancelUseCase-->>Controller: throw InvalidOrderStateException (400)
+        Controller-->>Customer: 400 Bad Request (Chỉ hủy được đơn CONFIRMED)
+    end
+
+    CancelUseCase->>Engine: evaluate(CUSTOMER_REQUEST, departureTime, now, subOrder.finalAmount)
+    Engine-->>CancelUseCase: RefundEvaluationResult(percentage, refundAmount)
+
+    alt Số tiền hoàn refundAmount > 0
+        CancelUseCase->>RefundRepo: save(new Refund(subOrderId, paymentId, refundAmount, PENDING, idempotencyKey))
+        RefundRepo->>DB: INSERT INTO refunds (...)
+        DB-->>RefundRepo: Refund Saved
+    end
+
+    CancelUseCase->>SlotPort: releaseBookedSlot(slotId, quantity)
+    SlotPort->>DB: UPDATE service_slots SET booked_count = booked_count - ? WHERE id = ?
+
+    CancelUseCase->>DB: UPDATE sub_orders SET status = 'CANCELLED', updated_at = now() WHERE id = ?
+
+    CancelUseCase->>EventPublisher: publishEvent(new SubOrderCancelledEvent(subOrderId, refundId))
+
+    CancelUseCase-->>Controller: CancellationResult(subOrderId, refundAmount, status)
+    deactivate CancelUseCase
+
+    Controller-->>Customer: 200 OK (Đã hủy thành công, mã hoàn tiền PENDING)
+    end

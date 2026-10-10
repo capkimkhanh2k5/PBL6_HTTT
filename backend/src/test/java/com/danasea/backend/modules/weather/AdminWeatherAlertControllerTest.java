@@ -1,5 +1,8 @@
 package com.danasea.backend.modules.weather;
 
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
+
 import com.danasea.backend.modules.communication.application.usecases.SendNotificationUseCase;
 import com.danasea.backend.modules.order.domain.models.RefundReason;
 import com.danasea.backend.modules.order.domain.models.RefundStatus;
@@ -16,15 +19,6 @@ import com.danasea.backend.modules.service.infrastructure.persistence.repositori
 import com.danasea.backend.modules.weather.infrastructure.persistence.entities.SafetyRuleEvaluationJpaEntity;
 import com.danasea.backend.modules.weather.infrastructure.persistence.repositories.JpaSafetyRuleEvaluationRepository;
 import com.danasea.backend.modules.weather.presentation.controllers.AdminWeatherAlertController;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.http.ResponseEntity;
-
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -33,9 +27,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
-
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.http.ResponseEntity;
 
 @ExtendWith(MockitoExtension.class)
 @DisplayName("AdminWeatherAlertController Tests")
@@ -179,6 +178,7 @@ class AdminWeatherAlertControllerTest {
         AdminWeatherAlertController.ResolveAlertRequest request =
                 new AdminWeatherAlertController.ResolveAlertRequest("CANCEL_AND_REFUND", "Bão giật cấp 6 không an toàn");
 
+        WeatherCancellationFixture.install(controller, subOrderRepository, refundRepository, slotRepository, slotId);
         ResponseEntity<Map<String, Object>> response = controller.resolveAlert(evaluationId, request);
 
         assertEquals(200, response.getStatusCode().value());
@@ -187,7 +187,7 @@ class AdminWeatherAlertControllerTest {
 
         // Kiểm tra SubOrder chuyển trạng thái CANCELLED
         assertEquals(SubOrderStatus.CANCELLED, subOrder.getStatus());
-        verify(subOrderRepository).save(subOrder);
+        verify(subOrderRepository).saveAndFlush(subOrder);
 
         // Kiểm tra tạo bản ghi Refund 100% với lý do WEATHER
         ArgumentCaptor<RefundJpaEntity> refundCaptor = ArgumentCaptor.forClass(RefundJpaEntity.class);
@@ -200,7 +200,7 @@ class AdminWeatherAlertControllerTest {
         assertNull(capturedRefund.getProcessedAt());
 
         // Kiểm tra cập nhật alertEntity
-        assertTrue(alertEntity.getIsSafe());
+        assertFalse(alertEntity.getIsSafe());
         assertEquals("RESOLVED_CANCEL_AND_REFUND", alertEntity.getStatus());
         verify(evaluationRepository).save(alertEntity);
     }
@@ -213,14 +213,15 @@ class AdminWeatherAlertControllerTest {
         AdminWeatherAlertController.ResolveAlertRequest request =
                 new AdminWeatherAlertController.ResolveAlertRequest("DISMISSED", "Đã thỏa thuận dời sang buổi chiều an toàn");
 
+        WeatherCancellationFixture.install(controller, subOrderRepository, refundRepository, slotRepository, slotId);
         ResponseEntity<Map<String, Object>> response = controller.resolveAlert(evaluationId, request);
 
         assertEquals(200, response.getStatusCode().value());
         assertEquals("RESOLVED_DISMISSED", response.getBody().get("status"));
-        assertTrue(alertEntity.getIsSafe());
+        assertFalse(alertEntity.getIsSafe());
         assertEquals("RESOLVED_DISMISSED", alertEntity.getStatus());
         verify(evaluationRepository).save(alertEntity);
-        verify(subOrderRepository, never()).save(any());
+        verify(subOrderRepository, never()).saveAndFlush(any());
         verify(refundRepository, never()).save(any());
     }
 }

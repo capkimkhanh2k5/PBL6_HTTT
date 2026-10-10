@@ -1,0 +1,24 @@
+flowchart TD
+    Start(["Admin kích hoạt tạo kỳ đối soát<br/><code>POST /api/admin/settlements/generate</code>"]) --> CheckAdmin{"Quyền <code>ROLE_ADMIN</code>?"}
+    CheckAdmin -- "Không phải Admin" --> Err403["Trả về <b>HTTP 403 Forbidden</b>"]
+    CheckAdmin -- "Hợp lệ" --> CheckPeriod{"Dải ngày (startDate - endDate)<br/>có hợp lệ và không trùng kỳ đã tạo?"}
+
+    CheckPeriod -- "Trùng lặp / Ngày sai" --> Err400["Trả về <b>HTTP 400 Bad Request</b><br/><code>INVALID_SETTLEMENT_PERIOD</code>"]
+    CheckPeriod -- "Hợp lệ" --> ScanOrders["Quét tất cả SubOrders thuộc Vendor:<br/>- Trạng thái = <code>COMPLETED</code><br/>- Ngày hoàn thành trong kỳ<br/>- Chưa từng nằm trong kỳ đối soát nào"]
+
+    ScanOrders --> HasOrders{"Có đơn hàng thỏa mãn?"}
+    HasOrders -- "Không có đơn" --> Err404["Trả về <b>HTTP 400 Bad Request</b><br/><code>NO_ELIGIBLE_ORDERS_FOR_SETTLEMENT</code>"]
+    HasOrders -- "Có đơn hàng" --> CalcTotals["<b>Tính toán tài chính kỳ đối soát:</b><br/>- Tổng doanh thu gốc (Gross Sales)<br/>- Khấu trừ hoa hồng nền tảng (Commission)<br/>- Khấu trừ hoàn tiền / khiếu nại (Refunds/Disputes)<br/>- Số tiền thực nhận của Vendor (Net Payable)"]
+
+    CalcTotals --> SavePeriod["Lưu bản ghi <code>SettlementPeriod</code>:<br/>- Status = <code>PENDING_VENDOR_REVIEW</code><br/>- Khóa liên kết các SubOrders vào kỳ này"]
+    SavePeriod --> Success201(["Trả về <b>HTTP 201 Created</b><br/><code>SettlementPeriodResponse</code>"])
+
+    classDef startEnd fill:#e0f2fe,stroke:#0284c7,stroke-width:2px,color:#0369a1;
+    classDef decision fill:#fef3c7,stroke:#d97706,stroke-width:2px,color:#92400e;
+    classDef action fill:#f0fdf4,stroke:#16a34a,stroke-width:2px,color:#15803d;
+    classDef error fill:#fee2e2,stroke:#dc2626,stroke-width:2px,color:#b91c1c;
+
+    class Start,Success201 startEnd;
+    class CheckAdmin,CheckPeriod,HasOrders decision;
+    class ScanOrders,CalcTotals,SavePeriod action;
+    class Err403,Err400,Err404 error;

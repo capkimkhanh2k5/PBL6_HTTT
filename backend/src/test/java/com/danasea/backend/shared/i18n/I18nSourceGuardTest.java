@@ -1,6 +1,6 @@
 package com.danasea.backend.shared.i18n;
 
-import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -8,8 +8,7 @@ import java.nio.file.Path;
 import java.util.List;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
-
-import static org.junit.jupiter.api.Assertions.assertFalse;
+import org.junit.jupiter.api.Test;
 
 class I18nSourceGuardTest {
 
@@ -34,7 +33,7 @@ class I18nSourceGuardTest {
     @Test
     void aiAndNotificationPresentationFallbacksStayLocalized() throws IOException {
         String chat = Files.readString(MAIN_JAVA.resolve(
-                "com/danasea/backend/modules/ai/application/usecase/ChatUseCase.java"));
+                "com/danasea/backend/modules/ai/application/usecases/ChatUseCase.java"));
         String groq = Files.readString(MAIN_JAVA.resolve(
                 "com/danasea/backend/modules/ai/infrastructure/groq/GroqLlmClient.java"));
         String weatherJob = Files.readString(MAIN_JAVA.resolve(

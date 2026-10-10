@@ -1,8 +1,9 @@
 package com.danasea.backend.modules.weather.application.usecases;
 
-import com.danasea.backend.modules.service.infrastructure.persistence.entities.CategoryJpaEntity;
-import com.danasea.backend.modules.service.infrastructure.persistence.entities.ServiceJpaEntity;
-import com.danasea.backend.modules.service.infrastructure.persistence.entities.ServiceSlotJpaEntity;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.*;
+
 import com.danasea.backend.modules.service.infrastructure.persistence.repositories.JpaCategoryRepository;
 import com.danasea.backend.modules.service.infrastructure.persistence.repositories.JpaServiceRepository;
 import com.danasea.backend.modules.service.infrastructure.persistence.repositories.JpaServiceSlotRepository;
@@ -16,8 +17,13 @@ import com.danasea.backend.modules.weather.domain.services.WeatherRuleEngine;
 import com.danasea.backend.modules.weather.infrastructure.adapters.WeatherForecastCacheService;
 import com.danasea.backend.modules.weather.infrastructure.adapters.WeatherProviderAdapter;
 import com.danasea.backend.modules.weather.infrastructure.api.OpenMeteoApiClient;
-import com.danasea.backend.modules.weather.infrastructure.api.dtos.OpenMeteoMarineResponse;
 import com.danasea.backend.modules.weather.infrastructure.api.dtos.OpenMeteoWeatherResponse;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -25,16 +31,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-
-import java.time.LocalDate;
-import java.time.LocalTime;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
-
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.*;
 
 /**
  * Empirical Adversarial Challenge Suite for Milestone 2:
@@ -98,7 +94,7 @@ public class AdvanceBookingSafetyAdversarialTest {
             LocalDate day7 = today.plusDays(7);
             when(categorySafetyRuleService.getRuleByCategorySlug("cheo-sup-kayak")).thenReturn(supRule);
 
-            WeatherInfoDto.TimeWindowForecast forecast = WeatherInfoDto.TimeWindowForecast.builder()
+            WeatherInfoDto.TimeWindowForecast forecast = WeatherInfoDto.TimeWindowForecast.builder().sourceFetchedAt(Instant.now()).validUntil(Instant.now().plusSeconds(1800))
                     .peakWaveHeight(0.4)
                     .peakWindSpeed(10.0)
                     .peakWindGust(14.0)
@@ -131,7 +127,7 @@ public class AdvanceBookingSafetyAdversarialTest {
             LocalDate day8 = today.plusDays(8);
             when(categorySafetyRuleService.getRuleByCategorySlug("cheo-sup-kayak")).thenReturn(supRule);
 
-            WeatherInfoDto.TimeWindowForecast forecast = WeatherInfoDto.TimeWindowForecast.builder()
+            WeatherInfoDto.TimeWindowForecast forecast = WeatherInfoDto.TimeWindowForecast.builder().sourceFetchedAt(Instant.now()).validUntil(Instant.now().plusSeconds(1800))
                     .peakWaveHeight(0.45)
                     .peakWindSpeed(12.0)
                     .peakWindGust(16.0)
@@ -163,7 +159,7 @@ public class AdvanceBookingSafetyAdversarialTest {
             when(categorySafetyRuleService.getRuleByCategorySlug("cheo-sup-kayak")).thenReturn(supRule);
 
             // Day 9: Marine API has no data (wave is null) with gentle atmospheric weather
-            WeatherInfoDto.TimeWindowForecast forecast = WeatherInfoDto.TimeWindowForecast.builder()
+            WeatherInfoDto.TimeWindowForecast forecast = WeatherInfoDto.TimeWindowForecast.builder().sourceFetchedAt(Instant.now()).validUntil(Instant.now().plusSeconds(1800))
                     .peakWaveHeight(null)
                     .peakWindSpeed(10.0)
                     .peakWindGust(15.0)
@@ -197,7 +193,7 @@ public class AdvanceBookingSafetyAdversarialTest {
             LocalDate day14 = today.plusDays(14);
             when(categorySafetyRuleService.getRuleByCategorySlug("cheo-sup-kayak")).thenReturn(supRule);
 
-            WeatherInfoDto.TimeWindowForecast forecast = WeatherInfoDto.TimeWindowForecast.builder()
+            WeatherInfoDto.TimeWindowForecast forecast = WeatherInfoDto.TimeWindowForecast.builder().sourceFetchedAt(Instant.now()).validUntil(Instant.now().plusSeconds(1800))
                     .peakWaveHeight(null)
                     .peakWindSpeed(10.0)
                     .peakWindGust(14.0)
@@ -234,7 +230,7 @@ public class AdvanceBookingSafetyAdversarialTest {
             LocalDate day6 = today.plusDays(6);
             when(categorySafetyRuleService.getRuleByCategorySlug("cheo-sup-kayak")).thenReturn(supRule);
 
-            WeatherInfoDto.TimeWindowForecast forecast = WeatherInfoDto.TimeWindowForecast.builder()
+            WeatherInfoDto.TimeWindowForecast forecast = WeatherInfoDto.TimeWindowForecast.builder().sourceFetchedAt(Instant.now()).validUntil(Instant.now().plusSeconds(1800))
                     .peakWaveHeight(0.35)
                     .peakWindSpeed(10.0)
                     .peakWindGust(15.0)
@@ -262,7 +258,7 @@ public class AdvanceBookingSafetyAdversarialTest {
             LocalDate day15 = today.plusDays(15);
             when(categorySafetyRuleService.getRuleByCategorySlug("cheo-sup-kayak")).thenReturn(supRule);
 
-            WeatherInfoDto.TimeWindowForecast forecast = WeatherInfoDto.TimeWindowForecast.builder()
+            WeatherInfoDto.TimeWindowForecast forecast = WeatherInfoDto.TimeWindowForecast.builder().sourceFetchedAt(Instant.now()).validUntil(Instant.now().plusSeconds(1800))
                     .peakWaveHeight(null)
                     .peakWindSpeed(12.0)
                     .peakWindGust(16.0)
@@ -291,7 +287,7 @@ public class AdvanceBookingSafetyAdversarialTest {
             LocalDate day16 = today.plusDays(16);
             when(categorySafetyRuleService.getRuleByCategorySlug("cheo-sup-kayak")).thenReturn(supRule);
 
-            WeatherInfoDto.TimeWindowForecast forecast = WeatherInfoDto.TimeWindowForecast.builder()
+            WeatherInfoDto.TimeWindowForecast forecast = WeatherInfoDto.TimeWindowForecast.builder().sourceFetchedAt(Instant.now()).validUntil(Instant.now().plusSeconds(1800))
                     .peakWaveHeight(null)
                     .peakWindSpeed(10.0)
                     .peakWindGust(15.0)
@@ -393,7 +389,7 @@ public class AdvanceBookingSafetyAdversarialTest {
             when(categorySafetyRuleService.getRuleByCategorySlug("unknown-sport-xyz"))
                     .thenReturn(CategorySafetyRule.DEFAULT_RULE);
 
-            WeatherInfoDto.TimeWindowForecast forecast = WeatherInfoDto.TimeWindowForecast.builder()
+            WeatherInfoDto.TimeWindowForecast forecast = WeatherInfoDto.TimeWindowForecast.builder().sourceFetchedAt(Instant.now()).validUntil(Instant.now().plusSeconds(1800))
                     .peakWaveHeight(0.5)
                     .peakWindSpeed(10.0)
                     .build();
@@ -416,7 +412,7 @@ public class AdvanceBookingSafetyAdversarialTest {
         void testExtremeInput_nullWaveOnDay8VsDay9() {
             when(categorySafetyRuleService.getRuleByCategorySlug("cheo-sup-kayak")).thenReturn(supRule);
 
-            WeatherInfoDto.TimeWindowForecast forecastDay8 = WeatherInfoDto.TimeWindowForecast.builder()
+            WeatherInfoDto.TimeWindowForecast forecastDay8 = WeatherInfoDto.TimeWindowForecast.builder().sourceFetchedAt(Instant.now()).validUntil(Instant.now().plusSeconds(1800))
                     .peakWaveHeight(null)
                     .peakWindSpeed(20.0)
                     .build();
@@ -437,7 +433,7 @@ public class AdvanceBookingSafetyAdversarialTest {
             assertEquals(0.74, resDay8.getPeakWaveHeightM(), 0.05);
 
             // On Day 9 with null wave:
-            WeatherInfoDto.TimeWindowForecast forecastDay9 = WeatherInfoDto.TimeWindowForecast.builder()
+            WeatherInfoDto.TimeWindowForecast forecastDay9 = WeatherInfoDto.TimeWindowForecast.builder().sourceFetchedAt(Instant.now()).validUntil(Instant.now().plusSeconds(1800))
                     .peakWaveHeight(null)
                     .peakWindSpeed(20.0)
                     .build();
@@ -494,7 +490,7 @@ public class AdvanceBookingSafetyAdversarialTest {
             LocalDate date = today.plusDays(7);
             when(categorySafetyRuleService.getRuleByCategorySlug("cheo-sup-kayak")).thenReturn(supRule);
 
-            WeatherInfoDto.TimeWindowForecast forecast = WeatherInfoDto.TimeWindowForecast.builder()
+            WeatherInfoDto.TimeWindowForecast forecast = WeatherInfoDto.TimeWindowForecast.builder().sourceFetchedAt(Instant.now()).validUntil(Instant.now().plusSeconds(1800))
                     .peakWaveHeight(1.2) // > 0.8 max
                     .peakWindSpeed(35.0) // > 20.0 max
                     .peakWindGust(55.0) // > 28.0 max
@@ -526,7 +522,7 @@ public class AdvanceBookingSafetyAdversarialTest {
             LocalDate date = today.plusDays(8);
             when(categorySafetyRuleService.getRuleByCategorySlug("cano-du-bay")).thenReturn(parasailingRule);
 
-            WeatherInfoDto.TimeWindowForecast forecast = WeatherInfoDto.TimeWindowForecast.builder()
+            WeatherInfoDto.TimeWindowForecast forecast = WeatherInfoDto.TimeWindowForecast.builder().sourceFetchedAt(Instant.now()).validUntil(Instant.now().plusSeconds(1800))
                     .peakWaveHeight(0.4) // Well below max (1.0m)
                     .peakWindSpeed(12.0) // Well below max (22.0 km/h)
                     .peakWindGust(38.0) // > maxWindGust (37.0 km/h / 20 knots)
@@ -552,7 +548,7 @@ public class AdvanceBookingSafetyAdversarialTest {
             LocalDate date = today.plusDays(7);
             when(categorySafetyRuleService.getRuleByCategorySlug("cheo-sup-kayak")).thenReturn(supRule);
 
-            WeatherInfoDto.TimeWindowForecast forecast = WeatherInfoDto.TimeWindowForecast.builder()
+            WeatherInfoDto.TimeWindowForecast forecast = WeatherInfoDto.TimeWindowForecast.builder().sourceFetchedAt(Instant.now()).validUntil(Instant.now().plusSeconds(1800))
                     .peakWaveHeight(0.3)
                     .peakWindSpeed(15.0) // caution range (12-20)
                     .peakWindGust(18.0)

@@ -1,5 +1,8 @@
 package com.danasea.backend.modules.service.infrastructure.persistence.repositories;
 
+import com.danasea.backend.modules.service.domain.models.SlotStatus;
+import com.danasea.backend.modules.service.infrastructure.persistence.entities.ServiceSlotJpaEntity;
+import jakarta.persistence.LockModeType;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
@@ -13,9 +16,7 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
-import com.danasea.backend.modules.service.domain.models.SlotStatus;
-import com.danasea.backend.modules.service.infrastructure.persistence.entities.ServiceSlotJpaEntity;
-import jakarta.persistence.LockModeType;
+import org.springframework.transaction.annotation.Transactional;
 
 @Repository
 public interface JpaServiceSlotRepository extends JpaRepository<ServiceSlotJpaEntity, UUID> {
@@ -83,4 +84,9 @@ public interface JpaServiceSlotRepository extends JpaRepository<ServiceSlotJpaEn
     @Modifying(clearAutomatically = true, flushAutomatically = true)
     @Query("UPDATE ServiceSlotJpaEntity s SET s.bookedCount = GREATEST(0, s.bookedCount - :quantity) WHERE s.id = :slotId")
     int decrementBookedCount(@Param("slotId") UUID slotId, @Param("quantity") int quantity);
+    @Modifying(flushAutomatically = true, clearAutomatically = true)
+    @Transactional
+    @Query("UPDATE ServiceSlotJpaEntity s SET s.status = com.danasea.backend.modules.service.domain.models.SlotStatus.CLOSED WHERE s.id = :slotId")
+    int closeForWeather(@Param("slotId") UUID slotId);
+
 }

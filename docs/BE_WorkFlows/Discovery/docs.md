@@ -2,15 +2,16 @@
 
 > Phân hệ Khám phá Dịch vụ & Cửa hàng Đối tác Công khai (Discovery & Public Storefront) chịu trách nhiệm cung cấp khả năng tìm kiếm đa tiêu chí theo thời gian thực, tính toán số chỗ khả dụng của từng khung giờ (Structured Slots Availability), bảo vệ an toàn thông tin nhạy cảm của đối tác (Strict DTO Separation) và hiển thị danh mục sản phẩm của cửa hàng đối tác (Vendor Storefront).
 
-| # | Sơ đồ | Loại | Nội dung |
-|---|-------|------|----------|
-| 1 | `Service_Discovery_MultiCriteria_Search_Flow` | Sequence Diagram | Khách hàng tìm kiếm dịch vụ (`GET /api/services`): Lọc theo ngày/giờ, số khách, khoảng giá, đối tác, đánh giá tối thiểu và sắp xếp linh hoạt. |
-| 2 | `Public_Service_Detail_And_Structured_Slots_Flow` | Sequence Diagram | Xem chi tiết dịch vụ (`GET /api/services/{id}`): Nạp thông tin vận hành, chính sách hủy/hoàn, khung giờ cấu trúc (Structured Slots) và bảo mật dữ liệu đối tác. |
-| 3 | `Public_Vendor_Storefront_Flow` | Sequence Diagram | Hồ sơ và cửa hàng đối tác công khai (`GET /api/vendors/{id}`, `GET /api/vendors/{id}/services`): Hiển thị chỉ số uy tín và danh sách dịch vụ đang mở bán. |
+| # | Sơ đồ | Loại | Mã nguồn Mermaid (.mmd) | Nội dung |
+|---|-------|------|--------------------------|----------|
+| 1 | `Service_Search_And_Filter_DF` | Decision Flowchart | [`codeFlows/Decision_Flowchart/Service_Search_And_Filter_DF.mmd`](codeFlows/Decision_Flowchart/Service_Search_And_Filter_DF.mmd) | Cây quyết định kiểm tra tham số, phân tách bộ lọc Haversine, Structured Slots và bảo mật DTO Isolation |
+| 2 | `Service_Discovery_MultiCriteria_Search_SD` | Sequence Diagram | [`codeFlows/Sequence_Diagram/Service_Discovery_MultiCriteria_Search_SD.mmd`](codeFlows/Sequence_Diagram/Service_Discovery_MultiCriteria_Search_SD.mmd) | Khách hàng tìm kiếm dịch vụ (`GET /api/services`): Lọc theo ngày/giờ, số khách, khoảng giá, đối tác, đánh giá tối thiểu và sắp xếp linh hoạt. |
+| 3 | `Public_Service_Detail_And_Structured_Slots_SD` | Sequence Diagram | [`codeFlows/Sequence_Diagram/Public_Service_Detail_And_Structured_Slots_SD.mmd`](codeFlows/Sequence_Diagram/Public_Service_Detail_And_Structured_Slots_SD.mmd) | Xem chi tiết dịch vụ (`GET /api/services/{id}`): Nạp thông tin vận hành, chính sách hủy/hoàn, khung giờ cấu trúc (Structured Slots) và bảo mật dữ liệu đối tác. |
+| 4 | `Public_Vendor_Storefront_SD` | Sequence Diagram | [`codeFlows/Sequence_Diagram/Public_Vendor_Storefront_SD.mmd`](codeFlows/Sequence_Diagram/Public_Vendor_Storefront_SD.mmd) | Hồ sơ và cửa hàng đối tác công khai (`GET /api/vendors/{id}`, `GET /api/vendors/{id}/services`): Hiển thị chỉ số uy tín và danh sách dịch vụ đang mở bán. |
 
 ---
 
-## 1. Service_Discovery_MultiCriteria_Search_Flow.mmd — Tìm Kiếm & Khám Phá Dịch Vụ Mở Rộng
+## 1. Service_Discovery_MultiCriteria_Search_SD.mmd — Tìm Kiếm & Khám Phá Dịch Vụ Mở Rộng
 
 **Điểm truy cập API:** `GET /api/services` (hoặc alias `/api/v1/catalog`)
 
@@ -31,7 +32,7 @@
 
 ---
 
-## 2. Public_Service_Detail_And_Structured_Slots_Flow.mmd — Chi Tiết Dịch Vụ & Khung Giờ Cấu Trúc
+## 2. Public_Service_Detail_And_Structured_Slots_SD.mmd — Chi Tiết Dịch Vụ & Khung Giờ Cấu Trúc
 
 **Điểm truy cập API:** `GET /api/services/{id}` (Truy cập công khai không yêu cầu JWT)
 
@@ -49,7 +50,7 @@
 
 ---
 
-## 3. Public_Vendor_Storefront_Flow.mmd — Hồ Sơ & Cửa Hàng Đối Tác Công Khai
+## 3. Public_Vendor_Storefront_SD.mmd — Hồ Sơ & Cửa Hàng Đối Tác Công Khai
 
 **Điểm truy cập API:**
 - `GET /api/vendors/{id}`: Hồ sơ công khai của nhà cung cấp.

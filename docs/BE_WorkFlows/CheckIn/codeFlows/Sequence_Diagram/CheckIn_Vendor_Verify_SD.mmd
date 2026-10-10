@@ -1,0 +1,70 @@
+sequenceDiagram
+    autonumber
+    actor Staff as Nhân Viên Vendor
+    participant Controller as CheckinVendorController
+    participant UseCase as VerifyCheckinUseCase
+    participant Signer as QrTokenSigner
+    participant TokenRepo as CheckinTokenRepository
+    participant SubOrderRepo as SubOrderRepository
+    participant SlotPort as ServiceSlotPort
+    participant WindowPolicy as CheckinWindowPolicy
+    participant DB as PostgreSQL
+
+    Staff->>Controller: POST /api/vendor/checkin/verify (qrToken)
+    Note over Staff,Controller: Header: Authorization: Bearer JWT (Staff/Vendor)
+
+    Controller->>UseCase: execute(qrToken, currentStaffId, staffVendorId)
+    activate UseCase
+
+    UseCase->>Signer: verifySignature(qrToken)
+    activate Signer
+    Signer->>Signer: MessageDigest.isEqual (Constant-time check)
+
+    alt Chữ ký sai hoặc bị giả mạo
+        Signer-->>UseCase: Invalid Signature
+        UseCase-->>Controller: throw InvalidQrSignatureException (400)
+        Controller-->>Staff: 400 Bad Request (INVALID_QR_SIGNATURE)
+    end
+    deactivate Signer
+
+    UseCase->>TokenRepo: findByTokenStringForUpdate(qrToken)
+    TokenRepo->>DB: SELECT * FROM checkin_tokens WHERE token = ? FOR UPDATE
+    DB-->>TokenRepo: tokenRecord
+
+    alt Token không tồn tại
+        UseCase-->>Controller: throw CheckinTokenNotFoundException (404)
+        Controller-->>Staff: 404 Not Found
+    else Token đã sử dụng (tokenRecord.used == true)
+        UseCase-->>Controller: throw QrTokenAlreadyUsedException (409)
+        Controller-->>Staff: 409 Conflict (Mã QR đã check-in trước đó)
+    else Token đã hết hạn (tokenRecord.expiryTime < now)
+        UseCase-->>Controller: throw QrTokenExpiredException (400)
+        Controller-->>Staff: 400 Bad Request (Mã QR đã hết hạn)
+    end
+
+    UseCase->>SubOrderRepo: findById(tokenRecord.subOrderId)
+    SubOrderRepo->>DB: SELECT * FROM sub_orders WHERE id = ?
+    DB-->>SubOrderRepo: SubOrder
+    UseCase->>SlotPort: getSlotDetails(subOrder.slotId)
+    SlotPort->>DB: SELECT * FROM service_slots WHERE id = ?
+    DB-->>SlotPort: SlotDetails (vendorId, startTime, endTime)
+
+    alt Khác Vendor (slot.vendorId != staffVendorId)
+        UseCase-->>Controller: throw AccessDeniedException (403)
+        Controller-->>Staff: 403 Forbidden (Không thể quét vé của vendor khác)
+    end
+
+    UseCase->>WindowPolicy: isWithinCheckinWindow(slot.startTime, slot.endTime, now)
+    alt Ngoài khung giờ check-in
+        WindowPolicy-->>UseCase: Invalid Window
+        UseCase-->>Controller: throw InvalidCheckinStateException (400)
+        Controller-->>Staff: 400 Bad Request (Ngoài khung giờ check-in)
+    end
+
+    UseCase->>DB: UPDATE checkin_tokens SET used = true, used_at = now(), used_by = currentStaffId WHERE id = ?
+    UseCase->>DB: UPDATE sub_orders SET status = 'CHECKED_IN', updated_at = now() WHERE id = ?
+
+    UseCase-->>Controller: VerifyCheckinResult(subOrderId, customerName, quantity, status='CHECKED_IN')
+    deactivate UseCase
+
+    Controller-->>Staff: 200 OK (Check-in thành công)

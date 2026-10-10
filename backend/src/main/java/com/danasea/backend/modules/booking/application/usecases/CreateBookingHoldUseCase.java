@@ -1,21 +1,5 @@
 package com.danasea.backend.modules.booking.application.usecases;
 
-import java.math.BigDecimal;
-import java.time.Duration;
-import java.time.LocalDateTime;
-import java.time.OffsetDateTime;
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
-import java.util.function.Function;
-import java.util.stream.Collectors;
-
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.transaction.support.TransactionSynchronization;
-import org.springframework.transaction.support.TransactionSynchronizationManager;
-
 import com.danasea.backend.modules.booking.application.dtos.BookingHoldItemDto;
 import com.danasea.backend.modules.booking.application.dtos.BookingHoldItemResult;
 import com.danasea.backend.modules.booking.application.dtos.BookingHoldResult;
@@ -32,8 +16,21 @@ import com.danasea.backend.modules.booking.domain.ports.ServiceSlotPort;
 import com.danasea.backend.modules.service.domain.models.InventoryType;
 import com.danasea.backend.modules.service.domain.models.OptionType;
 import com.danasea.backend.modules.service.domain.models.PricingUnit;
-
+import java.math.BigDecimal;
+import java.time.Duration;
+import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 @RequiredArgsConstructor
 public class CreateBookingHoldUseCase {
@@ -226,6 +223,8 @@ public class CreateBookingHoldUseCase {
                         .optionId(optId)
                         .pricingUnit(pricingUnit)
                         .participantsCount(key.participantsCount())
+                        .maxPaxPerPackage(option != null && option.isPrivate() ? option.getMaxPaxPerPackage() : null)
+                        .allowSplit(key.allowSplit())
                         .quantity(qty)
                         .bookingDate(details.getBookingDate())
                         .bookingTime(details.getBookingTime())

@@ -1,5 +1,14 @@
 package com.danasea.backend.modules.ai;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyDouble;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
 import com.danasea.backend.modules.ai.application.ports.ConfirmationCardStorePort;
 import com.danasea.backend.modules.ai.application.ports.ServiceSearchPort;
 import com.danasea.backend.modules.ai.application.tools.GetSafetyAlertTool;
@@ -21,25 +30,16 @@ import com.danasea.backend.modules.weather.application.ports.output.WeatherProvi
 import com.danasea.backend.modules.weather.application.usecases.GetWeatherInfoUseCase;
 import com.danasea.backend.modules.weather.domain.services.WeatherRuleEngine;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.jupiter.api.Test;
-import org.mockito.ArgumentCaptor;
-
 import java.math.BigDecimal;
+import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyDouble;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
 
 class AiToolContractHardeningTest {
 
@@ -60,7 +60,7 @@ class AiToolContractHardeningTest {
                 .promotionalPrice(new BigDecimal("450000"))
                 .availableSlots(List.of(slot))
                 .build());
-        when(availabilityPort.findAvailableSlotId(serviceId, slot)).thenReturn(java.util.Optional.of(slotId));
+        when(availabilityPort.findAvailableSlotId(serviceId, slot)).thenReturn(Optional.of(slotId));
         RequestBookingConfirmationTool tool = new RequestBookingConfirmationTool(
                 objectMapper, store, detailUseCase, availabilityPort);
 
@@ -168,7 +168,7 @@ class AiToolContractHardeningTest {
         WeatherProviderPort provider = mock(WeatherProviderPort.class);
         LocalDate date = LocalDate.now().plusDays(2);
         when(provider.getTimeWindowForecast(eq(16.1), eq(108.2), eq(date), eq(LocalTime.MIN), eq(LocalTime.MAX)))
-                .thenReturn(WeatherInfoDto.TimeWindowForecast.builder().peakWaveHeight(1.2).peakWindSpeed(18.0).build());
+                .thenReturn(WeatherInfoDto.TimeWindowForecast.builder().sourceFetchedAt(Instant.now()).validUntil(Instant.now().plusSeconds(1800)).peakWaveHeight(1.2).peakWindSpeed(18.0).build());
         GetWeatherForecastTool tool = new GetWeatherForecastTool(weatherUseCase, null, objectMapper, provider);
 
         var response = objectMapper.readTree(tool.execute("{\"location\":\"Custom point\",\"date\":\""

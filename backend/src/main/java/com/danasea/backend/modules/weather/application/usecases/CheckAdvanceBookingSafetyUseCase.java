@@ -1,5 +1,6 @@
 package com.danasea.backend.modules.weather.application.usecases;
 
+import com.danasea.backend.modules.booking.domain.models.Booking;
 import com.danasea.backend.modules.service.infrastructure.persistence.entities.CategoryJpaEntity;
 import com.danasea.backend.modules.service.infrastructure.persistence.entities.ServiceJpaEntity;
 import com.danasea.backend.modules.service.infrastructure.persistence.entities.ServiceSlotJpaEntity;
@@ -10,24 +11,24 @@ import com.danasea.backend.modules.weather.application.dtos.AdvanceBookingSafety
 import com.danasea.backend.modules.weather.application.dtos.AdvanceBookingSafetyResponse;
 import com.danasea.backend.modules.weather.application.dtos.WeatherInfoDto;
 import com.danasea.backend.modules.weather.application.ports.output.WeatherProviderPort;
+import com.danasea.backend.modules.weather.application.services.WeatherSafetyMessageRenderer;
 import com.danasea.backend.modules.weather.domain.models.CategorySafetyRule;
 import com.danasea.backend.modules.weather.domain.services.CategorySafetyRuleService;
 import com.danasea.backend.modules.weather.domain.services.WeatherRuleEngine;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
+import com.danasea.backend.shared.i18n.LocalizedMessageService;
+import com.danasea.backend.shared.i18n.SupportedLanguage;
 import java.time.Clock;
+import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.i18n.LocaleContextHolder;
-import com.danasea.backend.modules.weather.application.services.WeatherSafetyMessageRenderer;
-import com.danasea.backend.shared.i18n.LocalizedMessageService;
-import com.danasea.backend.shared.i18n.SupportedLanguage;
+import org.springframework.stereotype.Service;
 
 /**
  * UseCase assessing marine safety for reservations 7 to 14 days (up to 16 days) in advance.
@@ -133,7 +134,7 @@ public class CheckAdvanceBookingSafetyUseCase {
     public AdvanceBookingSafetyResponse checkSafety(UUID slotId, UUID serviceId, String categorySlug,
                                                    LocalDate targetDate, LocalTime startTime, LocalTime endTime,
                                                    double latitude, double longitude) {
-        LocalDate today = LocalDate.now(clock);
+        LocalDate today = LocalDate.now(clock.withZone(Booking.VIETNAM_ZONE));
         if (targetDate.isBefore(today)) {
             throw new IllegalArgumentException("Safety cannot be checked for a past date: " + targetDate);
         }
@@ -159,7 +160,7 @@ public class CheckAdvanceBookingSafetyUseCase {
     }
 
     public AdvanceBookingSafetyResponse execute(AdvanceBookingSafetyRequest request) {
-        return execute(request, LocalDate.now(clock));
+        return execute(request, LocalDate.now(clock.withZone(Booking.VIETNAM_ZONE)));
     }
 
     public AdvanceBookingSafetyResponse execute(AdvanceBookingSafetyRequest request, LocalDate referenceDate) {
@@ -167,7 +168,7 @@ public class CheckAdvanceBookingSafetyUseCase {
             throw new IllegalArgumentException("bookingDate is required");
         }
 
-        LocalDate today = referenceDate != null ? referenceDate : LocalDate.now(clock);
+        LocalDate today = referenceDate != null ? referenceDate : LocalDate.now(clock.withZone(Booking.VIETNAM_ZONE));
         long daysInAdvance = ChronoUnit.DAYS.between(today, request.getBookingDate());
 
         if (daysInAdvance < 0) {
@@ -216,9 +217,9 @@ public class CheckAdvanceBookingSafetyUseCase {
                     .endTime(endTime)
                     .daysInAdvance(daysInAdvance)
                     .daysAhead((int) daysInAdvance)
-                    .isSafe(true)
+                    .isSafe(false)
                     .alertLevel(WeatherRuleEngine.ALERT_YELLOW)
-                    .safetyStatus(WeatherRuleEngine.ALERT_YELLOW)
+                    .safetyStatus("UNKNOWN")
                     .isProvisional(true)
                     .marineCutoffExceeded(true)
                     .warningMessage("NOTICE: The booking date (" + daysInAdvance + " days ahead) exceeds Open-Meteo's 16-day forecast window.")
@@ -228,19 +229,37 @@ public class CheckAdvanceBookingSafetyUseCase {
                     .advisoryNotes(outOfRangeNotes)
                     .dataCoverage("OUT_OF_RANGE")
                     .dataCoverageNote("Open-Meteo currently provides forecasts for up to 16 days. This booking is outside the direct forecast window.")
-                    .estimatedMarine(true)
+                    .estimatedMarine(false)
                     .confidenceLevel("LOW")
                     .forecast(null)
                     .build();
         }
 
         // Extract time-window metrics
-        WeatherInfoDto.TimeWindowForecast forecast = weatherProviderPort.getTimeWindowForecast(
-                lat, lon, request.getBookingDate(), startTime, endTime
-        );
+        WeatherInfoDto.TimeWindowForecast forecast;
+        try {
+            forecast = weatherProviderPort.getTimeWindowForecast(lat, lon, request.getBookingDate(), startTime, endTime);
+        } catch (RuntimeException unavailable) {
+            log.warn("Weather forecast unavailable; safety remains unknown: {}", unavailable.getMessage());
+            forecast = null;
+        }
 
         if (forecast == null) {
             forecast = WeatherInfoDto.TimeWindowForecast.builder().build();
+        }
+
+        boolean stale = !forecast.isFreshAt(Instant.now());
+        if (stale || forecast.getPeakWindSpeed() == null) {
+            String message = LocalizedMessageService.standalone().get("weather.assessment.unavailable");
+            return AdvanceBookingSafetyResponse.builder().categorySlug(rule.getCategorySlug())
+                    .categoryName(rule.getCategoryName()).bookingDate(request.getBookingDate())
+                    .startTime(startTime).endTime(endTime).daysInAdvance(daysInAdvance).daysAhead((int) daysInAdvance)
+                    .isSafe(false).alertLevel(WeatherRuleEngine.ALERT_YELLOW).safetyStatus("UNKNOWN")
+                    .isProvisional(true).dataCoverage(stale ? "STALE_OR_UNVERIFIED_FORECAST" : "INSUFFICIENT_DATA")
+                    .estimatedMarine(false).confidenceLevel("LOW").fetchedAt(forecast.getSourceFetchedAt())
+                    .source(forecast.getProvider()).stale(stale).forecast(forecast).warningMessage(message)
+                    .summaryMessage(message).details(List.of(message)).advisoryDetails(List.of(message))
+                    .advisoryNotes(List.of(message)).build();
         }
 
         Double peakWave = forecast.getPeakWaveHeight();
@@ -329,6 +348,7 @@ public class CheckAdvanceBookingSafetyUseCase {
         }
 
         return AdvanceBookingSafetyResponse.builder()
+                .fetchedAt(forecast.getSourceFetchedAt()).source(forecast.getProvider()).stale(false)
                 .isSafe(evalResult.isSafe())
                 .alertLevel(evalResult.getAlertLevel())
                 .safetyStatus(evalResult.getAlertLevel())

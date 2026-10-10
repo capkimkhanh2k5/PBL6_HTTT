@@ -2,15 +2,17 @@
 
 > Module IAM & Authentication chịu trách nhiệm quản lý định danh người dùng, xác thực đăng nhập (Local & Google OAuth2 SSO), cấp phát/thu hồi JWT (Access/Refresh Token) và xử lý quy trình phục hồi tài khoản (Quên mật khẩu / Đặt lại mật khẩu) an toàn với nhiều lớp phòng vệ (Anti-Enumeration, Pessimistic Row Lock, Brute-force Defense, Token Versioning & Complete Session Revocation).
 
-| # | Sơ đồ | Loại | Nội dung |
-|---|-------|------|----------|
-| 1 | `Google_OAuth2_Login_Flow` | Sequence Diagram | Quy trình xác thực Google ID Token, kiểm tra tài khoản hoặc tự động đăng ký (Auto-Provisioning) và phát hành cặp Access/Refresh Token Danasea |
-| 2 | `Auth_ForgotPassword_Flow` | Sequence Diagram | Quy trình yêu cầu cấp mã OTP quên mật khẩu: Giới hạn tần suất IP (`Bucket4j`/Redis), phòng vệ chống lộ người dùng (**Anti-Enumeration Defense**), sinh mã OTP băm SHA-256 (hết hạn 15 phút), bọc try-catch sự kiện RabbitMQ tránh rò rỉ khi broker lỗi và gửi email nền song ngữ qua SMTP |
-| 3 | `Auth_ResetPassword_Flow` | Sequence Diagram | Quy trình đặt lại mật khẩu mới: Khóa bi quan hàng người dùng (**Pessimistic Row Lock** `SELECT ... FOR UPDATE`), phòng thủ chống tấn công Brute-force OTP với giao dịch `noRollbackFor` (giới hạn 5 lần thử sai), cập nhật mật khẩu BCrypt, tăng `sessionVersion` vô hiệu hóa toàn bộ Access Token, thu hồi toàn bộ Refresh Token của các phiên cũ và ghi nhận Audit Log an ninh |
+| # | Sơ đồ | Loại | Mã nguồn Mermaid (.mmd) | Nội dung |
+|---|-------|------|--------------------------|----------|
+| 1 | `Google_OAuth2_DF` | Decision Flowchart | [`codeFlows/Decision_Flowchart/Google_OAuth2_DF.mmd`](codeFlows/Decision_Flowchart/Google_OAuth2_DF.mmd) | Cây quyết định xác thực Google ID Token, phân nhánh tài khoản tồn tại vs tự động đăng ký mới (Auto-Provisioning) |
+| 2 | `Auth_ResetPassword_OtpVerify_DF` | Decision Flowchart | [`codeFlows/Decision_Flowchart/Auth_ResetPassword_OtpVerify_DF.mmd`](codeFlows/Decision_Flowchart/Auth_ResetPassword_OtpVerify_DF.mmd) | Cây quyết định phân tầng kiểm tra Rate Limit, Khóa bi quan User và phòng thủ Brute-force OTP giới hạn 5 lần (noRollbackFor commit) |
+| 3 | `Auth_ResetPassword_Execution_DF` | Decision Flowchart | [`codeFlows/Decision_Flowchart/Auth_ResetPassword_Execution_DF.mmd`](codeFlows/Decision_Flowchart/Auth_ResetPassword_Execution_DF.mmd) | Cây quyết định băm BCrypt, tăng sessionVersion vô hiệu hóa mọi JWT cũ, thu hồi toàn bộ Refresh Token và ghi Audit Log |
+| 4 | `Auth_ForgotPassword_SD` | Sequence Diagram | [`codeFlows/Sequence_Diagram/Auth_ForgotPassword_SD.mmd`](codeFlows/Sequence_Diagram/Auth_ForgotPassword_SD.mmd) | Quy trình yêu cầu cấp mã OTP quên mật khẩu: Giới hạn tần suất IP (`Bucket4j`/Redis), phòng vệ chống lộ người dùng (**Anti-Enumeration Defense**), sinh mã OTP băm SHA-256 (hết hạn 15 phút), bọc try-catch sự kiện RabbitMQ và gửi email nền |
+| 5 | `Auth_ResetPassword_SD` | Sequence Diagram | [`codeFlows/Sequence_Diagram/Auth_ResetPassword_SD.mmd`](codeFlows/Sequence_Diagram/Auth_ResetPassword_SD.mmd) | Quy trình đặt lại mật khẩu mới: Khóa bi quan hàng người dùng (**Pessimistic Row Lock**), phòng thủ Brute-force OTP (giới hạn 5 lần), cập nhật mật khẩu BCrypt, tăng `sessionVersion` và ghi nhận Audit Log |
 
 ---
 
-## 1. Google_OAuth2_Login_Flow.png — Luồng Đăng Nhập & Tự Động Đăng Ký Với Google
+## 1. Google_OAuth2_Login_SD.png — Luồng Đăng Nhập & Tự Động Đăng Ký Với Google
 
 **Luồng nghiệp vụ chi tiết:**
 
@@ -44,7 +46,7 @@
 
 ---
 
-## 2. Auth_ForgotPassword_Flow.png — Yêu Cầu Mã Xác Nhận Quên Mật Khẩu (OTP)
+## 2. Auth_ForgotPassword_SD.png — Yêu Cầu Mã Xác Nhận Quên Mật Khẩu (OTP)
 
 **Lớp xử lý chính:** `com.danasea.backend.security.authentication.application.usecases.ForgotPasswordUseCase`  
 **Endpoint:** `POST /api/auth/forgot-password`
@@ -87,7 +89,7 @@
 
 ---
 
-## 3. Auth_ResetPassword_Flow.png — Xác Thực OTP & Đặt Lại Mật Khẩu Mới
+## 3. Auth_ResetPassword_SD.png — Xác Thực OTP & Đặt Lại Mật Khẩu Mới
 
 **Lớp xử lý chính:** `com.danasea.backend.security.authentication.application.usecases.ResetPasswordUseCase`  
 **Endpoint:** `POST /api/auth/reset-password`

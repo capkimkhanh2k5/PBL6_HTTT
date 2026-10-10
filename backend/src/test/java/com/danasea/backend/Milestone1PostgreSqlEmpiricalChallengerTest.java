@@ -11,7 +11,6 @@ import java.sql.ResultSet;
 import java.sql.Statement;
 import java.time.OffsetDateTime;
 import java.util.UUID;
-
 import org.flywaydb.core.Flyway;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -41,12 +40,12 @@ class Milestone1PostgreSqlEmpiricalChallengerTest {
         Flyway flyway = Flyway.configure()
                 .dataSource(jdbcUrl, "challenger_user", "challenger_password")
                 .locations("classpath:db/migration")
-                .target("25")
+                .target("28")
                 .load();
 
         var result = flyway.migrate();
         assertTrue(result.success);
-        assertEquals("25", flyway.info().current().getVersion().getVersion());
+        assertEquals("28", flyway.info().current().getVersion().getVersion());
 
         try (Connection conn = DriverManager.getConnection(jdbcUrl, "challenger_user", "challenger_password");
              Statement stmt = conn.createStatement()) {

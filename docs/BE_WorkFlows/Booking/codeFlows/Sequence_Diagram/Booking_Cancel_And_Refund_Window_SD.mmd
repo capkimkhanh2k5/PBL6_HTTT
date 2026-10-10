@@ -1,0 +1,59 @@
+sequenceDiagram
+    autonumber
+    actor Customer as Khách Hàng
+    participant Controller as BookingController
+    participant UseCase as CancelBookingUseCase
+    participant BookingRepo as JpaBookingRepository
+    participant RedisAdapter as RedisInventoryLockAdapter
+    participant SlotPort as ServiceSlotPort
+    participant FinancialPort as BookingCancellationFinancialAdapter
+    participant RefundService as RefundProcessingService
+    participant DB as PostgreSQL
+
+    Customer->>Controller: PATCH /api/bookings/{id}/cancel (reason)
+    Controller->>UseCase: execute(bookingId, customerId, reason)
+    activate UseCase
+
+    UseCase->>BookingRepo: findById(bookingId)
+    BookingRepo->>DB: SELECT * FROM bookings WHERE id = ?
+    DB-->>BookingRepo: BookingJpaEntity
+    BookingRepo-->>UseCase: Booking
+
+    alt IDOR Violation (customerId != booking.customerId AND !hasRole('ROLE_ADMIN'))
+        UseCase-->>Controller: throw AccessDeniedException (403)
+        Controller-->>Customer: 403 Forbidden
+    end
+
+    alt Trạng thái Booking = HOLD (Chưa thanh toán)
+        UseCase->>RedisAdapter: releaseHolds(bookingId, items)
+        RedisAdapter-->>UseCase: Holds Released
+        UseCase->>DB: UPDATE bookings SET status = 'CANCELLED' WHERE id = ?
+        UseCase-->>Controller: CancelResult(refundPercentage=0, amount=0)
+        Controller-->>Customer: 200 OK (Chưa thanh toán, đã hủy giữ chỗ)
+    else Trạng thái Booking = CONFIRMED (Đã thanh toán)
+        Note over UseCase: Tính toán hoursUntilDeparture = departureTime - now()
+
+        alt Hủy SỚM (> 24 giờ) -> Hoàn 100%
+            loop Từng item trong booking
+                UseCase->>SlotPort: releaseBookedSlot(slotId, quantity)
+                SlotPort->>DB: UPDATE service_slots SET booked_count = booked_count - ? WHERE id = ?
+            end
+            UseCase->>DB: UPDATE bookings SET status = 'CANCELLED' WHERE id = ?
+            UseCase->>FinancialPort: initiateRefund(bookingId, refundPercentage=100)
+            activate FinancialPort
+            FinancialPort->>DB: INSERT INTO refunds (status='PENDING', amount=totalAmount, reason='CUSTOMER_CANCEL')
+            FinancialPort->>RefundService: triggerRefundProcessing(refundId)
+            deactivate FinancialPort
+            UseCase-->>Controller: CancelResult(refundPercentage=100, amount=totalAmount)
+            Controller-->>Customer: 200 OK (Hoàn 100%, mã Refund PENDING)
+        else Hủy TRỄ (<= 24 giờ) -> Hoàn 0%
+            loop Từng item trong booking
+                UseCase->>SlotPort: releaseBookedSlot(slotId, quantity)
+                SlotPort->>DB: UPDATE service_slots SET booked_count = booked_count - ? WHERE id = ?
+            end
+            UseCase->>DB: UPDATE bookings SET status = 'CANCELLED' WHERE id = ?
+            UseCase-->>Controller: CancelResult(refundPercentage=0, amount=0)
+            Controller-->>Customer: 200 OK (Hủy trễ, phạt 100% tiền vé)
+        end
+    end
+    deactivate UseCase

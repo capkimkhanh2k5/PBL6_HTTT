@@ -1,16 +1,18 @@
 package com.danasea.backend.modules.weather.application.dtos;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import java.time.Instant;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
-
 import lombok.NoArgsConstructor;
-import lombok.AllArgsConstructor;
-import java.time.Instant;
 
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class WeatherInfoDto {
     private double latitude;
     private double longitude;
@@ -18,11 +20,30 @@ public class WeatherInfoDto {
     private WeatherData weather;
     private MarineData marine;
 
+    // Cache quality & fallback metadata
+    private Instant fetchedAt;
+    private String source;
+    private Boolean stale;
+    private String dataCoverage;
+    private Boolean estimatedMarine;
+
+    @JsonIgnore
+    public boolean isStale() {
+        return Boolean.TRUE.equals(stale);
+    }
+
+    @JsonIgnore
+    public boolean isEstimatedMarine() {
+        return Boolean.TRUE.equals(estimatedMarine);
+    }
+
     @Data
     @Builder
     @NoArgsConstructor
     @AllArgsConstructor
+    @JsonIgnoreProperties(ignoreUnknown = true)
     public static class WeatherData {
+        private Instant sourceFetchedAt;
         private String time;
         private Double temperature;
         private Double precipitation;
@@ -38,10 +59,12 @@ public class WeatherInfoDto {
         private Double dewPoint;
         private Double surfacePressure;
 
+        @JsonIgnore
         public Double getRelativeHumidity2m() {
             return relativeHumidity;
         }
 
+        @JsonIgnore
         public Double getDewPoint2m() {
             return dewPoint;
         }
@@ -52,6 +75,7 @@ public class WeatherInfoDto {
     @NoArgsConstructor
     @AllArgsConstructor
     public static class MarineData {
+        private Instant sourceFetchedAt;
         private String time;
         private Double waveHeight;
         private Double waveDirection;
@@ -70,6 +94,12 @@ public class WeatherInfoDto {
     @NoArgsConstructor
     @AllArgsConstructor
     public static class TimeWindowForecast {
+        @JsonIgnore
+        public boolean isFreshAt(Instant now) {
+            return sourceFetchedAt != null && validUntil != null && !sourceFetchedAt.isAfter(now)
+                    && validUntil.isAfter(now) && sourceFetchedAt.plusSeconds(1800).isAfter(now);
+        }
+
         private Instant sourceFetchedAt;
         private Instant validUntil;
         private String provider;

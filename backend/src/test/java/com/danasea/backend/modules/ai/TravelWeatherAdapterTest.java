@@ -1,22 +1,21 @@
 package com.danasea.backend.modules.ai;
 
 import static org.assertj.core.api.Assertions.*;
-import static org.mockito.Mockito.*;
 import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.*;
 
-import java.time.LocalDate;
-import java.time.Instant;
-import java.time.LocalTime;
-import java.util.List;
-import java.util.UUID;
-
-import org.junit.jupiter.api.Test;
 import com.danasea.backend.modules.ai.infrastructure.adapters.TravelWeatherAdapter;
 import com.danasea.backend.modules.service.application.api.AiCatalogReadApi.PublishedService;
 import com.danasea.backend.modules.service.application.api.AiCatalogReadApi.Slot;
 import com.danasea.backend.modules.weather.application.dtos.AdvanceBookingSafetyResponse;
 import com.danasea.backend.modules.weather.application.dtos.WeatherInfoDto.TimeWindowForecast;
 import com.danasea.backend.modules.weather.application.usecases.CheckAdvanceBookingSafetyUseCase;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.util.List;
+import java.util.UUID;
+import org.junit.jupiter.api.Test;
 
 class TravelWeatherAdapterTest {
     @Test void estimatedMarineIsProvisionalAndMissingForecastCannotBeSafe() {
@@ -26,7 +25,7 @@ class TravelWeatherAdapterTest {
                 60, true, null, 0, List.of());
         var slot = new Slot(UUID.randomUUID(), LocalDate.now().plusDays(1), LocalTime.of(9, 0), LocalTime.of(10, 0), 10);
         when(source.checkBySlotId(slot.id())).thenReturn(AdvanceBookingSafetyResponse.builder().isSafe(true).isProvisional(false)
-                .estimatedMarine(true).forecast(TimeWindowForecast.builder().peakWindSpeed(10.0).sourceFetchedAt(Instant.now()).validUntil(Instant.now().plusSeconds(60)).build()).build());
+                .estimatedMarine(true).forecast(TimeWindowForecast.builder().sourceFetchedAt(Instant.now()).validUntil(Instant.now().plusSeconds(1800)).peakWindSpeed(10.0).sourceFetchedAt(Instant.now()).validUntil(Instant.now().plusSeconds(60)).build()).build());
         var estimated = adapter.assess(service, slot);
         assertThat(estimated.acceptable()).isTrue(); assertThat(estimated.provisional()).isTrue();
         when(source.checkBySlotId(slot.id())).thenReturn(AdvanceBookingSafetyResponse.builder().isSafe(true).forecast(null).build());

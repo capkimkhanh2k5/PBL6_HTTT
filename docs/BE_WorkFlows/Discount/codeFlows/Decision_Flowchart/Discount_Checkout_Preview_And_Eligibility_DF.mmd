@@ -1,0 +1,57 @@
+flowchart TD
+    %% ==========================================
+    %% DECISION FLOWCHART: DISCOUNT CHECKOUT PREVIEW & ELIGIBILITY
+    %% DANASEA Marine Tourism Platform
+    %% ==========================================
+
+    Start(["Khách hàng gửi yêu cầu xem trước mã giảm giá<br/><code>POST /api/checkout/discount-preview</code><br/>Body: <code>{bookingId, discountCode}</code>"]) --> CheckAuth{"Xác thực JWT Token?"}
+
+    CheckAuth -- "Chưa đăng nhập / Token hết hạn" --> Err401["Trả về <b>HTTP 401 Unauthorized</b>"]
+    CheckAuth -- "Hợp lệ" --> LookupBooking{"Tra cứu Booking theo <code>bookingId</code>?"}
+
+    LookupBooking -- "Không tìm thấy" --> Err404Book["Trả về <code>valid: false</code><br/><code>BOOKING_NOT_FOUND</code>"]
+    LookupBooking -- "Tìm thấy Booking" --> CheckOwner{"Kiểm tra quyền sở hữu (IDOR Check)<br/><code>booking.customerId == currentUserId</code>?"}
+
+    CheckOwner -- "Không khớp chủ tài khoản" --> Err403["Trả về <b>HTTP 403 Forbidden</b><br/><code>ACCESS_DENIED_NOT_OWNER</code>"]
+    CheckOwner -- "Khớp chủ đơn" --> CheckBookingStatus{"Trạng thái Booking là <code>HOLD</code><br/>và <code>now() < holdExpiresAt</code>?"}
+
+    CheckBookingStatus -- "Hết hạn hoặc không phải HOLD" --> ErrBookingInval["Trả về <code>valid: false</code><br/><code>BOOKING_NOT_ELIGIBLE_FOR_ORDER</code>"]
+    CheckBookingStatus -- "Booking HOLD hợp lệ" --> FindCode{"Tra cứu mã giảm giá<br/><code>findByCodeIgnoreCase(discountCode)</code>?"}
+
+    FindCode -- "Không tồn tại mã" --> ErrCodeNotFound["Trả về <code>valid: false</code><br/><code>DISCOUNT_NOT_FOUND</code>"]
+    FindCode -- "Tìm thấy mã" --> CheckActive{"Mã đang được kích hoạt<br/><code>code.isActive == true</code>?"}
+
+    CheckActive -- "Đang bị vô hiệu hóa" --> ErrInactive["Trả về <code>valid: false</code><br/><code>DISCOUNT_INACTIVE</code>"]
+    CheckActive -- "Đang hoạt động" --> CheckDateRange{"Kiểm tra thời gian hiệu lực<br/><code>validFrom <= now() <= validTo</code>?"}
+
+    CheckDateRange -- "Chưa tới ngày bắt đầu" --> ErrNotStarted["Trả về <code>valid: false</code><br/><code>DISCOUNT_NOT_STARTED</code>"]
+    CheckDateRange -- "Đã quá hạn sử dụng" --> ErrExpired["Trả về <code>valid: false</code><br/><code>DISCOUNT_EXPIRED</code>"]
+    CheckDateRange -- "Trong thời gian hiệu lực" --> CheckGlobalQuota{"Kiểm tra hạn mức toàn sàn<br/><code>code.usedCount < code.maxUses</code>?"}
+
+    CheckGlobalQuota -- "Đã hết lượt toàn sàn" --> ErrQuotaExceeded["Trả về <code>valid: false</code><br/><code>DISCOUNT_QUOTA_EXCEEDED</code>"]
+    CheckGlobalQuota -- "Còn lượt toàn sàn" --> CheckUserQuota{"Kiểm tra hạn mức mỗi người dùng<br/><code>userCount < code.maxUsesPerUser</code>?"}
+
+    CheckUserQuota -- "Người dùng đã dùng hết lượt" --> ErrUserLimit["Trả về <code>valid: false</code><br/><code>DISCOUNT_USER_LIMIT_EXCEEDED</code>"]
+    CheckUserQuota -- "Người dùng còn lượt" --> FilterScope{"Lọc các BookingItem khớp phạm vi áp dụng<br/>(Toàn sàn / Theo Vendor / Theo Service)?"}
+
+    FilterScope -- "Không có item nào khớp phạm vi" --> ErrScope["Trả về <code>valid: false</code><br/><code>DISCOUNT_ITEMS_NOT_ELIGIBLE</code>"]
+    FilterScope -- "Có item khớp" --> CheckMinOrder{"Tổng tiền các item khớp >= <code>code.minOrderAmount</code>?"}
+
+    CheckMinOrder -- "Chưa đạt giá trị đơn tối thiểu" --> ErrMinOrder["Trả về <code>valid: false</code><br/><code>DISCOUNT_MIN_ORDER_AMOUNT_NOT_MET</code>"]
+    CheckMinOrder -- "Đạt giá trị tối thiểu" --> CalcDiscount["Tính toán chiết khấu tạm tính<br/>theo tỷ lệ % hoặc số tiền cố định (capped by maxDiscountAmount)"]
+
+    CalcDiscount --> CheckZeroPayable{"Số tiền thực trả sau giảm giá<br/><code>finalPayableAmount <= 0</code>?"}
+
+    CheckZeroPayable -- "Đúng (Giảm 100% hoặc vượt tiền vé)" --> ErrZeroPayable["Trả về <code>valid: false</code><br/><b>Chặn voucher miễn phí 100%</b><br/><code>DISCOUNT_ZERO_PAYABLE_UNSUPPORTED</code>"]
+    CheckZeroPayable -- "Không (Số tiền thực trả > 0 VNĐ)" --> SuccessPreview(["Trả về <b>HTTP 200 OK</b><br/><code>valid: true</code><br/>- <code>discountAmount</code><br/>- <code>finalPayableAmount</code><br/>- Phân bổ chi tiết từng item<br/>- Thông điệp đa ngôn ngữ (i18n)"])
+
+    %% Style classes
+    classDef startEnd fill:#e0f2fe,stroke:#0284c7,stroke-width:2px,color:#0369a1;
+    classDef decision fill:#fef3c7,stroke:#d97706,stroke-width:2px,color:#92400e;
+    classDef action fill:#f0fdf4,stroke:#16a34a,stroke-width:2px,color:#15803d;
+    classDef error fill:#fee2e2,stroke:#dc2626,stroke-width:2px,color:#b91c1c;
+
+    class Start,SuccessPreview startEnd;
+    class CheckAuth,LookupBooking,CheckOwner,CheckBookingStatus,FindCode,CheckActive,CheckDateRange,CheckGlobalQuota,CheckUserQuota,FilterScope,CheckMinOrder,CheckZeroPayable decision;
+    class CalcDiscount action;
+    class Err401,Err404Book,Err403,ErrBookingInval,ErrCodeNotFound,ErrInactive,ErrNotStarted,ErrExpired,ErrQuotaExceeded,ErrUserLimit,ErrScope,ErrMinOrder,ErrZeroPayable error;
