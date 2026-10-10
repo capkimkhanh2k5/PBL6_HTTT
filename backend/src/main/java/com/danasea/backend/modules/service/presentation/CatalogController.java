@@ -1,5 +1,15 @@
 package com.danasea.backend.modules.service.presentation;
 
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.util.List;
+import java.util.UUID;
+import java.util.stream.Collectors;
+import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 import com.danasea.backend.modules.service.application.dtos.SearchServicesCriteria;
 import com.danasea.backend.modules.service.application.dtos.ServiceDetailResult;
 import com.danasea.backend.modules.service.application.dtos.ServiceSummaryResult;
@@ -10,13 +20,6 @@ import com.danasea.backend.modules.service.presentation.dtos.ServiceDetailRespon
 import com.danasea.backend.modules.service.presentation.dtos.ServiceSummaryResponse;
 import com.danasea.backend.security.infrastructure.SecurityUtils;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-
-import java.math.BigDecimal;
-import java.util.List;
-import java.util.UUID;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping({"/api/services", "/api/v1/catalog"})
@@ -35,10 +38,30 @@ public class CatalogController {
             @RequestParam(required = false) BigDecimal lat,
             @RequestParam(required = false) BigDecimal lng,
             @RequestParam(required = false) Double radiusKm,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.TIME) LocalTime timeSlot,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime dateTime,
+            @RequestParam(required = false) Integer guests,
+            @RequestParam(required = false) Integer participantCount,
+            @RequestParam(required = false) UUID vendorId,
+            @RequestParam(required = false) BigDecimal minRating,
+            @RequestParam(required = false) String sortBy,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size
     ) {
-        validateSearchParameters(keyword, minPrice, maxPrice, lat, lng, radiusKm, page, size);
+        if (dateTime != null) {
+            if (date == null) {
+                date = dateTime.toLocalDate();
+            }
+            if (timeSlot == null) {
+                timeSlot = dateTime.toLocalTime();
+            }
+        }
+        if (guests == null && participantCount != null) {
+            guests = participantCount;
+        }
+
+        validateSearchParameters(keyword, minPrice, maxPrice, lat, lng, radiusKm, guests, minRating, page, size);
         SearchServicesCriteria criteria = SearchServicesCriteria.builder()
                 .categoryId(categoryId)
                 .keyword(keyword)
@@ -47,6 +70,12 @@ public class CatalogController {
                 .lat(lat)
                 .lng(lng)
                 .radiusKm(radiusKm)
+                .date(date)
+                .timeSlot(timeSlot)
+                .guests(guests)
+                .vendorId(vendorId)
+                .minRating(minRating)
+                .sortBy(sortBy)
                 .page(page)
                 .size(size)
                 .build();
@@ -96,6 +125,16 @@ public class CatalogController {
                 .imageUrls(result.getImageUrls())
                 .availableSlots(result.getAvailableSlots())
                 .options(result.getOptions())
+                .vendorId(result.getVendorId())
+                .businessName(result.getBusinessName())
+                .badgeTier(result.getBadgeTier())
+                .duration(result.getDuration())
+                .capacity(result.getCapacity())
+                .participantConditions(result.getParticipantConditions())
+                .refundPolicy(result.getRefundPolicy())
+                .cancellationPolicy(result.getCancellationPolicy())
+                .safetyRules(result.getSafetyRules())
+                .slots(result.getSlots())
                 .build();
 
         return ResponseEntity.ok(response);
@@ -108,6 +147,8 @@ public class CatalogController {
             BigDecimal lat,
             BigDecimal lng,
             Double radiusKm,
+            Integer guests,
+            BigDecimal minRating,
             int page,
             int size) {
         if (page < 0) {
@@ -139,6 +180,13 @@ public class CatalogController {
         }
         if (radiusKm != null && (lat == null || radiusKm <= 0 || radiusKm > 200)) {
             throw new IllegalArgumentException("radiusKm requires coordinates and must be between 0 and 200");
+        }
+        if (minRating != null && (minRating.compareTo(BigDecimal.ZERO) < 0
+                || minRating.compareTo(BigDecimal.valueOf(5.0)) > 0)) {
+            throw new IllegalArgumentException("minRating must be between 0.0 and 5.0");
+        }
+        if (guests != null && guests <= 0) {
+            throw new IllegalArgumentException("guests must be greater than 0");
         }
     }
 }

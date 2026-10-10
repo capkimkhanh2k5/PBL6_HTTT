@@ -1,0 +1,87 @@
+sequenceDiagram
+    autonumber
+    actor User as Người dùng (Customer / Vendor)
+    participant Ctrl as NotificationController<br/>(/api/notifications)
+    participant ReadUC as MarkNotificationReadUseCase
+    participant ReadAllUC as MarkAllNotificationsReadUseCase
+    participant UnreadUC as GetUnreadNotificationCountUseCase
+    participant ListUC as GetNotificationsUseCase
+    participant Repo as JpaNotificationRepository
+    participant DB as PostgreSQL Database
+
+    Note over User, DB: Luồng Trung Tâm Thông Báo & Theo Dõi Trạng Thái Đã Đọc (R4)
+
+    rect rgb(240, 248, 255)
+        Note over User, DB: 1. Xem danh sách thông báo cá nhân
+        User->>Ctrl: GET /api/notifications?page=0&size=20 (JWT required)
+        activate Ctrl
+        Ctrl->>ListUC: execute(userId, page, size)
+        activate ListUC
+        ListUC->>Repo: findByUserIdOrderByCreatedAtDesc(userId, Pageable)
+        Repo->>DB: SELECT * FROM notifications WHERE user_id = ? ORDER BY created_at DESC
+        DB-->>Repo: Page<NotificationJpaEntity>
+        ListUC-->>Ctrl: Page<NotificationResponse> (gồm isRead, readAt, channel, referenceId)
+        deactivate ListUC
+        Ctrl-->>User: 200 OK (PageResponse)
+        deactivate Ctrl
+    end
+
+    rect rgb(255, 250, 240)
+        Note over User, DB: 2. Đánh dấu đã đọc một thông báo cụ thể (Chống IDOR)
+        User->>Ctrl: PATCH /api/notifications/{id}/read
+        activate Ctrl
+        Ctrl->>ReadUC: execute(notificationId, userId)
+        activate ReadUC
+        ReadUC->>Repo: findById(notificationId)
+        Repo->>DB: SELECT * FROM notifications WHERE id = ?
+        DB-->>Repo: NotificationJpaEntity
+
+        alt Thông báo không tồn tại
+            ReadUC-->>Ctrl: NotificationNotFoundException
+            Ctrl-->>User: 404 Not Found
+        else Vi phạm quyền sở hữu (IDOR - thông báo của user khác)
+            ReadUC-->>Ctrl: UnauthorizedNotificationAccessException
+            Ctrl-->>User: 403 Forbidden
+        end
+
+        opt Thông báo chưa đọc (!isRead)
+            ReadUC->>ReadUC: notification.markAsRead(now)
+            ReadUC->>Repo: save(notification)
+            Repo->>DB: UPDATE notifications SET is_read = true, read_at = now WHERE id = ?
+        end
+
+        ReadUC-->>Ctrl: NotificationResponse (isRead = true, readAt = timestamp)
+        deactivate ReadUC
+        Ctrl-->>User: 200 OK (NotificationResponse)
+        deactivate Ctrl
+    end
+
+    rect rgb(245, 255, 245)
+        Note over User, DB: 3. Đánh dấu đã đọc toàn bộ thông báo (Bulk Update Idempotent)
+        User->>Ctrl: PATCH /api/notifications/read-all
+        activate Ctrl
+        Ctrl->>ReadAllUC: execute(userId)
+        activate ReadAllUC
+        ReadAllUC->>Repo: markAllAsReadByUserId(userId, now)
+        Repo->>DB: UPDATE notifications SET is_read = true, read_at = now WHERE user_id = ? AND is_read = false
+        DB-->>Repo: int updatedRowsCount
+        ReadAllUC-->>Ctrl: updatedRowsCount
+        deactivate ReadAllUC
+        Ctrl-->>User: 200 OK (MarkAllNotificationsReadResponse: {updatedCount})
+        deactivate Ctrl
+    end
+
+    rect rgb(255, 245, 245)
+        Note over User, DB: 4. Lấy số lượng thông báo chưa đọc (Badge Counter)
+        User->>Ctrl: GET /api/notifications/unread-count
+        activate Ctrl
+        Ctrl->>UnreadUC: execute(userId)
+        activate UnreadUC
+        UnreadUC->>Repo: countByUserIdAndIsReadFalse(userId)
+        Repo->>DB: SELECT COUNT(*) FROM notifications WHERE user_id = ? AND is_read = false
+        DB-->>Repo: long unreadCount
+        UnreadUC-->>Ctrl: unreadCount
+        deactivate UnreadUC
+        Ctrl-->>User: 200 OK (UnreadCountResponse: {unreadCount})
+        deactivate Ctrl
+    end

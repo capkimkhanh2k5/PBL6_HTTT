@@ -1,39 +1,28 @@
 package com.danasea.backend.modules.service.infrastructure.persistence.adapters;
 
-import com.danasea.backend.modules.service.domain.models.SlotStatus;
-import com.danasea.backend.modules.service.domain.ports.ServiceAvailabilityPort;
-import com.danasea.backend.modules.service.infrastructure.persistence.repositories.JpaServiceSlotRepository;
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
-
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
+import com.danasea.backend.modules.service.application.services.ServiceDiscoveryAvailability;
+import com.danasea.backend.modules.service.domain.models.Service;
+import com.danasea.backend.modules.service.domain.ports.ServiceAvailabilityPort;
+import lombok.RequiredArgsConstructor;
 
 @Component
 @RequiredArgsConstructor
 public class ServiceAvailabilityAdapter implements ServiceAvailabilityPort {
-
-    private static final DateTimeFormatter TIME_FORMAT = DateTimeFormatter.ofPattern("HH:mm:ss");
-
-    private final JpaServiceSlotRepository slotRepository;
+    private final ServiceDiscoveryAvailability availability;
 
     @Override
     @Transactional(readOnly = true)
     public List<String> findAvailableSlots(UUID serviceId) {
-        return slotRepository
-                .findByServiceIdAndStatusAndDateGreaterThanEqualOrderByDateAscStartTimeAsc(
-                        serviceId, SlotStatus.OPEN, LocalDate.now())
-                .stream()
-                .filter(slot -> slot.getCapacity() != null
-                        && slot.getBookedCount() != null
-                        && slot.getBookedCount() < slot.getCapacity())
-                .map(slot -> slot.getDate() + "T" + slot.getStartTime().format(TIME_FORMAT))
-                .toList();
+        return availability.describe(Service.builder().id(serviceId).build()).stream().filter(slot -> slot.bookable())
+                .map(slot -> slot.date() + "T" + slot.startTime().format(DateTimeFormatter.ISO_LOCAL_TIME))
+                .distinct().toList();
     }
 
     @Override
@@ -48,16 +37,8 @@ public class ServiceAvailabilityAdapter implements ServiceAvailabilityPort {
         } catch (RuntimeException exception) {
             return Optional.empty();
         }
-        return slotRepository
-                .findByServiceIdAndStatusAndDateGreaterThanEqualOrderByDateAscStartTimeAsc(
-                        serviceId, SlotStatus.OPEN, LocalDate.now())
-                .stream()
-                .filter(slot -> slot.getDate().equals(requested.toLocalDate()))
-                .filter(slot -> slot.getStartTime().equals(requested.toLocalTime()))
-                .filter(slot -> slot.getCapacity() != null
-                        && slot.getBookedCount() != null
-                        && slot.getBookedCount() < slot.getCapacity())
-                .map(slot -> slot.getId())
-                .findFirst();
+        return availability.describe(Service.builder().id(serviceId).build()).stream().filter(slot -> slot.bookable())
+                .filter(slot -> slot.date().equals(requested.toLocalDate()) && slot.startTime().equals(requested.toLocalTime()))
+                .map(slot -> slot.slotId()).findFirst();
     }
 }

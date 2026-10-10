@@ -1,0 +1,61 @@
+sequenceDiagram
+    autonumber
+    participant Cron as Spring @Scheduled (Cron: 0 0 * * * *)<br/>Zone: Asia/Ho_Chi_Minh
+    participant Job as TripReminderJob
+    participant SlotRepo as JpaServiceSlotRepository
+    participant SubOrderRepo as JpaSubOrderRepository
+    participant MasterOrderRepo as JpaMasterOrderRepository
+    participant NotifUC as SendNotificationUseCase
+    participant PushPort as PushNotificationPort (Mobile Push)
+    participant DB as PostgreSQL Database
+
+    Note over Cron, DB: Luồng Tác Vụ Định Kỳ Nhắc Chuyến Sắp Khởi Hành (R5)
+
+    Cron->>Job: executeTripReminders() (Kích hoạt mỗi giờ)
+    activate Job
+
+    Note over Job: Xác định cửa sổ 24 giờ tiếp theo:<br/>• now = LocalDateTime.now(Asia/Ho_Chi_Minh)<br/>• horizon = now + 24 Hours
+
+    loop Phân trang theo từng batch 200 slots
+        Job->>SlotRepo: findDeparturesInWindow(now.date, now.time, horizon.date, horizon.time, PageRequest)
+        SlotRepo->>DB: SELECT * FROM service_slots WHERE departure BETWEEN now AND horizon
+        DB-->>SlotRepo: Page<ServiceSlotEntity>
+
+        loop Duyệt qua từng Slot trong cửa sổ khởi hành
+            Job->>SubOrderRepo: findBySlotId(slot.id)
+            SubOrderRepo->>DB: SELECT * FROM sub_orders WHERE slot_id = ?
+            DB-->>SubOrderRepo: List<SubOrder>
+
+            loop Với từng SubOrder
+                alt Trạng thái subOrder != CONFIRMED
+                    Note over Job: Bỏ qua (đơn chưa xác nhận hoặc đã hủy)
+                else Trạng thái subOrder == CONFIRMED
+                    Job->>MasterOrderRepo: findById(subOrder.masterOrderId)
+                    MasterOrderRepo->>DB: SELECT * FROM master_orders WHERE id = ?
+                    DB-->>MasterOrderRepo: MasterOrder
+
+                    alt MasterOrder chưa thanh toán hoặc bị hủy
+                        Note over Job: Bỏ qua đơn chưa hoàn tất thanh toán
+                    else MasterOrder đã thanh toán (paymentStatus == PAID)
+                        Note over Job: Khởi tạo thông báo Idempotent:<br/>Key = "trip:{slotId}:customer:{customerId}"
+                        Job->>NotifUC: executeOnce(NotificationCommand, idempotencyKey)
+                        activate NotifUC
+                        NotifUC->>DB: INSERT INTO notifications (...) ON CONFLICT DO NOTHING
+                        DB-->>NotifUC: Optional<NotificationEntity>
+                        NotifUC-->>Job: Optional<NotificationEntity>
+                        deactivate NotifUC
+
+                        opt Bản ghi mới được tạo thành công (Chưa gửi trước đó)
+                            Note over Job: Đăng ký hook sau khi commit giao dịch DB:<br/>TransactionSynchronization.afterCommit()
+                            Job->>PushPort: sendPush(userId, title, body, payload: {type: 'TRIP_REMINDER', slotId})
+                            activate PushPort
+                            Note over PushPort: Gửi Mobile Push Notification đến thiết bị khách hàng
+                            PushPort-->>Job: Gửi thành công (hoặc ghi log nếu adapter dev)
+                            deactivate PushPort
+                        end
+                    end
+                end
+            end
+        end
+    end
+    deactivate Job

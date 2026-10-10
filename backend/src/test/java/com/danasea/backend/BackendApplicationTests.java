@@ -1,10 +1,12 @@
 package com.danasea.backend;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.HashSet;
 import java.util.Set;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
-
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -27,7 +29,7 @@ class BackendApplicationTests {
 	}
 
 	@Test
-	void allApplicationEndpointsAreDiscoverable() {
+	void allApplicationEndpointsAreDiscoverable() throws Exception {
 		Set<String> endpoints = requestMappingHandlerMapping.getHandlerMethods().entrySet().stream()
 				.filter(entry -> entry.getValue().getBeanType().getPackageName().startsWith("com.danasea.backend"))
 				.flatMap(entry -> entry.getKey().getPatternValues().stream()
@@ -35,8 +37,17 @@ class BackendApplicationTests {
 								.map(method -> method.name() + " " + pattern)))
 				.collect(Collectors.toSet());
 
-		assertEquals(163, endpoints.size(),
-				() -> "Backend API inventory changed; discovered " + endpoints.size() + " endpoints");
+        Set<String> documented = new HashSet<>();
+        Pattern endpointLine = Pattern.compile("^- \\[x\\] (GET|POST|PUT|PATCH|DELETE) (/[^\\s?]+).*$");
+        for (String line : Files.readAllLines(Path.of("docs", "danasea-api-tracking.md"))) {
+            var match = endpointLine.matcher(line);
+            if (match.matches()) {
+                documented.add(match.group(1) + " " + match.group(2));
+            }
+        }
+        Files.createDirectories(Path.of("target", "test-artifacts"));
+        Files.write(Path.of("target", "test-artifacts", "api-endpoints.txt"), endpoints.stream().sorted().toList());
+        assertEquals(endpoints, documented, "Tracking must match all controller HTTP method/path mappings.");
 	}
 
 }

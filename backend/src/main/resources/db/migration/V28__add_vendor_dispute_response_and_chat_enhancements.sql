@@ -1,4 +1,4 @@
--- Migration: V25__add_vendor_dispute_response_and_chat_enhancements.sql
+-- Migration: V28__add_vendor_dispute_response_and_chat_enhancements.sql
 -- 1. Bổ sung các trường phản hồi và bằng chứng của Vendor vào bảng disputes
 ALTER TABLE disputes ADD COLUMN IF NOT EXISTS vendor_response TEXT;
 ALTER TABLE disputes ADD COLUMN IF NOT EXISTS vendor_evidence_urls TEXT;

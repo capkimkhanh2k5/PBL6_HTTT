@@ -1,6 +1,7 @@
 package com.danasea.backend.modules.communication.presentation.handlers;
 
 import com.danasea.backend.modules.communication.domain.exceptions.ConversationNotFoundException;
+import com.danasea.backend.modules.communication.domain.exceptions.NotificationNotFoundException;
 import com.danasea.backend.modules.communication.domain.exceptions.UnauthorizedChatAccessException;
 import com.danasea.backend.modules.order.domain.exceptions.OrderNotFoundException;
 import com.danasea.backend.shared.presentation.ErrorResponse;
@@ -52,5 +53,9 @@ public class CommunicationExceptionHandler extends LocalizedExceptionHandlerSupp
     public ResponseEntity<ErrorResponse> handleValidationErrors(MethodArgumentNotValidException ex) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                 .body(validationError(ex));
+    }
+    @ExceptionHandler(NotificationNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleNotificationNotFound(NotificationNotFoundException ex) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error("NOTIFICATION_NOT_FOUND"));
     }
 }

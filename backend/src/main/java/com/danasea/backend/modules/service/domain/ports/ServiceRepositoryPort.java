@@ -4,7 +4,7 @@ import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-
+import com.danasea.backend.modules.service.application.dtos.SearchServicesCriteria;
 import com.danasea.backend.modules.service.domain.models.Service;
 import com.danasea.backend.modules.service.domain.models.ServiceStatus;
 
@@ -50,4 +50,36 @@ public interface ServiceRepositoryPort {
             BigDecimal lng,
             Double radiusKm
     );
+
+    default List<Service> searchPublishedServices(SearchServicesCriteria criteria) {
+        if (criteria == null) {
+            return List.of();
+        }
+        return searchPublishedServices(
+                criteria.getCategoryId(),
+                criteria.getKeyword(),
+                criteria.getMinPrice(),
+                criteria.getMaxPrice(),
+                criteria.getLat(),
+                criteria.getLng(),
+                criteria.getRadiusKm(),
+                criteria.getPage(),
+                criteria.getSize()
+        );
+    }
+
+    default long countPublishedServices(SearchServicesCriteria criteria) {
+        if (criteria == null) {
+            return 0L;
+        }
+        return countPublishedServices(
+                criteria.getCategoryId(),
+                criteria.getKeyword(),
+                criteria.getMinPrice(),
+                criteria.getMaxPrice(),
+                criteria.getLat(),
+                criteria.getLng(),
+                criteria.getRadiusKm()
+        );
+    }
 }

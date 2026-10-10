@@ -25,9 +25,9 @@ class ChatMigrationIntegrationTest {
             .waitingFor(Wait.forListeningPort());
 
     @Test
-    void v26MergesDuplicatesPreservesMessagesAndBackfillsSequence() throws Exception {
+    void v29MergesDuplicatesPreservesMessagesAndBackfillsSequence() throws Exception {
         String url = "jdbc:postgresql://" + POSTGRES.getHost() + ":" + POSTGRES.getFirstMappedPort() + "/chat_migration";
-        Flyway.configure().dataSource(url, "test", "test").target("25").load().migrate();
+        Flyway.configure().dataSource(url, "test", "test").target("28").load().migrate();
         UUID customer = UUID.randomUUID(), vendor = UUID.randomUUID(), order = UUID.randomUUID();
         UUID first = UUID.randomUUID(), duplicate = UUID.randomUUID(), otherVendorConversation = UUID.randomUUID();
         try (var connection = DriverManager.getConnection(url, "test", "test")) {
@@ -47,9 +47,9 @@ class ChatMigrationIntegrationTest {
                 }
             }
         }
-        Flyway flyway = Flyway.configure().dataSource(url, "test", "test").load();
+        Flyway flyway = Flyway.configure().dataSource(url, "test", "test").target("29").load();
         assertTrue(flyway.migrate().success); flyway.validate();
-        assertEquals("26", flyway.info().current().getVersion().getVersion());
+        assertEquals("29", flyway.info().current().getVersion().getVersion());
         try (var connection = DriverManager.getConnection(url, "test", "test"); var statement = connection.createStatement()) {
             try (var rows = statement.executeQuery("SELECT count(*) FROM conversations")) { assertTrue(rows.next()); assertEquals(2, rows.getInt(1)); }
             try (var rows = statement.executeQuery("SELECT count(*),min(message_sequence),max(message_sequence) FROM messages WHERE conversation_id='" + first + "'")) {

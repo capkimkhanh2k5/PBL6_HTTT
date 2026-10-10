@@ -12,8 +12,8 @@ import java.util.Objects;
 import java.util.UUID;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
-
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -25,7 +25,6 @@ import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionTemplate;
-
 import com.danasea.backend.modules.audit.application.api.AuditLogInternalApi;
 import com.danasea.backend.modules.booking.application.dtos.ConfirmBookingCommand;
 import com.danasea.backend.modules.booking.application.usecases.ConfirmBookingUseCase;
@@ -38,6 +37,7 @@ import com.danasea.backend.modules.booking.infrastructure.persistence.entities.B
 import com.danasea.backend.modules.booking.infrastructure.persistence.repositories.JpaBookingRepository;
 import com.danasea.backend.modules.order.application.dtos.CreatePaymentIntentCommand;
 import com.danasea.backend.modules.order.application.usecases.CreatePaymentIntentUseCase;
+import com.danasea.backend.modules.order.domain.events.PaymentSuccessEvent;
 import com.danasea.backend.modules.order.domain.exceptions.InvalidOrderStateException;
 import com.danasea.backend.modules.order.domain.exceptions.InvalidWebhookException;
 import com.danasea.backend.modules.order.domain.exceptions.OrderNotFoundException;
@@ -75,13 +75,11 @@ import com.danasea.backend.modules.order.presentation.dtos.RefundResponse;
 import com.danasea.backend.modules.order.presentation.dtos.RefundWebhookRequest;
 import com.danasea.backend.modules.order.presentation.dtos.RefundWebhookResponse;
 import com.danasea.backend.modules.order.presentation.dtos.SubOrderResponse;
-import com.danasea.backend.modules.service.infrastructure.persistence.entities.ServiceSlotJpaEntity;
 import com.danasea.backend.modules.service.infrastructure.persistence.repositories.JpaServiceSlotRepository;
 import com.danasea.backend.modules.vendor.application.api.VendorInternalApi;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -90,6 +88,13 @@ public class OrderPaymentService {
 
     private static final Pattern IDEMPOTENCY_KEY = Pattern.compile("[A-Za-z0-9._:-]{8,100}");
     private static final BigDecimal DEFAULT_COMMISSION_RATE = CommissionPolicyPort.DEFAULT_COMMISSION_RATE;
+
+    private ApplicationEventPublisher eventPublisher;
+
+    @Autowired
+    public void setEventPublisher(ApplicationEventPublisher eventPublisher) {
+        this.eventPublisher = eventPublisher;
+    }
 
     private final JpaBookingRepository bookingRepository;
     private final JpaMasterOrderRepository masterOrderRepository;
@@ -743,6 +748,9 @@ public class OrderPaymentService {
         }
         payment.setLastError(null);
         payment.setStatus(PaymentStatus.SUCCESS);
+        if (payment.getPaidAt() == null) {
+            payment.setPaidAt(OffsetDateTime.now());
+        }
         payment.setReconciliationNextAttemptAt(null);
         if (providerTransactionId != null && !providerTransactionId.isBlank()) {
             payment.setProviderTransactionId(providerTransactionId);
@@ -765,6 +773,9 @@ public class OrderPaymentService {
             subOrderRepository.saveAll(subOrders);
 
             confirmBookingUseCase.execute(new ConfirmBookingCommand(order.getBookingId(), order.getCustomerId()));
+            if (eventPublisher != null) {
+                eventPublisher.publishEvent(new PaymentSuccessEvent(order.getId(), order.getCustomerId(), order.getBookingId()));
+            }
         }
     }
 
