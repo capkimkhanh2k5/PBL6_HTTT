@@ -239,211 +239,169 @@ export function Promotions() {
         </div>
       )}
 
-      <div className="px-space-xl py-space-lg flex flex-col gap-space-xl max-w-[1400px] mx-auto w-full">
+      <div className="w-full px-6 py-4 space-y-3.5">
         {/* Header Block */}
-        <div className="flex flex-col gap-space-sm">
-          <div className="flex items-center gap-space-xs text-on-surface-variant font-label-md text-label-md">
-            <span>Quản trị Bán hàng</span>
-            <span className="material-symbols-outlined text-[16px]">chevron_right</span>
-            <span className="text-primary font-bold">Mã ưu đãi & Khuyến mãi (Vendor)</span>
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-200">
+          <div>
+            <h1 className="text-xl md:text-2xl font-bold text-slate-900 tracking-tight">
+              Khuyến mãi
+            </h1>
           </div>
-
-          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-space-md">
-            <div>
-              <h1 className="font-headline-xl text-headline-xl font-bold text-on-surface tracking-tight">
-                Quản lý Mã Khuyến mãi Đối tác
-              </h1>
-              <p className="font-body-md text-body-md text-on-surface-variant mt-1 max-w-3xl">
-                Thiết lập mã giảm giá riêng của cơ sở kinh doanh nhằm kích cầu tour chèo SUP bán đảo Sơn Trà và lặn ngắm san hô. Áp dụng độc quyền cho các dịch vụ thuộc <span className="font-bold text-primary">Danang Ocean Club</span>.
-              </p>
-            </div>
-            <div className="flex items-center gap-space-sm">
-              <button
-                onClick={handleOpenCreate}
-                className="inline-flex items-center gap-space-sm px-space-lg py-3 rounded-xl bg-primary text-on-primary font-label-lg text-label-lg font-bold shadow-md hover:bg-primary-container transition-all cursor-pointer"
-                type="button"
-              >
-                <span className="material-symbols-outlined text-[20px]">add_circle</span>
-                <span>+ Tạo mã khuyến mãi mới</span>
-              </button>
-            </div>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={handleOpenCreate}
+              className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-primary text-white text-xs font-semibold hover:bg-primary-container transition-all cursor-pointer shadow-xs"
+              type="button"
+            >
+              <span className="material-symbols-outlined text-[18px]">add</span>
+              <span>Tạo mã mới</span>
+            </button>
           </div>
         </div>
 
-        {/* Scope Warning Banner */}
-        <div className="bg-surface-container-lowest rounded-2xl p-space-md shadow-sm border border-outline-variant/20 flex items-start gap-space-md">
-          <div className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center shrink-0 mt-0.5 text-primary">
-            <span className="material-symbols-outlined text-[20px]">verified_user</span>
-          </div>
-          <div className="flex flex-col gap-0.5">
-            <span className="font-headline-sm text-headline-sm text-primary font-bold">
-              Phạm vi áp dụng cố định: Cấp Đối tác (Scope: VENDOR)
-            </span>
-            <p className="font-body-sm text-body-sm text-on-surface-variant leading-relaxed">
-              Mã giảm giá do Đối tác thiết lập sẽ khấu trừ trực tiếp vào phần doanh thu của đối tác cho các dịch vụ do đơn vị vận hành (SUP, Kayak, Lặn biển), không áp dụng sang các đối tác cano hay tour trọn gói của Ban Quản lý VITA.
-            </p>
-          </div>
-        </div>
-
-        {/* 4 Top KPI Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-space-md">
-          <div className="bg-surface-container-lowest rounded-2xl p-space-lg shadow-sm border border-outline-variant/20 flex flex-col justify-between">
-            <span className="font-label-sm uppercase tracking-wider text-tertiary">Tổng số mã</span>
-            <span className="font-display-lg text-display-lg text-primary font-bold mt-1">
-              {promotions.length} <span className="font-headline-sm text-headline-sm text-tertiary">mã</span>
-            </span>
-            <span className="text-body-sm text-on-surface-variant mt-2">Toàn bộ chiến dịch</span>
-          </div>
-
-          <div className="bg-surface-container-lowest rounded-2xl p-space-lg shadow-sm border border-outline-variant/20 flex flex-col justify-between">
-            <span className="font-label-sm uppercase tracking-wider text-primary font-bold">Đang chạy</span>
-            <span className="font-display-lg text-display-lg text-primary font-bold mt-1">
-              {activeCount} <span className="font-headline-sm text-headline-sm text-primary">mã</span>
-            </span>
-            <span className="text-body-sm text-primary mt-2">Đang mở áp dụng cho khách</span>
-          </div>
-
-          <div className="bg-surface-container-lowest rounded-2xl p-space-lg shadow-sm border border-outline-variant/20 flex flex-col justify-between">
-            <span className="font-label-sm uppercase tracking-wider text-secondary font-bold">Lượt đã kích hoạt</span>
-            <span className="font-display-lg text-display-lg text-secondary font-bold mt-1">
-              {totalUsed} <span className="font-headline-sm text-headline-sm text-secondary">lượt</span>
-            </span>
-            <span className="text-body-sm text-on-surface-variant mt-2">Tổng số đơn có mã giảm</span>
-          </div>
-
-          <div className="bg-surface-container-lowest rounded-2xl p-space-lg shadow-sm border border-outline-variant/20 flex flex-col justify-between">
-            <span className="font-label-sm uppercase tracking-wider text-outline">Ưu đãi trung bình</span>
-            <span className="font-display-lg text-display-lg text-on-surface font-bold mt-1">
-              12.5%
-            </span>
-            <span className="text-body-sm text-on-surface-variant mt-2">Tỷ lệ giảm trung bình</span>
-          </div>
-        </div>
-
-        {/* Filter and Table Section */}
-        <div className="space-y-space-md">
-          <div className="flex items-center justify-between">
-            <div className="flex gap-2">
-              <button
-                onClick={() => setFilterStatus("ALL")}
-                className={`px-4 py-1.5 rounded-full font-label-md cursor-pointer transition-colors ${
-                  filterStatus === "ALL" ? "bg-primary text-on-primary font-bold" : "bg-surface-container-low text-on-surface-variant"
-                }`}
-              >
-                Tất cả ({promotions.length})
-              </button>
-              <button
-                onClick={() => setFilterStatus("ACTIVE")}
-                className={`px-4 py-1.5 rounded-full font-label-md cursor-pointer transition-colors ${
-                  filterStatus === "ACTIVE" ? "bg-primary text-on-primary font-bold" : "bg-surface-container-low text-on-surface-variant"
-                }`}
-              >
-                Đang hoạt động ({activeCount})
-              </button>
-              <button
-                onClick={() => setFilterStatus("INACTIVE")}
-                className={`px-4 py-1.5 rounded-full font-label-md cursor-pointer transition-colors ${
-                  filterStatus === "INACTIVE" ? "bg-primary text-on-primary font-bold" : "bg-surface-container-low text-on-surface-variant"
-                }`}
-              >
-                Tạm tắt ({promotions.length - activeCount})
-              </button>
-            </div>
-          </div>
-
-          {/* Table */}
-          <div
-            key={filterStatus}
-            className="bg-surface-container-lowest rounded-2xl shadow-sm border border-outline-variant/20 overflow-hidden animate-fade-in-up"
+        {/* Filter Tabs */}
+        <div className="flex items-center gap-1.5 overflow-x-auto pb-1 text-nowrap scrollbar-none">
+          <button
+            onClick={() => setFilterStatus("ALL")}
+            className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold cursor-pointer transition-colors ${
+              filterStatus === "ALL" ? "bg-primary text-white shadow-xs" : "bg-white text-slate-700 hover:bg-slate-50 border border-slate-200"
+            }`}
           >
-            <div className="overflow-x-auto">
-              <table className="w-full text-left">
-                <thead>
-                  <tr className="bg-surface-container-low text-on-surface-variant font-label-md text-label-md uppercase tracking-wider">
-                    <th className="py-3 px-space-lg">Mã ưu đãi</th>
-                    <th className="py-3 px-space-md">Loại ưu đãi</th>
-                    <th className="py-3 px-space-md">Giá trị</th>
-                    <th className="py-3 px-space-md">Lượt đã dùng</th>
-                    <th className="py-3 px-space-md">Thời hạn áp dụng</th>
-                    <th className="py-3 px-space-md text-center">Trạng thái</th>
-                    <th className="py-3 px-space-lg text-right">Thao tác</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-outline-variant/20 font-body-sm text-body-sm">
-                  {filteredPromotions.map((p) => (
-                    <tr key={p.id} className="hover:bg-surface-container-low/50 transition-colors">
-                      <td className="py-3.5 px-space-lg">
-                        <div className="flex items-center gap-space-sm">
-                          <div className="p-2 rounded-lg bg-primary/10 text-primary">
-                            <span className="material-symbols-outlined text-[20px]">local_offer</span>
-                          </div>
-                          <div>
-                            <span className="font-headline-sm text-headline-sm font-bold text-primary tracking-wide">
-                              {p.code}
-                            </span>
-                            <div className="font-label-sm text-label-sm text-tertiary">{p.description}</div>
-                          </div>
+            Tất cả ({promotions.length})
+          </button>
+          <button
+            onClick={() => setFilterStatus("ACTIVE")}
+            className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold cursor-pointer transition-colors ${
+              filterStatus === "ACTIVE" ? "bg-primary text-white shadow-xs" : "bg-white text-slate-700 hover:bg-slate-50 border border-slate-200"
+            }`}
+          >
+            Đang hoạt động ({activeCount})
+          </button>
+          <button
+            onClick={() => setFilterStatus("INACTIVE")}
+            className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold cursor-pointer transition-colors ${
+              filterStatus === "INACTIVE" ? "bg-primary text-white shadow-xs" : "bg-white text-slate-700 hover:bg-slate-50 border border-slate-200"
+            }`}
+          >
+            Tạm tắt ({promotions.length - activeCount})
+          </button>
+        </div>
+
+        {/* Table */}
+        <div
+          key={filterStatus}
+          className="bg-white rounded-xl shadow-xs border border-slate-200 overflow-hidden"
+        >
+          <div className="overflow-x-auto scrollbar-thin">
+            <table className="w-full text-left border-collapse min-w-[900px]">
+              <thead>
+                <tr className="bg-slate-100 text-slate-900 text-xs font-bold border-b border-slate-200">
+                  <th className="py-3 px-4 font-bold border-r border-slate-200">Mã ưu đãi</th>
+                  <th className="py-3 px-3 font-bold border-r border-slate-200">Loại ưu đãi</th>
+                  <th className="py-3 px-3 font-bold border-r border-slate-200">Giá trị</th>
+                  <th className="py-3 px-3 font-bold border-r border-slate-200">Lượt đã dùng</th>
+                  <th className="py-3 px-3 font-bold border-r border-slate-200">Thời hạn áp dụng</th>
+                  <th className="py-3 px-3 text-center font-bold border-r border-slate-200">Trạng thái</th>
+                  <th className="py-3 px-4 text-center font-bold">Thao tác</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-200 text-sm text-slate-800">
+                {filteredPromotions.map((p) => (
+                  <tr key={p.id} className="hover:bg-slate-50 transition-colors">
+                    <td className="py-3.5 px-4 border-r border-slate-200">
+                      <div className="flex items-center gap-3">
+                        <div className="p-1.5 rounded bg-slate-100 border border-slate-200 text-primary">
+                          <span className="material-symbols-outlined text-[18px]">local_offer</span>
                         </div>
-                      </td>
-                      <td className="py-3.5 px-space-md">
-                        <span className="px-2.5 py-1 rounded-md bg-surface-container text-on-surface-variant font-label-sm font-semibold">
-                          {p.type === "PERCENTAGE" ? "Phần trăm (%)" : "Số tiền cố định"}
-                        </span>
-                      </td>
-                      <td className="py-3.5 px-space-md font-bold text-primary">
-                        {p.type === "PERCENTAGE" ? `${p.value}%` : `${p.value.toLocaleString("vi-VN")} đ`}
-                      </td>
-                      <td className="py-3.5 px-space-md">
-                        <div className="flex flex-col gap-1 w-32">
-                          <div className="flex justify-between font-label-sm text-[12px]">
-                            <span className="font-bold">{p.usedCount} / {p.maxUses}</span>
-                            <span className="text-tertiary">{Math.round((p.usedCount / p.maxUses) * 100)}%</span>
-                          </div>
-                          <div className="w-full h-1.5 bg-surface-container rounded-full overflow-hidden">
-                            <div
-                              className="h-full bg-primary rounded-full"
-                              style={{ width: `${Math.min(100, (p.usedCount / p.maxUses) * 100)}%` }}
-                            ></div>
-                          </div>
+                        <div>
+                          <span className="font-mono font-bold text-sm text-slate-900 tracking-wide block">
+                            {p.code}
+                          </span>
+                          <span className="text-xs text-slate-500">{p.description}</span>
                         </div>
-                      </td>
-                      <td className="py-3.5 px-space-md text-on-surface-variant">
-                        <div>{p.validFrom} đến {p.validTo}</div>
-                      </td>
-                      <td className="py-3.5 px-space-md text-center">
+                      </div>
+                    </td>
+                    <td className="py-3.5 px-3 border-r border-slate-200">
+                      <span className="px-2 py-0.5 rounded bg-slate-100 border border-slate-200 text-xs font-semibold text-slate-700">
+                        {p.type === "PERCENTAGE" ? "Phần trăm (%)" : "Số tiền cố định"}
+                      </span>
+                    </td>
+                    <td className="py-3.5 px-3 font-mono font-bold text-slate-900 border-r border-slate-200">
+                      {p.type === "PERCENTAGE" ? `${p.value}%` : `${p.value.toLocaleString("vi-VN")} đ`}
+                    </td>
+                    <td className="py-3.5 px-3 border-r border-slate-200">
+                      <div className="flex flex-col gap-1 w-28">
+                        <span className="text-xs font-mono font-bold text-slate-800">{p.usedCount} / {p.maxUses}</span>
+                        <div className="w-full h-1.5 bg-slate-200 rounded-full overflow-hidden">
+                          <div
+                            className="h-full bg-primary rounded-full"
+                            style={{ width: `${Math.min(100, (p.usedCount / p.maxUses) * 100)}%` }}
+                          ></div>
+                        </div>
+                      </div>
+                    </td>
+                    <td className="py-3.5 px-3 text-xs text-slate-600 font-mono border-r border-slate-200">
+                      <div>{p.validFrom} – {p.validTo}</div>
+                    </td>
+                    <td className="py-3.5 px-3 text-center border-r border-slate-200">
+                      <button
+                        onClick={() => handleToggleActive(p.id)}
+                        className={`px-2.5 py-0.5 rounded text-xs font-semibold cursor-pointer transition-all ${
+                          p.isActive
+                            ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
+                            : "bg-slate-100 text-slate-600 border border-slate-200"
+                        }`}
+                      >
+                        {p.isActive ? "BẬT" : "TẮT"}
+                      </button>
+                    </td>
+                    <td className="py-3.5 px-4 text-center">
+                      <div className="flex items-center justify-center gap-1.5">
                         <button
-                          onClick={() => handleToggleActive(p.id)}
-                          className={`px-3 py-1 rounded-full text-label-sm font-bold cursor-pointer transition-all ${
-                            p.isActive
-                              ? "bg-primary/15 text-primary"
-                              : "bg-surface-container-high text-on-surface-variant"
-                          }`}
+                          onClick={() => setSelectedVoucherHistory(p)}
+                          className="p-1.5 rounded text-slate-600 hover:bg-slate-100 transition-colors cursor-pointer"
+                          title="Lịch sử áp dụng"
                         >
-                          {p.isActive ? "ĐANG BẬT" : "TẮT"}
+                          <span className="material-symbols-outlined text-[18px]">history</span>
                         </button>
-                      </td>
-                      <td className="py-3.5 px-space-lg text-right">
-                        <div className="flex items-center justify-end gap-1">
-                          <button
-                            onClick={() => setSelectedVoucherHistory(p)}
-                            className="p-1.5 rounded-lg text-secondary hover:bg-secondary/10 transition-colors cursor-pointer"
-                            title="Lịch sử áp dụng"
-                          >
-                            <span className="material-symbols-outlined text-[18px]">history</span>
-                          </button>
-                          <button
-                            onClick={() => handleOpenEdit(p)}
-                            className="p-1.5 rounded-lg text-primary hover:bg-primary/10 transition-colors cursor-pointer"
-                            title="Sửa mã"
-                          >
-                            <span className="material-symbols-outlined text-[18px]">edit</span>
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+                        <button
+                          onClick={() => handleOpenEdit(p)}
+                          className="p-1.5 rounded text-slate-600 hover:bg-slate-100 transition-colors cursor-pointer"
+                          title="Sửa mã"
+                        >
+                          <span className="material-symbols-outlined text-[18px]">edit</span>
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          {/* Minimal Clean Pagination Bar */}
+          <div className="px-4 py-2 border-t border-slate-200 bg-slate-50 flex items-center justify-between text-xs select-none">
+            <div className="flex items-center gap-2">
+              <span className="text-slate-600 font-medium">Số dòng:</span>
+              <select
+                defaultValue={10}
+                className="px-2 py-1 rounded bg-white border border-slate-200 text-xs font-semibold text-slate-800 cursor-pointer focus:outline-none"
+              >
+                <option value={5}>5</option>
+                <option value={10}>10</option>
+                <option value={20}>20</option>
+              </select>
+            </div>
+            <div className="flex items-center gap-1">
+              <button className="px-2 py-1 rounded text-slate-500 hover:bg-slate-200 font-medium cursor-pointer" disabled>
+                Trước
+              </button>
+              <span className="w-7 h-7 rounded bg-primary text-white flex items-center justify-center font-bold text-xs">
+                1
+              </span>
+              <button className="px-2 py-1 rounded text-slate-500 hover:bg-slate-200 font-medium cursor-pointer" disabled>
+                Sau
+              </button>
             </div>
           </div>
         </div>

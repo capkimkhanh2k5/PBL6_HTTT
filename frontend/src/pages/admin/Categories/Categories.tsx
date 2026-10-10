@@ -138,7 +138,6 @@ export function Categories() {
 
   const totalCount = categories.length;
   const activeCount = categories.filter(c => c.isActive).length;
-  const certRequiredCount = categories.filter(c => c.requiresSafetyCert).length;
 
   return (
     <main className="w-full pt-16 bg-surface px-space-xl pb-space-2xl min-h-screen">
@@ -151,101 +150,38 @@ export function Categories() {
           </div>
         )}
 
-        {/* Page Sub-Header */}
-        <section className="flex flex-col lg:flex-row lg:items-center justify-between gap-space-md mb-space-xl">
-          <div className="flex flex-col gap-space-xs">
-            <div className="flex items-center gap-2">
-              <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-primary/10 text-primary font-label-sm uppercase tracking-wider font-bold">
-                <span className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse"></span>
-                Cơ sở dữ liệu hải trình &amp; dịch vụ
-              </span>
-              <span className="text-outline-variant font-label-sm">|</span>
-              <span className="text-on-surface-variant font-label-sm font-semibold">Taxonomy Engine v2.4</span>
-            </div>
-            <h1 className="font-headline-xl text-headline-xl text-on-surface tracking-tight font-black">
-              Cấu trúc Danh mục &amp; Phân loại Trải nghiệm Biển
+        {/* Header */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 mb-4 border-b border-slate-200">
+          <div>
+            <h1 className="text-xl md:text-2xl font-bold text-slate-800 tracking-tight">
+              Quản lý Danh mục
             </h1>
-            <p className="font-body-md text-body-md text-on-surface-variant max-w-3xl">
-              Quản lý cây danh mục đa cấp, mã định danh URL (slug), quy định chứng chỉ an toàn và trạng thái hiển thị trên toàn sàn DANASEA.
-            </p>
           </div>
-
-          <div className="flex items-center gap-space-sm self-start lg:self-auto">
-            <button 
-              onClick={() => showToast("Đã xóa và nạp lại bộ đệm Redis Cache cho hệ thống phân loại!")}
-              className="flex items-center gap-2 px-space-md py-2.5 rounded-xl bg-surface-container-low hover:bg-surface-container text-on-surface font-label-lg transition-all shadow-sm font-semibold"
-            >
-              <span className="material-symbols-outlined text-[18px]">cached</span>
-              <span>Đồng bộ Redis Cache</span>
-            </button>
+          <div className="flex items-center gap-2">
+            <span className="px-2.5 py-1 rounded-md bg-white border border-slate-200 text-slate-600 text-xs font-medium">
+              Tổng: <strong>{totalCount}</strong> ({activeCount} kích hoạt)
+            </span>
             <button 
               onClick={handleResetToCreate}
-              className="flex items-center gap-2 px-space-lg py-2.5 rounded-xl bg-primary hover:bg-primary-container text-on-primary font-label-lg transition-all shadow-sm font-bold"
+              className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-primary text-white text-sm font-semibold hover:bg-primary-container transition-colors shadow-xs"
             >
-              <span className="material-symbols-outlined text-[20px]">add_circle</span>
-              <span>Tạo Danh Mục Mới</span>
+              <span className="material-symbols-outlined text-[18px]">add</span>
+              <span>Tạo Danh mục Mới</span>
             </button>
           </div>
-        </section>
-
-        {/* KPI Metrics */}
-        <section className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-space-lg mb-space-xl">
-          <div className="flex items-center gap-space-md p-space-lg rounded-2xl bg-surface-container-lowest shadow-sm border border-outline-variant/20">
-            <div className="w-12 h-12 rounded-xl bg-primary/10 text-primary flex items-center justify-center">
-              <span className="material-symbols-outlined text-[26px]">account_tree</span>
-            </div>
-            <div className="flex flex-col min-w-0">
-              <span className="font-label-sm uppercase text-outline font-bold">Tổng số danh mục</span>
-              <span className="font-headline-lg font-black text-on-surface">{totalCount}</span>
-              <span className="font-label-sm text-primary font-semibold">Phân loại biển</span>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-space-md p-space-lg rounded-2xl bg-surface-container-lowest shadow-sm border border-outline-variant/20">
-            <div className="w-12 h-12 rounded-xl bg-primary/10 text-primary flex items-center justify-center">
-              <span className="material-symbols-outlined text-[26px]">check_circle</span>
-            </div>
-            <div className="flex flex-col min-w-0">
-              <span className="font-label-sm uppercase text-outline font-bold">Đang kích hoạt</span>
-              <span className="font-headline-lg font-black text-primary">{activeCount} / {totalCount}</span>
-              <span className="font-label-sm text-outline-variant">{Math.round((activeCount / (totalCount || 1)) * 100)}% khả dụng trên sàn</span>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-space-md p-space-lg rounded-2xl bg-surface-container-lowest shadow-sm border border-outline-variant/20">
-            <div className="w-12 h-12 rounded-xl bg-secondary-container/20 text-secondary flex items-center justify-center">
-              <span className="material-symbols-outlined text-[26px]">verified_user</span>
-            </div>
-            <div className="flex flex-col min-w-0">
-              <span className="font-label-sm uppercase text-outline font-bold">Yêu cầu chứng chỉ</span>
-              <span className="font-headline-lg font-black text-secondary">{certRequiredCount}</span>
-              <span className="font-label-sm text-secondary font-semibold">Bắt buộc hồ sơ cứu hộ</span>
-            </div>
-          </div>
-
-          <div className="flex items-center justify-between p-space-lg rounded-2xl bg-surface-container-low border border-outline-variant/20">
-            <div className="flex flex-col">
-              <div className="flex items-center gap-1.5 text-on-surface-variant mb-1 font-bold">
-                <span className="material-symbols-outlined text-[18px] text-primary">cloud_done</span>
-                <span className="font-label-sm uppercase tracking-wider">Hạ tầng Cảng VITA</span>
-              </div>
-              <span className="font-headline-sm font-bold text-on-surface">Đồng bộ tức thì</span>
-              <span className="font-body-sm text-xs text-outline">REST API &amp; Webhook: Sẵn sàng</span>
-            </div>
-          </div>
-        </section>
+        </div>
 
         {/* Main 2-Column Workspace */}
         <section className="grid grid-cols-1 lg:grid-cols-12 gap-space-lg items-start">
           {/* LEFT COLUMN (Span 7): Category List */}
           <div className="lg:col-span-7 flex flex-col gap-space-md">
-            <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-space-sm p-space-md bg-surface-container-lowest rounded-2xl shadow-sm border border-outline-variant/20">
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-space-sm p-space-md bg-white rounded-xl shadow-xs border border-slate-200">
               <div className="relative flex-1">
-                <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline text-[20px]">filter_list</span>
+                <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-[20px]">filter_list</span>
                 <input 
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full h-10 pl-10 pr-space-md rounded-xl bg-surface-container-low text-on-surface font-body-md text-body-md placeholder:text-outline focus:outline-none focus:ring-1 focus:ring-primary border border-outline-variant/30" 
+                  className="w-full h-10 pl-10 pr-space-md rounded-lg bg-slate-50 text-slate-800 font-body-md text-body-md placeholder:text-slate-400 focus:outline-none focus:bg-white focus:ring-1 focus:ring-primary border border-slate-200" 
                   placeholder="Lọc theo tên phân loại hoặc slug..." 
                   type="text"
                 />
@@ -253,19 +189,19 @@ export function Categories() {
             </div>
 
             {/* List Table */}
-            <div className="bg-surface-container-lowest rounded-2xl shadow-sm overflow-hidden border border-outline-variant/20">
+            <div className="bg-white rounded-xl shadow-xs overflow-hidden border border-slate-200">
               <div className="overflow-x-auto">
                 <table className="w-full text-left border-collapse">
                   <thead>
-                    <tr className="bg-surface-container text-on-surface-variant font-label-sm text-xs uppercase tracking-wider">
-                      <th className="py-3 px-4">Biểu tượng &amp; Tên danh mục</th>
-                      <th className="py-3 px-3">Slug (URL)</th>
-                      <th className="py-3 px-3 text-center">Chứng chỉ</th>
-                      <th className="py-3 px-3 text-center">Hiển thị</th>
-                      <th className="py-3 px-4 text-right">Thao tác</th>
+                    <tr className="bg-slate-50 text-slate-700 text-xs font-semibold border-b border-slate-200">
+                      <th className="py-3 px-4 border-r border-slate-200 whitespace-nowrap">Biểu tượng &amp; Tên danh mục</th>
+                      <th className="py-3 px-3 border-r border-slate-200 whitespace-nowrap">Slug (URL)</th>
+                      <th className="py-3 px-3 border-r border-slate-200 whitespace-nowrap text-center">Chứng chỉ</th>
+                      <th className="py-3 px-3 border-r border-slate-200 whitespace-nowrap text-center">Hiển thị</th>
+                      <th className="py-3 px-4 text-center whitespace-nowrap">Thao tác</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-outline-variant/10 font-body-md text-sm">
+                  <tbody className="divide-y divide-slate-200 text-xs text-slate-700">
                     {filteredCategories.map(cat => {
                       const isSelected = cat.id === editingCategory?.id;
                       return (
@@ -273,41 +209,43 @@ export function Categories() {
                           key={cat.id}
                           onClick={() => handleSelectForEdit(cat)}
                           className={`cursor-pointer transition-colors ${
-                            isSelected ? 'bg-primary/10' : 'hover:bg-surface-container-low/40'
+                            isSelected ? 'bg-primary/5 hover:bg-primary/10' : 'hover:bg-slate-50'
                           }`}
                         >
-                          <td className="py-3.5 px-4 flex items-center gap-3">
-                            <div className="w-9 h-9 rounded-xl bg-primary/10 text-primary flex items-center justify-center font-bold">
-                              <span className="material-symbols-outlined text-[20px]">{cat.iconUrl || 'surfing'}</span>
-                            </div>
-                            <div>
-                              <span className="font-bold text-on-surface block">{cat.name}</span>
-                              <span className="text-xs text-outline italic">{cat.nameEn}</span>
+                          <td className="py-3.5 px-4 border-r border-slate-200">
+                            <div className="flex items-center gap-3">
+                              <div className="w-9 h-9 rounded-xl bg-primary/10 border border-primary/20 text-primary flex items-center justify-center font-bold">
+                                <span className="material-symbols-outlined text-[20px]">{cat.iconUrl || 'surfing'}</span>
+                              </div>
+                              <div>
+                                <span className="font-bold text-slate-800 block">{cat.name}</span>
+                                <span className="text-[11px] text-slate-400 italic">{cat.nameEn}</span>
+                              </div>
                             </div>
                           </td>
 
-                          <td className="py-3.5 px-3 font-mono text-xs text-outline">
+                          <td className="py-3.5 px-3 font-mono text-xs text-slate-500 border-r border-slate-200 whitespace-nowrap">
                             /{cat.slug}
                           </td>
 
-                          <td className="py-3.5 px-3 text-center">
+                          <td className="py-3.5 px-3 text-center border-r border-slate-200 whitespace-nowrap">
                             {cat.requiresSafetyCert ? (
-                              <span className="px-2 py-0.5 rounded-full bg-secondary-container/20 text-secondary text-[11px] font-bold">
+                              <span className="px-2 py-0.5 rounded-full bg-amber-50 text-amber-700 border border-amber-200 text-[11px] font-bold">
                                 Bắt buộc
                               </span>
                             ) : (
-                              <span className="px-2 py-0.5 rounded-full bg-surface-container text-outline text-[11px]">
+                              <span className="px-2 py-0.5 rounded-full bg-slate-100 text-slate-500 border border-slate-200 text-[11px]">
                                 Không
                               </span>
                             )}
                           </td>
 
-                          <td className="py-3.5 px-3 text-center">
+                          <td className="py-3.5 px-3 text-center border-r border-slate-200 whitespace-nowrap">
                             <button
                               type="button"
                               onClick={(e) => handleToggleActive(cat.id, cat.isActive, e)}
                               className={`w-9 h-5 rounded-full transition-colors relative inline-flex items-center p-0.5 ${
-                                cat.isActive ? 'bg-primary' : 'bg-surface-container-high'
+                                cat.isActive ? 'bg-primary' : 'bg-slate-300'
                               }`}
                             >
                               <span className={`w-4 h-4 rounded-full bg-white transition-transform ${
@@ -316,18 +254,18 @@ export function Categories() {
                             </button>
                           </td>
 
-                          <td className="py-3.5 px-4 text-right">
-                            <div className="flex items-center justify-end gap-1">
+                          <td className="py-3.5 px-4 text-center whitespace-nowrap">
+                            <div className="flex items-center justify-center gap-1.5">
                               <button 
                                 onClick={(e) => { e.stopPropagation(); handleSelectForEdit(cat); }}
-                                className="p-1.5 rounded-lg hover:bg-surface-container text-primary"
+                                className="p-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 transition-colors"
                                 title="Chỉnh sửa"
                               >
                                 <span className="material-symbols-outlined text-[18px]">edit</span>
                               </button>
                               <button 
                                 onClick={(e) => handleDelete(cat.id, cat.name, e)}
-                                className="p-1.5 rounded-lg hover:bg-secondary-container/20 text-secondary"
+                                className="p-1.5 rounded-lg bg-red-50 hover:bg-red-100 text-red-700 border border-red-200 transition-colors"
                                 title="Xóa danh mục"
                               >
                                 <span className="material-symbols-outlined text-[18px]">delete</span>
@@ -352,7 +290,7 @@ export function Categories() {
                     <span className="material-symbols-outlined text-[24px]">{formIcon}</span>
                   </div>
                   <div>
-                    <span className="text-xs uppercase tracking-wider text-primary font-bold">
+                    <span className="font-label-sm text-label-sm text-primary font-medium">
                       {editingCategory ? 'Chỉnh sửa danh mục' : 'Thêm mới danh mục'}
                     </span>
                     <h2 className="font-headline-md font-bold text-on-surface truncate">

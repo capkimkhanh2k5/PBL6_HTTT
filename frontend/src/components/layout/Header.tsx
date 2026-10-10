@@ -2,14 +2,16 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuthStore } from "../../store/useAuthStore";
 import { useCartStore } from "../../store/useCartStore";
 import { useWishlistStore } from "../../store/useWishlistStore";
+import { useLanguageStore } from "../../store/useLanguageStore";
 
 export function Header() {
   const location = useLocation();
   const navigate = useNavigate();
   
-  const { user, isAuthenticated, logout } = useAuthStore();
+  const { user, isAuthenticated } = useAuthStore();
   const cartItemCount = useCartStore((state) => state.getTotalItems());
   const wishlistCount = useWishlistStore((state) => state.wishlistIds.length);
+  const { language, setLanguage, t } = useLanguageStore();
 
   const isActive = (path: string) => location.pathname === path;
 
@@ -47,38 +49,57 @@ export function Header() {
   };
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 bg-surface-container-lowest/85 backdrop-blur-xl shadow-[0_4px_20px_-2px_rgba(16,47,58,0.06)]">
-      <div className="h-20 max-w-[1280px] mx-auto px-margin-desktop flex items-center justify-between gap-space-lg">
+    <header className="fixed top-0 left-0 right-0 z-50 bg-white/95 border-b border-slate-200/80 shadow-[0_4px_20px_-2px_rgba(16,47,58,0.06)] transform-gpu will-change-transform">
+      <div className="h-20 max-w-[1440px] w-full mx-auto px-4 sm:px-8 lg:px-12 flex items-center justify-between gap-space-lg">
         <div className="flex items-center gap-space-sm flex-shrink-0">
-          <img alt="DANASEA Brand Logo" className="h-8 w-auto object-contain" src="https://lh3.googleusercontent.com/aida/AEtjO1Wc3PDumzL5I2MlIC7zdJZmfwBfm4RHsplJ5nk-9ZaRKWyozKczleP4gMlRMYECYGlmoy61P0H5GG6zbTiOnv9OfrbuVqBwoPco9lX5TdnIOndbHvSBQrTFFImlLmSHKB20EH_fp68zcXl68-GiUe2CUKvkZGprNc2OedIHPdFefB5izHfijulRwWFEJMtI3mN_pen7Nzc9tS1VIfkLiHft_-cJWqR00zO95yZuFm90DNcjzOJt5JEfyFNO" />
-          <Link to="/" className="font-headline-md text-headline-md tracking-tight text-on-surface hover:text-primary transition-colors flex items-center gap-1.5">DANASEA</Link>
+          <img alt="DANASEA Brand Logo" className="h-8 w-auto object-contain" src="/images/danasea-logo.png" />
+          <Link to="/" className="font-headline-md text-headline-md tracking-tight text-slate-900 hover:text-primary transition-colors flex items-center gap-1.5 font-bold">DANASEA</Link>
         </div>
         
         <nav className="hidden xl:flex items-center gap-space-xl">
           <Link 
             to="/" 
-            className={`font-label-lg text-label-lg transition-all hover:-translate-y-0.5 hover:text-primary ${isActive("/") ? "text-primary font-bold border-b-2 border-primary pb-1" : "text-on-surface-variant"}`}
+            className={`font-label-lg text-label-lg transition-all hover:-translate-y-0.5 hover:text-primary ${isActive("/") ? "text-primary font-bold border-b-2 border-primary pb-1" : "text-slate-600"}`}
           >
-            Khám phá
+            {t.nav.explore}
           </Link>
           <Link 
             to="/search" 
-            className={`font-label-lg text-label-lg transition-all hover:-translate-y-0.5 hover:text-primary ${isActive("/search") ? "text-primary font-bold border-b-2 border-primary pb-1" : "text-on-surface-variant"}`}
+            className={`font-label-lg text-label-lg transition-all hover:-translate-y-0.5 hover:text-primary ${isActive("/search") ? "text-primary font-bold border-b-2 border-primary pb-1" : "text-slate-600"}`}
           >
-            Gói trải nghiệm
+            {t.nav.experiences}
           </Link>
           <button 
-            onClick={() => scrollToSection('#featured')} 
-            className="font-label-lg text-label-lg text-on-surface-variant transition-all hover:-translate-y-0.5 hover:text-primary cursor-pointer"
+            onClick={() => scrollToSection('#destinations')} 
+            className="font-label-lg text-label-lg text-slate-600 transition-all hover:-translate-y-0.5 hover:text-primary cursor-pointer"
           >
-            Điểm đến
+            {t.nav.destinations}
           </button>
         </nav>
         
         <div className="flex items-center gap-space-md flex-shrink-0">
-          <div className="flex items-center bg-surface-container-low rounded-full p-space-2xs text-on-surface-variant font-label-sm text-label-sm">
-            <span className="px-space-xs py-0.5 rounded-full bg-surface-container-lowest text-on-surface font-bold shadow-[0_1px_4px_rgba(0,0,0,0.04)] cursor-pointer">VI</span>
-            <span className="px-space-xs py-0.5 cursor-pointer hover:text-on-surface transition-colors">EN</span>
+          {/* Language Switcher Pill */}
+          <div className="flex items-center bg-slate-100 p-0.5 rounded-full border border-slate-200 text-xs font-semibold">
+            <button
+              onClick={() => setLanguage('vi')}
+              className={`px-3 py-1 rounded-full transition-all text-xs font-bold ${
+                language === 'vi' 
+                  ? 'bg-primary text-white shadow-xs' 
+                  : 'text-slate-600 hover:text-slate-900'
+              }`}
+            >
+              VI
+            </button>
+            <button
+              onClick={() => setLanguage('en')}
+              className={`px-3 py-1 rounded-full transition-all text-xs font-bold ${
+                language === 'en' 
+                  ? 'bg-primary text-white shadow-xs' 
+                  : 'text-slate-600 hover:text-slate-900'
+              }`}
+            >
+              EN
+            </button>
           </div>
           
           <div className="flex items-center gap-space-xs">

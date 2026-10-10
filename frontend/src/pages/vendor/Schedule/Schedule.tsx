@@ -161,34 +161,30 @@ export function Schedule() {
     <div className="w-full pt-4 pb-20 bg-background flex-1">
       {/* Toast Alert */}
       {toastMessage && (
-        <div className="fixed bottom-6 right-6 z-50 bg-on-surface text-surface px-5 py-3 rounded-2xl shadow-2xl flex items-center gap-3 border border-outline-variant/30 animate-bounce">
-          <span className="material-symbols-outlined text-primary text-[22px]">check_circle</span>
-          <span className="font-label-md text-label-md font-medium">{toastMessage}</span>
+        <div className="fixed bottom-6 right-6 z-50 bg-slate-900 text-white px-5 py-3 rounded-xl shadow-xl flex items-center gap-3 border border-slate-700 animate-bounce">
+          <span className="material-symbols-outlined text-emerald-400 text-[22px]">check_circle</span>
+          <span className="text-sm font-medium">{toastMessage}</span>
         </div>
       )}
 
-      <div className="w-full px-space-lg py-space-md space-y-space-md max-w-[1400px] mx-auto">
+      <div className="w-full px-6 py-4 space-y-4">
         {/* Top Action Bar & Filters */}
-        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-space-md">
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3 pb-3 border-b border-slate-200">
           <div>
-            <div className="flex items-center gap-space-xs text-primary font-label-sm text-label-sm tracking-wider uppercase">
-              <span className="material-symbols-outlined text-[16px]">schedule</span>
-              <span>Hệ thống điều phối luồng bến Mỹ Khê</span>
-            </div>
-            <h1 className="font-headline-lg text-headline-lg text-on-surface font-bold">
-              Quản lý Lịch khởi hành & Sức chứa ca biển
+            <h1 className="text-xl md:text-2xl font-bold text-slate-900 tracking-tight">
+              Lịch khởi hành
             </h1>
           </div>
 
-          <div className="flex flex-wrap items-center gap-space-sm">
+          <div className="flex flex-wrap items-center gap-2">
             {/* Service Selector Dropdown */}
-            <div className="relative min-w-[300px]">
-              <div className="flex items-center bg-surface-container-lowest px-space-md py-2 rounded-xl shadow-sm border border-outline-variant/30">
-                <span className="material-symbols-outlined text-primary text-body-lg mr-2">surfing</span>
+            <div className="relative min-w-[260px]">
+              <div className="flex items-center bg-white px-3 py-1.5 rounded-lg border border-slate-200 shadow-xs">
+                <span className="material-symbols-outlined text-primary text-[18px] mr-2">surfing</span>
                 <select
                   value={selectedService}
                   onChange={(e) => setSelectedService(e.target.value)}
-                  className="w-full bg-transparent text-on-surface font-label-lg text-label-lg focus:outline-none cursor-pointer"
+                  className="w-full bg-transparent text-slate-800 text-xs font-medium focus:outline-none cursor-pointer"
                 >
                   <option value="sup-sunrise">Chèo SUP đón bình minh biển Mỹ Khê (280.000 đ)</option>
                   <option value="jetski-sontra">Mô tô nước Bán đảo Sơn Trà (650.000 đ)</option>
@@ -198,11 +194,11 @@ export function Schedule() {
             </div>
 
             {/* View Segmented Switch */}
-            <div className="inline-flex p-1 bg-surface-container-low rounded-xl border border-outline-variant/20">
+            <div className="inline-flex p-0.5 bg-slate-100 rounded-lg border border-slate-200">
               <button
                 onClick={() => setViewMode("WEEK")}
-                className={`px-space-md py-1.5 rounded-lg font-label-md text-label-md font-bold transition-all cursor-pointer ${
-                  viewMode === "WEEK" ? "bg-surface-container-lowest text-primary shadow-sm" : "text-on-surface-variant"
+                className={`px-3 py-1 rounded-md text-xs font-semibold transition-all cursor-pointer ${
+                  viewMode === "WEEK" ? "bg-primary text-white shadow-xs" : "text-slate-600 hover:bg-slate-200"
                 }`}
                 type="button"
               >
@@ -210,8 +206,8 @@ export function Schedule() {
               </button>
               <button
                 onClick={() => setViewMode("MONTH")}
-                className={`px-space-md py-1.5 rounded-lg font-label-md text-label-md transition-all cursor-pointer ${
-                  viewMode === "MONTH" ? "bg-surface-container-lowest text-primary font-bold shadow-sm" : "text-on-surface-variant"
+                className={`px-3 py-1 rounded-md text-xs font-semibold transition-all cursor-pointer ${
+                  viewMode === "MONTH" ? "bg-primary text-white shadow-xs" : "text-slate-600 hover:bg-slate-200"
                 }`}
                 type="button"
               >
@@ -222,45 +218,18 @@ export function Schedule() {
             {/* New Slot Action Button */}
             <button
               onClick={() => setIsCreateModalOpen(true)}
-              className="flex items-center gap-space-xs px-space-lg py-2.5 bg-primary hover:bg-primary-container text-on-primary rounded-xl font-label-lg text-label-lg shadow-sm hover:shadow-md transition-all cursor-pointer font-bold"
+              className="flex items-center gap-1.5 px-3.5 py-1.5 bg-primary hover:bg-primary-container text-white rounded-lg text-xs font-semibold shadow-xs transition-all cursor-pointer"
               type="button"
             >
-              <span className="material-symbols-outlined text-body-lg">add_circle</span>
-              <span>+ Tạo thêm ca khởi hành</span>
+              <span className="material-symbols-outlined text-[18px]">add</span>
+              <span>Tạo ca khởi hành</span>
             </button>
           </div>
         </div>
 
-        {/* Weather Advisory Banner */}
-        <div className="bg-surface-container-lowest rounded-2xl p-space-md shadow-sm relative overflow-hidden border border-outline-variant/20">
-          <div className="absolute left-0 top-0 bottom-0 w-1.5 bg-primary"></div>
-          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-space-md pl-space-xs">
-            <div className="flex items-start gap-space-md">
-              <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center shrink-0">
-                <span className="material-symbols-outlined text-primary text-[28px]">airwave</span>
-              </div>
-              <div className="space-y-1">
-                <div className="flex flex-wrap items-center gap-space-xs">
-                  <span className="font-headline-sm text-headline-sm text-on-surface font-bold">
-                    Dữ liệu trạm đo Sơn Trà lúc 06:00
-                  </span>
-                  <span className="px-2 py-0.5 rounded-full bg-primary/15 text-primary font-label-sm text-label-sm font-semibold flex items-center gap-1">
-                    <span className="w-1.5 h-1.5 rounded-full bg-primary animate-ping"></span>
-                    ĐỦ ĐIỀU KIỆN XUẤT BẾN HÀNG HẢI
-                  </span>
-                </div>
-                <p className="font-body-md text-body-md text-on-surface-variant leading-relaxed">
-                  <strong className="text-on-surface font-semibold">Gió 12 km/h • Sóng 0.5m • Lượng mưa 0mm</strong> • Cập nhật cách đây 10 phút.
-                  <span className="text-tertiary ml-1">Luôn tuân thủ quy chuẩn áo phao trợ nổi khi ra biển.</span>
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-
         {/* Date Navigation Strip */}
-        <div className="flex items-center justify-between bg-surface-container-lowest p-space-sm rounded-2xl shadow-sm border border-outline-variant/20 overflow-x-auto">
-          <div className="flex items-center gap-space-xs">
+        <div className="bg-white p-2 rounded-xl shadow-xs border border-slate-200">
+          <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
             {[
               { date: "2024-10-23", label: "Hôm nay", sub: "23/10", count: "3 ca" },
               { date: "2024-10-24", label: "Ngày mai", sub: "24/10", count: `${slots.length} ca`, active: true },
@@ -271,18 +240,18 @@ export function Schedule() {
               <button
                 key={d.date}
                 onClick={() => setSelectedDate(d.date)}
-                className={`flex flex-col items-center px-space-lg py-2 rounded-xl transition-all cursor-pointer ${
+                className={`flex flex-col items-center justify-center py-2 px-3 rounded-lg transition-all cursor-pointer ${
                   selectedDate === d.date
-                    ? "bg-primary text-on-primary shadow-sm font-bold"
-                    : "text-on-surface-variant hover:bg-surface-container-low"
+                    ? "bg-primary text-white shadow-xs font-semibold"
+                    : "text-slate-700 hover:bg-slate-50 border border-slate-200"
                 }`}
                 type="button"
               >
-                <span className="font-label-sm text-label-sm opacity-90">{d.label}</span>
-                <span className="font-headline-sm text-headline-sm font-bold">{d.sub}</span>
+                <span className={`text-[11px] ${selectedDate === d.date ? "text-white/80" : "text-slate-500"}`}>{d.label}</span>
+                <span className="text-xs font-bold my-0.5">{d.sub}</span>
                 <span
-                  className={`font-label-sm text-[10px] px-2 py-0.5 rounded-full mt-0.5 ${
-                    selectedDate === d.date ? "bg-white/20 text-white" : "text-outline"
+                  className={`text-[10px] px-2 py-0.5 rounded-full ${
+                    selectedDate === d.date ? "bg-white/20 text-white font-medium" : "bg-slate-100 text-slate-600"
                   }`}
                 >
                   {d.count}
@@ -293,168 +262,163 @@ export function Schedule() {
         </div>
 
         {/* Main Content Layout: Slots List & Quick Control Rail */}
-        <div className="grid grid-cols-1 xl:grid-cols-12 gap-space-lg">
+        <div className="grid grid-cols-1 xl:grid-cols-12 gap-4 items-start">
           {/* Primary Slots List (8 Cols) */}
-          <div key={`${selectedDate}-${viewMode}`} className="xl:col-span-8 space-y-space-md animate-fade-in-up">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-space-xs">
-                <span className="font-headline-sm text-headline-sm text-on-surface font-bold">
+          <div key={`${selectedDate}-${viewMode}`} className="xl:col-span-8 space-y-2.5">
+            <div className="flex items-center justify-between h-7">
+              <div className="flex items-center gap-2">
+                <span className="text-sm text-slate-800 font-bold">
                   Lịch khởi hành: {selectedDate}
                 </span>
-                <span className="px-2 py-0.5 bg-surface-container-high rounded-full font-label-sm text-label-sm text-on-surface-variant">
+                <span className="px-2 py-0.5 bg-slate-100 border border-slate-200 rounded-full text-xs font-semibold text-slate-600">
                   {slots.length} ca
                 </span>
               </div>
             </div>
 
-            {/* Render Slot Cards */}
-            {slots.map((slot) => {
-              const available = Math.max(0, slot.capacity - (slot.booked + slot.holds));
-              const percentBooked = Math.min(100, Math.round((slot.booked / slot.capacity) * 100));
+            {/* Unified Timeline Schedule Ledger */}
+            <div className="bg-white rounded-xl border border-slate-200 shadow-xs divide-y divide-slate-200 overflow-hidden">
+              {slots.map((slot) => {
+                const available = Math.max(0, slot.capacity - (slot.booked + slot.holds));
+                const percentBooked = Math.min(100, Math.round((slot.booked / slot.capacity) * 100));
 
-              return (
-                <article
-                  key={slot.id}
-                  className="bg-surface-container-lowest rounded-2xl p-space-lg shadow-sm hover:shadow-md transition-all space-y-space-md border border-outline-variant/20"
-                >
-                  <div className="flex flex-wrap items-start justify-between gap-space-sm">
-                    <div className="space-y-1">
-                      <div className="flex items-center gap-space-xs">
-                        <span className="px-2.5 py-1 rounded-lg bg-primary-fixed-dim/30 text-primary font-headline-sm text-headline-sm font-bold">
+                return (
+                  <div
+                    key={slot.id}
+                    className="p-3.5 hover:bg-slate-50 transition-colors space-y-2.5"
+                  >
+                    <div className="flex flex-wrap items-center justify-between gap-2">
+                      <div className="flex items-center gap-2.5">
+                        <span className="px-2 py-0.5 rounded bg-slate-100 text-slate-800 border border-slate-200 font-mono text-xs font-bold">
                           {slot.name}
                         </span>
-                        <span className="font-headline-md text-headline-md text-on-surface font-bold">
+                        <span className="font-bold text-sm text-slate-900">
                           {slot.timeRange}
                         </span>
-                        <span className="font-label-md text-label-md text-tertiary">{slot.subTitle}</span>
-                      </div>
-                      <p className="font-body-sm text-body-sm text-on-surface-variant">{slot.location}</p>
-                    </div>
-
-                    <div className="flex items-center gap-2">
-                      {slot.status === "BLOCKED" ? (
-                        <span className="px-3 py-1 rounded-full bg-error-container/30 text-error font-label-sm text-label-sm font-bold">
-                          ĐÃ KHÓA (BLOCKED)
-                        </span>
-                      ) : available === 0 ? (
-                        <span className="px-3 py-1 rounded-full bg-secondary text-on-secondary font-label-sm text-label-sm font-bold">
-                          ĐẦY CHỖ
-                        </span>
-                      ) : (
-                        <span className="px-3 py-1 rounded-full bg-primary/10 text-primary font-label-sm text-label-sm font-bold tracking-wide">
-                          ĐANG MỞ ({available} CHỖ)
-                        </span>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Capacity Meter Visualization */}
-                  <div className="space-y-2 bg-surface-container-low p-space-md rounded-xl">
-                    <div className="flex items-center justify-between text-on-surface">
-                      <div className="flex items-center gap-4">
-                        <div>
-                          <span className="font-label-sm text-label-sm text-outline">Sức chứa:</span>
-                          <span className="font-headline-sm text-headline-sm font-bold ml-1 text-on-surface">
-                            {slot.capacity} khách
-                          </span>
-                        </div>
-                        <div className="h-4 w-[1px] bg-outline-variant"></div>
-                        <div>
-                          <span className="font-label-sm text-label-sm text-outline">Đã đặt:</span>
-                          <span className="font-headline-sm text-headline-sm font-bold ml-1 text-primary">
-                            {slot.booked} khách
-                          </span>
-                        </div>
-                        <div className="h-4 w-[1px] bg-outline-variant"></div>
-                        <div>
-                          <span className="font-label-sm text-label-sm text-outline">Giữ tạm:</span>
-                          <span className="font-headline-sm text-headline-sm font-bold ml-1 text-secondary">
-                            {slot.holds} khách
-                          </span>
-                        </div>
+                        <span className="text-xs text-slate-500">{slot.subTitle}</span>
                       </div>
 
-                      <div className="text-right">
-                        <span className="font-label-sm text-label-sm text-outline">Chỗ trống còn lại:</span>
-                        <span className="font-headline-sm text-headline-sm font-bold ml-1 text-primary">
-                          {available} chỗ
-                        </span>
+                      <div className="flex items-center gap-2">
+                        {slot.status === "BLOCKED" ? (
+                          <span className="px-2 py-0.5 rounded text-xs font-medium bg-red-50 text-red-700 border border-red-200">
+                            Đã khóa ca
+                          </span>
+                        ) : available === 0 ? (
+                          <span className="px-2 py-0.5 rounded text-xs font-medium bg-slate-100 text-slate-600 border border-slate-200">
+                            Đầy chỗ
+                          </span>
+                        ) : (
+                          <span className="px-2 py-0.5 rounded text-xs font-medium bg-emerald-50 text-emerald-700 border border-emerald-200">
+                            Đang mở ({available} chỗ trống)
+                          </span>
+                        )}
                       </div>
                     </div>
 
-                    <div className="w-full h-3 rounded-full bg-surface-container-highest overflow-hidden flex">
-                      <div
-                        className="bg-primary h-full transition-all duration-500"
-                        style={{ width: `${percentBooked}%` }}
-                      ></div>
+                    <p className="text-xs text-slate-600 flex items-center gap-1.5">
+                      <span className="material-symbols-outlined text-[15px] text-slate-400">location_on</span>
+                      <span>{slot.location}</span>
+                    </p>
+
+                    {/* Inline Capacity Metrics & Progress */}
+                    <div className="bg-slate-50 p-2.5 rounded-lg space-y-1.5 border border-slate-200">
+                      <div className="flex flex-wrap items-center justify-between gap-2 text-xs">
+                        <div className="flex items-center gap-3">
+                          <div>
+                            <span className="text-slate-500">Sức chứa:</span>
+                            <span className="font-semibold text-slate-800 ml-1">{slot.capacity} khách</span>
+                          </div>
+                          <span className="text-slate-300">•</span>
+                          <div>
+                            <span className="text-slate-500">Đã đặt:</span>
+                            <span className="font-semibold text-slate-800 ml-1">{slot.booked} khách</span>
+                          </div>
+                          <span className="text-slate-300">•</span>
+                          <div>
+                            <span className="text-slate-500">Giữ tạm:</span>
+                            <span className="font-semibold text-slate-800 ml-1">{slot.holds} khách</span>
+                          </div>
+                        </div>
+                        <div>
+                          <span className="text-slate-500">Còn lại:</span>
+                          <span className="font-semibold text-slate-800 ml-1">{available} chỗ</span>
+                        </div>
+                      </div>
+
+                      <div className="w-full h-2 rounded-full bg-slate-200 overflow-hidden">
+                        <div
+                          className="bg-primary h-full transition-all duration-300"
+                          style={{ width: `${percentBooked}%` }}
+                        ></div>
+                      </div>
+
+                      <div className="flex justify-between text-[11px] text-slate-500">
+                        <span>Lấp đầy: {percentBooked}%</span>
+                        <span>{slot.note}</span>
+                      </div>
                     </div>
 
-                    <div className="flex justify-between font-label-sm text-[11px] text-on-surface-variant">
-                      <span>Tỷ lệ lấp đầy: {percentBooked}%</span>
-                      <span>Giữ chỗ tự nhả sau 15 phút nếu chưa thanh toán</span>
-                    </div>
-                  </div>
-
-                  {/* Card Actions */}
-                  <div className="flex flex-wrap items-center justify-between gap-space-sm pt-2">
-                    <div className="flex items-center gap-space-xs">
-                      <span className="material-symbols-outlined text-outline text-body-lg">info</span>
-                      <span className="font-body-sm text-body-sm text-on-surface-variant">{slot.note}</span>
-                    </div>
-                    <div className="flex items-center gap-space-sm">
+                    {/* Actions */}
+                    <div className="flex items-center justify-end gap-2 pt-1">
                       <button
                         onClick={() => handleOpenEditCapacity(slot)}
-                        className="px-space-md py-2 rounded-xl bg-primary/10 hover:bg-primary/20 text-primary font-label-md text-label-md font-semibold transition-colors flex items-center gap-1 cursor-pointer"
+                        className="px-2.5 py-1 rounded bg-white hover:bg-slate-100 border border-slate-200 text-slate-700 text-xs font-medium transition-colors flex items-center gap-1 cursor-pointer shadow-xs"
                         type="button"
                       >
-                        <span className="material-symbols-outlined text-body-md">edit</span>
+                        <span className="material-symbols-outlined text-[15px] text-slate-500">edit</span>
                         <span>Sửa sức chứa</span>
                       </button>
                       <button
                         onClick={() => handleToggleBlockSlot(slot.id)}
-                        className={`px-space-md py-2 rounded-xl font-label-md text-label-md font-semibold transition-colors flex items-center gap-1 cursor-pointer ${
+                        className={`px-2.5 py-1 rounded text-xs font-medium transition-colors flex items-center gap-1 cursor-pointer border shadow-xs ${
                           slot.status === "BLOCKED"
-                            ? "bg-primary text-on-primary"
-                            : "bg-surface-container hover:bg-surface-container-high text-on-surface-variant"
+                            ? "bg-slate-800 text-white border-slate-800 hover:bg-slate-900"
+                            : "bg-white hover:bg-slate-100 border-slate-200 text-slate-700"
                         }`}
                         type="button"
                       >
-                        <span className="material-symbols-outlined text-body-md">
+                        <span className="material-symbols-outlined text-[15px]">
                           {slot.status === "BLOCKED" ? "lock_open" : "lock"}
                         </span>
-                        <span>{slot.status === "BLOCKED" ? "Mở khóa ca" : "Khóa ca tạm thời"}</span>
+                        <span>{slot.status === "BLOCKED" ? "Mở khóa ca" : "Khóa ca tạm"}</span>
                       </button>
                     </div>
                   </div>
-                </article>
-              );
-            })}
+                );
+              })}
+            </div>
           </div>
 
           {/* Right Rail: Safety Rules & Capacity Guidelines (4 Cols) */}
-          <div className="xl:col-span-4 space-y-space-md">
-            <div className="bg-surface-container-lowest rounded-2xl p-space-lg shadow-sm border border-outline-variant/20 space-y-space-md">
-              <div className="flex items-center gap-space-xs text-on-surface">
-                <span className="material-symbols-outlined text-primary text-body-xl">phishing</span>
-                <h3 className="font-headline-sm text-headline-sm font-bold">Tỷ lệ cứu hộ quy chuẩn</h3>
+          <div className="xl:col-span-4 space-y-2.5">
+            <div className="flex items-center justify-between h-7">
+              <span className="text-sm text-slate-800 font-bold">
+                Tiêu chuẩn an toàn bến bãi
+              </span>
+            </div>
+
+            <div className="bg-white rounded-xl p-4 shadow-xs border border-slate-200 space-y-3.5">
+              <div className="flex items-center gap-2 text-slate-800">
+                <span className="material-symbols-outlined text-primary text-[20px]">phishing</span>
+                <h3 className="text-sm font-bold">Tỷ lệ cứu hộ quy chuẩn</h3>
               </div>
-              <div className="space-y-3 font-body-sm text-body-sm">
-                <div className="flex items-center justify-between py-1.5 border-b border-surface-container">
-                  <span className="text-on-surface-variant">Tỷ lệ HDV : Khách SUP</span>
-                  <span className="font-bold text-on-surface">1 : 6 khách</span>
+              <div className="space-y-2.5 text-xs">
+                <div className="flex items-center justify-between py-1.5 border-b border-slate-100">
+                  <span className="text-slate-500">Tỷ lệ HDV : Khách SUP</span>
+                  <span className="font-bold text-slate-800">1 : 6 khách</span>
                 </div>
-                <div className="flex items-center justify-between py-1.5 border-b border-surface-container">
-                  <span className="text-on-surface-variant">Cano cứu hộ túc trực</span>
+                <div className="flex items-center justify-between py-1.5 border-b border-slate-100">
+                  <span className="text-slate-500">Cano cứu hộ túc trực</span>
                   <span className="font-bold text-primary">Sẵn sàng (Bến A2)</span>
                 </div>
                 <div className="flex items-center justify-between py-1.5">
-                  <span className="text-on-surface-variant">Giới hạn vùng chèo</span>
-                  <span className="font-bold text-on-surface">Cách bờ tối đa 350m</span>
+                  <span className="text-slate-500">Giới hạn vùng chèo</span>
+                  <span className="font-bold text-slate-800">Cách bờ tối đa 350m</span>
                 </div>
               </div>
-              <div className="p-space-sm rounded-xl bg-surface-container-low flex items-center gap-2">
-                <span className="material-symbols-outlined text-primary text-body-md">anchor</span>
-                <span className="font-label-sm text-label-sm text-on-surface-variant">
+              <div className="p-3 rounded-lg bg-slate-50 border border-slate-200 flex items-start gap-2">
+                <span className="material-symbols-outlined text-primary text-[18px] shrink-0 mt-0.5">anchor</span>
+                <span className="text-xs text-slate-600 leading-relaxed">
                   Tuyệt đối không giảm sức chứa nhỏ hơn số khách đã đặt.
                 </span>
               </div>

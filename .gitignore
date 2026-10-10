@@ -12,4 +12,10 @@
 .agents/
 .worktrees/
 *.zip
-private/
+MA_NGUON_GIAO_DIEN_CHINH/
+frontend/docs/*.html
+frontend/docs/*_files/
+frontend/docs/*.mp4
+frontend/docs/*.jpg
+frontend/docs/motionsites_prompts/
+frontend/public/images/*.mp4

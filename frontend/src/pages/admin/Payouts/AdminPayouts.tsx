@@ -94,68 +94,27 @@ export function AdminPayouts() {
           </div>
         )}
 
-        {/* Top Header */}
-        <div className="flex flex-col xl:flex-row xl:items-end justify-between gap-space-lg mb-space-xl">
-          <div className="flex flex-col max-w-3xl">
-            <div className="flex items-center gap-2 mb-2 font-bold">
-              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-primary/10 text-primary font-label-sm uppercase tracking-wider">
-                <span className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse"></span>
-                DANASEA - HỆ THỐNG QUẢN TRỊ NỀN TẢNG
-              </span>
-              <span className="text-outline-variant">•</span>
-              <span className="font-label-sm text-on-surface-variant font-medium">Kỳ đối soát T10/2024</span>
-            </div>
-            <h1 className="font-headline-lg text-headline-lg text-on-surface font-black tracking-tight">
-              Đối soát Doanh thu Toàn sàn &amp; Phê duyệt Chi trả (Payouts)
+        {/* Header */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 mb-4 border-b border-slate-200">
+          <div>
+            <h1 className="text-xl md:text-2xl font-bold text-slate-800 tracking-tight">
+              Quản lý Chi trả (Payouts)
             </h1>
-            <p className="font-body-md text-body-md text-on-surface-variant mt-1">
-              Chốt kỳ đối soát định kỳ với đối tác, khấu trừ hoa hồng Cảng vụ 10% và giải ngân về tài khoản ngân hàng chính thức.
-            </p>
           </div>
-
-          <div className="flex items-center gap-space-sm">
+          <div className="flex items-center gap-2">
+            <span className="px-2.5 py-1 rounded-md bg-amber-50 text-amber-700 border border-amber-200 text-xs font-semibold">
+              Chờ xử lý: {pendingCount}
+            </span>
+            <span className="px-2.5 py-1 rounded-md bg-primary/10 text-primary border border-primary/20 text-xs font-semibold">
+              Đã chi: {totalPaid.toLocaleString('vi-VN')} đ
+            </span>
             <button 
               onClick={handleExportStatement}
-              className="inline-flex items-center gap-2 px-space-md py-2.5 rounded-xl bg-surface-container-lowest text-on-surface font-label-lg shadow-sm hover:bg-surface-container transition-colors border border-outline-variant/20 font-semibold"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white hover:bg-slate-50 text-slate-700 text-sm font-medium border border-slate-200 shadow-xs transition-colors"
             >
-              <span className="material-symbols-outlined text-[20px] text-primary">download</span>
-              <span>Xuất báo cáo tổng hợp</span>
+              <span className="material-symbols-outlined text-[18px]">file_download</span>
+              <span>Xuất CSV</span>
             </button>
-          </div>
-        </div>
-
-        {/* KPI Cash Flow Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-space-md mb-space-2xl">
-          <div className="bg-surface-container-lowest rounded-xl p-space-lg shadow-sm flex flex-col justify-between border border-outline-variant/20">
-            <span className="font-label-md text-outline uppercase tracking-wider font-bold">Tổng doanh thu gộp (Gross)</span>
-            <div className="mt-space-md">
-              <span className="font-headline-lg font-black text-on-surface">482.500.000 đ</span>
-            </div>
-            <span className="text-xs text-primary font-semibold mt-2">100% qua cổng VietQR &amp; Thẻ</span>
-          </div>
-
-          <div className="bg-surface-container-lowest rounded-xl p-space-lg shadow-sm flex flex-col justify-between border border-outline-variant/20">
-            <span className="font-label-md text-outline uppercase tracking-wider font-bold">Hoa hồng Cảng vụ (10%)</span>
-            <div className="mt-space-md">
-              <span className="font-headline-lg font-black text-primary">48.250.000 đ</span>
-            </div>
-            <span className="text-xs text-outline mt-2">Tự động khấu trừ tại nguồn</span>
-          </div>
-
-          <div className="bg-surface-container-lowest rounded-xl p-space-lg shadow-sm flex flex-col justify-between border border-outline-variant/20">
-            <span className="font-label-md text-outline uppercase tracking-wider font-bold">Đã giải ngân (Paid Net)</span>
-            <div className="mt-space-md">
-              <span className="font-headline-lg font-black text-secondary">{totalPaid.toLocaleString('vi-VN')} đ</span>
-            </div>
-            <span className="text-xs text-secondary font-semibold mt-2">Lệnh chuyển Napas247 hoàn tất</span>
-          </div>
-
-          <div className="bg-surface-container-lowest rounded-xl p-space-lg shadow-sm flex flex-col justify-between border border-outline-variant/20">
-            <span className="font-label-md text-outline uppercase tracking-wider font-bold">Lệnh chờ xử lý</span>
-            <div className="mt-space-md">
-              <span className="font-headline-lg font-black text-secondary">{pendingCount} lệnh</span>
-            </div>
-            <span className="text-xs text-outline font-semibold mt-2">Cần duyệt chuyển tiền</span>
           </div>
         </div>
 
@@ -163,45 +122,48 @@ export function AdminPayouts() {
         <div className="grid grid-cols-12 gap-space-lg items-start">
           {/* LEFT COLUMN: Payout List (7 cols) */}
           <div className="col-span-12 lg:col-span-7 flex flex-col gap-space-md">
-            <div className="p-space-md rounded-2xl bg-surface-container-lowest shadow-sm flex items-center justify-between border border-outline-variant/20">
+            <div className="p-space-md rounded-xl bg-white shadow-xs flex items-center justify-between border border-slate-200">
               <div className="flex items-center gap-2">
                 <span className="material-symbols-outlined text-primary text-[20px]">payments</span>
-                <span className="font-label-lg font-bold text-on-surface">Lệnh Yêu Cầu Chi Trả</span>
+                <span className="font-bold text-slate-800 text-sm">Lệnh Yêu Cầu Chi Trả</span>
               </div>
-              <div className="flex gap-1.5">
+              <div className="flex gap-1.5 p-1 bg-slate-100 rounded-xl border border-slate-200">
                 <button
                   onClick={() => setStatusFilter('all')}
-                  className={`px-3 py-1 rounded-lg text-xs font-bold ${statusFilter === 'all' ? 'bg-primary text-on-primary' : 'bg-surface-container text-on-surface-variant'}`}
+                  className={`px-3 py-1.5 rounded-lg text-xs transition-all ${statusFilter === 'all' ? 'bg-primary text-white font-bold shadow-xs' : 'text-slate-600 hover:text-slate-900'}`}
                 >
                   Tất cả
                 </button>
                 <button
                   onClick={() => setStatusFilter('REQUESTED')}
-                  className={`px-3 py-1 rounded-lg text-xs font-bold ${statusFilter === 'REQUESTED' ? 'bg-secondary text-on-secondary' : 'bg-surface-container text-on-surface-variant'}`}
+                  className={`px-3 py-1.5 rounded-lg text-xs flex items-center gap-1.5 transition-all ${statusFilter === 'REQUESTED' ? 'bg-primary text-white font-bold shadow-xs' : 'text-slate-600 hover:text-slate-900'}`}
                 >
-                  Chờ duyệt ({pendingCount})
+                  <span>Chờ duyệt</span>
+                  {pendingCount > 0 && (
+                    <span className={`px-1.5 py-0.2 rounded-full font-bold text-[10px] ${statusFilter === 'REQUESTED' ? 'bg-white/20 text-white' : 'bg-slate-200 text-slate-700'}`}>{pendingCount}</span>
+                  )}
                 </button>
                 <button
                   onClick={() => setStatusFilter('PAID')}
-                  className={`px-3 py-1 rounded-lg text-xs font-bold ${statusFilter === 'PAID' ? 'bg-primary text-on-primary' : 'bg-surface-container text-on-surface-variant'}`}
+                  className={`px-3 py-1.5 rounded-lg text-xs transition-all ${statusFilter === 'PAID' ? 'bg-primary text-white font-bold shadow-xs' : 'text-slate-600 hover:text-slate-900'}`}
                 >
                   Đã thanh toán
                 </button>
               </div>
             </div>
 
-            <div className="bg-surface-container-lowest rounded-2xl shadow-sm overflow-hidden border border-outline-variant/20">
+            <div className="bg-white rounded-xl shadow-xs overflow-hidden border border-slate-200">
               <table className="w-full text-left border-collapse">
                 <thead>
-                  <tr className="bg-surface-container text-on-surface-variant font-label-sm text-xs uppercase tracking-wider">
-                    <th className="py-3 px-4">Mã lệnh &amp; Đối tác</th>
-                    <th className="py-3 px-3">Kỳ đối soát</th>
-                    <th className="py-3 px-3 text-right">Số tiền giải ngân</th>
-                    <th className="py-3 px-3 text-center">Trạng thái</th>
-                    <th className="py-3 px-4 text-right">Thao tác</th>
+                  <tr className="bg-slate-50 text-slate-700 text-xs font-semibold border-b border-slate-200">
+                    <th className="py-3 px-4 border-r border-slate-200 whitespace-nowrap">Mã lệnh &amp; Đối tác</th>
+                    <th className="py-3 px-3 border-r border-slate-200 whitespace-nowrap">Kỳ đối soát</th>
+                    <th className="py-3 px-3 text-right border-r border-slate-200 whitespace-nowrap">Số tiền giải ngân</th>
+                    <th className="py-3 px-3 text-center border-r border-slate-200 whitespace-nowrap">Trạng thái</th>
+                    <th className="py-3 px-4 text-center whitespace-nowrap">Thao tác</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-outline-variant/10 font-body-md text-xs">
+                <tbody className="divide-y divide-slate-200 text-xs text-slate-700">
                   {filteredPayouts.map(payout => {
                     const isSelected = payout.id === selectedPayout?.id;
                     return (
@@ -209,41 +171,46 @@ export function AdminPayouts() {
                         key={payout.id}
                         onClick={() => setSelectedPayoutId(payout.id)}
                         className={`cursor-pointer transition-colors ${
-                          isSelected ? 'bg-primary/10' : 'hover:bg-surface-container-low/40'
+                          isSelected ? 'bg-primary/5 hover:bg-primary/10' : 'hover:bg-slate-50'
                         }`}
                       >
-                        <td className="py-3.5 px-4">
+                        <td className="py-3.5 px-4 border-r border-slate-200">
                           <span className="font-mono font-bold text-primary block">{payout.id}</span>
-                          <span className="font-bold text-on-surface text-sm">{payout.vendorName}</span>
+                          <span className="font-bold text-slate-800 text-sm">{payout.vendorName}</span>
                         </td>
 
-                        <td className="py-3.5 px-3 text-outline">
+                        <td className="py-3.5 px-3 text-slate-500 border-r border-slate-200 whitespace-nowrap">
                           {payout.periodText}
                         </td>
 
-                        <td className="py-3.5 px-3 text-right font-bold text-secondary text-sm">
+                        <td className="py-3.5 px-3 text-right font-bold text-slate-800 text-sm border-r border-slate-200 whitespace-nowrap">
                           {payout.amount.toLocaleString('vi-VN')} đ
                         </td>
 
-                        <td className="py-3.5 px-3 text-center">
-                          <span className={`px-2 py-0.5 rounded-full font-bold text-[10px] ${
+                        <td className="py-3.5 px-3 text-center border-r border-slate-200 whitespace-nowrap">
+                          <span className={`px-2.5 py-1 rounded-full font-bold text-[10px] ${
                             payout.status === 'PAID'
-                              ? 'bg-primary/10 text-primary'
+                              ? 'bg-primary/10 text-primary border border-primary/20'
                               : payout.status === 'REQUESTED'
-                              ? 'bg-secondary-container/25 text-on-secondary-container animate-pulse'
-                              : 'bg-secondary-container/20 text-secondary'
+                              ? 'bg-amber-50 text-amber-700 border border-amber-200'
+                              : 'bg-red-50 text-red-700 border border-red-200'
                           }`}>
                             {payout.status === 'PAID' ? 'ĐÃ CHI TRẢ' : payout.status === 'REQUESTED' ? 'CHỜ DUYỆT' : 'TỪ CHỐI'}
                           </span>
                         </td>
 
-                        <td className="py-3.5 px-4 text-right">
-                          <button 
-                            className="p-1.5 rounded-lg bg-surface-container hover:bg-surface-container-high text-primary"
-                            title="Xem chi tiết"
-                          >
-                            <span className="material-symbols-outlined text-[18px]">chevron_right</span>
-                          </button>
+                        <td className="py-3.5 px-4 text-center whitespace-nowrap">
+                          <div className="flex items-center justify-center">
+                            <button 
+                              onClick={(e) => { e.stopPropagation(); setSelectedPayoutId(payout.id); }}
+                              className={`p-1.5 rounded-lg border transition-colors inline-flex items-center justify-center ${
+                                isSelected ? 'bg-primary text-white border-primary shadow-xs' : 'bg-slate-100 hover:bg-slate-200 text-slate-700 border-slate-200'
+                              }`}
+                              title="Xem chi tiết"
+                            >
+                              <span className="material-symbols-outlined text-[18px]">chevron_right</span>
+                            </button>
+                          </div>
                         </td>
                       </tr>
                     );
@@ -256,42 +223,48 @@ export function AdminPayouts() {
           {/* RIGHT COLUMN: Payout Detail & Action Drawer (5 cols) */}
           {selectedPayout && (
             <div className="col-span-12 lg:col-span-5 flex flex-col gap-space-lg sticky top-20">
-              <div className="bg-surface-container-lowest rounded-2xl shadow-md p-space-lg flex flex-col gap-4 border border-outline-variant/20">
-                <div className="flex items-start justify-between pb-3 border-b border-outline-variant/20">
+              <div className="bg-white rounded-xl shadow-xs p-space-lg flex flex-col gap-4 border border-slate-200">
+                <div className="flex items-start justify-between pb-3 border-b border-slate-200">
                   <div>
-                    <span className="text-xs font-bold text-primary uppercase tracking-wider">Lệnh rút tiền #{selectedPayout.id}</span>
-                    <h2 className="font-headline-md font-black text-on-surface mt-0.5">{selectedPayout.vendorName}</h2>
-                    <span className="text-xs text-outline">{selectedPayout.periodText}</span>
+                    <span className="text-xs font-medium text-primary">Lệnh rút tiền #{selectedPayout.id}</span>
+                    <h2 className="text-lg font-bold text-slate-800 mt-0.5">{selectedPayout.vendorName}</h2>
+                    <span className="text-xs text-slate-500">{selectedPayout.periodText}</span>
                   </div>
-                  <span className="px-2.5 py-1 rounded-full bg-secondary/10 text-secondary font-bold text-xs">
+                  <span className={`px-2.5 py-1 rounded-full font-bold text-xs ${
+                    selectedPayout.status === 'PAID'
+                      ? 'bg-primary/10 text-primary border border-primary/20'
+                      : selectedPayout.status === 'REQUESTED'
+                      ? 'bg-amber-50 text-amber-700 border border-amber-200'
+                      : 'bg-red-50 text-red-700 border border-red-200'
+                  }`}>
                     {selectedPayout.status}
                   </span>
                 </div>
 
                 {/* Bank Details */}
-                <div className="p-3.5 rounded-xl bg-surface-container-low flex flex-col gap-2">
-                  <span className="text-xs font-bold text-outline uppercase tracking-wider flex items-center gap-1">
+                <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200 flex flex-col gap-2">
+                  <span className="text-xs font-semibold text-slate-800 flex items-center gap-1">
                     <span className="material-symbols-outlined text-[16px] text-primary">account_balance</span>
                     Thông tin ngân hàng thụ hưởng
                   </span>
                   <div className="flex justify-between items-center text-xs">
-                    <span className="text-outline">Ngân hàng:</span>
-                    <span className="font-bold text-on-surface">{selectedPayout.bankName}</span>
+                    <span className="text-slate-500">Ngân hàng:</span>
+                    <span className="font-bold text-slate-800">{selectedPayout.bankName}</span>
                   </div>
                   <div className="flex justify-between items-center text-xs">
-                    <span className="text-outline">Số tài khoản:</span>
-                    <span className="font-mono font-black text-primary text-sm">{selectedPayout.bankAccountNumber}</span>
+                    <span className="text-slate-500">Số tài khoản:</span>
+                    <span className="font-mono font-bold text-primary text-sm">{selectedPayout.bankAccountNumber}</span>
                   </div>
-                  <div className="flex justify-between items-center text-xs border-t border-outline-variant/20 pt-1">
-                    <span className="text-outline">Chủ tài khoản:</span>
-                    <span className="font-bold text-on-surface text-right">{selectedPayout.bankAccountHolder}</span>
+                  <div className="flex justify-between items-center text-xs border-t border-slate-200 pt-1">
+                    <span className="text-slate-500">Chủ tài khoản:</span>
+                    <span className="font-bold text-slate-800 text-right">{selectedPayout.bankAccountHolder}</span>
                   </div>
                 </div>
 
                 {/* Amount Summary */}
-                <div className="p-3.5 rounded-xl bg-surface-container flex items-center justify-between">
-                  <span className="text-xs text-outline font-bold">Số tiền giải ngân:</span>
-                  <span className="font-headline-lg font-black text-secondary">
+                <div className="p-3.5 rounded-xl bg-slate-100 border border-slate-200 flex items-center justify-between">
+                  <span className="text-xs text-slate-600 font-bold">Số tiền giải ngân:</span>
+                  <span className="text-xl font-bold text-slate-900">
                     {selectedPayout.amount.toLocaleString('vi-VN')} đ
                   </span>
                 </div>
@@ -302,20 +275,20 @@ export function AdminPayouts() {
                     <>
                       <button 
                         onClick={() => setIsDisburseModalOpen(true)}
-                        className="w-full py-3 rounded-xl bg-primary text-on-primary font-bold text-xs hover:bg-primary-container transition-all flex items-center justify-center gap-1.5 shadow-sm"
+                        className="w-full py-2.5 rounded-xl bg-primary text-white font-semibold text-xs hover:bg-primary-container transition-all flex items-center justify-center gap-1.5 shadow-xs"
                       >
                         <span className="material-symbols-outlined text-[18px]">verified</span>
                         <span>Phê duyệt lệnh chi &amp; Chuyển Napas247</span>
                       </button>
                       <button 
                         onClick={handleRejectPayout}
-                        className="w-full py-2.5 rounded-xl bg-secondary-container/20 text-secondary font-bold text-xs hover:bg-secondary-container transition-colors"
+                        className="w-full py-2.5 rounded-xl bg-red-50 hover:bg-red-100 text-red-700 border border-red-200 font-semibold text-xs transition-colors"
                       >
                         Từ chối lệnh chi
                       </button>
                     </>
                   ) : (
-                    <div className="p-3 rounded-xl bg-primary/10 text-primary text-xs font-bold flex items-center gap-2">
+                    <div className="p-3 rounded-xl bg-primary/10 text-primary border border-primary/20 text-xs font-bold flex items-center gap-2">
                       <span className="material-symbols-outlined text-[18px]">check_circle</span>
                       <span>Lệnh chi này đã được xử lý bởi {selectedPayout.processedBy || 'Cảng vụ'}.</span>
                     </div>

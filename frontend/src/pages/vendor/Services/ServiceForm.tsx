@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { createPortal } from 'react-dom';
 import { useNavigate } from 'react-router-dom';
 
 interface ServiceImageItem {
@@ -27,12 +28,6 @@ export function ServiceForm() {
   const [waiver_content, setWaiverContent] = useState<string>(
     'Du khách cam kết đủ sức khỏe tham gia hoạt động biển, không mắc bệnh tim mạch cấp tính, tuân thủ mặc áo phao cứu sinh đạt chuẩn VITA trong suốt quá trình chèo trên mặt nước và chấp hành hiệu lệnh của huấn luyện viên/cứu hộ bãi biển.'
   );
-
-  // Departure point & GPS coordinates
-  const [stationName, setStationName] = useState('Trạm cứu hộ bãi tắm Mỹ Khê 2');
-  const [stationAddress, setStationAddress] = useState('Đường Võ Nguyên Giáp, Phường Phước Mỹ, Sơn Trà, Đà Nẵng');
-  const [latitude, setLatitude] = useState('16.0612');
-  const [longitude, setLongitude] = useState('108.2435');
 
   // Service images with sort_order
   const [images, setImages] = useState<ServiceImageItem[]>([
@@ -126,10 +121,10 @@ export function ServiceForm() {
   };
 
   return (
-    <main className="w-full pt-16 bg-background flex-1">
+    <main className="w-full bg-background flex-1">
       <div className="flex flex-col w-full">
-        {/* Sticky Header Bar for Service Editor */}
-        <div className="sticky top-16 z-30 bg-surface/90 backdrop-blur-md shadow-sm px-space-lg py-space-md flex flex-wrap items-center justify-between gap-space-md">
+        {/* Header Bar for Service Editor */}
+        <div className="w-full bg-surface-container-lowest border-b border-outline-variant/30 px-space-lg py-space-md flex flex-wrap items-center justify-between gap-space-md shadow-xs">
           <div className="flex flex-col">
             <nav className="flex items-center gap-space-xs text-on-surface-variant font-label-sm text-label-sm">
               <span onClick={() => navigate('/vendor/services')} className="hover:text-primary transition-colors cursor-pointer">
@@ -152,79 +147,79 @@ export function ServiceForm() {
           <div className="flex items-center gap-space-sm">
             <button 
               onClick={handleSaveDraft}
-              className="px-space-md py-2.5 rounded-xl bg-surface-container-highest hover:bg-surface-container text-on-surface font-label-lg text-label-lg transition-all flex items-center gap-1.5 shadow-sm" 
+              className="px-3.5 py-2 rounded-lg bg-surface-container-highest hover:bg-surface-container text-on-surface text-sm font-medium transition-colors flex items-center gap-1.5" 
               type="button"
             >
               <span className="material-symbols-outlined text-[18px]">save</span>
-              Lưu bản nháp (DRAFT)
+              <span>Lưu nháp</span>
             </button>
             <button 
               onClick={() => setPreviewOpen(true)}
-              className="px-space-md py-2.5 rounded-xl bg-surface-container-lowest hover:bg-surface-container-low text-primary font-label-lg text-label-lg transition-all flex items-center gap-1.5 shadow-sm" 
+              className="px-3.5 py-2 rounded-lg bg-surface-container-lowest hover:bg-surface-container-low text-primary text-sm font-medium border border-outline-variant/30 transition-colors flex items-center gap-1.5" 
               type="button"
             >
               <span className="material-symbols-outlined text-[18px]">visibility</span>
-              Xem trước
+              <span>Xem trước</span>
             </button>
             <button 
               onClick={handleSubmitApproval}
-              className="px-space-lg py-2.5 rounded-xl bg-primary hover:bg-primary-container text-on-primary font-label-lg text-label-lg transition-all flex items-center gap-1.5 shadow-md font-bold" 
+              className="px-4 py-2 rounded-lg bg-primary hover:bg-primary-container text-on-primary text-sm font-bold transition-colors flex items-center gap-1.5 shadow-xs" 
               type="button"
             >
               <span className="material-symbols-outlined text-[18px]">send</span>
-              Gửi Cảng vụ xét duyệt
+              <span>Gửi duyệt Cảng vụ</span>
             </button>
           </div>
         </div>
 
         {/* Main Content Layout */}
-        <div className="w-full px-space-lg py-space-xl max-w-[1440px] mx-auto">
+        <div className="w-full px-6 py-6">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-space-xl items-start">
-            {/* LEFT COLUMN: 65% Primary Form */}
-            <div className="lg:col-span-8 flex flex-col gap-space-xl">
+            {/* LEFT COLUMN: Consolidated Service Form Panel */}
+            <div className="lg:col-span-8 bg-surface-container-lowest rounded-xl border border-outline-variant/20 shadow-xs divide-y divide-outline-variant/20 overflow-hidden">
               {/* 1. Thông tin cơ bản */}
-              <section className="bg-surface-container-lowest rounded-2xl p-space-xl shadow-sm flex flex-col gap-space-lg border border-outline-variant/30">
-                <div className="flex items-center justify-between pb-space-sm border-b border-outline-variant/20">
-                  <div className="flex items-center gap-space-sm">
-                    <span className="w-8 h-8 rounded-xl bg-primary/10 text-primary flex items-center justify-center">
-                      <span className="material-symbols-outlined text-[20px]">tune</span>
+              <section className="p-6 space-y-5">
+                <div className="flex items-center justify-between pb-3 border-b border-outline-variant/15">
+                  <div className="flex items-center gap-2">
+                    <span className="w-7 h-7 rounded-lg bg-primary/10 text-primary flex items-center justify-center">
+                      <span className="material-symbols-outlined text-[18px]">tune</span>
                     </span>
-                    <h2 className="font-headline-sm text-headline-sm text-on-surface font-bold">1. Thông tin cơ bản</h2>
+                    <h2 className="font-bold text-base text-on-surface">1. Thông tin cơ bản</h2>
                   </div>
-                  <span className="font-label-sm text-label-sm text-primary uppercase tracking-wider font-bold">Bắt buộc</span>
+                  <span className="text-xs text-primary font-semibold">Bắt buộc</span>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-space-md">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="flex flex-col gap-1.5">
-                    <label className="font-label-md text-label-md text-on-surface font-semibold">
+                    <label className="text-xs font-semibold text-on-surface">
                       Tên dịch vụ (Tiếng Việt) <span className="text-error font-bold">*</span>
                     </label>
                     <input 
                       type="text" 
                       value={nameVi}
                       onChange={(e) => setNameVi(e.target.value)}
-                      className="w-full px-space-md py-3 rounded-xl bg-surface-container-low text-on-surface font-body-md focus:ring-2 focus:ring-primary shadow-sm" 
+                      className="w-full px-3.5 py-2.5 rounded-lg bg-surface-container-low text-on-surface text-sm border border-outline-variant/30 focus:outline-none focus:ring-1 focus:ring-primary" 
                     />
                   </div>
 
                   <div className="flex flex-col gap-1.5">
-                    <label className="font-label-md text-label-md text-on-surface font-semibold">
+                    <label className="text-xs font-semibold text-on-surface">
                       Service Name (English)
                     </label>
                     <input 
                       type="text" 
                       value={nameEn}
                       onChange={(e) => setNameEn(e.target.value)}
-                      className="w-full px-space-md py-3 rounded-xl bg-surface-container-low text-on-surface font-body-md focus:ring-2 focus:ring-primary shadow-sm" 
+                      className="w-full px-3.5 py-2.5 rounded-lg bg-surface-container-low text-on-surface text-sm border border-outline-variant/30 focus:outline-none focus:ring-1 focus:ring-primary" 
                     />
                   </div>
 
                   <div className="flex flex-col gap-1.5">
-                    <label className="font-label-md text-label-md text-on-surface font-semibold">Danh mục hoạt động</label>
+                    <label className="text-xs font-semibold text-on-surface">Danh mục hoạt động</label>
                     <select 
                       value={category}
                       onChange={(e) => setCategory(e.target.value)}
-                      className="w-full px-space-md py-3 rounded-xl bg-surface-container-low text-on-surface font-body-md focus:ring-2 focus:ring-primary shadow-sm cursor-pointer"
+                      className="w-full px-3.5 py-2.5 rounded-lg bg-surface-container-low text-on-surface text-sm border border-outline-variant/30 focus:outline-none focus:ring-1 focus:ring-primary cursor-pointer"
                     >
                       <option value="Chèo SUP & Kayak">Chèo SUP &amp; Kayak</option>
                       <option value="Mô tô nước & Jetski">Mô tô nước &amp; Jetski</option>
@@ -235,7 +230,7 @@ export function ServiceForm() {
                   </div>
 
                   <div className="flex flex-col gap-1.5">
-                    <label className="font-label-md text-label-md text-on-surface font-semibold">
+                    <label className="text-xs font-semibold text-on-surface">
                       Đơn giá niêm yết trọn gói (base_price) <span className="text-error font-bold">*</span>
                     </label>
                     <div className="relative">
@@ -243,79 +238,79 @@ export function ServiceForm() {
                         type="number" 
                         value={basePrice}
                         onChange={(e) => setBasePrice(Number(e.target.value))}
-                        className="w-full pl-space-md pr-24 py-3 rounded-xl bg-surface-container-low text-on-surface font-headline-sm font-bold text-primary focus:ring-2 focus:ring-primary shadow-sm" 
+                        className="w-full pl-3.5 pr-20 py-2.5 rounded-lg bg-surface-container-low text-on-surface font-mono font-bold text-primary border border-outline-variant/30 focus:outline-none focus:ring-1 focus:ring-primary text-sm" 
                       />
-                      <span className="absolute right-3 top-1/2 -translate-y-1/2 text-on-surface-variant font-label-md font-semibold">đ / người</span>
+                      <span className="absolute right-3 top-1/2 -translate-y-1/2 text-on-surface-variant text-xs font-medium">đ / người</span>
                     </div>
                   </div>
 
                   <div className="flex flex-col gap-1.5">
-                    <label className="font-label-md text-label-md text-on-surface font-semibold">Thời lượng (duration_minutes)</label>
+                    <label className="text-xs font-semibold text-on-surface">Thời lượng (duration_minutes)</label>
                     <div className="relative flex items-center">
                       <input 
                         type="number" 
                         value={durationMinutes}
                         onChange={(e) => setDurationMinutes(Number(e.target.value))}
-                        className="w-full px-space-md py-3 rounded-xl bg-surface-container-low text-on-surface font-body-md focus:ring-2 focus:ring-primary shadow-sm" 
+                        className="w-full px-3.5 py-2.5 rounded-lg bg-surface-container-low text-on-surface text-sm border border-outline-variant/30 focus:outline-none focus:ring-1 focus:ring-primary" 
                       />
-                      <span className="absolute right-4 text-on-surface-variant font-label-md">phút</span>
+                      <span className="absolute right-3 text-on-surface-variant text-xs">phút</span>
                     </div>
                   </div>
 
                   <div className="flex flex-col gap-1.5">
-                    <label className="font-label-md text-label-md text-on-surface font-semibold">Sức chứa tối đa / ca (capacity)</label>
+                    <label className="text-xs font-semibold text-on-surface">Sức chứa tối đa / ca (capacity)</label>
                     <div className="relative flex items-center">
                       <input 
                         type="number" 
                         value={capacity}
                         onChange={(e) => setCapacity(Number(e.target.value))}
-                        className="w-full px-space-md py-3 rounded-xl bg-surface-container-low text-on-surface font-body-md focus:ring-2 focus:ring-primary shadow-sm" 
+                        className="w-full px-3.5 py-2.5 rounded-lg bg-surface-container-low text-on-surface text-sm border border-outline-variant/30 focus:outline-none focus:ring-1 focus:ring-primary" 
                       />
-                      <span className="absolute right-4 text-on-surface-variant font-label-md">khách / slot</span>
+                      <span className="absolute right-3 text-on-surface-variant text-xs">khách / slot</span>
                     </div>
                   </div>
                 </div>
               </section>
 
               {/* 2. Quy chuẩn An toàn Hàng hải & Điều kiện thời tiết (Schema Strict) */}
-              <section className="bg-surface-container-lowest rounded-2xl p-space-xl shadow-sm flex flex-col gap-space-lg border border-outline-variant/30">
-                <div className="flex items-center justify-between pb-space-sm border-b border-outline-variant/20">
-                  <div className="flex items-center gap-space-sm">
-                    <span className="w-8 h-8 rounded-xl bg-secondary/10 text-secondary flex items-center justify-center">
-                      <span className="material-symbols-outlined text-[20px]">air</span>
+              <section className="p-6 space-y-5">
+                <div className="flex items-center justify-between pb-3 border-b border-outline-variant/15">
+                  <div className="flex items-center gap-2">
+                    <span className="w-7 h-7 rounded-lg bg-secondary/10 text-secondary flex items-center justify-center">
+                      <span className="material-symbols-outlined text-[18px]">air</span>
                     </span>
-                    <h2 className="font-headline-sm text-headline-sm text-on-surface font-bold">
+                    <h2 className="font-bold text-base text-on-surface">
                       2. Tiêu chuẩn An toàn Biển &amp; Thời tiết
                     </h2>
                   </div>
-                  <span className="px-2.5 py-0.5 rounded-full bg-secondary-container/20 text-secondary font-label-sm font-semibold">
+                  <span className="px-2.5 py-0.5 rounded-full bg-secondary-container/20 text-secondary text-xs font-semibold">
                     Quy chuẩn Cảng vụ
                   </span>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-space-md">
-                  {/* min_wind_kmh - Strictly named as requested */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  {/* min_wind_kmh */}
                   <div className="flex flex-col gap-1.5">
-                    <label className="font-label-md font-semibold text-on-surface flex items-center gap-1">
-                      <span>Tốc độ gió tối thiểu (min_wind_kmh)</span>
-                      <span className="material-symbols-outlined text-outline text-[16px]" title="Độ nhạy gió tối thiểu cần để vận hành">help</span>
+                    <label className="text-xs font-semibold text-on-surface flex items-center gap-1">
+                      <span>Gió tối thiểu (min_wind_kmh)</span>
+                      <span className="material-symbols-outlined text-outline text-[14px]" title="Độ nhạy gió tối thiểu cần để vận hành">help</span>
                     </label>
                     <div className="relative flex items-center">
                       <input 
                         type="number"
                         value={min_wind_kmh}
                         onChange={(e) => setMinWindKmh(Number(e.target.value))}
-                        className="w-full px-space-md py-3 rounded-xl bg-surface-container-low text-on-surface font-body-md focus:ring-2 focus:ring-primary"
+                        className="w-full px-3.5 py-2.5 rounded-lg bg-surface-container-low text-on-surface text-sm border border-outline-variant/30 focus:outline-none focus:ring-1 focus:ring-primary"
                       />
-                      <span className="absolute right-4 text-on-surface-variant font-label-sm">km/h</span>
+                      <span className="absolute right-3 text-on-surface-variant text-xs">km/h</span>
                     </div>
                   </div>
 
                   {/* max_wave_m */}
                   <div className="flex flex-col gap-1.5">
-                    <label className="font-label-md font-semibold text-on-surface flex items-center gap-1">
-                      <span>Chiều cao sóng tối đa (max_wave_m)</span>
-                      <span className="material-symbols-outlined text-outline text-[16px]" title="Ngưỡng sóng biển tối đa cho phép xuất bến an toàn">waves</span>
+                    <label className="text-xs font-semibold text-on-surface flex items-center gap-1">
+                      <span>Sóng tối đa (max_wave_m)</span>
+                      <span className="material-symbols-outlined text-outline text-[14px]" title="Ngưỡng sóng biển tối đa cho phép xuất bến an toàn">waves</span>
                     </label>
                     <div className="relative flex items-center">
                       <input 
@@ -323,107 +318,111 @@ export function ServiceForm() {
                         step="0.1"
                         value={max_wave_m}
                         onChange={(e) => setMaxWaveM(Number(e.target.value))}
-                        className="w-full px-space-md py-3 rounded-xl bg-surface-container-low text-on-surface font-body-md focus:ring-2 focus:ring-primary"
+                        className="w-full px-3.5 py-2.5 rounded-lg bg-surface-container-low text-on-surface text-sm border border-outline-variant/30 focus:outline-none focus:ring-1 focus:ring-primary"
                       />
-                      <span className="absolute right-4 text-on-surface-variant font-label-sm">mét</span>
+                      <span className="absolute right-3 text-on-surface-variant text-xs">mét</span>
                     </div>
                   </div>
 
                   {/* weather_sensitive toggle */}
                   <div className="flex flex-col gap-1.5 justify-center">
-                    <span className="font-label-md font-semibold text-on-surface">Nhạy cảm thời tiết (weather_sensitive)</span>
-                    <label className="flex items-center gap-2 cursor-pointer mt-2">
+                    <span className="text-xs font-semibold text-on-surface">Nhạy cảm thời tiết (weather_sensitive)</span>
+                    <label className="flex items-center gap-2 cursor-pointer mt-1">
                       <input 
                         type="checkbox"
                         checked={weather_sensitive}
                         onChange={(e) => setWeatherSensitive(e.target.checked)}
-                        className="w-5 h-5 rounded text-primary focus:ring-primary"
+                        className="w-4 h-4 rounded text-primary focus:ring-primary"
                       />
-                      <span className="font-body-sm text-on-surface">Có (Tự động cảnh báo khi thời tiết xấu)</span>
+                      <span className="text-xs text-on-surface">Tự động cảnh báo khi biển động</span>
                     </label>
                   </div>
                 </div>
 
                 {/* waiver_content */}
-                <div className="flex flex-col gap-1.5 pt-2">
-                  <label className="font-label-md font-semibold text-on-surface flex items-center justify-between">
+                <div className="flex flex-col gap-1.5">
+                  <label className="text-xs font-semibold text-on-surface flex items-center justify-between">
                     <span>Điều khoản miễn trừ trách nhiệm hàng hải (waiver_content)</span>
-                    <span className="text-error font-bold">* Bắt buộc</span>
+                    <span className="text-error font-bold text-[11px]">* Bắt buộc</span>
                   </label>
                   <textarea 
                     rows={3}
                     value={waiver_content}
                     onChange={(e) => setWaiverContent(e.target.value)}
                     placeholder="Nhập nội dung cam kết an toàn, chấp thuận mang phao và tuân thủ quy chế an toàn biển..."
-                    className="w-full p-space-md rounded-xl bg-surface-container-low text-on-surface font-body-sm focus:ring-2 focus:ring-primary shadow-sm"
+                    className="w-full p-3 rounded-lg bg-surface-container-low text-on-surface text-xs border border-outline-variant/30 focus:outline-none focus:ring-1 focus:ring-primary leading-relaxed"
                   />
                   <p className="text-[11px] text-on-surface-variant">
-                    Nội dung này bắt buộc du khách phải đọc và tích chọn chấp thuận trước khi tiến hành thanh toán đặt cọc.
+                    Du khách bắt buộc phải đọc và tích chọn chấp thuận cam kết an toàn trước khi thanh toán.
                   </p>
                 </div>
               </section>
 
               {/* 3. Thư viện hình ảnh có sort_order */}
-              <section className="bg-surface-container-lowest rounded-2xl p-space-xl shadow-sm flex flex-col gap-space-lg border border-outline-variant/30">
-                <div className="flex items-center justify-between pb-space-sm border-b border-outline-variant/20">
-                  <div className="flex items-center gap-space-sm">
-                    <span className="w-8 h-8 rounded-xl bg-primary/10 text-primary flex items-center justify-center">
-                      <span className="material-symbols-outlined text-[20px]">photo_library</span>
+              <section className="p-6 space-y-5">
+                <div className="flex items-center justify-between pb-3 border-b border-outline-variant/15">
+                  <div className="flex items-center gap-2">
+                    <span className="w-7 h-7 rounded-lg bg-primary/10 text-primary flex items-center justify-center">
+                      <span className="material-symbols-outlined text-[18px]">photo_library</span>
                     </span>
-                    <h2 className="font-headline-sm text-headline-sm text-on-surface font-bold">
+                    <h2 className="font-bold text-base text-on-surface">
                       3. Hình ảnh trải nghiệm (quản lý theo sort_order)
                     </h2>
                   </div>
                   <button 
                     onClick={handleAddImage}
-                    className="px-3 py-1.5 rounded-xl bg-primary-fixed text-on-primary-fixed font-label-sm font-semibold hover:bg-primary hover:text-on-primary transition-all flex items-center gap-1"
+                    className="px-3 py-1.5 rounded-lg bg-primary/10 text-primary text-xs font-semibold hover:bg-primary/20 transition-colors flex items-center gap-1 cursor-pointer"
+                    type="button"
                   >
                     <span className="material-symbols-outlined text-[16px]">add_photo_alternate</span>
-                    Thêm ảnh
+                    <span>Thêm ảnh</span>
                   </button>
                 </div>
 
-                <div className="flex flex-col gap-space-sm">
+                <div className="border border-outline-variant/20 rounded-lg divide-y divide-outline-variant/15 overflow-hidden">
                   {images.map((img, idx) => (
-                    <div key={img.id} className="flex items-center justify-between p-space-sm rounded-xl bg-surface-container-low/40 border border-outline-variant/30 gap-space-md">
-                      <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-full bg-surface-container-high flex items-center justify-center font-bold text-label-sm text-primary">
+                    <div key={img.id} className="flex items-center justify-between p-3 bg-surface-container-lowest hover:bg-surface-container-low/20 transition-colors gap-3">
+                      <div className="flex items-center gap-3 min-w-0">
+                        <span className="w-6 h-6 rounded bg-surface-container-high flex items-center justify-center font-mono font-bold text-xs text-primary shrink-0">
                           #{img.sort_order}
-                        </div>
-                        <div className="w-16 h-12 rounded-lg overflow-hidden shrink-0 shadow-sm bg-surface-container-high">
+                        </span>
+                        <div className="w-14 h-10 rounded-md overflow-hidden shrink-0 bg-surface-container-high">
                           <img src={img.url} alt={img.caption} className="w-full h-full object-cover" />
                         </div>
                         <div className="flex flex-col min-w-0">
-                          <span className="font-label-md font-bold text-on-surface truncate">
+                          <span className="text-xs font-bold text-on-surface truncate">
                             {idx === 0 ? 'Ảnh đại diện chính (Cover)' : `Ảnh chi tiết #${img.sort_order}`}
                           </span>
-                          <span className="text-[12px] text-on-surface-variant truncate">{img.caption}</span>
+                          <span className="text-[11px] text-on-surface-variant truncate">{img.caption}</span>
                         </div>
                       </div>
 
-                      <div className="flex items-center gap-1">
+                      <div className="flex items-center gap-1 shrink-0">
                         <button 
                           onClick={() => handleMoveImage(idx, 'UP')}
                           disabled={idx === 0}
                           title="Di chuyển lên trước"
-                          className="p-1.5 rounded-lg hover:bg-surface-container disabled:opacity-30 transition-colors"
+                          className="p-1.5 rounded hover:bg-surface-container disabled:opacity-20 transition-colors cursor-pointer"
+                          type="button"
                         >
-                          <span className="material-symbols-outlined text-[18px]">arrow_upward</span>
+                          <span className="material-symbols-outlined text-[16px]">arrow_upward</span>
                         </button>
                         <button 
                           onClick={() => handleMoveImage(idx, 'DOWN')}
                           disabled={idx === images.length - 1}
                           title="Di chuyển xuống sau"
-                          className="p-1.5 rounded-lg hover:bg-surface-container disabled:opacity-30 transition-colors"
+                          className="p-1.5 rounded hover:bg-surface-container disabled:opacity-20 transition-colors cursor-pointer"
+                          type="button"
                         >
-                          <span className="material-symbols-outlined text-[18px]">arrow_downward</span>
+                          <span className="material-symbols-outlined text-[16px]">arrow_downward</span>
                         </button>
                         <button 
                           onClick={() => handleRemoveImage(img.id)}
                           title="Xóa ảnh"
-                          className="p-1.5 rounded-lg text-error hover:bg-error/10 transition-colors"
+                          className="p-1.5 rounded text-error hover:bg-error/10 transition-colors cursor-pointer"
+                          type="button"
                         >
-                          <span className="material-symbols-outlined text-[18px]">delete</span>
+                          <span className="material-symbols-outlined text-[16px]">delete</span>
                         </button>
                       </div>
                     </div>
@@ -432,28 +431,30 @@ export function ServiceForm() {
               </section>
             </div>
 
-            {/* RIGHT COLUMN: Compliance Checklist */}
-            <div className="lg:col-span-4 flex flex-col gap-space-lg sticky top-36">
-              <div className="bg-surface-container-lowest rounded-2xl p-space-lg shadow-sm flex flex-col gap-space-md border border-outline-variant/30">
-                <div className="flex items-center gap-2 text-primary font-label-lg font-bold">
-                  <span className="material-symbols-outlined text-[22px]">gavel</span>
+            {/* RIGHT COLUMN: Compliance Checklist Panel */}
+            <div className="lg:col-span-4 sticky top-20">
+              <div className="bg-surface-container-lowest rounded-xl p-5 border border-outline-variant/20 shadow-xs space-y-4">
+                <div className="flex items-center gap-2 text-primary font-bold text-sm">
+                  <span className="material-symbols-outlined text-[20px]">gavel</span>
                   <span>Quy trình Xét duyệt Cảng vụ</span>
                 </div>
-                <p className="font-body-sm text-on-surface-variant leading-relaxed">
-                  Dịch vụ mới gửi sẽ có trạng thái <strong>PENDING_APPROVAL</strong>. Ban Quản lý Cảng vụ sẽ kiểm định tọa độ xuất bến, giới hạn thời tiết an toàn và điều khoản miễn trừ trước khi duyệt sang <strong>PUBLISHED</strong>.
+                <p className="text-xs text-on-surface-variant leading-relaxed">
+                  Dịch vụ mới tạo sẽ mang trạng thái <strong>PENDING_APPROVAL</strong>. Ban Quản lý Cảng vụ sẽ kiểm định tọa độ xuất bến, giới hạn thời tiết an toàn và điều khoản miễn trừ trước khi duyệt sang <strong>PUBLISHED</strong>.
                 </p>
 
-                <div className="pt-2 border-t border-outline-variant/20 flex flex-col gap-2">
+                <div className="pt-3 border-t border-outline-variant/15 flex flex-col gap-2">
                   <button 
                     onClick={handleSubmitApproval}
-                    className="w-full py-3 rounded-xl bg-primary text-on-primary font-label-md font-bold shadow-md hover:bg-primary-container transition-all flex items-center justify-center gap-2"
+                    className="w-full py-2.5 rounded-lg bg-primary text-on-primary text-sm font-bold shadow-xs hover:bg-primary-container transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
+                    type="button"
                   >
                     <span className="material-symbols-outlined text-[18px]">send</span>
-                    Gửi Cảng vụ xét duyệt
+                    <span>Gửi Cảng vụ xét duyệt</span>
                   </button>
                   <button 
                     onClick={handleSaveDraft}
-                    className="w-full py-2.5 rounded-xl bg-surface-container-high text-on-surface font-label-md font-semibold hover:bg-surface-container-highest transition-all"
+                    className="w-full py-2 rounded-lg bg-surface-container-high text-on-surface text-xs font-semibold hover:bg-surface-container-highest transition-colors cursor-pointer"
+                    type="button"
                   >
                     Lưu bản nháp (DRAFT)
                   </button>
@@ -470,6 +471,60 @@ export function ServiceForm() {
           <span className="material-symbols-outlined text-emerald-400 text-[20px]">task_alt</span>
           <span className="font-label-md text-label-md">{toastMessage}</span>
         </div>
+      )}
+
+      {/* Preview Modal */}
+      {previewOpen && createPortal(
+        <div className="fixed inset-0 z-[9999] bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl max-w-lg w-full p-6 space-y-4 shadow-2xl relative max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between border-b pb-3">
+              <h3 className="font-bold text-slate-900 text-lg">Xem trước thông tin dịch vụ</h3>
+              <button onClick={() => setPreviewOpen(false)} className="text-slate-400 hover:text-slate-600 cursor-pointer">
+                <span className="material-symbols-outlined">close</span>
+              </button>
+            </div>
+            <div className="space-y-3">
+              <div>
+                <span className="text-xs text-slate-500 font-medium">{category}</span>
+                <h4 className="font-bold text-slate-900 text-base">{nameVi || 'Chưa đặt tên'}</h4>
+                <p className="text-xs text-slate-500">{nameEn}</p>
+              </div>
+              <div className="p-3 bg-slate-50 rounded-xl space-y-1 text-sm">
+                <div className="flex justify-between">
+                  <span className="text-slate-600">Đơn giá:</span>
+                  <span className="font-bold text-primary">{basePrice.toLocaleString('vi-VN')} đ / người</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-slate-600">Thời lượng:</span>
+                  <span className="font-semibold text-slate-800">{durationMinutes} phút</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-slate-600">Sức chứa mỗi ca:</span>
+                  <span className="font-semibold text-slate-800">{capacity} người</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-slate-600">Giới hạn sóng biển:</span>
+                  <span className="font-semibold text-slate-800">&le; {max_wave_m}m</span>
+                </div>
+              </div>
+              <div>
+                <span className="text-xs text-slate-500 font-medium block mb-1">Cam kết miễn trừ an toàn:</span>
+                <p className="text-xs text-slate-700 leading-relaxed bg-slate-50 p-2.5 rounded-lg max-h-32 overflow-y-auto">
+                  {waiver_content}
+                </p>
+              </div>
+            </div>
+            <div className="flex justify-end pt-2 border-t">
+              <button
+                onClick={() => setPreviewOpen(false)}
+                className="px-4 py-2 bg-slate-900 text-white rounded-xl text-xs font-semibold hover:bg-slate-800 cursor-pointer"
+              >
+                Đóng xem trước
+              </button>
+            </div>
+          </div>
+        </div>,
+        document.body
       )}
     </main>
   );

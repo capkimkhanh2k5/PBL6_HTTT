@@ -53,237 +53,209 @@ export function Settings() {
   };
 
   return (
-    <main className="w-full pt-16 bg-surface px-space-xl pb-space-2xl min-h-screen">
+    <main className="w-full pt-16 bg-surface px-6 md:px-8 pb-12 min-h-screen">
       <div className="flex flex-col w-full animate-fade-in-up">
         {/* Toast */}
         {toastMessage && (
-          <div className="fixed top-20 right-8 z-50 flex items-center gap-3 px-4 py-3 rounded-xl bg-primary text-on-primary shadow-xl animate-fade-in-up">
+          <div className="fixed top-20 right-8 z-50 flex items-center gap-3 px-4 py-3 rounded-xl bg-primary text-white shadow-xl animate-fade-in-up">
             <span className="material-symbols-outlined text-[20px]">check_circle</span>
-            <span className="font-label-md text-label-md font-semibold">{toastMessage}</span>
+            <span className="text-sm font-semibold">{toastMessage}</span>
           </div>
         )}
 
-        {/* Page Header */}
-        <div className="flex flex-col xl:flex-row xl:items-end justify-between gap-space-lg mb-space-xl">
-          <div className="flex flex-col gap-space-xs max-w-3xl">
-            <div className="flex items-center gap-space-sm font-bold">
-              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-primary/10 text-primary font-label-sm uppercase tracking-wider">
-                <span className="w-2 h-2 rounded-full bg-primary animate-pulse"></span>
-                Cơ chế runtime production • node-danang-alpha-02
-              </span>
-              <span className="font-label-sm text-outline">v4.18.2-maritime</span>
-            </div>
-            <h1 className="font-headline-xl text-headline-xl text-on-surface tracking-tight font-black">
-              Cấu hình Tham số Hệ thống &amp; An toàn Hàng hải
+        {/* Header */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 mb-4 border-b border-slate-200">
+          <div>
+            <h1 className="text-xl md:text-2xl font-bold text-slate-900 tracking-tight">
+              Cài đặt Hệ thống
             </h1>
-            <p className="font-body-md text-body-md text-on-surface-variant">
-              Kiểm soát các tham số vận hành toàn sàn (system_configs), quy tắc chu kỳ chi trả, tỷ lệ hoa hồng mặc định và định mức an toàn mặt nước theo chuẩn Cảng vụ DANASEA.
-            </p>
           </div>
-
-          <div className="flex items-center gap-space-sm self-start xl:self-auto shrink-0">
-            <button 
-              onClick={() => showToast("Đã đồng bộ tức thì các tham số sang cụm bộ nhớ đệm Redis!")}
-              className="flex items-center gap-2 px-space-md py-2.5 rounded-xl bg-surface-container-lowest text-primary font-label-lg shadow-sm hover:bg-surface-container transition-all border border-outline-variant/20 font-semibold"
-            >
-              <span className="material-symbols-outlined text-[18px]">sync</span>
-              <span>Đồng bộ Redis Cache</span>
-            </button>
+          <div className="flex items-center gap-2">
             <button 
               onClick={handleResetDefaults}
-              className="flex items-center gap-2 px-space-md py-2.5 rounded-xl bg-surface-container-high text-on-surface font-label-lg hover:bg-surface-container transition-all font-semibold"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white hover:bg-slate-50 text-slate-700 text-sm font-medium border border-slate-200 transition-colors shadow-xs"
             >
               <span className="material-symbols-outlined text-[18px]">restart_alt</span>
               <span>Khôi phục mặc định</span>
             </button>
             <button 
               onClick={handleSaveAll}
-              className="flex items-center gap-2 px-space-lg py-2.5 rounded-xl bg-primary text-on-primary font-label-lg shadow-md hover:bg-primary-container transition-all font-bold"
+              className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-primary text-white text-sm font-semibold hover:bg-primary-container transition-colors shadow-xs"
             >
               <span className="material-symbols-outlined text-[18px]">save</span>
-              <span>Lưu thay đổi tham số</span>
+              <span>Lưu Cài đặt</span>
             </button>
           </div>
         </div>
 
-        {/* Operational Notices */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-space-md mb-space-xl">
-          <div className="lg:col-span-7 bg-surface-container-lowest p-space-lg rounded-xl shadow-sm flex items-start gap-space-md relative overflow-hidden border border-outline-variant/20">
-            <div className="w-1.5 absolute left-0 top-0 bottom-0 bg-primary"></div>
-            <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary shrink-0">
-              <span className="material-symbols-outlined text-[24px]">verified_user</span>
+        {/* System & Telemetry Banner */}
+        <div className="bg-white rounded-xl border border-slate-200 p-4 mb-6 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div className="flex items-start gap-3">
+            <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center text-primary shrink-0 mt-0.5">
+              <span className="material-symbols-outlined text-[20px]">verified_user</span>
             </div>
-            <div className="flex flex-col gap-1 min-w-0">
-              <div className="flex items-center gap-2 font-bold">
-                <span className="font-headline-sm text-on-surface">Kiểm soát Bất biến &amp; Nhật ký Kiểm toán</span>
-                <span className="px-2 py-0.5 rounded bg-primary text-on-primary font-mono text-xs">audit_logs strict</span>
+            <div>
+              <div className="flex items-center gap-2 font-bold text-sm text-slate-900">
+                <span>Kiểm soát Bất biến &amp; Nhật ký Kiểm toán</span>
+                <span className="px-1.5 py-0.5 rounded bg-primary/10 text-primary font-mono text-[10px]">audit_logs</span>
               </div>
-              <p className="font-body-md text-xs text-on-surface-variant leading-relaxed">
-                Mọi thay đổi tham số hệ thống sẽ được ghi vết tự động vào Nhật ký kiểm toán (audit_logs). 
-                <strong> Tuyệt đối không làm thay đổi tỷ lệ hoa hồng lịch sử</strong> của các đơn hàng đã chốt (commission snapshot).
+              <p className="text-xs text-slate-500 mt-0.5">
+                Mọi thay đổi tham số được ghi vết tự động. Không làm thay đổi tỷ lệ hoa hồng lịch sử của các đơn đã chốt.
               </p>
             </div>
           </div>
 
-          <div className="lg:col-span-5 bg-inverse-surface text-on-primary p-space-lg rounded-xl shadow-sm flex flex-col justify-between border border-outline-variant/20">
-            <div className="flex items-center justify-between mb-2">
-              <div className="flex items-center gap-2 font-bold">
-                <span className="material-symbols-outlined text-inverse-primary text-[20px]">routine</span>
-                <span className="text-xs uppercase tracking-wider">Bộ nhớ đệm thời tiết biển (weather_cache)</span>
-              </div>
-              <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-primary-container text-on-primary-container text-xs font-bold">
-                TTL: 15 phút
-              </span>
+          <div className="flex items-center gap-4 px-3 py-2 rounded-lg bg-slate-50 border border-slate-200 text-xs shrink-0">
+            <div className="flex items-center gap-1.5 text-slate-700 font-medium">
+              <span className="material-symbols-outlined text-primary text-[16px]">routine</span>
+              <span>Bộ đệm thời tiết:</span>
             </div>
-            <div className="grid grid-cols-3 gap-2 my-space-sm bg-surface-variant/10 p-2.5 rounded-lg text-center">
-              <div>
-                <span className="text-xs text-outline-variant block">Sóng biển</span>
-                <span className="font-headline-sm font-black text-inverse-primary">0.5 m</span>
-              </div>
-              <div>
-                <span className="text-xs text-outline-variant block">Tốc độ gió</span>
-                <span className="font-headline-sm font-black text-inverse-primary">12 km/h</span>
-              </div>
-              <div>
-                <span className="text-xs text-outline-variant block">Lượng mưa</span>
-                <span className="font-headline-sm font-black text-inverse-primary">0 mm</span>
-              </div>
+            <div className="flex items-center gap-3 font-semibold text-slate-900">
+              <span>Sóng: <strong className="text-primary">0.5m</strong></span>
+              <span>Gió: <strong className="text-primary">12km/h</strong></span>
+              <span>Mưa: <strong className="text-primary">0mm</strong></span>
             </div>
           </div>
         </div>
 
-        {/* Configuration Blocks */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-space-xl mb-space-2xl">
-          {/* BLOCK 1: Vận hành & Giao dịch */}
-          <div className="bg-surface-container-lowest rounded-xl shadow-sm p-space-xl flex flex-col justify-between border border-outline-variant/20">
-            <div>
-              <div className="flex items-center gap-3 mb-space-md border-b border-outline-variant/10 pb-3">
-                <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
-                  <span className="material-symbols-outlined text-[22px]">payments</span>
-                </div>
-                <div>
-                  <h2 className="font-headline-md font-bold text-on-surface">Khối 1: Vận hành &amp; Giao dịch Sàn</h2>
-                  <span className="text-xs text-outline">Tham số tài chính và chu kỳ kế toán</span>
-                </div>
+        {/* Configuration Form Sections (Vertical Document Layout) */}
+        <div className="bg-white rounded-xl border border-slate-200 shadow-xs divide-y divide-slate-200">
+          {/* Section 1: Vận hành & Giao dịch */}
+          <div className="p-6">
+            <div className="flex items-center gap-3 mb-6">
+              <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
+                <span className="material-symbols-outlined text-[18px]">payments</span>
               </div>
+              <div>
+                <h2 className="text-base font-bold text-slate-900">Vận hành &amp; Giao dịch Sàn</h2>
+                <p className="text-xs text-slate-500">Tham số tài chính, trích xuất hoa hồng và chu kỳ kế toán</p>
+              </div>
+            </div>
 
-              <div className="flex flex-col gap-4 mt-2">
-                <div className="p-space-md rounded-xl bg-surface-container-low flex flex-col gap-2">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <span className="font-bold text-sm text-on-surface block">Tỷ lệ hoa hồng mặc định sàn (%)</span>
-                      <code className="font-mono text-xs text-primary font-bold">PLATFORM_COMMISSION_RATE</code>
-                    </div>
-                    <div className="flex items-center gap-1">
-                      <input 
-                        type="number"
-                        step="0.5"
-                        value={commissionRate}
-                        onChange={(e) => setCommissionRate(e.target.value)}
-                        className="w-20 h-10 px-2 rounded-lg bg-surface-container-lowest text-right font-black text-base text-primary border border-outline-variant/30"
-                      />
-                      <span className="font-bold text-sm text-outline">%</span>
-                    </div>
+            <div className="space-y-6 divide-y divide-slate-200">
+              {/* Row 1: Commission Rate */}
+              <div className="pt-4 first:pt-0 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div className="max-w-xl">
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm font-semibold text-slate-900">Tỷ lệ hoa hồng mặc định sàn</span>
+                    <code className="font-mono text-[11px] text-primary bg-primary/10 px-1.5 py-0.5 rounded">PLATFORM_COMMISSION_RATE</code>
                   </div>
-                  <p className="text-xs text-on-surface-variant">
+                  <p className="text-xs text-slate-500 mt-1 leading-relaxed">
                     Khấu trừ tự động vào ví bảo chứng của đối tác trên mỗi dịch vụ con (SubOrder) hoàn tất.
                   </p>
                 </div>
+                <div className="flex items-center gap-2 shrink-0">
+                  <input 
+                    type="number"
+                    step="0.5"
+                    value={commissionRate}
+                    onChange={(e) => setCommissionRate(e.target.value)}
+                    className="w-24 h-9 px-3 rounded-lg bg-slate-50 text-right font-bold text-sm text-primary border border-slate-200 focus:outline-none focus:ring-2 focus:ring-primary"
+                  />
+                  <span className="text-xs font-bold text-slate-400">%</span>
+                </div>
+              </div>
 
-                <div className="p-space-md rounded-xl bg-surface-container-low flex flex-col gap-2">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <span className="font-bold text-sm text-on-surface block">Chu kỳ rút tiền đối tác (ngày)</span>
-                      <code className="font-mono text-xs text-primary font-bold">AUTO_PAYOUT_CYCLE_DAYS</code>
-                    </div>
-                    <div className="flex items-center gap-1">
-                      <input 
-                        type="number"
-                        value={payoutCycle}
-                        onChange={(e) => setPayoutCycle(e.target.value)}
-                        className="w-20 h-10 px-2 rounded-lg bg-surface-container-lowest text-right font-black text-base text-on-surface border border-outline-variant/30"
-                      />
-                      <span className="font-bold text-xs text-outline">ngày</span>
-                    </div>
+              {/* Row 2: Auto Payout Cycle */}
+              <div className="pt-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div className="max-w-xl">
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm font-semibold text-slate-900">Chu kỳ rút tiền đối tác</span>
+                    <code className="font-mono text-[11px] text-primary bg-primary/10 px-1.5 py-0.5 rounded">AUTO_PAYOUT_CYCLE_DAYS</code>
                   </div>
-                  <p className="text-xs text-on-surface-variant">
-                    Thời hạn chốt sổ settlement và cho phép NCC tạo lệnh giải ngân định kỳ.
+                  <p className="text-xs text-slate-500 mt-1 leading-relaxed">
+                    Thời hạn chốt sổ quyết toán settlement và cho phép nhà cung cấp tạo lệnh giải ngân định kỳ.
                   </p>
+                </div>
+                <div className="flex items-center gap-2 shrink-0">
+                  <input 
+                    type="number"
+                    value={payoutCycle}
+                    onChange={(e) => setPayoutCycle(e.target.value)}
+                    className="w-24 h-9 px-3 rounded-lg bg-slate-50 text-right font-bold text-sm text-slate-900 border border-slate-200 focus:outline-none focus:ring-2 focus:ring-primary"
+                  />
+                  <span className="text-xs font-bold text-slate-400">ngày</span>
                 </div>
               </div>
             </div>
           </div>
 
-          {/* BLOCK 2: An toàn Hàng hải */}
-          <div className="bg-surface-container-lowest rounded-xl shadow-sm p-space-xl flex flex-col justify-between border border-outline-variant/20">
-            <div>
-              <div className="flex items-center gap-3 mb-space-md border-b border-outline-variant/10 pb-3">
-                <div className="w-10 h-10 rounded-xl bg-secondary-container/20 flex items-center justify-center text-secondary">
-                  <span className="material-symbols-outlined text-[22px]">waves</span>
+          {/* Section 2: An toàn Hàng hải */}
+          <div className="p-6">
+            <div className="flex items-center gap-3 mb-6">
+              <div className="w-8 h-8 rounded-lg bg-amber-500/10 flex items-center justify-center text-amber-600">
+                <span className="material-symbols-outlined text-[18px]">waves</span>
+              </div>
+              <div>
+                <h2 className="text-base font-bold text-slate-900">Định Mức An Toàn Hàng Hải</h2>
+                <p className="text-xs text-slate-500">Ngưỡng thời tiết tự động kích hoạt cảnh báo Cờ Vàng hoặc Cấm Biển xuất bến</p>
+              </div>
+            </div>
+
+            <div className="space-y-6 divide-y divide-slate-200">
+              {/* Row 3: Max Safe Wave */}
+              <div className="pt-4 first:pt-0 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div className="max-w-xl">
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm font-semibold text-slate-900">Ngưỡng sóng tối đa cho phép</span>
+                    <code className="font-mono text-[11px] text-amber-700 bg-amber-50 px-1.5 py-0.5 rounded border border-amber-200">WEATHER_MAX_SAFE_WAVE_M</code>
+                  </div>
+                  <p className="text-xs text-slate-500 mt-1 leading-relaxed">
+                    Nếu sóng biển thực đo vượt ngưỡng này, hệ thống tự động cảnh báo cấm xuất bến tour SUP và cano.
+                  </p>
                 </div>
-                <div>
-                  <h2 className="font-headline-md font-bold text-on-surface">Khối 2: Định Mức An Toàn Hàng Hải</h2>
-                  <span className="text-xs text-outline">Ngưỡng tự động kích hoạt Cờ Vàng / Cấm Biển</span>
+                <div className="flex items-center gap-2 shrink-0">
+                  <input 
+                    type="number"
+                    step="0.1"
+                    value={maxSafeWave}
+                    onChange={(e) => setMaxSafeWave(e.target.value)}
+                    className="w-24 h-9 px-3 rounded-lg bg-slate-50 text-right font-bold text-sm text-amber-700 border border-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-500"
+                  />
+                  <span className="text-xs font-bold text-slate-400">mét (m)</span>
                 </div>
               </div>
 
-              <div className="flex flex-col gap-4 mt-2">
-                <div className="p-space-md rounded-xl bg-surface-container-low flex flex-col gap-2">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <span className="font-bold text-sm text-on-surface block">Ngưỡng sóng tối đa cho phép (mét)</span>
-                      <code className="font-mono text-xs text-primary font-bold">WEATHER_MAX_SAFE_WAVE_M</code>
-                    </div>
-                    <div className="flex items-center gap-1">
-                      <input 
-                        type="number"
-                        step="0.1"
-                        value={maxSafeWave}
-                        onChange={(e) => setMaxSafeWave(e.target.value)}
-                        className="w-20 h-10 px-2 rounded-lg bg-surface-container-lowest text-right font-black text-base text-secondary border border-outline-variant/30"
-                      />
-                      <span className="font-bold text-xs text-outline">m</span>
-                    </div>
+              {/* Row 4: Max Safe Wind */}
+              <div className="pt-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div className="max-w-xl">
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm font-semibold text-slate-900">Ngưỡng gió giật tối đa</span>
+                    <code className="font-mono text-[11px] text-amber-700 bg-amber-50 px-1.5 py-0.5 rounded border border-amber-200">WEATHER_MAX_SAFE_WIND_KMH</code>
                   </div>
-                  <p className="text-xs text-on-surface-variant">
-                    Nếu sóng biển thực đo &gt; ngưỡng này, hệ thống tự động cấm xuất bến tour SUP &amp; cano cao tốc.
-                  </p>
-                </div>
-
-                <div className="p-space-md rounded-xl bg-surface-container-low flex flex-col gap-2">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <span className="font-bold text-sm text-on-surface block">Ngưỡng gió giật tối đa (km/h)</span>
-                      <code className="font-mono text-xs text-primary font-bold">WEATHER_MAX_SAFE_WIND_KMH</code>
-                    </div>
-                    <div className="flex items-center gap-1">
-                      <input 
-                        type="number"
-                        value={maxSafeWind}
-                        onChange={(e) => setMaxSafeWind(e.target.value)}
-                        className="w-20 h-10 px-2 rounded-lg bg-surface-container-lowest text-right font-black text-base text-secondary border border-outline-variant/30"
-                      />
-                      <span className="font-bold text-xs text-outline">km/h</span>
-                    </div>
-                  </div>
-                  <p className="text-xs text-on-surface-variant">
+                  <p className="text-xs text-slate-500 mt-1 leading-relaxed">
                     Kích hoạt thông báo cảnh báo Cờ Vàng tới tất cả thuyền trưởng khi gió giật chạm ngưỡng.
                   </p>
                 </div>
+                <div className="flex items-center gap-2 shrink-0">
+                  <input 
+                    type="number"
+                    value={maxSafeWind}
+                    onChange={(e) => setMaxSafeWind(e.target.value)}
+                    className="w-24 h-9 px-3 rounded-lg bg-slate-50 text-right font-bold text-sm text-amber-700 border border-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-500"
+                  />
+                  <span className="text-xs font-bold text-slate-400">km/h</span>
+                </div>
+              </div>
 
-                <div className="p-space-md rounded-xl bg-surface-container-low flex flex-col gap-2">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <span className="font-bold text-sm text-on-surface block">Đường dây nóng cứu hộ Cảng vụ</span>
-                      <code className="font-mono text-xs text-primary font-bold">EMERGENCY_PORT_HOTLINE</code>
-                    </div>
-                    <input 
-                      type="text"
-                      value={emergencyHotline}
-                      onChange={(e) => setEmergencyHotline(e.target.value)}
-                      className="w-32 h-10 px-2 rounded-lg bg-surface-container-lowest text-center font-black text-sm text-primary border border-outline-variant/30"
-                    />
+              {/* Row 5: Emergency Hotline */}
+              <div className="pt-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div className="max-w-xl">
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm font-semibold text-slate-900">Đường dây nóng cứu hộ Cảng vụ</span>
+                    <code className="font-mono text-[11px] text-primary bg-primary/10 px-1.5 py-0.5 rounded">EMERGENCY_PORT_HOTLINE</code>
                   </div>
+                  <p className="text-xs text-slate-500 mt-1 leading-relaxed">
+                    Số điện thoại trực ban cứu hộ hiển thị khẩn cấp trên ứng dụng của tài xế cano và hướng dẫn viên.
+                  </p>
+                </div>
+                <div className="flex items-center gap-2 shrink-0">
+                  <input 
+                    type="text"
+                    value={emergencyHotline}
+                    onChange={(e) => setEmergencyHotline(e.target.value)}
+                    className="w-36 h-9 px-3 rounded-lg bg-slate-50 text-center font-bold text-sm text-primary border border-slate-200 focus:outline-none focus:ring-2 focus:ring-primary"
+                  />
                 </div>
               </div>
             </div>

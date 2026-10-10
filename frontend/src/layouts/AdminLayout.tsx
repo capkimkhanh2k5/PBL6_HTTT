@@ -1,5 +1,5 @@
 import { Outlet, NavLink, useLocation, useNavigate } from "react-router-dom";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 
 const ADMIN_PAGE_ORDER: Record<string, number> = {
   "/admin": 0,
@@ -23,21 +23,18 @@ export function AdminLayout() {
   const [searchGlobal, setSearchGlobal] = useState("");
   const [isNotiOpen, setIsNotiOpen] = useState(false);
 
-  useEffect(() => {
-    if (location.pathname !== prevPath) {
-      const prevOrder = ADMIN_PAGE_ORDER[prevPath] ?? 0;
-      const currentOrder = ADMIN_PAGE_ORDER[location.pathname] ?? 0;
-
-      if (currentOrder > prevOrder) {
-        setAnimationClass("animate-slide-in-right");
-      } else if (currentOrder < prevOrder) {
-        setAnimationClass("animate-slide-in-left");
-      } else {
-        setAnimationClass("animate-fade-in-up");
-      }
-      setPrevPath(location.pathname);
+  if (location.pathname !== prevPath) {
+    const prevOrder = ADMIN_PAGE_ORDER[prevPath] ?? 0;
+    const currentOrder = ADMIN_PAGE_ORDER[location.pathname] ?? 0;
+    setPrevPath(location.pathname);
+    if (currentOrder > prevOrder) {
+      setAnimationClass("animate-slide-in-right");
+    } else if (currentOrder < prevOrder) {
+      setAnimationClass("animate-slide-in-left");
+    } else {
+      setAnimationClass("animate-fade-in-up");
     }
-  }, [location.pathname, prevPath]);
+  }
 
   const navItems = [
     { to: "/admin", end: true, icon: "dashboard", label: "Tổng quan" },
@@ -56,24 +53,26 @@ export function AdminLayout() {
   return (
     <div className="bg-surface font-body-md text-on-surface min-h-screen flex antialiased selection:bg-primary-container selection:text-on-primary-container">
       {/* Fixed Admin Sidebar (260px) */}
-      <aside className="fixed left-0 top-0 h-screen w-[260px] bg-inverse-surface z-50 flex flex-col justify-between shadow-[0_1px_8px_rgba(0,0,0,0.04)] select-none">
+      <aside className="fixed left-0 top-0 h-screen w-[260px] bg-white border-r border-slate-200 z-50 flex flex-col justify-between shadow-xs select-none">
         <div className="flex flex-col flex-1 overflow-y-auto scrollbar-none">
           {/* Brand Header */}
-          <div className="p-space-lg flex flex-col gap-space-xs border-b border-surface-variant/10">
+          <div className="p-space-lg flex flex-col gap-space-xs border-b border-slate-200">
             <div
               className="flex items-center gap-space-sm cursor-pointer"
               onClick={() => navigate("/admin")}
             >
-              <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center text-on-primary font-black text-base shadow-sm">
-                D
-              </div>
-              <span className="font-headline-sm text-headline-sm font-bold tracking-tight text-on-primary">
+              <img
+                src="/images/danasea-logo.png"
+                alt="DANASEA"
+                className="w-8 h-8 rounded-lg object-contain shrink-0"
+              />
+              <span className="font-headline-sm text-headline-sm font-bold tracking-tight text-primary">
                 DANASEA
               </span>
             </div>
             <div className="mt-space-xs">
-              <span className="inline-flex items-center px-space-xs py-0.5 rounded bg-primary-container/20 text-inverse-primary font-label-sm text-[10px] uppercase font-bold tracking-wider">
-                HỆ THỐNG QUẢN TRỊ CẢNG VỤ
+              <span className="inline-flex items-center px-2 py-0.5 rounded bg-primary/10 text-primary font-label-sm text-[11px] font-semibold">
+                Quản trị Sàn DANASEA
               </span>
             </div>
           </div>
@@ -88,8 +87,8 @@ export function AdminLayout() {
                 className={({ isActive }) =>
                   `flex items-center justify-between px-space-md py-2.5 rounded-xl font-label-md text-[13px] transition-all ${
                     isActive
-                      ? "bg-primary-container text-on-primary-container font-bold shadow-sm"
-                      : "text-outline-variant hover:bg-surface-variant/20 hover:text-on-primary"
+                      ? "bg-primary text-white font-bold shadow-xs"
+                      : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
                   }`
                 }
               >
@@ -100,7 +99,13 @@ export function AdminLayout() {
                   <span>{item.label}</span>
                 </div>
                 {item.badge && (
-                  <span className="px-1.5 py-0.2 rounded-full bg-secondary-container text-on-secondary-container text-[10px] font-bold">
+                  <span
+                    className={`px-1.5 py-0.2 rounded-full text-[10px] font-bold ${
+                      location.pathname === item.to || (item.to !== "/admin" && location.pathname.startsWith(item.to))
+                        ? "bg-white/20 text-white"
+                        : "bg-slate-100 text-slate-700"
+                    }`}
+                  >
                     {item.badge}
                   </span>
                 )}
@@ -110,22 +115,22 @@ export function AdminLayout() {
         </div>
 
         {/* Footer Admin Profile Card */}
-        <div className="p-space-md bg-inverse-surface border-t border-surface-variant/10">
-          <div className="flex items-center gap-space-sm p-space-sm rounded-xl bg-surface-variant/10 text-on-primary">
-            <div className="w-9 h-9 rounded-full bg-primary flex items-center justify-center text-on-primary font-bold text-label-md shrink-0">
+        <div className="p-space-md bg-white border-t border-slate-200">
+          <div className="flex items-center gap-space-sm p-space-sm rounded-xl bg-slate-50 border border-slate-200 text-slate-800">
+            <div className="w-9 h-9 rounded-full bg-primary flex items-center justify-center text-white font-bold text-label-md shrink-0 shadow-xs">
               <span className="material-symbols-outlined text-[20px]">person</span>
             </div>
             <div className="flex flex-col min-w-0 flex-1">
-              <span className="font-label-md text-label-md text-on-primary font-bold truncate">
+              <span className="font-label-md text-label-md text-slate-900 font-bold truncate">
                 Trần Hải Đăng
               </span>
-              <span className="font-label-sm text-[10px] text-outline-variant truncate">
-                Ban QL Cảng VITA • ADMIN
+              <span className="font-label-sm text-[10px] text-slate-500 truncate">
+                Ban Quản trị Sàn • Admin
               </span>
             </div>
             <button
               onClick={() => navigate("/admin/settings")}
-              className="text-outline-variant hover:text-on-primary transition-colors p-1"
+              className="text-slate-400 hover:text-primary transition-colors p-1 cursor-pointer"
               title="Cài đặt hệ thống"
             >
               <span className="material-symbols-outlined text-[18px]">settings</span>
@@ -137,25 +142,19 @@ export function AdminLayout() {
       {/* Main Wrapper with Left Margin 260px */}
       <div className="pl-[260px] flex-1 flex flex-col min-w-0 min-h-screen">
         {/* Top Sticky Header */}
-        <header className="fixed top-0 left-[260px] right-0 h-16 bg-surface/90 backdrop-blur-xl shadow-[0_1px_8px_rgba(0,0,0,0.04)] z-40 flex items-center justify-between px-space-xl border-b border-outline-variant/30">
+        <header className="fixed top-0 left-[260px] right-0 h-16 bg-white/90 backdrop-blur-xl shadow-xs z-40 flex items-center justify-between px-space-xl border-b border-slate-200">
           <div className="flex items-center gap-space-lg flex-1 max-w-xl">
             <div className="relative w-full max-w-md">
-              <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline text-[20px]">
+              <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-[20px]">
                 search
               </span>
               <input
                 value={searchGlobal}
                 onChange={(e) => setSearchGlobal(e.target.value)}
-                className="w-full h-10 pl-10 pr-space-md rounded-xl bg-surface-container-lowest text-on-surface font-body-sm text-body-sm placeholder:text-outline focus:outline-none focus:ring-2 focus:ring-primary shadow-sm border border-outline-variant/30"
+                className="w-full h-10 pl-10 pr-space-md rounded-lg bg-slate-50 text-slate-800 font-body-sm text-body-sm placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-primary shadow-xs border border-slate-200"
                 placeholder="Tìm kiếm hồ sơ, đơn vị vận hành, mã tour..."
                 type="text"
               />
-            </div>
-            <div className="hidden xl:flex items-center gap-2 px-space-sm py-1.5 rounded-full bg-surface-container border border-outline-variant/20">
-              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-              <span className="font-label-sm text-[11px] text-on-surface-variant font-medium">
-                Kết nối CSDL Hàng hải 100%
-              </span>
             </div>
           </div>
 
@@ -163,32 +162,32 @@ export function AdminLayout() {
             {/* Quick Urgent Count Pill */}
             <div
               onClick={() => navigate("/admin/vendor-approval")}
-              className="hidden md:flex items-center gap-2 px-space-md py-1.5 rounded-lg bg-secondary-container/20 text-on-secondary-container font-label-md text-label-md cursor-pointer hover:bg-secondary-container/30 transition-colors"
+              className="hidden md:flex items-center gap-2 px-space-md py-1.5 rounded-lg bg-amber-50 text-amber-800 border border-amber-200 font-label-md text-label-md cursor-pointer hover:bg-amber-100 transition-colors shadow-xs"
             >
-              <span className="material-symbols-outlined text-secondary text-[18px]">
+              <span className="material-symbols-outlined text-amber-600 text-[18px]">
                 notification_important
               </span>
-              <span className="font-bold">8 Cần duyệt</span>
+              <span className="font-bold text-xs">8 cần duyệt</span>
             </div>
 
             {/* Notification Bell Dropdown Toggle */}
             <div className="relative">
               <button
                 onClick={() => setIsNotiOpen(!isNotiOpen)}
-                className="relative w-10 h-10 rounded-full flex items-center justify-center text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors"
+                className="relative w-10 h-10 rounded-full flex items-center justify-center text-slate-600 hover:bg-slate-100 hover:text-slate-900 transition-colors cursor-pointer"
               >
                 <span className="material-symbols-outlined text-[22px]">
                   notifications
                 </span>
-                <span className="absolute top-2 right-2 w-2.5 h-2.5 bg-secondary rounded-full animate-ping"></span>
-                <span className="absolute top-2 right-2 w-2.5 h-2.5 bg-secondary rounded-full"></span>
+                <span className="absolute top-2 right-2 w-2.5 h-2.5 bg-amber-500 rounded-full animate-ping"></span>
+                <span className="absolute top-2 right-2 w-2.5 h-2.5 bg-amber-500 rounded-full"></span>
               </button>
 
               {isNotiOpen && (
-                <div className="absolute right-0 mt-2 w-80 bg-surface-container-lowest rounded-2xl shadow-xl border border-outline-variant/30 p-space-sm z-50 animate-in fade-in zoom-in-95">
-                  <div className="flex items-center justify-between p-2 border-b border-outline-variant/30">
-                    <span className="font-label-md font-bold text-on-surface">Thông báo khẩn Cảng vụ</span>
-                    <span className="px-1.5 py-0.5 rounded bg-primary/10 text-primary text-[10px] font-bold">3 mới</span>
+                <div className="absolute right-0 mt-2 w-80 bg-white rounded-xl shadow-xl border border-slate-200 p-space-sm z-50 animate-in fade-in zoom-in-95">
+                  <div className="flex items-center justify-between p-2 border-b border-slate-100">
+                    <span className="font-label-md font-bold text-slate-900 text-xs">Thông báo vận hành hệ thống</span>
+                    <span className="px-1.5 py-0.5 rounded bg-primary/10 text-primary text-[10px] font-bold">3</span>
                   </div>
                   <div className="flex flex-col gap-1 py-1 max-h-72 overflow-y-auto">
                     <div

@@ -1,13 +1,35 @@
-import { useState, useMemo } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useState, useMemo, useEffect } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { FEATURED_SERVICES, CATEGORIES, MOCK_IMAGES } from '../../../mockData';
 import { useWishlistStore } from '../../../store/useWishlistStore';
 
 export function Search() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const categoryParam = searchParams.get('category');
+
+  // Map category slug from URL parameter to CATEGORIES id
+  const initialCatId = useMemo(() => {
+    if (!categoryParam) return null;
+    const lower = categoryParam.toLowerCase();
+    if (lower === 'sup') return 'cat-1';
+    if (lower === 'thrill' || lower.includes('cano') || lower.includes('jet')) return 'cat-2';
+    if (lower === 'diving' || lower.includes('lặn') || lower.includes('san hô')) return 'cat-3';
+    if (lower === 'kayak') return 'cat-4';
+    if (lower === 'combo' || lower.includes('đảo') || lower.includes('tour')) return 'cat-5';
+    const matched = CATEGORIES.find(c => c.id === categoryParam || c.name.toLowerCase().includes(lower));
+    return matched ? matched.id : null;
+  }, [categoryParam]);
+
   const { toggleWishlist, isInWishlist } = useWishlistStore();
-  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(initialCatId);
   const [priceMax, setPriceMax] = useState<number>(1500000);
+
+  useEffect(() => {
+    if (initialCatId !== undefined) {
+      setSelectedCategory(initialCatId);
+    }
+  }, [initialCatId]);
   
   const displayServices = useMemo(() => {
     return FEATURED_SERVICES.filter(service => {
@@ -20,12 +42,12 @@ export function Search() {
   return (
     <main className="w-full pt-20 bg-surface flex-1"><div className="flex flex-col w-full">
       {/* Top Ambient Banner / Weather Condition Ticker */}
-      <section className="w-full bg-surface-container-low py-2.5 px-margin-mobile md:px-margin-desktop shadow-sm">
-        <div className="max-w-[1280px] mx-auto flex flex-wrap items-center justify-between gap-space-sm font-body-sm text-body-sm text-on-surface-variant">
+      <section className="w-full bg-surface-container-low py-2.5 px-4 sm:px-8 lg:px-12 shadow-sm">
+        <div className="max-w-[1440px] w-full mx-auto flex flex-wrap items-center justify-between gap-space-sm font-body-sm text-body-sm text-on-surface-variant">
           <div className="flex items-center gap-space-sm flex-wrap">
-            <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-secondary-fixed text-on-secondary-fixed font-label-sm text-label-sm font-bold">
-              <span className="w-2 h-2 rounded-full bg-secondary animate-pulse"></span>
-              ĐIỀU KIỆN BIỂN ĐÀ NẴNG (is_safe: Phù hợp)
+            <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 font-label-sm text-label-sm font-bold border border-emerald-200">
+              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+              Thời tiết biển
             </span>
             <span className="hidden sm:inline-block">Chiều cao sóng: <strong>0.5m</strong></span>
             <span className="hidden md:inline-block">•</span>
@@ -42,13 +64,14 @@ export function Search() {
         </div>
       </section>
       
-      {/* Horizontal Floating Search Capsule Container */}
-      <section className="w-full max-w-[1280px] mx-auto px-margin-mobile md:px-margin-desktop pt-space-xl pb-space-lg">
-        <div className="bg-surface-container-lowest rounded-xl p-3 md:p-4 shadow-[0_12px_32px_-4px_rgba(16,47,58,0.08),0_4px_12px_-2px_rgba(0,104,116,0.08)]">
-          <form className="grid grid-cols-1 md:grid-cols-12 gap-3 items-center">
-            {/* Region Dropdown */}
-            <div className="md:col-span-4 flex items-center gap-3 px-4 py-3 rounded-full bg-surface-container-low hover:bg-surface-container transition-colors">
-              <span className="material-symbols-outlined text-secondary text-[24px]">explore</span>
+      {/* Horizontal Sticky Search Capsule Container (Phương án 1) */}
+      <section className="sticky top-20 z-40 bg-surface/98 w-full border-b border-outline-variant/20 shadow-sm transition-all duration-300 transform-gpu will-change-transform">
+        <div className="max-w-[1440px] mx-auto px-4 sm:px-8 lg:px-12 py-2 sm:py-2.5">
+          <div className="bg-surface-container-lowest rounded-2xl p-2.5 md:p-3 shadow-[0_8px_24px_-4px_rgba(16,47,58,0.08)] border border-outline-variant/30">
+            <form className="grid grid-cols-1 md:grid-cols-12 gap-3 items-center">
+              {/* Region Dropdown */}
+              <div className="md:col-span-4 flex items-center gap-3 px-4 py-3 rounded-full bg-surface-container-low hover:bg-surface-container transition-colors">
+                <span className="material-symbols-outlined text-secondary text-[24px]">explore</span>
               <div className="flex flex-col min-w-0 flex-1">
                 <label className="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">Khu vực biển</label>
                 <select className="bg-transparent font-label-lg text-label-lg text-on-surface outline-none cursor-pointer truncate">
@@ -91,18 +114,20 @@ export function Search() {
             </div>
           </form>
         </div>
-      </section>
+      </div>
+    </section>
       
       {/* Results Control Bar */}
-      <section className="w-full max-w-[1280px] mx-auto px-margin-mobile md:px-margin-desktop py-space-sm">
-        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-space-md bg-surface-container-lowest p-space-md rounded-lg shadow-sm">
+      <section className="w-full max-w-[1440px] mx-auto px-4 sm:px-8 lg:px-12 py-1 sm:py-1.5">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-surface-container-lowest px-4 py-2.5 sm:px-5 sm:py-3 rounded-xl shadow-sm">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full bg-secondary-fixed flex items-center justify-center text-on-secondary-fixed">
-              <span className="material-symbols-outlined text-[20px]">waves</span>
+            <div className="w-9 h-9 rounded-full bg-secondary-fixed flex items-center justify-center text-on-secondary-fixed shrink-0">
+              <span className="material-symbols-outlined text-[18px]">waves</span>
             </div>
             <div>
-              <h1 className="font-headline-sm text-headline-sm text-on-surface tracking-tight">Tìm thấy {displayServices.length} trải nghiệm biển phù hợp</h1>
-              <p className="font-body-sm text-body-sm text-on-surface-variant">Lọc theo khung giờ bình minh chuẩn trắc địa và độ tĩnh sóng lý tưởng</p>
+              <h1 className="font-headline-sm text-headline-sm text-on-surface tracking-tight font-bold text-base sm:text-lg">
+                Tìm thấy {displayServices.length} kết quả phù hợp
+              </h1>
             </div>
           </div>
           {/* Controls: List/Map Switch & Sorting Dropdown */}
@@ -120,11 +145,11 @@ export function Search() {
       </section>
       
       {/* Main Content Layout (Sidebar Filter + Experience Grid) */}
-      <section className="w-full max-w-[1280px] mx-auto px-margin-mobile md:px-margin-desktop py-space-md mb-space-3xl">
+      <section className="w-full max-w-[1440px] mx-auto px-4 sm:px-8 lg:px-12 pt-2 pb-14">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-space-xl items-start">
           
           {/* Left Sidebar: Filter Column */}
-          <aside className="lg:col-span-3 flex flex-col gap-space-lg bg-surface-container-lowest p-space-lg rounded-xl shadow-[0_4px_20px_-2px_rgba(16,47,58,0.05)] sticky top-24">
+          <aside className="lg:col-span-3 flex flex-col gap-space-lg bg-surface-container-lowest p-space-lg rounded-xl shadow-[0_4px_20px_-2px_rgba(16,47,58,0.05)] sticky top-[172px]">
             <div className="flex items-center justify-between pb-space-sm">
               <div className="flex items-center gap-2">
                 <span className="material-symbols-outlined text-secondary">tune</span>
