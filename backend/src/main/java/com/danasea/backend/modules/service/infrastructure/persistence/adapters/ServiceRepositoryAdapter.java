@@ -1,17 +1,17 @@
 package com.danasea.backend.modules.service.infrastructure.persistence.adapters;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
-
+import com.danasea.backend.modules.service.application.dtos.SearchServicesCriteria;
+import com.danasea.backend.modules.service.application.services.ServiceDiscoveryAvailability;
 import com.danasea.backend.modules.service.domain.models.Service;
 import com.danasea.backend.modules.service.domain.models.ServiceStatus;
 import com.danasea.backend.modules.service.domain.ports.ServiceRepositoryPort;
@@ -19,7 +19,6 @@ import com.danasea.backend.modules.service.infrastructure.persistence.entities.S
 import com.danasea.backend.modules.service.infrastructure.persistence.mappers.ServiceMapper;
 import com.danasea.backend.modules.service.infrastructure.persistence.repositories.JpaServiceRepository;
 import com.danasea.backend.modules.service.infrastructure.persistence.specifications.ServiceSpecifications;
-
 import lombok.RequiredArgsConstructor;
 
 @Component
@@ -28,6 +27,7 @@ public class ServiceRepositoryAdapter implements ServiceRepositoryPort {
 
     private final JpaServiceRepository jpaServiceRepository;
     private final ServiceMapper serviceMapper;
+    private final ServiceDiscoveryAvailability availability;
 
     @Override
     @Transactional
@@ -107,15 +107,18 @@ public class ServiceRepositoryAdapter implements ServiceRepositoryPort {
             int page,
             int size
     ) {
-        Specification<ServiceJpaEntity> spec = ServiceSpecifications.filter(
-                categoryId, keyword, minPrice, maxPrice, lat, lng, radiusKm
-        );
-        int pageIndex = Math.max(0, page);
-        int pageSize = (size <= 0) ? 20 : size;
-        Pageable pageable = PageRequest.of(pageIndex, pageSize, Sort.by(Sort.Direction.DESC, "createdAt"));
-        return jpaServiceRepository.findAll(spec, pageable)
-                .map(serviceMapper::toDomain)
-                .getContent();
+        SearchServicesCriteria criteria = SearchServicesCriteria.builder()
+                .categoryId(categoryId)
+                .keyword(keyword)
+                .minPrice(minPrice)
+                .maxPrice(maxPrice)
+                .lat(lat)
+                .lng(lng)
+                .radiusKm(radiusKm)
+                .page(page)
+                .size(size)
+                .build();
+        return searchPublishedServices(criteria);
     }
 
     @Override
@@ -129,9 +132,97 @@ public class ServiceRepositoryAdapter implements ServiceRepositoryPort {
             BigDecimal lng,
             Double radiusKm
     ) {
-        Specification<ServiceJpaEntity> spec = ServiceSpecifications.filter(
-                categoryId, keyword, minPrice, maxPrice, lat, lng, radiusKm
-        );
-        return jpaServiceRepository.count(spec);
+        SearchServicesCriteria criteria = SearchServicesCriteria.builder()
+                .categoryId(categoryId)
+                .keyword(keyword)
+                .minPrice(minPrice)
+                .maxPrice(maxPrice)
+                .lat(lat)
+                .lng(lng)
+                .radiusKm(radiusKm)
+                .build();
+        return countPublishedServices(criteria);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<Service> searchPublishedServices(SearchServicesCriteria criteria) {
+        SearchServicesCriteria filter = criteria == null ? SearchServicesCriteria.builder().build() : criteria;
+        int page = Math.max(0, filter.getPage());
+        int size = filter.getSize() <= 0 ? 20 : filter.getSize();
+        Specification<ServiceJpaEntity> spec = specification(filter);
+        Sort sort = resolveSort(filter.getSortBy());
+        if (sort.isSorted()) {
+            sort = sort.and(Sort.by("id"));
+        }
+        if (!hasSlotFilter(filter)) {
+            return jpaServiceRepository.findAll(spec, PageRequest.of(page, size, sort))
+                    .map(serviceMapper::toDomain).getContent();
+        }
+        List<Service> result = new ArrayList<>();
+        long skip = (long) page * size;
+        int batch = 0;
+        boolean hasNext;
+        do {
+            var candidates = jpaServiceRepository.findAll(spec, PageRequest.of(batch++, 200, sort));
+            hasNext = candidates.hasNext();
+            for (var candidate : candidates) {
+                if (!availability.matches(candidate.getId(), filter)) {
+                    continue;
+                }
+                if (skip > 0) {
+                    skip--;
+                } else if (result.size() < size) {
+                    result.add(serviceMapper.toDomain(candidate));
+                }
+            }
+        } while (hasNext && result.size() < size);
+        return result;
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public long countPublishedServices(SearchServicesCriteria criteria) {
+        SearchServicesCriteria filter = criteria == null ? SearchServicesCriteria.builder().build() : criteria;
+        Specification<ServiceJpaEntity> spec = ServiceSpecifications.filter(filter);
+        if (!hasSlotFilter(filter)) {
+            return jpaServiceRepository.count(spec);
+        }
+        long count = 0;
+        int batch = 0;
+        boolean hasNext;
+        do {
+            var candidates = jpaServiceRepository.findAll(spec, PageRequest.of(batch++, 200, Sort.by("id")));
+            hasNext = candidates.hasNext();
+            count += candidates.stream().filter(candidate -> availability.matches(candidate.getId(), filter)).count();
+        } while (hasNext);
+        return count;
+    }
+
+    private boolean hasSlotFilter(SearchServicesCriteria criteria) {
+        return criteria.getDate() != null || criteria.getTimeSlot() != null || criteria.getGuests() != null;
+    }
+
+    private Specification<ServiceJpaEntity> specification(SearchServicesCriteria criteria) {
+        Specification<ServiceJpaEntity> spec = ServiceSpecifications.filter(criteria);
+        String sort = criteria.getSortBy();
+        return sort != null && (sort.equalsIgnoreCase("bookings") || sort.equalsIgnoreCase("bookings_desc"))
+                ? spec.and(ServiceSpecifications.orderByBookings()) : spec;
+    }
+
+    private Sort resolveSort(String sortBy) {
+        if (sortBy == null || sortBy.isBlank()) {
+            return Sort.by(Sort.Direction.DESC, "createdAt");
+        }
+        String normalized = sortBy.trim().toLowerCase();
+        return switch (normalized) {
+            case "price_asc" -> Sort.by(Sort.Direction.ASC, "price");
+            case "price_desc" -> Sort.by(Sort.Direction.DESC, "price");
+            case "rating_desc", "rating" -> Sort.by(Sort.Direction.DESC, "avgRating");
+            case "views_desc", "views", "popularity" -> Sort.by(Sort.Direction.DESC, "viewCount");
+            case "bookings_desc", "bookings" -> Sort.unsorted();
+            case "createdat_asc", "created_asc" -> Sort.by(Sort.Direction.ASC, "createdAt");
+            default -> Sort.by(Sort.Direction.DESC, "createdAt");
+        };
     }
 }

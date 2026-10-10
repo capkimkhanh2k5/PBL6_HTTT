@@ -1,0 +1,53 @@
+sequenceDiagram
+    autonumber
+    actor Client as Khách hàng / Public Client
+    participant Ctrl as CatalogController<br/>(/api/services/{id})
+    participant UC as GetPublicServiceDetailUseCase
+    participant SvcRepo as JpaServiceRepository
+    participant SlotRepo as JpaServiceSlotRepository
+    participant VendorRepo as JpaVendorRepository
+    participant DB as PostgreSQL Database
+
+    Note over Client, DB: Luồng Chi Tiết Dịch Vụ Công Khai & Tách Dữ Liệu An Toàn (R2)
+
+    Client->>Ctrl: GET /api/services/{id} (Không cần JWT / Public access)
+    activate Ctrl
+
+    Ctrl->>UC: execute(serviceId)
+    activate UC
+
+    UC->>SvcRepo: findById(serviceId)
+    activate SvcRepo
+    SvcRepo->>DB: SELECT * FROM services WHERE id = ? AND is_deleted = false
+    DB-->>SvcRepo: ServiceEntity (hoặc Optional.empty)
+    deactivate SvcRepo
+
+    alt Không tìm thấy dịch vụ hoặc service chưa PUBLISHED
+        UC-->>Ctrl: ServiceNotFoundException
+        Ctrl-->>Client: 404 Not Found
+    end
+
+    Note over UC: BẢO VỆ DỮ LIỆU NHẠY CẢM (Zero Leakage):<br/>Chỉ lấy thông tin công khai của Vendor (Tên, Badge, Avatar).<br/>TUYỆT ĐỐI KHÔNG nạp tài khoản ngân hàng, mã số thuế, CCCD.
+
+    UC->>VendorRepo: findById(service.vendorId)
+    activate VendorRepo
+    VendorRepo->>DB: SELECT id, business_name, badge_tier, avatar_url FROM vendors WHERE id = ?
+    DB-->>VendorRepo: VendorEntity
+    deactivate VendorRepo
+
+    UC->>SlotRepo: findUpcomingSlotsByServiceId(serviceId, now)
+    activate SlotRepo
+    SlotRepo->>DB: SELECT * FROM service_slots WHERE service_id = ? AND date >= CURRENT_DATE
+    DB-->>SlotRepo: List<ServiceSlotEntity>
+    deactivate SlotRepo
+
+    Note over UC: Tính toán tồn kho cấu trúc (Structured Slots):<br/>• availableCapacity = Math.max(0, capacity - bookedCount)<br/>• Map sang StructuredSlotResponse (slotId, startTime, endTime, capacity, availableCapacity, price)
+
+    UC->>UC: Lắp ráp ServiceDetailResult:<br/>• Thông tin vận hành: duration, capacity, conditions<br/>• Chính sách: cancellationPolicy, refundPolicy, safetyRules<br/>• vendor: {vendorId, businessName, badgeTier}<br/>• structuredSlots & legacy availableSlots (tương thích ngược)
+
+    UC-->>Ctrl: ServiceDetailResult
+    deactivate UC
+
+    Ctrl->>Ctrl: Map sang ServiceDetailResponse
+    Ctrl-->>Client: 200 OK (Chi tiết dịch vụ đầy đủ, slots có sẵn theo thời gian thực)
+    deactivate Ctrl

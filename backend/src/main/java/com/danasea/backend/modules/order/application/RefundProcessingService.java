@@ -5,24 +5,24 @@ import java.math.RoundingMode;
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.UUID;
-
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionTemplate;
-
 import com.danasea.backend.modules.booking.domain.models.BookingStatus;
 import com.danasea.backend.modules.booking.infrastructure.persistence.repositories.JpaBookingRepository;
+import com.danasea.backend.modules.order.domain.events.RefundCompletedEvent;
 import com.danasea.backend.modules.order.domain.exceptions.InvalidWebhookException;
 import com.danasea.backend.modules.order.domain.models.MasterOrderStatus;
 import com.danasea.backend.modules.order.domain.models.PaymentOrderStatus;
 import com.danasea.backend.modules.order.domain.models.PaymentProvider;
 import com.danasea.backend.modules.order.domain.models.PaymentStatus;
-import com.danasea.backend.modules.order.domain.models.RefundStatus;
 import com.danasea.backend.modules.order.domain.models.RefundReason;
+import com.danasea.backend.modules.order.domain.models.RefundStatus;
 import com.danasea.backend.modules.order.domain.models.SubOrderStatus;
 import com.danasea.backend.modules.order.domain.ports.GatewayRefundRequest;
 import com.danasea.backend.modules.order.domain.ports.GatewayRefundStatus;
@@ -43,6 +43,13 @@ import com.danasea.backend.modules.service.infrastructure.persistence.repositori
 public class RefundProcessingService {
     public static final int MAX_RETRIES = 3;
     private static final String AWAITING = "GATEWAY_TIMEOUT_AWAITING_VERIFICATION";
+
+    private ApplicationEventPublisher eventPublisher;
+
+    @Autowired
+    public void setEventPublisher(ApplicationEventPublisher eventPublisher) {
+        this.eventPublisher = eventPublisher;
+    }
 
     private final JpaRefundRepository refundRepository;
     private final JpaSubOrderRepository subOrderRepository;
@@ -256,6 +263,10 @@ public class RefundProcessingService {
             refund.setNextAttemptAt(null);
             refundRepository.saveAndFlush(refund);
             applyRefundSuccess(refund, context.subOrder(), context.order(), context.payment());
+            if (eventPublisher != null) {
+                eventPublisher.publishEvent(new RefundCompletedEvent(refund.getId(), context.subOrder().getId(),
+                        context.order().getId(), context.order().getCustomerId(), refund.getAmount(), refund.getStatus()));
+            }
             return true;
         }
         if (result.status() == GatewayRefundStatus.FAILED) {

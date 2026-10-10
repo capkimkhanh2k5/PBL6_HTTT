@@ -1,0 +1,64 @@
+sequenceDiagram
+    autonumber
+    participant Gateway as Cổng Thanh Toán (VNPay/MoMo/Stripe)
+    participant Svc as OrderPaymentService / RefundProcessingService
+    participant Bus as Spring ApplicationEventPublisher
+    participant PayListener as PaymentNotificationEventListener
+    participant RefListener as RefundNotificationEventListener
+    participant NotifUC as SendNotificationUseCase
+    participant Repo as JpaNotificationRepository
+    participant DB as PostgreSQL Database
+
+    Note over Gateway, DB: Kiến Trúc Hướng Sự Kiện: Thông Báo Thanh Toán & Hoàn Tiền (R5)
+
+    rect rgb(240, 255, 240)
+        Note over Gateway, DB: Kịch bản 1: Thanh toán thành công (PaymentSuccessEvent)
+        Gateway->>Svc: Webhook / Callback xác nhận thanh toán thành công
+        activate Svc
+        Svc->>Svc: Cập nhật PaymentStatus = SUCCESS, MasterOrder = PAID
+        Svc->>Svc: ConfirmBookingUseCase.execute(...)
+        Svc->>Bus: publishEvent(new PaymentSuccessEvent(orderId, customerId, bookingId))
+        deactivate Svc
+
+        Bus->>PayListener: @EventListener handlePaymentSuccess(event)
+        activate PayListener
+        PayListener->>PayListener: Kiểm tra Order hợp lệ & trạng thái PAID
+
+        Note over PayListener, NotifUC: 1. Tạo thông báo In-App cho Khách hàng (Deduplicated Idempotency Key)
+        PayListener->>NotifUC: executeOnce(NotificationCommand, key: "payment:{orderId}:customer:{customerId}")
+        activate NotifUC
+        NotifUC->>Repo: save(NotificationJpaEntity)
+        Repo->>DB: INSERT INTO notifications (...) ON CONFLICT (idempotency_key) DO NOTHING
+        deactivate NotifUC
+
+        Note over PayListener, NotifUC: 2. Quét danh sách SubOrders để thông báo cho từng Vendor
+        loop Với mỗi SubOrder của MasterOrder
+            PayListener->>PayListener: Lấy vendor.userId từ vendorId (tránh gửi trùng)
+            PayListener->>NotifUC: executeOnce(NotificationCommand, key: "payment:{orderId}:vendor:{vendorId}")
+            activate NotifUC
+            NotifUC->>Repo: save(NotificationJpaEntity)
+            Repo->>DB: INSERT INTO notifications (...)
+            deactivate NotifUC
+        end
+        deactivate PayListener
+    end
+
+    rect rgb(255, 245, 245)
+        Note over Gateway, DB: Kịch bản 2: Hoàn tiền thành công (RefundCompletedEvent)
+        Gateway->>Svc: Webhook / Polling xác nhận Refund PROCESSED
+        activate Svc
+        Svc->>Svc: Cập nhật Refund.status = PROCESSED
+        Svc->>Bus: publishEvent(new RefundCompletedEvent(refundId, subOrderId, orderId, customerId, amount, PROCESSED))
+        deactivate Svc
+
+        Bus->>RefListener: @EventListener handleRefundCompleted(event)
+        activate RefListener
+
+        Note over RefListener, NotifUC: Tạo thông báo In-App bồi hoàn cho Khách hàng
+        RefListener->>NotifUC: executeOnce(NotificationCommand, key: "refund:{refundId}:customer:{customerId}")
+        activate NotifUC
+        NotifUC->>Repo: save(NotificationJpaEntity)
+        Repo->>DB: INSERT INTO notifications (...)
+        deactivate NotifUC
+        deactivate RefListener
+    end

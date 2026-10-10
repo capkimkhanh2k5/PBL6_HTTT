@@ -1,7 +1,6 @@
 package com.danasea.backend.configs;
 
 import java.util.Arrays;
-
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -14,7 +13,6 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
-
 import com.danasea.backend.configs.properties.CorsProperties;
 import com.danasea.backend.security.authentication.infrastructure.security.CustomAuthenticationEntryPoint;
 import com.danasea.backend.security.authentication.infrastructure.security.JwtAuthenticationFilter;
@@ -82,6 +80,7 @@ public class SecurityConfig {
 						.requestMatchers(HttpMethod.GET,
 								"/api/services", "/api/services/**",
 								"/api/v1/catalog", "/api/v1/catalog/**").permitAll()
+						.requestMatchers(HttpMethod.GET, "/api/vendors", "/api/vendors/**").permitAll()
 						.requestMatchers(HttpMethod.GET, "/api/recently-viewed").permitAll()
 						.requestMatchers("/api/admin/**").hasRole("ADMIN")
 						.anyRequest()

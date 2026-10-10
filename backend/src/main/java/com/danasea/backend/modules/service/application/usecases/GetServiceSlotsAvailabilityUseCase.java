@@ -4,39 +4,49 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
-
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
-
 import com.danasea.backend.modules.booking.domain.models.Booking;
+import com.danasea.backend.modules.service.application.services.SlotAvailabilityCalculator;
 import com.danasea.backend.modules.service.domain.exceptions.ServiceNotFoundException;
-import com.danasea.backend.modules.service.domain.models.InventoryType;
 import com.danasea.backend.modules.service.domain.models.OptionStatus;
 import com.danasea.backend.modules.service.domain.models.Service;
 import com.danasea.backend.modules.service.domain.models.ServiceOption;
 import com.danasea.backend.modules.service.domain.models.ServiceSlot;
-import com.danasea.backend.modules.service.domain.models.ServiceSlotUnit;
 import com.danasea.backend.modules.service.domain.models.SlotStatus;
 import com.danasea.backend.modules.service.domain.ports.ServiceOptionRepositoryPort;
 import com.danasea.backend.modules.service.domain.ports.ServiceRepositoryPort;
 import com.danasea.backend.modules.service.domain.ports.ServiceSlotRepositoryPort;
 import com.danasea.backend.modules.service.presentation.dtos.PublicServiceSlotAvailabilityResponse;
 
-import lombok.RequiredArgsConstructor;
-
 @Component
-@RequiredArgsConstructor
 public class GetServiceSlotsAvailabilityUseCase {
 
     private final ServiceRepositoryPort serviceRepository;
     private final ServiceOptionRepositoryPort serviceOptionRepository;
     private final ServiceSlotRepositoryPort serviceSlotRepository;
-    private final StringRedisTemplate redisTemplate;
+    private final SlotAvailabilityCalculator availability;
+
+    @Autowired
+    public GetServiceSlotsAvailabilityUseCase(ServiceRepositoryPort serviceRepository,
+            ServiceOptionRepositoryPort serviceOptionRepository, ServiceSlotRepositoryPort serviceSlotRepository,
+            SlotAvailabilityCalculator availability) {
+        this.serviceRepository = serviceRepository;
+        this.serviceOptionRepository = serviceOptionRepository;
+        this.serviceSlotRepository = serviceSlotRepository;
+        this.availability = availability;
+    }
+
+    public GetServiceSlotsAvailabilityUseCase(ServiceRepositoryPort serviceRepository,
+            ServiceOptionRepositoryPort serviceOptionRepository, ServiceSlotRepositoryPort serviceSlotRepository,
+            StringRedisTemplate redisTemplate) {
+        this(serviceRepository, serviceOptionRepository, serviceSlotRepository,
+                new SlotAvailabilityCalculator(serviceSlotRepository, redisTemplate));
+    }
 
     @Transactional(readOnly = true)
     public List<PublicServiceSlotAvailabilityResponse> execute(
@@ -103,13 +113,10 @@ public class GetServiceSlotsAvailabilityUseCase {
                 continue;
             }
 
-            int availablePaxOrPackages = calculateAvailability(slot, option);
+            var snapshot = availability.evaluate(slot, option);
+            int availablePaxOrPackages = snapshot.available();
             int reqQty = (quantity != null && quantity > 0) ? quantity : 1;
-            boolean bookable = availablePaxOrPackages >= reqQty;
-            if (bookable && option.isShared() && !allowSplit
-                    && InventoryType.SHARED_CAPACITY_UNITS.equals(slot.getInventoryType())) {
-                bookable = largestAvailableSharedUnit(slot) >= reqQty;
-            }
+            boolean bookable = snapshot.canBook(reqQty, option.isShared(), allowSplit, slot.getInventoryType());
 
             responses.add(PublicServiceSlotAvailabilityResponse.builder()
                     .slotId(slot.getId())
@@ -131,149 +138,4 @@ public class GetServiceSlotsAvailabilityUseCase {
         return responses;
     }
 
-    private int calculateAvailability(ServiceSlot slot, ServiceOption option) {
-        String key = "inventory:slot:" + slot.getId() + ":holds";
-        Map<Object, Object> rawHolds = redisTemplate.opsForHash().entries(key);
-        long now = System.currentTimeMillis();
-
-        if (InventoryType.SHARED_CAPACITY_UNITS.equals(slot.getInventoryType())) {
-            List<ServiceSlotUnit> units = slot.getUnits();
-            if (units == null || units.isEmpty()) {
-                units = serviceSlotRepository.findUnitsBySlotId(slot.getId());
-            }
-
-            Map<Integer, Integer> unitHeldSeats = new HashMap<>();
-            Map<Integer, Boolean> unitPrivateHeld = new HashMap<>();
-
-            if (rawHolds != null) {
-                for (Object valObj : rawHolds.values()) {
-                    String val = String.valueOf(valObj);
-                    parseUnitHoldEntry(val, now, unitHeldSeats, unitPrivateHeld);
-                }
-            }
-
-            if (option.isPrivate()) {
-                int requiredCap = (option.getMaxPaxPerPackage() != null && option.getMaxPaxPerPackage() > 0)
-                        ? option.getMaxPaxPerPackage()
-                        : 1;
-
-                int emptyCount = 0;
-                for (ServiceSlotUnit u : units) {
-                    int booked = (u.getBookedCount() != null) ? u.getBookedCount() : 0;
-                    int held = unitHeldSeats.getOrDefault(u.getUnitNumber(), 0);
-                    boolean priv = unitPrivateHeld.getOrDefault(u.getUnitNumber(), false);
-
-                    if (booked == 0 && held == 0 && !priv && u.getCapacity() >= requiredCap) {
-                        emptyCount++;
-                    }
-                }
-                return emptyCount;
-            } else {
-                // SHARED
-                int totalAvailableSeats = 0;
-                for (ServiceSlotUnit u : units) {
-                    boolean priv = unitPrivateHeld.getOrDefault(u.getUnitNumber(), false);
-                    if (priv) {
-                        continue; // Locked for private tour
-                    }
-                    int booked = (u.getBookedCount() != null) ? u.getBookedCount() : 0;
-                    int held = unitHeldSeats.getOrDefault(u.getUnitNumber(), 0);
-                    int avail = Math.max(0, u.getCapacity() - booked - held);
-                    totalAvailableSeats += avail;
-                }
-                return totalAvailableSeats;
-            }
-        } else {
-            // PERSON_LIMIT
-            int totalActiveHoldSeats = 0;
-            if (rawHolds != null) {
-                for (Object valObj : rawHolds.values()) {
-                    String val = String.valueOf(valObj);
-                    totalActiveHoldSeats += parsePersonLimitHoldSeats(val, now);
-                }
-            }
-
-            int cap = slot.getCapacity() != null ? slot.getCapacity() : 0;
-            int booked = slot.getBookedCount() != null ? slot.getBookedCount() : 0;
-            int avail = Math.max(0, cap - booked - totalActiveHoldSeats);
-
-            if (option.isPrivate()) {
-                return 0;
-            }
-            return avail;
-        }
-    }
-
-    private int largestAvailableSharedUnit(ServiceSlot slot) {
-        Map<Integer, Integer> held = new HashMap<>();
-        Map<Integer, Boolean> privateHeld = new HashMap<>();
-        redisTemplate.opsForHash().entries("inventory:slot:" + slot.getId() + ":holds").values()
-                .forEach(value -> parseUnitHoldEntry(String.valueOf(value), System.currentTimeMillis(), held, privateHeld));
-        List<ServiceSlotUnit> units = slot.getUnits();
-        if (units == null || units.isEmpty()) {
-            units = serviceSlotRepository.findUnitsBySlotId(slot.getId());
-        }
-        return units.stream().filter(unit -> !privateHeld.getOrDefault(unit.getUnitNumber(), false))
-                .mapToInt(unit -> Math.max(0, unit.getCapacity() - (unit.getBookedCount() != null ? unit.getBookedCount() : 0)
-                        - held.getOrDefault(unit.getUnitNumber(), 0)))
-                .max().orElse(0);
-    }
-
-    private void parseUnitHoldEntry(
-            String val,
-            long now,
-            Map<Integer, Integer> unitHeldSeats,
-            Map<Integer, Boolean> unitPrivateHeld
-    ) {
-        try {
-            int barPos = val.indexOf('|');
-            if (barPos < 0) return;
-            long exp = Long.parseLong(val.substring(0, barPos));
-            if (exp <= now) return;
-
-            String details = val.substring(barPos + 1);
-            if (!details.startsWith("UNITS:")) return;
-
-            String unitsStr = details.substring("UNITS:".length());
-            String[] allocations = unitsStr.split(";");
-            for (String alloc : allocations) {
-                if (alloc.isBlank()) continue;
-                String[] parts = alloc.split(":");
-                if (parts.length >= 3) {
-                    int unitNum = Integer.parseInt(parts[0]);
-                    int seats = Integer.parseInt(parts[1]);
-                    int priv = Integer.parseInt(parts[2]);
-
-                    unitHeldSeats.merge(unitNum, seats, Integer::sum);
-                    if (priv == 1) {
-                        unitPrivateHeld.put(unitNum, true);
-                    }
-                }
-            }
-        } catch (Exception ignored) {
-        }
-    }
-
-    private int parsePersonLimitHoldSeats(String val, long now) {
-        try {
-            int barPos = val.indexOf('|');
-            if (barPos > 0) {
-                long exp = Long.parseLong(val.substring(0, barPos));
-                if (exp <= now) return 0;
-                String details = val.substring(barPos + 1);
-                if (details.startsWith("PERSON_LIMIT:")) {
-                    return Integer.parseInt(details.substring("PERSON_LIMIT:".length()));
-                }
-            } else {
-                int colonPos = val.indexOf(':');
-                if (colonPos > 0) {
-                    int qty = Integer.parseInt(val.substring(0, colonPos));
-                    long exp = Long.parseLong(val.substring(colonPos + 1));
-                    if (exp > now) return qty;
-                }
-            }
-        } catch (Exception ignored) {
-        }
-        return 0;
-    }
 }

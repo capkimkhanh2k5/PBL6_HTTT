@@ -3,14 +3,12 @@ package com.danasea.backend.modules.order.application.usecases;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
-
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.util.List;
 import java.util.UUID;
-
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -18,8 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
-import org.springframework.transaction.annotation.Transactional;
-
+import com.danasea.backend.e2e.BaseE2ETest;
 import com.danasea.backend.modules.booking.domain.models.BookingStatus;
 import com.danasea.backend.modules.booking.infrastructure.persistence.entities.BookingJpaEntity;
 import com.danasea.backend.modules.booking.infrastructure.persistence.repositories.JpaBookingRepository;
@@ -28,8 +25,8 @@ import com.danasea.backend.modules.order.application.RefundProcessingService;
 import com.danasea.backend.modules.order.application.dtos.OrderRefundResult;
 import com.danasea.backend.modules.order.application.dtos.RequestRefundCommand;
 import com.danasea.backend.modules.order.domain.models.MasterOrderStatus;
+import com.danasea.backend.modules.order.domain.models.PaymentOrderStatus;
 import com.danasea.backend.modules.order.domain.models.PaymentProvider;
-import com.danasea.backend.modules.order.domain.models.PaymentStatus;
 import com.danasea.backend.modules.order.domain.models.RefundReason;
 import com.danasea.backend.modules.order.domain.models.RefundStatus;
 import com.danasea.backend.modules.order.domain.models.SubOrderStatus;
@@ -38,7 +35,6 @@ import com.danasea.backend.modules.order.domain.ports.GatewayRefundStatus;
 import com.danasea.backend.modules.order.domain.ports.PaymentGatewayPort;
 import com.danasea.backend.modules.order.domain.ports.RefundResult;
 import com.danasea.backend.modules.order.infrastructure.persistence.entities.MasterOrderJpaEntity;
-import com.danasea.backend.modules.order.infrastructure.persistence.entities.PaymentJpaEntity;
 import com.danasea.backend.modules.order.infrastructure.persistence.entities.RefundJpaEntity;
 import com.danasea.backend.modules.order.infrastructure.persistence.entities.SubOrderJpaEntity;
 import com.danasea.backend.modules.order.infrastructure.persistence.repositories.JpaMasterOrderRepository;
@@ -49,10 +45,10 @@ import com.danasea.backend.modules.order.presentation.dtos.RefundDetailResponse;
 import com.danasea.backend.modules.service.infrastructure.persistence.entities.ServiceSlotJpaEntity;
 import com.danasea.backend.modules.service.infrastructure.persistence.repositories.JpaServiceSlotRepository;
 
-@SpringBootTest
+@SpringBootTest(properties = {"spring.flyway.enabled=true", "spring.jpa.hibernate.ddl-auto=validate"})
 @ActiveProfiles("test")
 @DisplayName("Refund Persistence and End-to-End Processing Integration Test")
-class RefundPersistenceIntegrationTest {
+class RefundPersistenceIntegrationTest extends BaseE2ETest {
 
     @MockitoBean
     private io.github.bucket4j.redis.lettuce.cas.LettuceBasedProxyManager<byte[]> proxyManager;
@@ -99,61 +95,50 @@ class RefundPersistenceIntegrationTest {
                 .thenReturn(new RefundResult(true, "PAYPAL-REF-REAL-01", new BigDecimal("19.31"), "Success",
                         GatewayRefundStatus.COMPLETED, "USD"));
 
-        customerId = UUID.randomUUID();
-        bookingId = UUID.randomUUID();
-
-        // 1. Setup ServiceSlot (cách hơn 48h để được hoàn 100%)
-        ServiceSlotJpaEntity slot = new ServiceSlotJpaEntity();
-        slot.setServiceId(UUID.randomUUID());
+        customerId = customerUser.getId();
+        ServiceSlotJpaEntity slot = slotA1TomorrowMorning;
         slot.setDate(LocalDate.now().plusDays(5));
-        slot.setStartTime(LocalTime.of(10, 0));
-        slot.setEndTime(LocalTime.of(12, 0));
-        slot.setCapacity(20);
         slot.setBookedCount(5);
-        slot = serviceSlotRepository.save(slot);
+        serviceSlotRepository.saveAndFlush(slot);
         slotId = slot.getId();
 
-        // 2. Setup Booking
         BookingJpaEntity booking = new BookingJpaEntity();
         booking.setCustomerId(customerId);
         booking.setStatus(BookingStatus.CONFIRMED);
         booking.setTotalAmount(BigDecimal.valueOf(500000));
-        booking = bookingRepository.save(booking);
-        bookingId = booking.getId();
+        bookingId = bookingRepository.saveAndFlush(booking).getId();
 
-        // 3. Setup MasterOrder & SubOrder
-        MasterOrderJpaEntity masterOrder = new MasterOrderJpaEntity();
-        masterOrder.setCustomerId(customerId);
-        masterOrder.setBookingId(bookingId);
-        masterOrder.setStatus(MasterOrderStatus.PAID);
-        masterOrder.setTotalAmount(BigDecimal.valueOf(500000));
-        masterOrder.setDiscountAmount(BigDecimal.ZERO);
-        masterOrder = masterOrderRepository.save(masterOrder);
-        masterOrderId = masterOrder.getId();
+        paidOrder.setBookingId(bookingId);
+        paidOrder.setPaymentStatus(PaymentOrderStatus.PAID);
+        paidOrder.setTotalAmount(BigDecimal.valueOf(500000));
+        paidOrder.setDiscountAmount(BigDecimal.ZERO);
+        masterOrderId = masterOrderRepository.saveAndFlush(paidOrder).getId();
+        paidSubOrder.setUnitPrice(BigDecimal.valueOf(250000));
+        paidSubOrder.setSubtotalAmount(BigDecimal.valueOf(500000));
+        paidSubOrder.setDiscountAmount(BigDecimal.ZERO);
+        paidSubOrder.setFinalAmount(BigDecimal.valueOf(500000));
+        subOrderId = subOrderRepository.saveAndFlush(paidSubOrder).getId();
 
-        SubOrderJpaEntity subOrder = new SubOrderJpaEntity();
-        subOrder.setMasterOrderId(masterOrderId);
-        subOrder.setVendorId(UUID.randomUUID());
-        subOrder.setServiceId(slot.getServiceId());
-        subOrder.setSlotId(slotId);
-        subOrder.setQuantity(2);
-        subOrder.setUnitPrice(BigDecimal.valueOf(250000));
-        subOrder.setSubtotalAmount(BigDecimal.valueOf(500000));
-        subOrder.setStatus(SubOrderStatus.CONFIRMED);
-        subOrder = subOrderRepository.save(subOrder);
-        subOrderId = subOrder.getId();
+        paidPayment.setProvider(PaymentProvider.PAYPAL);
+        paidPayment.setProviderTransactionId("PAYPAL-CAPTURE-XYZ999");
+        paidPayment.setProviderAmount(new BigDecimal("19.31"));
+        paidPayment.setProviderCurrency("USD");
+        paidPayment.setAmount(BigDecimal.valueOf(500000));
+        paymentRepository.saveAndFlush(paidPayment);
+    }
 
-        // 4. Setup Original Payment
-        PaymentJpaEntity payment = new PaymentJpaEntity();
-        payment.setMasterOrderId(masterOrderId);
-        payment.setProvider(PaymentProvider.PAYPAL);
-        payment.setProviderTransactionId("PAYPAL-CAPTURE-XYZ999");
-        payment.setProviderAmount(new BigDecimal("19.31"));
-        payment.setProviderCurrency("USD");
-        payment.setAmount(BigDecimal.valueOf(500000));
-        payment.setStatus(PaymentStatus.SUCCESS);
-        payment.setIdempotencyKey("payment-init-key-01");
-        paymentRepository.save(payment);
+    @AfterEach
+    void removeRefundFixture() {
+        refundRepository.deleteAll();
+        if (masterOrderId != null) {
+            masterOrderRepository.findById(masterOrderId).ifPresent(order -> {
+                order.setBookingId(null);
+                masterOrderRepository.saveAndFlush(order);
+            });
+        }
+        if (bookingId != null) {
+            bookingRepository.deleteById(bookingId);
+        }
     }
 
     @Test
@@ -178,6 +163,9 @@ class RefundPersistenceIntegrationTest {
         assertThat(result.status()).isEqualTo(RefundStatus.PENDING);
         org.mockito.Mockito.verify(paymentGatewayPort, org.mockito.Mockito.never()).requestRefund(any(GatewayRefundRequest.class));
         assertThat(refundProcessingService.processRefund(result.refundId())).isTrue();
+
+        assertThat(notificationRepository.findByUserIdOrderByCreatedAtDesc(customerId).stream()
+                .filter(notification -> "REFUND_COMPLETED".equals(notification.getType())).count()).isEqualTo(1);
 
         // 1. Verify Refund DB Persistence
         RefundJpaEntity persistedRefund = refundRepository.findById(result.refundId()).orElseThrow();
