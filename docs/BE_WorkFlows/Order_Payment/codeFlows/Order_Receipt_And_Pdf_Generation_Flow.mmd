@@ -65,7 +65,7 @@ sequenceDiagram
         Note over PdfGen: 1. Nạp font Unicode tiếng Việt (NotoSans-Regular & NotoSans-Bold)<br/>2. Tự động ngắt dòng (Word Wrap) & phân trang động (Lines per page)<br/>3. Vẽ tiêu đề, mã REC, bảng kê dịch vụ chi tiết, tổng tiền, chân trang A4
         PdfGen-->>Ctrl: byte[] (PDF Binary Data)
         deactivate PdfGen
-        Ctrl-->>Client: 200 OK (Content-Type: application/pdf, Content-Disposition: inline; filename="receipt-...pdf")
+        Ctrl-->>Client: 200 OK (Content-Type: application/pdf, Content-Disposition: inline, filename=receipt-...pdf)
     else Yêu cầu định dạng JSON mặc định
         Ctrl-->>Client: 200 OK (Content-Type: application/json, Body: OrderReceiptResponse)
     end
