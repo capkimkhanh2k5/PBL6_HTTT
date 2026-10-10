@@ -1,16 +1,15 @@
 package com.danasea.backend.modules.communication.application.usecases;
 
-import com.danasea.backend.modules.communication.infrastructure.persistence.repositories.JpaNotificationRepository;
-import com.danasea.backend.modules.communication.presentation.dtos.NotificationResponse;
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import com.danasea.backend.modules.communication.infrastructure.persistence.repositories.JpaNotificationRepository;
+import com.danasea.backend.modules.communication.presentation.dtos.NotificationResponse;
+import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
@@ -34,6 +33,8 @@ public class GetNotificationsUseCase {
                         .status(entity.getStatus())
                         .sentAt(entity.getSentAt())
                         .createdAt(entity.getCreatedAt())
+                        .isRead(entity.isRead())
+                        .readAt(entity.getReadAt())
                         .build())
                 .collect(Collectors.toList());
     }
@@ -59,6 +60,8 @@ public class GetNotificationsUseCase {
                         .status(entity.getStatus())
                         .sentAt(entity.getSentAt())
                         .createdAt(entity.getCreatedAt())
+                        .isRead(entity.isRead())
+                        .readAt(entity.getReadAt())
                         .build());
     }
 }

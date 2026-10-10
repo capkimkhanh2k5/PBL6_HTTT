@@ -5,6 +5,9 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
@@ -15,13 +18,17 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableHandlerMethodArgumentResolver;
 import org.springframework.http.ResponseEntity;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import com.danasea.backend.modules.order.application.OrderPaymentService;
 import com.danasea.backend.modules.order.domain.models.PaymentProvider;
@@ -36,18 +43,23 @@ class AdminRefundControllerTest {
     @Mock
     private OrderPaymentService orderPaymentService;
 
+    @InjectMocks
     private AdminRefundController controller;
+
+    private MockMvc mockMvc;
 
     private final UUID refundId = UUID.randomUUID();
     private final UUID subOrderId = UUID.randomUUID();
 
     @BeforeEach
     void setUp() {
-        controller = new AdminRefundController(orderPaymentService);
+        mockMvc = MockMvcBuilders.standaloneSetup(controller)
+                .setCustomArgumentResolvers(new PageableHandlerMethodArgumentResolver())
+                .build();
     }
 
     @Test
-    @DisplayName("Should query refunds page with filters")
+    @DisplayName("Should query refunds page with basic filters")
     void shouldQueryRefundsPage() {
         RefundDetailResponse item = new RefundDetailResponse(
                 refundId,
@@ -77,6 +89,72 @@ class AdminRefundControllerTest {
         assertThat(response.getBody()).isNotNull();
         assertThat(response.getBody().getContent()).hasSize(1);
         assertThat(response.getBody().getContent().get(0).id()).isEqualTo(refundId);
+    }
+
+    @Test
+    @DisplayName("GET /api/admin/refunds with advanced filters (orderId, provider, vendorId, customerId, dates)")
+    void getRefunds_WithAdvancedFilters_ShouldReturnFilteredList() throws Exception {
+        UUID orderId = UUID.randomUUID();
+        UUID customerId = UUID.randomUUID();
+        UUID vendorId = UUID.randomUUID();
+
+        RefundDetailResponse item = new RefundDetailResponse(
+                refundId,
+                subOrderId,
+                BigDecimal.valueOf(250000),
+                null,
+                RefundReason.CUSTOMER_CANCEL,
+                RefundStatus.PROCESSED,
+                PaymentProvider.VNPAY,
+                "VNP-REF-999",
+                "TXN-777",
+                0,
+                null,
+                OffsetDateTime.now(),
+                OffsetDateTime.now()
+        );
+
+        when(orderPaymentService.getAdminRefunds(
+                eq(RefundStatus.PROCESSED),
+                eq(RefundReason.CUSTOMER_CANCEL),
+                eq(subOrderId),
+                eq(PaymentProvider.VNPAY),
+                eq(vendorId),
+                eq(customerId),
+                eq(orderId),
+                any(),
+                any(),
+                any()))
+                .thenReturn(new PageImpl<>(List.of(item), PageRequest.of(0, 20), 1));
+
+        mockMvc.perform(get("/api/admin/refunds")
+                        .param("status", "PROCESSED")
+                        .param("reason", "CUSTOMER_CANCEL")
+                        .param("subOrderId", subOrderId.toString())
+                        .param("orderId", orderId.toString())
+                        .param("provider", "VNPAY")
+                        .param("vendorId", vendorId.toString())
+                        .param("customerId", customerId.toString())
+                        .param("fromDate", "2026-10-01T00:00:00Z")
+                        .param("toDate", "2026-10-09T23:59:59Z")
+                        .param("page", "0")
+                        .param("size", "20"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content[0].id").value(refundId.toString()))
+                .andExpect(jsonPath("$.content[0].status").value("PROCESSED"))
+                .andExpect(jsonPath("$.content[0].provider").value("VNPAY"));
+
+        verify(orderPaymentService).getAdminRefunds(
+                eq(RefundStatus.PROCESSED),
+                eq(RefundReason.CUSTOMER_CANCEL),
+                eq(subOrderId),
+                eq(PaymentProvider.VNPAY),
+                eq(vendorId),
+                eq(customerId),
+                eq(orderId),
+                any(),
+                any(),
+                any());
     }
 
     @Test

@@ -1,12 +1,38 @@
 import { useNavigate } from "react-router-dom";
 import { useCartStore } from "../../../store/useCartStore";
-import { FEATURED_SERVICES, MOCK_IMAGES, MOCK_SLOTS } from "../../../mockData";
+import { FEATURED_SERVICES, MOCK_IMAGES } from "../../../mockData";
 import { useState, useEffect } from "react";
 
 export function Checkout() {
   const navigate = useNavigate();
   const { items, getTotalPrice, clearCart } = useCartStore();
   const [countdown, setCountdown] = useState(600); // 10 minutes
+  const [sessionCode] = useState(() => Math.floor(10000 + Math.random() * 90000));
+  const [promoInput, setPromoInput] = useState("");
+  const [appliedPromo, setAppliedPromo] = useState<{ code: string; discount: number } | null>(null);
+  const [promoError, setPromoError] = useState("");
+
+  const handleApplyPromo = () => {
+    setPromoError("");
+    const code = promoInput.trim().toUpperCase();
+    if (!code) return;
+    if (code === "DANASEA10" || code === "HE2024") {
+      const discount = Math.round(getTotalPrice() * 0.1);
+      setAppliedPromo({ code, discount });
+    } else if (code === "BIENXANH") {
+      setAppliedPromo({ code, discount: 50000 });
+    } else {
+      setPromoError("Mã khuyến mãi không hợp lệ hoặc đã hết lượt dùng");
+    }
+  };
+
+  const handleRemovePromo = () => {
+    setAppliedPromo(null);
+    setPromoInput("");
+    setPromoError("");
+  };
+
+  const finalTotal = Math.max(0, getTotalPrice() - (appliedPromo?.discount || 0));
 
   useEffect(() => {
     if (items.length === 0) {
@@ -57,7 +83,7 @@ export function Checkout() {
             </div>
             <div className="flex items-center gap-space-xs px-space-sm py-0.5 rounded-full bg-surface-container text-tertiary font-label-sm text-label-sm">
               <span className="w-2 h-2 rounded-full bg-secondary animate-ping"></span>
-              <span className="">Phiên giao dịch mã: <strong>DNS-{Math.floor(Math.random() * 100000)}</strong></span>
+              <span className="">Phiên giao dịch mã: <strong>DNS-{sessionCode}</strong></span>
             </div>
           </div>
           {/* Stepper Component */}
@@ -253,21 +279,68 @@ export function Checkout() {
                 })}
               </div>
               
+              {/* Promo Code Input */}
+              <div className="pt-2 border-t border-surface-container">
+                <label className="text-xs font-semibold text-slate-700 block mb-1.5">Mã ưu đãi / Khuyến mãi</label>
+                {appliedPromo ? (
+                  <div className="p-2.5 rounded-lg bg-emerald-50 border border-emerald-200 flex items-center justify-between text-xs">
+                    <div className="flex items-center gap-2">
+                      <span className="material-symbols-outlined text-emerald-600 text-sm">check_circle</span>
+                      <span className="font-bold text-emerald-800">{appliedPromo.code}</span>
+                      <span className="text-emerald-700">(-{appliedPromo.discount.toLocaleString('vi-VN')}đ)</span>
+                    </div>
+                    <button
+                      onClick={handleRemovePromo}
+                      className="text-red-500 hover:text-red-700 font-medium cursor-pointer"
+                      type="button"
+                    >
+                      Gỡ bỏ
+                    </button>
+                  </div>
+                ) : (
+                  <div className="space-y-1">
+                    <div className="flex gap-2">
+                      <input
+                        type="text"
+                        value={promoInput}
+                        onChange={(e) => setPromoInput(e.target.value)}
+                        placeholder="Nhập DANASEA10 hoặc HE2024"
+                        className="flex-1 px-3 py-2 rounded-lg border border-slate-200 text-xs text-slate-800 uppercase focus:outline-none focus:ring-1 focus:ring-primary"
+                      />
+                      <button
+                        onClick={handleApplyPromo}
+                        type="button"
+                        className="px-3 py-2 bg-slate-900 hover:bg-slate-800 text-white rounded-lg text-xs font-semibold cursor-pointer transition-colors"
+                      >
+                        Áp dụng
+                      </button>
+                    </div>
+                    {promoError && <p className="text-[11px] text-red-500">{promoError}</p>}
+                  </div>
+                )}
+              </div>
+              
               <div className="flex flex-col gap-space-xs pt-space-xs border-t border-surface-container font-body-md text-body-md text-on-surface-variant">
-                <div className="flex justify-between items-center">
-                  <span className="">Tạm tính</span>
+                <div className="flex justify-between items-center text-sm">
+                  <span>Tạm tính</span>
                   <span className="text-on-surface font-medium">{getTotalPrice().toLocaleString('vi-VN')}đ</span>
                 </div>
+                {appliedPromo && (
+                  <div className="flex justify-between items-center text-sm text-emerald-600 font-medium">
+                    <span>Khuyến mãi ({appliedPromo.code})</span>
+                    <span>-{appliedPromo.discount.toLocaleString('vi-VN')}đ</span>
+                  </div>
+                )}
                 <div className="flex justify-between items-baseline pt-space-md border-t border-surface-container mt-space-xs">
                   <div>
                     <span className="font-headline-sm text-[18px] text-on-surface font-bold">Tổng thanh toán:</span>
                   </div>
-                  <span className="font-display-hero text-[30px] leading-tight text-primary font-extrabold tracking-tight">{getTotalPrice().toLocaleString('vi-VN')}đ</span>
+                  <span className="font-display-hero text-[28px] leading-tight text-primary font-extrabold tracking-tight">{finalTotal.toLocaleString('vi-VN')}đ</span>
                 </div>
               </div>
-              <button onClick={handlePayment} className="w-full py-4 rounded-full bg-primary-container text-on-primary font-label-lg text-label-lg shadow-[0_8px_20px_rgba(255,115,92,0.35)] hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-space-sm font-bold tracking-wide" type="button">
+              <button onClick={handlePayment} className="w-full py-4 rounded-full bg-primary-container text-on-primary font-label-lg text-label-lg shadow-[0_8px_20px_rgba(255,115,92,0.35)] hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-space-sm font-bold tracking-wide cursor-pointer" type="button">
                 <span className="material-symbols-outlined text-[20px]">lock</span>
-                <span className="">Xác nhận & Thanh toán {getTotalPrice().toLocaleString('vi-VN')}đ</span>
+                <span>Xác nhận &amp; Thanh toán {finalTotal.toLocaleString('vi-VN')}đ</span>
               </button>
             </div>
           </div>

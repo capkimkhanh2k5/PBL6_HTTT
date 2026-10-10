@@ -139,130 +139,105 @@ export function AdminPromotions() {
           </div>
         )}
 
-        {/* Page Header */}
-        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-space-md pb-space-lg">
-          <div className="flex flex-col gap-1">
-            <div className="flex items-center gap-space-sm font-bold">
-              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-primary/10 text-primary font-label-sm uppercase tracking-wider">
-                <span className="material-symbols-outlined text-[14px]">verified_user</span>
-                Scope: PLATFORM
-              </span>
-              <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-secondary-container/20 text-secondary font-label-sm">
-                <span className="w-1.5 h-1.5 rounded-full bg-secondary"></span>
-                Ngân sách Cảng vụ VITA
-              </span>
-            </div>
-            <h1 className="font-headline-lg text-headline-lg text-on-surface tracking-tight font-black">
-              Quản lý Mã Khuyến mãi Nền tảng &amp; Chiến dịch Biển
+        {/* Header */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 mb-4 border-b border-slate-200">
+          <div>
+            <h1 className="text-xl md:text-2xl font-bold text-slate-800 tracking-tight">
+              Quản lý Khuyến mãi Toàn sàn
             </h1>
-            <p className="font-body-md text-body-md text-on-surface-variant max-w-3xl">
-              Thiết lập và kiểm soát các mã ưu đãi kích cầu du lịch biển toàn sàn (Scope: PLATFORM) do Ban Quản lý DANASEA bảo trợ ngân sách.
-            </p>
           </div>
-
-          <div className="flex items-center gap-space-sm">
+          <div className="flex items-center gap-2">
+            <span className="px-2.5 py-1 rounded-md bg-white border border-slate-200 text-slate-600 text-xs font-medium">
+              Tổng: <strong>{promotions.length}</strong> mã
+            </span>
             <button 
               onClick={handleResetForNew}
-              className="inline-flex items-center gap-2 px-space-md py-2.5 rounded-xl bg-primary text-on-primary font-label-lg font-bold shadow-sm hover:bg-primary-container transition-all"
+              className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-primary text-white text-sm font-semibold hover:bg-primary-container transition-colors shadow-xs"
             >
-              <span className="material-symbols-outlined text-[20px]">add_circle</span>
-              <span>Tạo mã toàn sàn mới</span>
+              <span className="material-symbols-outlined text-[18px]">add</span>
+              <span>Tạo Mã Toàn Sàn</span>
             </button>
-          </div>
-        </div>
-
-        {/* KPI Row */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-space-md mb-space-xl">
-          <div className="p-space-lg rounded-2xl bg-surface-container-lowest shadow-sm flex flex-col justify-between border border-outline-variant/20">
-            <span className="font-label-md text-outline uppercase tracking-wide font-bold">Chiến dịch toàn sàn</span>
-            <div className="mt-space-md flex items-baseline gap-2">
-              <span className="font-display-lg font-black text-on-surface">{promotions.length}</span>
-              <span className="text-xs text-outline font-semibold">mã khuyến mãi</span>
-            </div>
-            <span className="text-xs text-primary font-bold mt-2">100% tài trợ nền tảng</span>
-          </div>
-
-          <div className="p-space-lg rounded-2xl bg-surface-container-lowest shadow-sm flex flex-col justify-between border border-outline-variant/20">
-            <span className="font-label-md text-outline uppercase tracking-wide font-bold">Lượt khách quy đổi</span>
-            <div className="mt-space-md flex items-baseline gap-2">
-              <span className="font-display-lg font-black text-secondary">
-                {promotions.reduce((sum, p) => sum + p.usedCount, 0)}
-              </span>
-              <span className="text-xs text-outline font-semibold">lượt dùng</span>
-            </div>
-            <span className="text-xs text-secondary font-bold mt-2">Áp dụng trực tiếp tại Checkout</span>
-          </div>
-
-          <div className="p-space-lg rounded-2xl bg-surface-container-lowest shadow-sm flex flex-col justify-between border border-outline-variant/20">
-            <span className="font-label-md text-outline uppercase tracking-wide font-bold">Ngân sách kích cầu BQL</span>
-            <div className="mt-space-md flex items-baseline gap-1">
-              <span className="font-display-lg font-black text-primary">50.000.000</span>
-              <span className="font-bold text-on-surface">đ</span>
-            </div>
-            <span className="text-xs text-outline mt-2">Hạn mức Q4/2024</span>
           </div>
         </div>
 
         {/* Main 2-Column Split */}
         <div className="grid grid-cols-12 gap-space-lg items-start">
-          {/* Left Column: Promotions List (7 cols) */}
-          <div className="col-span-12 lg:col-span-7 flex flex-col gap-space-md">
-            <div className="p-space-md rounded-2xl bg-surface-container-lowest shadow-sm flex items-center justify-between border border-outline-variant/20">
-              <span className="font-label-lg font-bold text-on-surface">Danh sách Voucher Toàn Sàn</span>
-              <span className="text-xs text-outline">{promotions.length} mã</span>
+          {/* Left Column: Promotions Ledger Table (7 cols) */}
+          <div className="col-span-12 lg:col-span-7 bg-white rounded-xl border border-slate-200 overflow-hidden shadow-xs">
+            <div className="px-4 py-3 border-b border-slate-200 bg-slate-50 flex items-center justify-between">
+              <span className="text-xs font-bold text-slate-700 uppercase tracking-wider">Sổ Cái Voucher Toàn Sàn</span>
+              <span className="text-xs text-slate-500 font-medium">{promotions.length} mã khả dụng</span>
             </div>
 
-            <div className="flex flex-col gap-3">
-              {promotions.map(promo => {
-                const isSelected = promo.id === selectedPromo?.id;
-                const progressPct = Math.min(100, Math.round((promo.usedCount / (promo.maxUses || 1)) * 100));
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-xs border-collapse">
+                <thead>
+                  <tr className="border-b border-slate-200 bg-slate-50 text-slate-700 font-semibold text-[11px] uppercase">
+                    <th className="py-2.5 px-3 border-r border-slate-200">Mã voucher</th>
+                    <th className="py-2.5 px-3 border-r border-slate-200">Mức giảm</th>
+                    <th className="py-2.5 px-3 border-r border-slate-200">Tiến độ sử dụng</th>
+                    <th className="py-2.5 px-3 border-r border-slate-200">Thời hạn</th>
+                    <th className="py-2.5 px-3 text-center">Trạng thái</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-200 text-slate-700">
+                  {promotions.map(promo => {
+                    const isSelected = promo.id === selectedPromo?.id;
+                    const progressPct = Math.min(100, Math.round((promo.usedCount / (promo.maxUses || 1)) * 100));
 
-                return (
-                  <div
-                    key={promo.id}
-                    onClick={() => handleSelectPromo(promo)}
-                    className={`p-space-lg rounded-2xl shadow-sm transition-all cursor-pointer border ${
-                      isSelected ? 'border-primary ring-2 ring-primary/20 bg-primary/5' : 'border-outline-variant/20 bg-surface-container-lowest hover:bg-surface-container-low/40'
-                    }`}
-                  >
-                    <div className="flex items-center justify-between gap-2 mb-2">
-                      <span className="font-mono text-base font-black text-primary tracking-wider">{promo.code}</span>
-                      <span className={`px-2.5 py-0.5 rounded-full text-xs font-bold ${
-                        promo.isActive ? 'bg-primary/10 text-primary' : 'bg-surface-container text-outline'
-                      }`}>
-                        {promo.isActive ? 'ĐANG CHẠY' : 'TẠM TẮT'}
-                      </span>
-                    </div>
-
-                    <div className="flex items-center justify-between text-xs text-on-surface-variant mb-2">
-                      <span>Giảm: <strong className="text-secondary font-bold">
-                        {promo.discountType === 'FIXED' ? `${promo.discountValue.toLocaleString('vi-VN')} đ` : `${promo.discountValue}%`}
-                      </strong></span>
-                      <span>Hiệu lực: {promo.validFrom?.slice(0, 10)} → {promo.validTo?.slice(0, 10)}</span>
-                    </div>
-
-                    {/* Usage Progress */}
-                    <div className="flex flex-col gap-1">
-                      <div className="flex justify-between text-[11px] text-outline font-semibold">
-                        <span>Đã dùng {promo.usedCount} / {promo.maxUses} lượt</span>
-                        <span>{progressPct}%</span>
-                      </div>
-                      <div className="w-full h-1.5 rounded-full bg-surface-container overflow-hidden">
-                        <div className="h-full bg-primary rounded-full" style={{ width: `${progressPct}%` }}></div>
-                      </div>
-                    </div>
-                  </div>
-                );
-              })}
+                    return (
+                      <tr
+                        key={promo.id}
+                        onClick={() => handleSelectPromo(promo)}
+                        className={`cursor-pointer transition-colors ${
+                          isSelected
+                            ? 'bg-primary/5 border-l-4 border-l-primary font-medium text-slate-900'
+                            : 'hover:bg-slate-50 text-slate-600'
+                        }`}
+                      >
+                        <td className="py-3 px-3 border-r border-slate-200">
+                          <span className="font-mono text-xs font-bold text-primary px-1.5 py-0.5 rounded bg-primary/10 border border-primary/20">
+                            {promo.code}
+                          </span>
+                        </td>
+                        <td className="py-3 px-3 font-semibold text-slate-800 border-r border-slate-200">
+                          {promo.discountType === 'FIXED'
+                            ? `${promo.discountValue.toLocaleString('vi-VN')} đ`
+                            : `${promo.discountValue}%`}
+                        </td>
+                        <td className="py-3 px-3 min-w-[120px] border-r border-slate-200">
+                          <div className="flex items-center justify-between text-[11px] text-slate-500 mb-1">
+                            <span>{promo.usedCount}/{promo.maxUses}</span>
+                            <span className="font-semibold text-slate-700">{progressPct}%</span>
+                          </div>
+                          <div className="w-full h-1.5 rounded-full bg-slate-100 overflow-hidden border border-slate-200">
+                            <div className="h-full bg-primary rounded-full" style={{ width: `${progressPct}%` }}></div>
+                          </div>
+                        </td>
+                        <td className="py-3 px-3 text-slate-500 text-[11px] whitespace-nowrap border-r border-slate-200">
+                          {promo.validFrom?.slice(0, 10)} → {promo.validTo?.slice(0, 10)}
+                        </td>
+                        <td className="py-3 px-3 text-center whitespace-nowrap">
+                          <span className={`inline-block px-2 py-0.5 rounded text-[10px] font-bold ${
+                            promo.isActive ? 'bg-primary/10 text-primary border border-primary/20' : 'bg-slate-100 text-slate-500 border border-slate-200'
+                          }`}>
+                            {promo.isActive ? 'ĐANG CHẠY' : 'TẠM TẮT'}
+                          </span>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
             </div>
           </div>
 
           {/* Right Column: Editor Form (5 cols) */}
           <div className="col-span-12 lg:col-span-5 flex flex-col gap-space-lg sticky top-20">
-            <div className="bg-surface-container-lowest rounded-2xl shadow-md p-space-xl flex flex-col gap-4 border border-outline-variant/20">
-              <div className="flex items-start justify-between pb-3 border-b border-outline-variant/20">
+            <div className="bg-white rounded-xl shadow-xs p-space-xl flex flex-col gap-4 border border-slate-200">
+              <div className="flex items-start justify-between pb-3 border-b border-slate-200">
                 <div>
-                  <span className="text-xs font-bold text-primary uppercase tracking-wider">Cấu hình Chiến Dịch</span>
+                  <span className="font-label-sm text-xs font-medium text-primary">Cấu hình chiến dịch</span>
                   <h3 className="font-headline-sm font-black text-on-surface mt-0.5">
                     {selectedPromo ? `Sửa mã: ${selectedPromo.code}` : 'Tạo mới Voucher'}
                   </h3>

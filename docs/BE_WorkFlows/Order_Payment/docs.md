@@ -9,6 +9,9 @@
 | 3 | `Payment_Webhook_And_Fulfillment` | Sequence Diagram | Xử lý Webhook IPN từ cổng thanh toán: xác thực chữ ký số bảo mật, cơ chế chống lặp giao dịch (Idempotency Guard), chuyển trạng thái đơn hàng sang `PAID`, xác nhận đơn phụ `CONFIRMED` và kích hoạt hoàn tất Booking |
 | 4 | `Order_Payment_Lifecycle_StateMachine` | State Machine | Vòng đời trạng thái phân tách 2 trục độc lập giữa Vòng đời đơn hàng (`OrderStatus`), Trục dòng tiền thực thu (`PaymentStatus`) và Vòng đời đơn phụ của Vendor (`SubOrderStatus`) |
 | 5 | `EPIC04_Architecture_And_UseCases` | Flowchart | Kiến trúc phân lớp Clean Architecture tách biệt các Use Cases: Tạo đơn, Đa cổng thanh toán, Webhook, Xem trước mức hoàn tiền và Khởi tạo hoàn tiền |
+| 6 | `Admin_MultiFilter_Listing_Flow` | Sequence Diagram | Quản trị toàn sàn: Lọc đa chiều đơn hàng, giao dịch thanh toán và hoàn tiền cho Admin (`GET /api/admin/orders`, `/payments`, `/refunds`), tối ưu hóa subquery `EXISTS` và gom nhóm tránh N+1 |
+| 7 | `Automated_Payment_Reconciliation_Flow` | Sequence Diagram | Đối soát tự động định kỳ (`PaymentReconciliationJob`): Quét pending payments > 2 phút, gọi VNPay QueryDR (HMAC-SHA512) & PayPal Capture, cập nhật trạng thái đơn hàng và ghi nhận nhật ký kiểm toán `AuditLogInternalApi` |
+| 8 | `Order_Receipt_And_Pdf_Generation_Flow` | Sequence Diagram | Phát hành biên nhận đơn hàng (`GET /api/orders/{id}/receipt`): Xác thực IDOR, kiểm tra điều kiện PAID, nạp danh sách dịch vụ chi tiết và xuất PDF chuẩn tiếng Việt qua Apache PDFBox 3.0 |
 
 ---
 
@@ -33,8 +36,9 @@
      - `commissionAmount = subtotal * commissionRate`
      - `payoutAmount = subtotal - commissionAmount`
 5. Lưu trữ `MasterOrder` (trạng thái `PENDING_PAYMENT`, `paymentStatus = UNPAID`) và lưu toàn bộ danh sách `SubOrder` (trạng thái `PENDING`).
-6. Cập nhật trạng thái Booking sang `PENDING_PAYMENT` và phát sự kiện `OrderCreatedEvent`.
-7. Phản hồi thông tin đơn hàng `201 Created` cho khách hàng.
+6. **Áp dụng Voucher & Phân bổ chiết khấu (Discount Enhancement):** Nếu đơn hàng có gửi kèm `discountCode`, hệ thống thực thi khóa bi quan (`findByCodeForUpdate`), kiểm tra quota toàn sàn và từng user, phân bổ chiết khấu theo giải thuật Hare-Niemeyer vào từng SubOrder (`finalAmount`, `commissionBasisAmount`), tăng `usedCount` nguyên tử và lưu `DiscountRedemption` (Xem chi tiết tại [Module Discount](../Discount/docs.md)).
+7. Cập nhật trạng thái Booking sang `PENDING_PAYMENT` và phát sự kiện `OrderCreatedEvent`.
+8. Phản hồi thông tin đơn hàng `201 Created` cho khách hàng.
 
 ---
 
@@ -143,3 +147,81 @@ Sơ đồ tổng quan toàn bộ kiến trúc phân tầng chuẩn Clean Archite
 5. **Infrastructure Ports & Adapters:**
    - `PaymentGatewayPort` -> `VNPayPaymentAdapter` & `PayPalPaymentAdapter`.
    - `MasterOrderRepositoryPort`, `SubOrderRepositoryPort`, `PaymentRepositoryPort`, `RefundRepositoryPort`, `OrderEventPublisherPort`.
+
+---
+
+## 6. Admin_MultiFilter_Listing_Flow — Quản Trị Đơn Hàng, Giao Dịch & Hoàn Tiền Toàn Sàn
+
+> 📌 *Chi tiết sơ đồ Mermaid và đặc tả API:* xem tại [`Admin_Transaction_Refund_Management_Workflows.md`](./Admin_Transaction_Refund_Management_Workflows.md).
+
+**Lớp xử lý chính:**
+- `com.danasea.backend.modules.order.presentation.controllers.AdminOrderController`
+- `com.danasea.backend.modules.order.presentation.controllers.AdminPaymentController`
+- `com.danasea.backend.modules.order.presentation.controllers.AdminRefundController`
+- `com.danasea.backend.modules.order.application.OrderPaymentService`
+
+**Luồng nghiệp vụ chi tiết:**
+1. **Quản trị Đơn hàng (`GET /api/admin/orders`):**
+   - Hỗ trợ lọc đa chiều: `status`, `paymentStatus`, `customerId`, `vendorId`, `fromDate`/`from`, `toDate`/`to`, phân trang `Pageable`.
+   - Lọc theo nhà cung cấp (`vendorId`) thông qua truy vấn `EXISTS (SELECT 1 FROM sub_orders so WHERE so.master_order_id = m.id AND so.vendor_id = :vendorId)`.
+   - Áp dụng kỹ thuật Batch Query `subOrderRepository.findByMasterOrderIdIn(orderIds)` để gom nhóm danh sách `vendorIds` và tính `totalItems` trên RAM, loại trừ triệt để lỗi N+1 Query.
+   - Trả về DTO tóm tắt tối ưu `AdminOrderSummaryResponse`.
+2. **Quản trị Giao dịch Thanh toán (`GET /api/admin/payments` & `GET /api/admin/payments/{id}`):**
+   - Lọc theo `status`, `provider`, `orderId`, `vendorId`, `customerId`, thời gian.
+   - Trả về `PaymentResponse` với đầy đủ thông tin cổng, mã giao dịch, thời điểm hết hạn và URL thanh toán.
+3. **Quản trị Yêu cầu Hoàn tiền (`GET /api/admin/refunds` & `GET /api/admin/refunds/{id}`):**
+   - Lọc theo `status`, `reason`, `subOrderId`, `orderId`, `provider`, `vendorId`, `customerId`, thời gian.
+   - Trả về `RefundDetailResponse` kèm thông tin retry, mã lỗi cổng và tiến trình đối soát.
+4. **Lịch sử Giao dịch theo Đơn hàng (`GET /api/orders/{id}/payments` & `GET /api/orders/{id}/refunds`):**
+   - Tiếp nhận yêu cầu từ Khách hàng hoặc Quản trị viên.
+   - **IDOR Guard:** Kiểm tra quyền sở hữu `order.customerId == currentUserId` hoặc quyền `ROLE_ADMIN`. Chặn đứng ngay lập tức với `403 Forbidden` (`AccessDeniedException`) nếu tài khoản khác cố tình truy cập.
+
+---
+
+## 7. Automated_Payment_Reconciliation_Flow — Cơ Chế Đối Soát Tự Động & VNPay QueryDR / PayPal Capture
+
+> 📌 *Chi tiết sơ đồ Mermaid và đặc tả API:* xem tại [`Admin_Transaction_Refund_Management_Workflows.md`](./Admin_Transaction_Refund_Management_Workflows.md).
+
+**Lớp xử lý chính:**
+- `com.danasea.backend.modules.order.infrastructure.jobs.PaymentReconciliationJob`
+- `com.danasea.backend.modules.order.domain.ports.PaymentGatewayPort`
+- `com.danasea.backend.modules.order.infrastructure.adapters.VNPayPaymentAdapter`
+- `com.danasea.backend.modules.order.infrastructure.adapters.PayPalPaymentAdapter`
+- `com.danasea.backend.modules.audit.application.api.AuditLogInternalApi`
+
+**Luồng nghiệp vụ chi tiết:**
+1. **Quét nền định kỳ:** `PaymentReconciliationJob` kích hoạt mỗi 60 giây (quét các giao dịch `PENDING` có `createdAt < now - 2 phút`).
+2. **Phân luồng đối soát theo cổng:**
+   - **VNPay QueryDR (`vnp_Command=querydr`):** Tạo checksum HMAC-SHA512 với `vnp_HashSecret`, gửi request sang VNPay Merchant API. Nếu nhận `vnp_ResponseCode="00"` và `vnp_TransactionStatus="00"`, đánh dấu giao dịch `COMPLETED`.
+   - **PayPal Capture / Order Query:** Tra cứu thông tin capture/order trực tiếp qua PayPal REST API v2.
+3. **Đồng bộ trạng thái liên hoàn:**
+   - Khi cổng xác nhận thành công: `Payment` -> `SUCCESS`, `MasterOrder` -> `PAID`, toàn bộ `SubOrder` -> `CONFIRMED`, và tự động kích hoạt `ConfirmBookingUseCase.execute(...)`.
+   - Khi cổng xác nhận thất bại: `Payment` -> `FAILED` kèm lý do lỗi `lastError`.
+   - Khi giao dịch hết hạn thanh toán (`expiresAt < now`): `Payment` -> `FAILED` với mã lỗi `PAYMENT_EXPIRED_UNPAID`.
+4. **Lưu vết kiểm toán hệ thống (Audit Log):**
+   - Tự động gọi `AuditLogInternalApi.recordAuditLog(...)` cho từng sự kiện: `RECONCILE_PAYMENT_SUCCESS`, `RECONCILE_PAYMENT_FAILED`, `RECONCILE_PAYMENT_EXPIRED`.
+
+---
+
+## 8. Order_Receipt_And_Pdf_Generation_Flow.mmd — Phát Hành Biên Nhận Đơn Hàng & Xuất PDF
+
+**Lớp xử lý chính:**
+- `com.danasea.backend.modules.order.presentation.controllers.OrderController`
+- `com.danasea.backend.modules.order.application.usecases.GetOrderReceiptUseCase`
+- `com.danasea.backend.modules.order.infrastructure.pdf.PdfReceiptGenerator`
+
+**Điểm truy cập API:** `GET /api/orders/{id}/receipt` (Yêu cầu JWT xác thực)
+- Query param: `format=json` (mặc định) hoặc `format=pdf`.
+- Header: `Accept: application/pdf` hoặc `Accept: application/json`.
+
+**Quy tắc nghiệp vụ & Bảo mật (R6):**
+1. **Kiểm tra quyền sở hữu (IDOR Guard):** Khách hàng chỉ được phép tra cứu và xuất biên nhận cho đơn hàng do chính mình sở hữu (`order.customerId == currentUserId`). Quản trị viên (`isAdmin = true`) có toàn quyền tra cứu biên nhận cho mọi đơn hàng. Vi phạm trả về `403 Forbidden` (`UnauthorizedOrderAccessException`).
+2. **Điều kiện phát hành (Paid Status Guard):** Biên nhận chỉ được cấp cho đơn hàng đã thanh toán thành công (`paymentStatus != UNPAID`). Đơn hàng chưa thanh toán (`UNPAID`) hoặc bị hủy khi chưa thanh toán sẽ bị từ chối với `400 Bad Request` (`UnpaidOrderReceiptException`).
+3. **Lắp ráp dữ liệu hóa đơn chi tiết:**
+   - Sinh mã tra cứu: `orderCode` (`ORD-XXXXXXXX`) và `receiptCode` (`REC-XXXXXXXX`).
+   - Nạp danh sách đơn con (`SubOrders`), tên dịch vụ bản địa hóa qua `LocalizedContentSelector` (Việt / Anh), số lượng, đơn giá, giảm giá voucher và thành tiền thực thu.
+   - Thông tin phương thức thanh toán (`VNPAY`, `PAYPAL`) và mốc thời gian giao dịch thực tế `paidAt`.
+4. **Bộ sinh PDF tiếng Việt chuyên dụng (Apache PDFBox 3.0.8):**
+   - Tích hợp phông chữ `NotoSans-Regular.ttf` và `NotoSans-Bold.ttf` hỗ trợ hiển thị đầy đủ dấu tiếng Việt Unicode mà không bị lỗi phông hay ký tự lạ.
+   - Cơ chế ngắt dòng tự động (Word Wrapping) và phân trang động (`LINES_PER_PAGE = 43`), hỗ trợ các đơn hàng có nhiều mục dịch vụ trải dài qua nhiều trang mà không bị tràn khung.
+   - Trả về nhị phân `application/pdf` kèm header `Content-Disposition: inline; filename="receipt-{orderId}.pdf"`.

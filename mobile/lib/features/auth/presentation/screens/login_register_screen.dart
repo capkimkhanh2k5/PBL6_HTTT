@@ -1,3 +1,5 @@
+import '../../../../core/auth/auth_session.dart';
+import 'verify_email_screen.dart';
 import 'package:mobile/core/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import '../../../../core/theme/app_colors.dart';
@@ -19,6 +21,8 @@ class _LoginRegisterScreenState extends State<LoginRegisterScreen>
   late final AnimationController _intro;
   late bool _isLogin;
   bool _obscurePassword = true;
+  bool _busy = false;
+  final _confirmController = TextEditingController();
 
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
@@ -38,6 +42,7 @@ class _LoginRegisterScreenState extends State<LoginRegisterScreen>
 
   @override
   void dispose() {
+    _confirmController.dispose();
     _intro.dispose();
     _emailController.dispose();
     _passwordController.dispose();
@@ -46,45 +51,61 @@ class _LoginRegisterScreenState extends State<LoginRegisterScreen>
     super.dispose();
   }
 
-  void _submit() {
+  Future<void> _submit() async {
+    if (_busy) return;
     final email = _emailController.text.trim();
     if (!RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$').hasMatch(email) ||
-        _passwordController.text.length < 8 ||
-        (!_isLogin && _nameController.text.trim().isEmpty)) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: LocalizedText(
-            'Nhập email hợp lệ và mật khẩu từ 8 ký tự. Khi đăng ký, hãy nhập họ tên.',
-          ),
-        ),
-      );
+        _passwordController.text.isEmpty) {
+      _error('Nhập email hợp lệ và mật khẩu.');
       return;
     }
-    FocusScope.of(context).unfocus();
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: LocalizedText(
-          _isLogin
-              ? 'Đăng nhập thành công! Chào mừng bạn trở lại DANASEA.'
-              : 'Đăng ký tài khoản thành công! Vui lòng kiểm tra email để xác thực.',
-        ),
-        backgroundColor: AppColors.secondary,
-      ),
-    );
-    if (_isLogin) {
+    if (!_isLogin &&
+        (_nameController.text.trim().isEmpty ||
+            !AuthSession.strongPassword(_passwordController.text) ||
+            _passwordController.text != _confirmController.text)) {
+      _error('Nhập họ tên và mật khẩu mạnh; xác nhận mật khẩu phải khớp.');
+      return;
+    }
+    setState(() => _busy = true);
+    try {
+      final auth = AuthSession.instance;
+      if (auth.pendingVerification &&
+          auth.pendingEmail?.toLowerCase() == email.toLowerCase()) {
+        final verified = await Navigator.push<bool>(
+          context,
+          MaterialPageRoute(builder: (_) => const VerifyEmailScreen()),
+        );
+        if (verified != true) return;
+      } else if (_isLogin) {
+        await auth.login(email, _passwordController.text);
+      } else {
+        await auth.register(
+          _nameController.text,
+          email,
+          _passwordController.text,
+        );
+        if (!mounted) return;
+        final verified = await Navigator.push<bool>(
+          context,
+          MaterialPageRoute(builder: (_) => const VerifyEmailScreen()),
+        );
+        if (verified != true) return;
+      }
+      if (!mounted) return;
       Navigator.of(context).pushAndRemoveUntil(
-        PageRouteBuilder<void>(
-          pageBuilder: (_, animation, secondaryAnimation) => const HomeScreen(),
-          transitionsBuilder: (_, animation, secondaryAnimation, child) =>
-              FadeTransition(opacity: animation, child: child),
-          transitionDuration: const Duration(milliseconds: 450),
-        ),
+        MaterialPageRoute(builder: (_) => const HomeScreen()),
         (_) => false,
       );
-    } else {
-      setState(() => _isLogin = true);
+    } catch (e) {
+      if (mounted) _error(e.toString());
+    } finally {
+      if (mounted) setState(() => _busy = false);
     }
   }
+
+  void _error(String text) => ScaffoldMessenger.of(
+    context,
+  ).showSnackBar(SnackBar(content: LocalizedText(text)));
 
   @override
   Widget build(BuildContext context) {
@@ -144,6 +165,19 @@ class _LoginRegisterScreenState extends State<LoginRegisterScreen>
                                   ? AutofillHints.password
                                   : AutofillHints.newPassword,
                             ),
+                            if (!_isLogin) ...[
+                              const SizedBox(height: 16),
+                              _field(
+                                'Xác nhận mật khẩu',
+                                'Nhập lại mật khẩu',
+                                _confirmController,
+                                password: true,
+                              ),
+                              const LocalizedText(
+                                'Mật khẩu 8–100 ký tự, gồm chữ hoa, chữ thường, số và ký tự đặc biệt.',
+                              ),
+                            ],
+                            if (_busy) const LinearProgressIndicator(),
                             if (_isLogin)
                               Align(
                                 alignment: Alignment.centerRight,
@@ -173,7 +207,7 @@ class _LoginRegisterScreenState extends State<LoginRegisterScreen>
                                 ),
                                 shape: const StadiumBorder(),
                               ),
-                              onPressed: _submit,
+                              onPressed: _busy ? null : _submit,
                               child: LocalizedText(
                                 _isLogin ? 'Đăng nhập' : 'Đăng ký',
                               ),
@@ -226,15 +260,6 @@ class _LoginRegisterScreenState extends State<LoginRegisterScreen>
                                       fontWeight: FontWeight.w700,
                                       color: Color(0xFF4285F4),
                                     ),
-                                  ),
-                                ),
-                                const SizedBox(width: 18),
-                                _social(
-                                  'Apple',
-                                  const Icon(
-                                    Icons.apple,
-                                    color: Colors.black,
-                                    size: 29,
                                   ),
                                 ),
                               ],

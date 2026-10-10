@@ -1,17 +1,16 @@
-import { useState, useEffect } from 'react';
+import { useState, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useCartStore } from '../../../store/useCartStore';
 import { useWishlistStore } from '../../../store/useWishlistStore';
 import { FEATURED_SERVICES, MOCK_SLOTS, MOCK_IMAGES } from '../../../mockData';
-import type { Service, ServiceSlot, ServiceImage } from '../../../types';
 
 export function ExperienceDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
   
-  const [service, setService] = useState<Service | null>(null);
-  const [images, setImages] = useState<ServiceImage[]>([]);
-  const [slots, setSlots] = useState<ServiceSlot[]>([]);
+  const service = useMemo(() => FEATURED_SERVICES.find(s => s.id === id) || null, [id]);
+  const images = useMemo(() => service ? MOCK_IMAGES.filter(img => img.serviceId === service.id) : [], [service]);
+  const slots = useMemo(() => service ? MOCK_SLOTS.filter(s => s.serviceId === service.id) : [], [service]);
   
   const [qty, setQty] = useState(1);
   const [selectedDate, setSelectedDate] = useState('2024-10-28');
@@ -21,16 +20,6 @@ export function ExperienceDetail() {
   
   const addItem = useCartStore((state) => state.addItem);
   const { toggleWishlist, isInWishlist } = useWishlistStore();
-
-  useEffect(() => {
-    // Find service
-    const foundService = FEATURED_SERVICES.find(s => s.id === id);
-    if (foundService) {
-      setService(foundService);
-      setImages(MOCK_IMAGES.filter(img => img.serviceId === foundService.id));
-      setSlots(MOCK_SLOTS.filter(s => s.serviceId === foundService.id));
-    }
-  }, [id]);
 
   if (!service) {
     return (
@@ -84,7 +73,7 @@ export function ExperienceDetail() {
       <div className="flex flex-col w-full">
         {/* Breadcrumb Navigation */}
         <div className="w-full bg-surface-container-lowest/60 backdrop-blur-md">
-          <div className="max-w-[1280px] mx-auto px-margin-mobile md:px-margin-desktop py-space-sm">
+          <div className="max-w-[1440px] w-full mx-auto px-4 sm:px-8 lg:px-12 py-space-sm">
             <nav className="flex items-center gap-space-xs text-on-surface-variant font-label-md text-label-md overflow-x-auto whitespace-nowrap">
               <span onClick={() => navigate('/')} className="hover:text-primary transition-colors flex items-center gap-1 cursor-pointer">
                 <span className="material-symbols-outlined text-[16px]">home</span>
@@ -98,7 +87,7 @@ export function ExperienceDetail() {
           </div>
         </div>
 
-        <div className="max-w-[1280px] mx-auto w-full px-margin-mobile md:px-margin-desktop pt-space-md pb-space-4xl flex flex-col gap-space-xl">
+        <div className="max-w-[1440px] mx-auto w-full px-4 sm:px-8 lg:px-12 pt-space-md pb-space-4xl flex flex-col gap-space-xl">
           
           {/* Title & Quick Actions Header */}
           <section className="flex flex-col lg:flex-row lg:items-end justify-between gap-space-md">
@@ -177,12 +166,156 @@ export function ExperienceDetail() {
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-space-xl items-start">
             
             {/* LEFT COLUMN: Detailed Experience Intel */}
-            <main className="lg:col-span-8 flex flex-col gap-space-2xl">
-              <section className="flex flex-col gap-space-md">
-                <h2 className="font-headline-md text-headline-md text-on-surface">Mô tả trải nghiệm</h2>
-                <p className="font-body-lg text-on-surface-variant leading-relaxed">
+            <main className="lg:col-span-8 flex flex-col gap-6">
+              {/* Description */}
+              <section className="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-sm space-y-3">
+                <h2 className="text-xl font-bold text-slate-900">Mô tả trải nghiệm</h2>
+                <p className="text-slate-600 leading-relaxed text-[15px]">
                   {service.description}
                 </p>
+              </section>
+
+              {/* Service Specs & Safety */}
+              <section className="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-sm space-y-4">
+                <h2 className="text-xl font-bold text-slate-900">Thông tin vận hành &amp; Tiêu chuẩn an toàn</h2>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="p-4 rounded-xl bg-slate-50 border border-slate-100 flex items-start gap-3">
+                    <span className="material-symbols-outlined text-primary text-2xl">schedule</span>
+                    <div>
+                      <span className="text-xs text-slate-500 font-medium block">Thời lượng hoạt động</span>
+                      <span className="text-sm font-semibold text-slate-800">{service.durationMinutes || 120} phút / ca</span>
+                    </div>
+                  </div>
+                  <div className="p-4 rounded-xl bg-slate-50 border border-slate-100 flex items-start gap-3">
+                    <span className="material-symbols-outlined text-primary text-2xl">group</span>
+                    <div>
+                      <span className="text-xs text-slate-500 font-medium block">Sức chứa mỗi ca</span>
+                      <span className="text-sm font-semibold text-slate-800">Tối đa {service.capacityPerSlot || 12} người / khung giờ</span>
+                    </div>
+                  </div>
+                  <div className="p-4 rounded-xl bg-slate-50 border border-slate-100 flex items-start gap-3">
+                    <span className="material-symbols-outlined text-primary text-2xl">waves</span>
+                    <div>
+                      <span className="text-xs text-slate-500 font-medium block">Giới hạn chiều cao sóng</span>
+                      <span className="text-sm font-semibold text-slate-800">&le; {service.maxWaveM || 1.2} mét (Đảm bảo an toàn)</span>
+                    </div>
+                  </div>
+                  <div className="p-4 rounded-xl bg-slate-50 border border-slate-100 flex items-start gap-3">
+                    <span className="material-symbols-outlined text-primary text-2xl">location_on</span>
+                    <div>
+                      <span className="text-xs text-slate-500 font-medium block">Địa điểm tập trung</span>
+                      <span className="text-sm font-semibold text-slate-800">{service.address || service.locationName}</span>
+                    </div>
+                  </div>
+                </div>
+              </section>
+
+              {/* Inclusions & Highlights */}
+              <section className="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-sm space-y-4">
+                <h2 className="text-xl font-bold text-slate-900">Chi tiết dịch vụ bao gồm</h2>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  {[
+                    "Trang bị áo phao cứu sinh đạt chuẩn kiểm định hàng hải",
+                    "Hướng dẫn viên chuyên nghiệp kèm cặp kỹ năng cơ bản",
+                    "Túi chống nước bảo quản điện thoại & tư trang cá nhân",
+                    "Chụp ảnh & quay video kỷ niệm miễn phí trong suốt hành trình",
+                    "Nước khoáng đóng chai và khăn lạnh phục vụ tại bến",
+                    "Bảo hiểm du lịch trải nghiệm cho từng hành khách",
+                  ].map((inc, idx) => (
+                    <div key={idx} className="flex items-center gap-2.5 text-sm text-slate-700">
+                      <span className="material-symbols-outlined text-emerald-600 text-lg">check_circle</span>
+                      <span>{inc}</span>
+                    </div>
+                  ))}
+                </div>
+              </section>
+
+              {/* Safety Rules & Waiver */}
+              <section className="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-sm space-y-3">
+                <div className="flex items-center gap-2">
+                  <span className="material-symbols-outlined text-amber-600">health_and_safety</span>
+                  <h2 className="text-xl font-bold text-slate-900">Lưu ý an toàn &amp; Điều khoản</h2>
+                </div>
+                <p className="text-slate-600 text-sm leading-relaxed">
+                  {service.waiverContent ||
+                    "Quý khách vui lòng mặc áo phao trong suốt thời gian tham gia hoạt động dưới nước. Trẻ em dưới 12 tuổi bắt buộc phải có người lớn đi kèm. Không tham gia nếu có tiền sử bệnh tim mạch hoặc sử dụng chất kích thích/rượu bia trước khi xuống biển."}
+                </p>
+                <div className="p-3 bg-amber-50 rounded-xl border border-amber-200/70 text-xs text-amber-800 flex items-start gap-2">
+                  <span className="material-symbols-outlined text-amber-600 text-base shrink-0 mt-0.5">info</span>
+                  <span>Chính sách hoàn hủy: Hủy trước 24 giờ so với giờ khởi hành được hoàn tiền 100%. Trong trường hợp thời tiết xấu bão gió vượt ngưỡng an toàn, DANASEA sẽ hoàn tiền 100% hoặc đổi ngày theo yêu cầu.</span>
+                </div>
+              </section>
+
+              {/* Verified Vendor Card */}
+              <section className="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-sm flex items-center justify-between gap-4">
+                <div className="flex items-center gap-4">
+                  <div className="w-14 h-14 rounded-2xl bg-teal-50 border border-teal-100 flex items-center justify-center text-primary font-bold text-xl">
+                    <span className="material-symbols-outlined text-3xl">sailing</span>
+                  </div>
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <h3 className="font-bold text-slate-900 text-base">Đối tác DANASEA Official</h3>
+                      <span className="px-2 py-0.5 rounded-full bg-teal-50 text-teal-700 text-xs font-semibold border border-teal-200">Đã xác minh</span>
+                    </div>
+                    <p className="text-xs text-slate-500 mt-1">Đầy đủ giấy phép kinh doanh thể thao biển &amp; chứng chỉ cứu hộ quốc tế PADI</p>
+                  </div>
+                </div>
+                <button
+                  onClick={() => navigate('/search')}
+                  className="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold transition-colors shrink-0"
+                >
+                  Xem thêm dịch vụ
+                </button>
+              </section>
+
+              {/* Reviews & Ratings */}
+              <section className="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-sm space-y-4">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <h2 className="text-xl font-bold text-slate-900">Đánh giá từ khách hàng</h2>
+                    <span className="px-2.5 py-0.5 rounded-full bg-amber-50 text-amber-700 text-xs font-bold border border-amber-200">
+                      ★ 4.9 (128 nhận xét)
+                    </span>
+                  </div>
+                </div>
+
+                <div className="space-y-4 divide-y divide-slate-100">
+                  <div className="pt-3 first:pt-0 space-y-2">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2.5">
+                        <div className="w-8 h-8 rounded-full bg-slate-200 flex items-center justify-center font-bold text-xs text-slate-700">
+                          HL
+                        </div>
+                        <div>
+                          <span className="text-sm font-semibold text-slate-800 block">Hoàng Linh</span>
+                          <span className="text-xs text-slate-400">Trải nghiệm ngày 15/10/2024</span>
+                        </div>
+                      </div>
+                      <div className="flex text-amber-400 text-xs">★★★★★</div>
+                    </div>
+                    <p className="text-sm text-slate-600">
+                      Tour chèo SUP sáng sớm ngắm bình minh cực kỳ tuyệt vời! Hướng dẫn viên nhiệt tình, chụp hình có tâm và luôn để ý an toàn cho nhóm. Chắc chắn sẽ quay lại trải nghiệm thêm lần nữa.
+                    </p>
+                  </div>
+
+                  <div className="pt-4 space-y-2">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2.5">
+                        <div className="w-8 h-8 rounded-full bg-slate-200 flex items-center justify-center font-bold text-xs text-slate-700">
+                          TM
+                        </div>
+                        <div>
+                          <span className="text-sm font-semibold text-slate-800 block">Trần Tuấn Minh</span>
+                          <span className="text-xs text-slate-400">Trải nghiệm ngày 10/10/2024</span>
+                        </div>
+                      </div>
+                      <div className="flex text-amber-400 text-xs">★★★★★</div>
+                    </div>
+                    <p className="text-sm text-slate-600">
+                      Trang thiết bị mới, ván SUP xịn và áo phao sạch sẽ. Có cano túc trực nên rất yên tâm chèo ra xa bến. 10/10 điểm cho chất lượng dịch vụ!
+                    </p>
+                  </div>
+                </div>
               </section>
             </main>
 

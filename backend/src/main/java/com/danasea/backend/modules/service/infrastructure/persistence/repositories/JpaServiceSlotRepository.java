@@ -5,17 +5,16 @@ import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
-
 import com.danasea.backend.modules.service.domain.models.SlotStatus;
 import com.danasea.backend.modules.service.infrastructure.persistence.entities.ServiceSlotJpaEntity;
-
 import jakarta.persistence.LockModeType;
 
 @Repository
@@ -24,6 +23,17 @@ public interface JpaServiceSlotRepository extends JpaRepository<ServiceSlotJpaEn
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("SELECT s FROM ServiceSlotJpaEntity s WHERE s.id = :id")
     Optional<ServiceSlotJpaEntity> findByIdForUpdate(@Param("id") UUID id);
+
+    @Query("""
+            SELECT s FROM ServiceSlotJpaEntity s
+            WHERE (s.date > :fromDate OR (s.date = :fromDate AND s.startTime > :fromTime))
+              AND (s.date < :toDate OR (s.date = :toDate AND s.startTime <= :toTime))
+            ORDER BY s.date, s.startTime, s.id
+            """)
+    Slice<ServiceSlotJpaEntity> findDeparturesInWindow(
+            @Param("fromDate") LocalDate fromDate, @Param("fromTime") LocalTime fromTime,
+            @Param("toDate") LocalDate toDate, @Param("toTime") LocalTime toTime,
+            Pageable pageable);
 
     boolean existsByServiceIdAndDateAndStartTime(UUID serviceId, LocalDate date, LocalTime startTime);
 
@@ -68,8 +78,8 @@ public interface JpaServiceSlotRepository extends JpaRepository<ServiceSlotJpaEn
     @Query("UPDATE ServiceSlotJpaEntity s SET s.bookedCount = s.bookedCount + :quantity WHERE s.id = :slotId AND (s.capacity - s.bookedCount) >= :quantity")
     int incrementBookedCount(@Param("slotId") UUID slotId, @Param("quantity") int quantity);
 
-    java.util.List<ServiceSlotJpaEntity> findByDateBetween(java.time.LocalDate start, java.time.LocalDate end);
-    java.util.List<ServiceSlotJpaEntity> findByDate(java.time.LocalDate date);
+    List<ServiceSlotJpaEntity> findByDateBetween(LocalDate start, LocalDate end);
+    List<ServiceSlotJpaEntity> findByDate(LocalDate date);
     @Modifying(clearAutomatically = true, flushAutomatically = true)
     @Query("UPDATE ServiceSlotJpaEntity s SET s.bookedCount = GREATEST(0, s.bookedCount - :quantity) WHERE s.id = :slotId")
     int decrementBookedCount(@Param("slotId") UUID slotId, @Param("quantity") int quantity);

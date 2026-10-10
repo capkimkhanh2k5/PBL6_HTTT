@@ -213,208 +213,173 @@ export function Revenue() {
   };
 
   return (
-    <main className="w-full pt-16 bg-surface min-h-screen">
+    <div className="w-full bg-surface min-h-screen">
       <div className="flex flex-col w-full">
-        <div className="px-space-xl py-space-lg flex flex-col gap-space-xl max-w-[1360px] mx-auto w-full">
-          {/* Breadcrumb & Top Utility Header */}
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-space-md">
-            <div className="flex flex-col gap-space-xs">
-              <nav className="flex items-center gap-space-xs text-on-surface-variant font-label-md text-label-md">
-                <span>Quản trị Tài chính</span>
-                <span className="material-symbols-outlined text-[16px] text-outline">chevron_right</span>
-                <span className="text-primary font-semibold">Đối soát kỳ thanh toán &amp; Doanh thu biển</span>
-              </nav>
-              <div className="flex items-baseline gap-space-sm mt-1">
-                <h1 className="font-headline-lg text-headline-lg font-bold text-on-surface tracking-tight">
-                  Đối soát Doanh thu &amp; Bảng kê Chiết khấu
-                </h1>
-                <span className="hidden sm:inline-block px-2.5 py-0.5 rounded-full bg-primary-fixed text-on-primary-fixed font-label-sm text-label-sm font-semibold">
-                  Kỳ thanh toán 15 ngày
-                </span>
-              </div>
-              <p className="font-body-md text-body-md text-on-surface-variant max-w-3xl">
-                Quản lý các kỳ quyết toán định kỳ giữa Ban Quản lý Cảng vụ DANASEA và Đối tác vận hành biển Danang Ocean Club theo công thức chuẩn: <span className="font-semibold text-on-surface">Thực nhận (Net) = Doanh thu gộp (Gross) - Phí hoa hồng sàn (Commission 10%)</span>.
-              </p>
+        <div className="px-6 py-4 space-y-3.5 w-full">
+          {/* Top Utility Header */}
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-200">
+            <div>
+              <h1 className="text-xl md:text-2xl font-bold text-slate-900 tracking-tight">
+                Doanh thu
+              </h1>
             </div>
 
-            <div className="flex items-center gap-space-sm self-start md:self-auto shrink-0">
+            <div className="flex items-center gap-2 self-start sm:self-auto shrink-0">
               <button 
                 onClick={handlePrint}
-                className="inline-flex items-center gap-space-xs px-space-md py-2.5 rounded-xl bg-surface-container-lowest text-on-surface font-label-lg text-label-lg shadow-sm hover:bg-surface-container-high transition-all" 
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white border border-slate-200 text-slate-700 text-xs font-medium hover:bg-slate-50 transition-all shadow-xs cursor-pointer" 
                 type="button"
               >
-                <span className="material-symbols-outlined text-[18px] text-tertiary">print</span>
+                <span className="material-symbols-outlined text-[18px]">print</span>
                 <span>In biên bản</span>
               </button>
               <button 
                 onClick={handleExportCSV}
-                className="inline-flex items-center gap-space-xs px-space-md py-2.5 rounded-xl bg-primary text-on-primary font-label-lg text-label-lg shadow-sm hover:bg-primary-container transition-all" 
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-primary text-white text-xs font-semibold hover:bg-primary-container transition-all shadow-xs cursor-pointer" 
                 type="button"
               >
                 <span className="material-symbols-outlined text-[18px]">download</span>
-                <span>Xuất bảng kê (CSV)</span>
+                <span>Xuất CSV</span>
               </button>
             </div>
           </div>
 
           {/* Active Settlement Period Summary Card Banner */}
-          <div className="rounded-2xl bg-surface-container-lowest shadow-sm p-space-lg relative overflow-hidden border border-outline-variant/30">
-            <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-space-md pb-space-md border-b border-outline-variant/20">
-              <div className="flex items-center gap-space-md">
-                <div className="w-12 h-12 rounded-xl bg-primary-fixed flex items-center justify-center text-primary shrink-0">
-                  <span className="material-symbols-outlined text-[28px]">account_balance_wallet</span>
+          <div className="rounded-xl bg-white shadow-xs p-4 relative overflow-hidden border border-slate-200">
+            <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3 pb-3 border-b border-slate-100">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-lg bg-slate-100 border border-slate-200 flex items-center justify-center text-primary shrink-0">
+                  <span className="material-symbols-outlined text-[24px]">account_balance_wallet</span>
                 </div>
                 <div>
-                  <div className="flex items-center gap-space-sm flex-wrap">
-                    <span className="font-headline-sm text-headline-sm font-bold text-on-surface">
-                      Kỳ đối soát đang xem: {currentCycle.code}
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <span className="text-sm font-bold text-slate-900">
+                      Kỳ đối soát: {currentCycle.code}
                     </span>
                     {currentCycle.status === 'PAID' ? (
-                      <span className="px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 font-label-sm text-label-sm font-bold flex items-center gap-1">
-                        <span className="material-symbols-outlined text-[14px]">check_circle</span>
-                        ĐÃ THANH TOÁN (PAID)
+                      <span className="px-2 py-0.5 rounded text-xs font-medium bg-emerald-50 text-emerald-700 border border-emerald-200 flex items-center gap-1">
+                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-600"></span>
+                        Đã thanh toán
                       </span>
                     ) : (
-                      <span className="px-2.5 py-0.5 rounded-full bg-amber-50 text-amber-700 font-label-sm text-label-sm font-bold flex items-center gap-1">
-                        <span className="material-symbols-outlined text-[14px]">pending</span>
-                        ĐANG ĐỐI SOÁT (PENDING)
+                      <span className="px-2 py-0.5 rounded text-xs font-medium bg-amber-50 text-amber-700 border border-amber-200 flex items-center gap-1">
+                        <span className="w-1.5 h-1.5 rounded-full bg-amber-600"></span>
+                        Đang đối soát
                       </span>
                     )}
                   </div>
-                  <p className="font-body-sm text-body-sm text-on-surface-variant mt-0.5">
-                    Khoảng thời gian: <span className="font-semibold text-on-surface">{currentCycle.dateRange}</span> • {currentCycle.payoutDate}
+                  <p className="text-xs text-slate-500 mt-0.5">
+                    Thời gian: <span className="font-medium text-slate-700">{currentCycle.dateRange}</span> • {currentCycle.payoutDate}
                   </p>
                 </div>
               </div>
 
               {/* Inline Visual Settlement Ratio Bar */}
-              <div className="flex flex-col gap-1.5 w-full lg:w-72 bg-surface-container-low p-space-sm rounded-xl">
-                <div className="flex justify-between font-label-sm text-label-sm">
-                  <span className="text-on-surface-variant font-medium">Tỷ lệ thực nhận</span>
+              <div className="flex flex-col gap-1.5 w-full lg:w-72 bg-slate-50 p-3 rounded-xl border border-slate-200">
+                <div className="flex justify-between text-xs">
+                  <span className="text-slate-600 font-medium">Tỷ lệ thực nhận</span>
                   <span className="font-bold text-primary">90% Net / 10% Sàn</span>
                 </div>
-                <div className="w-full h-2.5 bg-surface-container-highest rounded-full overflow-hidden flex">
+                <div className="w-full h-2 bg-slate-200 rounded-full overflow-hidden flex">
                   <div className="h-full bg-primary" style={{ width: '90%' }} title="Thực nhận đối tác: 90%"></div>
-                  <div className="h-full bg-secondary" style={{ width: '10%' }} title="Phí dịch vụ sàn: 10%"></div>
+                  <div className="h-full bg-amber-500" style={{ width: '10%' }} title="Phí dịch vụ sàn: 10%"></div>
                 </div>
-                <div className="flex justify-between font-label-sm text-[10px] text-outline">
+                <div className="flex justify-between text-[11px] text-slate-500">
                   <span>Đối tác: {currentCycle.netAmount.toLocaleString('vi-VN')} đ</span>
                   <span>Hoa hồng: {currentCycle.commissionAmount.toLocaleString('vi-VN')} đ</span>
                 </div>
               </div>
             </div>
 
-            {/* 4 Core Metrics */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-space-md pt-space-md">
-              {/* Metric 1: Gross */}
-              <div className="p-space-md rounded-xl bg-surface-container-low flex flex-col gap-1">
-                <div className="flex items-center justify-between text-on-surface-variant">
-                  <span className="font-label-md text-label-md">Doanh thu gộp (Gross)</span>
-                  <span className="material-symbols-outlined text-[18px] text-tertiary">receipt_long</span>
+            {/* Inline Financial Summary Strip */}
+            <div className="flex flex-wrap items-center justify-between gap-4 px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 shadow-xs mt-3">
+              <div className="flex flex-wrap items-center gap-6 text-xs">
+                <div>
+                  <span className="text-slate-500 text-[11px] block font-medium">Doanh thu gộp (Gross)</span>
+                  <span className="font-mono font-bold text-base text-slate-900">
+                    {currentCycle.grossAmount.toLocaleString('vi-VN')} <span className="text-xs font-normal">đ</span>
+                  </span>
+                  <span className="text-[10px] text-slate-500 block">{currentCycle.itemsCount} đơn hoàn tất</span>
                 </div>
-                <div className="font-headline-md text-headline-md font-bold text-on-surface mt-1">
-                  {currentCycle.grossAmount.toLocaleString('vi-VN')} <span className="text-label-md font-medium text-tertiary">đ</span>
+                <span className="text-slate-300 self-center">•</span>
+                <div>
+                  <span className="text-slate-500 text-[11px] block font-medium">Phí sàn &amp; Cảng vụ (10%)</span>
+                  <span className="font-mono font-bold text-base text-amber-600">
+                    -{currentCycle.commissionAmount.toLocaleString('vi-VN')} <span className="text-xs font-normal">đ</span>
+                  </span>
                 </div>
-                <p className="font-body-sm text-body-sm text-on-surface-variant line-clamp-1">
-                  Tổng {currentCycle.itemsCount} dịch vụ con hoàn tất
-                </p>
+                <span className="text-slate-300 self-center">•</span>
+                <div>
+                  <span className="text-slate-500 text-[11px] block font-medium">Thực nhận đối tác (Net)</span>
+                  <span className="font-mono font-bold text-base text-primary">
+                    {currentCycle.netAmount.toLocaleString('vi-VN')} <span className="text-xs font-normal">đ</span>
+                  </span>
+                  <span className="text-[10px] text-primary block font-medium">
+                    {currentCycle.status === 'PAID' ? 'Đã chi trả' : 'Đang xử lý thanh toán'}
+                  </span>
+                </div>
               </div>
 
-              {/* Metric 2: Commission */}
-              <div className="p-space-md rounded-xl bg-surface-container-low flex flex-col gap-1">
-                <div className="flex items-center justify-between text-on-surface-variant">
-                  <span className="font-label-md text-label-md">Phí sàn &amp; Cảng vụ (10%)</span>
-                  <span className="material-symbols-outlined text-[18px] text-secondary">pie_chart</span>
-                </div>
-                <div className="font-headline-md text-headline-md font-bold text-secondary mt-1">
-                  {currentCycle.commissionAmount.toLocaleString('vi-VN')} <span className="text-label-md font-medium text-secondary">đ</span>
-                </div>
-                <p className="font-body-sm text-body-sm text-on-surface-variant line-clamp-1">
-                  Chiết khấu theo hợp đồng VITA
-                </p>
-              </div>
-
-              {/* Metric 3: Net Payable */}
-              <div className="p-space-md rounded-xl bg-primary-fixed/30 flex flex-col gap-1">
-                <div className="flex items-center justify-between text-primary">
-                  <span className="font-label-md text-label-md font-semibold">Thực nhận đối tác (Net)</span>
-                  <span className="material-symbols-outlined text-[20px]">payments</span>
-                </div>
-                <div className="font-headline-md text-headline-md font-bold text-primary mt-1">
-                  {currentCycle.netAmount.toLocaleString('vi-VN')} <span className="text-label-md font-medium text-primary">đ</span>
-                </div>
-                <p className="font-body-sm text-body-sm text-tertiary font-medium line-clamp-1">
-                  {currentCycle.status === 'PAID' ? 'Đã chuyển khoản Vietcombank' : 'Đang xử lý thanh toán'}
-                </p>
-              </div>
-
-              {/* Metric 4: Account */}
-              <div className="p-space-md rounded-xl bg-surface-container-low flex flex-col justify-between">
-                <div className="flex items-center justify-between text-on-surface-variant">
-                  <span className="font-label-md text-label-md">Tài khoản thụ hưởng</span>
-                  <span className="material-symbols-outlined text-[18px] text-outline">account_balance</span>
-                </div>
-                <div className="mt-1">
-                  <div className="font-label-md font-bold text-on-surface">0041000332891 (VCB)</div>
-                  <div className="text-[12px] text-on-surface-variant font-medium">CTY TNHH DU THUYỀN VÀ THỂ THAO BIỂN ĐÀ NẴNG</div>
-                </div>
+              <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-white border border-slate-200 text-xs text-slate-600 font-medium">
+                <span className="material-symbols-outlined text-[16px] text-slate-400">account_balance</span>
+                <span>VCB: <strong className="font-mono text-slate-800">0041000332891</strong></span>
               </div>
             </div>
           </div>
 
           {/* Section: Period Selection Table */}
-          <div className="flex flex-col gap-space-sm">
-            <h2 className="font-headline-sm text-headline-sm font-bold text-on-surface">
-              Lịch sử các kỳ đối soát doanh thu
+          <div className="flex flex-col gap-2">
+            <h2 className="text-sm font-bold text-slate-900">
+              Lịch sử các kỳ đối soát
             </h2>
-            <div className="rounded-2xl bg-surface-container-lowest shadow-sm overflow-hidden border border-outline-variant/30">
-              <table className="w-full text-left font-body-sm">
-                <thead className="bg-surface-container-low font-label-sm text-on-surface-variant uppercase tracking-wider">
-                  <tr>
-                    <th className="py-3 px-space-lg">Mã kỳ đối soát</th>
-                    <th className="py-3 px-space-md">Khoảng thời gian</th>
-                    <th className="py-3 px-space-md text-right">Doanh thu gộp</th>
-                    <th className="py-3 px-space-md text-right">Khấu trừ (10%)</th>
-                    <th className="py-3 px-space-md text-right">Thực nhận</th>
-                    <th className="py-3 px-space-md">Trạng thái</th>
-                    <th className="py-3 px-space-lg text-right">Thao tác</th>
+            <div className="rounded-xl bg-white shadow-xs overflow-hidden border border-slate-200">
+              <table className="w-full text-left border-collapse text-xs">
+                <thead>
+                  <tr className="bg-slate-100 text-slate-900 font-bold border-b border-slate-200">
+                    <th className="py-3 px-4 font-bold border-r border-slate-200">Mã kỳ đối soát</th>
+                    <th className="py-3 px-3 font-bold border-r border-slate-200">Khoảng thời gian</th>
+                    <th className="py-3 px-3 text-right font-bold border-r border-slate-200">Doanh thu gộp</th>
+                    <th className="py-3 px-3 text-right font-bold border-r border-slate-200">Khấu trừ (10%)</th>
+                    <th className="py-3 px-3 text-right font-bold border-r border-slate-200">Thực nhận</th>
+                    <th className="py-3 px-3 font-bold border-r border-slate-200">Trạng thái</th>
+                    <th className="py-3 px-4 text-center font-bold">Thao tác</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-outline-variant/20">
+                <tbody className="divide-y divide-slate-200 text-sm text-slate-800">
                   {SETTLEMENT_PERIODS.map(period => (
                     <tr 
                       key={period.code} 
-                      className={`hover:bg-surface-container-low/40 transition-colors ${selectedCycleCode === period.code ? 'bg-primary/5' : ''}`}
+                      className={`hover:bg-slate-50 transition-colors ${selectedCycleCode === period.code ? 'bg-slate-50 font-medium' : ''}`}
                     >
-                      <td className="py-space-md px-space-lg font-bold text-primary">{period.code}</td>
-                      <td className="py-space-md px-space-md text-on-surface-variant">{period.dateRange}</td>
-                      <td className="py-space-md px-space-md text-right font-semibold">{period.grossAmount.toLocaleString('vi-VN')} đ</td>
-                      <td className="py-space-md px-space-md text-right text-secondary font-semibold">-{period.commissionAmount.toLocaleString('vi-VN')} đ</td>
-                      <td className="py-space-md px-space-md text-right font-bold text-on-surface">{period.netAmount.toLocaleString('vi-VN')} đ</td>
-                      <td className="py-space-md px-space-md">
+                      <td className="py-3 px-4 font-bold font-mono text-slate-900 border-r border-slate-200">{period.code}</td>
+                      <td className="py-3 px-3 text-slate-600 text-xs border-r border-slate-200">{period.dateRange}</td>
+                      <td className="py-3 px-3 text-right font-mono font-bold text-slate-900 border-r border-slate-200">{period.grossAmount.toLocaleString('vi-VN')} đ</td>
+                      <td className="py-3 px-3 text-right font-mono text-amber-600 border-r border-slate-200">-{period.commissionAmount.toLocaleString('vi-VN')} đ</td>
+                      <td className="py-3 px-3 text-right font-mono font-bold text-primary border-r border-slate-200">{period.netAmount.toLocaleString('vi-VN')} đ</td>
+                      <td className="py-3 px-3 border-r border-slate-200">
                         {period.status === 'PAID' ? (
-                          <span className="px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 font-label-sm text-[11px] font-bold">
+                          <span className="px-2 py-0.5 rounded text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
                             ĐÃ THANH TOÁN
                           </span>
                         ) : (
-                          <span className="px-2.5 py-1 rounded-full bg-amber-50 text-amber-700 font-label-sm text-[11px] font-bold">
+                          <span className="px-2 py-0.5 rounded text-xs font-semibold bg-amber-50 text-amber-700 border border-amber-200">
                             CHỜ ĐỐI SOÁT
                           </span>
                         )}
                       </td>
-                      <td className="py-space-md px-space-lg text-right">
+                      <td className="py-3 px-4 text-center">
                         <button 
                           onClick={() => {
                             setSelectedCycleCode(period.code);
                             showToast(`Đã chuyển xem chi tiết kỳ ${period.code}`);
                           }}
-                          className={`px-3 py-1.5 rounded-lg font-label-sm font-bold transition-all ${
+                          className={`px-3 py-1 rounded-lg text-xs font-medium transition-all cursor-pointer shadow-xs ${
                             selectedCycleCode === period.code 
-                              ? 'bg-primary text-on-primary' 
-                              : 'bg-surface-container text-on-surface hover:bg-surface-container-high'
+                              ? 'bg-primary text-white' 
+                              : 'bg-white border border-slate-200 text-slate-700 hover:bg-slate-50'
                           }`}
                         >
-                          {selectedCycleCode === period.code ? 'Đang xem' : 'Xem bảng kê'}
+                          {selectedCycleCode === period.code ? 'Đang xem' : 'Xem'}
                         </button>
                       </td>
                     </tr>
@@ -425,78 +390,101 @@ export function Revenue() {
           </div>
 
           {/* Section: Sub-orders Breakdown of Current Settlement */}
-          <div className="flex flex-col gap-space-sm mt-2">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-space-md">
+          <div className="flex flex-col gap-2 mt-2">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
               <div>
-                <div className="flex items-center gap-space-xs">
-                  <h2 className="font-headline-sm text-headline-sm font-bold text-on-surface">
-                    Bảng kê dịch vụ hoàn tất trong kỳ
+                <div className="flex items-center gap-2">
+                  <h2 className="text-sm font-bold text-slate-900">
+                    Bảng kê chi tiết đơn trong kỳ
                   </h2>
-                  <span className="font-label-md text-label-md font-bold text-primary px-2 py-0.5 rounded bg-primary-fixed">
+                  <span className="text-xs font-bold text-slate-700 px-2 py-0.5 rounded bg-slate-100 border border-slate-200">
                     {currentCycle.code}
                   </span>
                 </div>
-                <p className="font-body-sm text-body-sm text-on-surface-variant mt-0.5">
-                  Dữ liệu đồng bộ từ cổng check-in QR bến bãi VITA và kiểm định an toàn Cảng vụ
-                </p>
               </div>
 
-              <div className="relative w-full sm:w-72">
-                <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline text-[18px]">search</span>
+              <div className="relative w-full sm:w-64">
+                <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-[18px]">search</span>
                 <input 
                   type="text"
                   placeholder="Tìm mã đơn hoặc khách..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full pl-9 pr-3 py-2 rounded-xl bg-surface-container-lowest border border-outline-variant/30 text-on-surface font-body-sm focus:outline-none focus:ring-2 focus:ring-primary shadow-sm"
+                  className="w-full pl-9 pr-3 py-1.5 rounded-lg bg-white border border-slate-200 text-slate-800 text-xs focus:outline-none focus:ring-1 focus:ring-primary shadow-xs"
                 />
               </div>
             </div>
 
             <div
               key={selectedCycleCode}
-              className="rounded-2xl bg-surface-container-lowest shadow-sm overflow-hidden border border-outline-variant/30 animate-fade-in-up"
+              className="rounded-xl bg-white shadow-xs overflow-hidden border border-slate-200"
             >
-              <table className="w-full text-left font-body-sm">
-                <thead className="bg-surface-container-low font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">
-                  <tr>
-                    <th className="py-3.5 px-space-lg">Mã Sub-order</th>
-                    <th className="py-3.5 px-space-md">Dịch vụ trải nghiệm</th>
-                    <th className="py-3.5 px-space-md">Khách hàng</th>
-                    <th className="py-3.5 px-space-sm text-center">Số lượng</th>
-                    <th className="py-3.5 px-space-md text-right">Đơn giá</th>
-                    <th className="py-3.5 px-space-md text-right font-semibold text-on-surface">Tổng tiền (Gross)</th>
-                    <th className="py-3.5 px-space-sm text-center">Tỷ lệ</th>
-                    <th className="py-3.5 px-space-md text-right text-secondary font-semibold">Khấu trừ sàn</th>
-                    <th className="py-3.5 px-space-lg text-right font-bold text-primary">Thực nhận</th>
+              <table className="w-full text-left border-collapse text-xs">
+                <thead>
+                  <tr className="bg-slate-100 text-slate-900 font-bold border-b border-slate-200">
+                    <th className="py-3 px-4 font-bold border-r border-slate-200">Mã Sub-order</th>
+                    <th className="py-3 px-3 font-bold border-r border-slate-200">Dịch vụ</th>
+                    <th className="py-3 px-3 font-bold border-r border-slate-200">Khách hàng</th>
+                    <th className="py-3 px-2 text-center font-bold border-r border-slate-200">Số lượng</th>
+                    <th className="py-3 px-3 text-right font-bold border-r border-slate-200">Đơn giá</th>
+                    <th className="py-3 px-3 text-right font-bold border-r border-slate-200">Tổng tiền</th>
+                    <th className="py-3 px-2 text-center font-bold border-r border-slate-200">Tỷ lệ</th>
+                    <th className="py-3 px-3 text-right font-bold border-r border-slate-200">Khấu trừ sàn</th>
+                    <th className="py-3 px-4 text-right font-bold">Thực nhận</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-outline-variant/20">
+                <tbody className="divide-y divide-slate-200 text-sm text-slate-800">
                   {filteredItems.map(item => (
-                    <tr key={item.id} className="hover:bg-surface-container-low/50 transition-colors">
-                      <td className="py-space-md px-space-lg font-semibold text-primary">{item.subOrderCode}</td>
-                      <td className="py-space-md px-space-md">
-                        <div className="font-semibold text-on-surface">{item.serviceName}</div>
-                        <div className="text-on-surface-variant font-label-sm text-[12px] flex items-center gap-1 mt-0.5">
-                          <span className="material-symbols-outlined text-[14px]">schedule</span>
+                    <tr key={item.id} className="hover:bg-slate-50 transition-colors">
+                      <td className="py-3 px-4 font-bold font-mono text-slate-900 border-r border-slate-200">{item.subOrderCode}</td>
+                      <td className="py-3 px-3 border-r border-slate-200">
+                        <div className="font-bold text-slate-900 text-xs">{item.serviceName}</div>
+                        <div className="text-slate-500 text-[11px] flex items-center gap-1 mt-0.5">
+                          <span className="material-symbols-outlined text-[13px]">schedule</span>
                           {item.slotTime}
                         </div>
                       </td>
-                      <td className="py-space-md px-space-md font-medium text-on-surface">{item.customerName}</td>
-                      <td className="py-space-md px-space-sm text-center">
-                        <span className="px-2 py-0.5 rounded-full bg-surface-container-high font-label-sm text-label-sm font-semibold">
-                          {item.quantity} khách
+                      <td className="py-3 px-3 font-medium text-slate-800 text-xs border-r border-slate-200">{item.customerName}</td>
+                      <td className="py-3 px-2 text-center border-r border-slate-200">
+                        <span className="px-2 py-0.5 rounded bg-slate-100 border border-slate-200 text-xs font-medium text-slate-700">
+                          {item.quantity} người
                         </span>
                       </td>
-                      <td className="py-space-md px-space-md text-right text-on-surface-variant">{item.unitPrice.toLocaleString('vi-VN')} đ</td>
-                      <td className="py-space-md px-space-md text-right font-semibold text-on-surface">{item.gross.toLocaleString('vi-VN')} đ</td>
-                      <td className="py-space-md px-space-sm text-center font-label-sm text-on-surface-variant">{item.rate}</td>
-                      <td className="py-space-md px-space-md text-right font-medium text-secondary">-{item.commission.toLocaleString('vi-VN')} đ</td>
-                      <td className="py-space-md px-space-lg text-right font-bold text-primary">{item.net.toLocaleString('vi-VN')} đ</td>
+                      <td className="py-3 px-3 text-right font-mono text-xs text-slate-700 border-r border-slate-200">{item.unitPrice.toLocaleString('vi-VN')} đ</td>
+                      <td className="py-3 px-3 text-right font-mono font-bold text-xs text-slate-900 border-r border-slate-200">{item.gross.toLocaleString('vi-VN')} đ</td>
+                      <td className="py-3 px-2 text-center text-xs text-slate-600 border-r border-slate-200">{item.rate}</td>
+                      <td className="py-3 px-3 text-right font-mono text-xs text-amber-600 border-r border-slate-200">-{item.commission.toLocaleString('vi-VN')} đ</td>
+                      <td className="py-3 px-4 text-right font-mono font-bold text-xs text-primary">{item.net.toLocaleString('vi-VN')} đ</td>
                     </tr>
                   ))}
                 </tbody>
               </table>
+
+              {/* Minimal Clean Pagination Bar */}
+              <div className="px-4 py-2 border-t border-slate-200 bg-slate-50 flex items-center justify-between text-xs select-none">
+                <div className="flex items-center gap-2">
+                  <span className="text-slate-600 font-medium">Số dòng:</span>
+                  <select
+                    defaultValue={10}
+                    className="px-2 py-1 rounded bg-white border border-slate-200 text-xs font-semibold text-slate-800 cursor-pointer focus:outline-none"
+                  >
+                    <option value={5}>5</option>
+                    <option value={10}>10</option>
+                    <option value={20}>20</option>
+                  </select>
+                </div>
+                <div className="flex items-center gap-1">
+                  <button className="px-2 py-1 rounded text-slate-500 hover:bg-slate-200 font-medium cursor-pointer" disabled>
+                    Trước
+                  </button>
+                  <span className="w-7 h-7 rounded bg-primary text-white flex items-center justify-center font-bold text-xs">
+                    1
+                  </span>
+                  <button className="px-2 py-1 rounded text-slate-500 hover:bg-slate-200 font-medium cursor-pointer" disabled>
+                    Sau
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -509,6 +497,6 @@ export function Revenue() {
           </div>
         )}
       </div>
-    </main>
+    </div>
   );
 }

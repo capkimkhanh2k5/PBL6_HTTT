@@ -260,6 +260,14 @@ public class PayPalPaymentAdapter implements PaymentGatewayPort {
     }
 
     @Override
+    public PaymentCaptureResult queryPayment(PaymentProvider provider, String providerOrderId, String transactionDate) {
+        if (provider == PaymentProvider.VNPAY) {
+            return vnPayPaymentAdapter.queryPayment(provider, providerOrderId, transactionDate);
+        }
+        return queryCapture(provider, providerOrderId);
+    }
+
+    @Override
     public PaymentCaptureResult queryCapture(PaymentProvider provider, String providerOrderId) {
         requirePayPal(provider);
         try {

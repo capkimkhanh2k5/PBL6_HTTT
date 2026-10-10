@@ -1,0 +1,36 @@
+========================================================================
+           HƯỚNG DẪN KHỞI CHẠY VÀ XEM DEMO DỰ ÁN DANASEA FRONTEND
+========================================================================
+
+Dự án đã được tích hợp đầy đủ:
+- Giao diện nền ảnh biển 2K sắc nét, không vỡ hạt, chuyển cảnh cuộn chuột.
+- Hiệu ứng kính mờ cao cấp (Frosted Glassmorphism).
+- Hiệu ứng xuất hiện Domino so le từng card khi cuộn vào tầm nhìn.
+- Hiệu ứng rê chuột: Phóng to card 10% tại trọng tâm và các card xung quanh dập dềnh sóng biển.
+
+------------------------------------------------------------------------
+CÁCH 1: XEM DEMO NHANH (KHÔNG CẦN CÀI ĐẶT THƯ VIỆN LÂU)
+------------------------------------------------------------------------
+Thư mục 'dist' đã được biên dịch sẵn bản Production mới nhất.
+Mở Terminal / PowerShell tại thư mục này và gõ:
+
+    npx serve dist
+
+Hoặc nếu có cài tiện ích 'Live Server' trên VS Code:
+- Nhấp chuột phải vào file 'dist/index.html' -> chọn "Open with Live Server".
+
+------------------------------------------------------------------------
+CÁCH 2: CHẠY DỰ ÁN CHẾ ĐỘ PHÁT TRIỂN (DEVELOPMENT MODE)
+------------------------------------------------------------------------
+1. Cài đặt các gói thư viện:
+    npm install
+
+2. Khởi chạy máy chủ phát triển:
+    npm run dev
+
+3. Mở trình duyệt truy cập:
+    http://localhost:5173/
+
+========================================================================
+DANASEA - Nền Tảng Đặt Trước Trải Nghiệm Biển Cảm Xúc Cao Tại Đà Nẵng
+========================================================================

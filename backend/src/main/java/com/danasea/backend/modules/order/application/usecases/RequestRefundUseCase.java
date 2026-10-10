@@ -163,11 +163,12 @@ public class RequestRefundUseCase {
                 effectiveDeparture = departureLookupPort.findDepartureTime(subOrder.getSlotId()).orElse(null);
             }
 
+            BigDecimal refundableBase = subOrder.getFinalAmount() != null ? subOrder.getFinalAmount() : subOrder.getSubtotalAmount();
             RefundEvaluationResult evaluation = refundPolicyEngine.evaluate(
                     reason,
                     effectiveDeparture,
                     cancelTime,
-                    subOrder.getSubtotalAmount()
+                    refundableBase
             );
 
             if (evaluation.refundAmount().compareTo(BigDecimal.ZERO) <= 0) {

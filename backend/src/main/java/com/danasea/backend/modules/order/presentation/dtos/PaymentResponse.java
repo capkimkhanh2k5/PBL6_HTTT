@@ -21,8 +21,31 @@ public record PaymentResponse(
         OffsetDateTime expiresAt,
         OffsetDateTime createdAt,
         OffsetDateTime updatedAt,
-        String providerOrderId
+        String providerOrderId,
+        String lastError,
+        Integer reconciliationAttempts,
+        OffsetDateTime reconciliationNextAttemptAt,
+        OffsetDateTime lastReconciledAt
 ) {
+    public PaymentResponse(
+            UUID id,
+            UUID masterOrderId,
+            PaymentProvider provider,
+            String providerTransactionId,
+            BigDecimal amount,
+            PaymentStatus status,
+            String idempotencyKey,
+            String webhookEventId,
+            String paymentUrl,
+            String qrCodeUrl,
+            OffsetDateTime expiresAt,
+            OffsetDateTime createdAt,
+            OffsetDateTime updatedAt,
+            String providerOrderId) {
+        this(id, masterOrderId, provider, providerTransactionId, amount, status, idempotencyKey, webhookEventId, paymentUrl, qrCodeUrl,
+                expiresAt, createdAt, updatedAt, providerOrderId, null, null, null, null);
+    }
+
     public PaymentResponse(
             UUID id,
             UUID masterOrderId,

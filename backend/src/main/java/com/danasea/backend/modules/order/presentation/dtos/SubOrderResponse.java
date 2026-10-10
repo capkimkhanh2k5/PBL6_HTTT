@@ -13,6 +13,20 @@ public record SubOrderResponse(
         Integer quantity,
         BigDecimal unitPrice,
         BigDecimal subtotalAmount,
-        SubOrderStatus status
+        SubOrderStatus status,
+        BigDecimal discountAmount,
+        BigDecimal finalAmount
 ) {
+    public SubOrderResponse(
+            UUID id,
+            UUID vendorId,
+            UUID serviceId,
+            UUID slotId,
+            Integer quantity,
+            BigDecimal unitPrice,
+            BigDecimal subtotalAmount,
+            SubOrderStatus status
+    ) {
+        this(id, vendorId, serviceId, slotId, quantity, unitPrice, subtotalAmount, status, BigDecimal.ZERO, subtotalAmount);
+    }
 }

@@ -35,7 +35,6 @@ export interface VendorNotificationItem {
 }
 
 const STORAGE_KEY_PROFILE = 'danasea_mock_vendor_profile_v1';
-const STORAGE_KEY_PAYOUTS = 'danasea_mock_vendor_payouts_v1';
 
 const DEFAULT_PROFILE: VendorProfileData = {
   id: 'vendor-doc-01',
@@ -122,7 +121,9 @@ export const VendorMockService = {
     };
     try {
       localStorage.setItem(STORAGE_KEY_PROFILE, JSON.stringify(updated));
-    } catch {}
+    } catch (e) {
+      console.error(e);
+    }
     return updated;
   },
 
@@ -138,7 +139,7 @@ export const VendorMockService = {
       submittedAt: new Date().toISOString().slice(0, 10)
     };
 
-    let updatedDocs = [...profile.documents];
+    const updatedDocs = [...profile.documents];
     if (existingIndex >= 0) {
       updatedDocs[existingIndex] = newDoc;
     } else {
@@ -148,7 +149,9 @@ export const VendorMockService = {
     const updated = { ...profile, documents: updatedDocs };
     try {
       localStorage.setItem(STORAGE_KEY_PROFILE, JSON.stringify(updated));
-    } catch {}
+    } catch (e) {
+      console.error(e);
+    }
     return updated;
   },
 

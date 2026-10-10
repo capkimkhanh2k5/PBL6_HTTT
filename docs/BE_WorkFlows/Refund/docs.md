@@ -47,7 +47,8 @@
 ### Giai đoạn 1: Xem trước mức hoàn tiền (Cancel Preview)
 1. Khách hàng gọi `GET /api/orders/sub-orders/{id}/cancel-preview`.
 2. `GetCancellationPreviewUseCase` nạp thông tin đơn phụ, thực hiện **IDOR check** xác thực quyền sở hữu.
-3. Gọi `RefundPolicyEngine.evaluate(CUSTOMER_REQUEST, startTime, now, subtotal)` để tính toán mức hoàn:
+3. Gọi `RefundPolicyEngine.evaluate(CUSTOMER_REQUEST, startTime, now, originalAmount)` để tính toán mức hoàn:
+   - `originalAmount` được lấy chính xác từ `subOrder.finalAmount` (số tiền thực trả sau khi đã áp dụng voucher giảm giá). Tuyệt đối không hoàn phần voucher trợ giá bằng tiền mặt (Xem chi tiết tại [Module Discount](../Discount/docs.md)).
    - **> 48 giờ:** Hoàn lại 100%.
    - **24 đến 48 giờ:** Hoàn lại 70%.
    - **2 đến 24 giờ:** Hoàn lại 30%.
@@ -96,8 +97,11 @@ Các bản ghi hoàn tiền `Refund (status = PENDING)` được khởi tạo t�
 
 ### Giai đoạn 4: Quản lý & Giám sát Hoàn tiền (Admin & Customer APIs)
 
+> 📌 *Chi tiết sơ đồ Mermaid và luồng nghiệp vụ:* xem tại [`../Order_Payment/Admin_Transaction_Refund_Management_Workflows.md`](../Order_Payment/Admin_Transaction_Refund_Management_Workflows.md).
+
 1. **Dành cho Quản trị viên (Admin Portal):**
-   - `GET /api/admin/refunds`: Tra cứu danh sách các khoản hoàn tiền toàn hệ thống (hỗ trợ phân trang, lọc theo trạng thái `PENDING`, `PROCESSED`, `FAILED`).
+   - `GET /api/admin/refunds`: Tra cứu danh sách các khoản hoàn tiền toàn sàn (phân trang `Pageable`, lọc nâng cao theo `status`, `reason`, `subOrderId`, `orderId`, `provider`, `vendorId`, `customerId`, khoảng thời gian `from/to`).
    - `GET /api/admin/refunds/{id}`: Xem chi tiết khoản hoàn tiền, mã tham chiếu cổng, số lần thử lại (`retryCount`), thời gian xử lý và nguyên nhân lỗi (nếu có).
-2. **Dành cho Khách hàng:**
-   - `GET /api/orders/{orderId}/refunds`: Khách hàng tra cứu tiến trình và trạng thái các khoản hoàn tiền thuộc đơn hàng của mình.
+2. **Dành cho Khách hàng & Quản trị viên:**
+   - `GET /api/orders/{orderId}/refunds`: Tra cứu tiến trình và trạng thái các khoản hoàn tiền thuộc đơn hàng.
+   - **Bảo mật IDOR Guard:** Kiểm tra nghiêm ngặt quyền sở hữu `order.customerId == currentUserId` hoặc quyền `ROLE_ADMIN` để ngăn chặn truy cập trái phép từ tài khoản khác (HTTP 403 Forbidden).

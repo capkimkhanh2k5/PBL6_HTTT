@@ -171,6 +171,7 @@ class AdminWeatherAlertControllerTest {
         subOrder.setSlotId(slotId);
         subOrder.setStatus(SubOrderStatus.CONFIRMED);
         subOrder.setSubtotalAmount(BigDecimal.valueOf(1500000));
+        subOrder.setFinalAmount(BigDecimal.valueOf(1200000));
 
         when(evaluationRepository.findByIdForUpdate(evaluationId)).thenReturn(Optional.of(alertEntity));
         when(subOrderRepository.findBySlotId(slotId)).thenReturn(List.of(subOrder));
@@ -192,7 +193,7 @@ class AdminWeatherAlertControllerTest {
         ArgumentCaptor<RefundJpaEntity> refundCaptor = ArgumentCaptor.forClass(RefundJpaEntity.class);
         verify(refundRepository).save(refundCaptor.capture());
         RefundJpaEntity capturedRefund = refundCaptor.getValue();
-        assertEquals(BigDecimal.valueOf(1500000), capturedRefund.getAmount());
+        assertEquals(BigDecimal.valueOf(1200000), capturedRefund.getAmount());
         assertEquals(BigDecimal.valueOf(100.0), capturedRefund.getRefundPercentage());
         assertEquals(RefundReason.WEATHER, capturedRefund.getReason());
         assertEquals(RefundStatus.PENDING, capturedRefund.getStatus());

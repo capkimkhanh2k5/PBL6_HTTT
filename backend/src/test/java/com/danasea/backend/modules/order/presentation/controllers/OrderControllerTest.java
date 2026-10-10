@@ -53,6 +53,7 @@ import com.danasea.backend.modules.order.presentation.dtos.CancellationPreviewRe
 import com.danasea.backend.modules.order.presentation.dtos.CreateOrderRequest;
 import com.danasea.backend.modules.order.presentation.dtos.OrderPageResponse;
 import com.danasea.backend.modules.order.presentation.dtos.OrderResponse;
+import com.danasea.backend.modules.order.presentation.dtos.PaymentResponse;
 import com.danasea.backend.modules.order.presentation.dtos.RefundDetailResponse;
 import com.danasea.backend.modules.order.presentation.dtos.RefundRequest;
 import com.danasea.backend.modules.order.presentation.dtos.RefundResponse;
@@ -429,5 +430,35 @@ class OrderControllerTest {
         assertNotNull(response.getBody());
         assertEquals(1, response.getBody().size());
         assertEquals(subOrderId, response.getBody().get(0).subOrderId());
+    }
+
+    @Test
+    @DisplayName("Should get order payments successfully")
+    void shouldGetOrderPaymentsSuccessfully() {
+        mockSecurityUser(customerId, "ROLE_CUSTOMER");
+        PaymentResponse paymentResponse = new PaymentResponse(
+                UUID.randomUUID(),
+                masterOrderId,
+                null,
+                "TXN-123",
+                BigDecimal.valueOf(200000),
+                null,
+                "idem-1",
+                null,
+                null,
+                null,
+                OffsetDateTime.now().plusMinutes(15),
+                OffsetDateTime.now(),
+                OffsetDateTime.now()
+        );
+        when(orderPaymentService.getOrderPayments(customerId, masterOrderId, false))
+                .thenReturn(List.of(paymentResponse));
+
+        ResponseEntity<List<PaymentResponse>> response = orderController.getOrderPayments(masterOrderId);
+
+        assertEquals(200, response.getStatusCode().value());
+        assertNotNull(response.getBody());
+        assertEquals(1, response.getBody().size());
+        assertEquals(masterOrderId, response.getBody().get(0).masterOrderId());
     }
 }

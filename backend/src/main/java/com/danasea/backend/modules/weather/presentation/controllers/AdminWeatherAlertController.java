@@ -242,14 +242,14 @@ public class AdminWeatherAlertController {
                                 RefundReason.WEATHER,
                                 slotStart,
                                 now,
-                                subOrder.getSubtotalAmount()
+                                subOrder.getFinalAmount()
                         );
 
                         String idempotencyKey = "weather-" + evaluationId;
                         var existingRefund = refundRepository.findBySubOrderIdAndIdempotencyKey(
                                 subOrder.getId(), idempotencyKey);
                         RefundJpaEntity refund = null;
-                        if (existingRefund.isEmpty()) {
+                        if (existingRefund.isEmpty() && evalResult.refundAmount().signum() > 0) {
                             RefundJpaEntity newRefund = new RefundJpaEntity();
                             newRefund.setSubOrderId(subOrder.getId());
                             newRefund.setAmount(evalResult.refundAmount());
@@ -260,11 +260,13 @@ public class AdminWeatherAlertController {
                             newRefund.setIdempotencyKey(idempotencyKey);
                             refund = refundRepository.save(newRefund);
                         } else {
-                            refund = existingRefund.get();
+                            refund = existingRefund.orElse(null);
                         }
 
 
-                        refundedCount++;
+                        if (evalResult.refundAmount().signum() > 0) {
+                            refundedCount++;
+                        }
                     }
                 }
             }

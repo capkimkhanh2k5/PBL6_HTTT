@@ -4,7 +4,7 @@ import { FEATURED_SERVICES, MOCK_IMAGES, MOCK_SLOTS } from "../../../mockData";
 
 export function Cart() {
   const navigate = useNavigate();
-  const { items, removeItem, clearCart, getTotalPrice } = useCartStore();
+  const { items, removeItem, getTotalPrice } = useCartStore();
 
   const handleCheckout = () => {
     if (items.length > 0) {

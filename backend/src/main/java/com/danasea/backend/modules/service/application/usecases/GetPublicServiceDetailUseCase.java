@@ -1,6 +1,12 @@
 package com.danasea.backend.modules.service.application.usecases;
 
+import java.util.List;
+import java.util.UUID;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+import com.danasea.backend.modules.order.domain.services.RefundPolicyEngine;
 import com.danasea.backend.modules.service.application.dtos.ServiceDetailResult;
+import com.danasea.backend.modules.service.application.services.ServiceDiscoveryAvailability;
 import com.danasea.backend.modules.service.domain.exceptions.ServiceNotFoundException;
 import com.danasea.backend.modules.service.domain.models.OptionStatus;
 import com.danasea.backend.modules.service.domain.models.Service;
@@ -10,16 +16,22 @@ import com.danasea.backend.modules.service.domain.ports.ServiceAvailabilityPort;
 import com.danasea.backend.modules.service.domain.ports.ServiceImageRepositoryPort;
 import com.danasea.backend.modules.service.domain.ports.ServiceOptionRepositoryPort;
 import com.danasea.backend.modules.service.domain.ports.ServiceRepositoryPort;
+import com.danasea.backend.modules.service.domain.ports.ServiceSlotRepositoryPort;
+import com.danasea.backend.modules.service.domain.ports.VendorPort;
 import com.danasea.backend.modules.service.presentation.dtos.ServiceOptionResponse;
+import com.danasea.backend.modules.service.presentation.dtos.StructuredSlotResponse;
+import com.danasea.backend.modules.vendor.domain.models.BadgeTier;
 import com.danasea.backend.shared.i18n.LocalizedContentSelector;
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Component;
-
-import java.util.UUID;
 
 @Component
-@RequiredArgsConstructor
 public class GetPublicServiceDetailUseCase {
+    private ServiceDiscoveryAvailability discoveryAvailability;
+
+    @Autowired
+    public void setDiscoveryAvailability(ServiceDiscoveryAvailability discoveryAvailability) {
+        this.discoveryAvailability = discoveryAvailability;
+    }
+
     private final ServiceRepositoryPort serviceRepositoryPort;
     private final RecordRecentlyViewedUseCase recordRecentlyViewedUseCase;
     private final CategoryRepositoryPort categoryRepositoryPort;
@@ -27,6 +39,48 @@ public class GetPublicServiceDetailUseCase {
     private final ServiceAvailabilityPort serviceAvailabilityPort;
     private final LocalizedContentSelector localizedContentSelector;
     private final ServiceOptionRepositoryPort serviceOptionRepositoryPort;
+    private final VendorPort vendorPort;
+    private final ServiceSlotRepositoryPort serviceSlotRepositoryPort;
+    private final RefundPolicyEngine refundPolicyEngine;
+
+    @Autowired
+    public GetPublicServiceDetailUseCase(
+            ServiceRepositoryPort serviceRepositoryPort,
+            RecordRecentlyViewedUseCase recordRecentlyViewedUseCase,
+            CategoryRepositoryPort categoryRepositoryPort,
+            ServiceImageRepositoryPort serviceImageRepositoryPort,
+            ServiceAvailabilityPort serviceAvailabilityPort,
+            @Autowired(required = false) LocalizedContentSelector localizedContentSelector,
+            ServiceOptionRepositoryPort serviceOptionRepositoryPort,
+            @Autowired(required = false) VendorPort vendorPort,
+            @Autowired(required = false) ServiceSlotRepositoryPort serviceSlotRepositoryPort,
+            @Autowired(required = false) RefundPolicyEngine refundPolicyEngine
+    ) {
+        this.serviceRepositoryPort = serviceRepositoryPort;
+        this.recordRecentlyViewedUseCase = recordRecentlyViewedUseCase;
+        this.categoryRepositoryPort = categoryRepositoryPort;
+        this.serviceImageRepositoryPort = serviceImageRepositoryPort;
+        this.serviceAvailabilityPort = serviceAvailabilityPort;
+        this.localizedContentSelector = localizedContentSelector;
+        this.serviceOptionRepositoryPort = serviceOptionRepositoryPort;
+        this.vendorPort = vendorPort;
+        this.serviceSlotRepositoryPort = serviceSlotRepositoryPort;
+        this.refundPolicyEngine = refundPolicyEngine;
+    }
+
+    public GetPublicServiceDetailUseCase(
+            ServiceRepositoryPort serviceRepositoryPort,
+            RecordRecentlyViewedUseCase recordRecentlyViewedUseCase,
+            CategoryRepositoryPort categoryRepositoryPort,
+            ServiceImageRepositoryPort serviceImageRepositoryPort,
+            ServiceAvailabilityPort serviceAvailabilityPort,
+            LocalizedContentSelector localizedContentSelector,
+            ServiceOptionRepositoryPort serviceOptionRepositoryPort
+    ) {
+        this(serviceRepositoryPort, recordRecentlyViewedUseCase, categoryRepositoryPort,
+                serviceImageRepositoryPort, serviceAvailabilityPort, localizedContentSelector,
+                serviceOptionRepositoryPort, null, null, null);
+    }
 
     public ServiceDetailResult execute(UUID id, UUID userId, String sessionId) {
         return load(id, userId, sessionId, true);
@@ -67,6 +121,51 @@ public class GetPublicServiceDetailUseCase {
                         .build())
                 .toList();
 
+        // Vendor public details
+        UUID vendorId = service.getVendorId();
+        String businessName = null;
+        BadgeTier badgeTier = null;
+        if (vendorPort != null && vendorId != null) {
+            var vendorOpt = vendorPort.findById(vendorId);
+            if (vendorOpt.isPresent()) {
+                var vendor = vendorOpt.get();
+                businessName = vendor.getBusinessName();
+                badgeTier = vendor.getBadgeTier();
+            }
+        }
+
+        // Operational info
+        Integer duration = service.getDurationMinutes();
+        Integer capacity = service.getCapacityPerSlot();
+        String participantConditions = localize(service.getWaiverContent(), service.getWaiverContentEn());
+        if (participantConditions == null || participantConditions.isBlank()) {
+            participantConditions = service.getWaiverContent();
+        }
+
+        // Refund, cancellation and safety policies
+        String refundPolicy = refundPolicyEngine != null ? refundPolicyEngine.getRefundPolicySummary()
+                : "Refund policy: 100% more than 48 hours before departure, 70% from 24 to 48 hours, 30% from 2 to 24 hours, and 0% within 2 hours. Dangerous weather and vendor fault receive a full refund.";
+        String cancellationPolicy = refundPolicyEngine != null ? refundPolicyEngine.getCancellationPolicySummary()
+                : "Cancellation policy: Free cancellation more than 48 hours before departure.";
+
+        String safetyRules;
+        if (Boolean.TRUE.equals(service.getWeatherSensitive())) {
+            safetyRules = "Weather-sensitive activity. Max wave: "
+                    + (service.getMaxWaveM() != null ? service.getMaxWaveM() + "m" : "N/A")
+                    + ", Max wind: "
+                    + (service.getMinWindKmh() != null ? service.getMinWindKmh() + "km/h" : "N/A")
+                    + ". Standard marine safety regulations and life jacket requirements apply.";
+        } else {
+            safetyRules = "Standard marine safety rules apply. Life jackets must be worn at all times.";
+        }
+
+        List<StructuredSlotResponse> structuredSlots = discoveryAvailability == null
+                ? List.of() : discoveryAvailability.describe(service);
+        List<String> availableSlots = discoveryAvailability == null ? serviceAvailabilityPort.findAvailableSlots(id)
+                : structuredSlots.stream().filter(StructuredSlotResponse::bookable)
+                        .map(slot -> slot.date() + "T" + slot.startTime().format(java.time.format.DateTimeFormatter.ISO_LOCAL_TIME))
+                        .distinct().toList();
+
         return ServiceDetailResult.builder()
                 .id(service.getId())
                 .name(localize(service.getName(), service.getNameEn()))
@@ -83,8 +182,18 @@ public class GetPublicServiceDetailUseCase {
                 .imageUrls(serviceImageRepositoryPort.findByServiceId(id).stream()
                         .map(image -> image.getUrl())
                         .toList())
-                .availableSlots(serviceAvailabilityPort.findAvailableSlots(id))
+                .availableSlots(availableSlots)
                 .options(options)
+                .vendorId(vendorId)
+                .businessName(businessName)
+                .badgeTier(badgeTier)
+                .duration(duration)
+                .capacity(capacity)
+                .participantConditions(participantConditions)
+                .refundPolicy(refundPolicy)
+                .cancellationPolicy(cancellationPolicy)
+                .safetyRules(safetyRules)
+                .slots(structuredSlots)
                 .build();
     }
 

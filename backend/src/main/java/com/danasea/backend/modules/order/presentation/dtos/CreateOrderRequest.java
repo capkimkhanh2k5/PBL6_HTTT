@@ -4,5 +4,11 @@ import java.util.UUID;
 
 import jakarta.validation.constraints.NotNull;
 
-public record CreateOrderRequest(@NotNull UUID bookingId) {
+public record CreateOrderRequest(
+        @NotNull UUID bookingId,
+        String discountCode
+) {
+    public CreateOrderRequest(@NotNull UUID bookingId) {
+        this(bookingId, null);
+    }
 }

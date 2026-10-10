@@ -5,8 +5,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-
 import com.danasea.backend.modules.order.domain.exceptions.BookingNotEligibleForOrderException;
+import com.danasea.backend.modules.order.domain.exceptions.InvalidDiscountException;
 import com.danasea.backend.modules.order.domain.exceptions.InvalidOrderStateException;
 import com.danasea.backend.modules.order.domain.exceptions.InvalidWebhookException;
 import com.danasea.backend.modules.order.domain.exceptions.OrderNotFoundException;
@@ -14,11 +14,18 @@ import com.danasea.backend.modules.order.domain.exceptions.PaymentGatewayExcepti
 import com.danasea.backend.modules.order.domain.exceptions.PaymentVerificationException;
 import com.danasea.backend.modules.order.domain.exceptions.RefundNotFoundException;
 import com.danasea.backend.modules.order.domain.exceptions.UnauthorizedOrderAccessException;
+import com.danasea.backend.modules.order.domain.exceptions.UnpaidOrderReceiptException;
 import com.danasea.backend.shared.presentation.ErrorResponse;
 import com.danasea.backend.shared.presentation.LocalizedExceptionHandlerSupport;
 
 @RestControllerAdvice
 public class OrderExceptionHandler extends LocalizedExceptionHandlerSupport {
+
+    @ExceptionHandler(UnpaidOrderReceiptException.class)
+    public ResponseEntity<ErrorResponse> handleUnpaidOrderReceipt(UnpaidOrderReceiptException ex) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(error("ORDER_NOT_PAID"));
+    }
 
     @ExceptionHandler(OrderNotFoundException.class)
     public ResponseEntity<ErrorResponse> handleOrderNotFound(OrderNotFoundException ex) {
@@ -72,5 +79,12 @@ public class OrderExceptionHandler extends LocalizedExceptionHandlerSupport {
     public ResponseEntity<ErrorResponse> handleInvalidWebhook(InvalidWebhookException ex) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                 .body(error("INVALID_WEBHOOK"));
+    }
+
+    @ExceptionHandler(InvalidDiscountException.class)
+    public ResponseEntity<ErrorResponse> handleInvalidDiscount(InvalidDiscountException ex) {
+        String code = ex.getErrorCode() != null ? ex.getErrorCode() : "INVALID_DISCOUNT";
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(error(code));
     }
 }

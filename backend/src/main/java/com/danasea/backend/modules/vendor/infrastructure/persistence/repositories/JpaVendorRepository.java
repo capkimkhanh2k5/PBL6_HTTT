@@ -6,6 +6,9 @@ import java.util.UUID;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Lock;
+import org.springframework.data.jpa.repository.Query;
+import jakarta.persistence.LockModeType;
 import org.springframework.stereotype.Repository;
 
 import com.danasea.backend.modules.vendor.domain.models.VerificationStatus;
@@ -13,6 +16,10 @@ import com.danasea.backend.modules.vendor.infrastructure.persistence.entities.Ve
 
 @Repository
 public interface JpaVendorRepository extends JpaRepository<VendorJpaEntity, UUID> {
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("select v from VendorJpaEntity v where v.id = :id")
+    Optional<VendorJpaEntity> findByIdForUpdate(UUID id);
+
     Optional<VendorJpaEntity> findByUserId(UUID userId);
 
     boolean existsByUserId(UUID userId);

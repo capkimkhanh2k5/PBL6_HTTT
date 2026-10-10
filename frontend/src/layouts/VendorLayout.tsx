@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { createPortal } from "react-dom";
 import { NavLink, Outlet, useNavigate, useLocation } from "react-router-dom";
 import { MOCK_NOTIFICATIONS, type VendorNotificationItem } from "../services/vendorMockService";
@@ -27,21 +27,18 @@ export function VendorLayout() {
   const [selectedNoti, setSelectedNoti] = useState<VendorNotificationItem | null>(null);
   const [notifications] = useState<VendorNotificationItem[]>(MOCK_NOTIFICATIONS);
 
-  useEffect(() => {
-    if (location.pathname !== prevPath) {
-      const prevOrder = VENDOR_PAGE_ORDER[prevPath] ?? 0;
-      const currentOrder = VENDOR_PAGE_ORDER[location.pathname] ?? 0;
-
-      if (currentOrder > prevOrder) {
-        setAnimationClass("animate-slide-in-right");
-      } else if (currentOrder < prevOrder) {
-        setAnimationClass("animate-slide-in-left");
-      } else {
-        setAnimationClass("animate-fade-in-up");
-      }
-      setPrevPath(location.pathname);
+  if (location.pathname !== prevPath) {
+    const prevOrder = VENDOR_PAGE_ORDER[prevPath] ?? 0;
+    const currentOrder = VENDOR_PAGE_ORDER[location.pathname] ?? 0;
+    setPrevPath(location.pathname);
+    if (currentOrder > prevOrder) {
+      setAnimationClass("animate-slide-in-right");
+    } else if (currentOrder < prevOrder) {
+      setAnimationClass("animate-slide-in-left");
+    } else {
+      setAnimationClass("animate-fade-in-up");
     }
-  }, [location.pathname, prevPath]);
+  }
 
   return (
     <div className="flex h-screen bg-background overflow-hidden">
@@ -58,13 +55,14 @@ export function VendorLayout() {
                 <span className="font-headline-sm text-headline-sm font-extrabold tracking-tight text-primary leading-none">
                   DANASEA
                 </span>
-                <span className="text-[10px] uppercase tracking-wider text-on-surface-variant font-bold mt-0.5">
-                  Vendor Partner
+                <span className="text-[11px] text-on-surface-variant font-medium mt-0.5">
+                  Đối tác Trải nghiệm
                 </span>
               </div>
             </div>
-            <span className="px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 text-[10px] font-bold">
-              VERIFIED
+            <span className="px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 text-[11px] font-medium flex items-center gap-1">
+              <span className="material-symbols-outlined text-[13px]">verified</span>
+              Đã xác thực
             </span>
           </div>
 
@@ -97,10 +95,10 @@ export function VendorLayout() {
             >
               <div className="flex items-center gap-3">
                 <span className="material-symbols-outlined text-[20px]">confirmation_number</span>
-                <span>Đơn hàng &amp; Check-in</span>
+                <span>Đơn hàng</span>
               </div>
               <span className="px-1.5 py-0.5 rounded-full bg-amber-100 text-amber-900 text-[10px] font-bold">
-                1 mới
+                1
               </span>
             </NavLink>
 
@@ -115,7 +113,7 @@ export function VendorLayout() {
               }
             >
               <span className="material-symbols-outlined text-[20px]">calendar_month</span>
-              <span>Lịch ca &amp; Sức chứa</span>
+              <span>Lịch khởi hành</span>
             </NavLink>
 
             <NavLink
@@ -129,7 +127,7 @@ export function VendorLayout() {
               }
             >
               <span className="material-symbols-outlined text-[20px]">kitesurfing</span>
-              <span>Quản lý Dịch vụ</span>
+              <span>Dịch vụ</span>
             </NavLink>
 
             <NavLink
@@ -143,7 +141,7 @@ export function VendorLayout() {
               }
             >
               <span className="material-symbols-outlined text-[20px]">sell</span>
-              <span>Khuyến mãi Voucher</span>
+              <span>Khuyến mãi</span>
             </NavLink>
 
             <NavLink
@@ -158,7 +156,7 @@ export function VendorLayout() {
             >
               <div className="flex items-center gap-3">
                 <span className="material-symbols-outlined text-[20px]">chat</span>
-                <span>Hộp thư &amp; CSAT</span>
+                <span>Đánh giá &amp; Phản hồi</span>
               </div>
               <span className="px-1.5 py-0.5 rounded-full bg-secondary-fixed text-on-secondary-fixed text-[10px] font-bold">
                 147
@@ -176,7 +174,7 @@ export function VendorLayout() {
               }
             >
               <span className="material-symbols-outlined text-[20px]">account_balance_wallet</span>
-              <span>Đối soát Doanh thu</span>
+              <span>Doanh thu</span>
             </NavLink>
 
             <NavLink
@@ -190,7 +188,7 @@ export function VendorLayout() {
               }
             >
               <span className="material-symbols-outlined text-[20px]">payments</span>
-              <span>Rút tiền &amp; Quyết toán</span>
+              <span>Quyết toán</span>
             </NavLink>
 
             <NavLink
@@ -205,7 +203,7 @@ export function VendorLayout() {
             >
               <div className="flex items-center gap-3">
                 <span className="material-symbols-outlined text-[20px]">gavel</span>
-                <span>Quản lý Khiếu nại</span>
+                <span>Khiếu nại</span>
               </div>
               <span className="px-1.5 py-0.5 rounded-full bg-surface-container text-on-surface-variant text-[10px] font-bold">
                 1
@@ -221,7 +219,7 @@ export function VendorLayout() {
             className="flex items-center gap-3 px-space-md py-2 rounded-xl text-on-surface-variant hover:bg-surface-container hover:text-on-surface font-label-md transition-colors"
           >
             <span className="material-symbols-outlined text-[20px]">badge</span>
-            <span>Hồ sơ &amp; Xác minh</span>
+            <span>Hồ sơ &amp; Pháp lý</span>
           </NavLink>
           <button
             onClick={() => navigate("/")}
@@ -236,11 +234,16 @@ export function VendorLayout() {
       {/* Main dynamic outlet */}
       <div className="flex-1 flex flex-col min-w-0">
         {/* Top bar for Vendor */}
-        <header className="h-16 bg-surface-container-lowest/80 backdrop-blur-md border-b border-outline-variant/30 px-space-lg flex items-center justify-between sticky top-0 z-20">
-          <div className="flex items-center gap-2">
-            <span className="font-label-sm text-primary uppercase tracking-widest font-bold">Cổng đối tác vận hành VITA</span>
-            <span className="text-outline-variant">•</span>
-            <span className="font-body-sm text-on-surface-variant">Bến 02 Mỹ Khê &amp; Bán đảo Sơn Trà</span>
+        <header className="h-16 bg-surface-container-lowest/80 backdrop-blur-md border-b border-outline-variant/30 px-6 flex items-center justify-between sticky top-0 z-20">
+          <div className="flex items-center gap-2.5">
+            <img
+              alt="DANASEA"
+              className="h-8 w-auto object-contain"
+              src="https://lh3.googleusercontent.com/aida/AEtjO1Wc3PDumzL5I2MlIC7zdJZmfwBfm4RHsplJ5nk-9ZaRKWyozKczleP4gMlRMYECYGlmoy61P0H5GG6zbTiOnv9OfrbuVqBwoPco9lX5TdnIOndbHvSBQrTFFImlLmSHKB20EH_fp68zcXl68-GiUe2CUKvkZGprNc2OedIHPdFefB5izHfijulRwWFEJMtI3mN_pen7Nzc9tS1VIfkLiHft_-cJWqR00zO95yZuFm90DNcjzOJt5JEfyFNO"
+            />
+            <span className="font-bold text-base tracking-tight text-primary">DANASEA</span>
+            <span className="text-slate-300 font-light">|</span>
+            <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Kênh Đối tác</span>
           </div>
 
           <div className="flex items-center gap-3">

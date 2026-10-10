@@ -1,14 +1,6 @@
 package com.danasea.backend.modules.settlement.domain.services;
 
-import com.danasea.backend.modules.order.domain.models.SubOrderStatus;
-import com.danasea.backend.modules.settlement.domain.models.LineItemExclusionReason;
-import com.danasea.backend.modules.settlement.domain.models.Settlement;
-import com.danasea.backend.modules.settlement.domain.models.SettlementLineItem;
-import com.danasea.backend.modules.settlement.domain.models.SettlementStatus;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Nested;
-import org.junit.jupiter.api.Test;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -16,7 +8,16 @@ import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Test;
+
+import com.danasea.backend.modules.order.domain.models.SubOrderStatus;
+import com.danasea.backend.modules.settlement.domain.models.LineItemExclusionReason;
+import com.danasea.backend.modules.settlement.domain.models.Settlement;
+import com.danasea.backend.modules.settlement.domain.models.SettlementLineItem;
+import com.danasea.backend.modules.settlement.domain.models.SettlementStatus;
 
 @DisplayName("SettlementCalculationTest — Comprehensive Tests for EPIC-07 R4")
 class SettlementCalculationTest {
@@ -305,6 +306,95 @@ class SettlementCalculationTest {
             assertThat(settlement.getTotalGrossRevenue()).isEqualByComparingTo("0.00");
             assertThat(settlement.getTotalCommission()).isEqualByComparingTo("0.00");
             assertThat(settlement.getTotalNetPayout()).isEqualByComparingTo("0.00");
+        }
+    }
+
+    @Nested
+    @DisplayName("6. Hạch toán Discount theo bên tài trợ (Vendor vs Platform Sponsored Vouchers)")
+    class DiscountSettlementTests {
+
+        @Test
+        @DisplayName("Voucher do Vendor tài trợ: cơ sở hoa hồng và gross giảm theo mức giảm giá")
+        void testVendorSponsoredVoucherSettlement() {
+            UUID subOrderId = UUID.randomUUID();
+            com.danasea.backend.modules.settlement.domain.models.SubOrderCalculationContext context =
+                    com.danasea.backend.modules.settlement.domain.models.SubOrderCalculationContext.builder()
+                    .subOrderId(subOrderId)
+                    .status(SubOrderStatus.COMPLETED)
+                    .subtotalAmount(new BigDecimal("1000000.00"))
+                    .vendorDiscountAmount(new BigDecimal("100000.00"))
+                    .platformDiscountAmount(BigDecimal.ZERO)
+                    .commissionBasisAmount(new BigDecimal("900000.00"))
+                    .finalAmount(new BigDecimal("900000.00"))
+                    .commissionRate(new BigDecimal("0.1000"))
+                    .build();
+
+            SettlementLineItem item = calculationEngine.calculateLineItem(context);
+
+            assertThat(item.isExcluded()).isFalse();
+            // Gross của vendor = 900,000
+            assertThat(item.getGrossAmount()).isEqualByComparingTo("900000.00");
+            // Hoa hồng = 900,000 * 10% = 90,000
+            assertThat(item.getCommissionAmount()).isEqualByComparingTo("90000.00");
+            // Vendor nhận = 810,000
+            assertThat(item.getNetAmount()).isEqualByComparingTo("810000.00");
+            assertThat(item.getGrossAmount()).isEqualTo(item.getCommissionAmount().add(item.getNetAmount()));
+        }
+
+        @Test
+        @DisplayName("Voucher do Sàn (DANASEA) tài trợ: cơ sở hoa hồng là giá gốc, vendor nhận đủ payout, sàn trợ giá")
+        void testPlatformSponsoredVoucherSettlement() {
+            UUID subOrderId = UUID.randomUUID();
+            com.danasea.backend.modules.settlement.domain.models.SubOrderCalculationContext context =
+                    com.danasea.backend.modules.settlement.domain.models.SubOrderCalculationContext.builder()
+                    .subOrderId(subOrderId)
+                    .status(SubOrderStatus.COMPLETED)
+                    .subtotalAmount(new BigDecimal("1000000.00"))
+                    .vendorDiscountAmount(BigDecimal.ZERO)
+                    .platformDiscountAmount(new BigDecimal("100000.00"))
+                    .commissionBasisAmount(new BigDecimal("1000000.00"))
+                    .finalAmount(new BigDecimal("900000.00"))
+                    .commissionRate(new BigDecimal("0.1000"))
+                    .build();
+
+            SettlementLineItem item = calculationEngine.calculateLineItem(context);
+
+            assertThat(item.isExcluded()).isFalse();
+            // Gross của vendor giữ nguyên giá gốc = 1,000,000
+            assertThat(item.getGrossAmount()).isEqualByComparingTo("1000000.00");
+            // Hoa hồng = 1,000,000 * 10% = 100,000
+            assertThat(item.getCommissionAmount()).isEqualByComparingTo("100000.00");
+            // Vendor nhận đủ payout = 900,000
+            assertThat(item.getNetAmount()).isEqualByComparingTo("900000.00");
+            assertThat(item.getGrossAmount()).isEqualTo(item.getCommissionAmount().add(item.getNetAmount()));
+        }
+
+        @Test
+        @DisplayName("Voucher đồng tài trợ (Vendor 50k, Sàn 50k): chỉ phần vendor tài trợ làm giảm cơ sở hoa hồng")
+        void testCoFundedVoucherSettlement() {
+            UUID subOrderId = UUID.randomUUID();
+            com.danasea.backend.modules.settlement.domain.models.SubOrderCalculationContext context =
+                    com.danasea.backend.modules.settlement.domain.models.SubOrderCalculationContext.builder()
+                    .subOrderId(subOrderId)
+                    .status(SubOrderStatus.COMPLETED)
+                    .subtotalAmount(new BigDecimal("1000000.00"))
+                    .vendorDiscountAmount(new BigDecimal("50000.00"))
+                    .platformDiscountAmount(new BigDecimal("50000.00"))
+                    .commissionBasisAmount(new BigDecimal("950000.00"))
+                    .finalAmount(new BigDecimal("900000.00"))
+                    .commissionRate(new BigDecimal("0.1000"))
+                    .build();
+
+            SettlementLineItem item = calculationEngine.calculateLineItem(context);
+
+            assertThat(item.isExcluded()).isFalse();
+            // Gross = 950,000
+            assertThat(item.getGrossAmount()).isEqualByComparingTo("950000.00");
+            // Hoa hồng = 950,000 * 10% = 95,000
+            assertThat(item.getCommissionAmount()).isEqualByComparingTo("95000.00");
+            // Vendor nhận = 855,000
+            assertThat(item.getNetAmount()).isEqualByComparingTo("855000.00");
+            assertThat(item.getGrossAmount()).isEqualTo(item.getCommissionAmount().add(item.getNetAmount()));
         }
     }
 }
